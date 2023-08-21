@@ -14,6 +14,7 @@ import lombok.Setter;
 public class Checkpoint {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     private String name;
