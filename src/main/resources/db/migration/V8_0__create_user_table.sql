@@ -9,5 +9,5 @@ CREATE TABLE "user"
 );
 
 ALTER TABLE "user"
-    ADD CONSTRAINT user_id PRIMARY KEY (id);
+    ADD CONSTRAINT user_pk PRIMARY KEY (id);
 
