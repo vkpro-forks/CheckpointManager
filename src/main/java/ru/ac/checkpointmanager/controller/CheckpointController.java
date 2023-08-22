@@ -8,6 +8,7 @@ import ru.ac.checkpointmanager.dto.CheckpointDTO;
 import ru.ac.checkpointmanager.model.Checkpoint;
 import ru.ac.checkpointmanager.service.CheckpointService;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,7 +27,7 @@ public class CheckpointController {
 
     /* CREATE */
     @PostMapping
-    public ResponseEntity<CheckpointDTO> addCheckpoint(@RequestBody CheckpointDTO checkpointDTO) {
+    public ResponseEntity<CheckpointDTO> addCheckpoint(@RequestBody @Valid CheckpointDTO checkpointDTO) {
         Checkpoint newCheckpoint = service.addCheckpoint(convertToCheckpoint(checkpointDTO));
         return ResponseEntity.ok(convertToCheckpointDTO(newCheckpoint));
     }

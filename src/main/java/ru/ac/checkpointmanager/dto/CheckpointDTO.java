@@ -1,8 +1,7 @@
 package ru.ac.checkpointmanager.dto;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
+import javax.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 import ru.ac.checkpointmanager.model.CheckpointType;
