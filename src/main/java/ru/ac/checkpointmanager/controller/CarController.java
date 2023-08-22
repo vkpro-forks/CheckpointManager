@@ -40,7 +40,7 @@ public class CarController {
         return ResponseEntity.ok(updated);
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{carId}")
     public ResponseEntity<Void> deletedCar(@PathVariable UUID carId) {
         carService.deleteCar(carId);
         return ResponseEntity.noContent().build();

@@ -30,8 +30,9 @@ public class Car {
     @Column(name = "type")
     private CarType type;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "color")
-    private String color;
+    private CarColor color;
 
     @Column(name = "year")
     private int year;
