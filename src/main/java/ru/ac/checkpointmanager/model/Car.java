@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "cars")
 @Data
@@ -14,24 +16,27 @@ import lombok.NoArgsConstructor;
 public class Car {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-
-    @Enumerated(EnumType.STRING)
-    private CarBrand brand;
-
-    private String model;
-
-    private String color;
+    @GeneratedValue
+    private UUID id;
 
     @Column(name = "license_plate")
     private String licensePlate;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "brand_model")
+    private CarBrandAndModel brandModel;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type")
     private CarType type;
 
+    @Column(name = "color")
+    private String color;
+
+    @Column(name = "year")
     private int year;
 
+    @Column(name = "photo")
     private String photo;
 
 }

@@ -1,6 +1,11 @@
 package ru.ac.checkpointmanager.model;
 
-public enum CarBrand {
+public enum CarBrandAndModel {
+
+    //заготовка для списка, пока в разработке
+
+
+
     //sedan and other
     TOYOTA,
     FORD,
