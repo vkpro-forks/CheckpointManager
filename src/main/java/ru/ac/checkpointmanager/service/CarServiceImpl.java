@@ -7,7 +7,6 @@ import ru.ac.checkpointmanager.model.Car;
 import ru.ac.checkpointmanager.repository.CarRepository;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -47,7 +46,6 @@ public class CarServiceImpl implements CarService {
             existingCar.setType(updateCar.getType());
             existingCar.setColor(updateCar.getColor());
             existingCar.setYear(updateCar.getYear());
-            existingCar.setPhoto(updateCar.getPhoto());
 
             return carRepository.save(existingCar);
         } catch (Exception exception) {

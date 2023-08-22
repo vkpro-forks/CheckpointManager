@@ -36,7 +36,4 @@ public class Car {
     @Column(name = "year")
     private int year;
 
-    @Column(name = "photo")
-    private String photo;
-
 }
