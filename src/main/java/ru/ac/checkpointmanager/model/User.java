@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 @Entity
@@ -13,17 +15,26 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @EqualsAndHashCode
-@Table(name = "\"user\"")
+@Table(name = "users")
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "full_name")
     private String fullName;
+
+    @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
+
+    @Email
+    @NotNull(message = "Email should not be empty")
     private String email;
+
     private String password;
-    private boolean isBlocked;
+
+    @Column(name = "is_blocked")
+    private Boolean isBlocked;
 }
 

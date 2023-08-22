@@ -1,4 +1,4 @@
-CREATE TABLE "user"
+CREATE TABLE users
 (
     id            BIGSERIAL NOT NULL,
     full_name     VARCHAR(255),
@@ -8,6 +8,6 @@ CREATE TABLE "user"
     is_blocked    BOOLEAN
 );
 
-ALTER TABLE "user"
+ALTER TABLE users
     ADD CONSTRAINT user_pk PRIMARY KEY (id);
 
