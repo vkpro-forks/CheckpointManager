@@ -1,6 +1,6 @@
 CREATE TABLE users
 (
-    id            UUID DEFAULT gen_random_uuid(),
+    id            BIGSERIAL NOT NULL,
     full_name     VARCHAR(255),
     date_of_birth DATE,
     email         VARCHAR(255),

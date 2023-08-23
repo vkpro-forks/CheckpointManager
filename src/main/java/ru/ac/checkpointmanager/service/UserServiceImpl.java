@@ -19,11 +19,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User createUser(User user) {
-        /* проверка, на уже зарегистрированного пользователя, по номеру телефона
-
-        if (checkPhoneNumber(user.getPhoneNumber) == true) {
-            throw new PhoneAlreadyExistException();
-        }  */
         return userRepository.save(user);
     }
 
