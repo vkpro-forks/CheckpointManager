@@ -21,6 +21,14 @@ public class CarModel {
     private CarBrand brand;
 
     private String model;
+
+    @PrePersist
+    @PreUpdate
+    public void toProperName() {
+        if (model != null) {
+            model = model.substring(0, 1).toUpperCase() + model.substring(1).toLowerCase();
+        }
+    }
 }
 
 

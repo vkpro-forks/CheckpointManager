@@ -1,6 +1,6 @@
 CREATE TABLE car_brand (
                            id BIGSERIAL PRIMARY KEY,
-                           name VARCHAR(255) NOT NULL
+                           brand VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE car_model (
@@ -22,7 +22,7 @@ CREATE TABLE cars (
 
 -- Добавляем бренд "Toyota" и сохраняем его ID
 WITH inserted_toyota AS (
-    INSERT INTO car_brand (name)
+    INSERT INTO car_brand (brand)
         VALUES ('Toyota')
         RETURNING id
 )
@@ -47,7 +47,7 @@ FROM inserted_toyota
 
 -- Добавляем бренд "Ford" и сохраняем его ID
 WITH inserted_ford AS (
-    INSERT INTO car_brand (name)
+    INSERT INTO car_brand (brand)
         VALUES ('Ford')
         RETURNING id
 )
@@ -71,7 +71,7 @@ FROM inserted_ford
 
 -- Добавляем бренд "Honda" и сохраняем его ID
 WITH inserted_honda AS (
-    INSERT INTO car_brand (name)
+    INSERT INTO car_brand (brand)
         VALUES ('Honda')
         RETURNING id
 )
@@ -96,7 +96,7 @@ FROM inserted_honda
 
 -- Добавляем бренд "Nissan" и сохраняем его ID
 WITH inserted_nissan AS (
-    INSERT INTO car_brand (name)
+    INSERT INTO car_brand (brand)
         VALUES ('Nissan')
         RETURNING id
 )
