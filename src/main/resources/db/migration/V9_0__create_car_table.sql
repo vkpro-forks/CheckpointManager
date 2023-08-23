@@ -1,10 +1,10 @@
 CREATE TABLE car_brand (
-                           id SERIAL PRIMARY KEY,
+                           id BIGSERIAL PRIMARY KEY,
                            name VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE car_model (
-                           id SERIAL PRIMARY KEY,
+                           id BIGSERIAL PRIMARY KEY,
                            brand_id BIGINT REFERENCES car_brand(id),
                            model VARCHAR(255) NOT NULL
 );
