@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.model;
+package ru.ac.checkpointmanager.model.enums;
 
 public enum CheckpointType {
     UNIVERSAL,
