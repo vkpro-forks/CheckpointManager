@@ -22,9 +22,12 @@ public class Car {
     @Column(name = "license_plate")
     private String licensePlate;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "brand_model")
-    private CarBrandAndModel brandModel;
+    @ManyToOne
+    @JoinColumn(name = "brand_id")
+    private CarBrand brand;
+
+    @Column(name = "model")
+    private String model;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
