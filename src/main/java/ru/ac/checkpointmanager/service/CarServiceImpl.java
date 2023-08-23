@@ -1,8 +1,8 @@
 package ru.ac.checkpointmanager.service;
 
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
+import ru.ac.checkpointmanager.exception.CarNotFoundException;
 import ru.ac.checkpointmanager.model.Car;
 import ru.ac.checkpointmanager.repository.CarRepository;
 
@@ -29,7 +29,7 @@ public class CarServiceImpl implements CarService {
         try {
             carRepository.deleteById(carId);
         } catch (EmptyResultDataAccessException ex) {
-            throw new EntityNotFoundException("Car with ID " + carId + " not found");
+            throw new CarNotFoundException("Car with ID " + carId + " not found");
         } catch (Exception exception) {
             throw new RuntimeException("Error deleting car with ID " + carId);
         }
@@ -39,7 +39,7 @@ public class CarServiceImpl implements CarService {
     public Car updateCar(UUID carId, Car updateCar) {
         try {
             Car existingCar = carRepository.findById(carId)
-                    .orElseThrow(() -> new EntityNotFoundException("Car with ID " + carId + " not found"));
+                    .orElseThrow(() -> new CarNotFoundException("Car with ID " + carId + " not found"));
 
             existingCar.setLicensePlate(updateCar.getLicensePlate());
             existingCar.setBrandModel(updateCar.getBrandModel());
@@ -56,7 +56,7 @@ public class CarServiceImpl implements CarService {
     @Override
     public Car getCarById(UUID carId) {
         return carRepository.findById(carId)
-                .orElseThrow(()-> new EntityNotFoundException("Car with ID " + carId + " not found"));
+                .orElseThrow(()-> new CarNotFoundException("Car with ID " + carId + " not found"));
     }
 
     @Override
