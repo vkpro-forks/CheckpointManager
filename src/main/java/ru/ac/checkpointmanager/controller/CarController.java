@@ -138,6 +138,15 @@ public class CarController {
         return new ResponseEntity<>(updateCarBrand, HttpStatus.OK);
     }
 
+    @GetMapping("/brands/search-name")
+    public ResponseEntity<List<CarBrand>> findCarBrandByName(@RequestParam String name) {
+        List<CarBrand> carBrands = carBrandService.findByBrandIgnoreCase(name);
+        if (carBrands.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(carBrands, HttpStatus.OK);
+    }
+
     //===================================controllers for models==============================================//
 
 
@@ -178,5 +187,13 @@ public class CarController {
         }
 
         return new ResponseEntity<>(updateCarModel, HttpStatus.OK);
+    }
+    @GetMapping("/models/search-name")
+    public ResponseEntity<List<CarModel>> findCarModelByName(@RequestParam String name) {
+        List<CarModel> carModels = carModelService.findByModelIgnoreCase(name);
+        if (carModels.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(carModels, HttpStatus.OK);
     }
 }

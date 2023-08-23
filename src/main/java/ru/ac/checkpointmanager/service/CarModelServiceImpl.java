@@ -4,6 +4,9 @@ import org.springframework.stereotype.Service;
 import ru.ac.checkpointmanager.exception.CarModelNotFoundException;
 import ru.ac.checkpointmanager.model.CarModel;
 import ru.ac.checkpointmanager.repository.CarModelRepository;
+
+import java.util.List;
+
 @Service
 public class CarModelServiceImpl implements CarModelService {
 
@@ -28,6 +31,7 @@ public class CarModelServiceImpl implements CarModelService {
     public void deleteModel(Long id) {
         carModelRepository.findById(id)
                 .orElseThrow(()-> new CarModelNotFoundException("Car model not found with ID: " + id));
+        carModelRepository.deleteById(id);
     }
 
     @Override
@@ -35,6 +39,11 @@ public class CarModelServiceImpl implements CarModelService {
         CarModel requestModel = carModelRepository.findById(id)
                 .orElseThrow(()-> new CarModelNotFoundException("Car model not found with ID: " + id));
         requestModel.setModel(carModel.getModel());
-        return requestModel;
+        return carModelRepository.save(requestModel);
+    }
+
+    @Override
+    public List<CarModel> findByModelIgnoreCase(String name) {
+        return carModelRepository.findByModelContainingIgnoreCase(name);
     }
 }

@@ -5,6 +5,8 @@ import ru.ac.checkpointmanager.exception.CarBrandNotFoundException;
 import ru.ac.checkpointmanager.model.CarBrand;
 import ru.ac.checkpointmanager.repository.CarBrandRepository;
 
+import java.util.List;
+
 @Service
 public class CarBrandServiceImpl implements CarBrandService {
 
@@ -29,6 +31,7 @@ public class CarBrandServiceImpl implements CarBrandService {
     public void deleteBrand(Long brandId) {
         carBrandRepository.findById(brandId)
                 .orElseThrow(()-> new CarBrandNotFoundException("Car brand not found with ID: " + brandId));
+        carBrandRepository.deleteById(brandId);
     }
 
     @Override
@@ -38,4 +41,10 @@ public class CarBrandServiceImpl implements CarBrandService {
         requestBrand.setBrand(carBrand.getBrand());
         return carBrandRepository.save(requestBrand);
     }
+
+    @Override
+    public List<CarBrand> findByBrandIgnoreCase(String name) {
+        return carBrandRepository.findByBrandContainingIgnoreCase(name);
+    }
+
 }
