@@ -26,8 +26,9 @@ public class Car {
     @JoinColumn(name = "brand_id")
     private CarBrand brand;
 
-    @Column(name = "model")
-    private String model;
+    @ManyToOne
+    @JoinColumn(name = "model_id")
+    private CarModel model;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type")

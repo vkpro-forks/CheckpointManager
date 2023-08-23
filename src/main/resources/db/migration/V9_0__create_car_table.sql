@@ -11,242 +11,112 @@ CREATE TABLE car_model (
 CREATE TABLE cars (
                       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
                       license_plate VARCHAR(255) NOT NULL,
-                      car_brand_and_model_id BIGINT REFERENCES car_brand(id),
+                      brand_id  BIGINT REFERENCES car_brand(id),
+                      model_id BIGINT REFERENCES car_model(id),
                       type VARCHAR(255) NOT NULL,
                       color VARCHAR(255) NOT NULL,
                       year INTEGER
 );
 
-WITH inserted_brand AS (
+
+
+-- Добавляем бренд "Toyota" и сохраняем его ID
+WITH inserted_toyota AS (
     INSERT INTO car_brand (name)
         VALUES ('Toyota')
         RETURNING id
 )
 
+-- Добавляем модели для бренда "Toyota", используя сохраненный ID бренда
 INSERT INTO car_model (brand_id, model)
-VALUES
-    (brand_id, 'Camry'),
-    (brand_id, 'Corolla'),
-    (brand_id, 'RAV4'),
-    (brand_id, 'Highlander'),
-    (brand_id, 'Tacoma'),
-    (brand_id, 'Prius'),
-    (brand_id, 'Sienna'),
-    (brand_id, 'Yaris'),
-    (brand_id, 'C-HR'),
-    (brand_id, 'Avalon'),
-    (brand_id, '4Runner'),
-    (brand_id, 'Sequoia'),
-    (brand_id, 'Land Cruiser'),
-    (brand_id, 'Supra'),
-    (brand_id, 'Tundra'),
-    (brand_id, 'Mirai'),
-    (brand_id, 'Venza'),
-    (brand_id, 'Matrix'),
-    (brand_id, 'Echo'),
-    (brand_id, 'Celica'),
-    (brand_id, 'MR2'),
-    (brand_id, 'Paseo'),
-    (brand_id, 'Starlet'),
-    (brand_id, 'Solara'),
-    (brand_id, 'Mark X'),
-    (brand_id, 'Sienta'),
-    (brand_id, 'Vios'),
-    (brand_id, 'iQ'),
-    (brand_id, 'Urban Cruiser'),
-    (brand_id, 'Wish'),
-    (brand_id, 'Camry Hybrid'),
-    (brand_id, 'Highlander Hybrid'),
-    (brand_id, 'Prius Prime'),
-    (brand_id, 'Yaris Cross'),
-    (brand_id, 'GR Supra'),
-    (brand_id, 'Tacoma TRD Pro'),
-    (brand_id, 'Corolla Cross'),
-    (brand_id, 'Crown'),
-    (brand_id, 'Century'),
-    (brand_id, 'Sprinter'),
-    (brand_id, 'Vellfire'),
-    (brand_id, 'Raize'),
-    (brand_id, 'GR Yaris'),
-    (brand_id, 'Alphard'),
-    (brand_id, 'Roomy'),
-    (brand_id, 'Avanza'),
-    (brand_id, 'Lexus LS'),
-    (brand_id, 'Lexus NX'),
-    (brand_id, 'Lexus RX'),
-    (brand_id, 'Lexus ES');
+SELECT id, model
+FROM inserted_toyota
+         CROSS JOIN (
+    VALUES
+        ('Camry'),
+        ('Corolla'),
+        ('RAV4'),
+        ('Highlander'),
+        ('Tacoma'),
+        ('Prius'),
+        ('Sienna'),
+        ('Yaris'),
+        ('C-HR')
 
-WITH inserted_brand AS (
+) AS models(model);
+
+-- Добавляем бренд "Ford" и сохраняем его ID
+WITH inserted_ford AS (
     INSERT INTO car_brand (name)
         VALUES ('Ford')
         RETURNING id
 )
 
+-- Добавляем модели для бренда "Ford", используя сохраненный ID бренда
 INSERT INTO car_model (brand_id, model)
-VALUES
-    (brand_id, 'F-150'),
-    (brand_id, 'Focus'),
-    (brand_id, 'Escape'),
-    (brand_id, 'Explorer'),
-    (brand_id, 'Mustang'),
-    (brand_id, 'Edge'),
-    (brand_id, 'Ranger'),
-    (brand_id, 'Fusion'),
-    (brand_id, 'Bronco'),
-    (brand_id, 'EcoSport'),
-    (brand_id, 'Expedition'),
-    (brand_id, 'Taurus'),
-    (brand_id, 'Transit'),
-    (brand_id, 'Flex'),
-    (brand_id, 'C-Max'),
-    (brand_id, 'Crown Victoria'),
-    (brand_id, 'Five Hundred'),
-    (brand_id, 'Freestyle'),
-    (brand_id, 'GT'),
-    (brand_id, 'Ka'),
-    (brand_id, 'Mondeo'),
-    (brand_id, 'Puma'),
-    (brand_id, 'S-Max'),
-    (brand_id, 'Tourneo'),
-    (brand_id, 'Windstar'),
-    (brand_id, 'Zephyr'),
-    (brand_id, 'Aspire'),
-    (brand_id, 'Contour'),
-    (brand_id, 'Escort'),
-    (brand_id, 'Excursion'),
-    (brand_id, 'Fiesta'),
-    (brand_id, 'Falcon'),
-    (brand_id, 'Figo'),
-    (brand_id, 'Focus Active'),
-    (brand_id, 'Focus ST'),
-    (brand_id, 'Fusion Hybrid'),
-    (brand_id, 'Galaxy'),
-    (brand_id, 'Granada'),
-    (brand_id, 'Kuga'),
-    (brand_id, 'Maverick'),
-    (brand_id, 'Model A'),
-    (brand_id, 'Model T'),
-    (brand_id, 'Pinto'),
-    (brand_id, 'Probe'),
-    (brand_id, 'Ranchero'),
-    (brand_id, 'Thunderbird'),
-    (brand_id, 'Torino'),
-    (brand_id, 'Transit Connect'),
-    (brand_id, 'Vedette'),
-    (brand_id, 'Zodiac');
+SELECT id, model
+FROM inserted_ford
+         CROSS JOIN (
+    VALUES
+        ('F-150'),
+        ('Focus'),
+        ('Escape'),
+        ('Explorer'),
+        ('Mustang'),
+        ('Edge'),
+        ('Ranger'),
+        ('Fusion')
 
-WITH inserted_brand AS (
+) AS models(model);
+
+-- Добавляем бренд "Honda" и сохраняем его ID
+WITH inserted_honda AS (
     INSERT INTO car_brand (name)
         VALUES ('Honda')
         RETURNING id
 )
 
+-- Добавляем модели для бренда "Honda", используя сохраненный ID бренда
 INSERT INTO car_model (brand_id, model)
-VALUES
-    (brand_id, 'Civic'),
-    (brand_id, 'Accord'),
-    (brand_id, 'CR-V'),
-    (brand_id, 'Pilot'),
-    (brand_id, 'Fit'),
-    (brand_id, 'HR-V'),
-    (brand_id, 'Odyssey'),
-    (brand_id, 'Insight'),
-    (brand_id, 'Ridgeline'),
-    (brand_id, 'Clarity'),
-    (brand_id, 'Passport'),
-    (brand_id, 'Element'),
-    (brand_id, 'S2000'),
-    (brand_id, 'CR-Z'),
-    (brand_id, 'Crosstour'),
-    (brand_id, 'City'),
-    (brand_id, 'Vezel'),
-    (brand_id, 'Jazz'),
-    (brand_id, 'Elysion'),
-    (brand_id, 'Shuttle'),
-    (brand_id, 'Avancier'),
-    (brand_id, 'Fit Shuttle'),
-    (brand_id, 'Prelude'),
-    (brand_id, 'Integra'),
-    (brand_id, 'Legend'),
-    (brand_id, 'S660'),
-    (brand_id, 'NSX'),
-    (brand_id, 'ZEST'),
-    (brand_id, 'Acty'),
-    (brand_id, 'Capa'),
-    (brand_id, 'Mobilio'),
-    (brand_id, 'Z'),
-    (brand_id, 'N-One'),
-    (brand_id, 'Life'),
-    (brand_id, 'CR-X'),
-    (brand_id, 'Rafaga'),
-    (brand_id, 'Edix'),
-    (brand_id, 'That S'),
-    (brand_id, 'S-MX'),
-    (brand_id, 'Crosstourer'),
-    (brand_id, 'Civic Type R'),
-    (brand_id, 'Freed'),
-    (brand_id, 'Fit Twist'),
-    (brand_id, 'Fit EV'),
-    (brand_id, 'Mugen Civic Type R'),
-    (brand_id, 'Accord Euro'),
-    (brand_id, 'Element SC'),
-    (brand_id, 'Fit Shuttle Hybrid'),
-    (brand_id, 'Fit Shuttle Electric Vehicle');
+SELECT id, model
+FROM inserted_honda
+         CROSS JOIN (
+    VALUES
+        ('Civic'),
+        ('Accord'),
+        ('CR-V'),
+        ('Pilot'),
+        ('Fit'),
+        ('HR-V'),
+        ('Odyssey'),
+        ('Insight'),
+        ('Ridgeline')
 
-WITH inserted_brand AS (
+) AS models(model);
+
+-- Добавляем бренд "Nissan" и сохраняем его ID
+WITH inserted_nissan AS (
     INSERT INTO car_brand (name)
         VALUES ('Nissan')
         RETURNING id
 )
+
+-- Добавляем модели для бренда "Nissan", используя сохраненный ID бренда
 INSERT INTO car_model (brand_id, model)
-VALUES
-    (brand_id, 'Altima'),
-    (brand_id, 'Maxima'),
-    (brand_id, 'Sentra'),
-    (brand_id, 'Versa'),
-    (brand_id, '370Z'),
-    (brand_id, 'GT-R'),
-    (brand_id, 'Murano'),
-    (brand_id, 'Rogue'),
-    (brand_id, 'Pathfinder'),
-    (brand_id, 'Armada'),
-    (brand_id, 'Juke'),
-    (brand_id, 'Kicks'),
-    (brand_id, 'Xterra'),
-    (brand_id, 'Frontier'),
-    (brand_id, 'Titan'),
-    (brand_id, 'Leaf'),
-    (brand_id, 'NV200'),
-    (brand_id, 'NV Cargo'),
-    (brand_id, 'NV Passenger'),
-    (brand_id, 'Quest'),
-    (brand_id, 'Cube'),
-    (brand_id, 'Note'),
-    (brand_id, 'Sylphy'),
-    (brand_id, 'Lannia'),
-    (brand_id, 'Teana'),
-    (brand_id, 'Cima'),
-    (brand_id, 'Fuga'),
-    (brand_id, 'Skyline'),
-    (brand_id, 'Patrol'),
-    (brand_id, 'Terra'),
-    (brand_id, 'March'),
-    (brand_id, 'Micra'),
-    (brand_id, 'Wingroad'),
-    (brand_id, 'Sunny'),
-    (brand_id, 'Almera'),
-    (brand_id, 'Almera Classic'),
-    (brand_id, 'Pulsar'),
-    (brand_id, 'Aprio'),
-    (brand_id, 'Tsuru'),
-    (brand_id, 'Livina'),
-    (brand_id, 'Grand Livina'),
-    (brand_id, 'Latio'),
-    (brand_id, 'Tiida'),
-    (brand_id, 'Bluebird Sylphy'),
-    (brand_id, 'Rogue Select'),
-    (brand_id, 'Rogue Sport'),
-    (brand_id, 'NP300'),
-    (brand_id, 'Zama'),
-    (brand_id, 'NV300'),
-    (brand_id, 'Cabstar');
+SELECT id, model
+FROM inserted_nissan
+         CROSS JOIN (
+    VALUES
+        ('Altima'),
+        ('Maxima'),
+        ('Sentra'),
+        ('Versa'),
+        ('370Z'),
+        ('GT-R'),
+        ('Murano'),
+        ('Rogue'),
+        ('Pathfinder')
+
+) AS models(model);
+
+

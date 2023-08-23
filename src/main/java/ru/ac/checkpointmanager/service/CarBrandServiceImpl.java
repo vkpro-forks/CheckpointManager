@@ -1,6 +1,8 @@
 package ru.ac.checkpointmanager.service;
 
 import org.springframework.stereotype.Service;
+import ru.ac.checkpointmanager.exception.CarBrandNotFoundException;
+import ru.ac.checkpointmanager.exception.CarNotFoundException;
 import ru.ac.checkpointmanager.model.CarBrand;
 import ru.ac.checkpointmanager.repository.CarBrandRepository;
 
@@ -15,6 +17,26 @@ public class CarBrandServiceImpl implements CarBrandService {
 
     @Override
     public CarBrand getBrandById(Long id) {
-        return carBrandRepository.findById(id).orElseThrow(null);
+        return carBrandRepository.findById(id)
+                .orElseThrow(()-> new CarBrandNotFoundException("Car brand not found with ID: " + id));
+    }
+
+    @Override
+    public CarBrand addBrand(CarBrand brand) {
+        return carBrandRepository.save(brand);
+    }
+
+    @Override
+    public void deleteBrand(Long brandId) {
+        CarBrand carBrand = carBrandRepository.findById(brandId)
+                .orElseThrow(()-> new CarBrandNotFoundException("Car brand not found with ID: " + brandId));
+    }
+
+    @Override
+    public CarBrand updateBrand(Long brandId, CarBrand carBrand) {
+        CarBrand requestBrand = carBrandRepository.findById(brandId)
+                .orElseThrow(()-> new CarBrandNotFoundException("Car brand not found with ID: " + brandId));
+        requestBrand.setName(carBrand.getName());
+        return carBrandRepository.save(requestBrand);
     }
 }

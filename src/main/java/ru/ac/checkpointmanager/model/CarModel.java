@@ -5,21 +5,25 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Entity
-@Table(name = "car_brand")
+@Table(name = "car_model")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CarBrand {
+public class CarModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    @ManyToOne
+    @JoinColumn(name = "brand_id")
+    private CarBrand brand;
 
-
+    private String model;
 }
+
+
+
+
+

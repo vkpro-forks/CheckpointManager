@@ -42,7 +42,7 @@ public class CarServiceImpl implements CarService {
                     .orElseThrow(() -> new CarNotFoundException("Car with ID " + carId + " not found"));
 
             existingCar.setLicensePlate(updateCar.getLicensePlate());
-            existingCar.setBrandModel(updateCar.getBrandModel());
+            existingCar.setBrand(updateCar.getBrand());
             existingCar.setType(updateCar.getType());
             existingCar.setColor(updateCar.getColor());
             existingCar.setYear(updateCar.getYear());
