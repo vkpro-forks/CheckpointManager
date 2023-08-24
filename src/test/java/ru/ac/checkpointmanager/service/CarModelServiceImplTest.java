@@ -10,6 +10,8 @@ import ru.ac.checkpointmanager.model.CarBrand;
 import ru.ac.checkpointmanager.model.CarModel;
 import ru.ac.checkpointmanager.repository.CarModelRepository;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -92,5 +94,23 @@ public class CarModelServiceImplTest {
         CarModel updateModel = carModelService.updateModel(1L, newModel);
 
         assertEquals("New Model", updateModel.getModel());
+    }
+
+    @Test
+    void findByModelIgnoreCase() {
+        CarModel carModel1 = new CarModel();
+        carModel1.setModel("Camry");
+
+        CarModel carModel2 = new CarModel();
+        carModel2.setModel("Civic");
+
+        List<CarModel> expectedModels = Arrays.asList(carModel1, carModel2);
+
+        when(carModelRepository.findByModelContainingIgnoreCase("c")).thenReturn(expectedModels);
+
+        List<CarModel> result = carModelService.findByModelIgnoreCase("c");
+
+        assertEquals(expectedModels, result);
+        verify(carModelRepository, times(1)).findByModelContainingIgnoreCase("c");
     }
 }

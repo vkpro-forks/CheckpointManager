@@ -8,15 +8,10 @@ CREATE TABLE car_model (
                            brand_id BIGINT REFERENCES car_brand(id),
                            model VARCHAR(255) NOT NULL
 );
-CREATE TABLE cars (
-                      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                      license_plate VARCHAR(255) NOT NULL,
-                      brand_id  BIGINT REFERENCES car_brand(id),
-                      model_id BIGINT REFERENCES car_model(id),
-                      type VARCHAR(255) NOT NULL,
-                      color VARCHAR(255) NOT NULL,
-                      year INTEGER
-);
+
+ALTER TABLE cars
+    ADD COLUMN brand_id BIGINT REFERENCES car_brand(id),
+    ADD COLUMN model_id BIGINT REFERENCES car_model(id);
 
 
 

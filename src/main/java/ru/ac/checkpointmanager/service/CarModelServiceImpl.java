@@ -19,7 +19,7 @@ public class CarModelServiceImpl implements CarModelService {
     @Override
     public CarModel getModelById(Long id) {
         return carModelRepository.findById(id)
-                .orElseThrow(()-> new CarModelNotFoundException("Car model not found with ID: " + id));
+                .orElseThrow(() -> new CarModelNotFoundException("Car model not found with ID: " + id));
     }
 
     @Override
@@ -30,14 +30,14 @@ public class CarModelServiceImpl implements CarModelService {
     @Override
     public void deleteModel(Long id) {
         carModelRepository.findById(id)
-                .orElseThrow(()-> new CarModelNotFoundException("Car model not found with ID: " + id));
+                .orElseThrow(() -> new CarModelNotFoundException("Car model not found with ID: " + id));
         carModelRepository.deleteById(id);
     }
 
     @Override
     public CarModel updateModel(Long id, CarModel carModel) {
         CarModel requestModel = carModelRepository.findById(id)
-                .orElseThrow(()-> new CarModelNotFoundException("Car model not found with ID: " + id));
+                .orElseThrow(() -> new CarModelNotFoundException("Car model not found with ID: " + id));
         requestModel.setModel(carModel.getModel());
         return carModelRepository.save(requestModel);
     }
@@ -46,4 +46,5 @@ public class CarModelServiceImpl implements CarModelService {
     public List<CarModel> findByModelIgnoreCase(String name) {
         return carModelRepository.findByModelContainingIgnoreCase(name);
     }
+
 }
