@@ -6,6 +6,7 @@ import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.repository.UserRepository;
 
 import java.util.Collection;
+import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -18,16 +19,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User createUser(User user) {
-        /* проверка, на уже зарегестрированного пользователя, по номеру телефона
-
-        if (checkPhoneNumber(user.getPhoneNumber) == true) {
-            throw new PhoneAlreadyExistException();
-        }  */
         return userRepository.save(user);
     }
 
     @Override
-    public User findById(Long id) {
+    public User findById(UUID id) {
         return userRepository.findById(id).orElseThrow(
                 () -> new UserNotFoundException("User by this id does not exist"));
     }
@@ -35,5 +31,40 @@ public class UserServiceImpl implements UserService {
     @Override
     public Collection<User> findByName(String name) {
         return userRepository.findUserByFullNameContainingIgnoreCase(name);
+    }
+
+    @Override
+    public User updateUser(User user) {
+        try {
+            User existingUser = userRepository.findById(user.getId()).orElseThrow(
+                    () -> new UserNotFoundException("User by this id does not exist"));
+
+            existingUser.setFullName(user.getFullName());
+            existingUser.setDateOfBirth(user.getDateOfBirth());
+            existingUser.setEmail(user.getEmail());
+            existingUser.setPassword(user.getPassword());
+
+            return userRepository.save(existingUser);
+        } catch (Exception e) {
+            throw new RuntimeException("Error updating user with ID " + user.getId());
+        }
+    }
+
+    @Override
+    public void deleteUser(UUID id) {
+        if (userRepository.findById(id).isEmpty()) {
+            throw new UserNotFoundException("Error deleting user with ID" + id);
+        }
+        userRepository.deleteById(id);
+    }
+
+    @Override
+    public Collection<User> getAll() {
+        Collection<User> users = userRepository.findAll();
+
+        if (users.isEmpty()) {
+            throw new UserNotFoundException("There is no user in DB");
+        }
+        return users;
     }
 }
