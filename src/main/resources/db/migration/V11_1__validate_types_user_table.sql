@@ -11,9 +11,6 @@ ALTER TABLE users
     ALTER COLUMN password SET NOT NULL;
 
 ALTER TABLE users
-    ADD CONSTRAINT password_unique UNIQUE (password);
-
-ALTER TABLE users
     ALTER COLUMN id DROP DEFAULT;
 
 ALTER TABLE users
