@@ -1,24 +1,16 @@
-package ru.ac.checkpointmanager.model;
+package ru.ac.checkpointmanager.dto;
 
 import jakarta.persistence.*;
 import javax.validation.constraints.*;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.ac.checkpointmanager.model.enums.CheckpointType;
 
-import java.time.LocalDateTime;
-
-
-@Entity
 @Setter
 @Getter
-@NoArgsConstructor
-@Table(name = "checkpoints")
-public class Checkpoint {
+public class CheckpointDTO {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @NotEmpty()
@@ -29,6 +21,4 @@ public class Checkpoint {
     private CheckpointType type;
 
     private String note;
-
-    private LocalDateTime addedAt;
 }
