@@ -1,6 +1,8 @@
 package ru.ac.checkpointmanager.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,6 +22,8 @@ public class CarModel {
     @JoinColumn(name = "brand_id")
     private CarBrand brand;
 
+    @NotNull
+    @Size(max = 25, message = "Имя модели должно быть не более 25 символов")
     private String model;
 
     @PrePersist

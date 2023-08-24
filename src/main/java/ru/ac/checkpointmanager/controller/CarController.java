@@ -43,12 +43,9 @@ public class CarController {
 
     @PostMapping
     public ResponseEntity<String> addCar(@RequestBody Car carRequest) {
-        if (!validateLicensePlate(carRequest.getLicensePlate())) {
-            return ResponseEntity.badRequest().body("Invalid license plate");
-        }
 
-        if (carRequest.getLicensePlate().length() > 9) {
-            return ResponseEntity.badRequest().body("License plate should not exceed 9 characters");
+        if(carRequest.getBrand() == null) {
+            return ResponseEntity.badRequest().body("Brand is missing in the request");
         }
 
         CarBrand brand = carBrandService.getBrandById(carRequest.getBrand().getId());
@@ -58,18 +55,25 @@ public class CarController {
         }
 
         CarModel model = carModelService.getModelById(carRequest.getModel().getId());
-
         if (model == null) {
-            return ResponseEntity.badRequest().body("Invalid brand ID");
+            return ResponseEntity.badRequest().body("Invalid model ID");
+        }
+
+        if (carRequest.getLicensePlate() == null || !validateLicensePlate(carRequest.getLicensePlate())) {
+            return ResponseEntity.badRequest().body("Invalid license plate");
+        }
+
+        if (carRequest.getLicensePlate().length() > 9) {
+            return ResponseEntity.badRequest().body("License plate should not exceed 9 characters");
         }
 
         Car car = new Car();
         car.setLicensePlate(carRequest.getLicensePlate());
         car.setBrand(brand);
         car.setModel(model);
-        car.setType(carRequest.getType());
-        car.setColor(carRequest.getColor());
-        car.setYear(carRequest.getYear());
+//        car.setType(carRequest.getType());
+//        car.setColor(carRequest.getColor());
+//        car.setYear(carRequest.getYear());
 
         Car addedCar = carService.addCar(carRequest);
         return ResponseEntity.ok("Car added with ID: " + addedCar.getId());
@@ -88,6 +92,11 @@ public class CarController {
     }
 
     private boolean validateLicensePlate(String licensePlate) {
+
+        if(licensePlate == null) {
+            return false;
+        }
+
         String invalidLetters = "йцгшщзфыплджэячьъбю";
         for (char letter : invalidLetters.toCharArray()) {
             if (licensePlate.contains(String.valueOf(letter))) {
@@ -122,12 +131,7 @@ public class CarController {
 
     @PutMapping("/brands/{id}")
     public ResponseEntity<CarBrand> updateCarBrand(@PathVariable Long id,
-                                                   @Valid @RequestBody CarBrand carBrandDetails,
-                                                   BindingResult result) {
-        if (result.hasErrors()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-
+                                                   @RequestBody CarBrand carBrandDetails) {
         CarBrand updateCarBrand;
         try {
             updateCarBrand = carBrandService.updateBrand(id, carBrandDetails);
@@ -173,12 +177,7 @@ public class CarController {
 
     @PutMapping("/models/{id}")
     public ResponseEntity<CarModel> updateCarModel(@PathVariable Long id,
-                                                   @Valid @RequestBody CarModel carModelDetails,
-                                                   BindingResult result) {
-        if (result.hasErrors()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-
+                                                   @RequestBody CarModel carModelDetails) {
         CarModel updateCarModel;
         try {
             updateCarModel = carModelService.updateModel(id, carModelDetails);

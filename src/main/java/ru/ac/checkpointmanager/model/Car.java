@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotNull;
 import java.util.UUID;
 
 @Entity
@@ -19,6 +20,7 @@ public class Car {
     @GeneratedValue
     private UUID id;
 
+    @NotNull
     @Column(name = "license_plate")
     private String licensePlate;
 
