@@ -5,6 +5,7 @@ import javax.validation.constraints.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ru.ac.checkpointmanager.model.enums.CheckpointType;
 
 import java.time.LocalDateTime;
 

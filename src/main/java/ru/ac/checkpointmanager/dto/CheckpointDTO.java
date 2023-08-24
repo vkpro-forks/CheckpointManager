@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import javax.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
-import ru.ac.checkpointmanager.model.CheckpointType;
+import ru.ac.checkpointmanager.model.enums.CheckpointType;
 
 @Setter
 @Getter
