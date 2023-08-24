@@ -27,21 +27,18 @@ public class UserController {
         this.modelMapper = modelMapper;
     }
 
-    //    dto
     @PostMapping("/authentication")
     public ResponseEntity<UserDTO> createUser(@RequestBody @Valid UserDTO userDTO) {
         User createdUser = userService.createUser(convertToUser(userDTO));
         return ResponseEntity.ok(convertToUserDTO(createdUser));
     }
 
-    //    dto
     @GetMapping("{id}")
     public ResponseEntity<UserDTO> findUserById(@PathVariable UUID id) {
         Optional<UserDTO> user = Optional.ofNullable(convertToUserDTO(userService.findById(id)));
         return user.map(ResponseEntity::ok).orElse(ResponseEntity.noContent().build());
     }
 
-    //    dto
     @GetMapping(params = "{name}")
     public ResponseEntity<Collection<UserDTO>> findUserByName(@RequestParam(required = false) String name) {
         Collection<UserDTO> foundUsers = userService.findByName(name).stream()
@@ -50,7 +47,6 @@ public class UserController {
         return foundUsers.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(foundUsers);
     }
 
-    //    dto
     @GetMapping
     public ResponseEntity<Collection<UserDTO>> getAll() {
         Collection<UserDTO> foundUsers = userService.getAll().stream()
@@ -59,19 +55,12 @@ public class UserController {
         return foundUsers.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(foundUsers);
     }
 
-    //    dto
     @PutMapping
     public ResponseEntity<UserDTO> updateUser(@RequestBody UserDTO userDTO) {
-        /* ищем юзера в базе по мэйлу, можно конечно по имени было, но лучше искать по тому, что не повторяется */
         User user = userService.findByEmail(userDTO.getEmail());
-
-        /* конвертируем переданного юзера из ДТО в обычного */
         User userToUpdate = convertToUser(userDTO);
-
-        /* Вручную добавляем id из БД, иначе null передается */
         userToUpdate.setId(user.getId());
 
-        /* обновляем юзера */
         User changedUser = userService.updateUser(userToUpdate);
         return user == null ? ResponseEntity.noContent().build() : ResponseEntity.ok(convertToUserDTO(changedUser));
     }

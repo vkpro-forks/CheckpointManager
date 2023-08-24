@@ -12,9 +12,6 @@ import java.time.LocalDate;
 @Setter
 public class UserDTO {
 
-//    добавила только поля, который пользователь сам в состоянии ввести
-
-
     @NotEmpty(message = "Name should not be empty")
     private String fullName;
 
