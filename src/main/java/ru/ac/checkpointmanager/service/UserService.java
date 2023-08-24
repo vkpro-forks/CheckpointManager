@@ -12,6 +12,8 @@ public interface UserService {
 
     Collection<User> findByName(String name);
 
+    User findByEmail(String email);
+
     User updateUser(User user);
 
     void deleteUser(UUID id);
