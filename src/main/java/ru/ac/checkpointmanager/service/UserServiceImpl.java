@@ -33,6 +33,13 @@ public class UserServiceImpl implements UserService {
         return userRepository.findUserByFullNameContainingIgnoreCase(name);
     }
 
+    /*поиск по мэйлу нужен вместо поиска по id,
+    тк в сущности UserDTO это поле на мой взгляд пользователю не нужно */
+    @Override
+    public User findByEmail(String email) {
+        return userRepository.findUserByEmail(email);
+    }
+
     @Override
     public User updateUser(User user) {
         try {
