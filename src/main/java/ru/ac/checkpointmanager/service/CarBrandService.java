@@ -12,6 +12,6 @@ public interface CarBrandService {
     void deleteBrand(Long brandId);
 
     CarBrand updateBrand(Long brandId, CarBrand carBrand);
-    List<CarBrand> findByBrandIgnoreCase(String name);
 
+    List<CarBrand> getAllBrands();
 }

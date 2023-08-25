@@ -14,5 +14,6 @@ public interface CarModelService {
 
     CarModel updateModel(Long brandId, CarModel carModel);
 
-    List<CarModel> findByModelIgnoreCase(String name);
+    List<CarModel> getAllModels();
+
 }

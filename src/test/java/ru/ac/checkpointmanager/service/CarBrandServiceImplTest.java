@@ -88,15 +88,5 @@ public class CarBrandServiceImplTest {
         assertEquals("New Brand", updatedBrand.getBrand());
     }
 
-    @Test
-    void findByBrandIgnoreCase() {
-        CarBrand carBrand = new CarBrand();
-        carBrand.setBrand("Test Brand");
-        when(carBrandRepository.findByBrandContainingIgnoreCase("Test")).thenReturn(Collections.singletonList(carBrand));
 
-        List<CarBrand> results = carBrandService.findByBrandIgnoreCase("Test");
-
-        assertFalse(results.isEmpty());
-        assertEquals(carBrand.getBrand(), results.get(0).getBrand());
-    }
 }

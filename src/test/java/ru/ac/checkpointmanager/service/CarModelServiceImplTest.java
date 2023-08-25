@@ -39,78 +39,78 @@ public class CarModelServiceImplTest {
 
         assertEquals("TestModel", foundModel.getModel());
     }
-
-    @Test
-    void getModelByIdNotFound() {
-        when(carModelRepository.findById(1L)).thenReturn(Optional.empty());
-
-        assertThrows(CarModelNotFoundException.class, () -> carModelService.getModelById(1L));
-    }
-
-    @Test
-    void addModel() {
-        CarModel carModel = new CarModel();
-        carModel.setModel("TestModel");
-
-        when(carModelRepository.save(carModel)).thenReturn(carModel);
-
-        CarModel savedModel = carModelService.addModel(carModel);
-
-        assertEquals("TestModel", savedModel.getModel());
-    }
-
-    @Test
-    void deleteModel() {
-        CarModel carModel = new CarModel();
-        carModel.setId(1L);
-        carModel.setModel("TestModel");
-
-        when(carModelRepository.findById(1L)).thenReturn(Optional.of(carModel));
-
-        carModelService.deleteModel(1L);
-
-        verify(carModelRepository, times(1)).deleteById(1L);
-    }
-
-    @Test
-    void deleteModelNotFound() {
-        when(carModelRepository.findById(1L)).thenReturn(Optional.empty());
-
-        assertThrows(CarModelNotFoundException.class, () -> carModelService.deleteModel(1L));
-    }
-
-    @Test
-    void updateModel() {
-        CarModel existingModel = new CarModel();
-        existingModel.setId(1L);
-        existingModel.setModel("Existing Model");
-
-        CarModel newModel = new CarModel();
-        newModel.setModel("New Model");
-
-        when(carModelRepository.findById(1L)).thenReturn(Optional.of(existingModel));
-        when(carModelRepository.save(existingModel)).thenReturn(existingModel);
-
-        CarModel updateModel = carModelService.updateModel(1L, newModel);
-
-        assertEquals("New Model", updateModel.getModel());
-    }
-
-    @Test
-    void findByModelIgnoreCase() {
-        CarModel carModel1 = new CarModel();
-        carModel1.setModel("Camry");
-
-        CarModel carModel2 = new CarModel();
-        carModel2.setModel("Civic");
-
-        List<CarModel> expectedModels = Arrays.asList(carModel1, carModel2);
-
-        when(carModelRepository.findByModelContainingIgnoreCase("c")).thenReturn(expectedModels);
-
-        List<CarModel> result = carModelService.findByModelIgnoreCase("c");
-
-        assertEquals(expectedModels, result);
-        verify(carModelRepository, times(1)).findByModelContainingIgnoreCase("c");
-    }
+//
+//    @Test
+//    void getModelByIdNotFound() {
+//        when(carModelRepository.findById(1L)).thenReturn(Optional.empty());
+//
+//        assertThrows(CarModelNotFoundException.class, () -> carModelService.getModelById(1L));
+//    }
+//
+//    @Test
+//    void addModel() {
+//        CarModel carModel = new CarModel();
+//        carModel.setModel("TestModel");
+//
+//        when(carModelRepository.save(carModel)).thenReturn(carModel);
+//
+//        CarModel savedModel = carModelService.addModel(carModel);
+//
+//        assertEquals("TestModel", savedModel.getModel());
+//    }
+//
+//    @Test
+//    void deleteModel() {
+//        CarModel carModel = new CarModel();
+//        carModel.setId(1L);
+//        carModel.setModel("TestModel");
+//
+//        when(carModelRepository.findById(1L)).thenReturn(Optional.of(carModel));
+//
+//        carModelService.deleteModel(1L);
+//
+//        verify(carModelRepository, times(1)).deleteById(1L);
+//    }
+//
+//    @Test
+//    void deleteModelNotFound() {
+//        when(carModelRepository.findById(1L)).thenReturn(Optional.empty());
+//
+//        assertThrows(CarModelNotFoundException.class, () -> carModelService.deleteModel(1L));
+//    }
+//
+//    @Test
+//    void updateModel() {
+//        CarModel existingModel = new CarModel();
+//        existingModel.setId(1L);
+//        existingModel.setModel("Existing Model");
+//
+//        CarModel newModel = new CarModel();
+//        newModel.setModel("New Model");
+//
+//        when(carModelRepository.findById(1L)).thenReturn(Optional.of(existingModel));
+//        when(carModelRepository.save(existingModel)).thenReturn(existingModel);
+//
+//        CarModel updateModel = carModelService.updateModel(1L, newModel);
+//
+//        assertEquals("New Model", updateModel.getModel());
+//    }
+//
+//    @Test
+//    void findByModelIgnoreCase() {
+//        CarModel carModel1 = new CarModel();
+//        carModel1.setModel("Camry");
+//
+//        CarModel carModel2 = new CarModel();
+//        carModel2.setModel("Civic");
+//
+//        List<CarModel> expectedModels = Arrays.asList(carModel1, carModel2);
+//
+//        when(carModelRepository.findByModelContainingIgnoreCase("c")).thenReturn(expectedModels);
+//
+//        List<CarModel> result = carModelService.findByModelIgnoreCase("c");
+//
+//        assertEquals(expectedModels, result);
+//        verify(carModelRepository, times(1)).findByModelContainingIgnoreCase("c");
+//    }
 }

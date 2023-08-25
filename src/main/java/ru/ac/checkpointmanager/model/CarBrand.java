@@ -25,7 +25,7 @@ public class CarBrand {
 
     @Column(name = "brand")
     @NotNull
-    @Size(max = 25, message = "Имя бренда должно быть не более 25 символов")
+    @Size(min = 2, max = 25, message = "Имя бренда должно быть не более 25 символов")
     @Pattern(regexp = "^[^0-9]*$", message = "Имя бренда не должно содержать цифр")
     private String brand;
 
@@ -36,6 +36,4 @@ public class CarBrand {
             brand = brand.substring(0, 1).toUpperCase() + brand.substring(1).toLowerCase();
         }
     }
-
-
 }
