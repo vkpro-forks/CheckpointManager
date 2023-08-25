@@ -1,20 +1,18 @@
 package ru.ac.checkpointmanager.dto;
 
 import jakarta.persistence.*;
-import javax.validation.constraints.*;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.*;
+import lombok.Data;
 import ru.ac.checkpointmanager.model.enums.CheckpointType;
 
-@Setter
-@Getter
+@Data
 public class CheckpointDTO {
 
     @Id
     private Integer id;
 
     @NotEmpty()
-    @Size(min = 2, max = 60, message = "Name should be between 2 and 60 symbols")
+    @Size(min = 2, max = 60)
     private String name;
 
     @Enumerated(EnumType.STRING)
