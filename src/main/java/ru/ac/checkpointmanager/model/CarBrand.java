@@ -29,6 +29,12 @@ public class CarBrand {
     @Pattern(regexp = "^[^0-9]*$", message = "Имя бренда не должно содержать цифр")
     private String brand;
 
+//    @OneToMany(mappedBy = "brand", fetch = FetchType.LAZY)
+//    private List<Car> cars = new ArrayList<>();
+//
+//    @OneToMany(mappedBy = "brand")
+//    private List<CarModel> models = new ArrayList<>();
+
     @PrePersist
     @PreUpdate
     public void toProperName() {
