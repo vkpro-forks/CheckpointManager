@@ -1,14 +1,16 @@
 package ru.ac.checkpointmanager.controller;
 
+import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.ac.checkpointmanager.dto.UserDTO;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.service.UserService;
 
-import javax.validation.Valid;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
@@ -28,9 +30,13 @@ public class UserController {
     }
 
     @PostMapping("/authentication")
-    public ResponseEntity<UserDTO> createUser(@RequestBody @Valid UserDTO userDTO) {
+    public ResponseEntity<?> createUser(@Valid @RequestBody UserDTO userDTO, BindingResult result) {
+        if (result.hasErrors()) {
+            return new ResponseEntity<>("Validation error", HttpStatus.BAD_REQUEST);
+        }
+
         User createdUser = userService.createUser(convertToUser(userDTO));
-        return ResponseEntity.ok(convertToUserDTO(createdUser));
+        return new ResponseEntity<>(convertToUserDTO(createdUser), HttpStatus.CREATED);
     }
 
     @GetMapping("{id}")
@@ -56,7 +62,11 @@ public class UserController {
     }
 
     @PutMapping
-    public ResponseEntity<UserDTO> updateUser(@RequestBody UserDTO userDTO) {
+    public ResponseEntity<?> updateUser(@Valid @RequestBody UserDTO userDTO, BindingResult result) {
+        if (result.hasErrors()) {
+            return new ResponseEntity<>("Validation error", HttpStatus.BAD_REQUEST);
+        }
+
         User user = userService.findByEmail(userDTO.getEmail());
         User userToUpdate = convertToUser(userDTO);
         userToUpdate.setId(user.getId());
