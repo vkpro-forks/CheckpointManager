@@ -1,5 +1,6 @@
 package ru.ac.checkpointmanager.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -29,11 +30,13 @@ public class CarBrand {
     @Pattern(regexp = "^[^0-9]*$", message = "Имя бренда не должно содержать цифр")
     private String brand;
 
-//    @OneToMany(mappedBy = "brand", fetch = FetchType.LAZY)
-//    private List<Car> cars = new ArrayList<>();
-//
-//    @OneToMany(mappedBy = "brand")
-//    private List<CarModel> models = new ArrayList<>();
+    @JsonIgnore
+    @OneToMany(mappedBy = "brand", fetch = FetchType.LAZY)
+    private List<Car> cars = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "brand")
+    private List<CarModel> models = new ArrayList<>();
 
     @PrePersist
     @PreUpdate
