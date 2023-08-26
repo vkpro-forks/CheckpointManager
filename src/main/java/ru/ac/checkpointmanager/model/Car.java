@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotNull;
 import java.util.UUID;
 
 @Entity
@@ -19,12 +20,17 @@ public class Car {
     @GeneratedValue
     private UUID id;
 
+    @NotNull
     @Column(name = "license_plate")
     private String licensePlate;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "brand_model")
-    private CarBrandAndModel brandModel;
+    @ManyToOne
+    @JoinColumn(name = "brand_id")
+    private CarBrand brand;
+
+    @ManyToOne
+    @JoinColumn(name = "model_id")
+    private CarModel model;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
