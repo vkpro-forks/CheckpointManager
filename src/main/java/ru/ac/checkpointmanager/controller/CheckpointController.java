@@ -79,7 +79,6 @@ public class CheckpointController {
         if (bindingResult.hasErrors()) {
             return new ResponseEntity<>(errorsList(bindingResult), HttpStatus.BAD_REQUEST);
         }
-
         Checkpoint currentCheckpoint = service.findCheckpointById(checkpointDTO.getId());
         if (currentCheckpoint == null) {
             return ResponseEntity.notFound().build();
