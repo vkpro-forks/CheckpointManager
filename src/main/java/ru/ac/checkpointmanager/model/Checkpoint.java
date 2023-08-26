@@ -1,18 +1,16 @@
 package ru.ac.checkpointmanager.model;
 
 import jakarta.persistence.*;
-import javax.validation.constraints.*;
-import lombok.Getter;
+import jakarta.validation.constraints.*;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import ru.ac.checkpointmanager.model.enums.CheckpointType;
 
 import java.time.LocalDateTime;
 
 
 @Entity
-@Setter
-@Getter
+@Data
 @NoArgsConstructor
 @Table(name = "checkpoints")
 public class Checkpoint {
@@ -22,7 +20,7 @@ public class Checkpoint {
     private Integer id;
 
     @NotEmpty()
-    @Size(min = 2, max = 60, message = "Name should be between 2 and 60 symbols")
+    @Size(min = 2, max = 60)
     private String name;
 
     @Enumerated(EnumType.STRING)
