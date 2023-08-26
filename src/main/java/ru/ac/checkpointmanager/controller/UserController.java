@@ -79,6 +79,7 @@ public class UserController {
     }
 
     //    method with limited access
+    //    1 variate
     @PatchMapping("{id}")
     public ResponseEntity<User> updateBlockStatus(@PathVariable UUID id, @RequestParam Boolean isBlocked) {
         User changedUser = userService.updateBlockStatus(id, isBlocked);
@@ -86,6 +87,7 @@ public class UserController {
     }
 
     //    method with limited access
+    //    2 variate
     @PatchMapping("/block/{id}")
     public ResponseEntity<?> blockById(@PathVariable UUID id) {
         try {
@@ -99,6 +101,7 @@ public class UserController {
     }
 
     //    method with limited access
+    //    2 variate
     @PatchMapping("/unblock/{id}")
     public ResponseEntity<?> unblockById(@PathVariable UUID id) {
         try {
@@ -110,6 +113,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
         }
     }
+//choose variate witch best for frontend
 
     @DeleteMapping("{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
