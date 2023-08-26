@@ -6,7 +6,7 @@ import ru.ac.checkpointmanager.exception.CheckpointNotFoundException;
 import ru.ac.checkpointmanager.model.Checkpoint;
 import ru.ac.checkpointmanager.repository.CheckpointRepository;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -18,7 +18,7 @@ public class CheckpointServiceImpl implements CheckpointService {
     @Override
     public Checkpoint addCheckpoint(Checkpoint checkpoint) {
 
-        checkpoint.setAddedAt(LocalDateTime.now());
+        checkpoint.setAddedAt(LocalDate.now());
         return checkpointRepository.save(checkpoint);
     }
 

@@ -4,11 +4,11 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
-import ru.ac.checkpointmanager.model.enums.CheckpointType;
+
 
 @Setter
 @Getter
-public class CheckpointDTO {
+public class TerritoryDTO {
 
     @Id
     private Integer id;
@@ -16,9 +16,6 @@ public class CheckpointDTO {
     @NotEmpty()
     @Size(min = 2, max = 60)
     private String name;
-
-    @Enumerated(EnumType.STRING)
-    private CheckpointType type;
 
     private String note;
 }

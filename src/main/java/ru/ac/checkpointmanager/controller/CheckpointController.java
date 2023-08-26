@@ -8,7 +8,7 @@ import ru.ac.checkpointmanager.dto.CheckpointDTO;
 import ru.ac.checkpointmanager.model.Checkpoint;
 import ru.ac.checkpointmanager.service.CheckpointService;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -66,7 +66,7 @@ public class CheckpointController {
 
     /* UPDATE */
     @PutMapping
-    public ResponseEntity<CheckpointDTO> editCheckpoint(@RequestBody CheckpointDTO checkpointDTO) {
+    public ResponseEntity<CheckpointDTO> editCheckpoint(@RequestBody @Valid CheckpointDTO checkpointDTO) {
         Checkpoint currentCheckpoint = service.findCheckpointById(checkpointDTO.getId());
         if (currentCheckpoint == null) {
             return ResponseEntity.notFound().build();
