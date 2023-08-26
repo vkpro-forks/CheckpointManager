@@ -2,12 +2,10 @@ package ru.ac.checkpointmanager.dto;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import ru.ac.checkpointmanager.model.enums.CheckpointType;
 
-@Setter
-@Getter
+@Data
 public class CheckpointDTO {
 
     @Id

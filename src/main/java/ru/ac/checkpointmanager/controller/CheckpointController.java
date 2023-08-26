@@ -2,13 +2,16 @@ package ru.ac.checkpointmanager.controller;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import ru.ac.checkpointmanager.dto.CheckpointDTO;
 import ru.ac.checkpointmanager.model.Checkpoint;
 import ru.ac.checkpointmanager.service.CheckpointService;
 
-import jakarta.validation.Valid;
+import jakarta.validation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,7 +30,12 @@ public class CheckpointController {
 
     /* CREATE */
     @PostMapping
-    public ResponseEntity<CheckpointDTO> addCheckpoint(@RequestBody @Valid CheckpointDTO checkpointDTO) {
+    public ResponseEntity<?> addCheckpoint(@RequestBody @Valid CheckpointDTO checkpointDTO,
+                                                       BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return new ResponseEntity<>(errorsList(bindingResult), HttpStatus.BAD_REQUEST);
+        }
+
         Checkpoint newCheckpoint = service.addCheckpoint(convertToCheckpoint(checkpointDTO));
         return ResponseEntity.ok(convertToCheckpointDTO(newCheckpoint));
     }
@@ -66,7 +74,11 @@ public class CheckpointController {
 
     /* UPDATE */
     @PutMapping
-    public ResponseEntity<CheckpointDTO> editCheckpoint(@RequestBody @Valid CheckpointDTO checkpointDTO) {
+    public ResponseEntity<?> editCheckpoint(@RequestBody @Valid CheckpointDTO checkpointDTO,
+                                                        BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return new ResponseEntity<>(errorsList(bindingResult), HttpStatus.BAD_REQUEST);
+        }
         Checkpoint currentCheckpoint = service.findCheckpointById(checkpointDTO.getId());
         if (currentCheckpoint == null) {
             return ResponseEntity.notFound().build();
@@ -105,4 +117,15 @@ public class CheckpointController {
         return modelMapper.map(checkpoint, CheckpointDTO.class);
     }
 
+    private String errorsList(BindingResult bindingResult) {
+            StringBuilder errorMsg = new StringBuilder();
+            List<FieldError> errors = bindingResult.getFieldErrors();
+            for (FieldError error : errors) {
+                errorMsg.append(error.getField())
+                        .append(" - ")
+                        .append(error.getDefaultMessage())
+                        .append("\n");
+            }
+            return errorMsg.toString();
+    }
 }

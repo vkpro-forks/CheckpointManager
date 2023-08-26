@@ -4,6 +4,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import ru.ac.checkpointmanager.exception.CarNotFoundException;
 import ru.ac.checkpointmanager.model.Car;
+import ru.ac.checkpointmanager.model.CarBrand;
 import ru.ac.checkpointmanager.repository.CarRepository;
 
 import java.util.List;
@@ -13,15 +14,26 @@ import java.util.UUID;
 public class CarServiceImpl implements CarService {
 
     private final CarRepository carRepository;
+    private final CarBrandService carBrandService;
 
-    public CarServiceImpl(CarRepository carRepository) {
+    private final CarModelService carModelService;
+
+    public CarServiceImpl(CarRepository carRepository, CarBrandService carBrandService, CarModelService carModelService) {
         this.carRepository = carRepository;
+        this.carBrandService = carBrandService;
+        this.carModelService = carModelService;
     }
 
 
     @Override
     public Car addCar(Car car) {
         return carRepository.save(car);
+    }
+
+    @Override
+    public Car getCarById(UUID carId) {
+        return carRepository.findById(carId)
+                .orElseThrow(()-> new CarNotFoundException("Car with ID " + carId + " not found"));
     }
 
     @Override
@@ -42,7 +54,7 @@ public class CarServiceImpl implements CarService {
                     .orElseThrow(() -> new CarNotFoundException("Car with ID " + carId + " not found"));
 
             existingCar.setLicensePlate(updateCar.getLicensePlate());
-            existingCar.setBrandModel(updateCar.getBrandModel());
+            existingCar.setBrand(updateCar.getBrand());
             existingCar.setType(updateCar.getType());
             existingCar.setColor(updateCar.getColor());
             existingCar.setYear(updateCar.getYear());
@@ -51,12 +63,6 @@ public class CarServiceImpl implements CarService {
         } catch (Exception exception) {
             throw new RuntimeException("Error updating car with ID " + carId);
         }
-    }
-
-    @Override
-    public Car getCarById(UUID carId) {
-        return carRepository.findById(carId)
-                .orElseThrow(()-> new CarNotFoundException("Car with ID " + carId + " not found"));
     }
 
     @Override
