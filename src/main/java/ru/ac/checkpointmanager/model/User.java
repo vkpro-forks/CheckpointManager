@@ -1,7 +1,10 @@
 package ru.ac.checkpointmanager.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,9 +29,10 @@ public class User {
 
     @Column(name = "full_name")
     @NotEmpty
-    @Size(min = 2, max = 100, message = "Full name have to contain between 2 and 100 characters")
-    @Pattern(regexp = "(?:[А-ЯA-Z][а-яa-z]*)(?:\\s+[А-ЯA-Z][а-яa-z]*)*")
-    /* проверяет, что первое и каждое следущее после пробела слово начинается с заглавной буквы (латинской или кириллицы)  */
+    @Size(min = 2, max = 100)
+    @Pattern(regexp = "(?:[А-ЯA-Z][а-яa-z]*)(?:\\s+[А-ЯA-Z][а-яa-z]*)*",
+            message = "The name has to start with a capital letter and contain only Latin or Cyrillic letters.\n" +
+                    "Example: \"Ivanov Ivan Jovanovich\"")
     private String fullName;
 
     @Column(name = "date_of_birth")
@@ -38,6 +42,7 @@ public class User {
     @NotEmpty(message = "Email should not be empty")
     private String email;
 
+    @NotEmpty
     private String password;
 
     @Column(name = "is_blocked")

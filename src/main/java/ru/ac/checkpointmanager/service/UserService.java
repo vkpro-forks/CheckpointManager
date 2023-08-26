@@ -16,6 +16,12 @@ public interface UserService {
 
     User updateUser(User user);
 
+    User updateBlockStatus(UUID id, Boolean isBlocked);
+
+    void blockById(UUID id);
+
+    void unblockById(UUID id);
+
     void deleteUser(UUID id);
 
     Collection<User> getAll();

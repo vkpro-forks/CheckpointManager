@@ -12,8 +12,10 @@ import java.time.LocalDate;
 public class UserDTO {
 
     @NotEmpty
-    @Size(min = 2, max = 100, message = "Full name have to contain between 2 and 100 characters")
-    @Pattern(regexp = "(?:[А-ЯA-Z][а-яa-z]*)(?:\\s+[А-ЯA-Z][а-яa-z]*)*")
+    @Size(min = 2, max = 100)
+    @Pattern(regexp = "(?:[А-ЯA-Z][а-яa-z]*)(?:\\s+[А-ЯA-Z][а-яa-z]*)*",
+            message = "The name has to start with a capital letter and contain only Latin or Cyrillic letters.\n" +
+                    "Example: \"Ivanov Ivan Jovanovich\"")
     private String fullName;
 
     private LocalDate dateOfBirth;

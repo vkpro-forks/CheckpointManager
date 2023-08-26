@@ -51,7 +51,48 @@ public class UserServiceImpl implements UserService {
 
             return userRepository.save(existingUser);
         } catch (Exception e) {
-            throw new RuntimeException("Error updating user with ID " + user.getId());
+            throw new RuntimeException("Error updating user with ID " + user.getId(), e);
+        }
+    }
+
+//    два варианта блокировки пользователя
+//    первый: с помощью одного метода можно и заблокировать и разблокировать по айди
+    @Override
+    public User updateBlockStatus(UUID id, Boolean isBlocked) {
+        try {
+            User existingUser = userRepository.findById(id).orElseThrow(
+                    () -> new UserNotFoundException("User by this id does not exist"));
+
+            existingUser.setIsBlocked(isBlocked);
+            return userRepository.save(existingUser);
+        } catch (Exception e) {
+            throw new RuntimeException("Error updating user with ID " + id, e);
+        }
+    }
+
+//    второй: два разных метода для блокировки или разблокировки по айди,
+//    логика блокировки через sql запрос в репозитории
+    @Override
+    public void blockById(UUID id) {
+        try {
+            userRepository.findById(id).orElseThrow(
+                    () -> new UserNotFoundException("User by this id does not exist"));
+
+            userRepository.blockById(id);
+        } catch (Exception e) {
+            throw new RuntimeException("Error updating user with ID " + id, e);
+        }
+    }
+
+    @Override
+    public void unblockById(UUID id) {
+        try {
+            userRepository.findById(id).orElseThrow(
+                    () -> new UserNotFoundException("User by this id does not exist"));
+
+            userRepository.unblockById(id);
+        } catch (Exception e) {
+            throw new RuntimeException("Error updating user with ID " + id, e);
         }
     }
 
