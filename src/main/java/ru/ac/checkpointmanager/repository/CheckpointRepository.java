@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface CheckpointRepository extends JpaRepository<Checkpoint, Integer> {
     List<Checkpoint> findCheckpointsByNameContainingIgnoreCase(String name);
+
+    List<Checkpoint> findCheckpointsByTerritoryIdOrderByName(Integer id);
 }

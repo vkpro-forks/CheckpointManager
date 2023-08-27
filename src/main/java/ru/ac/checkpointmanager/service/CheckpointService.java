@@ -14,6 +14,8 @@ public interface CheckpointService {
 
     List<Checkpoint> findAllCheckpoints();
 
+    List<Checkpoint> findCheckpointsByTerritoryId(Integer id);
+
     Checkpoint updateCheckpoint(Checkpoint checkpoint);
 
     void deleteCheckpointById(int id);

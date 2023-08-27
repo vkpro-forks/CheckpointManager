@@ -72,6 +72,17 @@ public class CheckpointController {
                 .collect(Collectors.toList()));
     }
 
+    @GetMapping("/territory")
+    public ResponseEntity<List<CheckpointDTO>> getCheckpointsByTerritoryId(@RequestParam Integer id) {
+        List<Checkpoint> checkpoints = service.findCheckpointsByTerritoryId(id);
+        if (checkpoints.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(checkpoints.stream()
+                .map(this::convertToCheckpointDTO)
+                .collect(Collectors.toList()));
+    }
+
     /* UPDATE */
     @PutMapping
     public ResponseEntity<?> editCheckpoint(@RequestBody @Valid CheckpointDTO checkpointDTO,

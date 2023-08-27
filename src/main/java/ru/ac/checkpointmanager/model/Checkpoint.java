@@ -28,4 +28,8 @@ public class Checkpoint {
     private String note;
 
     private LocalDate addedAt;
+
+    @ManyToOne
+    @JoinColumn(name = "territory_id")
+    private Territory territory;
 }
