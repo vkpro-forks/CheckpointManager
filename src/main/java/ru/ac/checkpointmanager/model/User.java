@@ -12,6 +12,7 @@ import lombok.Setter;
 import ru.ac.checkpointmanager.model.enums.UserRole;
 
 import java.time.LocalDate;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -50,5 +51,8 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private UserRole role;
+
+    @OneToMany(mappedBy = "user")
+    private Set<PhoneNumber> numbers;
 }
 
