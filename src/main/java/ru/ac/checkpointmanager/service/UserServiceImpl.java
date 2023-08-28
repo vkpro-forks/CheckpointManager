@@ -1,6 +1,9 @@
 package ru.ac.checkpointmanager.service;
 
+import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import ru.ac.checkpointmanager.dto.UserDTO;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.repository.UserRepository;
@@ -9,13 +12,12 @@ import java.util.Collection;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final ModelMapper modelMapper;
 
-    public UserServiceImpl(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
 
     @Override
     public User createUser(User user) {
@@ -50,8 +52,8 @@ public class UserServiceImpl implements UserService {
             existingUser.setPassword(user.getPassword());
 
             return userRepository.save(existingUser);
-        } catch (Exception e) {
-            throw new RuntimeException("Error updating user with ID " + user.getId(), e);
+        } catch (UserNotFoundException e) {
+            throw new UserNotFoundException("Error updating user with ID " + user.getId(), e);
         }
     }
 
@@ -112,5 +114,15 @@ public class UserServiceImpl implements UserService {
             throw new UserNotFoundException("There is no user in DB");
         }
         return users;
+    }
+
+    @Override
+    public User convertToUser(UserDTO userDTO) {
+        return modelMapper.map(userDTO, User.class);
+    }
+
+    @Override
+    public UserDTO convertToUserDTO(User user) {
+        return modelMapper.map(user, UserDTO.class);
     }
 }

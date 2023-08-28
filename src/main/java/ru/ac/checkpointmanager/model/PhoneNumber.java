@@ -1,8 +1,8 @@
 package ru.ac.checkpointmanager.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.EqualsAndHashCode;
@@ -28,7 +28,7 @@ public class PhoneNumber {
 
     @NotEmpty
     @Size(min = 6, max = 11)
-    @Pattern(regexp = " ^\\d+$", message = "The number has to contain only numbers from 0 to 9\n" +
+    @Pattern(regexp = "^\\d+$", message = "The number has to contain only numbers from 0 to 9\n" +
             "Example: \"79998885566\"")
     private String number;
 
@@ -36,11 +36,9 @@ public class PhoneNumber {
     private PhoneNumberType type;
 
     @ManyToOne
-    @JsonIgnore
     @JoinColumn(name = "user_id")
-    @NotEmpty
+    @NotNull
     private User user;
 
     private String note;
-
 }

@@ -1,5 +1,6 @@
 package ru.ac.checkpointmanager.service;
 
+import ru.ac.checkpointmanager.dto.UserDTO;
 import ru.ac.checkpointmanager.model.User;
 
 import java.util.Collection;
@@ -25,4 +26,8 @@ public interface UserService {
     void deleteUser(UUID id);
 
     Collection<User> getAll();
+
+    User convertToUser(UserDTO userDTO);
+
+    UserDTO convertToUserDTO(User user);
 }
