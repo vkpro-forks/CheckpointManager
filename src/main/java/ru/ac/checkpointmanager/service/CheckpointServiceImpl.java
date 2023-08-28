@@ -39,6 +39,11 @@ public class CheckpointServiceImpl implements CheckpointService {
     }
 
     @Override
+    public List<Checkpoint> findCheckpointsByTerritoryId(Integer id) {
+        return checkpointRepository.findCheckpointsByTerritoryIdOrderByName(id);
+    }
+
+    @Override
     public Checkpoint updateCheckpoint(Checkpoint checkpoint) {
         //because "addedAt" field not included in dto and after update checkpoint's data became empty
         //maybe exist better way to save this value in table?
