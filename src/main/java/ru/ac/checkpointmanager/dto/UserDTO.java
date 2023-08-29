@@ -6,10 +6,13 @@ import lombok.Setter;
 
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Getter
 @Setter
 public class UserDTO {
+
+    private UUID id;
 
     @NotEmpty
     @Size(min = 2, max = 100)

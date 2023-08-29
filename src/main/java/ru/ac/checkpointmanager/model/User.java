@@ -53,6 +53,6 @@ public class User {
     private UserRole role;
 
     @OneToMany(mappedBy = "user")
-    private Set<PhoneNumber> numbers;
+    private Set<Phone> numbers;
 }
 

@@ -8,14 +8,12 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.ac.checkpointmanager.dto.UserDTO;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
-import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.service.UserService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
 
 import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/user")
@@ -30,29 +28,25 @@ public class UserController {
         if (result.hasErrors()) {
             return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
         }
-        User createdUser = userService.createUser(userService.convertToUser(userDTO));
-        return new ResponseEntity<>(userService.convertToUserDTO(createdUser), HttpStatus.CREATED);
+        UserDTO createdUser = userService.createUser(userDTO);
+        return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
     }
 
     @GetMapping("{id}")
     public ResponseEntity<UserDTO> findUserById(@PathVariable UUID id) {
-        Optional<UserDTO> user = Optional.ofNullable(userService.convertToUserDTO(userService.findById(id)));
+        Optional<UserDTO> user = Optional.ofNullable(userService.findById(id));
         return user.map(ResponseEntity::ok).orElse(ResponseEntity.noContent().build());
     }
 
     @GetMapping(params = "{name}")
     public ResponseEntity<Collection<UserDTO>> findUserByName(@RequestParam(required = false) String name) {
-        Collection<UserDTO> foundUsers = userService.findByName(name).stream()
-                .map(userService::convertToUserDTO)
-                .collect(Collectors.toList());
+        Collection<UserDTO> foundUsers = userService.findByName(name);
         return foundUsers.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(foundUsers);
     }
 
     @GetMapping
     public ResponseEntity<Collection<UserDTO>> getAll() {
-        Collection<UserDTO> foundUsers = userService.getAll().stream()
-                .map(userService::convertToUserDTO)
-                .collect(Collectors.toList());
+        Collection<ru.ac.checkpointmanager.dto.UserDTO> foundUsers = userService.getAll();
         return foundUsers.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(foundUsers);
     }
 
@@ -62,20 +56,15 @@ public class UserController {
             return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
         }
 
-        User user = userService.findByEmail(userDTO.getEmail());
-        User userToUpdate = userService.convertToUser(userDTO);
-        userToUpdate.setId(user.getId());
-
-        User changedUser = userService.updateUser(userToUpdate);
-        return changedUser == null ? ResponseEntity.noContent().build()
-                : ResponseEntity.ok(userService.convertToUserDTO(changedUser));
+        UserDTO changedUser = userService.updateUser(userDTO);
+        return changedUser == null ? ResponseEntity.noContent().build() : ResponseEntity.ok(changedUser);
     }
 
     //    method with limited access
     //    1 variate
     @PatchMapping("{id}")
-    public ResponseEntity<User> updateBlockStatus(@PathVariable UUID id, @RequestParam Boolean isBlocked) {
-        User changedUser = userService.updateBlockStatus(id, isBlocked);
+    public ResponseEntity<UserDTO> updateBlockStatus(@PathVariable UUID id, @RequestParam Boolean isBlocked) {
+        UserDTO changedUser = userService.updateBlockStatus(id, isBlocked);
         return changedUser == null ? ResponseEntity.noContent().build() : ResponseEntity.ok(changedUser);
     }
 
@@ -88,8 +77,6 @@ public class UserController {
             return ResponseEntity.ok().build();
         } catch (UserNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-        } catch (RuntimeException ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
         }
     }
 
@@ -102,15 +89,13 @@ public class UserController {
             return ResponseEntity.ok().build();
         } catch (UserNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-        } catch (RuntimeException ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
         }
     }
 //choose variate witch best for frontend
 
     @DeleteMapping("{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
-        User foundUser = userService.findById(id);
+        UserDTO foundUser = userService.findById(id);
         if (foundUser == null) {
             return ResponseEntity.noContent().build();
         }
