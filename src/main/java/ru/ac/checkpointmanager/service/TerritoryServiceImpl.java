@@ -8,6 +8,7 @@ import ru.ac.checkpointmanager.repository.TerritoryRepository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -23,9 +24,9 @@ public class TerritoryServiceImpl implements TerritoryService {
     }
 
     @Override
-    public Territory findTerritoryById(int id) {
+    public Territory findTerritoryById(UUID id) {
         return territoryRepository.findById(id).orElseThrow(
-                () -> new TerritoryNotFoundException(String.format("Room not found [userId=%d]", id)));
+                () -> new TerritoryNotFoundException(String.format("Room not found [userId=%s]", id)));
     }
 
     @Override
@@ -49,7 +50,7 @@ public class TerritoryServiceImpl implements TerritoryService {
     }
 
     @Override
-    public void deleteTerritoryById(int id) {
+    public void deleteTerritoryById(UUID id) {
         territoryRepository.deleteById(id);
     }
 

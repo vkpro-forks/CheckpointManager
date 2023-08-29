@@ -13,6 +13,7 @@ import ru.ac.checkpointmanager.service.TerritoryService;
 
 import jakarta.validation.*;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -42,7 +43,7 @@ public class TerritoryController {
 
     /* READ */
     @GetMapping("/{id}")
-    public ResponseEntity<TerritoryDTO> getTerritory(@PathVariable("id") int id) {
+    public ResponseEntity<TerritoryDTO> getTerritory(@PathVariable("id") UUID id) {
         Territory territory = service.findTerritoryById(id);
         if (territory == null) {
             return ResponseEntity.notFound().build();
@@ -90,7 +91,7 @@ public class TerritoryController {
 
     /* DELETE */
     @DeleteMapping("{id}")
-    public ResponseEntity<Void> deleteTerritory(@PathVariable int id) {
+    public ResponseEntity<Void> deleteTerritory(@PathVariable UUID id) {
         Territory currentTerritory = service.findTerritoryById(id);
         if (currentTerritory == null) {
             return ResponseEntity.notFound().build();

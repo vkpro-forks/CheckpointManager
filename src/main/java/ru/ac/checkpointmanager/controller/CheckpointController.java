@@ -13,6 +13,7 @@ import ru.ac.checkpointmanager.service.CheckpointService;
 
 import jakarta.validation.*;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -42,7 +43,7 @@ public class CheckpointController {
 
     /* READ */
     @GetMapping("/{id}")
-    public ResponseEntity<CheckpointDTO> getCheckpoint(@PathVariable("id") int id) {
+    public ResponseEntity<CheckpointDTO> getCheckpoint(@PathVariable("id") UUID id) {
         Checkpoint checkpoint = service.findCheckpointById(id);
         if (checkpoint == null) {
             return ResponseEntity.notFound().build();
@@ -73,7 +74,7 @@ public class CheckpointController {
     }
 
     @GetMapping("/territory")
-    public ResponseEntity<List<CheckpointDTO>> getCheckpointsByTerritoryId(@RequestParam Integer id) {
+    public ResponseEntity<List<CheckpointDTO>> getCheckpointsByTerritoryId(@RequestParam UUID id) {
         List<Checkpoint> checkpoints = service.findCheckpointsByTerritoryId(id);
         if (checkpoints.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -100,7 +101,7 @@ public class CheckpointController {
 
     /* DELETE */
     @DeleteMapping("{id}")
-    public ResponseEntity<Void> deleteCheckpoint(@PathVariable int id) {
+    public ResponseEntity<Void> deleteCheckpoint(@PathVariable UUID id) {
         Checkpoint currentCheckpoint = service.findCheckpointById(id);
         if (currentCheckpoint == null) {
             return ResponseEntity.notFound().build();
@@ -112,16 +113,6 @@ public class CheckpointController {
     /* DTO mapping */
     private Checkpoint convertToCheckpoint(CheckpointDTO checkpointDTO) {
         return modelMapper.map(checkpointDTO, Checkpoint.class);
-
-//        example without ModelMapper:
-//        Checkpoint checkpoint = new Checkpoint();
-
-//        checkpoint.setName(checkpointDTO.getName());
-//        checkpoint.setType(checkpointDTO.getType());
-//        checkpoint.setNote(checkpointDTO.getNote());
-//        ... a lot of other available fields
-
-//        return checkpoint;
     }
 
     private CheckpointDTO convertToCheckpointDTO(Checkpoint checkpoint) {

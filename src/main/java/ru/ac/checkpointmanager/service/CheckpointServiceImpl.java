@@ -8,6 +8,7 @@ import ru.ac.checkpointmanager.repository.CheckpointRepository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -23,9 +24,9 @@ public class CheckpointServiceImpl implements CheckpointService {
     }
 
     @Override
-    public Checkpoint findCheckpointById(int id) {
+    public Checkpoint findCheckpointById(UUID id) {
         return checkpointRepository.findById(id).orElseThrow(
-                () -> new CheckpointNotFoundException(String.format("Room not found [userId=%d]", id)));
+                () -> new CheckpointNotFoundException(String.format("Room not found [userId=%s]", id)));
     }
 
     @Override
@@ -39,7 +40,7 @@ public class CheckpointServiceImpl implements CheckpointService {
     }
 
     @Override
-    public List<Checkpoint> findCheckpointsByTerritoryId(Integer id) {
+    public List<Checkpoint> findCheckpointsByTerritoryId(UUID id) {
         return checkpointRepository.findCheckpointsByTerritoryIdOrderByName(id);
     }
 
@@ -54,7 +55,7 @@ public class CheckpointServiceImpl implements CheckpointService {
     }
 
     @Override
-    public void deleteCheckpointById(int id) {
+    public void deleteCheckpointById(UUID id) {
         checkpointRepository.deleteById(id);
     }
 
