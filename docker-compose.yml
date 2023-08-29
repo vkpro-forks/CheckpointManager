@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  # Сервис для приложения Spring Boot
+  spring-app:
+    image: checkpoint-manager
+    build:
+      context: .  # Путь до вашего Spring Boot проекта
+      dockerfile: Dockerfile # Указание файла Dockerfile для вашего приложения
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres-db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/chpmanDB
+      - SPRING_DATASOURCE_USERNAME=chpman
+      - SPRING_DATASOURCE_PASSWORD=chpmanPass%
+  # Сервис для базы данных PostgreSQL
+  postgres-db:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=chpmanDB
+      - POSTGRES_USER=chpman
+      - POSTGRES_PASSWORD=chpmanPass%

@@ -19,4 +19,3 @@ spring:
     sqlMigrationPrefix: V
     sqlMigrationSeparator: __
     sql-migration-suffixes: .sql
-
