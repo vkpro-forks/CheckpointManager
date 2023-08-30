@@ -75,7 +75,7 @@ public class CarBrandAndModelController {
         return new ResponseEntity<>(allBrands, HttpStatus.OK);
     }
 
-    @GetMapping("/search/brands-by-name")
+    @GetMapping("/brands-name")
     public ResponseEntity<CarBrand> getBrandsByName(@RequestParam String brandNamePart) {
         CarBrand brand = carBrandService.findByBrandsContainingIgnoreCase(brandNamePart);
         if (brand == null) {
@@ -134,7 +134,7 @@ public class CarBrandAndModelController {
         return new ResponseEntity<>(allModels, HttpStatus.OK);
     }
 
-    @GetMapping("/search/model-by-name")
+    @GetMapping("/model-name")
     public ResponseEntity<CarModel> getModelByName(@RequestParam String modelNamePart) {
         CarModel model = carModelService.findByModelContainingIgnoreCase(modelNamePart);
         if (model == null) {
@@ -143,7 +143,7 @@ public class CarBrandAndModelController {
         return new ResponseEntity<>(model, HttpStatus.OK);
     }
 
-    @GetMapping("/search/model-by-brandId")
+    @GetMapping("/model-brandId")
     public ResponseEntity<List<CarModel>> getAllModelsByBrandId(@RequestParam Long brandId) {
         List<CarModel> models = carBrandService.findModelsByBrandId(brandId);
         if (models.isEmpty()) {
