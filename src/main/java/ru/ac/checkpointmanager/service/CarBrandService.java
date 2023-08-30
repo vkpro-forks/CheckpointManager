@@ -14,4 +14,5 @@ public interface CarBrandService {
     CarBrand updateBrand(Long brandId, CarBrand carBrand);
 
     List<CarBrand> getAllBrands();
+    CarBrand findByBrandContainingIgnoreCase(String brandName);
 }

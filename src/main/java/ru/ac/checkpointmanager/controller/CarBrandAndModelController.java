@@ -72,6 +72,16 @@ public class CarBrandAndModelController {
         return new ResponseEntity<>(allBrands, HttpStatus.OK);
     }
 
+    @GetMapping("/brands/find_by_name")
+    public ResponseEntity<CarBrand> getByBrandContainingIgnoreCase(@RequestParam String name) {
+        CarBrand foundBrand = carBrandService.findByBrandContainingIgnoreCase(name);
+        if (foundBrand != null) {
+            return ResponseEntity.ok(foundBrand);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     //===================================controllers for models==============================================//
 
 

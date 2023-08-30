@@ -29,7 +29,7 @@ dependencies {
     runtimeOnly 'org.postgresql:postgresql'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'com.h2database:h2:1.4.200'
+    implementation 'com.google.code.gson:gson:2.10.1'
 }
 
 tasks.named('test') {

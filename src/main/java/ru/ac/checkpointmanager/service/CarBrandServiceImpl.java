@@ -45,4 +45,9 @@ public class CarBrandServiceImpl implements CarBrandService {
         return carBrandRepository.findAll();
     }
 
+    @Override
+    public CarBrand findByBrandContainingIgnoreCase(String brandName) {
+        return carBrandRepository.findByBrandContainingIgnoreCase(brandName);
+    }
+
 }

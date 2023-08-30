@@ -7,4 +7,7 @@ import java.util.List;
 
 public interface CarBrandRepository extends JpaRepository<CarBrand, Long> {
 
+    CarBrand findByBrandContainingIgnoreCase(String brandName);
+    boolean existsByBrand(String brand);
+
 }
