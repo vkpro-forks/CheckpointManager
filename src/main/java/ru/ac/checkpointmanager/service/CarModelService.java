@@ -1,5 +1,7 @@
 package ru.ac.checkpointmanager.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import ru.ac.checkpointmanager.model.CarBrand;
 import ru.ac.checkpointmanager.model.CarModel;
 
@@ -15,5 +17,7 @@ public interface CarModelService {
     CarModel updateModel(Long brandId, CarModel carModel);
 
     List<CarModel> getAllModels();
+
+    CarModel findByModelContainingIgnoreCase(String modelNamePart);
 
 }

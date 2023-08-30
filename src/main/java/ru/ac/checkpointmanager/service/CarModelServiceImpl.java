@@ -1,8 +1,11 @@
 package ru.ac.checkpointmanager.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.ac.checkpointmanager.exception.CarModelNotFoundException;
+import ru.ac.checkpointmanager.model.CarBrand;
 import ru.ac.checkpointmanager.model.CarModel;
 import ru.ac.checkpointmanager.repository.CarModelRepository;
 
@@ -45,5 +48,9 @@ public class CarModelServiceImpl implements CarModelService {
         return carModelRepository.findAll();
     }
 
+    @Override
+    public CarModel findByModelContainingIgnoreCase(String modelNamePart) {
+        return carModelRepository.findByModelContainingIgnoreCase(modelNamePart);
+    }
 
 }

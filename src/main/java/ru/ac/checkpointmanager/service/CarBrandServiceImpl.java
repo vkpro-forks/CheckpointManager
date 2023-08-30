@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.ac.checkpointmanager.exception.CarBrandNotFoundException;
 import ru.ac.checkpointmanager.model.CarBrand;
+import ru.ac.checkpointmanager.model.CarModel;
 import ru.ac.checkpointmanager.repository.CarBrandRepository;
 
 import java.util.List;
@@ -46,8 +47,13 @@ public class CarBrandServiceImpl implements CarBrandService {
     }
 
     @Override
-    public CarBrand findByBrandContainingIgnoreCase(String brandName) {
+    public CarBrand findByBrandsContainingIgnoreCase(String brandName) {
         return carBrandRepository.findByBrandContainingIgnoreCase(brandName);
     }
 
+    @Override
+    public List<CarModel> findModelsByBrandId(Long brandId) {
+        CarBrand carBrand = getBrandById(brandId);
+        return carBrand.getModels();
+    }
 }

@@ -1,6 +1,7 @@
 package ru.ac.checkpointmanager.service;
 
 import ru.ac.checkpointmanager.model.CarBrand;
+import ru.ac.checkpointmanager.model.CarModel;
 
 import java.util.List;
 
@@ -14,5 +15,7 @@ public interface CarBrandService {
     CarBrand updateBrand(Long brandId, CarBrand carBrand);
 
     List<CarBrand> getAllBrands();
-    CarBrand findByBrandContainingIgnoreCase(String brandName);
+    CarBrand findByBrandsContainingIgnoreCase(String brandName);
+
+    List<CarModel> findModelsByBrandId(Long brandId);
 }
