@@ -2,6 +2,9 @@ package ru.ac.checkpointmanager.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -72,11 +75,22 @@ public class CarBrandAndModelController {
         return new ResponseEntity<>(allBrands, HttpStatus.OK);
     }
 
+    @GetMapping("/brands-name")
+    public ResponseEntity<CarBrand> getBrandsByName(@RequestParam String brandNamePart) {
+        CarBrand brand = carBrandService.findByBrandsContainingIgnoreCase(brandNamePart);
+        if (brand == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(brand, HttpStatus.OK);
+    }
+
+
     //===================================controllers for models==============================================//
 
 
     @PostMapping("/models")
     public ResponseEntity<?> createModel(@Valid @RequestBody CarModel model, BindingResult result) {
+
         if (result.hasErrors()) {
             return new ResponseEntity<>("Validation error", HttpStatus.BAD_REQUEST);
         }
@@ -108,6 +122,7 @@ public class CarBrandAndModelController {
 
         return new ResponseEntity<>(updateCarModel, HttpStatus.OK);
     }
+
     @GetMapping("/models/all")
     public ResponseEntity<List<CarModel>> getAllModels() {
         List<CarModel> allModels = carModelService.getAllModels();
@@ -119,5 +134,21 @@ public class CarBrandAndModelController {
         return new ResponseEntity<>(allModels, HttpStatus.OK);
     }
 
+    @GetMapping("/model-name")
+    public ResponseEntity<CarModel> getModelByName(@RequestParam String modelNamePart) {
+        CarModel model = carModelService.findByModelContainingIgnoreCase(modelNamePart);
+        if (model == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(model, HttpStatus.OK);
+    }
 
+    @GetMapping("/model-brandId")
+    public ResponseEntity<List<CarModel>> getAllModelsByBrandId(@RequestParam Long brandId) {
+        List<CarModel> models = carBrandService.findModelsByBrandId(brandId);
+        if (models.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(models, HttpStatus.OK);
+    }
 }
