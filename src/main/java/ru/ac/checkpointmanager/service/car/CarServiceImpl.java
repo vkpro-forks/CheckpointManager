@@ -1,11 +1,10 @@
-package ru.ac.checkpointmanager.service;
+package ru.ac.checkpointmanager.service.car;
 
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import ru.ac.checkpointmanager.exception.CarNotFoundException;
-import ru.ac.checkpointmanager.model.Car;
-import ru.ac.checkpointmanager.model.CarBrand;
-import ru.ac.checkpointmanager.repository.CarRepository;
+import ru.ac.checkpointmanager.model.car.Car;
+import ru.ac.checkpointmanager.repository.car.CarRepository;
 
 import java.util.List;
 import java.util.UUID;

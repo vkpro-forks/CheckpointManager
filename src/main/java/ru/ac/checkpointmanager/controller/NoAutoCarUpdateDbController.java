@@ -7,7 +7,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.ac.checkpointmanager.service.CarDataUpdater;
+import ru.ac.checkpointmanager.model.car.CarBrand;
+import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
+import ru.ac.checkpointmanager.repository.car.CarModelRepository;
+import ru.ac.checkpointmanager.service.car.CarDataUpdater;
 
 import java.util.ArrayList;
 import java.util.List;

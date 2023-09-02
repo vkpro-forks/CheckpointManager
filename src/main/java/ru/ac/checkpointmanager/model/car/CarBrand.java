@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.model;
+package ru.ac.checkpointmanager.model.car;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,23 +27,17 @@ public class CarBrand {
 
     @Column(name = "brand")
     @NotNull
-    @Size(min = 2, max = 25, message = "Имя бренда должно быть не более 25 символов")
-    @Pattern(regexp = "^[^0-9]*$", message = "Имя бренда не должно содержать цифр")
+    @Size(min = 2, max = 25, message = "Brand name must be less than 25 characters!")
     private String brand;
 
     @JsonIgnore
+    @ToString.Exclude
     @OneToMany(mappedBy = "brand", fetch = FetchType.LAZY)
     private List<Car> cars = new ArrayList<>();
 
     @JsonIgnore
+    @ToString.Exclude
     @OneToMany(mappedBy = "brand")
     private List<CarModel> models = new ArrayList<>();
 
-    @PrePersist
-    @PreUpdate
-    public void toProperName() {
-        if (brand != null) {
-            brand = brand.substring(0, 1).toUpperCase() + brand.substring(1).toLowerCase();
-        }
-    }
 }

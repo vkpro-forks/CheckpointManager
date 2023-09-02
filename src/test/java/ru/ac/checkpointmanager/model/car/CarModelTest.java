@@ -1,7 +1,8 @@
-package ru.ac.checkpointmanager.model;
+package ru.ac.checkpointmanager.model.car;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.ac.checkpointmanager.model.car.CarModel;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
