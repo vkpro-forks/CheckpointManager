@@ -50,6 +50,11 @@ public class UserServiceImpl implements UserService {
             User foundUser = userRepository.findById(userDTO.getId())
                     .orElseThrow(UserNotFoundException::new);
 
+            foundUser.setFullName(userDTO.getFullName());
+            foundUser.setDateOfBirth(userDTO.getDateOfBirth());
+            foundUser.setEmail(userDTO.getEmail());
+            foundUser.setPassword(userDTO.getPassword());
+
             userRepository.save(foundUser);
 
             return convertToUserDTO(foundUser);
