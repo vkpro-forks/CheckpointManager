@@ -6,6 +6,7 @@ import ru.ac.checkpointmanager.exception.CarNotFoundException;
 import ru.ac.checkpointmanager.model.car.Car;
 import ru.ac.checkpointmanager.repository.car.CarRepository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,6 +27,10 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public Car addCar(Car car) {
+        int currentYear = LocalDate.now().getYear();
+        if (car.getYear() < 1950 || car.getYear() > currentYear) {
+            throw new IllegalArgumentException("Year should be between 1950 and " + currentYear);
+        }
         return carRepository.save(car);
     }
 

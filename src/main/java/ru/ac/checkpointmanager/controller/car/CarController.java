@@ -25,23 +25,23 @@ public class CarController {
 
     private boolean validateLicensePlate(String licensePlate) {
         if (licensePlate == null || licensePlate.length() < 6 || licensePlate.length() > 10) {
-            return false;
+            return true;
         }
         String invalidLetters = "йцгшщзфыплджэячьъбю";
         for (char letter : invalidLetters.toCharArray()) {
             if (licensePlate.contains(String.valueOf(letter))) {
-                return false;
+                return true;
             }
         }
-        return licensePlate.matches("[a-zA-Z0-9]+");
+        return !licensePlate.matches("[a-zA-Z0-9]+");
     }
-
 
     @PostMapping
     public ResponseEntity<?> addCar(@RequestBody Car carRequest) {
-        if (!validateLicensePlate(carRequest.getLicensePlate())) {
+        if (validateLicensePlate(carRequest.getLicensePlate())) {
             return new ResponseEntity<>("Invalid license plate", HttpStatus.BAD_REQUEST);
         }
+
         CarBrand existingBrand = carBrandService.getBrandById(carRequest.getBrand().getId());
         CarModel existingModel = carModelService.getModelById(carRequest.getModel().getId());
         carRequest.setBrand(existingBrand);
@@ -52,7 +52,7 @@ public class CarController {
 
     @PutMapping("/{carId}")
     public ResponseEntity<?> updateCar(@PathVariable UUID carId, @RequestBody Car updateCar) {
-        if (!validateLicensePlate(updateCar.getLicensePlate())) {
+        if (validateLicensePlate(updateCar.getLicensePlate())) {
             return ResponseEntity.badRequest().body("Invalid license plate");
         }
         Car updated = carService.updateCar(carId, updateCar);
