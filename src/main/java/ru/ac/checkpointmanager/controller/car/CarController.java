@@ -33,7 +33,7 @@ public class CarController {
                 return true;
             }
         }
-        return !licensePlate.matches("[a-zA-Z0-9]+");
+        return !licensePlate.matches("[a-zA-Zа-яА-Я0-9]+");
     }
 
     @PostMapping
