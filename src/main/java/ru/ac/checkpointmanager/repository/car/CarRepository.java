@@ -1,7 +1,7 @@
-package ru.ac.checkpointmanager.repository;
+package ru.ac.checkpointmanager.repository.car;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import ru.ac.checkpointmanager.model.Car;
+import ru.ac.checkpointmanager.model.car.Car;
 
 import java.util.UUID;
 

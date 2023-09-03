@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.service;
+package ru.ac.checkpointmanager.service.car;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -6,11 +6,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.ac.checkpointmanager.exception.CarBrandNotFoundException;
-import ru.ac.checkpointmanager.model.CarBrand;
-import ru.ac.checkpointmanager.repository.CarBrandRepository;
+import ru.ac.checkpointmanager.model.car.CarBrand;
+import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
+import ru.ac.checkpointmanager.service.car.CarBrandServiceImpl;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;

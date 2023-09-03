@@ -1,7 +1,4 @@
-package ru.ac.checkpointmanager.service;
-
-import ru.ac.checkpointmanager.repository.CarBrandRepository;
-import ru.ac.checkpointmanager.repository.CarModelRepository;
+package ru.ac.checkpointmanager.service.car;
 
 import java.util.List;
 

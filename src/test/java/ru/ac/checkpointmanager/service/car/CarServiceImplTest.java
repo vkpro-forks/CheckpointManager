@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.service;
+package ru.ac.checkpointmanager.service.car;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -7,8 +7,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.EmptyResultDataAccessException;
 import ru.ac.checkpointmanager.exception.CarNotFoundException;
-import ru.ac.checkpointmanager.model.Car;
-import ru.ac.checkpointmanager.repository.CarRepository;
+import ru.ac.checkpointmanager.model.car.Car;
+import ru.ac.checkpointmanager.repository.car.CarRepository;
+import ru.ac.checkpointmanager.service.car.CarServiceImpl;
 
 import java.util.Arrays;
 import java.util.List;

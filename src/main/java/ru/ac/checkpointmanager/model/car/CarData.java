@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.model;
+package ru.ac.checkpointmanager.model.car;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

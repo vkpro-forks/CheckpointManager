@@ -1,9 +1,6 @@
-package ru.ac.checkpointmanager.service;
+package ru.ac.checkpointmanager.service.car;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import ru.ac.checkpointmanager.model.CarBrand;
-import ru.ac.checkpointmanager.model.CarModel;
+import ru.ac.checkpointmanager.model.car.CarModel;
 
 import java.util.List;
 
