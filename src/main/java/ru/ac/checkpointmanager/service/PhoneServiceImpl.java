@@ -22,8 +22,8 @@ public class PhoneServiceImpl implements PhoneService {
     @Override
     public PhoneDTO createPhoneNumber(PhoneDTO phoneDTO) {
         phoneDTO.setNumber(cleanPhone(phoneDTO.getNumber()));
-        phoneRepository.save(convertToPhone(phoneDTO));
-        return phoneDTO;
+        Phone phone = phoneRepository.save(convertToPhone(phoneDTO));
+        return convertToPhoneDTO(phone);
     }
 
     @Override
@@ -38,9 +38,11 @@ public class PhoneServiceImpl implements PhoneService {
             Phone foundPhone = phoneRepository.findById(phoneDTO.getId())
                     .orElseThrow(PhoneNumberNotFoundException::new);
 
-            foundPhone.setNumber(phoneDTO.getNumber());
+            foundPhone.setNumber(cleanPhone(phoneDTO.getNumber()));
             foundPhone.setType(phoneDTO.getType());
             foundPhone.setNote(phoneDTO.getNote());
+
+            phoneRepository.save(foundPhone);
 
             return convertToPhoneDTO(foundPhone);
         } catch (PhoneNumberNotFoundException e) {

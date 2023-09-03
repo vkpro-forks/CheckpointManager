@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.ac.checkpointmanager.dto.UserDTO;
+import ru.ac.checkpointmanager.exception.DateOfBirthFormatException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.service.UserService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
@@ -28,8 +29,14 @@ public class UserController {
         if (result.hasErrors()) {
             return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
         }
-        UserDTO createdUser = userService.createUser(userDTO);
-        return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+
+        try {
+            UserDTO createdUser = userService.createUser(userDTO);
+            return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+        } catch (DateOfBirthFormatException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+
     }
 
     @GetMapping("{id}")
@@ -38,15 +45,15 @@ public class UserController {
         return user.map(ResponseEntity::ok).orElse(ResponseEntity.noContent().build());
     }
 
-    @GetMapping(params = "{name}")
-    public ResponseEntity<Collection<UserDTO>> findUserByName(@RequestParam(required = false) String name) {
+    @GetMapping
+    public ResponseEntity<Collection<UserDTO>> findUserByName(@RequestParam String name) {
         Collection<UserDTO> foundUsers = userService.findByName(name);
         return foundUsers.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(foundUsers);
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<Collection<UserDTO>> getAll() {
-        Collection<ru.ac.checkpointmanager.dto.UserDTO> foundUsers = userService.getAll();
+        Collection<UserDTO> foundUsers = userService.getAll();
         return foundUsers.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(foundUsers);
     }
 

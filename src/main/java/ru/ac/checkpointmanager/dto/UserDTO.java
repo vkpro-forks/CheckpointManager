@@ -28,5 +28,7 @@ public class UserDTO {
     private String email;
 
     @NotEmpty
+    @Pattern(regexp = "^(?!.*\\s).+$", message = "Field should not contain spaces")
+    @Size(min = 6, max = 20)
     private String password;
 }
