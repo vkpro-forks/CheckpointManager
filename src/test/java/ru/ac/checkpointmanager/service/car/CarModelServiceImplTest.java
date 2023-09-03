@@ -1,17 +1,14 @@
-package ru.ac.checkpointmanager.service;
+package ru.ac.checkpointmanager.service.car;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.ac.checkpointmanager.exception.CarModelNotFoundException;
-import ru.ac.checkpointmanager.model.CarBrand;
-import ru.ac.checkpointmanager.model.CarModel;
-import ru.ac.checkpointmanager.repository.CarModelRepository;
+import ru.ac.checkpointmanager.model.car.CarModel;
+import ru.ac.checkpointmanager.repository.car.CarModelRepository;
+import ru.ac.checkpointmanager.service.car.CarModelServiceImpl;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

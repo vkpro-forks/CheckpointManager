@@ -1,8 +1,10 @@
-package ru.ac.checkpointmanager.model;
+package ru.ac.checkpointmanager.model.car;
 
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,6 +24,8 @@ public class Car {
 
     @NotNull
     @Column(name = "license_plate")
+    @Size(min = 6, max = 10)
+    @Pattern(regexp = "^[a-zA-Zа-яА-Я0-9]+$", message = "Invalid characters in license plate")
     private String licensePlate;
 
     @ManyToOne

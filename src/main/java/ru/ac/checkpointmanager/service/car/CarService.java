@@ -1,9 +1,8 @@
-package ru.ac.checkpointmanager.service;
+package ru.ac.checkpointmanager.service.car;
 
-import ru.ac.checkpointmanager.model.Car;
+import ru.ac.checkpointmanager.model.car.Car;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 public interface CarService {
