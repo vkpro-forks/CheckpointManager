@@ -1,8 +1,8 @@
-package ru.ac.checkpointmanager.service;
+package ru.ac.checkpointmanager.service.car;
 
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.ac.checkpointmanager.service.car.CarDataApiService;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -58,8 +58,9 @@ public class CarDataApiServiceImpl implements CarDataApiService {
             apiUrlBuilder.append("&make=").append(brand);
         }
 
+
         String apiUrl = apiUrlBuilder.toString();
-        System.out.println("API URL: " + apiUrl); // Вывести URL перед отправкой запроса
+        System.out.println("API URL: " + apiUrl);
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()

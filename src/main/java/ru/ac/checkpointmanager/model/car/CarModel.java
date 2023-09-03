@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.model;
+package ru.ac.checkpointmanager.model.car;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Table(name = "car_model")
@@ -23,16 +24,10 @@ public class CarModel {
     private CarBrand brand;
 
     @NotNull
-    @Size(max = 25, message = "Имя модели должно быть не более 25 символов")
+    @Column(unique = true)
+    @Size(max = 25, message = "Model name must be less than 25 characters!")
     private String model;
 
-    @PrePersist
-    @PreUpdate
-    public void toProperName() {
-        if (model != null) {
-            model = model.substring(0, 1).toUpperCase() + model.substring(1).toLowerCase();
-        }
-    }
 }
 
 

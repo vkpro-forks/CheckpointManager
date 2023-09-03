@@ -1,13 +1,10 @@
-package ru.ac.checkpointmanager.service;
+package ru.ac.checkpointmanager.service.car;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.ac.checkpointmanager.exception.CarModelNotFoundException;
-import ru.ac.checkpointmanager.model.CarBrand;
-import ru.ac.checkpointmanager.model.CarModel;
-import ru.ac.checkpointmanager.repository.CarModelRepository;
+import ru.ac.checkpointmanager.model.car.CarModel;
+import ru.ac.checkpointmanager.repository.car.CarModelRepository;
 
 import java.util.List;
 

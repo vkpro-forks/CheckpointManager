@@ -1,19 +1,26 @@
-package ru.ac.checkpointmanager.service;
+package ru.ac.checkpointmanager.service.car;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import ru.ac.checkpointmanager.exception.CarBrandNotFoundException;
-import ru.ac.checkpointmanager.model.CarBrand;
-import ru.ac.checkpointmanager.model.CarModel;
-import ru.ac.checkpointmanager.repository.CarBrandRepository;
+import ru.ac.checkpointmanager.model.car.CarBrand;
+import ru.ac.checkpointmanager.model.car.CarModel;
+import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class CarBrandServiceImpl implements CarBrandService {
 
     private final CarBrandRepository carBrandRepository;
+    private final Validator validator;
 
     @Override
     public CarBrand getBrandById(Long id) {
@@ -35,10 +42,16 @@ public class CarBrandServiceImpl implements CarBrandService {
 
     @Override
     public CarBrand updateBrand(Long brandId, CarBrand carBrand) {
-        CarBrand requestBrand = carBrandRepository.findById(brandId)
-                .orElseThrow(()-> new CarBrandNotFoundException("Car brand not found with ID: " + brandId));
-        requestBrand.setBrand(carBrand.getBrand());
-        return carBrandRepository.save(requestBrand);
+        CarBrand updateCarBrand = carBrandRepository.findById(brandId)
+                .orElseThrow(() -> new CarBrandNotFoundException("Brand not found"));
+
+        Set<ConstraintViolation<CarBrand>> violations = validator.validate(carBrand);
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException(violations);
+        }
+
+        updateCarBrand.setBrand(carBrand.getBrand());
+        return carBrandRepository.save(updateCarBrand);
     }
 
     @Override
@@ -47,7 +60,7 @@ public class CarBrandServiceImpl implements CarBrandService {
     }
 
     @Override
-    public CarBrand findByBrandsContainingIgnoreCase(String brandName) {
+    public List<CarBrand> findByBrandsContainingIgnoreCase(String brandName) {
         return carBrandRepository.findByBrandContainingIgnoreCase(brandName);
     }
 

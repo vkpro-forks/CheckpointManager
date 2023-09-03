@@ -66,6 +66,7 @@ public class UserServiceImpl implements UserService {
             foundUser.setDateOfBirth(userDTO.getDateOfBirth());
             foundUser.setEmail(userDTO.getEmail());
             foundUser.setPassword(userDTO.getPassword());
+
             userRepository.save(foundUser);
 
             return convertToUserDTO(foundUser);
