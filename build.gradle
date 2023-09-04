@@ -46,3 +46,11 @@ processResources {
     }
 }
 
+processResources {
+    expand(project.properties)
+    filesMatching("**/application.yml") {
+        expand(version: project.version)
+    }
+}
+
+
