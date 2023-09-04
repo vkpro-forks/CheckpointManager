@@ -46,18 +46,22 @@ public class CheckpointServiceImpl implements CheckpointService {
 
     @Override
     public Checkpoint updateCheckpoint(Checkpoint checkpoint) {
-        //because "addedAt" field not included in dto and after update checkpoint's data became empty
-        //maybe exist better way to save this value in table?
-        checkpoint.setAddedAt(checkpointRepository
-                .findById(checkpoint.getId())
-                .get().getAddedAt());
-        return checkpointRepository.save(checkpoint);
+
+        Checkpoint foundCheckpoint = checkpointRepository.findById(checkpoint.getId())
+                        .orElseThrow(() -> new CheckpointNotFoundException
+                                (String.format("Checkpoint not found [Id=%s]", checkpoint.getId())));
+
+        foundCheckpoint.setName(checkpoint.getName());
+        foundCheckpoint.setType(checkpoint.getType());
+        foundCheckpoint.setNote(checkpoint.getNote());
+        foundCheckpoint.setTerritory(checkpoint.getTerritory());
+
+        return checkpointRepository.save(foundCheckpoint);
     }
 
     @Override
     public void deleteCheckpointById(UUID id) {
         checkpointRepository.deleteById(id);
     }
-
 
 }

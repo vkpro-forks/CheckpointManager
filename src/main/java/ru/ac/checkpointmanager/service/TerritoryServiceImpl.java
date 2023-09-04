@@ -41,12 +41,15 @@ public class TerritoryServiceImpl implements TerritoryService {
 
     @Override
     public Territory updateTerritory(Territory territory) {
-        //because "addedAt" field not included in dto and after update territory's data became empty
-        //maybe exist better way to save this value in table?
-        territory.setAddedAt(territoryRepository
-                .findById(territory.getId())
-                .get().getAddedAt());
-        return territoryRepository.save(territory);
+
+        Territory foundTerritory = territoryRepository.findById(territory.getId())
+                .orElseThrow(() -> new TerritoryNotFoundException
+                        (String.format("Territory not found [Id=%s]", territory.getId())));
+
+        foundTerritory.setName(territory.getName());
+        foundTerritory.setNote(territory.getNote());
+
+        return territoryRepository.save(foundTerritory);
     }
 
     @Override
