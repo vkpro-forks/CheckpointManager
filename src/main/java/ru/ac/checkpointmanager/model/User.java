@@ -44,6 +44,8 @@ public class User {
     private String email;
 
     @NotEmpty
+    @Pattern(regexp = "^(?!.*\\s).+$", message = "Field should not contain spaces")//чтоб пароль без пробелов был
+    @Size(min = 6, max = 20)
     private String password;
 
     @Column(name = "is_blocked")

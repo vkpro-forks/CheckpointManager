@@ -4,10 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import ru.ac.checkpointmanager.dto.UserDTO;
+import ru.ac.checkpointmanager.exception.DateOfBirthFormatException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.repository.UserRepository;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.Collection;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -22,8 +25,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO createUser(UserDTO userDTO) {
-        userRepository.save(convertToUser(userDTO));
-        return userDTO;
+        if (!validateDOB(userDTO.getDateOfBirth())) {
+            throw new DateOfBirthFormatException
+                    ("Date of birth should not be greater than the current date " +
+                            "or less than 100 years from the current moment");
+        }
+
+        User user = convertToUser(userDTO);
+        user.setIsBlocked(false);
+        userRepository.save(user);
+
+        return convertToUserDTO(user);
     }
 
     @Override
@@ -49,6 +61,10 @@ public class UserServiceImpl implements UserService {
         try {
             User foundUser = userRepository.findById(userDTO.getId())
                     .orElseThrow(UserNotFoundException::new);
+
+            if (!validateDOB(userDTO.getDateOfBirth())) {
+                throw new DateOfBirthFormatException();
+            }
 
             foundUser.setFullName(userDTO.getFullName());
             foundUser.setDateOfBirth(userDTO.getDateOfBirth());
@@ -126,11 +142,21 @@ public class UserServiceImpl implements UserService {
         return userDTOS;
     }
 
-    private User convertToUser(ru.ac.checkpointmanager.dto.UserDTO userDTO) {
+    private User convertToUser(UserDTO userDTO) {
         return modelMapper.map(userDTO, User.class);
     }
 
     private ru.ac.checkpointmanager.dto.UserDTO convertToUserDTO(User user) {
-        return modelMapper.map(user, ru.ac.checkpointmanager.dto.UserDTO.class);
+        return modelMapper.map(user, UserDTO.class);
+    }
+
+    private Boolean validateDOB(LocalDate dateOfBirth) {
+        LocalDate currentDate = LocalDate.now();
+        if (dateOfBirth.isAfter(currentDate)) {
+            return false; // Date of birth is in the future
+        }
+
+        Period age = Period.between(dateOfBirth, currentDate);
+        return age.getYears() <= 100; // Date of birth is at least 100 years ago
     }
 }
