@@ -7,6 +7,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.util.Set;
+import java.util.UUID;
 
 
 @Entity
@@ -16,8 +17,8 @@ import java.util.Set;
 public class Territory {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @NotEmpty()
     @Size(min = 2, max = 60)
@@ -30,4 +31,6 @@ public class Territory {
     @JsonIgnore
     @OneToMany(mappedBy = "territory")
     private Set<Checkpoint> checkpoints;
+
+
 }

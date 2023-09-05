@@ -5,10 +5,11 @@ import org.springframework.stereotype.Repository;
 import ru.ac.checkpointmanager.model.Checkpoint;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface CheckpointRepository extends JpaRepository<Checkpoint, Integer> {
+public interface CheckpointRepository extends JpaRepository<Checkpoint, UUID> {
     List<Checkpoint> findCheckpointsByNameContainingIgnoreCase(String name);
 
-    List<Checkpoint> findCheckpointsByTerritoryIdOrderByName(Integer id);
+    List<Checkpoint> findCheckpointsByTerritoryIdOrderByName(UUID id);
 }

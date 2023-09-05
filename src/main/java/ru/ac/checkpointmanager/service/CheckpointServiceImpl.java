@@ -8,6 +8,7 @@ import ru.ac.checkpointmanager.repository.CheckpointRepository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -23,9 +24,9 @@ public class CheckpointServiceImpl implements CheckpointService {
     }
 
     @Override
-    public Checkpoint findCheckpointById(int id) {
+    public Checkpoint findCheckpointById(UUID id) {
         return checkpointRepository.findById(id).orElseThrow(
-                () -> new CheckpointNotFoundException(String.format("Room not found [userId=%d]", id)));
+                () -> new CheckpointNotFoundException(String.format("Room not found [userId=%s]", id)));
     }
 
     @Override
@@ -39,24 +40,28 @@ public class CheckpointServiceImpl implements CheckpointService {
     }
 
     @Override
-    public List<Checkpoint> findCheckpointsByTerritoryId(Integer id) {
+    public List<Checkpoint> findCheckpointsByTerritoryId(UUID id) {
         return checkpointRepository.findCheckpointsByTerritoryIdOrderByName(id);
     }
 
     @Override
     public Checkpoint updateCheckpoint(Checkpoint checkpoint) {
-        //because "addedAt" field not included in dto and after update checkpoint's data became empty
-        //maybe exist better way to save this value in table?
-        checkpoint.setAddedAt(checkpointRepository
-                .findById(checkpoint.getId())
-                .get().getAddedAt());
-        return checkpointRepository.save(checkpoint);
+
+        Checkpoint foundCheckpoint = checkpointRepository.findById(checkpoint.getId())
+                        .orElseThrow(() -> new CheckpointNotFoundException
+                                (String.format("Checkpoint not found [Id=%s]", checkpoint.getId())));
+
+        foundCheckpoint.setName(checkpoint.getName());
+        foundCheckpoint.setType(checkpoint.getType());
+        foundCheckpoint.setNote(checkpoint.getNote());
+        foundCheckpoint.setTerritory(checkpoint.getTerritory());
+
+        return checkpointRepository.save(foundCheckpoint);
     }
 
     @Override
-    public void deleteCheckpointById(int id) {
+    public void deleteCheckpointById(UUID id) {
         checkpointRepository.deleteById(id);
     }
-
 
 }

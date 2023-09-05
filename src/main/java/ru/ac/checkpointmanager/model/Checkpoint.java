@@ -6,6 +6,7 @@ import lombok.*;
 import ru.ac.checkpointmanager.model.enums.CheckpointType;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 
 @Entity
@@ -15,8 +16,8 @@ import java.time.LocalDate;
 public class Checkpoint {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @NotEmpty()
     @Size(min = 2, max = 60)
