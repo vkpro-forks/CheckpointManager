@@ -1,6 +1,6 @@
 -- liquibase formatted sql
 
--- changeset fifimova:22 context:ignore
+-- changeset fifimova:22
 CREATE TABLE phones
 (
     id      UUID DEFAULT gen_random_uuid(),
@@ -9,11 +9,10 @@ CREATE TABLE phones
     user_id UUID NOT NULL,
     note    TEXT,
 
-    CONSTRAINT phone_pk PRIMARY KEY (id),
-    CONSTRAINT phone_fk_user FOREIGN KEY (user_id) REFERENCES users (id)
+    CONSTRAINT phone_pk PRIMARY KEY (id)
 );
 
--- changeset fifimova:22.1 context:ignore
+-- changeset fifimova:22.1
 ALTER TABLE phones
     ALTER COLUMN type SET DEFAULT 'MOBILE';
 
