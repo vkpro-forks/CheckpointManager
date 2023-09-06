@@ -1,6 +1,6 @@
 -- liquibase formatted sql
 
--- changeset fifimova:8 context:ignore
+-- changeset fifimova:8
 CREATE TABLE users
 (
     id            BIGSERIAL NOT NULL,
@@ -14,10 +14,7 @@ CREATE TABLE users
 ALTER TABLE users
     ADD CONSTRAINT user_pk PRIMARY KEY (id);
 
--- changeset fifimova:11 context:ignore
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
--- changeset fifimova:11.1 context:ignore
+-- changeset fifimova:11.1
 ALTER TABLE users
     ALTER COLUMN full_name SET NOT NULL;
 
@@ -39,11 +36,11 @@ ALTER TABLE users
 ALTER TABLE users
     ALTER COLUMN id SET DEFAULT gen_random_uuid();
 
--- changeset fifimova:19 context:ignore
+-- changeset fifimova:19
 ALTER TABLE users
     ADD COLUMN role TEXT;
 
--- changeset fifimova:21 context:ignore
+-- changeset fifimova:21
 ALTER TABLE users
     ALTER COLUMN is_blocked SET DEFAULT false;
 

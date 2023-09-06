@@ -1,13 +1,9 @@
 databaseChangeLog:
-  - include:
-      file: liquibase/scripts/cars.sql
-  - include:
-      file: liquibase/scripts/cars_brand_and_model.sql
-  - include:
-      file: liquibase/scripts/checkpoints.sql
-  - include:
-      file: liquibase/scripts/territories.sql
-  - include:
-      file: liquibase/scripts/users.sql
-  - include:
-      file: liquibase/scripts/phones.sql
+  - includeAll:
+        path: liquibase/scripts/create_extension/
+  - includeAll:
+      path: liquibase/scripts/create_tables/
+  - includeAll:
+      path: liquibase/scripts/add_foreign_keys/
+  - includeAll:
+      path: liquibase/scripts/add_data/
