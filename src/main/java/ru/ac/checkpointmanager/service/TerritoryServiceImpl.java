@@ -54,6 +54,10 @@ public class TerritoryServiceImpl implements TerritoryService {
 
     @Override
     public void deleteTerritoryById(UUID id) {
+
+        if (territoryRepository.findById(id).isEmpty()) {
+            throw new TerritoryNotFoundException(String.format("Territory not found [Id=%s]", id));
+        }
         territoryRepository.deleteById(id);
     }
 

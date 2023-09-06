@@ -7,8 +7,6 @@ import java.util.List;
 
 public class ErrorUtils {
 
-//    класс для статического метода, который ошибки BindingResult расписывает,
-//    в контроллере просто позовите этот класс :)
     public static String errorsList(BindingResult bindingResult) {
         StringBuilder errorMsg = new StringBuilder();
         List<FieldError> errors = bindingResult.getFieldErrors();
