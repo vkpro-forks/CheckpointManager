@@ -18,8 +18,10 @@ ALTER TABLE cars
 
 -- changeset x3imal:17.1 context:ignore
 ALTER TABLE cars
-    DROP COLUMN brand_model;
+DROP
+COLUMN brand_model;
 
 ALTER TABLE cars
-    DROP COLUMN brand_id,
+DROP
+COLUMN brand_id,
     ADD COLUMN brand_id BIGSERIAL REFERENCES car_brand (id);

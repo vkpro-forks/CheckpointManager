@@ -13,9 +13,13 @@ spring:
         show_sql: true
     hibernate:
       ddl-auto: validate
-  liquibase:
-    change-log: classpath:liquibase/changelog-master.yml
-    contexts: default
-    default-schema: public
-    drop-first: false
+  flyway:
+    sqlMigrationPrefix: V
+    locations: classpath:migration
     enabled: true
+#  liquibase:
+#    change-log: classpath:qp/migration
+#    contexts: default
+#    default-schema: public
+#    drop-first: false
+#    enabled: true
