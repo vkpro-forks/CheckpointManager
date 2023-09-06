@@ -12,6 +12,7 @@ import lombok.Setter;
 import ru.ac.checkpointmanager.model.enums.UserRole;
 
 import java.time.LocalDate;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -43,6 +44,8 @@ public class User {
     private String email;
 
     @NotEmpty
+    @Pattern(regexp = "^(?!.*\\s).+$", message = "Field should not contain spaces")//чтоб пароль без пробелов был
+    @Size(min = 6, max = 20)
     private String password;
 
     @Column(name = "is_blocked")
@@ -50,5 +53,8 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private UserRole role;
+
+    @OneToMany(mappedBy = "user")
+    private Set<Phone> numbers;
 }
 

@@ -1,3 +1,5 @@
+app:
+  version: ${version}
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
@@ -11,12 +13,9 @@ spring:
         show_sql: true
     hibernate:
       ddl-auto: validate
-  flyway:
-    baseline-on-migrate: true
-    out-of-order: true
-    schemas: public
-    locations: classpath:db/migration
-    sqlMigrationPrefix: V
-    sqlMigrationSeparator: __
-    sql-migration-suffixes: .sql
-
+  liquibase:
+    change-log: classpath:liquibase/changelog-master.yml
+    contexts: default
+    default-schema: public
+    drop-first: false
+    enabled: true

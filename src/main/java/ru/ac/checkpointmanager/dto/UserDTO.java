@@ -6,10 +6,13 @@ import lombok.Setter;
 
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Getter
 @Setter
 public class UserDTO {
+
+    private UUID id;
 
     @NotEmpty
     @Size(min = 2, max = 100)
@@ -25,5 +28,7 @@ public class UserDTO {
     private String email;
 
     @NotEmpty
+    @Pattern(regexp = "^(?!.*\\s).+$", message = "Field should not contain spaces")
+    @Size(min = 6, max = 20)
     private String password;
 }

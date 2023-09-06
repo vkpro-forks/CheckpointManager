@@ -1,22 +1,20 @@
 package ru.ac.checkpointmanager.service;
 
-import ru.ac.checkpointmanager.model.User;
+import ru.ac.checkpointmanager.dto.UserDTO;
 
 import java.util.Collection;
 import java.util.UUID;
 
 public interface UserService {
-    User createUser(User user);
+    UserDTO createUser(UserDTO userDTO);
 
-    User findById(UUID id);
+    UserDTO findById(UUID id);
 
-    Collection<User> findByName(String name);
+    Collection<UserDTO> findByName(String name);
 
-    User findByEmail(String email);
+    UserDTO updateUser(UserDTO userDTO);
 
-    User updateUser(User user);
-
-    User updateBlockStatus(UUID id, Boolean isBlocked);
+    UserDTO updateBlockStatus(UUID id, Boolean isBlocked);
 
     void blockById(UUID id);
 
@@ -24,5 +22,5 @@ public interface UserService {
 
     void deleteUser(UUID id);
 
-    Collection<User> getAll();
+    Collection<UserDTO> getAll();
 }

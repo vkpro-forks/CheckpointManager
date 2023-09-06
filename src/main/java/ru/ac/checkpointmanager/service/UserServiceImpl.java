@@ -1,86 +1,112 @@
 package ru.ac.checkpointmanager.service;
 
+import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import ru.ac.checkpointmanager.dto.UserDTO;
+import ru.ac.checkpointmanager.exception.DateOfBirthFormatException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.repository.UserRepository;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.Collection;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final ModelMapper modelMapper;
 
-    public UserServiceImpl(UserRepository userRepository) {
-        this.userRepository = userRepository;
+
+    @Override
+    public UserDTO createUser(UserDTO userDTO) {
+        if (!validateDOB(userDTO.getDateOfBirth())) {
+            throw new DateOfBirthFormatException
+                    ("Date of birth should not be greater than the current date " +
+                            "or less than 100 years from the current moment");
+        }
+
+        User user = convertToUser(userDTO);
+        user.setIsBlocked(false);
+        userRepository.save(user);
+
+        return convertToUserDTO(user);
     }
 
     @Override
-    public User createUser(User user) {
-        return userRepository.save(user);
+    public UserDTO findById(UUID id) {
+        return convertToUserDTO(userRepository.findById(id).orElseThrow(
+                () -> new UserNotFoundException("User by this id does not exist")));
     }
 
     @Override
-    public User findById(UUID id) {
-        return userRepository.findById(id).orElseThrow(
-                () -> new UserNotFoundException("User by this id does not exist"));
+    public Collection<UserDTO> findByName(String name) {
+        Collection<UserDTO> userDTOS = userRepository.findUserByFullNameContainingIgnoreCase(name).stream()
+                .map(this::convertToUserDTO)
+                .collect(Collectors.toList());
+
+        if (userDTOS.isEmpty()) {
+            throw new UserNotFoundException("There is no user with name containing " + name);
+        }
+        return userDTOS;
     }
 
     @Override
-    public Collection<User> findByName(String name) {
-        return userRepository.findUserByFullNameContainingIgnoreCase(name);
-    }
-
-    @Override
-    public User findByEmail(String email) {
-        return userRepository.findUserByEmail(email);
-    }
-
-    @Override
-    public User updateUser(User user) {
+    public UserDTO updateUser(UserDTO userDTO) {
         try {
-            User existingUser = userRepository.findById(user.getId()).orElseThrow(
-                    () -> new UserNotFoundException("User by this id does not exist"));
+            User foundUser = userRepository.findById(userDTO.getId())
+                    .orElseThrow(UserNotFoundException::new);
 
-            existingUser.setFullName(user.getFullName());
-            existingUser.setDateOfBirth(user.getDateOfBirth());
-            existingUser.setEmail(user.getEmail());
-            existingUser.setPassword(user.getPassword());
+            if (!validateDOB(userDTO.getDateOfBirth())) {
+                throw new DateOfBirthFormatException();
+            }
 
-            return userRepository.save(existingUser);
-        } catch (Exception e) {
-            throw new RuntimeException("Error updating user with ID " + user.getId(), e);
+            foundUser.setFullName(userDTO.getFullName());
+            foundUser.setDateOfBirth(userDTO.getDateOfBirth());
+            foundUser.setEmail(userDTO.getEmail());
+            foundUser.setPassword(userDTO.getPassword());
+
+            userRepository.save(foundUser);
+
+            return convertToUserDTO(foundUser);
+        } catch (UserNotFoundException e) {
+            throw new UserNotFoundException("Error updating user with ID " + userDTO.getId(), e);
         }
     }
 
-//    два варианта блокировки пользователя
+    //    два варианта блокировки пользователя
 //    первый: с помощью одного метода можно и заблокировать и разблокировать по айди
     @Override
-    public User updateBlockStatus(UUID id, Boolean isBlocked) {
+    public UserDTO updateBlockStatus(UUID id, Boolean isBlocked) {
         try {
             User existingUser = userRepository.findById(id).orElseThrow(
-                    () -> new UserNotFoundException("User by this id does not exist"));
+                    UserNotFoundException::new);
 
             existingUser.setIsBlocked(isBlocked);
-            return userRepository.save(existingUser);
-        } catch (Exception e) {
-            throw new RuntimeException("Error updating user with ID " + id, e);
+            userRepository.save(existingUser);
+
+            return convertToUserDTO(existingUser);
+        } catch (UserNotFoundException e) {
+            throw new UserNotFoundException("Error updating user with ID " + id, e);
         }
     }
 
-//    второй: два разных метода для блокировки или разблокировки по айди,
+    //    второй: два разных метода для блокировки или разблокировки по айди,
 //    логика блокировки через sql запрос в репозитории
     @Override
     public void blockById(UUID id) {
         try {
             userRepository.findById(id).orElseThrow(
-                    () -> new UserNotFoundException("User by this id does not exist"));
+                    UserNotFoundException::new);
 
             userRepository.blockById(id);
-        } catch (Exception e) {
-            throw new RuntimeException("Error updating user with ID " + id, e);
+        } catch (UserNotFoundException e) {
+            throw new UserNotFoundException("Error updating user with ID " + id, e);
         }
     }
 
@@ -88,11 +114,11 @@ public class UserServiceImpl implements UserService {
     public void unblockById(UUID id) {
         try {
             userRepository.findById(id).orElseThrow(
-                    () -> new UserNotFoundException("User by this id does not exist"));
+                    UserNotFoundException::new);
 
             userRepository.unblockById(id);
-        } catch (Exception e) {
-            throw new RuntimeException("Error updating user with ID " + id, e);
+        } catch (UserNotFoundException e) {
+            throw new UserNotFoundException("Error updating user with ID " + id, e);
         }
     }
 
@@ -105,12 +131,32 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Collection<User> getAll() {
-        Collection<User> users = userRepository.findAll();
+    public Collection<UserDTO> getAll() {
+        Collection<UserDTO> userDTOS = userRepository.findAll().stream()
+                .map(this::convertToUserDTO)
+                .collect(Collectors.toList());
 
-        if (users.isEmpty()) {
+        if (userDTOS.isEmpty()) {
             throw new UserNotFoundException("There is no user in DB");
         }
-        return users;
+        return userDTOS;
+    }
+
+    private User convertToUser(UserDTO userDTO) {
+        return modelMapper.map(userDTO, User.class);
+    }
+
+    private ru.ac.checkpointmanager.dto.UserDTO convertToUserDTO(User user) {
+        return modelMapper.map(user, UserDTO.class);
+    }
+
+    private Boolean validateDOB(LocalDate dateOfBirth) {
+        LocalDate currentDate = LocalDate.now();
+        if (dateOfBirth.isAfter(currentDate)) {
+            return false; // Date of birth is in the future
+        }
+
+        Period age = Period.between(dateOfBirth, currentDate);
+        return age.getYears() <= 100; // Date of birth is at least 100 years ago
     }
 }

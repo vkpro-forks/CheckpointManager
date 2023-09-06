@@ -1,11 +1,14 @@
+
+
 plugins {
     id 'java'
     id 'org.springframework.boot' version '3.1.2'
     id 'io.spring.dependency-management' version '1.1.2'
 }
 
+
 group = 'ru.ac'
-version = '0.0.1-SNAPSHOT'
+version = '0.0.8-SNAPSHOT'
 
 java {
     sourceCompatibility = '17'
@@ -19,7 +22,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
-    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.liquibase:liquibase-core:4.23.1'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     testImplementation 'org.hamcrest:hamcrest-library:2.2'
     implementation 'jakarta.validation:jakarta.validation-api:'
@@ -29,9 +32,25 @@ dependencies {
     runtimeOnly 'org.postgresql:postgresql'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'com.h2database:h2:1.4.200'
+    implementation 'com.google.code.gson:gson:2.10.1'
 }
 
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+processResources {
+    expand(project.properties)
+    filesMatching("**/application.yml") {
+        expand(version: project.version)
+    }
+}
+
+processResources {
+    expand(project.properties)
+    filesMatching("**/application.yml") {
+        expand(version: project.version)
+    }
+}
+
+
