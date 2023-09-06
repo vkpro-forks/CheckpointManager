@@ -41,7 +41,13 @@ public class CheckpointServiceImpl implements CheckpointService {
 
     @Override
     public List<Checkpoint> findCheckpointsByTerritoryId(UUID id) {
-        return checkpointRepository.findCheckpointsByTerritoryIdOrderByName(id);
+
+        List<Checkpoint> foundCheckpoints = checkpointRepository.findCheckpointsByTerritoryIdOrderByName(id);
+
+        if (foundCheckpoints.isEmpty()) {
+            throw new CheckpointNotFoundException(String.format("For Territory [id=%s] not exist any Checkpoints", id));
+        }
+        return foundCheckpoints;
     }
 
     @Override
@@ -61,6 +67,10 @@ public class CheckpointServiceImpl implements CheckpointService {
 
     @Override
     public void deleteCheckpointById(UUID id) {
+
+        if (checkpointRepository.findById(id).isEmpty()) {
+            throw new CheckpointNotFoundException(String.format("Checkpoint not found [Id=%s]", id));
+        }
         checkpointRepository.deleteById(id);
     }
 
