@@ -16,7 +16,7 @@ CREATE TABLE phones
 ALTER TABLE phones
     ALTER COLUMN type SET DEFAULT 'MOBILE';
 
--- changeset fifimova:31
+-- changeset fifimova:31 context:ignore
 ALTER TABLE phones
     ALTER COLUMN type DROP DEFAULT;
 
