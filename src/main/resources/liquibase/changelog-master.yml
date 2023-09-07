@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - includeAll:
+        path: liquibase/scripts/create_extension/
+  - includeAll:
+      path: liquibase/scripts/create_tables/
+  - includeAll:
+      path: liquibase/scripts/add_foreign_keys/
+  - includeAll:
+      path: liquibase/scripts/add_data/

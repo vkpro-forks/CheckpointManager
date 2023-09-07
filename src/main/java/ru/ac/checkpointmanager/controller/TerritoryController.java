@@ -1,39 +1,35 @@
 package ru.ac.checkpointmanager.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.service.TerritoryService;
+import ru.ac.checkpointmanager.utils.ErrorUtils;
 
 import jakarta.validation.*;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("territory")
+@RequiredArgsConstructor
 public class TerritoryController {
 
     private final TerritoryService service;
     private final ModelMapper modelMapper;
-
-    @Autowired
-    public TerritoryController(TerritoryService service, ModelMapper modelMapper) {
-        this.service = service;
-        this.modelMapper = modelMapper;
-    }
 
     /* CREATE */
     @PostMapping
     public ResponseEntity<?> addTerritory(@RequestBody @Valid TerritoryDTO territoryDTO,
                                            BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            return new ResponseEntity<>(errorsList(bindingResult), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
         }
 
         Territory newTerritory = service.addTerritory(convertToTerritory(territoryDTO));
@@ -42,7 +38,7 @@ public class TerritoryController {
 
     /* READ */
     @GetMapping("/{id}")
-    public ResponseEntity<TerritoryDTO> getTerritory(@PathVariable("id") int id) {
+    public ResponseEntity<TerritoryDTO> getTerritory(@PathVariable("id") UUID id) {
         Territory territory = service.findTerritoryById(id);
         if (territory == null) {
             return ResponseEntity.notFound().build();
@@ -77,7 +73,7 @@ public class TerritoryController {
     public ResponseEntity<?> editTerritory(@RequestBody @Valid TerritoryDTO territoryDTO,
                                             BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            return new ResponseEntity<>(errorsList(bindingResult), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
         }
 
         Territory currentTerritory = service.findTerritoryById(territoryDTO.getId());
@@ -90,7 +86,7 @@ public class TerritoryController {
 
     /* DELETE */
     @DeleteMapping("{id}")
-    public ResponseEntity<Void> deleteTerritory(@PathVariable int id) {
+    public ResponseEntity<Void> deleteTerritory(@PathVariable UUID id) {
         Territory currentTerritory = service.findTerritoryById(id);
         if (currentTerritory == null) {
             return ResponseEntity.notFound().build();
@@ -106,17 +102,5 @@ public class TerritoryController {
 
     private TerritoryDTO convertToTerritoryDTO(Territory territory) {
         return modelMapper.map(territory, TerritoryDTO.class);
-    }
-
-    private String errorsList(BindingResult bindingResult) {
-        StringBuilder errorMsg = new StringBuilder();
-        List<FieldError> errors = bindingResult.getFieldErrors();
-        for (FieldError error : errors) {
-            errorMsg.append(error.getField())
-                    .append(" - ")
-                    .append(error.getDefaultMessage())
-                    .append("\n");
-        }
-        return errorMsg.toString();
     }
 }

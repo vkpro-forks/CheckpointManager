@@ -12,8 +12,4 @@ public class CheckpointManagerApplication {
         SpringApplication.run(CheckpointManagerApplication.class, args);
     }
 
-    @Bean
-    public ModelMapper modelMapper() {
-        return new ModelMapper();
-    }
 }

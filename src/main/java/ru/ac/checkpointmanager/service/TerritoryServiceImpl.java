@@ -8,6 +8,7 @@ import ru.ac.checkpointmanager.repository.TerritoryRepository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -23,9 +24,9 @@ public class TerritoryServiceImpl implements TerritoryService {
     }
 
     @Override
-    public Territory findTerritoryById(int id) {
+    public Territory findTerritoryById(UUID id) {
         return territoryRepository.findById(id).orElseThrow(
-                () -> new TerritoryNotFoundException(String.format("Room not found [userId=%d]", id)));
+                () -> new TerritoryNotFoundException(String.format("Room not found [userId=%s]", id)));
     }
 
     @Override
@@ -40,16 +41,23 @@ public class TerritoryServiceImpl implements TerritoryService {
 
     @Override
     public Territory updateTerritory(Territory territory) {
-        //because "addedAt" field not included in dto and after update territory's data became empty
-        //maybe exist better way to save this value in table?
-        territory.setAddedAt(territoryRepository
-                .findById(territory.getId())
-                .get().getAddedAt());
-        return territoryRepository.save(territory);
+
+        Territory foundTerritory = territoryRepository.findById(territory.getId())
+                .orElseThrow(() -> new TerritoryNotFoundException
+                        (String.format("Territory not found [Id=%s]", territory.getId())));
+
+        foundTerritory.setName(territory.getName());
+        foundTerritory.setNote(territory.getNote());
+
+        return territoryRepository.save(foundTerritory);
     }
 
     @Override
-    public void deleteTerritoryById(int id) {
+    public void deleteTerritoryById(UUID id) {
+
+        if (territoryRepository.findById(id).isEmpty()) {
+            throw new TerritoryNotFoundException(String.format("Territory not found [Id=%s]", id));
+        }
         territoryRepository.deleteById(id);
     }
 
