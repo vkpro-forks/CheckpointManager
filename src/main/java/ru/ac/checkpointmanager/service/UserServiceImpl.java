@@ -15,6 +15,7 @@ import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 
+import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.UUID;
 
@@ -30,6 +31,8 @@ public class UserServiceImpl implements UserService {
     private final PhoneRepository phoneRepository;
     private final PhoneService phoneService;
     private final ModelMapper modelMapper;
+
+    private final Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
 
 
     @Transactional
@@ -54,6 +57,7 @@ public class UserServiceImpl implements UserService {
         User user = convertToUser(userPhoneDTO.getUserDTO());
         user.setMainNumber(cleanPhone(phoneDTO.getNumber()));
         user.setIsBlocked(false);
+        user.setAddedAt(currentTimestamp);
         userRepository.save(user);
 
         // устанавливаем идентификатор пользователя для PhoneDTO и создаем номер телефона,

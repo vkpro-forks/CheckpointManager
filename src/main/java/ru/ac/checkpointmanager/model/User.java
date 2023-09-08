@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.ac.checkpointmanager.model.enums.UserRole;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.Set;
 import java.util.UUID;
@@ -60,5 +61,8 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     private Set<Phone> numbers;
+
+    @Column(name = "added_at")
+    private Timestamp addedAt;
 }
 

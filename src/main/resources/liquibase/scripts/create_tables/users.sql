@@ -48,6 +48,11 @@ ALTER TABLE users
 ALTER TABLE users
     ADD COLUMN main_number TEXT;
 
+-- changeset fifimova:25.1
+ALTER TABLE users
+    ADD COLUMN added_at timestamp;
+
+
 
 
 
