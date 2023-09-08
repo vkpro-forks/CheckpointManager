@@ -7,7 +7,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.ac.checkpointmanager.dto.UserDTO;
+import ru.ac.checkpointmanager.dto.UserPhoneDTO;
 import ru.ac.checkpointmanager.exception.DateOfBirthFormatException;
+import ru.ac.checkpointmanager.exception.PhoneAlreadyExistException;
+import ru.ac.checkpointmanager.exception.PhoneNumberNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.service.UserService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
@@ -25,18 +28,18 @@ public class UserController {
 
 
     @PostMapping("/authentication")
-    public ResponseEntity<?> createUser(@Valid @RequestBody UserDTO userDTO, BindingResult result) {
+    public ResponseEntity<?> createUser(@Valid @RequestBody UserPhoneDTO userPhoneDTO, BindingResult result) {
         if (result.hasErrors()) {
             return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
         }
 
         try {
-            UserDTO createdUser = userService.createUser(userDTO);
+            UserPhoneDTO createdUser = userService.createUser(userPhoneDTO);
             return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
-        } catch (DateOfBirthFormatException e) {
+        } catch (DateOfBirthFormatException | PhoneAlreadyExistException e) {
+            // блок отлавливает эксепшены и пишет месседжы, которые прописаны в сервисе
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
-
     }
 
     @GetMapping("{id}")
@@ -45,16 +48,22 @@ public class UserController {
         return user.map(ResponseEntity::ok).orElse(ResponseEntity.noContent().build());
     }
 
-    @GetMapping
+    @GetMapping("/name")
     public ResponseEntity<Collection<UserDTO>> findUserByName(@RequestParam String name) {
         Collection<UserDTO> foundUsers = userService.findByName(name);
         return foundUsers.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(foundUsers);
     }
 
-    @GetMapping("/all")
+    @GetMapping()
     public ResponseEntity<Collection<UserDTO>> getAll() {
         Collection<UserDTO> foundUsers = userService.getAll();
         return foundUsers.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(foundUsers);
+    }
+
+    @GetMapping("/numbers/{id}")
+    public ResponseEntity<Collection<String>> findUsersPhoneNumbers(@PathVariable UUID id) {
+        Collection<String> numbers = userService.findUsersPhoneNumbers(id);
+        return numbers.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(numbers);
     }
 
     @PutMapping
@@ -63,16 +72,25 @@ public class UserController {
             return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
         }
 
-        UserDTO changedUser = userService.updateUser(userDTO);
-        return changedUser == null ? ResponseEntity.noContent().build() : ResponseEntity.ok(changedUser);
+        try {
+            UserDTO changedUser = userService.updateUser(userDTO);
+            return new ResponseEntity<>(changedUser, HttpStatus.OK);
+        } catch (UserNotFoundException | DateOfBirthFormatException | PhoneNumberNotFoundException e) {
+            // блок отлавливает эксепшены и пишет месседжы, которые прописаны в сервисе
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     //    method with limited access
     //    1 variate
     @PatchMapping("{id}")
-    public ResponseEntity<UserDTO> updateBlockStatus(@PathVariable UUID id, @RequestParam Boolean isBlocked) {
-        UserDTO changedUser = userService.updateBlockStatus(id, isBlocked);
-        return changedUser == null ? ResponseEntity.noContent().build() : ResponseEntity.ok(changedUser);
+    public ResponseEntity<?> updateBlockStatus(@PathVariable UUID id, @RequestParam Boolean isBlocked) {
+        try {
+            UserDTO changedUser = userService.updateBlockStatus(id, isBlocked);
+            return ResponseEntity.ok(changedUser);
+        } catch (UserNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 
     //    method with limited access
@@ -82,8 +100,8 @@ public class UserController {
         try {
             userService.blockById(id);
             return ResponseEntity.ok().build();
-        } catch (UserNotFoundException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+        } catch (UserNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 
@@ -94,8 +112,8 @@ public class UserController {
         try {
             userService.unblockById(id);
             return ResponseEntity.ok().build();
-        } catch (UserNotFoundException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+        } catch (UserNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 //choose variate witch best for frontend

@@ -44,3 +44,11 @@ ALTER TABLE users
 ALTER TABLE users
     ALTER COLUMN is_blocked SET DEFAULT false;
 
+-- changeset fifimova:25
+ALTER TABLE users
+    ADD COLUMN main_number TEXT;
+
+
+
+
+

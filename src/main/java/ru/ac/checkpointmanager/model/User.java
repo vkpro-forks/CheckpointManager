@@ -39,6 +39,10 @@ public class User {
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
 
+    @NotEmpty
+    @Size(min = 6, max = 20)
+    private String mainNumber;
+
     @Email
     @NotEmpty(message = "Email should not be empty")
     private String email;
