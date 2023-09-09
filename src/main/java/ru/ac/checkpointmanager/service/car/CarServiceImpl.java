@@ -14,14 +14,9 @@ import java.util.UUID;
 public class CarServiceImpl implements CarService {
 
     private final CarRepository carRepository;
-    private final CarBrandService carBrandService;
-
-    private final CarModelService carModelService;
 
     public CarServiceImpl(CarRepository carRepository, CarBrandService carBrandService, CarModelService carModelService) {
         this.carRepository = carRepository;
-        this.carBrandService = carBrandService;
-        this.carModelService = carModelService;
     }
 
 

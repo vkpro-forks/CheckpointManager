@@ -13,6 +13,7 @@ import ru.ac.checkpointmanager.exception.CarModelNotFoundException;
 import ru.ac.checkpointmanager.model.car.CarModel;
 import ru.ac.checkpointmanager.service.car.CarBrandService;
 import ru.ac.checkpointmanager.service.car.CarModelService;
+import ru.ac.checkpointmanager.utils.ErrorUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +28,10 @@ public class CarModelController {
     private final CarBrandService carBrandService;
     private static final String NOT_FOUND_MESSAGE = " not found with ID: ";
 
+    private boolean isInvalidModelName(String modelName) {
+        return !modelName.matches("^[a-zA-Zа-яА-Я0-9\\s-]+$");
+    }
+
     private Map<String, String> getErrors(ConstraintViolationException e) {
         Map<String, String> errors = new HashMap<>();
         e.getConstraintViolations().forEach(violation -> {
@@ -35,15 +40,11 @@ public class CarModelController {
         return errors;
     }
 
-    private boolean isInvalidModelName(String modelName) {
-        return !modelName.matches("^[a-zA-Zа-яА-Я0-9\\s-]+$");
-    }
-
     @PostMapping("/models")
     public ResponseEntity<?> createModel(@Valid @RequestBody CarModel model, BindingResult result) {
 
         if (result.hasErrors()) {
-            return new ResponseEntity<>("Validation error", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
         }
         try {
             CarModel carModel = carModelService.addModel(model);

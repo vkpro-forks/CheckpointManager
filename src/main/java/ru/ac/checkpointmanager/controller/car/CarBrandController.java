@@ -16,6 +16,7 @@ import ru.ac.checkpointmanager.model.car.CarModel;
 import ru.ac.checkpointmanager.service.car.CarBrandService;
 import ru.ac.checkpointmanager.service.car.CarModelService;
 import ru.ac.checkpointmanager.service.car.CarService;
+import ru.ac.checkpointmanager.utils.ErrorUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -28,18 +29,10 @@ public class CarBrandController {
 
     private final CarBrandService carBrandService;
 
-    private ResponseEntity<Map<String, String>> handleValidationErrors(BindingResult result) {
-        Map<String, String> errors = new HashMap<>();
-        for (FieldError error : result.getFieldErrors()) {
-            errors.put(error.getField(), error.getDefaultMessage());
-        }
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
-    }
-
     @PostMapping("/brands")
     public ResponseEntity<?> createBrand(@Valid @RequestBody CarBrand brand, BindingResult result) {
         if (result.hasErrors()) {
-            return handleValidationErrors(result);
+            return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
         }
         if (!brand.getBrand().matches("^[a-zA-Z-\\s]+$")) {
             return new ResponseEntity<>("Brand name should contain only letters," +
@@ -70,7 +63,7 @@ public class CarBrandController {
                                             @RequestBody CarBrand carBrandDetails,
                                             BindingResult result) {
         if (result.hasErrors()) {
-            return handleValidationErrors(result);
+            return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
         }
         if (!carBrandDetails.getBrand().matches("^[a-zA-Zа-яА-Я0-9\\s-]+$")) {
             return new ResponseEntity<>("Brand name should contain only letters, " +
@@ -80,7 +73,7 @@ public class CarBrandController {
             CarBrand carBrand = carBrandService.updateBrand(id, carBrandDetails);
             return new ResponseEntity<>(carBrand, HttpStatus.OK);
         } catch (ConstraintViolationException e) {
-            return handleValidationErrors(result);
+            return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
         } catch (CarBrandNotFoundException e) {
             return new ResponseEntity<>("Brand not found", HttpStatus.NOT_FOUND);
         }
