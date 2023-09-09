@@ -8,17 +8,18 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.ac.checkpointmanager.exception.CarTrailerNotFoundException;
 import ru.ac.checkpointmanager.model.car.Trailer;
-import ru.ac.checkpointmanager.service.car.CarTrailerService;
+import ru.ac.checkpointmanager.service.car.TrailerService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
 
 import java.util.NoSuchElementException;
+import java.util.UUID;
 
 @RestController
-@RequestMapping("/car/trailer")
+@RequestMapping("/trailer")
 @RequiredArgsConstructor
-public class CarTrailerController {
+public class TrailerController {
 
-    private final CarTrailerService carTrailerService;
+    private final TrailerService carTrailerService;
 
     @PostMapping
     public ResponseEntity<?> createTrailer(@Valid @RequestBody Trailer trailer, BindingResult bindingResult) {
@@ -26,14 +27,16 @@ public class CarTrailerController {
             String errorMsg = ErrorUtils.errorsList(bindingResult);
             return new ResponseEntity<>(errorMsg, HttpStatus.BAD_REQUEST);
         }
-
+        if (carTrailerService.trailerExistsByLicensePlate(trailer.getLicensePlate())) {
+            return new ResponseEntity<>("Trailer with this license plate already exists", HttpStatus.CONFLICT);
+        }
         Trailer createdTrailer = carTrailerService.addTrailer(trailer);
         return new ResponseEntity<>(createdTrailer, HttpStatus.CREATED);
     }
 
 
     @GetMapping("{id}")
-    public ResponseEntity<?> getTrailer(@PathVariable Long id) {
+    public ResponseEntity<?> getTrailer(@PathVariable UUID id) {
         Trailer responseTrailer = carTrailerService.getTrailer(id);
         if (responseTrailer == null) {
             return new ResponseEntity<>("Trailer not found", HttpStatus.NOT_FOUND);
@@ -43,7 +46,7 @@ public class CarTrailerController {
 
 
     @DeleteMapping("{id}")
-    public ResponseEntity<String> deleteTrailer(@PathVariable Long id) {
+    public ResponseEntity<String> deleteTrailer(@PathVariable UUID id) {
         try {
             carTrailerService.deleteTrailer(id);
             return new ResponseEntity<>("Trailer " + id + " deleted!", HttpStatus.OK);
@@ -53,7 +56,7 @@ public class CarTrailerController {
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<?> updateTrailer(@PathVariable Long id, @RequestBody Trailer trailer) {
+    public ResponseEntity<?> updateTrailer(@PathVariable UUID id, @RequestBody Trailer trailer) {
         try {
             Trailer updatedTrailer = carTrailerService.updateTrailer(trailer, id);
             return new ResponseEntity<>(updatedTrailer, HttpStatus.OK);

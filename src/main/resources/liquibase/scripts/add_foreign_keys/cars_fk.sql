@@ -15,3 +15,10 @@ ALTER TABLE cars
     ADD COLUMN trailer_id BIGINT NULL,
 ADD CONSTRAINT fk_cars_trailer FOREIGN KEY (trailer_id) REFERENCES trailer(id);
 
+-- changeset x3imal:37.2
+ALTER TABLE cars
+DROP CONSTRAINT fk_cars_trailer;
+
+-- changeset x3imal:37.3
+ALTER TABLE cars
+DROP COLUMN trailer_id;

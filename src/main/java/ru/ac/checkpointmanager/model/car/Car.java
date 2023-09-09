@@ -47,9 +47,4 @@ public class Car {
     @Column(name = "year")
     private int year;
 
-    @OneToOne
-    @JoinColumn(name = "trailer_id")
-    private Trailer trailer;
-
-
 }

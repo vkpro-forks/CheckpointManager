@@ -17,8 +17,8 @@ import java.util.UUID;
 public class Trailer {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue
+    private UUID id;
 
     @NotNull
     @Column(name = "license_plate")
