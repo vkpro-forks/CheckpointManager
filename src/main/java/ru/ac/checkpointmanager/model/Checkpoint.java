@@ -30,6 +30,7 @@ public class Checkpoint {
 
     private LocalDate addedAt;
 
+    @NotNull()
     @ManyToOne
     @JoinColumn(name = "territory_id")
     private Territory territory;
