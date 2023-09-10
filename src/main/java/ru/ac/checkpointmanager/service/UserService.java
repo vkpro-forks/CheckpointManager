@@ -1,12 +1,13 @@
 package ru.ac.checkpointmanager.service;
 
 import ru.ac.checkpointmanager.dto.UserDTO;
+import ru.ac.checkpointmanager.dto.UserPhoneDTO;
 
 import java.util.Collection;
 import java.util.UUID;
 
 public interface UserService {
-    UserDTO createUser(UserDTO userDTO);
+    UserPhoneDTO createUser(UserPhoneDTO userDTO);
 
     UserDTO findById(UUID id);
 
@@ -23,4 +24,7 @@ public interface UserService {
     void deleteUser(UUID id);
 
     Collection<UserDTO> getAll();
+
+    // метод обращается к сету номеров юзера и добавляет только поле НОМЕРА в лист
+    Collection<String> findUsersPhoneNumbers(UUID userId);
 }

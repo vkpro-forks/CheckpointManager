@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.ac.checkpointmanager.dto.PhoneDTO;
+import ru.ac.checkpointmanager.exception.PhoneNumberNotFoundException;
 import ru.ac.checkpointmanager.service.PhoneService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
 
@@ -16,7 +17,7 @@ import java.util.UUID;
 
 
 @RestController
-@RequestMapping("/number")
+@RequestMapping("/phone")
 @RequiredArgsConstructor
 public class PhoneController {
 
@@ -52,8 +53,12 @@ public class PhoneController {
             return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
         }
 
-        PhoneDTO changedNumber = phoneService.updatePhoneNumber(phoneDTO);
-        return changedNumber == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(changedNumber);
+        try {
+            PhoneDTO changedNumber = phoneService.updatePhoneNumber(phoneDTO);
+            return ResponseEntity.ok(changedNumber);
+        } catch (PhoneNumberNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 
     @DeleteMapping("{id}")

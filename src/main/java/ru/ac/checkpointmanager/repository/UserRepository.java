@@ -24,4 +24,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     @Modifying
     @Query(value = "UPDATE users u SET is_blocked = false WHERE u.id = :id", nativeQuery = true)
     void unblockById(@Param("id") UUID id);
+
+
 }

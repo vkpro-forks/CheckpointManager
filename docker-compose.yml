@@ -3,7 +3,7 @@ version: '3'
 services:
   # Сервис для приложения Spring Boot
   spring-app:
-    image: checkpoint-manager
+    image: checkpoint-manager:${PROJECT_VERSION}
     build:
       context: .  # Путь до вашего Spring Boot проекта
       dockerfile: Dockerfile # Указание файла Dockerfile для вашего приложения

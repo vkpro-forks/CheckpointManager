@@ -12,6 +12,8 @@ import java.util.Collection;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static ru.ac.checkpointmanager.utils.FieldsValidation.cleanPhone;
+
 @Service
 @RequiredArgsConstructor
 public class PhoneServiceImpl implements PhoneService {
@@ -28,26 +30,23 @@ public class PhoneServiceImpl implements PhoneService {
 
     @Override
     public PhoneDTO findById(UUID id) {
-        return convertToPhoneDTO(phoneRepository.findById(id).orElseThrow(
-                () -> new PhoneNumberNotFoundException("The number by this id does not exist")));
+        Phone foundPhone = phoneRepository.findById(id).orElseThrow(
+                () -> new PhoneNumberNotFoundException("The number by this id does not exist"));
+        return convertToPhoneDTO(foundPhone);
     }
 
     @Override
     public PhoneDTO updatePhoneNumber(PhoneDTO phoneDTO) {
-        try {
-            Phone foundPhone = phoneRepository.findById(phoneDTO.getId())
-                    .orElseThrow(PhoneNumberNotFoundException::new);
+        Phone foundPhone = phoneRepository.findById(phoneDTO.getId()).orElseThrow(
+                () -> new PhoneNumberNotFoundException("The number by this id does not exist"));
 
-            foundPhone.setNumber(cleanPhone(phoneDTO.getNumber()));
-            foundPhone.setType(phoneDTO.getType());
-            foundPhone.setNote(phoneDTO.getNote());
+        foundPhone.setNumber(cleanPhone(phoneDTO.getNumber()));
+        foundPhone.setType(phoneDTO.getType());
+        foundPhone.setNote(phoneDTO.getNote());
 
-            phoneRepository.save(foundPhone);
+        phoneRepository.save(foundPhone);
 
-            return convertToPhoneDTO(foundPhone);
-        } catch (PhoneNumberNotFoundException e) {
-            throw new PhoneNumberNotFoundException("Error updating user with ID " + phoneDTO.getId(), e);
-        }
+        return convertToPhoneDTO(foundPhone);
     }
 
 
@@ -77,16 +76,6 @@ public class PhoneServiceImpl implements PhoneService {
 
     private PhoneDTO convertToPhoneDTO(Phone phone) {
         return modelMapper.map(phone, PhoneDTO.class);
-    }
-
-    private String cleanPhone(String phone) {
-        // Удаление всех символов, кроме цифр
-        String cleanedPhone = phone.replaceAll("[^\\d]", "");
-
-        // Удаление ведущих нулей
-        cleanedPhone = cleanedPhone.replaceFirst("^0+(?!$)", "");
-
-        return cleanedPhone;
     }
 }
 
