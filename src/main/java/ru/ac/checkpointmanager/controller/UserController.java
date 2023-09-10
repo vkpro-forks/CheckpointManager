@@ -8,9 +8,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.ac.checkpointmanager.dto.UserDTO;
 import ru.ac.checkpointmanager.dto.UserPhoneDTO;
-import ru.ac.checkpointmanager.exception.DateOfBirthFormatException;
-import ru.ac.checkpointmanager.exception.PhoneAlreadyExistException;
-import ru.ac.checkpointmanager.exception.PhoneNumberNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.service.UserService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
@@ -36,7 +33,7 @@ public class UserController {
         try {
             UserPhoneDTO createdUser = userService.createUser(userPhoneDTO);
             return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
-        } catch (DateOfBirthFormatException | PhoneAlreadyExistException e) {
+        } catch (RuntimeException e) {
             // блок отлавливает эксепшены и пишет месседжы, которые прописаны в сервисе
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
@@ -75,7 +72,7 @@ public class UserController {
         try {
             UserDTO changedUser = userService.updateUser(userDTO);
             return new ResponseEntity<>(changedUser, HttpStatus.OK);
-        } catch (UserNotFoundException | DateOfBirthFormatException | PhoneNumberNotFoundException e) {
+        } catch (RuntimeException e) {
             // блок отлавливает эксепшены и пишет месседжы, которые прописаны в сервисе
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
