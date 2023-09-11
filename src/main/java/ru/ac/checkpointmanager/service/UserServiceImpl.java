@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.dto.UserDTO;
-import ru.ac.checkpointmanager.dto.UserPhoneDTO;
 import ru.ac.checkpointmanager.exception.DateOfBirthFormatException;
 import ru.ac.checkpointmanager.exception.PhoneAlreadyExistException;
 import ru.ac.checkpointmanager.exception.PhoneNumberNotFoundException;
@@ -20,6 +19,7 @@ import java.util.Collection;
 import java.util.UUID;
 
 import static java.util.stream.Collectors.toList;
+import static ru.ac.checkpointmanager.model.enums.PhoneNumberType.MOBILE;
 import static ru.ac.checkpointmanager.utils.FieldsValidation.cleanPhone;
 import static ru.ac.checkpointmanager.utils.FieldsValidation.validateDOB;
 
@@ -34,39 +34,43 @@ public class UserServiceImpl implements UserService {
 
     private final Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
 
-
     @Transactional
     @Override
-    public UserPhoneDTO createUser(UserPhoneDTO userPhoneDTO) {
+    public UserDTO createUser(UserDTO userDTO) {
         // проверяем дату
-        if (!validateDOB(userPhoneDTO.getUserDTO().getDateOfBirth())) {
+        if (!validateDOB(userDTO.getDateOfBirth())) {
             throw new DateOfBirthFormatException
                     ("Date of birth should not be greater than the current date " +
                             "or less than 100 years from the current moment");
         }
 
-        PhoneDTO phoneDTO = userPhoneDTO.getPhoneDTO();
-
-        // проверяем существует ли номер телефона по номеру (по id нет смысла, тк его вводить при создании необязательно)
-        if (phoneRepository.existsByNumber(phoneDTO.getNumber())) {
+        // проверяем существует ли номер телефона по номеру
+        if (phoneRepository.existsByNumber(cleanPhone(userDTO.getMainNumber()))) {
             throw new PhoneAlreadyExistException(String.format
-                    ("Phone number [number=%s] already exist", phoneDTO.getNumber()));
+                    ("Phone number [number=%s] already exist", userDTO.getMainNumber()));
         }
 
         // сохраняем юзера в БД, присваиваем основной номер, ставим незаблокированным
-        User user = convertToUser(userPhoneDTO.getUserDTO());
-        user.setMainNumber(cleanPhone(phoneDTO.getNumber()));
+        User user = convertToUser(userDTO);
+        user.setMainNumber(cleanPhone(userDTO.getMainNumber()));
         user.setIsBlocked(false);
         user.setAddedAt(currentTimestamp);
         userRepository.save(user);
 
-        // устанавливаем идентификатор пользователя для PhoneDTO и создаем номер телефона,
         // метод из PhoneService сохранит его в бд
-        phoneDTO.setUserId(user.getId());
-        PhoneDTO savedPhone = phoneService.createPhoneNumber(phoneDTO);
+        PhoneDTO phoneDTO = createPhoneDTO(user);
+        phoneService.createPhoneNumber(phoneDTO);
 
-        // возращаем юзера и номер с установленным id
-        return convertToUserPhoneDTO(user, savedPhone);
+        return convertToUserDTO(user);
+    }
+
+    // устанавливаем поля для сущности PhoneDTO из данных сохранённого юзера, тип телефона по умолчанию мобильный
+    private PhoneDTO createPhoneDTO(User user) {
+        PhoneDTO phoneDTO = new PhoneDTO();
+        phoneDTO.setUserId(user.getId());
+        phoneDTO.setNumber(user.getMainNumber());
+        phoneDTO.setType(MOBILE);
+        return phoneDTO;
     }
 
     @Override
@@ -100,7 +104,7 @@ public class UserServiceImpl implements UserService {
         }
 
         // проверяем, регистрировал ли на себя юзер введеный номер
-        if (!findUsersPhoneNumbers(userDTO.getId()).contains(userDTO.getMainNumber())) {
+        if (!findUsersPhoneNumbers(userDTO.getId()).contains(cleanPhone(userDTO.getMainNumber()))) {
             throw new PhoneNumberNotFoundException(String.format
                     ("Phone number [number=%s] does not exist", userDTO.getMainNumber()));
         }
@@ -183,12 +187,5 @@ public class UserServiceImpl implements UserService {
 
     private UserDTO convertToUserDTO(User user) {
         return modelMapper.map(user, UserDTO.class);
-    }
-
-    private UserPhoneDTO convertToUserPhoneDTO(User user, PhoneDTO phoneDTO) {
-        UserPhoneDTO userPhoneDTO = new UserPhoneDTO();
-        userPhoneDTO.setUserDTO(modelMapper.map(user, UserDTO.class));
-        userPhoneDTO.setPhoneDTO(phoneDTO);
-        return userPhoneDTO;
     }
 }
