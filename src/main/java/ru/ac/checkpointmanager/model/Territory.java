@@ -32,5 +32,9 @@ public class Territory {
     @OneToMany(mappedBy = "territory")
     private Set<Checkpoint> checkpoints;
 
-
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "user_territory",
+            joinColumns = @JoinColumn(name = "territory_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id"))
+    private Set<User> users;
 }

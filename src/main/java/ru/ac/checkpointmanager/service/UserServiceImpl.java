@@ -6,16 +6,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.dto.UserDTO;
-import ru.ac.checkpointmanager.exception.DateOfBirthFormatException;
-import ru.ac.checkpointmanager.exception.PhoneAlreadyExistException;
-import ru.ac.checkpointmanager.exception.PhoneNumberNotFoundException;
-import ru.ac.checkpointmanager.exception.UserNotFoundException;
+import ru.ac.checkpointmanager.exception.*;
+import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 
 import java.sql.Timestamp;
 import java.util.Collection;
+import java.util.Set;
 import java.util.UUID;
 
 import static java.util.stream.Collectors.toList;
@@ -78,6 +77,15 @@ public class UserServiceImpl implements UserService {
         User foundUser = userRepository.findById(id).orElseThrow(
                 () -> new UserNotFoundException(String.format("User not found [Id=%s]", id)));
         return convertToUserDTO(foundUser);
+    }
+
+    @Override
+    public Set<Territory> findTerritoriesByUserId(UUID userId) {
+        Set<Territory> territories = userRepository.findTerritoriesByUserId(userId);
+        if (territories.isEmpty()) {
+            throw new TerritoryNotFoundException(String.format("Territory for User not found [user_id=%s]", userId));
+        }
+        return territories;
     }
 
     @Override

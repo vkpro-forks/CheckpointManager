@@ -8,11 +8,13 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.model.Territory;
+import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.service.TerritoryService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
 
 import jakarta.validation.*;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -37,13 +39,22 @@ public class TerritoryController {
     }
 
     /* READ */
-    @GetMapping("/{id}")
-    public ResponseEntity<TerritoryDTO> getTerritory(@PathVariable("id") UUID id) {
-        Territory territory = service.findTerritoryById(id);
+    @GetMapping("/{territoryId}")
+    public ResponseEntity<TerritoryDTO> getTerritory(@PathVariable("territoryId") UUID territoryId) {
+        Territory territory = service.findTerritoryById(territoryId);
         if (territory == null) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(convertToTerritoryDTO(territory));
+    }
+
+    @GetMapping("/{territoryId}/users")
+    public ResponseEntity<Set<User>> getUsersByTerritory(@PathVariable UUID territoryId) {
+        Set<User> users = service.findUsersByTerritoryId(territoryId);
+        if (users.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(users);
     }
 
     @GetMapping("/name")

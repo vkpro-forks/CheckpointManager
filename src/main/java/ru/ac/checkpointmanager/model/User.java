@@ -61,5 +61,11 @@ public class User {
 
     @Column(name = "added_at")
     private Timestamp addedAt;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "user_territory",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "territory_id"))
+    private Set<Territory> territories;
 }
 

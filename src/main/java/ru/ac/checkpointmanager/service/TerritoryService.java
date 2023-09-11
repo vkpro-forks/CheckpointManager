@@ -1,8 +1,10 @@
 package ru.ac.checkpointmanager.service;
 
 import ru.ac.checkpointmanager.model.Territory;
+import ru.ac.checkpointmanager.model.User;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public interface TerritoryService {
@@ -10,6 +12,8 @@ public interface TerritoryService {
     Territory addTerritory(Territory territory);
 
     Territory findTerritoryById(UUID id);
+
+    Set<User> findUsersByTerritoryId(UUID territoryId);
 
     List<Territory> findTerritoriesByName(String name);
 
