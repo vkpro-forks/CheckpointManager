@@ -15,3 +15,11 @@ CREATE TABLE cars
 ALTER TABLE cars
     DROP COLUMN brand_model;
 
+-- changeset x3imal:37.1
+ALTER TABLE cars
+    ADD COLUMN trailer_id BIGINT NULL;
+
+-- changeset x3imal:37.3
+ALTER TABLE cars
+    DROP COLUMN trailer_id;
+
