@@ -104,7 +104,7 @@ public class UserServiceImpl implements UserService {
         }
 
         // проверяем, регистрировал ли на себя юзер введеный номер
-        if (!findUsersPhoneNumbers(userDTO.getId()).contains(userDTO.getMainNumber())) {
+        if (!findUsersPhoneNumbers(userDTO.getId()).contains(cleanPhone(userDTO.getMainNumber()))) {
             throw new PhoneNumberNotFoundException(String.format
                     ("Phone number [number=%s] does not exist", userDTO.getMainNumber()));
         }
