@@ -10,7 +10,6 @@ import ru.ac.checkpointmanager.repository.TerritoryRepository;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -33,8 +32,8 @@ public class TerritoryServiceImpl implements TerritoryService {
     }
 
     @Override
-    public Set<User> findUsersByTerritoryId(UUID territoryId) {
-        Set<User> users = territoryRepository.findUsersByTerritoryId(territoryId);
+    public List<User> findUsersByTerritoryId(UUID territoryId) {
+        List<User> users = territoryRepository.findUsersByTerritoryId(territoryId);
         if (users.isEmpty()) {
             throw new UserNotFoundException(String.format("Users for Territory not found [territory_id=%s]", territoryId));
         }

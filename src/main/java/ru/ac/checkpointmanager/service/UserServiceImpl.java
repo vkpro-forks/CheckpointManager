@@ -1,23 +1,23 @@
 package ru.ac.checkpointmanager.service;
 
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.PhoneDTO;
+import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.UserDTO;
 import ru.ac.checkpointmanager.exception.*;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
+import ru.ac.checkpointmanager.utils.Mapper;
 
 import java.sql.Timestamp;
 import java.util.Collection;
-import java.util.Set;
+import java.util.List;
 import java.util.UUID;
 
-import static java.util.stream.Collectors.toList;
 import static ru.ac.checkpointmanager.model.enums.PhoneNumberType.MOBILE;
 import static ru.ac.checkpointmanager.utils.FieldsValidation.cleanPhone;
 import static ru.ac.checkpointmanager.utils.FieldsValidation.validateDOB;
@@ -29,7 +29,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PhoneRepository phoneRepository;
     private final PhoneService phoneService;
-    private final ModelMapper modelMapper;
+    private final Mapper mapper;
 
     private final Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
 
@@ -50,7 +50,7 @@ public class UserServiceImpl implements UserService {
         }
 
         // сохраняем юзера в БД, присваиваем основной номер, ставим незаблокированным
-        User user = convertToUser(userDTO);
+        User user = mapper.convertToUser(userDTO);
         user.setMainNumber(cleanPhone(userDTO.getMainNumber()));
         user.setIsBlocked(false);
         user.setAddedAt(currentTimestamp);
@@ -60,7 +60,7 @@ public class UserServiceImpl implements UserService {
         PhoneDTO phoneDTO = createPhoneDTO(user);
         phoneService.createPhoneNumber(phoneDTO);
 
-        return convertToUserDTO(user);
+        return mapper.convertToUserDTO(user);
     }
 
     // устанавливаем поля для сущности PhoneDTO из данных сохранённого юзера, тип телефона по умолчанию мобильный
@@ -76,23 +76,22 @@ public class UserServiceImpl implements UserService {
     public UserDTO findById(UUID id) {
         User foundUser = userRepository.findById(id).orElseThrow(
                 () -> new UserNotFoundException(String.format("User not found [Id=%s]", id)));
-        return convertToUserDTO(foundUser);
+        return mapper.convertToUserDTO(foundUser);
     }
 
     @Override
-    public Set<Territory> findTerritoriesByUserId(UUID userId) {
-        Set<Territory> territories = userRepository.findTerritoriesByUserId(userId);
+    public List<TerritoryDTO> findTerritoriesByUserId(UUID userId) {
+        List<Territory> territories = userRepository.findTerritoriesByUserId(userId);
         if (territories.isEmpty()) {
             throw new TerritoryNotFoundException(String.format("Territory for User not found [user_id=%s]", userId));
         }
-        return territories;
+        return mapper.toTerritoriesDTO(territories);
     }
 
     @Override
     public Collection<UserDTO> findByName(String name) {
-        Collection<UserDTO> userDTOS = userRepository.findUserByFullNameContainingIgnoreCase(name).stream()
-                .map(this::convertToUserDTO)
-                .collect(toList());
+        Collection<UserDTO> userDTOS = mapper.toUsersDTO(userRepository
+                .findUserByFullNameContainingIgnoreCase(name));
 
         if (userDTOS.isEmpty()) {
             throw new UserNotFoundException("There is no user with name containing " + name);
@@ -128,7 +127,7 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(foundUser);
 
-        return convertToUserDTO(foundUser);
+        return mapper.convertToUserDTO(foundUser);
     }
 
     //    два варианта блокировки пользователя
@@ -142,7 +141,7 @@ public class UserServiceImpl implements UserService {
         existingUser.setIsBlocked(isBlocked);
         userRepository.save(existingUser);
 
-        return convertToUserDTO(existingUser);
+        return mapper.convertToUserDTO(existingUser);
     }
 
     //    второй: два разных метода для блокировки или разблокировки по айди,
@@ -173,9 +172,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Collection<UserDTO> getAll() {
-        Collection<UserDTO> userDTOS = userRepository.findAll().stream()
-                .map(this::convertToUserDTO)
-                .collect(toList());
+        Collection<UserDTO> userDTOS = mapper.toUsersDTO(userRepository.findAll());
 
         if (userDTOS.isEmpty()) {
             throw new UserNotFoundException("There is no user in DB");
@@ -189,11 +186,4 @@ public class UserServiceImpl implements UserService {
         return phoneRepository.getNumbersByUserId(userId);
     }
 
-    private User convertToUser(UserDTO userDTO) {
-        return modelMapper.map(userDTO, User.class);
-    }
-
-    private UserDTO convertToUserDTO(User user) {
-        return modelMapper.map(user, UserDTO.class);
-    }
 }

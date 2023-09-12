@@ -9,7 +9,7 @@ import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 
 import java.util.Collection;
-import java.util.Set;
+import java.util.List;
 import java.util.UUID;
 
 public interface UserRepository extends JpaRepository<User, UUID> {
@@ -28,5 +28,5 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     void unblockById(@Param("id") UUID id);
 
     @Query("SELECT u.territories FROM User u WHERE u.id = :userId")
-    Set<Territory> findTerritoriesByUserId(@Param("userId") UUID userId);
+    List<Territory> findTerritoriesByUserId(@Param("userId") UUID userId);
 }

@@ -8,7 +8,6 @@ import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @Repository
@@ -16,5 +15,5 @@ public interface TerritoryRepository extends JpaRepository<Territory, UUID> {
     List<Territory> findTerritoriesByNameContainingIgnoreCase(String name);
 
     @Query("SELECT t.users FROM Territory t WHERE t.id = :territoryId")
-    Set<User> findUsersByTerritoryId(@Param("territoryId") UUID territoryId);
+    List<User> findUsersByTerritoryId(@Param("territoryId") UUID territoryId);
 }

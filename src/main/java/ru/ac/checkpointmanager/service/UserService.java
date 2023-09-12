@@ -1,10 +1,10 @@
 package ru.ac.checkpointmanager.service;
 
+import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.UserDTO;
-import ru.ac.checkpointmanager.model.Territory;
 
 import java.util.Collection;
-import java.util.Set;
+import java.util.List;
 import java.util.UUID;
 
 public interface UserService {
@@ -13,7 +13,7 @@ public interface UserService {
 
     UserDTO findById(UUID id);
 
-    Set<Territory> findTerritoriesByUserId(UUID userId);
+    List<TerritoryDTO> findTerritoriesByUserId(UUID userId);
 
     Collection<UserDTO> findByName(String name);
 
