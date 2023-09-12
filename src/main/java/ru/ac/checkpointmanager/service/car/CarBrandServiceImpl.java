@@ -4,15 +4,14 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import ru.ac.checkpointmanager.exception.CarBrandNotFoundException;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.model.car.CarModel;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
+import ru.ac.checkpointmanager.repository.car.CarModelRepository;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -20,30 +19,53 @@ import java.util.Set;
 public class CarBrandServiceImpl implements CarBrandService {
 
     private final CarBrandRepository carBrandRepository;
+    private final CarModelRepository carModelRepository;
     private final Validator validator;
 
     @Override
     public CarBrand getBrandById(Long id) {
         return carBrandRepository.findById(id)
-                .orElseThrow(()-> new CarBrandNotFoundException("Car brand not found with ID: " + id));
+                .orElseThrow(() -> new CarBrandNotFoundException("Car brand not found with ID: " + id));
     }
 
     @Override
     public CarBrand addBrand(CarBrand brand) {
+        CarBrand existingBrand = carBrandRepository.findByBrand(brand.getBrand());
+        if (existingBrand != null) {
+            throw new IllegalArgumentException("A brand with the same name already exists!");
+        }
         return carBrandRepository.save(brand);
     }
 
+
+    //удалить бренд можно только в том случае, если у этого бренда в бд нет ни одной модели
     @Override
     public void deleteBrand(Long brandId) {
-        carBrandRepository.findById(brandId)
-                .orElseThrow(()-> new CarBrandNotFoundException("Car brand not found with ID: " + brandId));
+        CarBrand carBrand = carBrandRepository.findById(brandId)
+                .orElseThrow(() -> new CarBrandNotFoundException("Car brand not found with ID: " + brandId));
+        if (!carBrand.getModels().isEmpty()) {
+            System.out.println(carBrand.getModels());
+            throw new RuntimeException("Cannot delete brand with associated models!");
+        }
+        carBrandRepository.deleteById(brandId);
+    }
+
+    //удаляем бренд и все модели которые к нему привязаны
+    @Override
+    public void deleteBrandAndAllModelsByBrand(Long brandId) {
+        CarBrand carBrand = carBrandRepository.findById(brandId)
+                .orElseThrow(() -> new CarBrandNotFoundException("Car brand not found with ID: " + brandId));
+        if (carBrand.getModels().isEmpty()) {
+            throw new RuntimeException("CModel list is empty!");
+        }
+        carModelRepository.deleteAll(carBrand.getModels());
         carBrandRepository.deleteById(brandId);
     }
 
     @Override
     public CarBrand updateBrand(Long brandId, CarBrand carBrand) {
         CarBrand updateCarBrand = carBrandRepository.findById(brandId)
-                .orElseThrow(() -> new CarBrandNotFoundException("Brand not found"));
+                .orElseThrow(() -> new CarBrandNotFoundException("Brand not found with ID" + brandId));
 
         Set<ConstraintViolation<CarBrand>> violations = validator.validate(carBrand);
         if (!violations.isEmpty()) {

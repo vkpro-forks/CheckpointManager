@@ -27,6 +27,7 @@ public class CarBrand {
 
     @Column(name = "brand")
     @NotNull
+    @Pattern(regexp = "^[a-zA-Zа-яА-Я0-9\\s-]+$", message = "Brand name should contain only letters, spaces, numbers, and hyphens.")
     @Size(min = 2, max = 25, message = "Brand name must be less than 25 characters!")
     private String brand;
 

@@ -3,6 +3,7 @@ package ru.ac.checkpointmanager.service.car;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.ac.checkpointmanager.exception.CarModelNotFoundException;
+import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.model.car.CarModel;
 import ru.ac.checkpointmanager.repository.car.CarModelRepository;
 
@@ -16,6 +17,10 @@ public class CarModelServiceImpl implements CarModelService {
 
     @Override
     public CarModel addModel(CarModel carModel) {
+        CarModel existingModel = carModelRepository.findByModel(carModel.getModel());
+        if (existingModel != null) {
+            throw new IllegalArgumentException("A model with the same name already exists!");
+        }
         return carModelRepository.save(carModel);
     }
 
@@ -47,6 +52,10 @@ public class CarModelServiceImpl implements CarModelService {
 
     @Override
     public CarModel findByModelContainingIgnoreCase(String modelNamePart) {
+        CarModel foundModel = carModelRepository.findByModelContainingIgnoreCase(modelNamePart);
+        if (foundModel == null) {
+            throw new CarModelNotFoundException("Model not found with name part: " + modelNamePart);
+        }
         return carModelRepository.findByModelContainingIgnoreCase(modelNamePart);
     }
 
