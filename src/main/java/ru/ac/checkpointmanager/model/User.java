@@ -67,5 +67,9 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "territory_id"))
     private Set<Territory> territories;
+
+    public User(UUID id) {
+        this.id = id;
+    }
 }
 

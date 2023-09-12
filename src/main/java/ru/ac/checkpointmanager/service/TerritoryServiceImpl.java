@@ -64,6 +64,15 @@ public class TerritoryServiceImpl implements TerritoryService {
     }
 
     @Override
+    public void joinUserToTerritory(UUID territoryId, UUID userId) {
+
+        Territory territory = territoryRepository.findById(territoryId).orElseThrow(
+                () -> new TerritoryNotFoundException(String.format("Territory not found [Id=%s]", territoryId)));
+        territory.getUsers().add(new User(userId));
+        territoryRepository.save(territory);
+    }
+
+    @Override
     public void deleteTerritoryById(UUID id) {
 
         if (territoryRepository.findById(id).isEmpty()) {

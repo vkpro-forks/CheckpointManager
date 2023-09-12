@@ -91,6 +91,14 @@ public class TerritoryController {
         return ResponseEntity.ok(mapper.toTerritoryDTO(updatedTerritory));
     }
 
+    @PatchMapping("/{territoryId}/user/{userId}")
+    public ResponseEntity<?> joinUserToTerritory(@PathVariable UUID territoryId,
+                                                 @PathVariable UUID userId) {
+
+        service.joinUserToTerritory(territoryId, userId);
+        return ResponseEntity.ok().build();
+    }
+
     /* DELETE */
     @DeleteMapping("{id}")
     public ResponseEntity<Void> deleteTerritory(@PathVariable UUID id) {
