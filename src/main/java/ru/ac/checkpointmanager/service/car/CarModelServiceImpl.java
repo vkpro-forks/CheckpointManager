@@ -52,6 +52,10 @@ public class CarModelServiceImpl implements CarModelService {
 
     @Override
     public CarModel findByModelContainingIgnoreCase(String modelNamePart) {
+        CarModel foundModel = carModelRepository.findByModelContainingIgnoreCase(modelNamePart);
+        if (foundModel == null) {
+            throw new CarModelNotFoundException("Model not found with name part: " + modelNamePart);
+        }
         return carModelRepository.findByModelContainingIgnoreCase(modelNamePart);
     }
 
