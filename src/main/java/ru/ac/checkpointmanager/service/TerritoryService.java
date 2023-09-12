@@ -20,7 +20,9 @@ public interface TerritoryService {
 
     Territory updateTerritory(Territory territory);
 
-    void joinUserToTerritory(UUID territoryId, UUID userId);
+    void attachUserToTerritory(UUID territoryId, UUID userId);
 
     void deleteTerritoryById(UUID id);
+
+    void detachUserFromTerritory(UUID territoryId, UUID userId);
 }

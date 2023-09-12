@@ -92,10 +92,10 @@ public class TerritoryController {
     }
 
     @PatchMapping("/{territoryId}/user/{userId}")
-    public ResponseEntity<?> joinUserToTerritory(@PathVariable UUID territoryId,
+    public ResponseEntity<?> attachUserToTerritory(@PathVariable UUID territoryId,
                                                  @PathVariable UUID userId) {
 
-        service.joinUserToTerritory(territoryId, userId);
+        service.attachUserToTerritory(territoryId, userId);
         return ResponseEntity.ok().build();
     }
 
@@ -107,6 +107,14 @@ public class TerritoryController {
             return ResponseEntity.notFound().build();
         }
         service.deleteTerritoryById(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{territoryId}/user/{userId}")
+    public ResponseEntity<?> detachUserFromTerritory(@PathVariable UUID territoryId,
+                                                 @PathVariable UUID userId) {
+
+        service.detachUserFromTerritory(territoryId, userId);
         return ResponseEntity.ok().build();
     }
 }

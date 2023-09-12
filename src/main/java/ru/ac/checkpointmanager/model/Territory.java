@@ -6,6 +6,7 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -36,5 +37,5 @@ public class Territory {
     @JoinTable(name = "user_territory",
             joinColumns = @JoinColumn(name = "territory_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id"))
-    private Set<User> users;
+    private List<User> users;
 }

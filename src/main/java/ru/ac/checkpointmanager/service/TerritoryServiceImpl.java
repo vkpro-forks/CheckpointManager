@@ -7,6 +7,7 @@ import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.repository.TerritoryRepository;
+import ru.ac.checkpointmanager.repository.UserRepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.UUID;
 public class TerritoryServiceImpl implements TerritoryService {
 
     private final TerritoryRepository territoryRepository;
+    private final UserRepository userRepository;
 
     @Override
     public Territory addTerritory(Territory territory) {
@@ -64,11 +66,14 @@ public class TerritoryServiceImpl implements TerritoryService {
     }
 
     @Override
-    public void joinUserToTerritory(UUID territoryId, UUID userId) {
+    public void attachUserToTerritory(UUID territoryId, UUID userId) {
 
         Territory territory = territoryRepository.findById(territoryId).orElseThrow(
                 () -> new TerritoryNotFoundException(String.format("Territory not found [Id=%s]", territoryId)));
-        territory.getUsers().add(new User(userId));
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new UserNotFoundException(String.format("User not found [Id=%s]", userId)));
+
+        territory.getUsers().add(user);
         territoryRepository.save(territory);
     }
 
@@ -81,5 +86,15 @@ public class TerritoryServiceImpl implements TerritoryService {
         territoryRepository.deleteById(id);
     }
 
+    @Override
+    public void detachUserFromTerritory(UUID territoryId, UUID userId) {
 
+        Territory territory = territoryRepository.findById(territoryId).orElseThrow(
+                () -> new TerritoryNotFoundException(String.format("Territory not found [Id=%s]", territoryId)));
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new UserNotFoundException(String.format("User not found [Id=%s]", userId)));
+
+        territory.getUsers().remove(user);
+        territoryRepository.save(territory);
+    }
 }
