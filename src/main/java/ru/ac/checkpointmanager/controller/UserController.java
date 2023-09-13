@@ -8,10 +8,12 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.ac.checkpointmanager.dto.UserDTO;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
+import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.service.UserService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -42,6 +44,12 @@ public class UserController {
     public ResponseEntity<UserDTO> findUserById(@PathVariable UUID id) {
         Optional<UserDTO> user = Optional.ofNullable(userService.findById(id));
         return user.map(ResponseEntity::ok).orElse(ResponseEntity.noContent().build());
+    }
+
+    @GetMapping("/{userId}/territories")
+    public ResponseEntity<List<TerritoryDTO>> getTerritoriesByUser(@PathVariable UUID userId) {
+        List<TerritoryDTO> territories = userService.findTerritoriesByUserId(userId);
+        return territories.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(territories);
     }
 
     @GetMapping("/name")

@@ -3,8 +3,11 @@ package ru.ac.checkpointmanager.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
+import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.model.Territory;
+import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.repository.TerritoryRepository;
+import ru.ac.checkpointmanager.repository.UserRepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -15,6 +18,7 @@ import java.util.UUID;
 public class TerritoryServiceImpl implements TerritoryService {
 
     private final TerritoryRepository territoryRepository;
+    private final UserRepository userRepository;
 
     @Override
     public Territory addTerritory(Territory territory) {
@@ -26,7 +30,16 @@ public class TerritoryServiceImpl implements TerritoryService {
     @Override
     public Territory findTerritoryById(UUID id) {
         return territoryRepository.findById(id).orElseThrow(
-                () -> new TerritoryNotFoundException(String.format("Room not found [userId=%s]", id)));
+                () -> new TerritoryNotFoundException(String.format("Territory not found [id=%s]", id)));
+    }
+
+    @Override
+    public List<User> findUsersByTerritoryId(UUID territoryId) {
+        List<User> users = territoryRepository.findUsersByTerritoryId(territoryId);
+        if (users.isEmpty()) {
+            throw new UserNotFoundException(String.format("Users for Territory not found [territory_id=%s]", territoryId));
+        }
+        return users;
     }
 
     @Override
@@ -53,6 +66,18 @@ public class TerritoryServiceImpl implements TerritoryService {
     }
 
     @Override
+    public void attachUserToTerritory(UUID territoryId, UUID userId) {
+
+        Territory territory = territoryRepository.findById(territoryId).orElseThrow(
+                () -> new TerritoryNotFoundException(String.format("Territory not found [Id=%s]", territoryId)));
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new UserNotFoundException(String.format("User not found [Id=%s]", userId)));
+
+        territory.getUsers().add(user);
+        territoryRepository.save(territory);
+    }
+
+    @Override
     public void deleteTerritoryById(UUID id) {
 
         if (territoryRepository.findById(id).isEmpty()) {
@@ -61,5 +86,15 @@ public class TerritoryServiceImpl implements TerritoryService {
         territoryRepository.deleteById(id);
     }
 
+    @Override
+    public void detachUserFromTerritory(UUID territoryId, UUID userId) {
 
+        Territory territory = territoryRepository.findById(territoryId).orElseThrow(
+                () -> new TerritoryNotFoundException(String.format("Territory not found [Id=%s]", territoryId)));
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new UserNotFoundException(String.format("User not found [Id=%s]", userId)));
+
+        territory.getUsers().remove(user);
+        territoryRepository.save(territory);
+    }
 }

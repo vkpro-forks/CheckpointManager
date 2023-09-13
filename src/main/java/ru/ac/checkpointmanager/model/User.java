@@ -10,6 +10,7 @@ import ru.ac.checkpointmanager.model.enums.UserRole;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -61,5 +62,11 @@ public class User {
 
     @Column(name = "added_at")
     private Timestamp addedAt;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "user_territory",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "territory_id"))
+    private List<Territory> territories;
 }
 

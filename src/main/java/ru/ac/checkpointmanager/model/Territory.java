@@ -6,6 +6,7 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -32,5 +33,9 @@ public class Territory {
     @OneToMany(mappedBy = "territory")
     private Set<Checkpoint> checkpoints;
 
-
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "user_territory",
+            joinColumns = @JoinColumn(name = "territory_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id"))
+    private List<User> users;
 }

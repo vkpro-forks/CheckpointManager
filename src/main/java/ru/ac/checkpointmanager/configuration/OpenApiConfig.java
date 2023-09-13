@@ -16,8 +16,8 @@ public class OpenApiConfig {
     @Bean
     public OpenAPI openAPI() {
         return new OpenAPI()
-                .info(new Info().title("My API")
-                        .description("My API description")
+                .info(new Info().title("Checkpoint Manager")
+                        .description("Have a good connection to this wonderful API")
                         .version(appVersion));
     }
 }
