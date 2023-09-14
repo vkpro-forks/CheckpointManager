@@ -13,7 +13,7 @@ public class PhoneDTO {
     private UUID id;
 
     @NotEmpty
-    @Size(min = 6, max = 20)
+    @Size(min = 11, max = 20)
     private String number;
 
     private PhoneNumberType type;

@@ -42,7 +42,6 @@ public class UserServiceImpl implements UserService {
                     ("Date of birth should not be greater than the current date " +
                             "or less than 100 years from the current moment");
         }
-
         // проверяем существует ли номер телефона по номеру
         if (phoneRepository.existsByNumber(cleanPhone(userDTO.getMainNumber()))) {
             throw new PhoneAlreadyExistException(String.format
@@ -50,7 +49,7 @@ public class UserServiceImpl implements UserService {
         }
 
         // сохраняем юзера в БД, присваиваем основной номер, ставим незаблокированным
-        User user = mapper.convertToUser(userDTO);
+        User user = mapper.toUser(userDTO);
         user.setMainNumber(cleanPhone(userDTO.getMainNumber()));
         user.setIsBlocked(false);
         user.setAddedAt(currentTimestamp);
@@ -60,7 +59,7 @@ public class UserServiceImpl implements UserService {
         PhoneDTO phoneDTO = createPhoneDTO(user);
         phoneService.createPhoneNumber(phoneDTO);
 
-        return mapper.convertToUserDTO(user);
+        return mapper.toUserDTO(user);
     }
 
     // устанавливаем поля для сущности PhoneDTO из данных сохранённого юзера, тип телефона по умолчанию мобильный
@@ -76,7 +75,7 @@ public class UserServiceImpl implements UserService {
     public UserDTO findById(UUID id) {
         User foundUser = userRepository.findById(id).orElseThrow(
                 () -> new UserNotFoundException(String.format("User not found [Id=%s]", id)));
-        return mapper.convertToUserDTO(foundUser);
+        return mapper.toUserDTO(foundUser);
     }
 
     @Override
@@ -104,44 +103,38 @@ public class UserServiceImpl implements UserService {
         User foundUser = userRepository.findById(userDTO.getId())
                 .orElseThrow(() -> new UserNotFoundException(
                         String.format("User not found [Id=%s]", userDTO.getId())));
-
         if (!validateDOB(userDTO.getDateOfBirth())) {
             throw new DateOfBirthFormatException("Date of birth should not be greater than the current date " +
                     "or less than 100 years from the current moment");
         }
-
         // проверяем, регистрировал ли на себя юзер введеный номер
         if (!findUsersPhoneNumbers(userDTO.getId()).contains(cleanPhone(userDTO.getMainNumber()))) {
             throw new PhoneNumberNotFoundException(String.format
                     ("Phone number [number=%s] does not exist", userDTO.getMainNumber()));
         }
-
         foundUser.setFullName(userDTO.getFullName());
         foundUser.setDateOfBirth(userDTO.getDateOfBirth());
 
         // меняем основной номер из списка номеров юзера
         foundUser.setMainNumber(cleanPhone(userDTO.getMainNumber()));
-
         foundUser.setEmail(userDTO.getEmail());
         foundUser.setPassword(userDTO.getPassword());
 
         userRepository.save(foundUser);
 
-        return mapper.convertToUserDTO(foundUser);
+        return mapper.toUserDTO(foundUser);
     }
 
     //    два варианта блокировки пользователя
-
     //    первый: с помощью одного метода можно и заблокировать и разблокировать по айди
     @Override
     public UserDTO updateBlockStatus(UUID id, Boolean isBlocked) {
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(String.format("User not found [Id=%s]", id)));
-
         existingUser.setIsBlocked(isBlocked);
         userRepository.save(existingUser);
 
-        return mapper.convertToUserDTO(existingUser);
+        return mapper.toUserDTO(existingUser);
     }
 
     //    второй: два разных метода для блокировки или разблокировки по айди,
@@ -150,7 +143,6 @@ public class UserServiceImpl implements UserService {
     public void blockById(UUID id) {
         userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(String.format("User not found [Id=%s]", id)));
-
         userRepository.blockById(id);
     }
 
@@ -158,7 +150,6 @@ public class UserServiceImpl implements UserService {
     public void unblockById(UUID id) {
         userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(String.format("User not found [Id=%s]", id)));
-
         userRepository.unblockById(id);
     }
 
@@ -185,5 +176,4 @@ public class UserServiceImpl implements UserService {
     public Collection<String> findUsersPhoneNumbers(UUID userId) {
         return phoneRepository.getNumbersByUserId(userId);
     }
-
 }

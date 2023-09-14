@@ -26,7 +26,7 @@ public class Phone {
     private UUID id;
 
     @NotEmpty
-    @Size(min = 6, max = 20)
+    @Size(min = 11, max = 20)
     private String number;
 
     @Enumerated(EnumType.STRING)
