@@ -14,35 +14,35 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class CheckpointServiceImpl implements CheckpointService {
 
-    private final CheckpointRepository checkpointRepository;
+    private final CheckpointRepository repository;
 
     @Override
     public Checkpoint addCheckpoint(Checkpoint checkpoint) {
 
         checkpoint.setAddedAt(LocalDate.now());
-        return checkpointRepository.save(checkpoint);
+        return repository.save(checkpoint);
     }
 
     @Override
     public Checkpoint findCheckpointById(UUID id) {
-        return checkpointRepository.findById(id).orElseThrow(
-                () -> new CheckpointNotFoundException(String.format("Room not found [userId=%s]", id)));
+        return repository.findById(id).orElseThrow(
+                () -> new CheckpointNotFoundException(String.format("Checkpoint not found [userId=%s]", id)));
     }
 
     @Override
     public List<Checkpoint> findCheckpointsByName(String name) {
-        return checkpointRepository.findCheckpointsByNameContainingIgnoreCase(name);
+        return repository.findCheckpointsByNameContainingIgnoreCase(name);
     }
 
     @Override
     public List<Checkpoint> findAllCheckpoints() {
-        return checkpointRepository.findAll();
+        return repository.findAll();
     }
 
     @Override
     public List<Checkpoint> findCheckpointsByTerritoryId(UUID id) {
 
-        List<Checkpoint> foundCheckpoints = checkpointRepository.findCheckpointsByTerritoryIdOrderByName(id);
+        List<Checkpoint> foundCheckpoints = repository.findCheckpointsByTerritoryIdOrderByName(id);
 
         if (foundCheckpoints.isEmpty()) {
             throw new CheckpointNotFoundException(String.format("For Territory [id=%s] not exist any Checkpoints", id));
@@ -53,7 +53,7 @@ public class CheckpointServiceImpl implements CheckpointService {
     @Override
     public Checkpoint updateCheckpoint(Checkpoint checkpoint) {
 
-        Checkpoint foundCheckpoint = checkpointRepository.findById(checkpoint.getId())
+        Checkpoint foundCheckpoint = repository.findById(checkpoint.getId())
                         .orElseThrow(() -> new CheckpointNotFoundException
                                 (String.format("Checkpoint not found [Id=%s]", checkpoint.getId())));
 
@@ -62,16 +62,16 @@ public class CheckpointServiceImpl implements CheckpointService {
         foundCheckpoint.setNote(checkpoint.getNote());
         foundCheckpoint.setTerritory(checkpoint.getTerritory());
 
-        return checkpointRepository.save(foundCheckpoint);
+        return repository.save(foundCheckpoint);
     }
 
     @Override
     public void deleteCheckpointById(UUID id) {
 
-        if (checkpointRepository.findById(id).isEmpty()) {
+        if (repository.findById(id).isEmpty()) {
             throw new CheckpointNotFoundException(String.format("Checkpoint not found [Id=%s]", id));
         }
-        checkpointRepository.deleteById(id);
+        repository.deleteById(id);
     }
 
 }

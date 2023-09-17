@@ -4,9 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 import ru.ac.checkpointmanager.dto.CheckpointDTO;
+import ru.ac.checkpointmanager.dto.PassDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.UserDTO;
 import ru.ac.checkpointmanager.model.Checkpoint;
+import ru.ac.checkpointmanager.model.Pass;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 
@@ -42,6 +44,19 @@ public class Mapper {
     public List<TerritoryDTO> toTerritoriesDTO(List<Territory> territories) {
         return territories.stream()
                 .map(e -> modelMapper.map(e, TerritoryDTO.class))
+                .toList();
+    }
+
+    /* Pass mapping */
+    public Pass toPass(PassDTO passDTO) {
+        return modelMapper.map(passDTO, Pass.class);
+    }
+    public PassDTO toPassDTO(Pass pass) {
+        return modelMapper.map(pass, PassDTO.class);
+    }
+    public List<PassDTO> toPassDTO(List<Pass> pass) {
+        return pass.stream()
+                .map(e -> modelMapper.map(e, PassDTO.class))
                 .toList();
     }
 

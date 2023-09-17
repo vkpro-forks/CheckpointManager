@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @Entity
 @Data
-@NoArgsConstructor
+//@NoArgsConstructor
 @Table(name = "checkpoints")
 public class Checkpoint {
 
@@ -23,6 +23,7 @@ public class Checkpoint {
     @Size(min = 2, max = 60)
     private String name;
 
+    @NotNull()
     @Enumerated(EnumType.STRING)
     private CheckpointType type;
 
