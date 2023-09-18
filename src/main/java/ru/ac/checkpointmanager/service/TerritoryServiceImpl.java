@@ -17,25 +17,25 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class TerritoryServiceImpl implements TerritoryService {
 
-    private final TerritoryRepository territoryRepository;
+    private final TerritoryRepository repository;
     private final UserRepository userRepository;
 
     @Override
     public Territory addTerritory(Territory territory) {
 
         territory.setAddedAt(LocalDate.now());
-        return territoryRepository.save(territory);
+        return repository.save(territory);
     }
 
     @Override
     public Territory findTerritoryById(UUID id) {
-        return territoryRepository.findById(id).orElseThrow(
+        return repository.findById(id).orElseThrow(
                 () -> new TerritoryNotFoundException(String.format("Territory not found [id=%s]", id)));
     }
 
     @Override
     public List<User> findUsersByTerritoryId(UUID territoryId) {
-        List<User> users = territoryRepository.findUsersByTerritoryId(territoryId);
+        List<User> users = repository.findUsersByTerritoryId(territoryId);
         if (users.isEmpty()) {
             throw new UserNotFoundException(String.format("Users for Territory not found [territory_id=%s]", territoryId));
         }
@@ -44,57 +44,57 @@ public class TerritoryServiceImpl implements TerritoryService {
 
     @Override
     public List<Territory> findTerritoriesByName(String name) {
-        return territoryRepository.findTerritoriesByNameContainingIgnoreCase(name);
+        return repository.findTerritoriesByNameContainingIgnoreCase(name);
     }
 
     @Override
     public List<Territory> findAllTerritories() {
-        return territoryRepository.findAll();
+        return repository.findAll();
     }
 
     @Override
     public Territory updateTerritory(Territory territory) {
 
-        Territory foundTerritory = territoryRepository.findById(territory.getId())
+        Territory foundTerritory = repository.findById(territory.getId())
                 .orElseThrow(() -> new TerritoryNotFoundException
                         (String.format("Territory not found [Id=%s]", territory.getId())));
 
         foundTerritory.setName(territory.getName());
         foundTerritory.setNote(territory.getNote());
 
-        return territoryRepository.save(foundTerritory);
+        return repository.save(foundTerritory);
     }
 
     @Override
     public void attachUserToTerritory(UUID territoryId, UUID userId) {
 
-        Territory territory = territoryRepository.findById(territoryId).orElseThrow(
+        Territory territory = repository.findById(territoryId).orElseThrow(
                 () -> new TerritoryNotFoundException(String.format("Territory not found [Id=%s]", territoryId)));
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new UserNotFoundException(String.format("User not found [Id=%s]", userId)));
 
         territory.getUsers().add(user);
-        territoryRepository.save(territory);
+        repository.save(territory);
     }
 
     @Override
     public void deleteTerritoryById(UUID id) {
 
-        if (territoryRepository.findById(id).isEmpty()) {
+        if (repository.findById(id).isEmpty()) {
             throw new TerritoryNotFoundException(String.format("Territory not found [Id=%s]", id));
         }
-        territoryRepository.deleteById(id);
+        repository.deleteById(id);
     }
 
     @Override
     public void detachUserFromTerritory(UUID territoryId, UUID userId) {
 
-        Territory territory = territoryRepository.findById(territoryId).orElseThrow(
+        Territory territory = repository.findById(territoryId).orElseThrow(
                 () -> new TerritoryNotFoundException(String.format("Territory not found [Id=%s]", territoryId)));
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new UserNotFoundException(String.format("User not found [Id=%s]", userId)));
 
         territory.getUsers().remove(user);
-        territoryRepository.save(territory);
+        repository.save(territory);
     }
 }

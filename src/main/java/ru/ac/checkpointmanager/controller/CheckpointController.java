@@ -25,7 +25,7 @@ public class CheckpointController {
 
     /* CREATE */
     @PostMapping
-    public ResponseEntity<?> addCheckpoint(@RequestBody @Valid ru.ac.checkpointmanager.dto.CheckpointDTO checkpointDTO,
+    public ResponseEntity<?> addCheckpoint(@RequestBody @Valid CheckpointDTO checkpointDTO,
                                                        BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
@@ -63,9 +63,9 @@ public class CheckpointController {
         return ResponseEntity.ok(mapper.toCheckpointsDTO(checkpoints));
     }
 
-    @GetMapping("/territory")
-    public ResponseEntity<List<CheckpointDTO>> getCheckpointsByTerritoryId(@RequestParam UUID id) {
-        List<Checkpoint> checkpoints = service.findCheckpointsByTerritoryId(id);
+    @GetMapping("/territory/{territoryId}")
+    public ResponseEntity<List<CheckpointDTO>> getCheckpointsByTerritoryId(@PathVariable UUID territoryId) {
+        List<Checkpoint> checkpoints = service.findCheckpointsByTerritoryId(territoryId);
         if (checkpoints.isEmpty()) {
             return ResponseEntity.notFound().build();
         }

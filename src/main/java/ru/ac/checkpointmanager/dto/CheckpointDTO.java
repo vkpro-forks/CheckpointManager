@@ -15,6 +15,7 @@ public class CheckpointDTO {
     @Size(min = 2, max = 60)
     private String name;
 
+    @NotNull()
     private CheckpointType type;
 
     private String note;

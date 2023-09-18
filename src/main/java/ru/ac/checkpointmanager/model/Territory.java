@@ -13,7 +13,6 @@ import java.util.UUID;
 
 @Entity
 @Data
-@NoArgsConstructor
 @Table(name = "territories")
 public class Territory {
 
@@ -38,4 +37,8 @@ public class Territory {
             joinColumns = @JoinColumn(name = "territory_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id"))
     private List<User> users;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "territory", fetch = FetchType.LAZY)
+    private List<Pass> pass;
 }

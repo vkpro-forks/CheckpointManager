@@ -1,5 +1,6 @@
 package ru.ac.checkpointmanager.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.EqualsAndHashCode;
@@ -63,10 +64,15 @@ public class User {
     @Column(name = "added_at")
     private Timestamp addedAt;
 
+    @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_territory",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "territory_id"))
     private List<Territory> territories;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<Pass> pass;
 }
 
