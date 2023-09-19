@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
+import ru.ac.checkpointmanager.dto.UserAuthDTO;
 import ru.ac.checkpointmanager.dto.UserDTO;
 import ru.ac.checkpointmanager.exception.*;
 import ru.ac.checkpointmanager.model.Territory;
@@ -35,22 +36,22 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public UserDTO createUser(UserDTO userDTO) {
+    public UserAuthDTO createUser(UserAuthDTO userAuthDTO) {
         // проверяем дату
-        if (!validateDOB(userDTO.getDateOfBirth())) {
+        if (!validateDOB(userAuthDTO.getDateOfBirth())) {
             throw new DateOfBirthFormatException
                     ("Date of birth should not be greater than the current date " +
                             "or less than 100 years from the current moment");
         }
         // проверяем существует ли номер телефона по номеру
-        if (phoneRepository.existsByNumber(cleanPhone(userDTO.getMainNumber()))) {
+        if (phoneRepository.existsByNumber(cleanPhone(userAuthDTO.getMainNumber()))) {
             throw new PhoneAlreadyExistException(String.format
-                    ("Phone number [number=%s] already exist", userDTO.getMainNumber()));
+                    ("Phone number [number=%s] already exist", userAuthDTO.getMainNumber()));
         }
 
         // сохраняем юзера в БД, присваиваем основной номер, ставим незаблокированным
-        User user = mapper.toUser(userDTO);
-        user.setMainNumber(cleanPhone(userDTO.getMainNumber()));
+        User user = mapper.toUser(userAuthDTO);
+        user.setMainNumber(cleanPhone(userAuthDTO.getMainNumber()));
         user.setIsBlocked(false);
         user.setAddedAt(currentTimestamp);
         userRepository.save(user);
@@ -59,7 +60,7 @@ public class UserServiceImpl implements UserService {
         PhoneDTO phoneDTO = createPhoneDTO(user);
         phoneService.createPhoneNumber(phoneDTO);
 
-        return mapper.toUserDTO(user);
+        return mapper.toUserAuthDTO(user);
     }
 
     // устанавливаем поля для сущности PhoneDTO из данных сохранённого юзера, тип телефона по умолчанию мобильный
@@ -99,30 +100,30 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDTO updateUser(UserDTO userDTO) {
-        User foundUser = userRepository.findById(userDTO.getId())
+    public UserAuthDTO updateUser(UserAuthDTO userAuthDTO) {
+        User foundUser = userRepository.findById(userAuthDTO.getId())
                 .orElseThrow(() -> new UserNotFoundException(
-                        String.format("User not found [Id=%s]", userDTO.getId())));
-        if (!validateDOB(userDTO.getDateOfBirth())) {
+                        String.format("User not found [Id=%s]", userAuthDTO.getId())));
+        if (!validateDOB(userAuthDTO.getDateOfBirth())) {
             throw new DateOfBirthFormatException("Date of birth should not be greater than the current date " +
                     "or less than 100 years from the current moment");
         }
         // проверяем, регистрировал ли на себя юзер введеный номер
-        if (!findUsersPhoneNumbers(userDTO.getId()).contains(cleanPhone(userDTO.getMainNumber()))) {
+        if (!findUsersPhoneNumbers(userAuthDTO.getId()).contains(cleanPhone(userAuthDTO.getMainNumber()))) {
             throw new PhoneNumberNotFoundException(String.format
-                    ("Phone number [number=%s] does not exist", userDTO.getMainNumber()));
+                    ("Phone number [number=%s] does not exist", userAuthDTO.getMainNumber()));
         }
-        foundUser.setFullName(userDTO.getFullName());
-        foundUser.setDateOfBirth(userDTO.getDateOfBirth());
+        foundUser.setFullName(userAuthDTO.getFullName());
+        foundUser.setDateOfBirth(userAuthDTO.getDateOfBirth());
 
         // меняем основной номер из списка номеров юзера
-        foundUser.setMainNumber(cleanPhone(userDTO.getMainNumber()));
-        foundUser.setEmail(userDTO.getEmail());
-        foundUser.setPassword(userDTO.getPassword());
+        foundUser.setMainNumber(cleanPhone(userAuthDTO.getMainNumber()));
+        foundUser.setEmail(userAuthDTO.getEmail());
+        foundUser.setPassword(userAuthDTO.getPassword());
 
         userRepository.save(foundUser);
 
-        return mapper.toUserDTO(foundUser);
+        return mapper.toUserAuthDTO(foundUser);
     }
 
     //    два варианта блокировки пользователя

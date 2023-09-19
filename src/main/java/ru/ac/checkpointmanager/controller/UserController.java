@@ -6,9 +6,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import ru.ac.checkpointmanager.dto.TerritoryDTO;
+import ru.ac.checkpointmanager.dto.UserAuthDTO;
 import ru.ac.checkpointmanager.dto.UserDTO;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
-import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.service.UserService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
 
@@ -25,20 +26,20 @@ public class UserController {
     private final UserService userService;
 
 
-    @PostMapping("/authentication")
-    public ResponseEntity<?> createUser(@Valid @RequestBody UserDTO userDTO, BindingResult result) {
-        if (result.hasErrors()) {
-            return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
-        }
-
-        try {
-            UserDTO createdUser = userService.createUser(userDTO);
-            return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
-        } catch (RuntimeException e) {
-            // блок отлавливает эксепшены и пишет месседжы, которые прописаны в сервисе
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
+//    @PostMapping("/authentication")
+//    public ResponseEntity<?> createUser(@Valid @RequestBody UserAuthDTO userAuthDTO, BindingResult result) {
+//        if (result.hasErrors()) {
+//            return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
+//        }
+//
+//        try {
+//            UserAuthDTO createdUser = userService.createUser(userAuthDTO);
+//            return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+//        } catch (RuntimeException e) {
+//            // блок отлавливает эксепшены и пишет месседжы, которые прописаны в сервисе
+//            return ResponseEntity.badRequest().body(e.getMessage());
+//        }
+//    }
 
     @GetMapping("{id}")
     public ResponseEntity<UserDTO> findUserById(@PathVariable UUID id) {
@@ -71,13 +72,13 @@ public class UserController {
     }
 
     @PutMapping
-    public ResponseEntity<?> updateUser(@Valid @RequestBody UserDTO userDTO, BindingResult result) {
+    public ResponseEntity<?> updateUser(@Valid @RequestBody UserAuthDTO userAuthDTO, BindingResult result) {
         if (result.hasErrors()) {
             return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
         }
 
         try {
-            UserDTO changedUser = userService.updateUser(userDTO);
+            UserAuthDTO changedUser = userService.updateUser(userAuthDTO);
             return new ResponseEntity<>(changedUser, HttpStatus.OK);
 
         } catch (RuntimeException e) {
