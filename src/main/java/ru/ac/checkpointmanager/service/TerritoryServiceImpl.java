@@ -13,6 +13,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+import static ru.ac.checkpointmanager.utils.StringTrimmer.trimThemAll;
+
 @Service
 @RequiredArgsConstructor
 public class TerritoryServiceImpl implements TerritoryService {
@@ -22,7 +24,7 @@ public class TerritoryServiceImpl implements TerritoryService {
 
     @Override
     public Territory addTerritory(Territory territory) {
-
+        trimThemAll(territory);
         territory.setAddedAt(LocalDate.now());
         return repository.save(territory);
     }
@@ -54,7 +56,7 @@ public class TerritoryServiceImpl implements TerritoryService {
 
     @Override
     public Territory updateTerritory(Territory territory) {
-
+        trimThemAll(territory);
         Territory foundTerritory = repository.findById(territory.getId())
                 .orElseThrow(() -> new TerritoryNotFoundException
                         (String.format("Territory not found [Id=%s]", territory.getId())));

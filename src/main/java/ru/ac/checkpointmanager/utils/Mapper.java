@@ -21,16 +21,16 @@ import java.util.List;
 @RequiredArgsConstructor
 public class Mapper {
 
-    private final ModelMapper modelMapper = new ModelMapper();
+    private static final ModelMapper modelMapper = new ModelMapper();
 
     /* Checkpoint mapping */
-    public Checkpoint toCheckpoint(CheckpointDTO checkpointDTO) {
+    public static Checkpoint toCheckpoint(CheckpointDTO checkpointDTO) {
         return modelMapper.map(checkpointDTO, Checkpoint.class);
     }
-    public CheckpointDTO toCheckpointDTO(Checkpoint checkpoint) {
+    public static CheckpointDTO toCheckpointDTO(Checkpoint checkpoint) {
         return modelMapper.map(checkpoint, CheckpointDTO.class);
     }
-    public List<CheckpointDTO> toCheckpointsDTO(List<Checkpoint> checkpoints) {
+    public static List<CheckpointDTO> toCheckpointsDTO(List<Checkpoint> checkpoints) {
         return checkpoints.stream()
                 .map(e -> modelMapper.map(e, CheckpointDTO.class))
                 .toList();

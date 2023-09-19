@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.ac.checkpointmanager.dto.CheckpointDTO;
-import ru.ac.checkpointmanager.utils.Mapper;
 import ru.ac.checkpointmanager.model.Checkpoint;
 import ru.ac.checkpointmanager.service.CheckpointService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
@@ -15,13 +14,14 @@ import jakarta.validation.*;
 import java.util.List;
 import java.util.UUID;
 
+import static ru.ac.checkpointmanager.utils.Mapper.*;
+
 @RestController
 @RequestMapping("checkpoint")
 @RequiredArgsConstructor
 public class CheckpointController {
 
     private final CheckpointService service;
-    private final Mapper mapper;
 
     /* CREATE */
     @PostMapping
@@ -31,8 +31,8 @@ public class CheckpointController {
             return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
         }
 
-        Checkpoint newCheckpoint = service.addCheckpoint(mapper.toCheckpoint(checkpointDTO));
-        return ResponseEntity.ok(mapper.toCheckpointDTO(newCheckpoint));
+        Checkpoint newCheckpoint = service.addCheckpoint(toCheckpoint(checkpointDTO));
+        return ResponseEntity.ok(toCheckpointDTO(newCheckpoint));
     }
 
     /* READ */
@@ -42,7 +42,7 @@ public class CheckpointController {
         if (foundCheckpoint == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(mapper.toCheckpointDTO(foundCheckpoint));
+        return ResponseEntity.ok(toCheckpointDTO(foundCheckpoint));
     }
 
     @GetMapping("/name")
@@ -51,7 +51,7 @@ public class CheckpointController {
         if (checkpoints.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(mapper.toCheckpointsDTO(checkpoints));
+        return ResponseEntity.ok(toCheckpointsDTO(checkpoints));
     }
 
     @GetMapping
@@ -60,7 +60,7 @@ public class CheckpointController {
         if (checkpoints.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(mapper.toCheckpointsDTO(checkpoints));
+        return ResponseEntity.ok(toCheckpointsDTO(checkpoints));
     }
 
     @GetMapping("/territory/{territoryId}")
@@ -69,7 +69,7 @@ public class CheckpointController {
         if (checkpoints.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(mapper.toCheckpointsDTO(checkpoints));
+        return ResponseEntity.ok(toCheckpointsDTO(checkpoints));
     }
 
     /* UPDATE */
@@ -83,8 +83,8 @@ public class CheckpointController {
         if (currentCheckpoint == null) {
             return ResponseEntity.notFound().build();
         }
-        Checkpoint updatedCheckpoint = service.updateCheckpoint(mapper.toCheckpoint(checkpointDTO));
-        return ResponseEntity.ok(mapper.toCheckpointDTO(updatedCheckpoint));
+        Checkpoint updatedCheckpoint = service.updateCheckpoint(toCheckpoint(checkpointDTO));
+        return ResponseEntity.ok(toCheckpointDTO(updatedCheckpoint));
     }
 
     /* DELETE */

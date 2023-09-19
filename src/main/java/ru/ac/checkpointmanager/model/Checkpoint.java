@@ -1,7 +1,6 @@
 package ru.ac.checkpointmanager.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
 import lombok.*;
 import ru.ac.checkpointmanager.model.enums.CheckpointType;
 
@@ -11,7 +10,6 @@ import java.util.UUID;
 
 @Entity
 @Data
-//@NoArgsConstructor
 @Table(name = "checkpoints")
 public class Checkpoint {
 
@@ -19,11 +17,8 @@ public class Checkpoint {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @NotEmpty()
-    @Size(min = 2, max = 60)
     private String name;
 
-    @NotNull()
     @Enumerated(EnumType.STRING)
     private CheckpointType type;
 
@@ -31,7 +26,6 @@ public class Checkpoint {
 
     private LocalDate addedAt;
 
-    @NotNull()
     @ManyToOne
     @JoinColumn(name = "territory_id")
     private Territory territory;
