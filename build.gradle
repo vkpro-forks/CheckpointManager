@@ -6,7 +6,7 @@ plugins {
 
 
 group = 'ru.ac'
-version = '0.0.10-SNAPSHOT'
+version = '0.0.12-SNAPSHOT'
 
 java {
     sourceCompatibility = '17'

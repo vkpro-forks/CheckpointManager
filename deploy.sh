@@ -1,6 +1,6 @@
 #!/bin/bash
 #логин на docker hub
-docker login -u aasurov -p 89140257531aA
+docker login -u aasurov -p $DOCKER_HUB_TOKEN
 
 
 # Шаг 1: Удаление и остановка текущих контейнеров
