@@ -26,12 +26,12 @@ docker tag checkpoint-manager:$PROJECT_VERSION aasurov/anvilcoder:checkpoint-man
 docker push aasurov/anvilcoder:checkpoint-manager-$PROJECT_VERSION
 
 # Шаг 8: Копирование Dockerfile, deploy.sh и JAR файла на удаленный сервер
-scp .env root@185.233.83.75:~
-scp docker-compose.remote.yml root@185.233.83.75:~
-scp Dockerfile root@185.233.83.75:~
-scp deploy.sh root@185.233.83.75:~
-scp build/libs/app.jar root@185.233.83.75:~
+scp .env root@84.252.74.180:~
+scp docker-compose.remote.yml root@84.252.74.180:~
+scp Dockerfile root@84.252.74.180:~
+scp deploy.sh root@84.252.74.180:~
+scp build/libs/app.jar root@84.252.74.180:~
 
 #Шаг 9: Передача версии на уделнный сервер
-ssh root@185.233.83.75 "PROJECT_VERSION=$PROJECT_VERSION bash -s" < deploy.sh
+ssh root@84.252.74.180 "PROJECT_VERSION=$PROJECT_VERSION bash -s" < deploy.sh
 
