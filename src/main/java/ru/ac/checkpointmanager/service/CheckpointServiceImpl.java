@@ -10,6 +10,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+import static ru.ac.checkpointmanager.utils.StringTrimmer.trimThemAll;
+
 @Service
 @RequiredArgsConstructor
 public class CheckpointServiceImpl implements CheckpointService {
@@ -18,7 +20,7 @@ public class CheckpointServiceImpl implements CheckpointService {
 
     @Override
     public Checkpoint addCheckpoint(Checkpoint checkpoint) {
-
+        trimThemAll(checkpoint);
         checkpoint.setAddedAt(LocalDate.now());
         return repository.save(checkpoint);
     }
@@ -52,7 +54,7 @@ public class CheckpointServiceImpl implements CheckpointService {
 
     @Override
     public Checkpoint updateCheckpoint(Checkpoint checkpoint) {
-
+        trimThemAll(checkpoint);
         Checkpoint foundCheckpoint = repository.findById(checkpoint.getId())
                         .orElseThrow(() -> new CheckpointNotFoundException
                                 (String.format("Checkpoint not found [Id=%s]", checkpoint.getId())));

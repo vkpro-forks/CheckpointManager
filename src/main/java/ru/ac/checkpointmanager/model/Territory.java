@@ -2,7 +2,6 @@ package ru.ac.checkpointmanager.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -20,8 +19,6 @@ public class Territory {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @NotEmpty()
-    @Size(min = 2, max = 60)
     private String name;
 
     private String note;
