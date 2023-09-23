@@ -4,7 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 import ru.ac.checkpointmanager.dto.*;
+import ru.ac.checkpointmanager.dto.CheckpointDTO;
+import ru.ac.checkpointmanager.dto.PassDTO;
+import ru.ac.checkpointmanager.dto.TerritoryDTO;
+import ru.ac.checkpointmanager.dto.UserDTO;
 import ru.ac.checkpointmanager.model.Checkpoint;
+import ru.ac.checkpointmanager.model.Pass;
+import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.model.Phone;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
@@ -16,18 +22,17 @@ import java.util.List;
 @RequiredArgsConstructor
 public class Mapper {
 
-    private final ModelMapper modelMapper = new ModelMapper();
+    private static final ModelMapper modelMapper = new ModelMapper();
 
     /* Checkpoint mapping */
-    public Checkpoint toCheckpoint(CheckpointDTO checkpointDTO) {
+    public static Checkpoint toCheckpoint(CheckpointDTO checkpointDTO) {
         return modelMapper.map(checkpointDTO, Checkpoint.class);
     }
-
-    public CheckpointDTO toCheckpointDTO(Checkpoint checkpoint) {
+  
+    public static CheckpointDTO toCheckpointDTO(Checkpoint checkpoint) {
         return modelMapper.map(checkpoint, CheckpointDTO.class);
     }
-
-    public List<CheckpointDTO> toCheckpointsDTO(List<Checkpoint> checkpoints) {
+    public static List<CheckpointDTO> toCheckpointsDTO(List<Checkpoint> checkpoints) {
         return checkpoints.stream()
                 .map(e -> modelMapper.map(e, CheckpointDTO.class))
                 .toList();
@@ -45,6 +50,19 @@ public class Mapper {
     public List<TerritoryDTO> toTerritoriesDTO(List<Territory> territories) {
         return territories.stream()
                 .map(e -> modelMapper.map(e, TerritoryDTO.class))
+                .toList();
+    }
+
+    /* Pass mapping */
+    public Pass toPass(PassDTO passDTO) {
+        return modelMapper.map(passDTO, Pass.class);
+    }
+    public PassDTO toPassDTO(Pass pass) {
+        return modelMapper.map(pass, PassDTO.class);
+    }
+    public List<PassDTO> toPassDTO(List<Pass> pass) {
+        return pass.stream()
+                .map(e -> modelMapper.map(e, PassDTO.class))
                 .toList();
     }
 
