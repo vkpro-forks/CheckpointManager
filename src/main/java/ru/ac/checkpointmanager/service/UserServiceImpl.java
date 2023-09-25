@@ -161,7 +161,7 @@ public class UserServiceImpl implements UserService {
         if (existingUser.getIsBlocked()) {
             userRepository.unblockById(id);
         } else {
-            throw new IllegalStateException(String.format("User already blocked [Id=%s]", id));
+            throw new IllegalStateException(String.format("User already unblocked [Id=%s]", id));
         }
     }
 
