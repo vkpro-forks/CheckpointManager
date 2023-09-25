@@ -25,6 +25,8 @@ public class UserDTO {
 
     private LocalDate dateOfBirth;
 
+    @NotEmpty
+    @Size(min = 11, max = 20)
     private String mainNumber;
 
     @Email

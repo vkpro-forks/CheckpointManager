@@ -25,6 +25,8 @@ public class UserAuthDTO {
 
     private LocalDate dateOfBirth;
 
+    @NotEmpty
+    @Size(min = 11, max = 20)
     private String mainNumber;
 
     @Email
@@ -35,6 +37,5 @@ public class UserAuthDTO {
     @Pattern(regexp = "^(?!.*\\s).+$", message = "Field should not contain spaces")
     @Size(min = 6, max = 20)
     private String password;
-
-    private String repeatedPassword;
+    private String matchingPassword;;
 }

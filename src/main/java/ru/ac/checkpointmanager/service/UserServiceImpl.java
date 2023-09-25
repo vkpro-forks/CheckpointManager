@@ -1,6 +1,11 @@
 package ru.ac.checkpointmanager.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.PhoneDTO;
@@ -8,6 +13,7 @@ import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.UserAuthDTO;
 import ru.ac.checkpointmanager.dto.UserDTO;
 import ru.ac.checkpointmanager.exception.*;
+import ru.ac.checkpointmanager.model.Role;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
@@ -18,6 +24,7 @@ import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static ru.ac.checkpointmanager.model.enums.PhoneNumberType.MOBILE;
 import static ru.ac.checkpointmanager.utils.FieldsValidation.cleanPhone;
@@ -31,8 +38,31 @@ public class UserServiceImpl implements UserService {
     private final PhoneRepository phoneRepository;
     private final PhoneService phoneService;
     private final Mapper mapper;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     private final Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepository.findByEmail(username);
+        if (user == null) {
+            throw new UsernameNotFoundException
+                    ("Invalid username or password");
+        }
+        return new org.springframework.security
+                .core.userdetails.User(user.getEmail(),
+                user.getPassword(),
+                mapRolesToAuthorities(user.getRoles()));
+    }
+
+    private Collection<? extends GrantedAuthority>
+    mapRolesToAuthorities(Collection<Role> roles) {
+
+        return roles.stream()
+                .map(role -> new SimpleGrantedAuthority
+                        (role.getName()))
+                .collect(Collectors.toList());
+    }
 
     @Transactional
     @Override
@@ -177,4 +207,5 @@ public class UserServiceImpl implements UserService {
     public Collection<String> findUsersPhoneNumbers(UUID userId) {
         return phoneRepository.getNumbersByUserId(userId);
     }
+
 }
