@@ -12,7 +12,9 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/**")
                 .allowedOrigins(
                         "https://checkpoint-manager.ru",  // ваш домен
-                        "https://www.checkpoint-manager.ru" // другие домены, если они вам нужны
+                        "https://www.checkpoint-manager.ru",
+                        "https://pipolapopala.github.io",// другие домены, если они вам нужны
+                        "http://localhost:8080"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
                 .allowCredentials(true)
