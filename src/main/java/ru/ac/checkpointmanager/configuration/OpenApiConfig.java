@@ -17,6 +17,7 @@ public class OpenApiConfig {
     @Bean
     public OpenAPI openAPI() {
         return new OpenAPI()
+                .addServersItem(new Server().url("http://localhost:8080"))
                 .addServersItem(new Server().url("https://checkpoint-manager.ru"))
                 .info(new Info().title("Checkpoint Manager")
                         .description("Наши бэкэндеры лучшие! Не забудем и о тестерах и фронтах конечно!")
