@@ -1,9 +1,11 @@
 package ru.ac.checkpointmanager.controller.car;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.ac.checkpointmanager.model.car.Car;
 import ru.ac.checkpointmanager.model.car.CarBrand;
@@ -11,6 +13,7 @@ import ru.ac.checkpointmanager.model.car.CarModel;
 import ru.ac.checkpointmanager.service.car.CarBrandService;
 import ru.ac.checkpointmanager.service.car.CarModelService;
 import ru.ac.checkpointmanager.service.car.CarService;
+import ru.ac.checkpointmanager.utils.ErrorUtils;
 
 import java.util.List;
 import java.util.UUID;
@@ -25,7 +28,11 @@ public class CarController {
     private final CarModelService carModelService;
 
     @PostMapping
-    public ResponseEntity<?> addCar(@RequestBody Car carRequest) {
+    public ResponseEntity<?> addCar(@Valid @RequestBody Car carRequest, BindingResult result) {
+        if (result.hasErrors()) {
+            return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
+        }
+
         try {
             CarBrand existingBrand = carBrandService.getBrandById(carRequest.getBrand().getId());
             CarModel existingModel = carModelService.getModelById(carRequest.getModel().getId());
@@ -39,7 +46,11 @@ public class CarController {
     }
 
     @PutMapping("/{carId}")
-    public ResponseEntity<?> updateCar(@PathVariable UUID carId, @RequestBody Car updateCar) {
+    public ResponseEntity<?> updateCar(@Valid @PathVariable UUID carId, @RequestBody Car updateCar, BindingResult result) {
+        if (result.hasErrors()) {
+            return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
+        }
+
         Car updated = carService.updateCar(carId, updateCar);
         return ResponseEntity.ok(updated);
     }

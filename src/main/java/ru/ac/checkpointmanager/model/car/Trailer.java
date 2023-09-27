@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.ac.checkpointmanager.model.enums.CarColor;
 
 import java.util.UUID;
 @Entity

@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.model.car;
+package ru.ac.checkpointmanager.model.enums;
 
 public enum CarColor {
 

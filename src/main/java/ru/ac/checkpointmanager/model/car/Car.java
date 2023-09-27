@@ -8,6 +8,8 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.ac.checkpointmanager.model.enums.CarColor;
+import ru.ac.checkpointmanager.model.enums.CarType;
 
 import java.util.UUID;
 
@@ -24,8 +26,8 @@ public class Car {
 
     @NotNull
     @Column(name = "license_plate")
-    @Size(min = 6, max = 10)
-    @Pattern(regexp = "^[a-zA-Zа-яА-Я0-9]+$", message = "Invalid characters in license plate")
+    @Size(min = 6, max = 10, message = "The number must be at least 6 characters and no more than 10")
+    @Pattern(regexp = "^[a-zA-Zа-ги-пр-тв-яА-ГИ-ПР-ТВ-Я0-9]+$", message = "Invalid characters in license plate")
     private String licensePlate;
 
     @ManyToOne
@@ -47,4 +49,7 @@ public class Car {
     @Column(name = "year")
     private int year;
 
+    public void setLicensePlate(String licensePlate) {
+        this.licensePlate = licensePlate.toUpperCase();
+    }
 }
