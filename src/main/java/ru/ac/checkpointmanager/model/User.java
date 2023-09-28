@@ -58,7 +58,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Phone> numbers;
 
     @Column(name = "added_at")
