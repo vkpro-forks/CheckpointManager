@@ -56,7 +56,7 @@ ALTER TABLE users
 ALTER TABLE users
     DROP COLUMN role;
 
---changeset fifimovs:43.1
+--changeset fifimova:43.1
 ALTER TABLE users
     ADD CONSTRAINT number_unique UNIQUE (main_number);
 

@@ -3,7 +3,7 @@
 -- changeset fifimova:43
 CREATE TABLE roles
 (
-    id   UUID DEFAULT gen_random_uuid(),
+    id   SERIAL NOT NULL,
     name TEXT NOT NULL,
 
     CONSTRAINT role_pk PRIMARY KEY (id)

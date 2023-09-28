@@ -37,5 +37,5 @@ public class UserAuthDTO {
     @Pattern(regexp = "^(?!.*\\s).+$", message = "Field should not contain spaces")
     @Size(min = 6, max = 20)
     private String password;
-    private String matchingPassword;;
+    private String matchingPassword;
 }

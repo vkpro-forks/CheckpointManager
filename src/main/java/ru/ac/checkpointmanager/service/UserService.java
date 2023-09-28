@@ -1,6 +1,5 @@
 package ru.ac.checkpointmanager.service;
 
-import org.springframework.security.core.userdetails.UserDetailsService;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.UserAuthDTO;
 import ru.ac.checkpointmanager.dto.UserDTO;
@@ -9,8 +8,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-public interface UserService extends UserDetailsService {
-
+public interface UserService {
     UserAuthDTO createUser(UserAuthDTO userAuthDTO);
 
     UserDTO findById(UUID id);

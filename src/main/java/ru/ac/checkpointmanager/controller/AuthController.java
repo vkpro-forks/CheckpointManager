@@ -1,28 +1,61 @@
 package ru.ac.checkpointmanager.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+import ru.ac.checkpointmanager.dto.UserAuthDTO;
 import ru.ac.checkpointmanager.service.UserService;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/authentication")
 @RequiredArgsConstructor
 public class AuthController {
 
     private final UserService userService;
+    private final AuthenticationManager authenticationManager;
 
-//    @GetMapping("/registration")
-//    public String registrationPage(@ModelAttribute("user") UserAuthDTO user) {
-//        return "auth/registration";
-//    }
-//
-//    @PostMapping("/registration")
-//    public String registerUser(@ModelAttribute("user") @Valid UserAuthDTO user, BindingResult result) {
-//        if (result.hasErrors()) {
-//            return "auth/registration";
-//        }
-//        userService.createUser(user);
-//        return "redirect:/auth/login";
-//    }
+    @GetMapping("/login")
+    public String showLoginForm() {
+        return "authentication/login";
+    }
+
+    @PostMapping("/login")
+    public String processLogin(HttpServletRequest request) {
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(username, password)
+            );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            return "redirect:/welcome";
+        } catch (AuthenticationException e) {
+            return "redirect:/login?error";
+        }
+    }
+
+    @GetMapping("/registration")
+    public String registrationPage(@ModelAttribute("user") UserAuthDTO user) {
+        return "authentication/registration";
+    }
+
+    @PostMapping("/registration")
+    public String performRegistration(@ModelAttribute("user") @Valid UserAuthDTO user,
+                                      BindingResult bindingResult) {
+
+        if (bindingResult.hasErrors())
+            return "/authentication/registration";
+
+        userService.createUser(user);
+
+        return "redirect:/authentication/login";
+    }
 }
