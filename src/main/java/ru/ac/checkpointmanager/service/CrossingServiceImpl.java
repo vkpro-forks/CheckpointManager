@@ -1,9 +1,6 @@
 package ru.ac.checkpointmanager.service;
 
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.ac.checkpointmanager.exception.PassNotFoundException;
 import ru.ac.checkpointmanager.model.Checkpoint;
@@ -20,13 +17,11 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@NoArgsConstructor
-@AllArgsConstructor
 public class CrossingServiceImpl implements CrossingService {
 
 
-    private  PassRepository passRepository;
-    private CrossingRepository crossingRepository;
+    private final PassRepository passRepository;
+    private final CrossingRepository crossingRepository;
 
 
     @Override //логика сложная, распишу сразу тут, чтоб было понятно
