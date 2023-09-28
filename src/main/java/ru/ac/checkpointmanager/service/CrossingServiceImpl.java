@@ -3,6 +3,7 @@ package ru.ac.checkpointmanager.service;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.ac.checkpointmanager.exception.PassNotFoundException;
 import ru.ac.checkpointmanager.model.Checkpoint;
@@ -19,33 +20,50 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 public class CrossingServiceImpl implements CrossingService {
 
-    private PassRepository passRepository;
+
+    private  PassRepository passRepository;
     private CrossingRepository crossingRepository;
 
 
-    @Override
+    @Override //логика сложная, распишу сразу тут, чтоб было понятно
     public Crossing markCrossing(UUID passId, Checkpoint checkpoint, LocalDateTime localDateTime, Direction direction) {
+        //проверяем в бд есть ли такой пропуск или нет, если нет, выбрасываем исключение
         Pass pass = passRepository.findById(passId).orElseThrow(
-                ()-> new PassNotFoundException(String.format("There is no such pass %s", passId)));
+                ()-> new PassNotFoundException("There is no such pass!"));
 
+        //Используем Optional что дать возможность оставить пустую переменную, чтоб избежать исключения NullPointerException
+        //проверяем было ли уже пересечение
         Optional<Crossing> lastCrossingOpt = crossingRepository.findTopByPassOrderByIdDesc(pass);
 
+        //проверяем пропуск, проверяем было уже пересечение с этим пропуском
         if (pass.getTypeTime() == PassTypeTime.ONETIME) {
             if (lastCrossingOpt.isPresent()) {
                 Crossing lastCrossing = lastCrossingOpt.get();
+
+                //если было пересечение на выезд, выбрасываем исключение, что выезд уже был
                 if (lastCrossing.getDirection() == Direction.OUT) {
                     throw new IllegalStateException(String.format("The %s has already been used.", passId));
+
+                    //аналогично, если был въезд, а человек пытается въехать, выбрасываем исключение
                 } else if (lastCrossing.getDirection() == Direction.IN) {
                     throw new IllegalStateException(String.format("This %s is not active.", passId));
                 }
+
+            //если первое использование пропуска пытаются сделать выезд, выбрасываем исключение, что нужно активировать пропуск - заездом
             } else if (direction == Direction.OUT) {
                 throw new IllegalStateException(String.format("This %s has not been activated (login to activate))", passId));
             }
+
+        //если пропуск многоразовый
         } else if (pass.getTypeTime() == PassTypeTime.PERMANENT) {
             if (lastCrossingOpt.isPresent()) {
                 Crossing lastCrossing = lastCrossingOpt.get();
+
+                //проверяем чтоб въезд и выезд чередовались между собой, если нет, то так же выкидываем исключение, что нужно сделать активацию - въехать/выехать.
                 if (lastCrossing.getDirection() == direction) {
                     throw new IllegalStateException(String.format("This %s need to check in/check out", passId));
                 }
