@@ -13,7 +13,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "crossing")
+@Table(name = "crossings")
 public class Crossing {
 
     @Id
@@ -21,7 +21,7 @@ public class Crossing {
     private UUID id;
 
     @ManyToOne
-    @JoinColumn(name = "passes_id", referencedColumnName = "id")
+    @JoinColumn(name = "pass_id", referencedColumnName = "id")
     private Pass pass;
 
     @ManyToOne
