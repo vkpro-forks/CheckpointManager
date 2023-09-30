@@ -138,9 +138,13 @@ public class UserServiceImpl implements UserService {
     public UserDTO updateBlockStatus(UUID id, Boolean isBlocked) {
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(String.format("User not found [Id=%s]", id)));
-        existingUser.setIsBlocked(isBlocked);
-        userRepository.save(existingUser);
-
+        if (existingUser.getIsBlocked() != isBlocked) {
+            existingUser.setIsBlocked(isBlocked);
+            userRepository.save(existingUser);
+        } else {
+            //  если текущий статус блокировки пользователя совпадает с новым статусом, будет выброшено исключение
+            throw new IllegalStateException(String.format("User already %s [Id=%s]", isBlocked ? "blocked" : "unblocked", id));
+        }
         return mapper.toUserDTO(existingUser);
     }
 
@@ -148,16 +152,24 @@ public class UserServiceImpl implements UserService {
     //    логика блокировки через sql запрос в репозитории
     @Override
     public void blockById(UUID id) {
-        userRepository.findById(id)
+        User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(String.format("User not found [Id=%s]", id)));
-        userRepository.blockById(id);
+        if (!existingUser.getIsBlocked()) {
+            userRepository.blockById(id);
+        } else {
+            throw new IllegalStateException(String.format("User already blocked [Id=%s]", id));
+        }
     }
 
     @Override
     public void unblockById(UUID id) {
-        userRepository.findById(id)
+        User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(String.format("User not found [Id=%s]", id)));
-        userRepository.unblockById(id);
+        if (existingUser.getIsBlocked()) {
+            userRepository.unblockById(id);
+        } else {
+            throw new IllegalStateException(String.format("User already unblocked [Id=%s]", id));
+        }
     }
 
     @Override
@@ -165,6 +177,7 @@ public class UserServiceImpl implements UserService {
         if (userRepository.findById(id).isEmpty()) {
             throw new UserNotFoundException("Error deleting user with ID" + id);
         }
+
         userRepository.deleteById(id);
     }
 
