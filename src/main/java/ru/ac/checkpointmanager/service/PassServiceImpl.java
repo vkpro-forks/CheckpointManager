@@ -4,8 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import ru.ac.checkpointmanager.exception.PassNotFoundException;
+import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.model.Pass;
+import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.enums.PassStatus;
+import ru.ac.checkpointmanager.repository.CrossingRepository;
 import ru.ac.checkpointmanager.repository.PassRepository;
 
 import java.time.LocalDateTime;
@@ -18,7 +21,7 @@ import java.util.UUID;
 public class PassServiceImpl implements PassService{
 
     private final PassRepository repository;
-//    private final CrossingRepository crossingRepository;
+    private final CrossingRepository crossingRepository;
 
     @Override
     public Pass addPass(Pass pass) {
@@ -121,23 +124,26 @@ public class PassServiceImpl implements PassService{
                 LocalDateTime.now(), PassStatus.ACTIVE);
         if (passes.isEmpty()) {return;}
 
-//        for (Pass pass : passes) {
-//            List<Crossing> passCrossings = crossingRepository.findByPassId(pass.getId());
-//            if (passCrossings.isEmpty()) {
-//                pass.setStatus(PassStatus.OUTDATED);
-//            } else {
-////                Crossing lastCrossing = Collections.max(passCrossings, Comparator.comparing(Crossing::getEndTime));
-//                Crossing lastCrossing = passCrossings.stream()
-//                        .max(Comparator.comparing(Crossing::getEndTime));
-////                        .orElse(null);
-//                if (lastCrossing.getDirection.equals())
-//            }
-//        }
+        for (Pass pass : passes) {
+            List<Crossing> passCrossings = crossingRepository.findCrossingsByPass(pass.getId());
 
-//        records.forEach(record -> {
-//            logger.info("Notification was sent");
-//            telegramBot.execute(new SendMessage(record.getChatId(), String.format("Привет! Не забудь:\n%s" +
-//                    " , в %s", record.getNotification(), record.getAlarmDate())));
-//        });
+            if (passCrossings.isEmpty()) {
+                pass.setStatus(PassStatus.OUTDATED);
+            } else {
+                Crossing lastCrossing = passCrossings.stream()
+                        .max(Comparator.comparing(Crossing::getLocalDateTime))
+                        .orElse(null);
+                if (lastCrossing.getDirection().equals(Direction.OUT)) {
+                    pass.setStatus(PassStatus.COMPLETED);
+                } else if (lastCrossing.getDirection().equals(Direction.IN)) {
+                    pass.setStatus(PassStatus.WARNING);
+                }
+            }
+            repository.save(pass);
+            //вот здесь
+        }
+        //вызов метода отправки сообщения на фронт о том, что данные пропусков изменены
+        //вопрос - на какой фронт? Не всем же клиентам, а только тем, к чьим территориям относились пропуска!
+        //тогда этот вызов должен быть сразу после сохранения пропуска, т.е. отправка по каждому измененному пропуску
     }
 }
