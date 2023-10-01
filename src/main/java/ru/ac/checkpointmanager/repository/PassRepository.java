@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.model.Pass;
+import ru.ac.checkpointmanager.model.enums.PassStatus;
 
 import java.util.List;
 import java.util.UUID;
@@ -26,4 +27,9 @@ public interface PassRepository extends JpaRepository<Pass, UUID> {
     @Modifying
     @Query(value = "UPDATE Pass p SET p.status = 'ACTIVE' WHERE p.id = :id")
     void activateById(@Param("id") UUID id);
+
+    @Transactional
+    @Modifying
+    @Query("UPDATE Pass p SET p.status = 'COMPLETED' WHERE p.id = :id")
+    void completedStatusById(@Param("id") UUID id);
 }

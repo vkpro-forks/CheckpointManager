@@ -3,16 +3,12 @@ package ru.ac.checkpointmanager.utils;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
-import ru.ac.checkpointmanager.dto.CheckpointDTO;
-import ru.ac.checkpointmanager.dto.PassDTO;
-import ru.ac.checkpointmanager.dto.TerritoryDTO;
-import ru.ac.checkpointmanager.dto.UserDTO;
-import ru.ac.checkpointmanager.model.Checkpoint;
-import ru.ac.checkpointmanager.model.Pass;
-import ru.ac.checkpointmanager.dto.PhoneDTO;
-import ru.ac.checkpointmanager.model.Phone;
-import ru.ac.checkpointmanager.model.Territory;
-import ru.ac.checkpointmanager.model.User;
+import ru.ac.checkpointmanager.dto.*;
+import ru.ac.checkpointmanager.exception.CheckpointNotFoundException;
+import ru.ac.checkpointmanager.exception.PassNotFoundException;
+import ru.ac.checkpointmanager.model.*;
+import ru.ac.checkpointmanager.repository.CheckpointRepository;
+import ru.ac.checkpointmanager.repository.PassRepository;
 
 import java.util.Collection;
 import java.util.List;
@@ -21,6 +17,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class Mapper {
 
+
+
+    private final PassRepository passRepository;
+    private final CheckpointRepository checkpointRepository;
     private static final ModelMapper modelMapper = new ModelMapper();
 
     /* Checkpoint mapping */
@@ -87,6 +87,34 @@ public class Mapper {
     public List<PhoneDTO> toPhonesDTO(Collection<Phone> phones) {
         return phones.stream()
                 .map(p  -> modelMapper.map(p, PhoneDTO.class))
+                .toList();
+    }
+
+
+    /* Crossing mapping */
+    public Crossing toCrossing(CrossingDTO crossingDTO) {
+        Crossing crossing = new Crossing();
+
+        Pass pass = passRepository.findById(crossingDTO.getPassId()).orElseThrow(
+                ()-> new PassNotFoundException("Pass not found"));
+        Checkpoint checkpoint = checkpointRepository.findById(crossingDTO.getCheckpointId()).orElseThrow(
+                ()-> new CheckpointNotFoundException("Checkpoint not found"));
+
+        crossing.setPass(pass);
+        crossing.setCheckpoint(checkpoint);
+        crossing.setLocalDateTime(crossingDTO.getLocalDateTime());
+        crossing.setDirection(crossingDTO.getDirection());
+
+        return crossing;
+    }
+
+    public CrossingDTO toCrossingDTO(Crossing crossing) {
+        return modelMapper.map(crossing, CrossingDTO.class);
+    }
+
+    public List<CrossingDTO> toCrossingsDTO(Collection<Crossing> crossings) {
+        return crossings.stream()
+                .map(crossing -> modelMapper.map(crossing, CrossingDTO.class))
                 .toList();
     }
 }
