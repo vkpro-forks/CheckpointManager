@@ -1,6 +1,7 @@
 package ru.ac.checkpointmanager.controller;
 
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,9 +11,8 @@ import ru.ac.checkpointmanager.dto.CrossingDTO;
 import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.service.CrossingService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
+import ru.ac.checkpointmanager.utils.Mapper;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/crossing")
@@ -21,17 +21,17 @@ import java.util.UUID;
 public class CrossingController {
 
     private final CrossingService crossingService;
+    private final Mapper mapper;
 
     @PostMapping("/mark")
-    public ResponseEntity<?> markCrossing(@RequestBody CrossingDTO crossingDTO, BindingResult bindingResult) {
+    public ResponseEntity<?> markCrossing(@Valid @RequestBody CrossingDTO crossingDTO, BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
             return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
         }
 
-        Crossing crossing = crossingService.markCrossing(crossingDTO.getPassId(), crossingDTO.getCheckpoint(),
-                crossingDTO.getLocalDateTime(), crossingDTO.getDirection());
+        Crossing crossing = crossingService.markCrossing(mapper.toCrossing(crossingDTO));
 
-        return new ResponseEntity<>(crossing, HttpStatus.OK);
+        return new ResponseEntity<>(mapper.toCrossingDTO(crossing), HttpStatus.OK);
     }
 }

@@ -1,5 +1,6 @@
 package ru.ac.checkpointmanager.service;
 
+import ru.ac.checkpointmanager.dto.CrossingDTO;
 import ru.ac.checkpointmanager.model.Checkpoint;
 import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.model.enums.Direction;
@@ -9,5 +10,5 @@ import java.util.UUID;
 
 public interface CrossingService {
 
-    Crossing markCrossing(UUID passId, Checkpoint checkpoint, LocalDateTime localDateTime, Direction direction);
+    Crossing markCrossing(Crossing crossing);
 }

@@ -7,6 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import ru.ac.checkpointmanager.exception.CarBrandNotFoundException;
+import ru.ac.checkpointmanager.exception.EntranceWasAlreadyException;
+import ru.ac.checkpointmanager.exception.NoActivePassException;
+import ru.ac.checkpointmanager.service.CrossingServiceImpl;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,4 +43,15 @@ public class GlobalExceptionHandler {
                 (List<String>) null), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @ExceptionHandler(EntranceWasAlreadyException.class)
+    public ResponseEntity<String> handleEntranceWasAlreadyException(EntranceWasAlreadyException e) {
+        System.out.println("Handling EntranceWasAlreadyException");
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(NoActivePassException.class)
+    public ResponseEntity<String> handleNoActivePassException(NoActivePassException e) {
+        System.out.println("Handling NoActivePassException");
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
 }
