@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 import ru.ac.checkpointmanager.dto.*;
+import ru.ac.checkpointmanager.exception.CheckpointNotFoundException;
+import ru.ac.checkpointmanager.exception.PassNotFoundException;
 import ru.ac.checkpointmanager.model.*;
 import ru.ac.checkpointmanager.repository.CheckpointRepository;
 import ru.ac.checkpointmanager.repository.PassRepository;
@@ -93,8 +95,10 @@ public class Mapper {
     public Crossing toCrossing(CrossingDTO crossingDTO) {
         Crossing crossing = new Crossing();
 
-        Pass pass = passRepository.findById(crossingDTO.getPassId()).orElseThrow(null);
-        Checkpoint checkpoint = checkpointRepository.findById(crossingDTO.getCheckpointId()).orElseThrow(null);
+        Pass pass = passRepository.findById(crossingDTO.getPassId()).orElseThrow(
+                ()-> new PassNotFoundException("Pass not found"));
+        Checkpoint checkpoint = checkpointRepository.findById(crossingDTO.getCheckpointId()).orElseThrow(
+                ()-> new CheckpointNotFoundException("Checkpoint not found"));
 
         crossing.setPass(pass);
         crossing.setCheckpoint(checkpoint);

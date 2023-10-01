@@ -59,8 +59,7 @@ public class CrossingServiceImpl implements CrossingService {
 
             // Если успешно вышли, то переводим статус в CANCELLED
             if (crossing.getDirection().equals(Direction.OUT)) {
-                pass.setStatus(PassStatus.COMPLETED);
-                passRepository.save(pass);
+                passRepository.completedStatusById(pass.getId());
             }
         }
 
