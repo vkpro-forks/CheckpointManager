@@ -1,6 +1,7 @@
 package ru.ac.checkpointmanager.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import ru.ac.checkpointmanager.exception.PassNotFoundException;
 import ru.ac.checkpointmanager.model.Pass;
@@ -8,6 +9,7 @@ import ru.ac.checkpointmanager.model.enums.PassStatus;
 import ru.ac.checkpointmanager.repository.PassRepository;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,6 +18,7 @@ import java.util.UUID;
 public class PassServiceImpl implements PassService{
 
     private final PassRepository repository;
+//    private final CrossingRepository crossingRepository;
 
     @Override
     public Pass addPass(Pass pass) {
@@ -109,5 +112,32 @@ public class PassServiceImpl implements PassService{
             throw new PassNotFoundException(String.format("Pass not found [Id=%s]", id));
         }
         repository.deleteById(id);
+    }
+
+//    @Scheduled(cron = "0 0/1 * * * *")
+    @Scheduled(fixedDelay = 5_000L)
+    public void fetchDatabaseRecords() {
+        List<Pass> passes = repository.findByEndTimeIsBeforeAndStatusLike(
+                LocalDateTime.now(), PassStatus.ACTIVE);
+        if (passes.isEmpty()) {return;}
+
+//        for (Pass pass : passes) {
+//            List<Crossing> passCrossings = crossingRepository.findByPassId(pass.getId());
+//            if (passCrossings.isEmpty()) {
+//                pass.setStatus(PassStatus.OUTDATED);
+//            } else {
+////                Crossing lastCrossing = Collections.max(passCrossings, Comparator.comparing(Crossing::getEndTime));
+//                Crossing lastCrossing = passCrossings.stream()
+//                        .max(Comparator.comparing(Crossing::getEndTime));
+////                        .orElse(null);
+//                if (lastCrossing.getDirection.equals())
+//            }
+//        }
+
+//        records.forEach(record -> {
+//            logger.info("Notification was sent");
+//            telegramBot.execute(new SendMessage(record.getChatId(), String.format("Привет! Не забудь:\n%s" +
+//                    " , в %s", record.getNotification(), record.getAlarmDate())));
+//        });
     }
 }
