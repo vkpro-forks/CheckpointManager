@@ -13,5 +13,5 @@ import java.util.UUID;
 public interface CrossingRepository extends JpaRepository<Crossing, UUID> {
 
     Optional<Crossing> findTopByPassOrderByIdDesc(Pass pass);
-    List<Crossing> findCrossingsByPass(UUID pass_id);
+    List<Crossing> findCrossingsByPassId(UUID pass_id);
 }

@@ -13,11 +13,34 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Repository class for <code>Pass</code> domain objects
+ *
+ * @author Dmitry Ldv236
+ */
 @Repository
 public interface PassRepository extends JpaRepository<Pass, UUID> {
 
+    /**
+     * Search for all the passes available in the database that create by specified user
+     * @param userId requested user
+     * @return list of found passes
+     */
     List<Pass> findPassesByUserIdOrderByAddedAtDesc(UUID userId);
-    List<Pass> findPassesByTerritoryIdOrderByAddedAtDesc(UUID userId);
+
+    /**
+     * Search for all the passes available in the database that relate to the specified territory
+     * @param territoryId current territory in the user script
+     * @return list of found passes
+     */
+    List<Pass> findPassesByTerritoryIdOrderByAddedAtDesc(UUID territoryId);
+
+    /**
+     * Search in the database for active passes that have expired
+     * @param time It is supposed to transmit the current date and time
+     * @param status It is supposed to transmit the enum value <code>PassStatus.ACTIVE</code>
+     * @return list of found passes
+     */
     List<Pass> findByEndTimeIsBeforeAndStatusLike(LocalDateTime time, PassStatus status);
 
     @Transactional
