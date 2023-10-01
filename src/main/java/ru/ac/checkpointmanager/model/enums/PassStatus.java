@@ -4,5 +4,6 @@ public enum PassStatus {
     ACTIVE,
     COMPLETED,
     CANCELLED,
-    OUTDATED
+    OUTDATED,
+    WARNING
 }

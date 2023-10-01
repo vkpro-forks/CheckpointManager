@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.model.Pass;
 import ru.ac.checkpointmanager.model.enums.PassStatus;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,6 +18,7 @@ public interface PassRepository extends JpaRepository<Pass, UUID> {
 
     List<Pass> findPassesByUserIdOrderByAddedAtDesc(UUID userId);
     List<Pass> findPassesByTerritoryIdOrderByAddedAtDesc(UUID userId);
+    List<Pass> findByEndTimeIsBeforeAndStatusLike(LocalDateTime time, PassStatus status);
 
     @Transactional
     @Modifying
