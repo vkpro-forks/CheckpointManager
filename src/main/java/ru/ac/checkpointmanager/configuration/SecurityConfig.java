@@ -1,33 +1,35 @@
 package ru.ac.checkpointmanager.configuration;
 
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import ru.ac.checkpointmanager.service.UserDetailServiceImpl;
 
 @Configuration
 @EnableWebSecurity(debug = true)
 @RequiredArgsConstructor
+@EnableMethodSecurity
 public class SecurityConfig {
-
-    private final UserDetailServiceImpl userService;
+    private final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        logger.info("filter chain started");
         http
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((authorize) ->
-                        authorize
-                                .requestMatchers("/", "/authentication/**").permitAll()
-                                .requestMatchers("/welcome").authenticated()
-                                .anyRequest().authenticated()
+                                authorize
+                                        .requestMatchers("/registration/**").permitAll()
+                                        .anyRequest().authenticated()
                 ).formLogin(
                         form -> form
                                 .usernameParameter("username")
@@ -36,7 +38,9 @@ public class SecurityConfig {
                                 .loginProcessingUrl("/authentication/login")
                                 .defaultSuccessUrl("/welcome")
                                 .permitAll()
-                ).logout(
+                )
+//                .sessionManagement(session -> session.sessionCreationPolicy(STATELESS)) нужно для токенов
+                .logout(
                         logout -> logout
                                 .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
                                 .permitAll()
@@ -44,41 +48,8 @@ public class SecurityConfig {
         return http.build();
     }
 
-//    @Bean
-//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//        http
-//                .authorizeRequests((authorizeRequests) ->
-//                        authorizeRequests
-//                                  .requestMatchers("/admin/**").hasRole("ADMIN")
-//                                .requestMatchers("/**").hasRole("USER")
-//                                .requestMatchers("/swagger-ui.html", "/swagger-resources/**", "/v2/api-docs", "/webjars/**")
-//                                .permitAll()
-//                ).exceptionHandling(
-//                        exception -> exception
-//                                .authenticationEntryPoint(((request, response, authException) -> {
-//                                    response.sendRedirect("http://localhost:8080/authentication/login.html");
-//                                }))
-//                );
-//                .csrf(AbstractHttpConfigurer::disable)
-
-
-
     @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-        authenticationProvider.setPasswordEncoder(passwordEncoder());
-        authenticationProvider.setUserDetailsService(userService);
-        return authenticationProvider;
-    }
-
-    @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-        return configuration.getAuthenticationManager();
-    }
-
 }

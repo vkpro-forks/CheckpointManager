@@ -1,61 +1,48 @@
 package ru.ac.checkpointmanager.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import ru.ac.checkpointmanager.dto.UserAuthDTO;
 import ru.ac.checkpointmanager.service.UserService;
 
-@RestController
-@RequestMapping("/authentication")
+@Controller
 @RequiredArgsConstructor
 public class AuthController {
 
     private final UserService userService;
-    private final AuthenticationManager authenticationManager;
 
-    @GetMapping("/login")
-    public String showLoginForm() {
-        return "authentication/login";
+    @GetMapping("/welcome")
+    public String greeting() {
+        return "welcome";
     }
 
-    @PostMapping("/login")
-    public String processLogin(HttpServletRequest request) {
-        String username = request.getParameter("username");
-        String password = request.getParameter("password");
-
-        try {
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(username, password)
-            );
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            return "redirect:/welcome";
-        } catch (AuthenticationException e) {
-            return "redirect:/login?error";
-        }
+    @GetMapping("/authentication/login")
+    public String showLoginForm() {
+        return "login";
     }
 
     @GetMapping("/registration")
     public String registrationPage(@ModelAttribute("user") UserAuthDTO user) {
-        return "authentication/registration";
+        return "registration";
     }
 
-    @PostMapping("/registration")
+    @PostMapping(
+            path = "/registration",
+            consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
     public String performRegistration(@ModelAttribute("user") @Valid UserAuthDTO user,
                                       BindingResult bindingResult) {
 
         if (bindingResult.hasErrors())
-            return "/authentication/registration";
+            return "registration";
 
         userService.createUser(user);
 
-        return "redirect:/authentication/login";
+        return "redirect:/swagger-ui.html";
     }
 }

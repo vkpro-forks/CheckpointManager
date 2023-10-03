@@ -6,7 +6,7 @@
 </head>
 <body>
 <h2>Регистрация</h2>
-<form th:method="POST" th:action="@{/authentication/registration}" th:object="${user}">
+<form th:method="POST" th:action="@{/registration}" th:object="\${user}">
     <label for="fullName">Введите имя пользователя: </label>
     <input type="text" th:field="*{fullName}" id="fullName"/>
     <br/>
@@ -27,7 +27,7 @@
     <input type="password" th:field="*{password}" id="password"/>
     <br/>
 
-    <label for="repeatedPassword">Повторите пароль:</label>
+    <label for="password">Повторите пароль:</label>
     <input type="password" th:field="*{password}" id="repeatedPassword" required>
     <hr>
 

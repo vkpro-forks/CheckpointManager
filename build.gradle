@@ -46,7 +46,7 @@ processResources {
     filesMatching("**/application.yml") {
         expand(version: project.version)
     }
-    exclude '**/*.html'
+//    exclude '**/*.groovy'
 }
 
 

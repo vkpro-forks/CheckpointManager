@@ -67,28 +67,35 @@ public class Mapper {
     }
 
     /* User mapping */
-    public User toUser(UserDTO userDTO) {
+    public static User toUser(UserDTO userDTO) {
         return modelMapper.map(userDTO, User.class);
     }
 
-    public UserDTO toUserDTO(User user) {
+    public static UserDTO toUserDTO(User user) {
         return modelMapper.map(user, UserDTO.class);
     }
 
-    public List<UserDTO> toUsersDTO(Collection<User> users) {
+    public static List<UserDTO> toUsersDTO(Collection<User> users) {
         return users.stream()
                 .map(e -> modelMapper.map(e, UserDTO.class))
                 .toList();
     }
 
-    public User toUser(UserAuthDTO userAuthDTO) {
+    public static User toUser(UserAuthDTO userAuthDTO) {
         return modelMapper.map(userAuthDTO, User.class);
     }
 
-    public UserAuthDTO toUserAuthDTO(User user) {
+    public static UserAuthDTO toUserAuthDTO(User user) {
         return modelMapper.map(user, UserAuthDTO.class);
     }
 
+    public static User toUser(UserDetailsDTO userDetailsDTO) {
+        return modelMapper.map(userDetailsDTO, User.class);
+    }
+
+    public static UserDetailsDTO toUserDetailsDTO(User user) {
+        return modelMapper.map(user, UserDetailsDTO.class);
+    }
 
     /* Phone mapping */
     public Phone toPhone(PhoneDTO phoneDTO) {
