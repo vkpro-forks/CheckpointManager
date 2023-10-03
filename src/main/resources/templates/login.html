@@ -6,7 +6,7 @@
 </head>
 <body>
 <form action="/authentication/login" method="post">
-    <div style="color: red" th:if="\${param.error}">
+    <div style="color: red" th:if="${param.error}">
          Bad credentials
     </div>
     <label for="username">Username:

@@ -25,22 +25,6 @@ public class UserController {
 
     private final UserService userService;
 
-
-//    @PostMapping("/authentication")
-//    public ResponseEntity<?> createUser(@Valid @RequestBody UserAuthDTO userAuthDTO, BindingResult result) {
-//        if (result.hasErrors()) {
-//            return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
-//        }
-//
-//        try {
-//            UserAuthDTO createdUser = userService.createUser(userAuthDTO);
-//            return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
-//        } catch (RuntimeException e) {
-//            // блок отлавливает эксепшены и пишет месседжы, которые прописаны в сервисе
-//            return ResponseEntity.badRequest().body(e.getMessage());
-//        }
-//    }
-
     @GetMapping("{id}")
     public ResponseEntity<UserDTO> findUserById(@PathVariable UUID id) {
         Optional<UserDTO> user = Optional.ofNullable(userService.findById(id));

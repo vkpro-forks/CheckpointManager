@@ -2,7 +2,6 @@ package ru.ac.checkpointmanager.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,16 +31,14 @@ public class AuthController {
         return "registration";
     }
 
-    @PostMapping(
-            path = "/registration",
-            consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
+    @PostMapping("/registration")
     public String performRegistration(@ModelAttribute("user") @Valid UserAuthDTO user,
                                       BindingResult bindingResult) {
 
         if (bindingResult.hasErrors())
-            return "registration";
+            return "/registration";
 
-        userService.createUser(user);
+        this.userService.createUser(user);
 
         return "redirect:/swagger-ui.html";
     }

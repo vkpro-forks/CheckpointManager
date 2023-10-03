@@ -6,30 +6,31 @@
 </head>
 <body>
 <h2>Регистрация</h2>
-<form th:method="POST" th:action="@{/registration}" th:object="\${user}">
+<form th:method="POST" th:action="@{/registration}" th:object="${user}">
     <label for="fullName">Введите имя пользователя: </label>
     <input type="text" th:field="*{fullName}" id="fullName"/>
+    <div style="color:red" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}">Username Error</div>
     <br/>
 
     <label for="dateOfBirth">Введите год рождения: </label>
     <input type="date" th:field="*{dateOfBirth}" id="dateOfBirth"/>
+    <div style="color:red" th:if="${#fields.hasErrors('dateOfBirth')}" th:errors="*{dateOfBirth}">dateOfBirth Error</div>
     <br/>
 
     <label for="mainNumber">Введите номер телефона: </label>
     <input type="text" th:field="*{mainNumber}" id="mainNumber"/>
+    <div style="color:red" th:if="${#fields.hasErrors('mainNumber')}" th:errors="*{mainNumber}">mainNumber Error</div>
     <br/>
 
     <label for="email">Введите адрес электронной почты: </label>
     <input type="email" th:field="*{email}" id="email"/>
+    <div style="color:red" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">email Error</div>
     <br/>
 
     <label for="password">Введите пароль: </label>
     <input type="password" th:field="*{password}" id="password"/>
+    <div style="color:red" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">password Error</div>
     <br/>
-
-    <label for="password">Повторите пароль:</label>
-    <input type="password" th:field="*{password}" id="repeatedPassword" required>
-    <hr>
 
     <input type="submit" value="Зарегистрироваться!"/>
 </form>

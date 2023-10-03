@@ -36,7 +36,7 @@ public class SecurityConfig {
                                 .passwordParameter("password")
                                 .loginPage("/authentication/login")
                                 .loginProcessingUrl("/authentication/login")
-                                .defaultSuccessUrl("/welcome")
+                                .defaultSuccessUrl("/swagger-ui.html")
                                 .permitAll()
                 )
 //                .sessionManagement(session -> session.sessionCreationPolicy(STATELESS)) нужно для токенов
