@@ -100,6 +100,13 @@ public class PassController {
         return ResponseEntity.ok(mapper.toPassDTO(activatedPass));
     }
 
+    @PatchMapping("/{id}/unwarning")
+    public ResponseEntity<PassDTO> unWarningPass(@PathVariable UUID id) {
+
+        Pass completedPass = service.unWarningPass(id);
+        return ResponseEntity.ok(mapper.toPassDTO(completedPass));
+    }
+
     /* DELETE */
     @DeleteMapping("{id}")
     public ResponseEntity<Void> deletePass(@PathVariable UUID id) {
