@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SourceType;
 import ru.ac.checkpointmanager.model.enums.Direction;
 
 import java.time.LocalDateTime;
@@ -29,6 +31,7 @@ public class Crossing {
     private Checkpoint checkpoint;
 
     @Column(name = "local_date_time")
+    @CreationTimestamp(source = SourceType.VM)
     private LocalDateTime localDateTime;
 
     @Enumerated(EnumType.STRING)

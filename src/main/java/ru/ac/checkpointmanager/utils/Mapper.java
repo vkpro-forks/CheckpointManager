@@ -102,7 +102,6 @@ public class Mapper {
 
         crossing.setPass(pass);
         crossing.setCheckpoint(checkpoint);
-        crossing.setLocalDateTime(crossingDTO.getLocalDateTime());
         crossing.setDirection(crossingDTO.getDirection());
 
         return crossing;

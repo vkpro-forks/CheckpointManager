@@ -3,10 +3,7 @@ package ru.ac.checkpointmanager.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.ac.checkpointmanager.exception.CheckpointNotFoundException;
-import ru.ac.checkpointmanager.exception.EntranceWasAlreadyException;
-import ru.ac.checkpointmanager.exception.NoActivePassException;
-import ru.ac.checkpointmanager.exception.PassNotFoundException;
+import ru.ac.checkpointmanager.exception.*;
 import ru.ac.checkpointmanager.model.Checkpoint;
 import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.model.Pass;
@@ -57,7 +54,6 @@ public class CrossingServiceImpl implements CrossingService {
                 throw new NoActivePassException(String.format("This %s has not been activated (login to activate)", crossing.getPass().getId()));
             }
 
-            // Если успешно вышли, то переводим статус в CANCELLED
             if (crossing.getDirection().equals(Direction.OUT)) {
                 passRepository.completedStatusById(pass.getId());
             }
@@ -65,6 +61,12 @@ public class CrossingServiceImpl implements CrossingService {
 
         Checkpoint checkpoint = checkpointRepository.findById(crossing.getCheckpoint().getId())
                 .orElseThrow(() -> new CheckpointNotFoundException("Checkpoint not found"));
+
+        //проверяем активен ли пропуск
+        if (pass.getStatus() != PassStatus.ACTIVE) {
+            throw new NoActivePassException("The pass is not active");
+        }
+
 
         Crossing newCrossing = new Crossing();
         newCrossing.setPass(pass);
