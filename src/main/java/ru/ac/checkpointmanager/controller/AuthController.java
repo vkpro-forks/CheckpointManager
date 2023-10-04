@@ -16,11 +16,6 @@ public class AuthController {
 
     private final UserService userService;
 
-    @GetMapping("/welcome")
-    public String greeting() {
-        return "welcome";
-    }
-
     @GetMapping("/authentication/login")
     public String showLoginForm() {
         return "login";
