@@ -94,7 +94,6 @@ public class Mapper {
     /* Crossing mapping */
     public Crossing toCrossing(CrossingDTO crossingDTO) {
         Crossing crossing = new Crossing();
-
         Pass pass = passRepository.findById(crossingDTO.getPassId()).orElseThrow(
                 ()-> new PassNotFoundException("Pass not found"));
         Checkpoint checkpoint = checkpointRepository.findById(crossingDTO.getCheckpointId()).orElseThrow(

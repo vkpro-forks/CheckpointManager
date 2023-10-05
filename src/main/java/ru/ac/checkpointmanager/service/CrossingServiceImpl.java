@@ -2,6 +2,8 @@ package ru.ac.checkpointmanager.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ru.ac.checkpointmanager.exception.*;
 import ru.ac.checkpointmanager.model.Checkpoint;
@@ -26,15 +28,29 @@ public class CrossingServiceImpl implements CrossingService {
     private final PassRepository passRepository;
     private final CrossingRepository crossingRepository;
     private final CheckpointRepository checkpointRepository;
+    private final Logger logger = LoggerFactory.getLogger(CrossingServiceImpl.class);
 
     @Override //логика сложная, распишу сразу тут, чтоб было понятно
     public Crossing markCrossing(Crossing crossing) {
 
 
         //проверяем в бд есть ли такой пропуск или нет, если нет, выбрасываем исключение
-
         Pass pass = passRepository.findById(crossing.getPass().getId()).orElseThrow(
                 () -> new PassNotFoundException("There is no such pass!"));
+
+        //проверяем активен ли пропуск
+        if (pass.getStatus() != PassStatus.ACTIVE) {
+            throw new NoActivePassException("The pass is not active");
+        }
+
+        Checkpoint checkpoint = checkpointRepository.findById(crossing.getCheckpoint().getId())
+                .orElseThrow(() -> new CheckpointNotFoundException("Checkpoint not found"));
+
+        UUID territoryIdFromPass = pass.getTerritory().getId();
+        UUID territoryIdFromCheckpoint = checkpoint.getTerritory().getId();
+        if (!territoryIdFromPass.equals(territoryIdFromCheckpoint)) {
+            throw new MismatchedTerritoryException("The checkpoint does not belong to the territory of the pass");
+        }
 
         //Используем Optional что дать возможность оставить пустую переменную, чтоб избежать исключения NullPointerException
         //проверяем было ли уже пересечение
@@ -57,14 +73,6 @@ public class CrossingServiceImpl implements CrossingService {
             if (crossing.getDirection().equals(Direction.OUT)) {
                 passRepository.completedStatusById(pass.getId());
             }
-        }
-
-        Checkpoint checkpoint = checkpointRepository.findById(crossing.getCheckpoint().getId())
-                .orElseThrow(() -> new CheckpointNotFoundException("Checkpoint not found"));
-
-        //проверяем активен ли пропуск
-        if (pass.getStatus() != PassStatus.ACTIVE) {
-            throw new NoActivePassException("The pass is not active");
         }
 
 
