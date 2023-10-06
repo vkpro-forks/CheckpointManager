@@ -25,6 +25,8 @@ public class Pass {
     @JoinColumn(name = "user_id")
     private User user;
 
+    private String name;
+
     @Enumerated(EnumType.STRING)
     private PassStatus status;
 
@@ -34,6 +36,7 @@ public class Pass {
     @ManyToOne
     @JoinColumn(name = "territory_id")
     private Territory territory;
+
     private String note;
 
     @CreationTimestamp(source = SourceType.VM)

@@ -6,8 +6,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import ru.ac.checkpointmanager.exception.PassNotFoundException;
+import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.model.Pass;
+import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.enums.PassStatus;
 import ru.ac.checkpointmanager.repository.CrossingRepository;
@@ -17,7 +19,9 @@ import ru.ac.checkpointmanager.utils.MethodLog;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
+import static ru.ac.checkpointmanager.utils.Mapper.*;
 
 /**
  * Service class for Pass domain objects
@@ -30,9 +34,14 @@ public class PassServiceImpl implements PassService{
     private final Logger logger = LoggerFactory.getLogger(PassServiceImpl.class);
     private final PassRepository repository;
     private final CrossingRepository crossingRepository;
+    private final TerritoryService territoryService;
+    private final UserService userService;
 
     @Override
     public Pass addPass(Pass pass) {
+        checkUserTerritoryRelation(pass);
+        checkCrossCovering(pass);
+
         logger.info(String.format("Invoked method %s", MethodLog.getMethodName()));
         pass.setStatus(PassStatus.ACTIVE);
         return repository.save(pass);
@@ -73,14 +82,11 @@ public class PassServiceImpl implements PassService{
         return foundPasses;
     }
 
-    /**
-     * Вносит изменения в существующий пропуск по переданному UUID.
-     * Если пропуск имеет статус, отличный от "активный", выбрасывает IllegalStateException.
-     * @param pass Пропуск Pass с измененными данными
-     * @return Измененный пропуск Pass
-     */
     @Override
     public Pass updatePass(Pass pass) {
+        checkUserTerritoryRelation(pass);
+        checkCrossCovering(pass);
+
         logger.info(String.format("Invoked method %s [%s]", MethodLog.getMethodName(), pass.getId()));
         Pass foundPass = findPass(pass.getId());
 
@@ -108,7 +114,8 @@ public class PassServiceImpl implements PassService{
         }
 
         repository.cancelById(id);
-        return repository.findById(id).get();
+        pass.setStatus(PassStatus.CANCELLED);
+        return pass;
     }
 
     @Override
@@ -125,7 +132,8 @@ public class PassServiceImpl implements PassService{
         }
 
         repository.activateById(id);
-        return repository.findById(id).get();
+        pass.setStatus(PassStatus.ACTIVE);
+        return pass;
     }
 
     @Override
@@ -138,8 +146,10 @@ public class PassServiceImpl implements PassService{
         }
 
         repository.completedStatusById(id);
-        return repository.findById(id).get();
+        pass.setStatus(PassStatus.COMPLETED);
+        return pass;
     }
+
 
     @Override
     public void deletePass(UUID id) {
@@ -151,7 +161,45 @@ public class PassServiceImpl implements PassService{
     }
 
     /**
-     * Шедулированный метод - ищет в БД все активные пропуска с истекшим временем действия,
+     * @param newPass добавляемый или изменяемый пропуск
+     * @exception TerritoryNotFoundException, если указанный юзер не имеет связи с указанной территорией,
+     * т.е. не имеет права создавать пропуска для этой территории
+     */
+    private void checkUserTerritoryRelation(Pass newPass) {
+        Territory territory = newPass.getTerritory();
+
+        List<Territory> territories = toTerritories(userService.findTerritoriesByUserId(newPass.getUser().getId()));
+        if (!territories.contains(territory)) {
+            throw new TerritoryNotFoundException("The user does not have authority for this territory");
+        }
+    }
+
+    /**
+     * @param newPass добавляемый или изменяемый пропуск
+     * @exception IllegalArgumentException, если в системе существует активный пропуск,
+     * созданный тем же юзером, в котором совпадает территория, данные машины/человека
+     * и пересекается время действия
+     */
+    void checkCrossCovering(Pass newPass) {
+        List<Pass> passes = repository.findPassesByUserIdOrderByAddedAtDesc(newPass.getUser().getId());
+
+        for (Pass existPass : passes) {
+
+            if (existPass.getStatus().equals(PassStatus.ACTIVE) &&
+                newPass.getTerritory().equals(existPass.getTerritory()) /*&&
+                Objects.equals(newPass.getCar, existPass.getCar) &&
+                Objects.equals(newPass.getPerson, existPass.getPerson)*/) {
+
+                if (newPass.getEndTime().isAfter(existPass.getStartTime()) &&
+                    newPass.getStartTime().isBefore(existPass.getEndTime())) {
+
+                    throw new IllegalArgumentException("This user already has such pass with crosscovered time");
+                }
+            }
+        }
+    }
+    /**
+     * С заданной периодичностью ищет все активные пропуска с истекшим временем действия,
      * затем по каждому наденному пропуску ищет зафиксированные пересечения.
      * Если пересечений не было, присваивает пропуску статус "устаревший" (PassStatus.OUTDATED).
      * Если пересечения были, и последнее было на выезд - статус "выполнен" (PassStatus.COMPLETED).

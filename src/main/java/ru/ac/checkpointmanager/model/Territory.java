@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -38,4 +39,17 @@ public class Territory {
     @JsonIgnore
     @OneToMany(mappedBy = "territory", fetch = FetchType.LAZY)
     private List<Pass> pass;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Territory territory = (Territory) o;
+        return Objects.equals(id, territory.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }
