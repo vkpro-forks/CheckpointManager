@@ -98,14 +98,6 @@ public class Mapper {
         return modelMapper.map(user, UserAuthDTO.class);
     }
 
-    public static User toUser(UserDetailsDTO userDetailsDTO) {
-        return modelMapper.map(userDetailsDTO, User.class);
-    }
-
-    public static UserDetailsDTO toUserDetailsDTO(User user) {
-        return modelMapper.map(user, UserDetailsDTO.class);
-    }
-
     /* Phone mapping */
     public Phone toPhone(PhoneDTO phoneDTO) {
         return modelMapper.map(phoneDTO, Phone.class);

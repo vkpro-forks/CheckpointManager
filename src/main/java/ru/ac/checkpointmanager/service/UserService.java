@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface UserService {
-    UserAuthDTO createUser(UserAuthDTO userAuthDTO);
+//    UserAuthDTO createUser(UserAuthDTO userAuthDTO);
 
     UserDTO findById(UUID id);
 

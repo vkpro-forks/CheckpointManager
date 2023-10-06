@@ -1,29 +1,24 @@
 package ru.ac.checkpointmanager.service;
 
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.UserAuthDTO;
 import ru.ac.checkpointmanager.dto.UserDTO;
-import ru.ac.checkpointmanager.exception.*;
+import ru.ac.checkpointmanager.exception.DateOfBirthFormatException;
+import ru.ac.checkpointmanager.exception.PhoneNumberNotFoundException;
+import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
+import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
-import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.utils.Mapper;
 
-import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-import static ru.ac.checkpointmanager.model.enums.PhoneNumberType.MOBILE;
 import static ru.ac.checkpointmanager.utils.FieldsValidation.cleanPhone;
 import static ru.ac.checkpointmanager.utils.FieldsValidation.validateDOB;
 import static ru.ac.checkpointmanager.utils.Mapper.*;
@@ -34,59 +29,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PhoneRepository phoneRepository;
-    private final PhoneService phoneService;
     private final Mapper mapper;
-    private final PasswordEncoder passwordEncoder;
-    private final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
-
-    private final Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
-
-    @Transactional
-    @Override
-    public UserAuthDTO createUser(UserAuthDTO userAuthDTO) {
-        logger.info("Method createUser was invoked");
-        boolean userExist = userRepository.findByEmail(userAuthDTO.getEmail()).isPresent();
-        if (userExist) {
-            logger.warn("Email already taken");
-            throw new IllegalStateException(String.format("Email %s already taken", userAuthDTO.getEmail()));
-        }
-
-        if (!validateDOB(userAuthDTO.getDateOfBirth())) {
-            logger.warn("Invalid date of birth");
-            throw new DateOfBirthFormatException("Date of birth should not be greater than the current date");
-        }
-
-        if (phoneRepository.existsByNumber(cleanPhone(userAuthDTO.getMainNumber()))) {
-            logger.warn("Phone already taken");
-            throw new PhoneAlreadyExistException(String.format
-                    ("Phone number %s already exist", userAuthDTO.getMainNumber()));
-        }
-
-        User user = toUser(userAuthDTO);
-        user.setRole(Role.USER);
-        user.setMainNumber(cleanPhone(userAuthDTO.getMainNumber()));
-        user.setIsBlocked(false);
-        user.setAddedAt(currentTimestamp);
-
-        String encodedPassword = passwordEncoder.encode(userAuthDTO.getPassword());
-        user.setPassword(encodedPassword);
-
-        userRepository.save(user);
-        logger.info("User saved");
-
-        PhoneDTO phoneDTO = createPhoneDTO(user);
-        phoneService.createPhoneNumber(phoneDTO);
-
-        return toUserAuthDTO(user);
-    }
-
-    private PhoneDTO createPhoneDTO(User user) {
-        PhoneDTO phoneDTO = new PhoneDTO();
-        phoneDTO.setUserId(user.getId());
-        phoneDTO.setNumber(user.getMainNumber());
-        phoneDTO.setType(MOBILE);
-        return phoneDTO;
-    }
 
     @Override
     public UserDTO findById(UUID id) {

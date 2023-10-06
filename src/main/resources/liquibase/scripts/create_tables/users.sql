@@ -57,8 +57,3 @@ ALTER TABLE users
     ADD CONSTRAINT number_unique UNIQUE (main_number);
 
 
-
-
-
-
-

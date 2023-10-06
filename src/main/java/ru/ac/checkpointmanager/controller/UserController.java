@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
@@ -37,6 +38,7 @@ public class UserController {
         return territories.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(territories);
     }
 
+    @PreAuthorize("hasRole('ROLE_USER') OR hasRole('ROLE_ADMIN')")
     @GetMapping("/name")
     public ResponseEntity<Collection<UserDTO>> findUserByName(@RequestParam String name) {
         Collection<UserDTO> foundUsers = userService.findByName(name);

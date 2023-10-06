@@ -1,40 +1,53 @@
 package ru.ac.checkpointmanager.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.dto.UserAuthDTO;
-import ru.ac.checkpointmanager.service.UserService;
+import ru.ac.checkpointmanager.security.AuthenticationRequest;
+import ru.ac.checkpointmanager.security.AuthenticationResponse;
+import ru.ac.checkpointmanager.security.AuthenticationService;
 
-@Controller
+import java.io.IOException;
+
+import static ru.ac.checkpointmanager.utils.ErrorUtils.errorsList;
+
+@RestController
 @RequiredArgsConstructor
+@RequestMapping("/authentication")
 public class AuthController {
 
-    private final UserService userService;
-
-    @GetMapping("/authentication/login")
-    public String showLoginForm() {
-        return "login";
-    }
-
-    @GetMapping("/registration")
-    public String registrationPage(@ModelAttribute("user") UserAuthDTO user) {
-        return "registration";
-    }
+    private final AuthenticationService service;
 
     @PostMapping("/registration")
-    public String performRegistration(@ModelAttribute("user") @Valid UserAuthDTO user,
-                                      BindingResult bindingResult) {
+    public ResponseEntity<?> register(@RequestBody @Valid UserAuthDTO user,
+                                      BindingResult result) {
 
-        if (bindingResult.hasErrors())
-            return "/registration";
+        if (result.hasErrors())
+            return new ResponseEntity<>(errorsList(result), HttpStatus.BAD_REQUEST);
 
-        this.userService.createUser(user);
+        try {
+            return new ResponseEntity<>(service.createUser(user), HttpStatus.CREATED);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 
-        return "redirect:/swagger-ui.html";
+    @PostMapping("/login")
+    public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
+        return ResponseEntity.ok(service.authenticate(request));
+    }
+
+    @PostMapping("/refresh-token")
+    public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        service.refreshToken(request, response);
     }
 }
