@@ -18,6 +18,8 @@ import ru.ac.checkpointmanager.utils.MethodLog;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static ru.ac.checkpointmanager.utils.StringTrimmer.trimThemAll;
+
 /**
  * Service class for Pass domain objects
  *
@@ -38,6 +40,7 @@ public class PassServiceImpl implements PassService{
         checkOverlapTime(pass);
 
         logger.info(String.format("Invoked method %s", MethodLog.getMethodName()));
+        trimThemAll(pass);
         pass.setStatus(PassStatus.ACTIVE);
         return repository.save(pass);
     }
@@ -83,6 +86,7 @@ public class PassServiceImpl implements PassService{
         checkOverlapTime(pass);
 
         logger.info(String.format("Invoked method %s [%s]", MethodLog.getMethodName(), pass.getId()));
+        trimThemAll(pass);
         Pass foundPass = findPass(pass.getId());
 
         if (!foundPass.getStatus().equals(PassStatus.ACTIVE)) {
