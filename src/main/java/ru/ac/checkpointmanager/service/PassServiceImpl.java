@@ -9,7 +9,6 @@ import ru.ac.checkpointmanager.exception.PassNotFoundException;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.model.Pass;
-import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.enums.PassStatus;
 import ru.ac.checkpointmanager.repository.CrossingRepository;
@@ -17,11 +16,7 @@ import ru.ac.checkpointmanager.repository.PassRepository;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
-import static ru.ac.checkpointmanager.utils.Mapper.*;
+import java.util.*;
 
 /**
  * Service class for Pass domain objects
@@ -40,7 +35,7 @@ public class PassServiceImpl implements PassService{
     @Override
     public Pass addPass(Pass pass) {
         checkUserTerritoryRelation(pass);
-        checkCrossCovering(pass);
+        checkOverlapTime(pass);
 
         logger.info(String.format("Invoked method %s", MethodLog.getMethodName()));
         pass.setStatus(PassStatus.ACTIVE);
@@ -85,7 +80,7 @@ public class PassServiceImpl implements PassService{
     @Override
     public Pass updatePass(Pass pass) {
         checkUserTerritoryRelation(pass);
-        checkCrossCovering(pass);
+        checkOverlapTime(pass);
 
         logger.info(String.format("Invoked method %s [%s]", MethodLog.getMethodName(), pass.getId()));
         Pass foundPass = findPass(pass.getId());
@@ -95,6 +90,7 @@ public class PassServiceImpl implements PassService{
                     "You can only change the active pass");
         }
 
+        foundPass.setName(pass.getName());
         foundPass.setTypeTime(pass.getTypeTime());
         foundPass.setTerritory(pass.getTerritory());
         foundPass.setNote(pass.getNote());
@@ -166,36 +162,50 @@ public class PassServiceImpl implements PassService{
      * т.е. не имеет права создавать пропуска для этой территории
      */
     private void checkUserTerritoryRelation(Pass newPass) {
-        Territory territory = newPass.getTerritory();
-
-        List<Territory> territories = toTerritories(userService.findTerritoriesByUserId(newPass.getUser().getId()));
-        if (!territories.contains(territory)) {
-            throw new TerritoryNotFoundException("The user does not have authority for this territory");
+        //два способа - через лист территорий, найденных по userId,
+        // и проверка соответствия id в связующей таблице sql-запросом
+        //возможна разница в производительности, пока отставлю оба
+//        Territory territory = newPass.getTerritory();
+//
+//        List<Territory> territories = toTerritories(userService.findTerritoriesByUserId(newPass.getUser().getId()));
+//        if (!territories.contains(territory)) {
+//            throw new TerritoryNotFoundException("The user does not have authority for this territory");
+//        }
+        UUID userId = newPass.getUser().getId();
+        UUID territoryId = newPass.getTerritory().getId();
+        if (!repository.checkUserTerritoryRelation(userId, territoryId)) {
+            String message = String.format("Reject operation: user [%s] not have permission to create passes " +
+                    "for this territory [%s]", userId, territoryId);
+            logger.warn(message);
+            throw new IllegalArgumentException(message);
         }
     }
 
     /**
      * @param newPass добавляемый или изменяемый пропуск
-     * @exception IllegalArgumentException, если в системе существует активный пропуск,
+     * @exception IllegalArgumentException, если в системе существует другой активный пропуск,
      * созданный тем же юзером, в котором совпадает территория, данные машины/человека
-     * и пересекается время действия
+     * и пересекается (накладывается) время действия
      */
-    void checkCrossCovering(Pass newPass) {
-        List<Pass> passes = repository.findPassesByUserIdOrderByAddedAtDesc(newPass.getUser().getId());
+    void checkOverlapTime(Pass newPass) {
+        List<Pass> passesByUser = repository.findPassesByUserIdOrderByAddedAtDesc(newPass.getUser().getId());
 
-        for (Pass existPass : passes) {
+        Optional<Pass> overlapPass = passesByUser.stream()
+                .filter(existPass -> existPass.getStatus().equals(PassStatus.ACTIVE))
+                .filter(existPass -> !newPass.getId().equals(existPass.getId()))
+                .filter(existPass -> newPass.getTerritory().equals(existPass.getTerritory()))
+                //раскомментить когда в Pass будут добавлены Car и Person
+//                .filter(existPass -> Objects.equals(newPass.getCar, existPass.getCar))
+//                .filter(existPass -> Objects.equals(newPass.getPerson, existPass.getPerson))
+                .filter(existPass -> newPass.getEndTime().isAfter(existPass.getStartTime()) &&
+                        newPass.getStartTime().isBefore(existPass.getEndTime()))
+                .findFirst();
 
-            if (existPass.getStatus().equals(PassStatus.ACTIVE) &&
-                newPass.getTerritory().equals(existPass.getTerritory()) /*&&
-                Objects.equals(newPass.getCar, existPass.getCar) &&
-                Objects.equals(newPass.getPerson, existPass.getPerson)*/) {
-
-                if (newPass.getEndTime().isAfter(existPass.getStartTime()) &&
-                    newPass.getStartTime().isBefore(existPass.getEndTime())) {
-
-                    throw new IllegalArgumentException("This user already has such pass with crosscovered time");
-                }
-            }
+        if (overlapPass.isPresent()) {
+            String message = String.format("Reject operation: user [%s] already has such a pass with " +
+                            "overlapping time [%s]", newPass.getUser().getId(), overlapPass.get().getId());
+            logger.info(message);
+            throw new IllegalArgumentException(message);
         }
     }
     /**
