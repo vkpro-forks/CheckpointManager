@@ -93,8 +93,8 @@ public class UserController {
         try {
             UserDTO changedUser = userService.updateBlockStatus(id, isBlocked);
             return ResponseEntity.ok(changedUser);
-        } catch (UserNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (UserNotFoundException | IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
@@ -105,8 +105,8 @@ public class UserController {
         try {
             userService.blockById(id);
             return ResponseEntity.ok().build();
-        } catch (UserNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (UserNotFoundException | IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
@@ -117,8 +117,8 @@ public class UserController {
         try {
             userService.unblockById(id);
             return ResponseEntity.ok().build();
-        } catch (UserNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (UserNotFoundException | IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
     //choose variate witch best for frontend

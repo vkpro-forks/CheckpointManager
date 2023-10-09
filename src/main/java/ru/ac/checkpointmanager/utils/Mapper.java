@@ -19,10 +19,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class Mapper {
 
-
-
     private final PassService passService;
     private final CheckpointService checkpointService;
+
     private static final ModelMapper modelMapper = new ModelMapper();
 
     /* Checkpoint mapping */
@@ -50,7 +49,11 @@ public class Mapper {
                 .map(e -> modelMapper.map(e, TerritoryDTO.class))
                 .toList();
     }
-
+    public static List<Territory> toTerritories(List<TerritoryDTO> territoriesDTO) {
+        return territoriesDTO.stream()
+                .map(e -> modelMapper.map(e, Territory.class))
+                .toList();
+    }
     /* Pass mapping */
     public Pass toPass(PassDTO passDTO) {
         return modelMapper.map(passDTO, Pass.class);

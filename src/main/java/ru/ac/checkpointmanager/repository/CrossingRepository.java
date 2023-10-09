@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.model.Pass;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -12,4 +13,5 @@ import java.util.UUID;
 public interface CrossingRepository extends JpaRepository<Crossing, UUID> {
 
     Optional<Crossing> findTopByPassOrderByIdDesc(Pass pass);
+    List<Crossing> findCrossingsByPassId(UUID pass_id);
 }
