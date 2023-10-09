@@ -23,6 +23,8 @@ public interface PassService {
 
     Pass activateCancelledPass(UUID id);
 
+    Pass unWarningPass(UUID id);
+
     void deletePass(UUID id);
 
 }

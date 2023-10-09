@@ -16,3 +16,7 @@ CREATE TABLE passes
     CONSTRAINT pass_pk PRIMARY KEY (id),
     CONSTRAINT check_time CHECK (end_time > start_time)
 );
+
+-- changeset Ldv236:54
+ALTER TABLE passes
+ADD COLUMN name text;

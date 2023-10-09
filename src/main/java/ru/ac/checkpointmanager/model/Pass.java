@@ -1,10 +1,10 @@
 package ru.ac.checkpointmanager.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.FutureOrPresent;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SourceType;
 import ru.ac.checkpointmanager.model.enums.PassStatus;
 import ru.ac.checkpointmanager.model.enums.PassTypeTime;
 
@@ -21,34 +21,29 @@ public class Pass {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @NotNull()
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
-    @NotNull()
+    private String name;
+
     @Enumerated(EnumType.STRING)
     private PassStatus status;
 
-    @NotNull()
     @Enumerated(EnumType.STRING)
     private PassTypeTime typeTime;
 
-    @NotNull()
     @ManyToOne
     @JoinColumn(name = "territory_id")
     private Territory territory;
+
     private String note;
 
-    @NotNull()
+    @CreationTimestamp(source = SourceType.VM)
     private LocalDateTime addedAt;
 
-    @NotNull()
-    @FutureOrPresent
     private LocalDateTime startTime;
 
-    @NotNull()
-    @FutureOrPresent
     private LocalDateTime endTime;
 
     //добавить оба когда будут реализованы кар и персон
