@@ -3,10 +3,7 @@ package ru.ac.checkpointmanager.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import ru.ac.checkpointmanager.model.enums.UserRole;
 
 import java.sql.Timestamp;
@@ -17,10 +14,8 @@ import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
-@EqualsAndHashCode
 @Table(name = "users")
 public class User {
 
