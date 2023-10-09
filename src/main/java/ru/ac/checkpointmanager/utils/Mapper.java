@@ -98,14 +98,8 @@ public class Mapper {
     public Crossing toCrossing(CrossingDTO crossingDTO) {
         Crossing crossing = new Crossing();
         Pass pass = passService.findPass(crossingDTO.getPassId());
-        if (pass == null) {
-            throw new PassNotFoundException("Pass not found");
-        }
 
         Checkpoint checkpoint = checkpointService.findCheckpointById(crossingDTO.getCheckpointId());
-        if (checkpoint == null) {
-            throw new CheckpointNotFoundException("Checkpoint not found");
-        }
 
         crossing.setPass(pass);
         crossing.setCheckpoint(checkpoint);
