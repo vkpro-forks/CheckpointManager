@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.ac.checkpointmanager.model.enums.PhoneNumberType;
@@ -12,10 +11,9 @@ import ru.ac.checkpointmanager.model.enums.PhoneNumberType;
 import java.util.Objects;
 import java.util.UUID;
 
+@Entity
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
-@Entity
 @Table(name = "phones")
 public class Phone {
 
@@ -37,6 +35,7 @@ public class Phone {
     private User user;
 
     private String note;
+
 
     @Override
     public boolean equals(Object o) {
