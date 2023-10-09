@@ -7,8 +7,6 @@ import ru.ac.checkpointmanager.dto.*;
 import ru.ac.checkpointmanager.exception.CheckpointNotFoundException;
 import ru.ac.checkpointmanager.exception.PassNotFoundException;
 import ru.ac.checkpointmanager.model.*;
-import ru.ac.checkpointmanager.repository.CheckpointRepository;
-import ru.ac.checkpointmanager.repository.PassRepository;
 import ru.ac.checkpointmanager.service.CheckpointService;
 import ru.ac.checkpointmanager.service.PassService;
 
