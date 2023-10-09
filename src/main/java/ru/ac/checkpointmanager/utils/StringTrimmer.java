@@ -5,6 +5,11 @@ import java.util.Arrays;
 import java.util.List;
 
 public final class StringTrimmer {
+    /**
+     * во всех полях типа String принятого объекта удаляет двойные пробелы,
+     * а также пробелы в начале и конце строки
+     * @param object экземпляр любой из сушностей
+     */
     public static void trimThemAll(Object object) {
         List<Field> fields = Arrays.stream(object.getClass().getDeclaredFields()).toList();
         fields.forEach(field -> {
