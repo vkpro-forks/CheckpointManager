@@ -27,7 +27,7 @@ import static ru.ac.checkpointmanager.utils.ErrorUtils.errorsList;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/authentication")
+@RequestMapping("chpman/authentication")
 @SecuritySchemes({
         @SecurityScheme(
                 name = "bearerAuth",

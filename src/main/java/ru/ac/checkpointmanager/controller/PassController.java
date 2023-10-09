@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("pass")
+@RequestMapping("chpman/pass")
 @RequiredArgsConstructor
 public class PassController {
 

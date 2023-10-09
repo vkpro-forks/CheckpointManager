@@ -33,7 +33,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
-        if (request.getServletPath().contains("/authentication")) { // содержит ли путь сервлета в запросе /authentication
+        if (request.getServletPath().contains("/chpman/authentication")) { // содержит ли путь сервлета в запросе /authentication
             filterChain.doFilter(request, response); // если содержит, вызывается doFilter для разрешения продолжения обработки запроса следующему фильтру или сервлету в цепочке
             return;
         }

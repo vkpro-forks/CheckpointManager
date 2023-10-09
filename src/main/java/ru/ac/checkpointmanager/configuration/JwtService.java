@@ -101,5 +101,8 @@ public class JwtService {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
+    // hmacShaKeyFor создает секретный ключ для HMAC (Hash-based Message Authentication Code) с использованием алгоритма SHA
+    // (Secure Hash Algorithm). HMAC - это специфический тип кода аутентификации сообщений, который использует криптографическую
+    // хеш-функцию в сочетании с секретным ключом
 }
 

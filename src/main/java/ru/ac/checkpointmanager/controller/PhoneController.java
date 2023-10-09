@@ -17,7 +17,7 @@ import java.util.UUID;
 
 
 @RestController
-@RequestMapping("/phone")
+@RequestMapping("chpman/phone")
 @RequiredArgsConstructor
 public class PhoneController {
 

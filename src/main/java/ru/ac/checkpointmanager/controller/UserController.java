@@ -20,7 +20,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("chpman/user")
 @RequiredArgsConstructor
 public class UserController {
 

@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("territory")
+@RequestMapping("chpman/territory")
 @RequiredArgsConstructor
 public class TerritoryController {
 
