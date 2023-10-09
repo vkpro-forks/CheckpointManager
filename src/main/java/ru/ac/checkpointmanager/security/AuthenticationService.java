@@ -52,7 +52,7 @@ public class AuthenticationService {
     private final Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
 
     @Transactional
-    public AuthenticationResponse createUser(UserAuthDTO userAuthDTO) {
+    public UserAuthDTO createUser(UserAuthDTO userAuthDTO) {
         logger.info("Method createUser was invoked");
         boolean userExist = userRepository.findByEmail(userAuthDTO.getEmail()).isPresent();
         if (userExist) {
@@ -94,7 +94,7 @@ public class AuthenticationService {
                 response.setRefreshToken(refreshToken);
                 response.setAccessToken(jwtToken);
 
-        return response;
+        return toUserAuthDTO(user);
     }
 
     private PhoneDTO createPhoneDTO(User user) {
