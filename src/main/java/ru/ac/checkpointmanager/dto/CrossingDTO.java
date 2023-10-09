@@ -1,6 +1,7 @@
 package ru.ac.checkpointmanager.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import ru.ac.checkpointmanager.model.enums.Direction;
 import java.time.LocalDateTime;
@@ -14,7 +15,7 @@ public class CrossingDTO {
 
     private UUID checkpointId;
 
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private LocalDateTime localDateTime;
 
     private Direction direction;

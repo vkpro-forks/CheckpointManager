@@ -40,7 +40,7 @@ public class CrossingServiceImpl implements CrossingService {
 
         //проверяем активен ли пропуск
         if (pass.getStatus() != PassStatus.ACTIVE) {
-            throw new NoActivePassException("The pass is not active");
+            throw new InactivePassException("The pass is not active");
         }
 
         Checkpoint checkpoint = checkpointRepository.findById(crossing.getCheckpoint().getId())
@@ -67,7 +67,7 @@ public class CrossingServiceImpl implements CrossingService {
                     throw new EntranceWasAlreadyException(String.format("The %s has already been used for entry.", crossing.getPass().getId()));
                 }
             } else if (crossing.getDirection() == Direction.OUT) {
-                throw new NoActivePassException(String.format("This %s has not been activated (login to activate)", crossing.getPass().getId()));
+                throw new InactivePassException(String.format("This %s has not been activated (login to activate)", crossing.getPass().getId()));
             }
 
             if (crossing.getDirection().equals(Direction.OUT)) {
@@ -76,13 +76,13 @@ public class CrossingServiceImpl implements CrossingService {
         }
 
 
-        Crossing newCrossing = new Crossing();
-        newCrossing.setPass(pass);
-        newCrossing.setCheckpoint(checkpoint);
-        newCrossing.setLocalDateTime(crossing.getLocalDateTime());
-        newCrossing.setDirection(crossing.getDirection());
+        crossing = new Crossing();
+        crossing.setPass(pass);
+        crossing.setCheckpoint(checkpoint);
+        crossing.setLocalDateTime(crossing.getLocalDateTime());
+        crossing.setDirection(crossing.getDirection());
 
-        return crossingRepository.save(newCrossing);
+        return crossingRepository.save(crossing);
     }
 
 
