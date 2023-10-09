@@ -13,6 +13,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.filter.CharacterEncodingFilter;
 
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
@@ -29,20 +30,17 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         logger.info("filter chain started");
+        CharacterEncodingFilter filter = new CharacterEncodingFilter();
+        filter.setEncoding("UTF-8");
+        filter.setForceEncoding(true);
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((authorize) ->
                         authorize
                                 .requestMatchers("/authentication/**",
-                                        "/swagger-ui.html",
-                                        "/swagger-ui/**",
-                                        "/swagger-ui/index.html",
-                                        "/swagger-resources/**",
-                                        "/v2/api-docs",
-                                        "/configuration/ui",
-                                        "/configuration/security",
-                                        "/swagger-ui.html",
-                                        "/webjars/**").permitAll()
+                                        "/swagger-ui/**", "/v2/api-docs/**",
+                                        "/error", "/webjars/**"
+                                ).permitAll()
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))

@@ -1,5 +1,10 @@
 package ru.ac.checkpointmanager.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.security.SecuritySchemes;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -23,11 +28,21 @@ import static ru.ac.checkpointmanager.utils.ErrorUtils.errorsList;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/authentication")
+@SecuritySchemes({
+        @SecurityScheme(
+                name = "bearerAuth",
+                type = SecuritySchemeType.HTTP,
+                scheme = "bearer",
+                bearerFormat = "JWT"
+        )
+})
 public class AuthController {
 
     private final AuthenticationService service;
 
     @PostMapping("/registration")
+    @Operation(summary = "registration")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> register(@RequestBody @Valid UserAuthDTO user,
                                       BindingResult result) {
 
@@ -42,11 +57,15 @@ public class AuthController {
     }
 
     @PostMapping("/login")
+    @Operation(summary = "login")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
         return ResponseEntity.ok(service.authenticate(request));
     }
 
     @PostMapping("/refresh-token")
+    @Operation(summary = "refresh token")
+    @SecurityRequirement(name = "bearerAuth")
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         service.refreshToken(request, response);
     }
