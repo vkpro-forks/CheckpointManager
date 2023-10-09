@@ -7,8 +7,8 @@ import ru.ac.checkpointmanager.dto.*;
 import ru.ac.checkpointmanager.exception.CheckpointNotFoundException;
 import ru.ac.checkpointmanager.exception.PassNotFoundException;
 import ru.ac.checkpointmanager.model.*;
-import ru.ac.checkpointmanager.repository.CheckpointRepository;
-import ru.ac.checkpointmanager.repository.PassRepository;
+import ru.ac.checkpointmanager.service.CheckpointService;
+import ru.ac.checkpointmanager.service.PassService;
 
 import java.util.Collection;
 import java.util.List;
@@ -17,8 +17,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class Mapper {
 
-    private final PassRepository passRepository;
-    private final CheckpointRepository checkpointRepository;
+    private final PassService passService;
+    private final CheckpointService checkpointService;
+
     private static final ModelMapper modelMapper = new ModelMapper();
 
     /* Checkpoint mapping */
@@ -96,15 +97,12 @@ public class Mapper {
     /* Crossing mapping */
     public Crossing toCrossing(CrossingDTO crossingDTO) {
         Crossing crossing = new Crossing();
+        Pass pass = passService.findPass(crossingDTO.getPassId());
 
-        Pass pass = passRepository.findById(crossingDTO.getPassId()).orElseThrow(
-                ()-> new PassNotFoundException("Pass not found"));
-        Checkpoint checkpoint = checkpointRepository.findById(crossingDTO.getCheckpointId()).orElseThrow(
-                ()-> new CheckpointNotFoundException("Checkpoint not found"));
+        Checkpoint checkpoint = checkpointService.findCheckpointById(crossingDTO.getCheckpointId());
 
         crossing.setPass(pass);
         crossing.setCheckpoint(checkpoint);
-        crossing.setLocalDateTime(crossingDTO.getLocalDateTime());
         crossing.setDirection(crossingDTO.getDirection());
 
         return crossing;

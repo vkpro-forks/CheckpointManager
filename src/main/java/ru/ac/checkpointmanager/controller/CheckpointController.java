@@ -19,7 +19,7 @@ import static ru.ac.checkpointmanager.utils.Mapper.*;
 @RestController
 @RequestMapping("checkpoint")
 @RequiredArgsConstructor
-public class CheckpointController {
+public class  CheckpointController {
 
     private final CheckpointService service;
 

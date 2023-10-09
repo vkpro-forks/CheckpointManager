@@ -10,9 +10,12 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import ru.ac.checkpointmanager.exception.CarBrandNotFoundException;
 import ru.ac.checkpointmanager.exception.EntranceWasAlreadyException;
-import ru.ac.checkpointmanager.exception.NoActivePassException;
+
+import ru.ac.checkpointmanager.exception.InactivePassException;
+
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.service.PassServiceImpl;
+
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -54,8 +57,8 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(NoActivePassException.class)
-    public ResponseEntity<String> handleNoActivePassException(NoActivePassException e) {
+    @ExceptionHandler(InactivePassException.class)
+    public ResponseEntity<String> handleNoActivePassException(InactivePassException e) {
         System.out.println("Handling NoActivePassException");
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
