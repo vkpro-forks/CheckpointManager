@@ -16,6 +16,8 @@ public class PassDTO {
     @NotNull()
     private UserDTO user;
 
+    String name;
+
     @NotNull()
     private PassStatus status;
 

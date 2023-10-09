@@ -57,4 +57,8 @@ public interface PassRepository extends JpaRepository<Pass, UUID> {
     @Modifying
     @Query("UPDATE Pass p SET p.status = 'COMPLETED' WHERE p.id = :id")
     void completedStatusById(@Param("id") UUID id);
+
+    @Query(value = "SELECT EXISTS (SELECT FROM user_territory WHERE user_id = :uId AND territory_id = :tId)"
+            , nativeQuery = true)
+    boolean checkUserTerritoryRelation(@Param("uId") UUID userId, @Param("tId") UUID territoryId);
 }
