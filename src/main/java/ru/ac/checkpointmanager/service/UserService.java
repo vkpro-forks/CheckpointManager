@@ -1,6 +1,7 @@
 package ru.ac.checkpointmanager.service;
 
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
+import ru.ac.checkpointmanager.dto.UserAuthDTO;
 import ru.ac.checkpointmanager.dto.UserDTO;
 
 import java.util.Collection;
@@ -8,8 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface UserService {
-
-    UserDTO createUser(UserDTO userDTO);
+//    UserAuthDTO createUser(UserAuthDTO userAuthDTO);
 
     UserDTO findById(UUID id);
 
@@ -17,7 +17,7 @@ public interface UserService {
 
     Collection<UserDTO> findByName(String name);
 
-    UserDTO updateUser(UserDTO userDTO);
+    UserAuthDTO updateUser(UserAuthDTO userAuthDTO);
 
     UserDTO updateBlockStatus(UUID id, Boolean isBlocked);
 

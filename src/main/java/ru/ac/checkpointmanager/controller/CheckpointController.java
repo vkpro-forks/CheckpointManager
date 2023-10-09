@@ -17,7 +17,7 @@ import java.util.UUID;
 import static ru.ac.checkpointmanager.utils.Mapper.*;
 
 @RestController
-@RequestMapping("checkpoint")
+@RequestMapping("chpman/checkpoint")
 @RequiredArgsConstructor
 public class  CheckpointController {
 

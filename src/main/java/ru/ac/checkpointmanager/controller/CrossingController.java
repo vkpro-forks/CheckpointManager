@@ -15,7 +15,7 @@ import ru.ac.checkpointmanager.utils.Mapper;
 
 
 @RestController
-@RequestMapping("/crossing")
+@RequestMapping("chpman/crossing")
 @RequiredArgsConstructor
 //я предполагаю, что этот эндпоинт будет вызываться когда будет открываться шлагбаум(например) и тем самым фиксироваться пересечение
 public class CrossingController {
