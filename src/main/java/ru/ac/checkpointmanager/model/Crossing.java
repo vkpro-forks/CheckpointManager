@@ -9,6 +9,7 @@ import org.hibernate.annotations.SourceType;
 import ru.ac.checkpointmanager.model.enums.Direction;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -37,4 +38,16 @@ public class Crossing {
     @Enumerated(EnumType.STRING)
     private Direction direction;
 
+    @Override
+    public boolean equals(Object o) {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+        Crossing crossing = (Crossing) o;
+        return Objects.equals(id, crossing.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }
