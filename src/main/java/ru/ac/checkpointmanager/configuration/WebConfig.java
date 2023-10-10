@@ -10,15 +10,15 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-//                .allowedOrigins("*") //эту строку нужно будет убрать, когда будем диплоить
-                .allowedOrigins(
-                        "https://checkpoint-manager.ru",  // ваш домен
-                        "https://www.checkpoint-manager.ru",
-                        "https://pipolapopala.github.io",// другие домены, если они вам нужны
-                        "http://localhost:8080"
-                )
+                .allowedOrigins("*") //эту строку нужно будет убрать, когда будем диплоить
+//                .allowedOrigins(
+//                        "https://checkpoint-manager.ru",  // ваш домен
+//                        "https://www.checkpoint-manager.ru",
+//                        "https://pipolapopala.github.io",// другие домены, если они вам нужны
+//                        "http://localhost:8080"
+//                )
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
-                .allowCredentials(true)
+//                .allowCredentials(true)
                 .maxAge(3600);
     }
 }
