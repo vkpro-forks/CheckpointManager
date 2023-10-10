@@ -64,7 +64,6 @@ public class CarBrandController {
             CarBrand carBrand = carBrandService.updateBrand(id, carBrandDetails);
             return new ResponseEntity<>(carBrand, HttpStatus.OK);
     }
-
     @GetMapping("/brands/all")
     public ResponseEntity<List<CarBrand>> getAllBrands() {
         List<CarBrand> allBrands = carBrandService.getAllBrands();
