@@ -13,7 +13,7 @@ import ru.ac.checkpointmanager.utils.ErrorUtils;
 import java.util.List;
 
 @RestController
-@RequestMapping("/car")
+@RequestMapping("chpman/car")
 @RequiredArgsConstructor
 public class CarBrandController {
 
@@ -60,7 +60,6 @@ public class CarBrandController {
             CarBrand carBrand = carBrandService.updateBrand(id, carBrandDetails);
             return new ResponseEntity<>(carBrand, HttpStatus.OK);
     }
-
     @GetMapping("/brands/all")
     public ResponseEntity<List<CarBrand>> getAllBrands() {
         List<CarBrand> allBrands = carBrandService.getAllBrands();
