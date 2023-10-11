@@ -1,9 +1,12 @@
 package ru.ac.checkpointmanager.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import ru.ac.checkpointmanager.dto.ChangePasswordRequest;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
-import ru.ac.checkpointmanager.dto.UserAuthDTO;
 import ru.ac.checkpointmanager.dto.UserDTO;
 import ru.ac.checkpointmanager.exception.DateOfBirthFormatException;
 import ru.ac.checkpointmanager.exception.PhoneNumberNotFoundException;
@@ -11,17 +14,20 @@ import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
+import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.utils.Mapper;
 
+import java.security.Principal;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
 import static ru.ac.checkpointmanager.utils.FieldsValidation.cleanPhone;
 import static ru.ac.checkpointmanager.utils.FieldsValidation.validateDOB;
-import static ru.ac.checkpointmanager.utils.Mapper.*;
+import static ru.ac.checkpointmanager.utils.Mapper.toUserDTO;
+import static ru.ac.checkpointmanager.utils.Mapper.toUsersDTO;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +36,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PhoneRepository phoneRepository;
     private final Mapper mapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public UserDTO findById(UUID id) {
@@ -59,27 +66,60 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserAuthDTO updateUser(UserAuthDTO userAuthDTO) {
-        User foundUser = userRepository.findById(userAuthDTO.getId())
+    public UserDTO updateUser(UserDTO userDTO) {
+        User foundUser = userRepository.findById(userDTO.getId())
                 .orElseThrow(() -> new UserNotFoundException(
-                        String.format("User not found [id=%s]", userAuthDTO.getId())));
-        if (!validateDOB(userAuthDTO.getDateOfBirth())) {
+                        String.format("User not found [id=%s]", userDTO.getId())));
+        if (!validateDOB(userDTO.getDateOfBirth())) {
             throw new DateOfBirthFormatException("Date of birth should not be greater than the current date");
         }
 
-        if (!findUsersPhoneNumbers(userAuthDTO.getId()).contains(cleanPhone(userAuthDTO.getMainNumber()))) {
+        if (!findUsersPhoneNumbers(userDTO.getId()).contains(cleanPhone(userDTO.getMainNumber()))) {
             throw new PhoneNumberNotFoundException(String.format
-                    ("Phone number %s does not exist", userAuthDTO.getMainNumber()));
+                    ("Phone number %s does not exist", userDTO.getMainNumber()));
         }
-        foundUser.setFullName(userAuthDTO.getFullName());
-        foundUser.setDateOfBirth(userAuthDTO.getDateOfBirth());
-        foundUser.setMainNumber(cleanPhone(userAuthDTO.getMainNumber()));
-        foundUser.setEmail(userAuthDTO.getEmail());
-        foundUser.setPassword(userAuthDTO.getPassword());
+        foundUser.setFullName(userDTO.getFullName());
+        foundUser.setDateOfBirth(userDTO.getDateOfBirth());
+        foundUser.setMainNumber(cleanPhone(userDTO.getMainNumber()));
+        foundUser.setEmail(userDTO.getEmail());
 
         userRepository.save(foundUser);
 
-        return toUserAuthDTO(foundUser);
+        return toUserDTO(foundUser);
+    }
+
+    @Override
+    public void changePassword(ChangePasswordRequest request, Principal connectedUser) { //  Principal представляет собой пользователя, который был идентифицирован в результате процесса аутентификации
+        User user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal(); // получаем юзера из connectedUser, который представляет текущего пользователя
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new IllegalStateException("Wrong password");
+        }
+
+        if (!request.getNewPassword().equals(request.getConfirmationPassword())) {
+            throw new IllegalStateException("Password are not the same");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+
+    }
+
+    @Override
+    public void changeRole(UUID id, Role role, Principal connectedUser) {
+        User existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(String.format("User not found [Id=%s]", id)));
+
+        User user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+
+        if (existingUser.getRole().equals(role)) {
+            throw new IllegalStateException(String.format("This user already has role %s", role));
+        }
+        if (role == Role.ADMIN && !user.getRole().equals(Role.ADMIN)) {
+            throw new AccessDeniedException("You do not have permission to change the role to ADMIN");
+        }
+        existingUser.setRole(role);
+        userRepository.save(existingUser);
     }
 
     //    два варианта блокировки пользователя
