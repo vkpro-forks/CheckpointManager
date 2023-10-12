@@ -14,6 +14,8 @@ import ru.ac.checkpointmanager.exception.EntranceWasAlreadyException;
 import ru.ac.checkpointmanager.exception.InactivePassException;
 
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
+import ru.ac.checkpointmanager.exception.avatar.AvatarIsTooBigException;
+import ru.ac.checkpointmanager.exception.avatar.AvatarNotFoundException;
 import ru.ac.checkpointmanager.service.PassServiceImpl;
 
 
@@ -74,5 +76,19 @@ public class GlobalExceptionHandler {
         String message = String.format("Exception %s: %s", e.getClass(), e.getMessage());
         logger.error(message);
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AvatarIsTooBigException.class)
+    public ResponseEntity<ApiError> handleAvatarIsTooBigException(AvatarIsTooBigException e) {
+        String message = String.format("Exception %s: %s", e.getClass(), e.getMessage());
+        logger.error(message);
+        return new ResponseEntity<>(new ApiError(HttpStatus.BAD_REQUEST, message), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AvatarNotFoundException.class)
+    public ResponseEntity<ApiError> handleAvatarNotFoundException(AvatarNotFoundException e) {
+        String message = String.format("Exception %s: %s", e.getClass(), e.getMessage());
+        logger.error(message);
+        return new ResponseEntity<>(new ApiError(HttpStatus.NOT_FOUND, message), HttpStatus.NOT_FOUND);
     }
 }

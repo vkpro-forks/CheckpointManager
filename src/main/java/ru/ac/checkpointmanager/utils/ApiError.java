@@ -27,4 +27,9 @@ public class ApiError {
         this.message = message;
         this.errors = Arrays.asList(error);
     }
+
+    public ApiError(HttpStatus status, String message) {
+        this.status = status;
+        this.message = message;
+    }
 }
