@@ -31,7 +31,7 @@ public class Avatar {
     private String filePath;
 
     @Column(name = "file_size")
-    private long fileSize;
+    private Long fileSize;
 
     @Column(name = "preview")
     private byte[] preview;
