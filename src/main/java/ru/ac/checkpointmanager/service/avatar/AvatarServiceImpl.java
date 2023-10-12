@@ -42,7 +42,7 @@ public class AvatarServiceImpl implements AvatarService {
         long imageSize = avatarFile.getSize();
 
         if (imageSize > (1024 * 5000)) {
-            logger.error("Image is too big for avatar. Size = {} MB", imageSize / 1024);
+            logger.error("Image is too big for avatar. Size = {} MB", imageSize / 1024 / (double) 1000);
             throw new AvatarIsTooBigException("File size exceeds maximum permitted value of 5MB");
         }
 
@@ -111,7 +111,6 @@ public class AvatarServiceImpl implements AvatarService {
 
     /**
      * Generate byte array of compressed avatar image of given file path.
-     *
      * @param filePath path to image file
      * @return byte array of compressed avatar
      * @throws IOException if file is not found
