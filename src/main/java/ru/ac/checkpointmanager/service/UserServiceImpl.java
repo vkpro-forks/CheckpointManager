@@ -112,11 +112,15 @@ public class UserServiceImpl implements UserService {
 
         User user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
 
+        if (role == Role.ADMIN && !user.getRole().equals(Role.ADMIN)) { // если НЕадмин хочет назначить кому-то админа
+            throw new AccessDeniedException("You do not have permission to change the role to ADMIN");
+        }
+
+        if (existingUser.getRole().equals(Role.ADMIN) && !user.getRole().equals(Role.ADMIN)) { // если НЕадмин пытается сменить роль админа на любую другую
+            throw new AccessDeniedException("You do not have permission to change the role ADMIN to another role");
+        }
         if (existingUser.getRole().equals(role)) {
             throw new IllegalStateException(String.format("This user already has role %s", role));
-        }
-        if (role == Role.ADMIN && !user.getRole().equals(Role.ADMIN)) {
-            throw new AccessDeniedException("You do not have permission to change the role to ADMIN");
         }
         existingUser.setRole(role);
         userRepository.save(existingUser);
