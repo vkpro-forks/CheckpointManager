@@ -1,6 +1,7 @@
 package ru.ac.checkpointmanager.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -26,6 +27,7 @@ import static ru.ac.checkpointmanager.utils.StringTrimmer.trimThemAll;
  * @author Dmitry Ldv236
  */
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class PassServiceImpl implements PassService{
     private final Logger logger = LoggerFactory.getLogger(PassServiceImpl.class);
@@ -33,6 +35,8 @@ public class PassServiceImpl implements PassService{
     private final CrossingRepository crossingRepository;
     private final TerritoryService territoryService;
     private final UserService userService;
+
+    private int hourForLogInScheduledCheck;
 
     @Override
     public Pass addPass(Pass pass) {
@@ -223,6 +227,10 @@ public class PassServiceImpl implements PassService{
 //    @Scheduled(cron = "0 0/1 * * * *")
     @Scheduled(fixedDelay = 5_000L)
     public void checkPassesOnEndTimeReached() {
+        if (LocalDateTime.now().getHour() != hourForLogInScheduledCheck) {
+            hourForLogInScheduledCheck = LocalDateTime.now().getHour();
+            log.debug("Scheduled method 'checkPassesOnEndTimeReached' continues to work");
+        }
         List<Pass> passes = repository.findByEndTimeIsBeforeAndStatusLike(
                 LocalDateTime.now(), PassStatus.ACTIVE);
         if (passes.isEmpty()) {return;}

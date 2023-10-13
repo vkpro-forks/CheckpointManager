@@ -1,6 +1,7 @@
 package ru.ac.checkpointmanager.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
@@ -16,6 +17,7 @@ import java.util.UUID;
 import static ru.ac.checkpointmanager.utils.StringTrimmer.trimThemAll;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class TerritoryServiceImpl implements TerritoryService {
 
@@ -70,6 +72,12 @@ public class TerritoryServiceImpl implements TerritoryService {
     @Override
     public void attachUserToTerritory(UUID territoryId, UUID userId) {
 
+        if (repository.checkUserTerritoryRelation(userId, territoryId)) {
+            String message = String.format("User [%s] and territory [%s] are already connected");
+            log.warn(message);
+            throw new IllegalArgumentException(message);
+        }
+
         Territory territory = repository.findById(territoryId).orElseThrow(
                 () -> new TerritoryNotFoundException(String.format("Territory not found [Id=%s]", territoryId)));
         User user = userRepository.findById(userId).orElseThrow(
@@ -90,6 +98,12 @@ public class TerritoryServiceImpl implements TerritoryService {
 
     @Override
     public void detachUserFromTerritory(UUID territoryId, UUID userId) {
+
+        if (!repository.checkUserTerritoryRelation(userId, territoryId)) {
+            String message = String.format("User [%s] and territory [%s] have no connection");
+            log.warn(message);
+            throw new IllegalArgumentException(message);
+        }
 
         Territory territory = repository.findById(territoryId).orElseThrow(
                 () -> new TerritoryNotFoundException(String.format("Territory not found [Id=%s]", territoryId)));

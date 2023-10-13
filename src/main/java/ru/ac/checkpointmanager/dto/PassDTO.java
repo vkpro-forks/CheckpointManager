@@ -30,11 +30,11 @@ public class PassDTO {
     private String note;
 
     @NotNull()
-    @FutureOrPresent
+    @Future
     private LocalDateTime startTime;
 
     @NotNull()
-    @FutureOrPresent
+    @Future
     private LocalDateTime endTime;
 
 //    private Car car;
