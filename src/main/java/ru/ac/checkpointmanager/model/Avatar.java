@@ -21,18 +21,13 @@ public class Avatar {
      * UUID of Entity related to the avatar
      */
     @Id
-    @Column(name = "avatar_holder")
     private UUID avatarHolder;
 
-    @Column(name = "media_type")
     private String mediaType;
 
-    @Column(name = "file_path")
     private String filePath;
 
-    @Column(name = "file_size")
     private Long fileSize;
 
-    @Column(name = "preview")
     private byte[] preview;
 }
