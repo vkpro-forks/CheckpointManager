@@ -53,13 +53,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(EntranceWasAlreadyException.class)
     public ResponseEntity<String> handleEntranceWasAlreadyException(EntranceWasAlreadyException e) {
-        System.out.println("Handling EntranceWasAlreadyException");
+        logger.error("Handling EntranceWasAlreadyException");
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(InactivePassException.class)
     public ResponseEntity<String> handleNoActivePassException(InactivePassException e) {
-        System.out.println("Handling NoActivePassException");
+        logger.error("Handling NoActivePassException");
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
