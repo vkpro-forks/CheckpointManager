@@ -1,9 +1,11 @@
 package ru.ac.checkpointmanager.controller;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.ac.checkpointmanager.dto.PassDTO;
@@ -16,8 +18,10 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("pass")
+@RequestMapping("chpman/pass")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
+@PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
 public class PassController {
 
     private final PassService service;
@@ -98,6 +102,13 @@ public class PassController {
 
         Pass activatedPass = service.activateCancelledPass(id);
         return ResponseEntity.ok(mapper.toPassDTO(activatedPass));
+    }
+
+    @PatchMapping("/{id}/unwarning")
+    public ResponseEntity<PassDTO> unWarningPass(@PathVariable UUID id) {
+
+        Pass completedPass = service.unWarningPass(id);
+        return ResponseEntity.ok(mapper.toPassDTO(completedPass));
     }
 
     /* DELETE */

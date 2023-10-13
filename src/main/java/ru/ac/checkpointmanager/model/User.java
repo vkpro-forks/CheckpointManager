@@ -2,26 +2,23 @@ package ru.ac.checkpointmanager.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import jakarta.validation.constraints.Email;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import ru.ac.checkpointmanager.model.enums.UserRole;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import ru.ac.checkpointmanager.model.enums.Role;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
-@Entity
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
-@EqualsAndHashCode
+@Entity
 @Table(name = "users")
-public class User {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -29,36 +26,31 @@ public class User {
     private UUID id;
 
     @Column(name = "full_name")
-    @NotEmpty
-    @Size(min = 2, max = 100)
-    @Pattern(regexp = "(?:[А-ЯA-Z][а-яa-z]*)(?:\\s+[А-ЯA-Z][а-яa-z]*)*",
-            message = "The name has to start with a capital letter and contain only Latin or Cyrillic letters.\n" +
-                    "Example: \"Ivanov Ivan Jovanovich\"")
     private String fullName;
 
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
 
-    @NotEmpty
-    @Size(min = 6, max = 20)
+    @Column(name = "main_number")
     private String mainNumber;
 
     @Email
-    @NotEmpty(message = "Email should not be empty")
+    @Column(name = "email")
     private String email;
 
-    @NotEmpty
-    @Pattern(regexp = "^(?!.*\\s).+$", message = "Field should not contain spaces")//чтоб пароль без пробелов был
-    @Size(min = 6, max = 20)
+    @Column(name = "password")
     private String password;
 
     @Column(name = "is_blocked")
     private Boolean isBlocked;
 
     @Enumerated(EnumType.STRING)
-    private UserRole role;
+    private Role role;
 
     @OneToMany(mappedBy = "user")
+    private List<Token> tokens;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Phone> numbers;
 
     @Column(name = "added_at")
@@ -74,5 +66,53 @@ public class User {
     @JsonIgnore
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Pass> pass;
-}
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.name()));
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return !isBlocked;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+}

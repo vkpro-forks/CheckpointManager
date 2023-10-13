@@ -1,11 +1,10 @@
 package ru.ac.checkpointmanager.controller.car;
 
-import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import ru.ac.checkpointmanager.model.car.Car;
 import ru.ac.checkpointmanager.model.car.CarBrand;
@@ -19,8 +18,10 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/car")
+@RequestMapping("chpman/car")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
+@PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
 public class CarController {
 
     private final CarService carService;
