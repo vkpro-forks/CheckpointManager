@@ -1,14 +1,17 @@
 package ru.ac.checkpointmanager.controller;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import ru.ac.checkpointmanager.dto.TerritoryDTO;
+import ru.ac.checkpointmanager.dto.UserAuthDTO;
 import ru.ac.checkpointmanager.dto.UserDTO;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
-import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.service.UserService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
 
@@ -18,66 +21,57 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("chpman/user")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 public class UserController {
 
     private final UserService userService;
 
-
-    @PostMapping("/authentication")
-    public ResponseEntity<?> createUser(@Valid @RequestBody UserDTO userDTO, BindingResult result) {
-        if (result.hasErrors()) {
-            return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
-        }
-
-        try {
-            UserDTO createdUser = userService.createUser(userDTO);
-            return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
-        } catch (RuntimeException e) {
-            // блок отлавливает эксепшены и пишет месседжы, которые прописаны в сервисе
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("{id}")
     public ResponseEntity<UserDTO> findUserById(@PathVariable UUID id) {
         Optional<UserDTO> user = Optional.ofNullable(userService.findById(id));
         return user.map(ResponseEntity::ok).orElse(ResponseEntity.noContent().build());
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/{userId}/territories")
     public ResponseEntity<List<TerritoryDTO>> getTerritoriesByUser(@PathVariable UUID userId) {
         List<TerritoryDTO> territories = userService.findTerritoriesByUserId(userId);
         return territories.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(territories);
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/name")
     public ResponseEntity<Collection<UserDTO>> findUserByName(@RequestParam String name) {
         Collection<UserDTO> foundUsers = userService.findByName(name);
         return foundUsers.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(foundUsers);
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping()
     public ResponseEntity<Collection<UserDTO>> getAll() {
         Collection<UserDTO> foundUsers = userService.getAll();
         return foundUsers.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(foundUsers);
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/numbers/{id}")
     public ResponseEntity<Collection<String>> findUsersPhoneNumbers(@PathVariable UUID id) {
         Collection<String> numbers = userService.findUsersPhoneNumbers(id);
         return numbers.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(numbers);
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER')")
     @PutMapping
-    public ResponseEntity<?> updateUser(@Valid @RequestBody UserDTO userDTO, BindingResult result) {
+    public ResponseEntity<?> updateUser(@Valid @RequestBody UserAuthDTO userAuthDTO, BindingResult result) {
         if (result.hasErrors()) {
             return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
         }
 
         try {
-            UserDTO changedUser = userService.updateUser(userDTO);
+            UserAuthDTO changedUser = userService.updateUser(userAuthDTO);
             return new ResponseEntity<>(changedUser, HttpStatus.OK);
 
         } catch (RuntimeException e) {
@@ -88,6 +82,7 @@ public class UserController {
 
     //    method with limited access
     //    1 variate
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @PatchMapping("{id}")
     public ResponseEntity<?> updateBlockStatus(@PathVariable UUID id, @RequestParam Boolean isBlocked) {
         try {
@@ -100,6 +95,7 @@ public class UserController {
 
     //    method with limited access
     //    2 variate
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @PatchMapping("/block/{id}")
     public ResponseEntity<?> blockById(@PathVariable UUID id) {
         try {
@@ -112,6 +108,7 @@ public class UserController {
 
     //    method with limited access
     //    2 variate
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @PatchMapping("/unblock/{id}")
     public ResponseEntity<?> unblockById(@PathVariable UUID id) {
         try {
@@ -123,6 +120,7 @@ public class UserController {
     }
     //choose variate witch best for frontend
 
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER')")
     @DeleteMapping("{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
         UserDTO foundUser = userService.findById(id);

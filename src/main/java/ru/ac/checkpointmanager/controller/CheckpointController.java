@@ -1,8 +1,10 @@
 package ru.ac.checkpointmanager.controller;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.ac.checkpointmanager.dto.CheckpointDTO;
@@ -17,8 +19,10 @@ import java.util.UUID;
 import static ru.ac.checkpointmanager.utils.Mapper.*;
 
 @RestController
-@RequestMapping("checkpoint")
+@RequestMapping("chpman/checkpoint")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
+@PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
 public class  CheckpointController {
 
     private final CheckpointService service;

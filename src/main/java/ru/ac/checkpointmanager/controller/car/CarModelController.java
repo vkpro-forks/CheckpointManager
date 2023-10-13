@@ -1,29 +1,25 @@
 package ru.ac.checkpointmanager.controller.car;
 
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.ConstraintViolationException;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import ru.ac.checkpointmanager.exception.CarBrandNotFoundException;
-import ru.ac.checkpointmanager.exception.CarModelNotFoundException;
 import ru.ac.checkpointmanager.model.car.CarModel;
 import ru.ac.checkpointmanager.service.car.CarBrandService;
 import ru.ac.checkpointmanager.service.car.CarModelService;
-import ru.ac.checkpointmanager.utils.ApiError;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/car")
+@RequestMapping("chpman/car")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
+@PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
 public class CarModelController {
 
     private final CarModelService carModelService;
