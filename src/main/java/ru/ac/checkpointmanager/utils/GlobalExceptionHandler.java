@@ -2,30 +2,24 @@ package ru.ac.checkpointmanager.utils;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import ru.ac.checkpointmanager.exception.CarBrandNotFoundException;
 import ru.ac.checkpointmanager.exception.EntranceWasAlreadyException;
-
 import ru.ac.checkpointmanager.exception.InactivePassException;
-
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.avatar.AvatarIsTooBigException;
 import ru.ac.checkpointmanager.exception.avatar.AvatarNotFoundException;
-import ru.ac.checkpointmanager.service.PassServiceImpl;
-
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @ControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
-
-    private final Logger logger = LoggerFactory.getLogger(PassServiceImpl.class);
 
     @ExceptionHandler(CarBrandNotFoundException.class)
     public ResponseEntity<String> handleCarBrandNotFoundException(CarBrandNotFoundException e) {
@@ -67,28 +61,28 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(TerritoryNotFoundException.class)
     public ResponseEntity<String> handleTerritoryNotFoundException(TerritoryNotFoundException e) {
-        logger.error("Handling TerritoryNotFoundException");
+        log.error("Handling TerritoryNotFoundException");
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException e) {
         String message = String.format("Exception %s: %s", e.getClass(), e.getMessage());
-        logger.error(message);
+        log.error(message);
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(AvatarIsTooBigException.class)
     public ResponseEntity<ApiError> handleAvatarIsTooBigException(AvatarIsTooBigException e) {
         String message = String.format("Exception %s: %s", e.getClass(), e.getMessage());
-        logger.error(message);
+        log.error(message);
         return new ResponseEntity<>(new ApiError(HttpStatus.BAD_REQUEST, message), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(AvatarNotFoundException.class)
     public ResponseEntity<ApiError> handleAvatarNotFoundException(AvatarNotFoundException e) {
         String message = String.format("Exception %s: %s", e.getClass(), e.getMessage());
-        logger.error(message);
+        log.error(message);
         return new ResponseEntity<>(new ApiError(HttpStatus.NOT_FOUND, message), HttpStatus.NOT_FOUND);
     }
 }

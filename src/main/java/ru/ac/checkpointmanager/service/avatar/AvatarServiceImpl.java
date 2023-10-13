@@ -2,8 +2,7 @@ package ru.ac.checkpointmanager.service.avatar;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,9 +27,8 @@ import static java.nio.file.StandardOpenOption.CREATE_NEW;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class AvatarServiceImpl implements AvatarService {
-    private final Logger logger = LoggerFactory.getLogger(AvatarServiceImpl.class);
-
     private final AvatarRepository repository;
 
     @Value("${avatars.dir.path}")
@@ -42,11 +40,11 @@ public class AvatarServiceImpl implements AvatarService {
         long imageSize = avatarFile.getSize();
 
         if (imageSize > (1024 * 5000)) {
-            logger.error("Image is too big for avatar. Size = {} MB", imageSize / 1024 / (double) 1000);
+            log.error("Image is too big for avatar. Size = {} MB", imageSize / 1024 / (double) 1000);
             throw new AvatarIsTooBigException("File size exceeds maximum permitted value of 5MB");
         }
 
-        logger.debug("Creating directory if absent, deleting image f already exists");
+        log.debug("Creating directory if absent, deleting image f already exists");
         Path filePath = Path.of(avatarsDir, entityID + "." +
                 getExtension(avatarFile.getOriginalFilename()));
         Files.createDirectories(filePath.getParent());
@@ -59,7 +57,7 @@ public class AvatarServiceImpl implements AvatarService {
         ) {
             bis.transferTo(bos);
         }
-        logger.debug("Filling avatar object with values and saving in repository");
+        log.debug("Filling avatar object with values and saving in repository");
         Avatar avatar = new Avatar();
         avatar.setAvatarHolder(entityID);
         avatar.setFilePath(filePath.toString());
@@ -94,7 +92,7 @@ public class AvatarServiceImpl implements AvatarService {
         try {
             Files.delete(filePath);
         } catch (IOException e) {
-            logger.error("I/O error occurred");
+            log.error("I/O error occurred");
         }
         repository.delete(avatar);
     }
@@ -105,7 +103,7 @@ public class AvatarServiceImpl implements AvatarService {
         if (avatar.isPresent()) {
             return avatar.get();
         }
-        logger.info("Entity with id = {} has no avatar", entityID);
+        log.info("Entity with UUID = {} has no avatar", entityID);
         throw new AvatarNotFoundException("Avatar for this entity is not uploaded yet");
     }
 
@@ -124,7 +122,7 @@ public class AvatarServiceImpl implements AvatarService {
         ) {
             BufferedImage image = ImageIO.read(bis);
 
-            logger.debug("Creating avatar preview and return result of it as byte array");
+            log.debug("Creating avatar preview and return result of it as byte array");
             int height = image.getHeight() / (image.getWidth() / 100);
             BufferedImage preview = new BufferedImage(100, height, image.getType());
             Graphics2D graphics = preview.createGraphics();
@@ -145,6 +143,6 @@ public class AvatarServiceImpl implements AvatarService {
     }
 
     private void logWhenMethodInvoked(String methodName) {
-        logger.info("Method '{}' was invoked", methodName);
+        log.info("Method '{}' was invoked", methodName);
     }
 }
