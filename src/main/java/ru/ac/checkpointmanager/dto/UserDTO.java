@@ -1,5 +1,6 @@
 package ru.ac.checkpointmanager.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
@@ -33,6 +34,7 @@ public class UserDTO {
     @NotEmpty(message = "Email should not be empty")
     private String email;
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Boolean isBlocked;
 }
 
