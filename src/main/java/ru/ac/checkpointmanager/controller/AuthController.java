@@ -12,7 +12,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.dto.UserAuthDTO;
 import ru.ac.checkpointmanager.security.AuthenticationRequest;
 import ru.ac.checkpointmanager.security.AuthenticationResponse;
@@ -43,15 +46,12 @@ public class AuthController {
     public ResponseEntity<?> register(@RequestBody @Valid UserAuthDTO user,
                                       BindingResult result) {
 
-        if (result.hasErrors())
+        if (result.hasErrors()) {
             return new ResponseEntity<>(errorsList(result), HttpStatus.BAD_REQUEST);
-
-        try {
-            return new ResponseEntity<>(service.createUser(user), HttpStatus.CREATED);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
         }
+        return new ResponseEntity<>(service.createUser(user), HttpStatus.CREATED);
     }
+
 
     @PostMapping("/login")
     @Operation(summary = "login")
