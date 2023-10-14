@@ -80,6 +80,12 @@ public class TerritoryServiceImpl implements TerritoryService {
     public void attachUserToTerritory(UUID territoryId, UUID userId) {
         log.info("Method {}, user - {}, terr - {}", MethodLog.getMethodName(), userId, territoryId);
 
+        if (repository.checkUserTerritoryRelation(userId, territoryId)) {
+            String message = String.format("User [%s] and territory [%s] are already connected");
+            log.warn(message);
+            throw new IllegalArgumentException(message);
+        }
+
         Territory territory = repository.findById(territoryId).orElseThrow(
                 () -> new TerritoryNotFoundException(String.format("Territory not found [Id=%s]", territoryId)));
         User user = userRepository.findById(userId).orElseThrow(
@@ -102,6 +108,12 @@ public class TerritoryServiceImpl implements TerritoryService {
     @Override
     public void detachUserFromTerritory(UUID territoryId, UUID userId) {
         log.info("Method {}, user - {}, terr - {}", MethodLog.getMethodName(), userId, territoryId);
+
+        if (!repository.checkUserTerritoryRelation(userId, territoryId)) {
+            String message = String.format("User [%s] and territory [%s] have no connection");
+            log.warn(message);
+            throw new IllegalArgumentException(message);
+        }
 
         Territory territory = repository.findById(territoryId).orElseThrow(
                 () -> new TerritoryNotFoundException(String.format("Territory not found [Id=%s]", territoryId)));

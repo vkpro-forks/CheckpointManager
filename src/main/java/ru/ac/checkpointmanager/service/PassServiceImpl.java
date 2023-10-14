@@ -32,6 +32,8 @@ public class PassServiceImpl implements PassService{
     private final PassRepository repository;
     private final CrossingRepository crossingRepository;
 
+    private int hourForLogInScheduledCheck;
+
     @Override
     public Pass addPass(Pass pass) {
         log.info("Method {}, UUID - {}", MethodLog.getMethodName(), pass.getId());
@@ -109,6 +111,12 @@ public class PassServiceImpl implements PassService{
 
         if (!pass.getStatus().equals(PassStatus.ACTIVE)) {
             throw new IllegalStateException("You can only cancel an active Pass");
+        }
+
+        if (crossingRepository.findCrossingsByPassId(id).size() > 0) {
+            repository.completedStatusById(id);
+            pass.setStatus(PassStatus.COMPLETED);
+            return pass;
         }
 
         repository.cancelById(id);
@@ -210,8 +218,13 @@ public class PassServiceImpl implements PassService{
      * После этого сохраняет пропуск и вызывает метод оповещения фронтенда об изменениях (пока нет :).
      */
 //    @Scheduled(cron = "0 0/1 * * * *")
-    @Scheduled(fixedDelay = 5_000L)
+    @Scheduled(fixedDelay = 10_000L)
     public void checkPassesOnEndTimeReached() {
+        if (LocalDateTime.now().getHour() != hourForLogInScheduledCheck) {
+            hourForLogInScheduledCheck = LocalDateTime.now().getHour();
+            log.debug("Scheduled method 'checkPassesOnEndTimeReached' continues to work");
+        }
+      
         List<Pass> passes = repository.findByEndTimeIsBeforeAndStatusLike(LocalDateTime.now(), PassStatus.ACTIVE);
         if (passes.isEmpty()) {return;}
 
