@@ -74,7 +74,7 @@ public class UserController {
         return new ResponseEntity<>(changedUser, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @PatchMapping("/password")
     public ResponseEntity<?> changePassword(@RequestBody @Valid ChangePasswordRequest request,
                                             BindingResult result,
