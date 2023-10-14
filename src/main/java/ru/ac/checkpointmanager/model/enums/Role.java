@@ -1,8 +1,11 @@
 package ru.ac.checkpointmanager.model.enums;
 
-public enum UserRole {
+import lombok.Getter;
+
+@Getter
+public enum Role {
     ADMIN,
+    MANAGER,
     SECURITY,
-    USER,
-    GUEST
+    USER
 }

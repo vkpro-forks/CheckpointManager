@@ -10,7 +10,7 @@ spring:
     properties:
       hibernate: 
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        show_sql: true
+        show_sql: false
     hibernate:
       ddl-auto: validate
   liquibase:
@@ -19,3 +19,10 @@ spring:
     default-schema: public
     drop-first: false
     enabled: true
+application:
+  security:
+    jwt:
+      secret-key: 8790D58F7205C4C250CD67DD6D9B6F8B20D2E928FFAA6D4A2BEB2AD2189B01D1
+      expiration: 86400000 # a day
+      refresh-token:
+        expiration: 604800000 # 7 days

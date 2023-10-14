@@ -9,6 +9,7 @@ import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
+import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -26,6 +27,7 @@ public class TerritoryServiceImpl implements TerritoryService {
 
     @Override
     public Territory addTerritory(Territory territory) {
+        log.info("Method {}, UUID - {}", MethodLog.getMethodName(), territory.getId());
         trimThemAll(territory);
         territory.setAddedAt(LocalDate.now());
         return repository.save(territory);
@@ -33,12 +35,14 @@ public class TerritoryServiceImpl implements TerritoryService {
 
     @Override
     public Territory findTerritoryById(UUID id) {
+        log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), id);
         return repository.findById(id).orElseThrow(
                 () -> new TerritoryNotFoundException(String.format("Territory not found [id=%s]", id)));
     }
 
     @Override
     public List<User> findUsersByTerritoryId(UUID territoryId) {
+        log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), territoryId);
         List<User> users = repository.findUsersByTerritoryId(territoryId);
         if (users.isEmpty()) {
             throw new UserNotFoundException(String.format("Users for Territory not found [territory_id=%s]", territoryId));
@@ -48,16 +52,19 @@ public class TerritoryServiceImpl implements TerritoryService {
 
     @Override
     public List<Territory> findTerritoriesByName(String name) {
+        log.debug("Method {}, name - {}", MethodLog.getMethodName(), name);
         return repository.findTerritoriesByNameContainingIgnoreCase(name);
     }
 
     @Override
     public List<Territory> findAllTerritories() {
+        log.debug("Method {}", MethodLog.getMethodName());
         return repository.findAll();
     }
 
     @Override
     public Territory updateTerritory(Territory territory) {
+        log.info("Method {}, UUID - {}", MethodLog.getMethodName(), territory.getId());
         trimThemAll(territory);
         Territory foundTerritory = repository.findById(territory.getId())
                 .orElseThrow(() -> new TerritoryNotFoundException
@@ -71,6 +78,7 @@ public class TerritoryServiceImpl implements TerritoryService {
 
     @Override
     public void attachUserToTerritory(UUID territoryId, UUID userId) {
+        log.info("Method {}, user - {}, terr - {}", MethodLog.getMethodName(), userId, territoryId);
 
         if (repository.checkUserTerritoryRelation(userId, territoryId)) {
             String message = String.format("User [%s] and territory [%s] are already connected");
@@ -89,6 +97,7 @@ public class TerritoryServiceImpl implements TerritoryService {
 
     @Override
     public void deleteTerritoryById(UUID id) {
+        log.info("Method {}, UUID - {}", MethodLog.getMethodName(), id);
 
         if (repository.findById(id).isEmpty()) {
             throw new TerritoryNotFoundException(String.format("Territory not found [Id=%s]", id));
@@ -98,6 +107,7 @@ public class TerritoryServiceImpl implements TerritoryService {
 
     @Override
     public void detachUserFromTerritory(UUID territoryId, UUID userId) {
+        log.info("Method {}, user - {}, terr - {}", MethodLog.getMethodName(), userId, territoryId);
 
         if (!repository.checkUserTerritoryRelation(userId, territoryId)) {
             String message = String.format("User [%s] and territory [%s] have no connection");

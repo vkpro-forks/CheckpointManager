@@ -2,8 +2,6 @@ package ru.ac.checkpointmanager.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import ru.ac.checkpointmanager.exception.PassNotFoundException;
@@ -30,20 +28,18 @@ import static ru.ac.checkpointmanager.utils.StringTrimmer.trimThemAll;
 @Slf4j
 @RequiredArgsConstructor
 public class PassServiceImpl implements PassService{
-    private final Logger logger = LoggerFactory.getLogger(PassServiceImpl.class);
+
     private final PassRepository repository;
     private final CrossingRepository crossingRepository;
-    private final TerritoryService territoryService;
-    private final UserService userService;
 
     private int hourForLogInScheduledCheck;
 
     @Override
     public Pass addPass(Pass pass) {
+        log.info("Method {}, UUID - {}", MethodLog.getMethodName(), pass.getId());
         checkUserTerritoryRelation(pass);
         checkOverlapTime(pass);
 
-        logger.info(String.format("Invoked method %s", MethodLog.getMethodName()));
         trimThemAll(pass);
         pass.setStatus(PassStatus.ACTIVE);
         return repository.save(pass);
@@ -51,20 +47,20 @@ public class PassServiceImpl implements PassService{
 
     @Override
     public List<Pass> findPasses() {
-        logger.info(String.format("Invoked method %s", MethodLog.getMethodName()));
+        log.debug("Method {}", MethodLog.getMethodName());
         return repository.findAll();
     }
 
     @Override
     public Pass findPass(UUID id) {
-        logger.info(String.format("Invoked method %s [%s]", MethodLog.getMethodName(), id));
+        log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), id);
         return repository.findById(id).orElseThrow(
                 () -> new PassNotFoundException(String.format("Pass not found [userId=%s]", id)));
     }
 
     @Override
     public List<Pass> findPassesByUser(UUID userId) {
-        logger.info(String.format("Invoked method %s [%s]", MethodLog.getMethodName(), userId));
+        log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), userId);
         List<Pass> foundPasses = repository.findPassesByUserIdOrderByAddedAtDesc(userId);
 
         if (foundPasses.isEmpty()) {
@@ -75,7 +71,7 @@ public class PassServiceImpl implements PassService{
 
     @Override
     public List<Pass> findPassesByTerritory(UUID terId) {
-        logger.info(String.format("Invoked method %s [%s]", MethodLog.getMethodName(), terId));
+        log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), terId);
         List<Pass> foundPasses = repository.findPassesByTerritoryIdOrderByAddedAtDesc(terId);
 
         if (foundPasses.isEmpty()) {
@@ -86,10 +82,10 @@ public class PassServiceImpl implements PassService{
 
     @Override
     public Pass updatePass(Pass pass) {
+        log.info("Method {}, UUID - {}", MethodLog.getMethodName(), pass.getId());
         checkUserTerritoryRelation(pass);
         checkOverlapTime(pass);
 
-        logger.info(String.format("Invoked method %s [%s]", MethodLog.getMethodName(), pass.getId()));
         trimThemAll(pass);
         Pass foundPass = findPass(pass.getId());
 
@@ -110,7 +106,7 @@ public class PassServiceImpl implements PassService{
 
     @Override
     public Pass cancelPass(UUID id) {
-        logger.info(String.format("Invoked method %s [%s]", MethodLog.getMethodName(), id));
+        log.info("Method {}, UUID - {}", MethodLog.getMethodName(), id);
         Pass pass = findPass(id);
 
         if (!pass.getStatus().equals(PassStatus.ACTIVE)) {
@@ -130,7 +126,7 @@ public class PassServiceImpl implements PassService{
 
     @Override
     public Pass activateCancelledPass(UUID id) {
-        logger.info(String.format("Invoked method %s [%s]", MethodLog.getMethodName(), id));
+        log.info("Method {}, UUID - {}", MethodLog.getMethodName(), id);
         Pass pass = findPass(id);
 
         if (!pass.getStatus().equals(PassStatus.CANCELLED)) {
@@ -148,7 +144,7 @@ public class PassServiceImpl implements PassService{
 
     @Override
     public Pass unWarningPass(UUID id) {
-        logger.info(String.format("Invoked method %s [%s]", MethodLog.getMethodName(), id));
+        log.info("Method {}, UUID - {}", MethodLog.getMethodName(), id);
         Pass pass = findPass(id);
 
         if (!pass.getStatus().equals(PassStatus.WARNING)) {
@@ -163,7 +159,7 @@ public class PassServiceImpl implements PassService{
 
     @Override
     public void deletePass(UUID id) {
-        logger.info(String.format("Invoked method %s [%s]", MethodLog.getMethodName(), id));
+        log.info("Method {}, UUID - {}", MethodLog.getMethodName(), id);
         if (repository.findById(id).isEmpty()) {
             throw new PassNotFoundException(String.format("Pass not found [Id=%s]", id));
         }
@@ -176,21 +172,12 @@ public class PassServiceImpl implements PassService{
      * т.е. не имеет права создавать пропуска для этой территории
      */
     private void checkUserTerritoryRelation(Pass newPass) {
-        //два способа - через лист территорий, найденных по userId,
-        // и проверка соответствия id в связующей таблице sql-запросом
-        //возможна разница в производительности, пока отставлю оба
-//        Territory territory = newPass.getTerritory();
-//
-//        List<Territory> territories = toTerritories(userService.findTerritoriesByUserId(newPass.getUser().getId()));
-//        if (!territories.contains(territory)) {
-//            throw new TerritoryNotFoundException("The user does not have authority for this territory");
-//        }
         UUID userId = newPass.getUser().getId();
         UUID territoryId = newPass.getTerritory().getId();
         if (!repository.checkUserTerritoryRelation(userId, territoryId)) {
             String message = String.format("Reject operation: user [%s] not have permission to create passes " +
                     "for this territory [%s]", userId, territoryId);
-            logger.warn(message);
+            log.warn(message);
             throw new IllegalArgumentException(message);
         }
     }
@@ -218,7 +205,7 @@ public class PassServiceImpl implements PassService{
         if (overlapPass.isPresent()) {
             String message = String.format("Reject operation: user [%s] already has such a pass with " +
                             "overlapping time [%s]", newPass.getUser().getId(), overlapPass.get().getId());
-            logger.info(message);
+            log.debug(message);
             throw new IllegalArgumentException(message);
         }
     }
@@ -237,13 +224,11 @@ public class PassServiceImpl implements PassService{
             hourForLogInScheduledCheck = LocalDateTime.now().getHour();
             log.debug("Scheduled method 'checkPassesOnEndTimeReached' continues to work");
         }
-        List<Pass> passes = repository.findByEndTimeIsBeforeAndStatusLike(
-                LocalDateTime.now(), PassStatus.ACTIVE);
+      
+        List<Pass> passes = repository.findByEndTimeIsBeforeAndStatusLike(LocalDateTime.now(), PassStatus.ACTIVE);
         if (passes.isEmpty()) {return;}
 
-        logger.info(String.format("Invoked method %s, endTime reached on %d active pass(es)"
-                , MethodLog.getMethodName()
-                , passes.size()));
+        log.debug("Method {}, endTime reached on {} active pass(es)", MethodLog.getMethodName(), passes.size());
 
         for (Pass pass : passes) {
             List<Crossing> passCrossings = crossingRepository.findCrossingsByPassId(pass.getId());
@@ -262,13 +247,9 @@ public class PassServiceImpl implements PassService{
             }
             repository.save(pass);
 
-            logger.info(String.format("For Pass [id %s] changed status on %s"
-                    , pass.getId()
-                    , pass.getStatus()));
-            //вот здесь
+            log.info("Pass [UUID - {}], exist {} crossings, changed status on {}",
+                    pass.getId(),passes.size(), pass.getStatus());
+            //отправка сообщения на фронт о том, что данные пропусков изменены?
         }
-        //вызов метода отправки сообщения на фронт о том, что данные пропусков изменены
-        //вопрос - на какой фронт? Не всем же клиентам, а только тем, к чьим территориям относились пропуска!
-        //тогда этот вызов должен быть сразу после сохранения пропуска, т.е. отправка по каждому измененному пропуску
     }
 }

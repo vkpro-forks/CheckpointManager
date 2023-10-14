@@ -1,15 +1,16 @@
 package ru.ac.checkpointmanager.service;
 
+import ru.ac.checkpointmanager.dto.ChangePasswordRequest;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.UserDTO;
+import ru.ac.checkpointmanager.model.enums.Role;
 
+import java.security.Principal;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
 public interface UserService {
-
-    UserDTO createUser(UserDTO userDTO);
 
     UserDTO findById(UUID id);
 
@@ -18,6 +19,10 @@ public interface UserService {
     Collection<UserDTO> findByName(String name);
 
     UserDTO updateUser(UserDTO userDTO);
+
+    void changePassword(ChangePasswordRequest request, Principal connectedUser);
+
+    void changeRole(UUID id, Role role, Principal connectedUser);
 
     UserDTO updateBlockStatus(UUID id, Boolean isBlocked);
 

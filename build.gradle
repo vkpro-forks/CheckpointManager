@@ -6,7 +6,7 @@ plugins {
 
 
 group = 'ru.ac'
-version = '0.0.14-SNAPSHOT-TEST'
+version = '0.1.0-SNAPSHOT-TEST'
 
 java {
     sourceCompatibility = '17'
@@ -19,19 +19,26 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.security:spring-security-test'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
     implementation 'org.liquibase:liquibase-core:4.23.1'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
-    testImplementation 'org.hamcrest:hamcrest-library:2.2'
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
     implementation 'jakarta.validation:jakarta.validation-api:'
     implementation 'org.modelmapper:modelmapper:3.1.1'
-    testImplementation 'junit:junit:4.13.1'
+    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'org.postgresql:postgresql'
     annotationProcessor 'org.projectlombok:lombok'
+
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    implementation 'com.google.code.gson:gson:2.10.1'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+    testImplementation 'org.hamcrest:hamcrest-library:2.2'
+    testImplementation 'junit:junit:4.13.1'
 }
 
 tasks.named('test') {
@@ -39,7 +46,6 @@ tasks.named('test') {
 }
 
 processResources {
-    expand(project.properties)
     filesMatching("**/application.yml") {
         expand(version: project.version)
     }

@@ -1,26 +1,33 @@
 package ru.ac.checkpointmanager.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import ru.ac.checkpointmanager.dto.PhoneDTO;
+import ru.ac.checkpointmanager.dto.ChangePasswordRequest;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.UserDTO;
-import ru.ac.checkpointmanager.exception.*;
+import ru.ac.checkpointmanager.exception.DateOfBirthFormatException;
+import ru.ac.checkpointmanager.exception.PhoneNumberNotFoundException;
+import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
+import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
+import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.utils.Mapper;
 
-import java.sql.Timestamp;
+import java.security.Principal;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-import static ru.ac.checkpointmanager.model.enums.PhoneNumberType.MOBILE;
 import static ru.ac.checkpointmanager.utils.FieldsValidation.cleanPhone;
 import static ru.ac.checkpointmanager.utils.FieldsValidation.validateDOB;
+import static ru.ac.checkpointmanager.utils.Mapper.toUserDTO;
+import static ru.ac.checkpointmanager.utils.Mapper.toUsersDTO;
 
 @Service
 @RequiredArgsConstructor
@@ -28,54 +35,14 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PhoneRepository phoneRepository;
-    private final PhoneService phoneService;
     private final Mapper mapper;
-
-    private final Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
-
-    @Transactional
-    @Override
-    public UserDTO createUser(UserDTO userDTO) {
-        // проверяем дату
-        if (!validateDOB(userDTO.getDateOfBirth())) {
-            throw new DateOfBirthFormatException
-                    ("Date of birth should not be greater than the current date " +
-                            "or less than 100 years from the current moment");
-        }
-        // проверяем существует ли номер телефона по номеру
-        if (phoneRepository.existsByNumber(cleanPhone(userDTO.getMainNumber()))) {
-            throw new PhoneAlreadyExistException(String.format
-                    ("Phone number [number=%s] already exist", userDTO.getMainNumber()));
-        }
-
-        // сохраняем юзера в БД, присваиваем основной номер, ставим незаблокированным
-        User user = mapper.toUser(userDTO);
-        user.setMainNumber(cleanPhone(userDTO.getMainNumber()));
-        user.setIsBlocked(false);
-        user.setAddedAt(currentTimestamp);
-        userRepository.save(user);
-
-        // метод из PhoneService сохранит его в бд
-        PhoneDTO phoneDTO = createPhoneDTO(user);
-        phoneService.createPhoneNumber(phoneDTO);
-
-        return mapper.toUserDTO(user);
-    }
-
-    // устанавливаем поля для сущности PhoneDTO из данных сохранённого юзера, тип телефона по умолчанию мобильный
-    private PhoneDTO createPhoneDTO(User user) {
-        PhoneDTO phoneDTO = new PhoneDTO();
-        phoneDTO.setUserId(user.getId());
-        phoneDTO.setNumber(user.getMainNumber());
-        phoneDTO.setType(MOBILE);
-        return phoneDTO;
-    }
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public UserDTO findById(UUID id) {
         User foundUser = userRepository.findById(id).orElseThrow(
-                () -> new UserNotFoundException(String.format("User not found [Id=%s]", id)));
-        return mapper.toUserDTO(foundUser);
+                () -> new UserNotFoundException(String.format("User not found [id=%s]", id)));
+        return toUserDTO(foundUser);
     }
 
     @Override
@@ -89,7 +56,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Collection<UserDTO> findByName(String name) {
-        Collection<UserDTO> userDTOS = mapper.toUsersDTO(userRepository
+        Collection<UserDTO> userDTOS = toUsersDTO(userRepository
                 .findUserByFullNameContainingIgnoreCase(name));
 
         if (userDTOS.isEmpty()) {
@@ -102,27 +69,61 @@ public class UserServiceImpl implements UserService {
     public UserDTO updateUser(UserDTO userDTO) {
         User foundUser = userRepository.findById(userDTO.getId())
                 .orElseThrow(() -> new UserNotFoundException(
-                        String.format("User not found [Id=%s]", userDTO.getId())));
+                        String.format("User not found [id=%s]", userDTO.getId())));
         if (!validateDOB(userDTO.getDateOfBirth())) {
-            throw new DateOfBirthFormatException("Date of birth should not be greater than the current date " +
-                    "or less than 100 years from the current moment");
+            throw new DateOfBirthFormatException("Date of birth should not be greater than the current date");
         }
-        // проверяем, регистрировал ли на себя юзер введеный номер
+
         if (!findUsersPhoneNumbers(userDTO.getId()).contains(cleanPhone(userDTO.getMainNumber()))) {
             throw new PhoneNumberNotFoundException(String.format
-                    ("Phone number [number=%s] does not exist", userDTO.getMainNumber()));
+                    ("Phone number %s does not exist", userDTO.getMainNumber()));
         }
         foundUser.setFullName(userDTO.getFullName());
         foundUser.setDateOfBirth(userDTO.getDateOfBirth());
-
-        // меняем основной номер из списка номеров юзера
         foundUser.setMainNumber(cleanPhone(userDTO.getMainNumber()));
         foundUser.setEmail(userDTO.getEmail());
-        foundUser.setPassword(userDTO.getPassword());
 
         userRepository.save(foundUser);
 
-        return mapper.toUserDTO(foundUser);
+        return toUserDTO(foundUser);
+    }
+
+    @Override
+    public void changePassword(ChangePasswordRequest request, Principal connectedUser) { //  Principal представляет собой пользователя, который был идентифицирован в результате процесса аутентификации
+        User user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal(); // получаем юзера из connectedUser, который представляет текущего пользователя
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new IllegalStateException("Wrong password");
+        }
+
+        if (!request.getNewPassword().equals(request.getConfirmationPassword())) {
+            throw new IllegalStateException("Password are not the same");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+
+    }
+
+    @Override
+    public void changeRole(UUID id, Role role, Principal connectedUser) {
+        User existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(String.format("User not found [Id=%s]", id)));
+
+        User user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+
+        if (role == Role.ADMIN && !user.getRole().equals(Role.ADMIN)) { // если НЕадмин хочет назначить кому-то админа
+            throw new AccessDeniedException("You do not have permission to change the role to ADMIN");
+        }
+
+        if (existingUser.getRole().equals(Role.ADMIN) && !user.getRole().equals(Role.ADMIN)) { // если НЕадмин пытается сменить роль админа на любую другую
+            throw new AccessDeniedException("You do not have permission to change the role ADMIN to another role");
+        }
+        if (existingUser.getRole().equals(role)) {
+            throw new IllegalStateException(String.format("This user already has role %s", role));
+        }
+        existingUser.setRole(role);
+        userRepository.save(existingUser);
     }
 
     //    два варианта блокировки пользователя
@@ -135,10 +136,9 @@ public class UserServiceImpl implements UserService {
             existingUser.setIsBlocked(isBlocked);
             userRepository.save(existingUser);
         } else {
-            //  если текущий статус блокировки пользователя совпадает с новым статусом, будет выброшено исключение
-            throw new IllegalStateException(String.format("User already %s [Id=%s]", isBlocked ? "blocked" : "unblocked", id));
+            throw new IllegalStateException(String.format("User already %s [id=%s]", isBlocked ? "blocked" : "unblocked", id));
         }
-        return mapper.toUserDTO(existingUser);
+        return toUserDTO(existingUser);
     }
 
     //    второй: два разных метода для блокировки или разблокировки по айди,
@@ -146,22 +146,22 @@ public class UserServiceImpl implements UserService {
     @Override
     public void blockById(UUID id) {
         User existingUser = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(String.format("User not found [Id=%s]", id)));
+                .orElseThrow(() -> new UserNotFoundException(String.format("User not found [id=%s]", id)));
         if (!existingUser.getIsBlocked()) {
             userRepository.blockById(id);
         } else {
-            throw new IllegalStateException(String.format("User already blocked [Id=%s]", id));
+            throw new IllegalStateException(String.format("User already blocked [id=%s]", id));
         }
     }
 
     @Override
     public void unblockById(UUID id) {
         User existingUser = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(String.format("User not found [Id=%s]", id)));
+                .orElseThrow(() -> new UserNotFoundException(String.format("User not found [id=%s]", id)));
         if (existingUser.getIsBlocked()) {
             userRepository.unblockById(id);
         } else {
-            throw new IllegalStateException(String.format("User already unblocked [Id=%s]", id));
+            throw new IllegalStateException(String.format("User already unblocked [id=%s]", id));
         }
     }
 
@@ -176,7 +176,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Collection<UserDTO> getAll() {
-        Collection<UserDTO> userDTOS = mapper.toUsersDTO(userRepository.findAll());
+        Collection<UserDTO> userDTOS = toUsersDTO(userRepository.findAll());
 
         if (userDTOS.isEmpty()) {
             throw new UserNotFoundException("There is no user in DB");
@@ -184,7 +184,6 @@ public class UserServiceImpl implements UserService {
         return userDTOS;
     }
 
-    // метод ищет в таблице phones номера, которые привязаны к переданному user_id
     @Override
     public Collection<String> findUsersPhoneNumbers(UUID userId) {
         return phoneRepository.getNumbersByUserId(userId);

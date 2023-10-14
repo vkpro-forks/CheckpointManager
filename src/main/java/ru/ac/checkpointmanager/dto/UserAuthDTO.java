@@ -1,19 +1,18 @@
 package ru.ac.checkpointmanager.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.UUID;
 
-@Getter
-@Setter
-public class UserDTO {
+@Data
+@NoArgsConstructor
+public class UserAuthDTO {
 
     private UUID id;
 
@@ -34,7 +33,8 @@ public class UserDTO {
     @NotEmpty(message = "Email should not be empty")
     private String email;
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private Boolean isBlocked;
+    @NotEmpty
+    @Pattern(regexp = "^(?!.*\\s).+$", message = "Field should not contain spaces")
+    @Size(min = 6, max = 20)
+    private String password;
 }
-
