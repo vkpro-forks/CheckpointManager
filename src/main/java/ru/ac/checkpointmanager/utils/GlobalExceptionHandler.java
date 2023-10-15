@@ -48,89 +48,89 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(EntranceWasAlreadyException.class)
     public ResponseEntity<String> handleEntranceWasAlreadyException(EntranceWasAlreadyException e) {
-        log.error("Handling EntranceWasAlreadyException");
+        log.warn("Handling EntranceWasAlreadyException");
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(InactivePassException.class)
     public ResponseEntity<String> handleNoActivePassException(InactivePassException e) {
-        log.error("Handling NoActivePassException");
+        log.warn("Handling NoActivePassException");
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(TerritoryNotFoundException.class)
     public ResponseEntity<String> handleTerritoryNotFoundException(TerritoryNotFoundException e) {
-        log.error("Handling TerritoryNotFoundException");
+        log.warn("Handling TerritoryNotFoundException");
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException e) {
         String message = String.format("Exception %s: %s", e.getClass(), e.getMessage());
-        log.error(message);
+        log.warn(message);
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(AvatarIsTooBigException.class)
     public ResponseEntity<ApiError> handleAvatarIsTooBigException(AvatarIsTooBigException e) {
         String message = String.format("Exception %s: %s", e.getClass(), e.getMessage());
-        log.error(message);
+        log.warn(message);
         return new ResponseEntity<>(new ApiError(HttpStatus.BAD_REQUEST, message), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(AvatarNotFoundException.class)
     public ResponseEntity<ApiError> handleAvatarNotFoundException(AvatarNotFoundException e) {
         String message = String.format("Exception %s: %s", e.getClass(), e.getMessage());
-        log.error(message);
+        log.warn(message);
         return new ResponseEntity<>(new ApiError(HttpStatus.NOT_FOUND, message), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<String> handleAccessDeniedException(AccessDeniedException e) {
         String message = String.format("Exception %s: %s", e.getClass(), e.getMessage());
-            log.error(message);
+        log.warn(message);
         return new ResponseEntity<>(message, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<String> handleUserNotFoundException(UserNotFoundException e) {
         String message = String.format("Exception %s: %s", e.getClass(), e.getMessage());
-            log.error(message);
+        log.warn(message);
         return new ResponseEntity<>(message, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(DateOfBirthFormatException.class)
     public ResponseEntity<String> handleDateOfBirthFormatException(DateOfBirthFormatException e) {
         String message = String.format("Exception %s: %s", e.getClass(), e.getMessage());
-            log.error(message);
+        log.warn(message);
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<String> handleIllegalStateException(IllegalStateException e) {
         String message = String.format("Exception %s: %s", e.getClass(), e.getMessage());
-            log.error(message);
+        log.warn(message);
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(PhoneAlreadyExistException.class)
     public ResponseEntity<String> handlePhoneAlreadyExistException(PhoneAlreadyExistException e) {
         String message = String.format("Exception %s: %s", e.getClass(), e.getMessage());
-            log.error(message);
+        log.warn(message);
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(PhoneNumberNotFoundException.class)
     public ResponseEntity<String> handlePhoneNumberNotFoundException(PhoneNumberNotFoundException e) {
         String message = String.format("Exception %s: %s", e.getClass(), e.getMessage());
-            log.error(message);
+        log.warn(message);
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<String> handleUsernameNotFoundException(UsernameNotFoundException e) {
         String message = String.format("Exception %s: %s", e.getClass(), e.getMessage());
-            log.error(message);
+        log.warn(message);
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
     }
 }
