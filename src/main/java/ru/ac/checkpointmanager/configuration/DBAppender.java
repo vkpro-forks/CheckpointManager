@@ -14,8 +14,15 @@ public class DBAppender extends AppenderBase<ILoggingEvent> {
     private String username;
     private String password;
 
+
+
     @Override
     public void start() {
+        if (url == null || username == null || password == null) {
+            addError("One or more of the database connection parameters is null");
+            return;
+        }
+
         try {
             connection = DriverManager.getConnection(url, username, password);
         } catch (SQLException e) {
@@ -26,7 +33,7 @@ public class DBAppender extends AppenderBase<ILoggingEvent> {
 
     @Override
     protected void append(ILoggingEvent eventObject) {
-        if (!isStarted()) {
+        if (!isStarted() || connection == null) {
             return;
         }
 

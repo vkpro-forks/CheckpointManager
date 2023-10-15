@@ -11,10 +11,14 @@ services:
       - "8080:8080"
     depends_on:
       - postgres-db
+      - avatars-storage
     environment:
+      - SPRING_PROFILES_ACTIVE=dev
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/chpmanDB
       - SPRING_DATASOURCE_USERNAME=chpman
       - SPRING_DATASOURCE_PASSWORD=chpmanPass%
+      - AVATAR_STORAGE_PATH=/avatars # указание на папку в контейнере avatars-storage
+
   # Сервис для базы данных PostgreSQL
   postgres-db:
     image: postgres:latest
@@ -24,3 +28,11 @@ services:
       - POSTGRES_DB=chpmanDB
       - POSTGRES_USER=chpman
       - POSTGRES_PASSWORD=chpmanPass%
+
+  # Сервис для хранения аватаров
+  avatars-storage:
+    image: nginx:latest
+    volumes:
+      - ./avatars:/usr/share/nginx/html:ro # локальная папка монтируется в /usr/share/nginx/html
+    ports:
+      - "8081:80" # nginx будет доступен на порту 8081

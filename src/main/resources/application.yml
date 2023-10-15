@@ -33,4 +33,6 @@ application:
         expiration: 604800000 # 7 days
 avatars:
   dir:
-    path:
+    path: ./avatars
+
+
