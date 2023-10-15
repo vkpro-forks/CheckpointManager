@@ -10,8 +10,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import ru.ac.checkpointmanager.exception.*;
-import ru.ac.checkpointmanager.exception.avatar.AvatarIsTooBigException;
-import ru.ac.checkpointmanager.exception.avatar.AvatarNotFoundException;
+
 
 import java.util.List;
 import java.util.stream.Collectors;
