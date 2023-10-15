@@ -22,6 +22,8 @@ spring:
     default-schema: public
     drop-first: false
     enabled: true
+  profiles:
+    active: dev
 application:
   security:
     jwt:

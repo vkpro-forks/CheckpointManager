@@ -27,7 +27,7 @@ docker push aasurov/anvilcoder:checkpoint-manager-$PROJECT_VERSION
 
 # Шаг 8: Копирование Dockerfile, deploy.sh и JAR файла на удаленный сервер
 scp .env root@84.252.74.180:~
-scp docker-compose.remote.yml root@84.252.74.180:~
+scp docker-compose.prod.yml root@84.252.74.180:~
 scp Dockerfile root@84.252.74.180:~
 scp deploy.sh root@84.252.74.180:~
 scp build/libs/app.jar root@84.252.74.180:~
