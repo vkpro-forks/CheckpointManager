@@ -11,7 +11,7 @@ docker rmi $(docker images -q)
 docker pull aasurov/anvilcoder:checkpoint-manager-$PROJECT_VERSION
 
 # Шаг 3: Запуск контейнеров с новыми образами
-docker-compose -f docker-compose.remote.yml up -d
+docker-compose -f docker-compose.prod.yml up -d
 
 # Шаг 4: Удаление всех файлов внутри каталога
-rm -f app.jar deploy.sh docker-compose.remote.yml Dockerfile
+rm -f app.jar deploy.sh docker-compose.prod.yml Dockerfile

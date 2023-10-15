@@ -4,6 +4,12 @@ plugins {
     id 'io.spring.dependency-management' version '1.1.2'
 }
 
+bootRun {
+    systemProperties = [
+            'spring.profiles.active': 'dev'
+    ]
+}
+
 
 group = 'ru.ac'
 version = '0.1.1-SNAPSHOT-TEST'
@@ -50,5 +56,6 @@ processResources {
         expand(version: project.version)
     }
 }
+
 
 

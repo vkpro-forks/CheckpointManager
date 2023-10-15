@@ -22,6 +22,8 @@ spring:
     default-schema: public
     drop-first: false
     enabled: true
+  profiles:
+    active: dev
 application:
   security:
     jwt:
@@ -31,4 +33,6 @@ application:
         expiration: 604800000 # 7 days
 avatars:
   dir:
-    path:
+    path: ./avatars
+
+

@@ -35,8 +35,7 @@
     </root>
 
     <logger name="ru.ac.checkpointmanager" level="debug">
-        <appender-ref ref="DB" />
+<!--        <appender-ref ref="DB" />-->
     </logger>
 
 </configuration>
-
