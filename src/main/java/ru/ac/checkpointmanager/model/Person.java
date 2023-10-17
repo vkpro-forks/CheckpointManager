@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -16,7 +17,7 @@ public class Person {
 
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private UUID id;
 
     @Column(name = "fullName")
@@ -24,6 +25,9 @@ public class Person {
 
     @Column(name = "person_phone")
     private String phone;
+
+    @OneToMany(mappedBy = "person")
+    private List<Pass> passes;
 
     @Override
     public boolean equals(Object o) {
