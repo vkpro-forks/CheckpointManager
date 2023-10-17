@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.security;
+package ru.ac.checkpointmanager.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,6 +14,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.configuration.JwtService;
+import ru.ac.checkpointmanager.dto.AuthenticationRequest;
+import ru.ac.checkpointmanager.dto.AuthenticationResponse;
 import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.dto.UserAuthDTO;
 import ru.ac.checkpointmanager.exception.DateOfBirthFormatException;
@@ -25,8 +27,6 @@ import ru.ac.checkpointmanager.model.enums.TokenType;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
 import ru.ac.checkpointmanager.repository.TokenRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
-import ru.ac.checkpointmanager.service.PhoneService;
-import ru.ac.checkpointmanager.service.UserServiceImpl;
 
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -39,7 +39,7 @@ import static ru.ac.checkpointmanager.utils.Mapper.*;
 
 @Service
 @RequiredArgsConstructor
-public class AuthenticationService {
+public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserRepository userRepository;
     private final PhoneRepository phoneRepository;
     private final PhoneService phoneService;
@@ -52,6 +52,7 @@ public class AuthenticationService {
     private final Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
 
     @Transactional
+    @Override
     public UserAuthDTO createUser(UserAuthDTO userAuthDTO) {
         logger.info("Method createUser was invoked");
         boolean userExist = userRepository.findByEmail(userAuthDTO.getEmail()).isPresent();
@@ -105,6 +106,7 @@ public class AuthenticationService {
         return phoneDTO;
     }
 
+    @Override
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         authenticationManager.authenticate( // проверяет  правильность предоставленных учетных данных юзера
                 new UsernamePasswordAuthenticationToken(
@@ -151,6 +153,7 @@ public class AuthenticationService {
     }
 
     /* метод позволяет обновить токен доступа пользователя на основе предоставленного токена обновления */
+    @Override
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         final String refreshToken;

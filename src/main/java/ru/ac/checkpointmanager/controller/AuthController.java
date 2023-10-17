@@ -17,9 +17,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.dto.UserAuthDTO;
-import ru.ac.checkpointmanager.security.AuthenticationRequest;
-import ru.ac.checkpointmanager.security.AuthenticationResponse;
-import ru.ac.checkpointmanager.security.AuthenticationService;
+import ru.ac.checkpointmanager.dto.AuthenticationRequest;
+import ru.ac.checkpointmanager.dto.AuthenticationResponse;
+import ru.ac.checkpointmanager.service.AuthenticationService;
+import ru.ac.checkpointmanager.service.AuthenticationServiceImpl;
 
 import java.io.IOException;
 
