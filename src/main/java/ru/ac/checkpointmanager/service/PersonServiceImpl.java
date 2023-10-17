@@ -7,6 +7,7 @@ import ru.ac.checkpointmanager.exception.PersonNotFoundException;
 import ru.ac.checkpointmanager.model.Person;
 import ru.ac.checkpointmanager.repository.PersonRepository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -64,4 +65,26 @@ public class PersonServiceImpl implements PersonService {
         log.info("Deleting Person with UUID: {}", uuid);
         personRepository.delete(existPerson);
     }
+
+    @Override
+    public List<Person> findByNamePart(String name) {
+        if (name == null || name.isEmpty()) {
+            log.warn("Attempt to find Person by null or empty name");
+            throw new IllegalArgumentException("Name part cannot be null or empty");
+        }
+        log.info("Searching for Persons with name containing: {}", name);
+        return personRepository.findByNameContainingIgnoreCase(name);
+    }
+
+    @Override
+    public List<Person> findByPhonePart(String phone) {
+        if (phone == null || phone.isEmpty()) {
+            log.warn("Attempt to find Person by null or empty phone");
+            throw new IllegalArgumentException("Phone part cannot be null or empty");
+        }
+        log.info("Searching for Persons with phone containing: {}", phone);
+        return personRepository.findByPhoneContaining(phone);
+    }
+
+
 }
