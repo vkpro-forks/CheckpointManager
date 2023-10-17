@@ -86,5 +86,15 @@ public class PersonServiceImpl implements PersonService {
         return personRepository.findByPhoneContaining(phone);
     }
 
+    @Override
+    public Optional<Person> findByPassId(UUID passId) {
+        if (passId == null) {
+            log.warn("Attempt to find Person by null passId");
+            throw new IllegalArgumentException("Pass ID cannot be null");
+        }
+        log.info("Searching for Person with Pass ID: {}", passId);
+        return personRepository.findPersonByPasses_Id(passId);
+    }
+
 
 }

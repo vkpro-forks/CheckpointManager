@@ -3,6 +3,7 @@ package ru.ac.checkpointmanager.service;
 import ru.ac.checkpointmanager.model.Person;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface PersonService {
@@ -16,7 +17,9 @@ public interface PersonService {
     void deletePerson(UUID uuid);
 
     List<Person> findByNamePart(String name);
+
     List<Person> findByPhonePart(String phone);
 
+    Optional<Person> findByPassId(UUID passId);
 
 }
