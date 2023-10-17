@@ -20,7 +20,7 @@ public class Person {
     @GeneratedValue
     private UUID id;
 
-    @Column(name = "fullName")
+    @Column(name = "full_name")
     private String name;
 
     @Column(name = "person_phone")
@@ -28,6 +28,8 @@ public class Person {
 
     @OneToMany(mappedBy = "person")
     private List<Pass> passes;
+
+    private String note;
 
     @Override
     public boolean equals(Object o) {
