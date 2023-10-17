@@ -95,6 +95,4 @@ public class PersonServiceImpl implements PersonService {
         log.info("Searching for Person with Pass ID: {}", passId);
         return personRepository.findPersonByPasses_Id(passId);
     }
-
-
 }
