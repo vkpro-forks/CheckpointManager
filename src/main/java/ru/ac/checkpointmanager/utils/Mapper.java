@@ -30,9 +30,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class Mapper {
 
-    private final PassRepository passRepository;
-    private final CheckpointRepository checkpointRepository;
-
     private static final ModelMapper modelMapper = new ModelMapper();
 
     /* Checkpoint mapping */
