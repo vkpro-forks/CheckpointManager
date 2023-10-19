@@ -4,9 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.mail.MailException;
+import org.springframework.mail.MailSendException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -20,6 +21,8 @@ import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.dto.UserAuthDTO;
 import ru.ac.checkpointmanager.exception.DateOfBirthFormatException;
 import ru.ac.checkpointmanager.exception.PhoneAlreadyExistException;
+import ru.ac.checkpointmanager.exception.UserNotFoundException;
+import ru.ac.checkpointmanager.model.TemporaryUser;
 import ru.ac.checkpointmanager.model.Token;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.enums.Role;
@@ -31,14 +34,17 @@ import ru.ac.checkpointmanager.repository.UserRepository;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.UUID;
 
 import static ru.ac.checkpointmanager.model.enums.PhoneNumberType.MOBILE;
 import static ru.ac.checkpointmanager.utils.FieldsValidation.cleanPhone;
 import static ru.ac.checkpointmanager.utils.FieldsValidation.validateDOB;
-import static ru.ac.checkpointmanager.utils.Mapper.*;
+import static ru.ac.checkpointmanager.utils.Mapper.toTemporaryUser;
+import static ru.ac.checkpointmanager.utils.Mapper.toUser;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserRepository userRepository;
     private final PhoneRepository phoneRepository;
@@ -47,55 +53,80 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
-    private final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
-
+    private final EmailService emailService;
+    private final TemporaryUserService temporaryUserService;
     private final Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
 
     @Transactional
     @Override
-    public UserAuthDTO createUser(UserAuthDTO userAuthDTO) {
-        logger.info("Method createUser was invoked");
+    public TemporaryUser preRegister(UserAuthDTO userAuthDTO) {
+        log.info("Method preRegister was invoked");
         boolean userExist = userRepository.findByEmail(userAuthDTO.getEmail()).isPresent();
         if (userExist) {
-            logger.warn("Email already taken");
+            log.warn("Email already taken");
             throw new IllegalStateException(String.format("Email %s already taken", userAuthDTO.getEmail()));
         }
 
         if (!validateDOB(userAuthDTO.getDateOfBirth())) {
-            logger.warn("Invalid date of birth");
+            log.warn("Invalid date of birth");
             throw new DateOfBirthFormatException("Date of birth should not be greater than the current date");
         }
 
         if (phoneRepository.existsByNumber(cleanPhone(userAuthDTO.getMainNumber()))) {
-            logger.warn("Phone already taken");
+            log.warn("Phone already taken");
             throw new PhoneAlreadyExistException(String.format
                     ("Phone number %s already exist", userAuthDTO.getMainNumber()));
         }
 
-        User user = toUser(userAuthDTO);
-        user.setRole(Role.USER);
-        user.setMainNumber(cleanPhone(userAuthDTO.getMainNumber()));
-        user.setIsBlocked(false);
-        user.setAddedAt(currentTimestamp);
+        TemporaryUser temporaryUser = toTemporaryUser(userAuthDTO);
+        temporaryUser.setMainNumber(cleanPhone(temporaryUser.getMainNumber()));
 
-        String encodedPassword = passwordEncoder.encode(userAuthDTO.getPassword());
-        user.setPassword(encodedPassword);
+        String encodedPassword = passwordEncoder.encode(temporaryUser.getPassword());
+        temporaryUser.setPassword(encodedPassword);
 
-        userRepository.save(user);
-        logger.info("User saved");
+        String token = UUID.randomUUID().toString();
+        temporaryUser.setVerifiedToken(token);
 
-        PhoneDTO phoneDTO = createPhoneDTO(user);
-        phoneService.createPhoneNumber(phoneDTO);
-        
-        String jwtToken = jwtService.generateToken(user);
-        String refreshToken = jwtService.generateRefreshToken(user);
-        saveUserToken(user, jwtToken);
-        
-        AuthenticationResponse response = new AuthenticationResponse();
-                response.setRefreshToken(refreshToken);
-                response.setAccessToken(jwtToken);
+        try {
+            emailService.send(userAuthDTO.getEmail(), token);
+            log.info("Mail message was sent");
+        } catch (MailException e) {
+            log.error("Email sending failed");
+            throw new MailSendException(String.format("Non-existent email address %s was provided", userAuthDTO.getEmail()));
+        }
 
-        return toUserAuthDTO(user);
+        temporaryUserService.create(temporaryUser);
+        return temporaryUser;
+    }
+
+    @Transactional
+    @Override
+    public void confirmRegistration(String token) {
+        log.info("Method confirmRegistration was invoked");
+        TemporaryUser tempUser = temporaryUserService.findByVerifiedToken(token);
+
+        if (tempUser != null) {
+            User user = toUser(tempUser);
+            user.setRole(Role.USER);
+            user.setIsBlocked(false);
+            user.setAddedAt(currentTimestamp);
+
+            userRepository.save(user);
+            log.info("User saved");
+
+            temporaryUserService.delete(tempUser);
+            log.info("tempUser deleted");
+
+            String jwtToken = jwtService.generateToken(user);
+            saveUserToken(user, jwtToken);
+
+            PhoneDTO phoneDTO = createPhoneDTO(user);
+            phoneService.createPhoneNumber(phoneDTO);
+            log.info("Phone saved");
+        } else {
+            log.error("Email not confirmed");
+            throw new UserNotFoundException(String.format("User with token - '%s', not found  ", token));
+        }
     }
 
     private PhoneDTO createPhoneDTO(User user) {
@@ -105,6 +136,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         phoneDTO.setType(MOBILE);
         return phoneDTO;
     }
+
 
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
@@ -116,7 +148,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         );
         User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() ->
                 new UsernameNotFoundException(String.format("User with email - '%s', not found  ", request.getEmail())));
-        
+
         String jwtToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
         revokeAllUserTokens(user);
@@ -168,7 +200,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if (userEmail != null) {
             User user = this.userRepository.findByEmail(userEmail).orElseThrow(() ->
                     new UsernameNotFoundException(String.format("User with email - '%s', not found  ", userEmail)));
-            
+
             if (jwtService.isTokenValid(refreshToken, user)) { // проверяет токен обновления действителен ли для данного пользователя
                 String accessToken = jwtService.generateToken(user);
                 revokeAllUserTokens(user);

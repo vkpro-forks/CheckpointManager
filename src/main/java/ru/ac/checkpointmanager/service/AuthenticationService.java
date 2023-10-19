@@ -5,11 +5,15 @@ import jakarta.servlet.http.HttpServletResponse;
 import ru.ac.checkpointmanager.dto.AuthenticationRequest;
 import ru.ac.checkpointmanager.dto.AuthenticationResponse;
 import ru.ac.checkpointmanager.dto.UserAuthDTO;
+import ru.ac.checkpointmanager.model.TemporaryUser;
 
 import java.io.IOException;
 
 public interface AuthenticationService {
-    UserAuthDTO createUser(UserAuthDTO userAuthDTO);
+
+    TemporaryUser preRegister(UserAuthDTO userAuthDTO);
+
+    void confirmRegistration(String token);
 
     AuthenticationResponse authenticate(AuthenticationRequest request);
 
