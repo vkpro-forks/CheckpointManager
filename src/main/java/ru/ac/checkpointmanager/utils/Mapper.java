@@ -50,15 +50,15 @@ public class Mapper {
     }
 
     /* Territory mapping */
-    public Territory toTerritory(TerritoryDTO territoryDTO) {
+    public static Territory toTerritory(TerritoryDTO territoryDTO) {
         return modelMapper.map(territoryDTO, Territory.class);
     }
 
-    public TerritoryDTO toTerritoryDTO(Territory territory) {
+    public static TerritoryDTO toTerritoryDTO(Territory territory) {
         return modelMapper.map(territory, TerritoryDTO.class);
     }
 
-    public List<TerritoryDTO> toTerritoriesDTO(List<Territory> territories) {
+    public static List<TerritoryDTO> toTerritoriesDTO(List<Territory> territories) {
         return territories.stream()
                 .map(e -> modelMapper.map(e, TerritoryDTO.class))
                 .toList();
@@ -69,13 +69,13 @@ public class Mapper {
                 .toList();
     }
     /* Pass mapping */
-    public Pass toPass(PassDTO passDTO) {
+    public static Pass toPass(PassDTO passDTO) {
         return modelMapper.map(passDTO, Pass.class);
     }
-    public PassDTO toPassDTO(Pass pass) {
+    public static PassDTO toPassDTO(Pass pass) {
         return modelMapper.map(pass, PassDTO.class);
     }
-    public List<PassDTO> toPassDTO(List<Pass> pass) {
+    public static List<PassDTO> toPassDTO(List<Pass> pass) {
         return pass.stream()
                 .map(e -> modelMapper.map(e, PassDTO.class))
                 .toList();
@@ -105,44 +105,26 @@ public class Mapper {
     }
 
     /* Phone mapping */
-    public Phone toPhone(PhoneDTO phoneDTO) {
+    public static Phone toPhone(PhoneDTO phoneDTO) {
         return modelMapper.map(phoneDTO, Phone.class);
     }
 
-    public PhoneDTO toPhoneDTO(Phone phone) {
+    public static PhoneDTO toPhoneDTO(Phone phone) {
         return modelMapper.map(phone, PhoneDTO.class);
     }
 
-    public List<PhoneDTO> toPhonesDTO(Collection<Phone> phones) {
+    public static List<PhoneDTO> toPhonesDTO(Collection<Phone> phones) {
         return phones.stream()
                 .map(p -> modelMapper.map(p, PhoneDTO.class))
                 .toList();
     }
 
-
     /* Crossing mapping */
-    public Crossing toCrossing(CrossingDTO crossingDTO) {
-        Crossing crossing = new Crossing();
-        Optional<Pass> optionalPass = passRepository.findById(crossingDTO.getPassId());
-        Pass pass = optionalPass.orElseThrow(
-                () -> new PassNotFoundException("Pass not found for ID " + crossingDTO.getPassId()));
-
-        Optional<Checkpoint> optionalCheckpoint = checkpointRepository.findById(crossingDTO.getCheckpointId());
-        Checkpoint checkpoint = optionalCheckpoint.orElseThrow(
-                () -> new CheckpointNotFoundException("Checkpoint not found for ID " + crossingDTO.getCheckpointId()));
-
-        crossing.setPass(pass);
-        crossing.setCheckpoint(checkpoint);
-        crossing.setDirection(crossingDTO.getDirection());
-
-        return crossing;
-    }
-
-    public CrossingDTO toCrossingDTO(Crossing crossing) {
+    public static CrossingDTO toCrossingDTO(Crossing crossing) {
         return modelMapper.map(crossing, CrossingDTO.class);
     }
 
-    public List<CrossingDTO> toCrossingsDTO(Collection<Crossing> crossings) {
+    public static List<CrossingDTO> toCrossingsDTO(Collection<Crossing> crossings) {
         return crossings.stream()
                 .map(crossing -> modelMapper.map(crossing, CrossingDTO.class))
                 .toList();
