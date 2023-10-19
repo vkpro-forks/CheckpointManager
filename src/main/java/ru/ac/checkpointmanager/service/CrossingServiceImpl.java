@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import ru.ac.checkpointmanager.dto.CrossingDTO;
 import ru.ac.checkpointmanager.exception.*;
 import ru.ac.checkpointmanager.model.Checkpoint;
 import ru.ac.checkpointmanager.model.Crossing;
@@ -24,14 +25,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class CrossingServiceImpl implements CrossingService {
 
-
     private final PassRepository passRepository;
     private final CrossingRepository crossingRepository;
     private final CheckpointRepository checkpointRepository;
     private final Logger logger = LoggerFactory.getLogger(CrossingServiceImpl.class);
 
     @Override
-    public Crossing markCrossing(Crossing crossing) {
+    public Crossing markCrossing(CrossingDTO crossingDTO) {
+        Crossing crossing = mapToCrossing(crossingDTO);
         logger.info("Attempting to mark crossing for pass ID: {}", crossing.getPass().getId());
 
         Pass pass = validatePass(crossing.getPass().getId());
@@ -111,6 +112,18 @@ public class CrossingServiceImpl implements CrossingService {
     //проверяет, не пытается ли пользователь выехать без активации пропуска (т.е. без въезда)
     private boolean isInvalidOutEntry(Direction currentDirection, Optional<Crossing> lastCrossingOpt) {
         return currentDirection == Direction.OUT && lastCrossingOpt.isEmpty();
+    }
+
+    private Crossing mapToCrossing(CrossingDTO crossingDTO) {
+        Crossing crossing = new Crossing();
+        Pass pass = passRepository.findById(crossingDTO.getPassId()).orElseThrow(
+                () -> new PassNotFoundException("Pass not found for ID " + crossingDTO.getPassId()));
+        Checkpoint checkpoint = checkpointRepository.findById(crossingDTO.getCheckpointId()).orElseThrow(
+                () -> new CheckpointNotFoundException("Checkpoint not found for ID " + crossingDTO.getCheckpointId()));
+        crossing.setPass(pass);
+        crossing.setCheckpoint(checkpoint);
+        crossing.setDirection(crossingDTO.getDirection());
+        return crossing;
     }
 }
 
