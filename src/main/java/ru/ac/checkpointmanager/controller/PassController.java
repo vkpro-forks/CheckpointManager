@@ -16,8 +16,7 @@ import ru.ac.checkpointmanager.utils.ErrorUtils;
 import java.util.List;
 import java.util.UUID;
 
-import static ru.ac.checkpointmanager.utils.Mapper.toPass;
-import static ru.ac.checkpointmanager.utils.Mapper.toPassDTO;
+import static ru.ac.checkpointmanager.utils.Mapper.*;
 
 @RestController
 @RequestMapping("chpman/pass")
