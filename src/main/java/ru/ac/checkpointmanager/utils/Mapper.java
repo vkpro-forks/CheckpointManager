@@ -117,6 +117,10 @@ public class Mapper {
     }
 
     /* Crossing mapping */
+    public static Crossing toCrossing(CrossingDTO crossingDTO) {
+        return modelMapper.map(crossingDTO, Crossing.class);
+    }
+
     public static CrossingDTO toCrossingDTO(Crossing crossing) {
         return modelMapper.map(crossing, CrossingDTO.class);
     }

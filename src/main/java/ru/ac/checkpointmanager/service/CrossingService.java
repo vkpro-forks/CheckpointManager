@@ -5,5 +5,5 @@ import ru.ac.checkpointmanager.model.Crossing;
 
 public interface CrossingService {
 
-    Crossing markCrossing(CrossingDTO crossingDTO);
+    Crossing markCrossing(Crossing crossing);
 }

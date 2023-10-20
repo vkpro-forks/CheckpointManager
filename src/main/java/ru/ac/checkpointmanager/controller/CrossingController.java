@@ -17,6 +17,7 @@ import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.service.CrossingService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
 
+import static ru.ac.checkpointmanager.utils.Mapper.toCrossing;
 import static ru.ac.checkpointmanager.utils.Mapper.toCrossingDTO;
 
 
@@ -35,7 +36,7 @@ public class CrossingController {
         if (bindingResult.hasErrors()) {
             return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
         }
-        Crossing crossing = crossingService.markCrossing(crossingDTO);
+        Crossing crossing = crossingService.markCrossing(toCrossing(crossingDTO));
         return new ResponseEntity<>(toCrossingDTO(crossing), HttpStatus.OK);
     }
 }
