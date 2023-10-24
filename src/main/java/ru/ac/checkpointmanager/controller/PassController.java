@@ -12,10 +12,11 @@ import ru.ac.checkpointmanager.dto.PassDTO;
 import ru.ac.checkpointmanager.model.Pass;
 import ru.ac.checkpointmanager.service.PassService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
-import ru.ac.checkpointmanager.utils.Mapper;
 
 import java.util.List;
 import java.util.UUID;
+
+import static ru.ac.checkpointmanager.utils.Mapper.*;
 
 @RestController
 @RequestMapping("chpman/pass")
@@ -25,7 +26,6 @@ import java.util.UUID;
 public class PassController {
 
     private final PassService service;
-    private final Mapper mapper;
 
     /* CREATE */
     @PostMapping
@@ -34,8 +34,8 @@ public class PassController {
         if (bindingResult.hasErrors()) {
             return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
         }
-        Pass newPass = service.addPass(mapper.toPass(passDTO));
-        return ResponseEntity.ok(mapper.toPassDTO(newPass));
+        Pass newPass = service.addPass(toPass(passDTO));
+        return ResponseEntity.ok(toPassDTO(newPass));
     }
 
     /* READ */
@@ -45,7 +45,7 @@ public class PassController {
         if (passes.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(mapper.toPassDTO(passes));
+        return ResponseEntity.ok(toPassDTO(passes));
     }
 
     @GetMapping("/{id}")
@@ -54,7 +54,7 @@ public class PassController {
         if (foundPass == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(mapper.toPassDTO(foundPass));
+        return ResponseEntity.ok(toPassDTO(foundPass));
     }
 
     @GetMapping("/user/{userId}")
@@ -63,7 +63,7 @@ public class PassController {
         if (passes.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(mapper.toPassDTO(passes));
+        return ResponseEntity.ok(toPassDTO(passes));
     }
 
     @GetMapping("/territory/{territoryId}")
@@ -72,7 +72,7 @@ public class PassController {
         if (passes.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(mapper.toPassDTO(passes));
+        return ResponseEntity.ok(toPassDTO(passes));
     }
 
     /* UPDATE */
@@ -86,29 +86,29 @@ public class PassController {
         if (currentPass == null) {
             return ResponseEntity.notFound().build();
         }
-        Pass updatedPass = service.updatePass(mapper.toPass(passDTO));
-        return ResponseEntity.ok(mapper.toPassDTO(updatedPass));
+        Pass updatedPass = service.updatePass(toPass(passDTO));
+        return ResponseEntity.ok(toPassDTO(updatedPass));
     }
 
     @PatchMapping("/{id}/cancel")
     public ResponseEntity<PassDTO> cancelPass(@PathVariable UUID id) {
 
         Pass cancelledPass = service.cancelPass(id);
-        return ResponseEntity.ok(mapper.toPassDTO(cancelledPass));
+        return ResponseEntity.ok(toPassDTO(cancelledPass));
     }
 
     @PatchMapping("/{id}/activate")
     public ResponseEntity<PassDTO> activatePass(@PathVariable UUID id) {
 
         Pass activatedPass = service.activateCancelledPass(id);
-        return ResponseEntity.ok(mapper.toPassDTO(activatedPass));
+        return ResponseEntity.ok(toPassDTO(activatedPass));
     }
 
     @PatchMapping("/{id}/unwarning")
     public ResponseEntity<PassDTO> unWarningPass(@PathVariable UUID id) {
 
         Pass completedPass = service.unWarningPass(id);
-        return ResponseEntity.ok(mapper.toPassDTO(completedPass));
+        return ResponseEntity.ok(toPassDTO(completedPass));
     }
 
     /* DELETE */
