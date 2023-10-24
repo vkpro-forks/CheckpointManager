@@ -6,8 +6,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import ru.ac.checkpointmanager.model.Pass;
-import ru.ac.checkpointmanager.model.enums.PassStatus;
+import ru.ac.checkpointmanager.model.passes.Pass;
+import ru.ac.checkpointmanager.model.passes.PassStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;

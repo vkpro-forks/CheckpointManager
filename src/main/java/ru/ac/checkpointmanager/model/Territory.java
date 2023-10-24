@@ -3,6 +3,7 @@ package ru.ac.checkpointmanager.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+import ru.ac.checkpointmanager.model.passes.Pass;
 
 import java.time.LocalDate;
 import java.util.List;

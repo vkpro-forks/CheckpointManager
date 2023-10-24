@@ -9,22 +9,15 @@ import ru.ac.checkpointmanager.dto.PassDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.UserDTO;
 import ru.ac.checkpointmanager.model.Checkpoint;
-import ru.ac.checkpointmanager.model.Pass;
+import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.model.Phone;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
-import ru.ac.checkpointmanager.exception.CheckpointNotFoundException;
-import ru.ac.checkpointmanager.exception.PassNotFoundException;
 import ru.ac.checkpointmanager.model.*;
-import ru.ac.checkpointmanager.repository.CheckpointRepository;
-import ru.ac.checkpointmanager.repository.PassRepository;
-import ru.ac.checkpointmanager.service.CheckpointService;
-import ru.ac.checkpointmanager.service.PassService;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor

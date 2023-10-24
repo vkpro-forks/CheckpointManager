@@ -2,8 +2,8 @@ package ru.ac.checkpointmanager.dto;
 
 import jakarta.validation.constraints.*;
 import lombok.Data;
-import ru.ac.checkpointmanager.model.enums.PassStatus;
-import ru.ac.checkpointmanager.model.enums.PassTypeTime;
+import ru.ac.checkpointmanager.model.passes.PassStatus;
+import ru.ac.checkpointmanager.model.passes.PassTypeTime;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

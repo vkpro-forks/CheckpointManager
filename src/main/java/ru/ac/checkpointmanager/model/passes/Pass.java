@@ -1,12 +1,12 @@
-package ru.ac.checkpointmanager.model;
+package ru.ac.checkpointmanager.model.passes;
 
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SourceType;
-import ru.ac.checkpointmanager.model.enums.PassStatus;
-import ru.ac.checkpointmanager.model.enums.PassTypeTime;
+import ru.ac.checkpointmanager.model.Territory;
+import ru.ac.checkpointmanager.model.User;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
