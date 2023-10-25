@@ -2,6 +2,7 @@ package ru.ac.checkpointmanager.dto;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import ru.ac.checkpointmanager.model.enums.PhoneNumberType;
@@ -15,6 +16,7 @@ public class PhoneDTO {
 
     @NotEmpty
     @Size(min = 11, max = 20)
+    @Pattern(regexp = "[+]?[\\s]*[0-9]*[1-9]+", message = "должно соответствовать формату номера телефона")
     private String number;
 
     @NotNull

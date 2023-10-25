@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import ru.ac.checkpointmanager.dto.CrossingDTO;
 import ru.ac.checkpointmanager.exception.*;
 import ru.ac.checkpointmanager.model.Checkpoint;
 import ru.ac.checkpointmanager.model.Crossing;
@@ -23,7 +24,6 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class CrossingServiceImpl implements CrossingService {
-
 
     private final PassRepository passRepository;
     private final CrossingRepository crossingRepository;
