@@ -31,7 +31,7 @@ import static java.nio.file.StandardOpenOption.CREATE_NEW;
 @RequiredArgsConstructor
 @Slf4j
 public class AvatarServiceImpl implements AvatarService {
-    private final static String EXTENSIONS = "JPEG, PNG, ICO, GIF, TIFF, WebP, EPS, SVG";
+    private final static String EXTENSIONS = "jpg, jpeg, png, ico, gif, tiff, eps, svg, bmp";
     private final AvatarRepository repository;
 
     @Value("${avatars.dir.path}")
