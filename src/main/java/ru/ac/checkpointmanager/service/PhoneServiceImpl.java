@@ -6,32 +6,31 @@ import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.exception.PhoneNumberNotFoundException;
 import ru.ac.checkpointmanager.model.Phone;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
-import ru.ac.checkpointmanager.utils.Mapper;
 
 import java.util.Collection;
 import java.util.UUID;
 
 import static ru.ac.checkpointmanager.utils.FieldsValidation.cleanPhone;
+import static ru.ac.checkpointmanager.utils.Mapper.*;
 
 @Service
 @RequiredArgsConstructor
 public class PhoneServiceImpl implements PhoneService {
 
     private final PhoneRepository phoneRepository;
-    private final Mapper mapper;
 
     @Override
     public PhoneDTO createPhoneNumber(PhoneDTO phoneDTO) {
         phoneDTO.setNumber(cleanPhone(phoneDTO.getNumber()));
-        Phone phone = phoneRepository.save(mapper.toPhone(phoneDTO));
-        return mapper.toPhoneDTO(phone);
+        Phone phone = phoneRepository.save(toPhone(phoneDTO));
+        return toPhoneDTO(phone);
     }
 
     @Override
     public PhoneDTO findById(UUID id) {
         Phone foundPhone = phoneRepository.findById(id).orElseThrow(
                 () -> new PhoneNumberNotFoundException("The number by this id does not exist"));
-        return mapper.toPhoneDTO(foundPhone);
+        return toPhoneDTO(foundPhone);
     }
 
     @Override
@@ -45,7 +44,7 @@ public class PhoneServiceImpl implements PhoneService {
 
         phoneRepository.save(foundPhone);
 
-        return mapper.toPhoneDTO(foundPhone);
+        return toPhoneDTO(foundPhone);
     }
 
 
@@ -59,7 +58,7 @@ public class PhoneServiceImpl implements PhoneService {
 
     @Override
     public Collection<PhoneDTO> getAll() {
-        Collection<PhoneDTO> numbers = mapper.toPhonesDTO(phoneRepository.findAll());
+        Collection<PhoneDTO> numbers = toPhonesDTO(phoneRepository.findAll());
 
         if (numbers.isEmpty()) {
             throw new PhoneNumberNotFoundException("There is no phone number in DB");
