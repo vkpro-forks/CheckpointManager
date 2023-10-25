@@ -31,11 +31,13 @@ import static java.nio.file.StandardOpenOption.CREATE_NEW;
 @RequiredArgsConstructor
 @Slf4j
 public class AvatarServiceImpl implements AvatarService {
-    private final static String EXTENSIONS = "jpg, jpeg, png, ico, gif, tiff, eps, svg, bmp";
     private final AvatarRepository repository;
 
     @Value("${avatars.dir.path}")
     private String avatarsDir;
+
+    @Value("${avatars.extensions}")
+    private String extensions;
 
     @Override
     public void uploadAvatar(UUID entityID, MultipartFile avatarFile) throws IOException {
@@ -149,11 +151,12 @@ public class AvatarServiceImpl implements AvatarService {
      * @throws AvatarIsTooBigException if file size is bigger than 5MB
      */
     private void validateAvatar(MultipartFile avatarFile) {
+        System.out.println(extensions);
         if (avatarFile == null) {
             throw new AvatarIsEmptyException("When uploading avatar you need to choose the file");
         }
-        if (!(EXTENSIONS.contains(getExtension(avatarFile.getOriginalFilename())))) {
-            throw new BadAvatarExtensionException("Extension of your file must be one of these: " + EXTENSIONS);
+        if (!(extensions.contains(getExtension(avatarFile.getOriginalFilename())))) {
+            throw new BadAvatarExtensionException("Extension of your file must be one of these: " + extensions);
         }
         long imageSize = avatarFile.getSize();
         if (imageSize > (1024 * 5000)) {

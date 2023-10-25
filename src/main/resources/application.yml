@@ -34,5 +34,4 @@ application:
 avatars:
   dir:
     path: ./avatars
-
-
+  extensions: jpg, jpeg, png, ico, gif, tiff, eps, svg, bmp
