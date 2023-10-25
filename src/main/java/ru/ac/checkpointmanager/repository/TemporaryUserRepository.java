@@ -10,7 +10,4 @@ public interface TemporaryUserRepository extends JpaRepository<TemporaryUser, UU
     TemporaryUser findByVerifiedToken(String verifiedToken);
 
     void deleteByAddedAtBefore(Timestamp timestamp);
-
-//    List<TemporaryUser> findByAddedAtBefore(Timestamp timestamp);
-
 }

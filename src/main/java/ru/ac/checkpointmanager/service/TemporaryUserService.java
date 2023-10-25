@@ -8,6 +8,4 @@ public interface TemporaryUserService {
     TemporaryUser create(TemporaryUser temporaryUser);
 
     void delete(TemporaryUser temporaryUser);
-
-//    void deleteByTempToken(String verifiedToken);
 }
