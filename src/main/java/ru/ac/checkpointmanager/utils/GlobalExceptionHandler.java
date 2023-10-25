@@ -88,7 +88,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiError> handleAvatarIsEmptyException(AvatarIsEmptyException e) {
         String message = String.format("Exception %s: %s", e.getClass(), e.getMessage());
         log.warn(message);
-        return new ResponseEntity<>(new ApiError(HttpStatus.BAD_REQUEST, message), HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(new ApiError(HttpStatus.BAD_REQUEST, message), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(BadAvatarExtensionException.class)
+    public ResponseEntity<ApiError> handleBadAvatarExtensionException(BadAvatarExtensionException e) {
+        String message = String.format("Exception %s: %s", e.getClass(), e.getMessage());
+        log.warn(message);
+        return new ResponseEntity<>(new ApiError(HttpStatus.BAD_REQUEST, message), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
