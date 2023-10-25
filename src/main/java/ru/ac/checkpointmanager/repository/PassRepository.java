@@ -1,11 +1,9 @@
 package ru.ac.checkpointmanager.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
 
@@ -43,20 +41,20 @@ public interface PassRepository extends JpaRepository<Pass, UUID> {
      */
     List<Pass> findByEndTimeIsBeforeAndStatusLike(LocalDateTime time, PassStatus status);
 
-    @Transactional
-    @Modifying
-    @Query(value = "UPDATE passes SET status = 'CANCELLED' WHERE id = :id", nativeQuery = true)
-    void cancelById(@Param("id") UUID id);
+//    @Transactional
+//    @Modifying
+//    @Query(value = "UPDATE passes SET status = 'CANCELLED' WHERE id = :id", nativeQuery = true)
+//    void cancelById(@Param("id") UUID id);
 
-    @Transactional
-    @Modifying
-    @Query(value = "UPDATE Pass p SET p.status = 'ACTIVE' WHERE p.id = :id")
-    void activateById(@Param("id") UUID id);
+//    @Transactional
+//    @Modifying
+//    @Query(value = "UPDATE Pass p SET p.status = 'ACTIVE' WHERE p.id = :id")
+//    void activateById(@Param("id") UUID id);
 
-    @Transactional
-    @Modifying
-    @Query("UPDATE Pass p SET p.status = 'COMPLETED' WHERE p.id = :id")
-    void completedStatusById(@Param("id") UUID id);
+//    @Transactional
+//    @Modifying
+//    @Query("UPDATE Pass p SET p.status = 'COMPLETED' WHERE p.id = :id")
+//    void completedStatusById(@Param("id") UUID id);
 
     @Query(value = "SELECT EXISTS (SELECT FROM user_territory WHERE user_id = :uId AND territory_id = :tId)"
             , nativeQuery = true)

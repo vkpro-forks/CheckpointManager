@@ -15,9 +15,11 @@ import java.util.UUID;
 @Entity
 @Data
 @Table(name = "territories")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Territory {
 
     @Id
+    @EqualsAndHashCode.Include
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
@@ -40,17 +42,4 @@ public class Territory {
     @JsonIgnore
     @OneToMany(mappedBy = "territory", fetch = FetchType.LAZY)
     private List<Pass> pass;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Territory territory = (Territory) o;
-        return Objects.equals(id, territory.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
 }

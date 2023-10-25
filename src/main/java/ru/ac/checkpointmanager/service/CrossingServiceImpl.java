@@ -95,7 +95,7 @@ public class CrossingServiceImpl implements CrossingService {
             }
 
             if (currentDirection.equals(Direction.OUT)) {
-                passRepository.completedStatusById(pass.getId());
+                pass.setStatus(PassStatus.COMPLETED);
             }
         }
     }

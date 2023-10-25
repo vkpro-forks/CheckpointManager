@@ -2,6 +2,7 @@ package ru.ac.checkpointmanager.model.passes;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SourceType;
@@ -14,10 +15,14 @@ import java.util.UUID;
 @Entity
 @Table(name = "passes")
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @RequiredArgsConstructor
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name="dtype", discriminatorType = DiscriminatorType.STRING)
 public class Pass {
 
     @Id
+    @EqualsAndHashCode.Include
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
@@ -45,15 +50,5 @@ public class Pass {
     private LocalDateTime startTime;
 
     private LocalDateTime endTime;
-
-    //добавить оба когда будут реализованы кар и персон
-    //+бд и дто
-//    @ManyToOne
-//    @JoinColumn(name = "car_id")
-//    private Car car;
-
-//    @ManyToOne
-//    @JoinColumn(name = "person_id")
-//    private Person person;
 
 }

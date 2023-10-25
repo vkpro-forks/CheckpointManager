@@ -15,6 +15,8 @@ import ru.ac.checkpointmanager.model.Phone;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.*;
+import ru.ac.checkpointmanager.model.passes.PassAuto;
+import ru.ac.checkpointmanager.model.passes.PassWalk;
 
 import java.util.Collection;
 import java.util.List;
@@ -60,7 +62,12 @@ public class Mapper {
     }
     /* Pass mapping */
     public static Pass toPass(PassDTO passDTO) {
-        return modelMapper.map(passDTO, Pass.class);
+        if (passDTO.getCar() != null) {
+            return modelMapper.map(passDTO, PassAuto.class);
+        } else if (passDTO.getPerson() != null) {
+            return modelMapper.map(passDTO, PassWalk.class);
+        }
+        throw new IllegalArgumentException("Ошибка при конвертации passDTO (не содержит car или person)");
     }
     public static PassDTO toPassDTO(Pass pass) {
         return modelMapper.map(pass, PassDTO.class);
