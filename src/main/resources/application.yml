@@ -8,7 +8,7 @@ spring:
     password: chpmanPass%
   servlet:
     multipart:
-      max-file-size: 6MB
+      max-file-size: 5MB
   jpa:
     properties:
       hibernate: 

@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.ac.checkpointmanager.exception.AvatarIsEmptyException;
-import ru.ac.checkpointmanager.exception.AvatarIsTooBigException;
 import ru.ac.checkpointmanager.exception.AvatarNotFoundException;
 import ru.ac.checkpointmanager.exception.BadAvatarExtensionException;
 import ru.ac.checkpointmanager.model.Avatar;
@@ -148,7 +147,6 @@ public class AvatarServiceImpl implements AvatarService {
      * @param avatarFile file that needs to be validated
      * @throws AvatarIsEmptyException if file was not passed
      * @throws BadAvatarExtensionException if file is of not allowed extension
-     * @throws AvatarIsTooBigException if file size is bigger than 5MB
      */
     private void validateAvatar(MultipartFile avatarFile) {
         System.out.println(extensions);
@@ -157,11 +155,6 @@ public class AvatarServiceImpl implements AvatarService {
         }
         if (!(extensions.contains(getExtension(avatarFile.getOriginalFilename())))) {
             throw new BadAvatarExtensionException("Extension of your file must be one of these: " + extensions);
-        }
-        long imageSize = avatarFile.getSize();
-        if (imageSize > (1024 * 5000)) {
-            log.error("Image is too big for avatar. Size = {} MB", imageSize / 1024 / (double) 1000);
-            throw new AvatarIsTooBigException("File size exceeds maximum permitted value of 5MB");
         }
     }
 
