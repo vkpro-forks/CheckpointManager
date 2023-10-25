@@ -11,7 +11,7 @@ spring:
       max-file-size: 6MB
   jpa:
     properties:
-      hibernate: 
+      hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         show_sql: false
     hibernate:
@@ -31,14 +31,14 @@ spring:
     password: zgvovxqtnyosjfxx
     protocol: smtp
     properties:
-        mail:
-          smtp:
-            ssl:
-              enable: true
-            auth: true
-            starttls:
-              enable: true
-
+      mail:
+        smtp:
+          ssl:
+            enable: true
+          auth: true
+          starttls:
+            enable: true
+  confirmation-link: http://localhost:8080/chpman/authentication/confirm?token=
 application:
   security:
     jwt:
@@ -49,6 +49,3 @@ application:
 avatars:
   dir:
     path: ./avatars
-
-
-

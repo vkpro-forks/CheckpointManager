@@ -99,11 +99,14 @@ public class Mapper {
     }
 
     /**
-     * Method for converting from a Temporary User to the main User entity.
+     * Метод для конвертации временного пользователя в основного.
+     * При маппинге игнорируется поле id, так как идентификатор основного пользователя назначается при сохранении в базу данных.
      *
+     * @param temporaryUser временный пользователь, который будет конвертирован в основного пользователя.
+     * @return User - основной пользователь.
      *
-     * @param temporaryUser
-     * @return
+     * @see TemporaryUser
+     * @see User
      */
     public static User toUser(TemporaryUser temporaryUser) {
         PropertyMap<TemporaryUser, User> propertyMap = new PropertyMap<>() {

@@ -17,7 +17,6 @@ import ru.ac.checkpointmanager.dto.AuthenticationRequest;
 import ru.ac.checkpointmanager.dto.AuthenticationResponse;
 import ru.ac.checkpointmanager.dto.UserAuthDTO;
 import ru.ac.checkpointmanager.service.AuthenticationService;
-import ru.ac.checkpointmanager.service.TemporaryUserService;
 
 import java.io.IOException;
 
@@ -38,7 +37,6 @@ import static ru.ac.checkpointmanager.utils.ErrorUtils.errorsList;
 public class AuthController {
 
     private final AuthenticationService authenticationService;
-    private final TemporaryUserService temporaryUserService;
 
     @PostMapping("/registration")
     @Operation(summary = "registration")
@@ -57,14 +55,6 @@ public class AuthController {
         return ResponseEntity.ok("Регистрация успешно подтверждена, можете войти в аккаунт, " +
                 "используя адрес электронной почты и пароль, указанные при регистрации");
     }
-
-//    @DeleteMapping("/cancel")
-//    @Operation(summary = "to cancel confirming registration")
-//    public ResponseEntity<?> deleteTempUser(@RequestParam String verifiedToken) {
-//        temporaryUserService.deleteByTempToken(verifiedToken);
-//        return ResponseEntity.ok("Регистрация остановлена");
-//    }
-
 
     @PostMapping("/login")
     @Operation(summary = "login")

@@ -13,3 +13,7 @@ CREATE TABLE temporary_users
 
     CONSTRAINT temporary_user_pk PRIMARY KEY (id)
 );
+
+-- changeset fifimova:72.1
+ALTER TABLE temporary_users
+    ADD COLUMN added_at TIMESTAMP;

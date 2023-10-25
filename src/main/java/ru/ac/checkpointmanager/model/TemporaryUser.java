@@ -5,14 +5,17 @@ import jakarta.validation.constraints.Email;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.Objects;
 import java.util.UUID;
 
 /**
- * The TemporaryUser class represents a user with temporary access.
+ * Класс TemporaryUser представляет временный объект пользователях, содержит всю необходимую информацию
+ * для создания основного пользователя приложения.
  *
  * @author fifimova
+ * @see User
  */
 
 @Data
@@ -44,6 +47,9 @@ public class TemporaryUser {
 
     @Column(name = "verified_token")
     private String verifiedToken;
+
+    @Column(name = "added_at")
+    private Timestamp addedAt;
 
     @Override
     public boolean equals(Object o) {

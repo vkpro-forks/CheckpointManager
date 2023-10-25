@@ -19,12 +19,7 @@ import ru.ac.checkpointmanager.repository.TokenRepository;
 import java.io.IOException;
 import java.util.stream.Collectors;
 
-/**
- * This filter is responsible for authenticating requests using JWT (JSON Web Token).
- * It extracts the JWT from the request header, validates it, and sets the authenticated user in the SecurityContextHolder.
- *
- * @author fifimova
- */
+
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -33,19 +28,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
     private final TokenRepository tokenRepository;
 
-    /**
-     * Filters the incoming request and performs JWT authentication.
-     * If the request path contains "/chpman/authentication", the filter chain is continued without authentication.
-     * Otherwise, it extracts the JWT from the "Authorization" header, validates it, and sets the authenticated user in the SecurityContextHolder.
-     * If the token is valid and not expired or revoked, it creates an authentication object and sets it in the SecurityContextHolder.
-     * Finally, it continues the filter chain.
-     *
-     * @param request  the incoming HttpServletRequest
-     * @param response the outgoing HttpServletResponse
-     * @param filterChain the filter chain to continue processing the request
-     * @throws ServletException if an error occurs during the filter processing
-     * @throws IOException if an I/O error occurs during the filter processing
-     */
     @Override
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,
@@ -59,7 +41,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String authHeader = request.getHeader("Authorization"); // получается значение заголовка "Authorization" из запроса и сохраняется в переменной
         final String jwt;
         final String userEmail;
-        if (authHeader == null ||!authHeader.startsWith("Bearer ")) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }

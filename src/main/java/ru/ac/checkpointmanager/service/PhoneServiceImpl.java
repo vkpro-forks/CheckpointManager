@@ -66,4 +66,9 @@ public class PhoneServiceImpl implements PhoneService {
         }
         return numbers;
     }
+
+    @Override
+    public Boolean existsByNumber(String number) {
+        return phoneRepository.existsByNumber(number);
+    }
 }
