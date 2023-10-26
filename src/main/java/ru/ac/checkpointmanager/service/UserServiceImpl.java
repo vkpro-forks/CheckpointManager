@@ -17,6 +17,7 @@ import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
+import ru.ac.checkpointmanager.service.avatar.AvatarService;
 import ru.ac.checkpointmanager.utils.Mapper;
 
 import java.security.Principal;
@@ -37,6 +38,7 @@ public class UserServiceImpl implements UserService {
     private final PhoneRepository phoneRepository;
     private final Mapper mapper;
     private final PasswordEncoder passwordEncoder;
+    private final AvatarService avatarService;
 
     @Override
     public UserDTO findById(UUID id) {
@@ -170,8 +172,8 @@ public class UserServiceImpl implements UserService {
         if (userRepository.findById(id).isEmpty()) {
             throw new UserNotFoundException("Error deleting user with ID" + id);
         }
-
         userRepository.deleteById(id);
+        avatarService.deleteAvatarIfExists(id);
     }
 
     @Override
