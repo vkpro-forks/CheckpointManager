@@ -41,6 +41,8 @@ public class PassDTO {
     @Future
     private LocalDateTime endTime;
 
+    private String dtype;
+
     private Car car;
 
     private Person person;

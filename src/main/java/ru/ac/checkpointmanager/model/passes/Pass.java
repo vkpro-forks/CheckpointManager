@@ -51,4 +51,6 @@ public class Pass {
 
     private LocalDateTime endTime;
 
+    @Column(insertable=false, updatable=false)
+    private String dtype;
 }
