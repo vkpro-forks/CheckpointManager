@@ -83,9 +83,13 @@ public class AvatarServiceImpl implements AvatarService {
     }
 
     @Override
-    public void deleteAvatar(UUID entityID) {
+    public Avatar deleteAvatarIfExists(UUID entityID) {
         logWhenMethodInvoked(MethodLog.getMethodName());
-        Avatar avatar = findAvatarOrThrow(entityID);
+        Avatar avatar = repository.findById(entityID).orElse(null);
+        if (avatar == null) {
+            log.debug("Method returns because entity has no avatar");
+            return null;
+        }
         Path filePath = Path.of(avatarsDir, entityID + "." +
                 getExtension(avatar.getFilePath()));
         try {
@@ -94,6 +98,7 @@ public class AvatarServiceImpl implements AvatarService {
             log.error("I/O error occurred");
         }
         repository.delete(avatar);
+        return avatar;
     }
 
     @Override

@@ -25,7 +25,15 @@ public interface AvatarService {
 
     void getAvatar(UUID entityID, HttpServletResponse response) throws IOException;
 
-    void deleteAvatar(UUID entityID);
+    /**
+     * Method searches for avatar in table by entity id.
+     * If there is one, then removal of file in directory is performed.
+     * If result of search is nothing, then method returns with no error.
+     *
+     * @param entityID id of entity, which avatar needs to deleted
+     * @return
+     */
+    Avatar deleteAvatarIfExists(UUID entityID);
 
     /**
      * If avatar is present in DB then it will be returned
