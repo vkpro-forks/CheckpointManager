@@ -14,4 +14,6 @@ public interface PersonRepository extends JpaRepository<Person, UUID> {
     List<Person> findByNameContainingIgnoreCase(String name);
     List<Person> findByPhoneContaining(String phone);
     Optional<Person> findPersonByPasses_Id(UUID passId);
+    Optional<Person> findByPhone(String name);
+
 }

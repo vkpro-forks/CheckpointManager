@@ -2,6 +2,7 @@ package ru.ac.checkpointmanager.dto;
 
 import jakarta.validation.constraints.*;
 import lombok.Data;
+import ru.ac.checkpointmanager.model.Person;
 import ru.ac.checkpointmanager.model.enums.PassStatus;
 import ru.ac.checkpointmanager.model.enums.PassTypeTime;
 
@@ -39,6 +40,7 @@ public class PassDTO {
 
 //    private Car car;
 
-//    private Person person;
+    @NotNull
+    private PersonDTO person;
 
 }

@@ -1,0 +1,32 @@
+2023-10-19 09:39:37,726 WARN [main] [JpaBaseConfiguration.java:231] - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2023-10-19 09:39:37,973 WARN [main] [WebSecurity.java:324] - 
+
+********************************************************************
+**********        Security debugging is enabled.       *************
+**********    This may include sensitive information.  *************
+**********      Do not use in a production system!     *************
+********************************************************************
+
+
+2023-10-19 09:43:51,647 WARN [http-nio-8080-exec-10] [PassServiceImpl.java:180] - Reject operation: user [611ae81b-4535-4c96-96b8-839482261310] not have permission to create passes for this territory [b5fe1fbd-e99d-4d19-b8a0-787d23ede01b]
+2023-10-19 09:43:51,649 WARN [http-nio-8080-exec-10] [GlobalExceptionHandler.java:74] - Exception class java.lang.IllegalArgumentException: Reject operation: user [611ae81b-4535-4c96-96b8-839482261310] not have permission to create passes for this territory [b5fe1fbd-e99d-4d19-b8a0-787d23ede01b]
+2023-10-19 12:28:13,201 WARN [main] [JpaBaseConfiguration.java:231] - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2023-10-19 12:28:13,435 WARN [main] [WebSecurity.java:324] - 
+
+********************************************************************
+**********        Security debugging is enabled.       *************
+**********    This may include sensitive information.  *************
+**********      Do not use in a production system!     *************
+********************************************************************
+
+
+2023-10-19 12:39:28,369 WARN [main] [JpaBaseConfiguration.java:231] - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2023-10-19 12:39:28,608 WARN [main] [WebSecurity.java:324] - 
+
+********************************************************************
+**********        Security debugging is enabled.       *************
+**********    This may include sensitive information.  *************
+**********      Do not use in a production system!     *************
+********************************************************************
+
+

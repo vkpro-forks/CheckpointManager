@@ -8,10 +8,12 @@ import ru.ac.checkpointmanager.exception.PassNotFoundException;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.model.Pass;
+import ru.ac.checkpointmanager.model.Person;
 import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.enums.PassStatus;
 import ru.ac.checkpointmanager.repository.CrossingRepository;
 import ru.ac.checkpointmanager.repository.PassRepository;
+import ru.ac.checkpointmanager.repository.PersonRepository;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.time.LocalDateTime;
@@ -30,6 +32,7 @@ import static ru.ac.checkpointmanager.utils.StringTrimmer.trimThemAll;
 public class PassServiceImpl implements PassService{
 
     private final PassRepository repository;
+    private final PersonRepository personRepository;
     private final CrossingRepository crossingRepository;
 
     private int hourForLogInScheduledCheck;
@@ -37,6 +40,8 @@ public class PassServiceImpl implements PassService{
     @Override
     public Pass addPass(Pass pass) {
         log.info("Method {}, UUID - {}", MethodLog.getMethodName(), pass.getId());
+        Person savedPerson = personRepository.save(pass.getPerson());
+        pass.setPerson(savedPerson);
         checkUserTerritoryRelation(pass);
         checkOverlapTime(pass);
 
@@ -44,6 +49,17 @@ public class PassServiceImpl implements PassService{
         pass.setStatus(PassStatus.ACTIVE);
         return repository.save(pass);
     }
+
+    //метод для проверки существует ли person в бд
+//    private Person checkIfExistsOrSave(Person person) {
+//        Optional<Person> existingPersonOpt = personRepository.findByPhone(person.getPhone());
+//
+//        if (existingPersonOpt.isPresent()) {
+//            return existingPersonOpt.get();
+//        } else {
+//            return personRepository.save(person);
+//        }
+//    }
 
     @Override
     public List<Pass> findPasses() {
@@ -197,7 +213,7 @@ public class PassServiceImpl implements PassService{
                 .filter(existPass -> newPass.getTerritory().equals(existPass.getTerritory()))
                 //раскомментить когда в Pass будут добавлены Car и Person
 //                .filter(existPass -> Objects.equals(newPass.getCar, existPass.getCar))
-//                .filter(existPass -> Objects.equals(newPass.getPerson, existPass.getPerson))
+                .filter(existPass -> Objects.equals(newPass.getPerson(), existPass.getPerson()))
                 .filter(existPass -> newPass.getEndTime().isAfter(existPass.getStartTime()) &&
                         newPass.getStartTime().isBefore(existPass.getEndTime()))
                 .findFirst();

@@ -9,6 +9,7 @@ import org.hibernate.annotations.SourceType;
 import ru.ac.checkpointmanager.model.enums.Direction;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -33,7 +34,7 @@ public class Crossing {
 
     @Column(name = "local_date_time")
     @CreationTimestamp(source = SourceType.VM)
-    private LocalDateTime localDateTime;
+    private ZonedDateTime localDateTime;
 
     @Enumerated(EnumType.STRING)
     private Direction direction;

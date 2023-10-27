@@ -16,6 +16,10 @@ spring:
         show_sql: false
     hibernate:
       ddl-auto: validate
+      jdbc:
+        time_zone: 'Europe/Moscow'
+  jackson:
+    time-zone: Europe/Moscow
   liquibase:
     change-log: classpath:liquibase/changelog-master.yml
     contexts: default

@@ -147,4 +147,18 @@ public class Mapper {
                 .map(crossing -> modelMapper.map(crossing, CrossingDTO.class))
                 .toList();
     }
+
+    public Person toPerson(PersonDTO personDTO) {
+        return modelMapper.map(personDTO, Person.class);
+    }
+
+    public PersonDTO toPersonDTO(Person person) {
+        return modelMapper.map(person, PersonDTO.class);
+    }
+
+    public List<PersonDTO> toPersonDTO(Collection<Person> person) {
+        return person.stream()
+                .map(p -> modelMapper.map(p, PersonDTO.class))
+                .toList();
+    }
 }
