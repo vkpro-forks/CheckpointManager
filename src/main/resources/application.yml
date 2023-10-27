@@ -11,7 +11,7 @@ spring:
       max-file-size: 6MB
   jpa:
     properties:
-      hibernate: 
+      hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         show_sql: true
     hibernate:
@@ -24,6 +24,21 @@ spring:
     enabled: true
   profiles:
     active: dev
+  mail:
+    host: smtp.yandex.ru
+    port: 465
+    username: anvilcoder@yandex.ru
+    password: zgvovxqtnyosjfxx
+    protocol: smtp
+    properties:
+      mail:
+        smtp:
+          ssl:
+            enable: true
+          auth: true
+          starttls:
+            enable: true
+  confirmation-link: http://localhost:8080/chpman/authentication/confirm?token=
 application:
   security:
     jwt:
@@ -34,5 +49,3 @@ application:
 avatars:
   dir:
     path: ./avatars
-
-

@@ -5,14 +5,16 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SourceType;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.model.passes.Pass;
 
-import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Data
@@ -55,7 +57,8 @@ public class User implements UserDetails {
     private Set<Phone> numbers;
 
     @Column(name = "added_at")
-    private Timestamp addedAt;
+    @CreationTimestamp(source = SourceType.VM)
+    private LocalDateTime addedAt;
 
     @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY)

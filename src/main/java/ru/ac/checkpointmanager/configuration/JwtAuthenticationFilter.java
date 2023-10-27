@@ -19,6 +19,7 @@ import ru.ac.checkpointmanager.repository.TokenRepository;
 import java.io.IOException;
 import java.util.stream.Collectors;
 
+
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -40,7 +41,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String authHeader = request.getHeader("Authorization"); // получается значение заголовка "Authorization" из запроса и сохраняется в переменной
         final String jwt;
         final String userEmail;
-        if (authHeader == null ||!authHeader.startsWith("Bearer ")) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }

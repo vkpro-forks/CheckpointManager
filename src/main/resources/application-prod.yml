@@ -1,0 +1,18 @@
+spring:
+  profiles:
+    active: prod
+  mail:
+    host: smtp.yandex.ru
+    port: 465
+    username: anvilcoder@yandex.ru
+    password: zgvovxqtnyosjfxx
+    protocol: smtp
+    properties:
+      mail:
+        smtp:
+          ssl:
+            enable: true
+          auth: true
+          starttls:
+            enable: true
+  confirmation-link: https://checkpoint-manager.ru/chpman/authentication/confirm?token=
