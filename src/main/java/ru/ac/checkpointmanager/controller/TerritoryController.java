@@ -12,7 +12,7 @@ import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.UserDTO;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
-import ru.ac.checkpointmanager.service.TerritoryService;
+import ru.ac.checkpointmanager.service.territories.TerritoryService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
 
 import java.util.List;

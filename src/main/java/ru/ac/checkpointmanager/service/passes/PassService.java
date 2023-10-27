@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.service;
+package ru.ac.checkpointmanager.service.passes;
 
 import ru.ac.checkpointmanager.model.passes.Pass;
 

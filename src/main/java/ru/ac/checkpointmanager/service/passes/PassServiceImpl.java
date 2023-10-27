@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.service;
+package ru.ac.checkpointmanager.service.passes;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -118,15 +118,11 @@ public class PassServiceImpl implements PassService{
         }
 
         if (crossingRepository.findCrossingsByPassId(id).size() > 0) {
-//            repository.completedStatusById(id);
             pass.setStatus(PassStatus.COMPLETED);
-//            repository.save(pass);
             return pass;
         }
 
-//        repository.cancelById(id);
         pass.setStatus(PassStatus.CANCELLED);
-//            repository.save(pass);
         return pass;
     }
 
@@ -144,9 +140,7 @@ public class PassServiceImpl implements PassService{
             throw new IllegalStateException("This pass has already expired");
         }
 
-//        repository.activateById(id);
         pass.setStatus(PassStatus.ACTIVE);
-//            repository.save(pass);
         return pass;
     }
 
@@ -159,12 +153,9 @@ public class PassServiceImpl implements PassService{
             throw new IllegalStateException("You can only to unwarnining a previously warninged pass");
         }
 
-//        repository.completedStatusById(id);
         pass.setStatus(PassStatus.COMPLETED);
-//            repository.save(pass);
         return pass;
     }
-
 
     @Override
     public void deletePass(UUID id) {
@@ -234,15 +225,14 @@ public class PassServiceImpl implements PassService{
         }
     }
     /**
-     * С заданной периодичностью ищет все активные пропуска с истекшим временем действия,
-     * затем по каждому наденному пропуску ищет зафиксированные пересечения.
+     * Каждую минуту ищет все активные пропуска с истекшим временем действия,
+     * затем по каждому найденному пропуску ищет зафиксированные пересечения.
      * Если пересечений не было, присваивает пропуску статус "устаревший" (PassStatus.OUTDATED).
      * Если пересечения были, и последнее было на выезд - статус "выполнен" (PassStatus.COMPLETED).
      * Если пересечения были, и последнее было на въезд - статус "предупреждение" (PassStatus.WARNING).
      * После этого сохраняет пропуск и вызывает метод оповещения фронтенда об изменениях (пока нет :).
      */
-//    @Scheduled(cron = "0 0/1 * * * *")
-    @Scheduled(fixedDelay = 30_000L)
+    @Scheduled(cron = "0 * * * * ?")
     public void checkPassesOnEndTimeReached() {
         if (LocalDateTime.now().getHour() != hourForLogInScheduledCheck) {
             hourForLogInScheduledCheck = LocalDateTime.now().getHour();
@@ -252,7 +242,7 @@ public class PassServiceImpl implements PassService{
         List<Pass> passes = repository.findByEndTimeIsBeforeAndStatusLike(LocalDateTime.now(), PassStatus.ACTIVE);
         if (passes.isEmpty()) {return;}
 
-        log.debug("Method {}, endTime reached on {} active pass(es)", MethodLog.getMethodName(), passes.size());
+        log.info("Method {}, endTime reached on {} active pass(es)", MethodLog.getMethodName(), passes.size());
 
         for (Pass pass : passes) {
             List<Crossing> passCrossings = crossingRepository.findCrossingsByPassId(pass.getId());
