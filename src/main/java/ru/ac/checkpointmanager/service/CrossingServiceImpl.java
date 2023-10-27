@@ -5,14 +5,13 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import ru.ac.checkpointmanager.dto.CrossingDTO;
 import ru.ac.checkpointmanager.exception.*;
 import ru.ac.checkpointmanager.model.Checkpoint;
 import ru.ac.checkpointmanager.model.Crossing;
-import ru.ac.checkpointmanager.model.Pass;
+import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.enums.Direction;
-import ru.ac.checkpointmanager.model.enums.PassStatus;
-import ru.ac.checkpointmanager.model.enums.PassTypeTime;
+import ru.ac.checkpointmanager.model.passes.PassStatus;
+import ru.ac.checkpointmanager.model.passes.PassTypeTime;
 import ru.ac.checkpointmanager.repository.CheckpointRepository;
 import ru.ac.checkpointmanager.repository.CrossingRepository;
 import ru.ac.checkpointmanager.repository.PassRepository;
@@ -96,7 +95,7 @@ public class CrossingServiceImpl implements CrossingService {
             }
 
             if (currentDirection.equals(Direction.OUT)) {
-                passRepository.completedStatusById(pass.getId());
+                pass.setStatus(PassStatus.COMPLETED);
             }
         }
     }

@@ -9,8 +9,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.ac.checkpointmanager.dto.PassDTO;
-import ru.ac.checkpointmanager.model.Pass;
-import ru.ac.checkpointmanager.service.PassService;
+import ru.ac.checkpointmanager.model.passes.Pass;
+import ru.ac.checkpointmanager.service.passes.PassService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
 
 import java.util.List;

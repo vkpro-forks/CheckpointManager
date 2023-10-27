@@ -5,15 +5,11 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
 import org.springframework.stereotype.Component;
 import ru.ac.checkpointmanager.dto.*;
-import ru.ac.checkpointmanager.exception.CheckpointNotFoundException;
-import ru.ac.checkpointmanager.exception.PassNotFoundException;
 import ru.ac.checkpointmanager.model.*;
-import ru.ac.checkpointmanager.repository.CheckpointRepository;
-import ru.ac.checkpointmanager.repository.PassRepository;
+import ru.ac.checkpointmanager.model.passes.*;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -59,7 +55,12 @@ public class Mapper {
 
     /* Pass mapping */
     public static Pass toPass(PassDTO passDTO) {
-        return modelMapper.map(passDTO, Pass.class);
+        if (passDTO.getCar() != null) {
+            return modelMapper.map(passDTO, PassAuto.class);
+        } else if (passDTO.getPerson() != null) {
+            return modelMapper.map(passDTO, PassWalk.class);
+        }
+        throw new IllegalArgumentException("Ошибка при конвертации passDTO (не содержит car или person)");
     }
   
     public static PassDTO toPassDTO(Pass pass) {

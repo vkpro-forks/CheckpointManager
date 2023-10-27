@@ -24,7 +24,7 @@ import java.util.Arrays;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Configuration
-@EnableWebSecurity(debug = true)
+@EnableWebSecurity(debug = false)
 @EnableMethodSecurity
 @Slf4j
 public class SecurityConfig {
