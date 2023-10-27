@@ -154,7 +154,6 @@ public class AvatarServiceImpl implements AvatarService {
      * @throws BadAvatarExtensionException if file is of not allowed extension
      */
     private void validateAvatar(MultipartFile avatarFile) {
-        System.out.println(extensions);
         if (avatarFile == null) {
             throw new AvatarIsEmptyException("When uploading avatar you need to choose the file");
         }
