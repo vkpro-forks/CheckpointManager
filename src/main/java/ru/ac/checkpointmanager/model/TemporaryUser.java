@@ -4,9 +4,11 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SourceType;
 
-import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -49,7 +51,8 @@ public class TemporaryUser {
     private String verifiedToken;
 
     @Column(name = "added_at")
-    private Timestamp addedAt;
+    @CreationTimestamp(source = SourceType.VM)
+    private LocalDateTime addedAt;
 
     @Override
     public boolean equals(Object o) {

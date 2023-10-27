@@ -31,7 +31,6 @@ import ru.ac.checkpointmanager.repository.TokenRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.UUID;
 
@@ -59,7 +58,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
-    private final Timestamp currentTime = new Timestamp(System.currentTimeMillis());
 
     /**
      * Предварительная регистрация нового пользователя в системе.
@@ -109,7 +107,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         TemporaryUser temporaryUser = toTemporaryUser(userAuthDTO);
         temporaryUser.setMainNumber(cleanPhone(temporaryUser.getMainNumber()));
-        temporaryUser.setAddedAt(currentTime);
 
         String encodedPassword = passwordEncoder.encode(temporaryUser.getPassword());
         temporaryUser.setPassword(encodedPassword);
@@ -155,7 +152,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             User user = toUser(tempUser);
             user.setRole(Role.USER);
             user.setIsBlocked(false);
-            user.setAddedAt(currentTime);
 
             userRepository.save(user);
             log.info("User saved");

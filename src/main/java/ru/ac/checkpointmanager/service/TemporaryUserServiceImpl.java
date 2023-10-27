@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.model.TemporaryUser;
 import ru.ac.checkpointmanager.repository.TemporaryUserRepository;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 /**
@@ -51,11 +50,12 @@ public class TemporaryUserServiceImpl implements TemporaryUserService {
     @Scheduled(fixedRate = 30000)
     @Transactional
     public void cleanup() {
-        if (LocalDateTime.now().getHour() != hourForLogInScheduledCheck) {
-            hourForLogInScheduledCheck = LocalDateTime.now().getHour();
+        LocalDateTime now = LocalDateTime.now();
+        if (now.getHour() != hourForLogInScheduledCheck) {
+            hourForLogInScheduledCheck = now.getHour();
             log.debug("Scheduled method 'cleanup' for temporary_users table continues to work");
         }
-        Timestamp cutoffTime = new Timestamp(System.currentTimeMillis() - 15 * 60 * 1000);
+        LocalDateTime cutoffTime = now.minusMinutes(15);
         repository.deleteByAddedAtBefore(cutoffTime);
     }
 }
