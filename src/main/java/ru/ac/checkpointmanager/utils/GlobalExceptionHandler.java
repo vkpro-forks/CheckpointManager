@@ -134,7 +134,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MailSendException.class)
-    public ResponseEntity<String> handleUsernameNotFoundException(MailSendException e) {
+    public ResponseEntity<String> handleMailSendException(MailSendException e) {
         String message = String.format("Exception %s: %s", e.getClass(), e.getMessage());
         log.warn(message);
         return new ResponseEntity<>(message, HttpStatus.INTERNAL_SERVER_ERROR);
