@@ -11,4 +11,6 @@ import java.util.UUID;
 public interface CrossingService {
 
     Crossing markCrossing(Crossing crossing);
+
+    Crossing getCrossing(UUID uuid);
 }

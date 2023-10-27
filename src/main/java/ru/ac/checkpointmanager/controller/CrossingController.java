@@ -15,6 +15,8 @@ import ru.ac.checkpointmanager.service.CrossingService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
 import ru.ac.checkpointmanager.utils.Mapper;
 
+import java.util.UUID;
+
 
 @RestController
 @RequestMapping("chpman/crossing")
@@ -37,5 +39,11 @@ public class CrossingController {
         Crossing crossing = crossingService.markCrossing(mapper.toCrossing(crossingDTO));
 
         return new ResponseEntity<>(mapper.toCrossingDTO(crossing), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getCrossing(@PathVariable UUID id) {
+        Crossing existCrossing = crossingService.getCrossing(id);
+        return new ResponseEntity<>(mapper.toCrossingDTO(existCrossing), HttpStatus.OK);
     }
 }

@@ -2,6 +2,7 @@ package ru.ac.checkpointmanager.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -9,6 +10,7 @@ import ru.ac.checkpointmanager.exception.*;
 import ru.ac.checkpointmanager.model.Checkpoint;
 import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.model.Pass;
+import ru.ac.checkpointmanager.model.Person;
 import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.enums.PassStatus;
 import ru.ac.checkpointmanager.model.enums.PassTypeTime;
@@ -24,6 +26,7 @@ import java.util.UUID;
 @Transactional
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CrossingServiceImpl implements CrossingService {
 
 
@@ -54,6 +57,20 @@ public class CrossingServiceImpl implements CrossingService {
         logger.info("Successfully marked crossing for pass ID: {}", crossing.getPass().getId());
         return crossingRepository.save(crossing);
     }
+
+    @Override
+    public Crossing getCrossing(UUID uuid) {
+        if (uuid == null) {
+            log.warn("Attempt to get Crossing with null UUID");
+            throw new IllegalArgumentException("UUID cannot be null");
+        }
+        Optional<Crossing> personCrossing = crossingRepository.findById(uuid);
+        return personCrossing.orElseThrow(() -> {
+            log.warn("Crossing not found for UUID: {}", uuid);
+            return new CrossingNotFoundException("Crossing not found");
+        });
+    }
+
 
     // проверяет, существует ли пропуск с данным ID и активен ли он
     private Pass validatePass(UUID passId) {
