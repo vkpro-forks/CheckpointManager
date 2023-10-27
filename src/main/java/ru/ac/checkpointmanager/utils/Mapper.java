@@ -2,25 +2,14 @@ package ru.ac.checkpointmanager.utils;
 
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.PropertyMap;
 import org.springframework.stereotype.Component;
 import ru.ac.checkpointmanager.dto.*;
-import ru.ac.checkpointmanager.dto.CheckpointDTO;
-import ru.ac.checkpointmanager.dto.PassDTO;
-import ru.ac.checkpointmanager.dto.TerritoryDTO;
-import ru.ac.checkpointmanager.dto.UserDTO;
-import ru.ac.checkpointmanager.model.Checkpoint;
-import ru.ac.checkpointmanager.model.Pass;
-import ru.ac.checkpointmanager.dto.PhoneDTO;
-import ru.ac.checkpointmanager.model.Phone;
-import ru.ac.checkpointmanager.model.Territory;
-import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.exception.CheckpointNotFoundException;
 import ru.ac.checkpointmanager.exception.PassNotFoundException;
 import ru.ac.checkpointmanager.model.*;
 import ru.ac.checkpointmanager.repository.CheckpointRepository;
 import ru.ac.checkpointmanager.repository.PassRepository;
-import ru.ac.checkpointmanager.service.CheckpointService;
-import ru.ac.checkpointmanager.service.PassService;
 
 import java.util.Collection;
 import java.util.List;
@@ -36,10 +25,11 @@ public class Mapper {
     public static Checkpoint toCheckpoint(CheckpointDTO checkpointDTO) {
         return modelMapper.map(checkpointDTO, Checkpoint.class);
     }
-  
+
     public static CheckpointDTO toCheckpointDTO(Checkpoint checkpoint) {
         return modelMapper.map(checkpoint, CheckpointDTO.class);
     }
+
     public static List<CheckpointDTO> toCheckpointsDTO(List<Checkpoint> checkpoints) {
         return checkpoints.stream()
                 .map(e -> modelMapper.map(e, CheckpointDTO.class))
@@ -60,15 +50,18 @@ public class Mapper {
                 .map(e -> modelMapper.map(e, TerritoryDTO.class))
                 .toList();
     }
+
     public static List<Territory> toTerritories(List<TerritoryDTO> territoriesDTO) {
         return territoriesDTO.stream()
                 .map(e -> modelMapper.map(e, Territory.class))
                 .toList();
     }
+
     /* Pass mapping */
     public static Pass toPass(PassDTO passDTO) {
         return modelMapper.map(passDTO, Pass.class);
     }
+  
     public static PassDTO toPassDTO(Pass pass) {
         return modelMapper.map(pass, PassDTO.class);
     }
@@ -99,6 +92,30 @@ public class Mapper {
 
     public static UserAuthDTO toUserAuthDTO(User user) {
         return modelMapper.map(user, UserAuthDTO.class);
+    }
+
+    /**
+     * Метод для конвертации временного пользователя в основного.
+     * При маппинге игнорируется поле id, так как идентификатор основного пользователя назначается при сохранении в базу данных.
+     *
+     * @param temporaryUser временный пользователь, который будет конвертирован в основного пользователя.
+     * @return User - основной пользователь.
+     *
+     * @see TemporaryUser
+     * @see User
+     */
+    public static User toUser(TemporaryUser temporaryUser) {
+        PropertyMap<TemporaryUser, User> propertyMap = new PropertyMap<>() {
+            protected void configure() {
+                skip(destination.getId());
+            }
+        };
+        modelMapper.addMappings(propertyMap);
+        return modelMapper.map(temporaryUser, User.class);
+    }
+
+    public static TemporaryUser toTemporaryUser(UserAuthDTO userAuthDTO) {
+        return modelMapper.map(userAuthDTO, TemporaryUser.class);
     }
 
     /* Phone mapping */

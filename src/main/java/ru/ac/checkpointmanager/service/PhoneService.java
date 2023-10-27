@@ -16,4 +16,6 @@ public interface PhoneService {
     void deletePhoneNumber(UUID id);
 
     Collection<PhoneDTO> getAll();
+
+    Boolean existsByNumber(String number);
 }
