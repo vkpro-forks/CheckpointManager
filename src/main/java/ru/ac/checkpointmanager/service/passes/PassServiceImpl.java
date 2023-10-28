@@ -1,15 +1,18 @@
-package ru.ac.checkpointmanager.service;
+package ru.ac.checkpointmanager.service.passes;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.exception.PassNotFoundException;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.model.Crossing;
-import ru.ac.checkpointmanager.model.Pass;
+import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.enums.Direction;
-import ru.ac.checkpointmanager.model.enums.PassStatus;
+import ru.ac.checkpointmanager.model.passes.PassAuto;
+import ru.ac.checkpointmanager.model.passes.PassStatus;
+import ru.ac.checkpointmanager.model.passes.PassWalk;
 import ru.ac.checkpointmanager.repository.CrossingRepository;
 import ru.ac.checkpointmanager.repository.PassRepository;
 import ru.ac.checkpointmanager.utils.MethodLog;
@@ -105,6 +108,7 @@ public class PassServiceImpl implements PassService{
     }
 
     @Override
+    @Transactional
     public Pass cancelPass(UUID id) {
         log.info("Method {}, UUID - {}", MethodLog.getMethodName(), id);
         Pass pass = findPass(id);
@@ -114,17 +118,16 @@ public class PassServiceImpl implements PassService{
         }
 
         if (crossingRepository.findCrossingsByPassId(id).size() > 0) {
-            repository.completedStatusById(id);
             pass.setStatus(PassStatus.COMPLETED);
             return pass;
         }
 
-        repository.cancelById(id);
         pass.setStatus(PassStatus.CANCELLED);
         return pass;
     }
 
     @Override
+    @Transactional
     public Pass activateCancelledPass(UUID id) {
         log.info("Method {}, UUID - {}", MethodLog.getMethodName(), id);
         Pass pass = findPass(id);
@@ -137,7 +140,6 @@ public class PassServiceImpl implements PassService{
             throw new IllegalStateException("This pass has already expired");
         }
 
-        repository.activateById(id);
         pass.setStatus(PassStatus.ACTIVE);
         return pass;
     }
@@ -151,11 +153,9 @@ public class PassServiceImpl implements PassService{
             throw new IllegalStateException("You can only to unwarnining a previously warninged pass");
         }
 
-        repository.completedStatusById(id);
         pass.setStatus(PassStatus.COMPLETED);
         return pass;
     }
-
 
     @Override
     public void deletePass(UUID id) {
@@ -192,33 +192,47 @@ public class PassServiceImpl implements PassService{
         List<Pass> passesByUser = repository.findPassesByUserIdOrderByAddedAtDesc(newPass.getUser().getId());
 
         Optional<Pass> overlapPass = passesByUser.stream()
-                .filter(existPass -> existPass.getStatus().equals(PassStatus.ACTIVE))
-                .filter(existPass -> !newPass.getId().equals(existPass.getId()))
-                .filter(existPass -> newPass.getTerritory().equals(existPass.getTerritory()))
-                //раскомментить когда в Pass будут добавлены Car и Person
-//                .filter(existPass -> Objects.equals(newPass.getCar, existPass.getCar))
-//                .filter(existPass -> Objects.equals(newPass.getPerson, existPass.getPerson))
+                //чтобы сравнить car или person в зависимости от типа пропуска, необходимо привести сравниваемые
+                //пропуска к соответствующему типу (т.к. в PassWalk нет поля Car и метода getCar, и наоборот)
+                .filter(existPass -> {
+                    if (existPass instanceof PassAuto) {
+                        PassAuto newPassAuto = (PassAuto) newPass;
+                        PassAuto existPassAuto = (PassAuto) existPass;
+                        return Objects.equals(newPassAuto.getCar(), existPassAuto.getCar());
+                    } else if (existPass instanceof PassWalk) {
+                         PassWalk newPassWalk = (PassWalk) newPass;
+                        PassWalk existPassWalk = (PassWalk) existPass;
+                        return Objects.equals(newPassWalk.getPerson(), existPassWalk.getPerson());
+                    } else {
+                        return false; // Обработка других типов объектов Pass
+                    }
+                })
+                .filter(existPass -> Objects.equals(existPass.getStatus(), PassStatus.ACTIVE))
+                .filter(existPass -> !Objects.equals(newPass.getId(), existPass.getId()))
+                .filter(existPass -> Objects.equals(newPass.getTerritory(), existPass.getTerritory()))
+                // время пропусков пересекается при выполнении двух условий:
+                //- время окончания нового пропуска больше времени начала существующего пропуска
+                //- время начала нового пропуска меньше времени окончания существующего пропуска
                 .filter(existPass -> newPass.getEndTime().isAfter(existPass.getStartTime()) &&
                         newPass.getStartTime().isBefore(existPass.getEndTime()))
                 .findFirst();
 
         if (overlapPass.isPresent()) {
             String message = String.format("Reject operation: user [%s] already has such a pass with " +
-                            "overlapping time [%s]", newPass.getUser().getId(), overlapPass.get().getId());
+                    "overlapping time [%s]", newPass.getUser().getId(), overlapPass.get().getId());
             log.debug(message);
             throw new IllegalArgumentException(message);
         }
     }
     /**
-     * С заданной периодичностью ищет все активные пропуска с истекшим временем действия,
-     * затем по каждому наденному пропуску ищет зафиксированные пересечения.
+     * Каждую минуту ищет все активные пропуска с истекшим временем действия,
+     * затем по каждому найденному пропуску ищет зафиксированные пересечения.
      * Если пересечений не было, присваивает пропуску статус "устаревший" (PassStatus.OUTDATED).
      * Если пересечения были, и последнее было на выезд - статус "выполнен" (PassStatus.COMPLETED).
      * Если пересечения были, и последнее было на въезд - статус "предупреждение" (PassStatus.WARNING).
      * После этого сохраняет пропуск и вызывает метод оповещения фронтенда об изменениях (пока нет :).
      */
-//    @Scheduled(cron = "0 0/1 * * * *")
-    @Scheduled(fixedDelay = 10_000L)
+    @Scheduled(cron = "0 * * * * ?")
     public void checkPassesOnEndTimeReached() {
         if (LocalDateTime.now().getHour() != hourForLogInScheduledCheck) {
             hourForLogInScheduledCheck = LocalDateTime.now().getHour();
@@ -228,7 +242,7 @@ public class PassServiceImpl implements PassService{
         List<Pass> passes = repository.findByEndTimeIsBeforeAndStatusLike(LocalDateTime.now(), PassStatus.ACTIVE);
         if (passes.isEmpty()) {return;}
 
-        log.debug("Method {}, endTime reached on {} active pass(es)", MethodLog.getMethodName(), passes.size());
+        log.info("Method {}, endTime reached on {} active pass(es)", MethodLog.getMethodName(), passes.size());
 
         for (Pass pass : passes) {
             List<Crossing> passCrossings = crossingRepository.findCrossingsByPassId(pass.getId());

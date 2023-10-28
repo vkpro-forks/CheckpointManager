@@ -9,7 +9,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.ac.checkpointmanager.dto.CheckpointDTO;
 import ru.ac.checkpointmanager.model.Checkpoint;
-import ru.ac.checkpointmanager.service.CheckpointService;
+import ru.ac.checkpointmanager.service.checkpoints.CheckpointService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
 
 import jakarta.validation.*;

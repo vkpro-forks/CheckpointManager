@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.service;
+package ru.ac.checkpointmanager.service.territories;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -83,7 +83,7 @@ public class TerritoryServiceImpl implements TerritoryService {
         log.info("Method {}, user - {}, terr - {}", MethodLog.getMethodName(), userId, territoryId);
 
         if (repository.checkUserTerritoryRelation(userId, territoryId)) {
-            String message = String.format("User [%s] and territory [%s] are already connected");
+            String message = String.format("User [%s] and territory [%s] are already connected", userId, territoryId);
             log.warn(message);
             throw new IllegalArgumentException(message);
         }
@@ -113,7 +113,7 @@ public class TerritoryServiceImpl implements TerritoryService {
         log.info("Method {}, user - {}, terr - {}", MethodLog.getMethodName(), userId, territoryId);
 
         if (!repository.checkUserTerritoryRelation(userId, territoryId)) {
-            String message = String.format("User [%s] and territory [%s] have no connection");
+            String message = String.format("User [%s] and territory [%s] have no connection", userId, territoryId);
             log.warn(message);
             throw new IllegalArgumentException(message);
         }

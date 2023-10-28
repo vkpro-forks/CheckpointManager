@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.service;
+package ru.ac.checkpointmanager.service.checkpoints;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

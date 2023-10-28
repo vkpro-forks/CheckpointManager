@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.model.enums;
+package ru.ac.checkpointmanager.model.passes;
 
 /**  Возможные статусы пропусков
  *     ACTIVE - (дефолтное значение) активный пропуск, по которому можно пересекать кпп
