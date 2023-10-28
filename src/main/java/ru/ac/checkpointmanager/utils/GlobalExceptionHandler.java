@@ -10,6 +10,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import ru.ac.checkpointmanager.exception.*;
 
 import java.util.List;
@@ -70,8 +71,8 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(AvatarIsTooBigException.class)
-    public ResponseEntity<ApiError> handleAvatarIsTooBigException(AvatarIsTooBigException e) {
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiError> handleAvatarIsTooBigException(MaxUploadSizeExceededException e) {
         String message = String.format("Exception %s: %s", e.getClass(), e.getMessage());
         log.warn(message);
         return new ResponseEntity<>(new ApiError(HttpStatus.BAD_REQUEST, message), HttpStatus.BAD_REQUEST);
@@ -82,6 +83,20 @@ public class GlobalExceptionHandler {
         String message = String.format("Exception %s: %s", e.getClass(), e.getMessage());
         log.warn(message);
         return new ResponseEntity<>(new ApiError(HttpStatus.NOT_FOUND, message), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(AvatarIsEmptyException.class)
+    public ResponseEntity<ApiError> handleAvatarIsEmptyException(AvatarIsEmptyException e) {
+        String message = String.format("Exception %s: %s", e.getClass(), e.getMessage());
+        log.warn(message);
+        return new ResponseEntity<>(new ApiError(HttpStatus.BAD_REQUEST, message), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(BadAvatarExtensionException.class)
+    public ResponseEntity<ApiError> handleBadAvatarExtensionException(BadAvatarExtensionException e) {
+        String message = String.format("Exception %s: %s", e.getClass(), e.getMessage());
+        log.warn(message);
+        return new ResponseEntity<>(new ApiError(HttpStatus.BAD_REQUEST, message), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(AccessDeniedException.class)

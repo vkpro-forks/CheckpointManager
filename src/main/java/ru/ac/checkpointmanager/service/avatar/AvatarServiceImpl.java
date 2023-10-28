@@ -7,8 +7,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import ru.ac.checkpointmanager.exception.AvatarIsTooBigException;
+import ru.ac.checkpointmanager.exception.AvatarIsEmptyException;
 import ru.ac.checkpointmanager.exception.AvatarNotFoundException;
+import ru.ac.checkpointmanager.exception.BadAvatarExtensionException;
 import ru.ac.checkpointmanager.model.Avatar;
 import ru.ac.checkpointmanager.repository.AvatarRepository;
 import ru.ac.checkpointmanager.utils.MethodLog;
@@ -34,15 +35,13 @@ public class AvatarServiceImpl implements AvatarService {
     @Value("${avatars.dir.path}")
     private String avatarsDir;
 
+    @Value("${avatars.extensions}")
+    private String extensions;
+
     @Override
     public void uploadAvatar(UUID entityID, MultipartFile avatarFile) throws IOException {
         logWhenMethodInvoked(MethodLog.getMethodName());
-        long imageSize = avatarFile.getSize();
-
-        if (imageSize > (1024 * 5000)) {
-            log.error("Image is too big for avatar. Size = {} MB", imageSize / 1024 / (double) 1000);
-            throw new AvatarIsTooBigException("File size exceeds maximum permitted value of 5MB");
-        }
+        validateAvatar(avatarFile);
 
         log.debug("Creating directory if absent, deleting image f already exists");
         Path filePath = Path.of(avatarsDir, entityID + "." +
@@ -84,9 +83,13 @@ public class AvatarServiceImpl implements AvatarService {
     }
 
     @Override
-    public void deleteAvatar(UUID entityID) {
+    public Avatar deleteAvatarIfExists(UUID entityID) {
         logWhenMethodInvoked(MethodLog.getMethodName());
-        Avatar avatar = findAvatarOrThrow(entityID);
+        Avatar avatar = repository.findById(entityID).orElse(null);
+        if (avatar == null) {
+            log.debug("Method returns because entity has no avatar");
+            return null;
+        }
         Path filePath = Path.of(avatarsDir, entityID + "." +
                 getExtension(avatar.getFilePath()));
         try {
@@ -95,6 +98,7 @@ public class AvatarServiceImpl implements AvatarService {
             log.error("I/O error occurred");
         }
         repository.delete(avatar);
+        return avatar;
     }
 
     @Override
@@ -140,6 +144,22 @@ public class AvatarServiceImpl implements AvatarService {
      */
     private String getExtension(String fileName) {
         return fileName.substring(fileName.lastIndexOf(".") + 1);
+    }
+
+    /**
+     * Utility method that validates the avatar file. Will throw one of exceptions if
+     * condition is triggered.
+     * @param avatarFile file that needs to be validated
+     * @throws AvatarIsEmptyException if file was not passed
+     * @throws BadAvatarExtensionException if file is of not allowed extension
+     */
+    private void validateAvatar(MultipartFile avatarFile) {
+        if (avatarFile == null) {
+            throw new AvatarIsEmptyException("When uploading avatar you need to choose the file");
+        }
+        if (!(extensions.contains(getExtension(avatarFile.getOriginalFilename())))) {
+            throw new BadAvatarExtensionException("Extension of your file must be one of these: " + extensions);
+        }
     }
 
     private void logWhenMethodInvoked(String methodName) {

@@ -17,8 +17,7 @@ import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.service.CrossingService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
 
-import static ru.ac.checkpointmanager.utils.Mapper.toCrossing;
-import static ru.ac.checkpointmanager.utils.Mapper.toCrossingDTO;
+import static ru.ac.checkpointmanager.utils.Mapper.*;
 
 
 @RestController

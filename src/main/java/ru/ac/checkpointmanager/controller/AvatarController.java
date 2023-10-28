@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ru.ac.checkpointmanager.exception.AvatarNotFoundException;
 import ru.ac.checkpointmanager.model.Avatar;
 import ru.ac.checkpointmanager.service.avatar.AvatarService;
 
@@ -46,6 +47,8 @@ public class AvatarController {
 
     @DeleteMapping("/{entityID}")
     public void deleteAvatar(@PathVariable UUID entityID) {
-        service.deleteAvatar(entityID);
+        if (service.deleteAvatarIfExists(entityID) == null) {
+            throw new AvatarNotFoundException("Entity with id = " + entityID + " has no avatar");
+        }
     }
 }
