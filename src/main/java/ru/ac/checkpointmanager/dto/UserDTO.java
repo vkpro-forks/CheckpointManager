@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import ru.ac.checkpointmanager.model.enums.Role;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -36,5 +37,8 @@ public class UserDTO {
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Boolean isBlocked;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Role role;
 }
 
