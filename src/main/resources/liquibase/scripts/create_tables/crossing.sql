@@ -11,3 +11,8 @@ CREATE TABLE crossings
     PRIMARY KEY (id)
 );
 
+-- changeset x3imal:74.2
+ALTER TABLE crossings
+    ALTER COLUMN local_date_time TYPE TIMESTAMP;
+
+

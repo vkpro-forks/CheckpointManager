@@ -18,6 +18,7 @@ import ru.ac.checkpointmanager.repository.CheckpointRepository;
 import ru.ac.checkpointmanager.repository.CrossingRepository;
 import ru.ac.checkpointmanager.repository.PassRepository;
 
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Optional;
@@ -51,7 +52,7 @@ public class CrossingServiceImpl implements CrossingService {
         crossing.setCheckpoint(checkpoint);
 
         logger.info("Local DateTime before setting: {}", crossing.getLocalDateTime());
-        crossing.setLocalDateTime(ZonedDateTime.now(ZoneId.of("Europe/Moscow")));
+        crossing.setLocalDateTime(LocalDateTime.now(ZoneId.of("Europe/Moscow")));
         logger.info("Local DateTime after setting: {}", crossing.getLocalDateTime());
 
         logger.info("Successfully marked crossing for pass ID: {}", crossing.getPass().getId());

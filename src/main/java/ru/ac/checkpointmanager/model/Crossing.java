@@ -34,7 +34,7 @@ public class Crossing {
 
     @Column(name = "local_date_time")
     @CreationTimestamp(source = SourceType.VM)
-    private ZonedDateTime localDateTime;
+    private LocalDateTime localDateTime;
 
     @Enumerated(EnumType.STRING)
     private Direction direction;

@@ -14,10 +14,9 @@ spring:
       hibernate: 
         dialect: org.hibernate.dialect.PostgreSQLDialect
         show_sql: false
-    hibernate:
-      ddl-auto: validate
+        ddl-auto: validate
       jdbc:
-        time_zone: 'Europe/Moscow'
+        time-zone: Europe/Moscow
   jackson:
     time-zone: Europe/Moscow
   liquibase:
