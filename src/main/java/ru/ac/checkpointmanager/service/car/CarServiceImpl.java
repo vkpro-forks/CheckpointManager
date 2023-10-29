@@ -19,7 +19,6 @@ public class CarServiceImpl implements CarService {
 
     public CarServiceImpl(CarRepository carRepository,
                           CarBrandService carBrandService,
-                          CarModelService carModelService,
                           AvatarService avatarService) {
         this.carRepository = carRepository;
         this.avatarService = avatarService;

@@ -10,9 +10,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.ac.checkpointmanager.model.car.Car;
 import ru.ac.checkpointmanager.model.car.CarBrand;
-import ru.ac.checkpointmanager.model.car.CarModel;
 import ru.ac.checkpointmanager.service.car.CarBrandService;
-import ru.ac.checkpointmanager.service.car.CarModelService;
 import ru.ac.checkpointmanager.service.car.CarService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
 
@@ -28,7 +26,6 @@ public class CarController {
 
     private final CarService carService;
     private final CarBrandService carBrandService;
-    private final CarModelService carModelService;
 
     @PostMapping
     public ResponseEntity<?> addCar(@Valid @RequestBody Car carRequest, BindingResult result) {
@@ -38,9 +35,7 @@ public class CarController {
 
         try {
             CarBrand existingBrand = carBrandService.getBrandById(carRequest.getBrand().getId());
-            CarModel existingModel = carModelService.getModelById(carRequest.getModel().getId());
             carRequest.setBrand(existingBrand);
-            carRequest.setModel(existingModel);
             Car newCar = carService.addCar(carRequest);
             return new ResponseEntity<>(newCar, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {

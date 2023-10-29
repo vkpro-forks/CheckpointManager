@@ -7,10 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.ac.checkpointmanager.exception.CarBrandNotFoundException;
 import ru.ac.checkpointmanager.model.car.CarBrand;
-import ru.ac.checkpointmanager.model.car.CarModel;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
-import ru.ac.checkpointmanager.repository.car.CarModelRepository;
-import ru.ac.checkpointmanager.service.avatar.AvatarService;
 
 import java.util.List;
 import java.util.Set;
@@ -20,8 +17,7 @@ import java.util.Set;
 public class CarBrandServiceImpl implements CarBrandService {
 
     private final CarBrandRepository carBrandRepository;
-    private final CarModelRepository carModelRepository;
-    private final Validator validator;
+        private final Validator validator;
 
     @Override
     public CarBrand getBrandById(Long id) {
@@ -44,10 +40,7 @@ public class CarBrandServiceImpl implements CarBrandService {
     public void deleteBrand(Long brandId) {
         CarBrand carBrand = carBrandRepository.findById(brandId)
                 .orElseThrow(() -> new CarBrandNotFoundException("Car brand not found with ID: " + brandId));
-        if (!carBrand.getModels().isEmpty()) {
-            System.out.println(carBrand.getModels());
-            throw new RuntimeException("Cannot delete brand with associated models!");
-        }
+
         carBrandRepository.deleteById(brandId);
     }
 
@@ -56,10 +49,7 @@ public class CarBrandServiceImpl implements CarBrandService {
     public void deleteBrandAndAllModelsByBrand(Long brandId) {
         CarBrand carBrand = carBrandRepository.findById(brandId)
                 .orElseThrow(() -> new CarBrandNotFoundException("Car brand not found with ID: " + brandId));
-        if (carBrand.getModels().isEmpty()) {
-            throw new RuntimeException("CModel list is empty!");
-        }
-        carModelRepository.deleteAll(carBrand.getModels());
+
         carBrandRepository.deleteById(brandId);
     }
 
@@ -87,9 +77,4 @@ public class CarBrandServiceImpl implements CarBrandService {
         return carBrandRepository.findByBrandContainingIgnoreCase(brandName);
     }
 
-    @Override
-    public List<CarModel> findModelsByBrandId(Long brandId) {
-        CarBrand carBrand = getBrandById(brandId);
-        return carBrand.getModels();
-    }
 }

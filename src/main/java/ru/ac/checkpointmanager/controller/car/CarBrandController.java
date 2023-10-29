@@ -47,11 +47,6 @@ public class CarBrandController {
     }
 
     //удаляем бренд и все модели которые к нему привязаны
-    @DeleteMapping("/brands-all-models/{id}")
-    public ResponseEntity<String> deleteCarBrandByIdWithAllModelsByBrand(@PathVariable Long id) {
-            carBrandService.deleteBrandAndAllModelsByBrand(id);
-            return ResponseEntity.noContent().build();
-    }
 
     @PutMapping("/brands/{id}")
     public ResponseEntity<?> updateCarBrand(@Valid @PathVariable Long id,
