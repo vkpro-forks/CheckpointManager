@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import ru.ac.checkpointmanager.model.passes.Pass;
+import ru.ac.checkpointmanager.model.passes.PassWalk;
 
 import java.util.List;
 import java.util.Objects;
@@ -30,7 +31,7 @@ public class Person {
     private String phone;
 
     @OneToMany(mappedBy = "person")
-    private List<Pass> passes;
+    private List<PassWalk> passes;
 
     private String note;
 

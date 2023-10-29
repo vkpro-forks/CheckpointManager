@@ -53,16 +53,6 @@ public class Pass {
 
     private LocalDateTime endTime;
 
-    @ManyToOne
-    @JoinColumn(name = "person_id")
-    private Person person;
-
-
-    //добавить оба когда будут реализованы кар и персон
-    //+бд и дто
-//    @ManyToOne
-//    @JoinColumn(name = "car_id")
-//    private Car car;
     @Column(insertable=false, updatable=false)
     private String dtype;
 }

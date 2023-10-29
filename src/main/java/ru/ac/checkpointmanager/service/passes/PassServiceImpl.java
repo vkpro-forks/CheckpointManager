@@ -15,6 +15,7 @@ import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.model.passes.PassWalk;
 import ru.ac.checkpointmanager.repository.CrossingRepository;
 import ru.ac.checkpointmanager.repository.PassRepository;
+import ru.ac.checkpointmanager.service.PersonService;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.time.LocalDateTime;
@@ -34,12 +35,14 @@ public class PassServiceImpl implements PassService{
 
     private final PassRepository repository;
     private final CrossingRepository crossingRepository;
+    private final PersonService personService;
 
     private int hourForLogInScheduledCheck;
 
     @Override
     public Pass addPass(Pass pass) {
         log.info("Method {}, UUID - {}", MethodLog.getMethodName(), pass.getId());
+
         checkUserTerritoryRelation(pass);
         checkOverlapTime(pass);
 
@@ -127,7 +130,6 @@ public class PassServiceImpl implements PassService{
     }
 
     @Override
-    @Transactional
     public Pass activateCancelledPass(UUID id) {
         log.info("Method {}, UUID - {}", MethodLog.getMethodName(), id);
         Pass pass = findPass(id);
@@ -207,6 +209,7 @@ public class PassServiceImpl implements PassService{
                         return false; // Обработка других типов объектов Pass
                     }
                 })
+
                 .filter(existPass -> Objects.equals(existPass.getStatus(), PassStatus.ACTIVE))
                 .filter(existPass -> !Objects.equals(newPass.getId(), existPass.getId()))
                 .filter(existPass -> Objects.equals(newPass.getTerritory(), existPass.getTerritory()))
