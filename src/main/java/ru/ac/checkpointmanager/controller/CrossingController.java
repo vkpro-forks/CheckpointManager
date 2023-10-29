@@ -8,14 +8,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
 import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.service.CrossingService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
+import ru.ac.checkpointmanager.utils.Mapper;
 
 import static ru.ac.checkpointmanager.utils.Mapper.*;
 
@@ -44,6 +42,6 @@ public class CrossingController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getCrossing(@PathVariable UUID id) {
         Crossing existCrossing = crossingService.getCrossing(id);
-        return new ResponseEntity<>(mapper.toCrossingDTO(existCrossing), HttpStatus.OK);
+        return new ResponseEntity<>(Mapper.toCrossingDTO(existCrossing), HttpStatus.OK);
     }
 }

@@ -3,7 +3,11 @@ package ru.ac.checkpointmanager.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import ru.ac.checkpointmanager.model.passes.Pass;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Data

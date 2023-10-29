@@ -3,10 +3,6 @@ package ru.ac.checkpointmanager.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.*;
 import lombok.Data;
-import ru.ac.checkpointmanager.model.Person;
-import ru.ac.checkpointmanager.model.enums.PassStatus;
-import ru.ac.checkpointmanager.model.enums.PassTypeTime;
-import ru.ac.checkpointmanager.model.Person;
 import ru.ac.checkpointmanager.model.car.Car;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.model.passes.PassTypeTime;
@@ -48,8 +44,7 @@ public class PassDTO {
 
     @NotNull
     private PersonDTO person;
-    private Car car;
 
-    private Person person;
+    private Car car;
 
 }

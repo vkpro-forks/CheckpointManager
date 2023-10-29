@@ -9,15 +9,12 @@ import ru.ac.checkpointmanager.exception.PassNotFoundException;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.model.passes.Pass;
-import ru.ac.checkpointmanager.model.Pass;
-import ru.ac.checkpointmanager.model.Person;
 import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.model.passes.PassWalk;
 import ru.ac.checkpointmanager.repository.CrossingRepository;
 import ru.ac.checkpointmanager.repository.PassRepository;
-import ru.ac.checkpointmanager.repository.PersonRepository;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.time.LocalDateTime;

@@ -9,8 +9,6 @@ import org.springframework.stereotype.Service;
 import ru.ac.checkpointmanager.exception.*;
 import ru.ac.checkpointmanager.model.Checkpoint;
 import ru.ac.checkpointmanager.model.Crossing;
-import ru.ac.checkpointmanager.model.Pass;
-import ru.ac.checkpointmanager.model.Person;
 import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
