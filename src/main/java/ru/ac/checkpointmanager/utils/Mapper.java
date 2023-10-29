@@ -2,36 +2,18 @@ package ru.ac.checkpointmanager.utils;
 
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.PropertyMap;
 import org.springframework.stereotype.Component;
 import ru.ac.checkpointmanager.dto.*;
-import ru.ac.checkpointmanager.dto.CheckpointDTO;
-import ru.ac.checkpointmanager.dto.PassDTO;
-import ru.ac.checkpointmanager.dto.TerritoryDTO;
-import ru.ac.checkpointmanager.dto.UserDTO;
-import ru.ac.checkpointmanager.model.Checkpoint;
-import ru.ac.checkpointmanager.model.Pass;
-import ru.ac.checkpointmanager.dto.PhoneDTO;
-import ru.ac.checkpointmanager.model.Phone;
-import ru.ac.checkpointmanager.model.Territory;
-import ru.ac.checkpointmanager.model.User;
-import ru.ac.checkpointmanager.exception.CheckpointNotFoundException;
-import ru.ac.checkpointmanager.exception.PassNotFoundException;
 import ru.ac.checkpointmanager.model.*;
-import ru.ac.checkpointmanager.repository.CheckpointRepository;
-import ru.ac.checkpointmanager.repository.PassRepository;
-import ru.ac.checkpointmanager.service.CheckpointService;
-import ru.ac.checkpointmanager.service.PassService;
+import ru.ac.checkpointmanager.model.passes.*;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
 public class Mapper {
-
-    private final PassRepository passRepository;
-    private final CheckpointRepository checkpointRepository;
 
     private static final ModelMapper modelMapper = new ModelMapper();
 
@@ -39,10 +21,11 @@ public class Mapper {
     public static Checkpoint toCheckpoint(CheckpointDTO checkpointDTO) {
         return modelMapper.map(checkpointDTO, Checkpoint.class);
     }
-  
+
     public static CheckpointDTO toCheckpointDTO(Checkpoint checkpoint) {
         return modelMapper.map(checkpoint, CheckpointDTO.class);
     }
+
     public static List<CheckpointDTO> toCheckpointsDTO(List<Checkpoint> checkpoints) {
         return checkpoints.stream()
                 .map(e -> modelMapper.map(e, CheckpointDTO.class))
@@ -50,32 +33,40 @@ public class Mapper {
     }
 
     /* Territory mapping */
-    public Territory toTerritory(TerritoryDTO territoryDTO) {
+    public static Territory toTerritory(TerritoryDTO territoryDTO) {
         return modelMapper.map(territoryDTO, Territory.class);
     }
 
-    public TerritoryDTO toTerritoryDTO(Territory territory) {
+    public static TerritoryDTO toTerritoryDTO(Territory territory) {
         return modelMapper.map(territory, TerritoryDTO.class);
     }
 
-    public List<TerritoryDTO> toTerritoriesDTO(List<Territory> territories) {
+    public static List<TerritoryDTO> toTerritoriesDTO(List<Territory> territories) {
         return territories.stream()
                 .map(e -> modelMapper.map(e, TerritoryDTO.class))
                 .toList();
     }
+
     public static List<Territory> toTerritories(List<TerritoryDTO> territoriesDTO) {
         return territoriesDTO.stream()
                 .map(e -> modelMapper.map(e, Territory.class))
                 .toList();
     }
+
     /* Pass mapping */
-    public Pass toPass(PassDTO passDTO) {
-        return modelMapper.map(passDTO, Pass.class);
+    public static Pass toPass(PassDTO passDTO) {
+        if (passDTO.getCar() != null) {
+            return modelMapper.map(passDTO, PassAuto.class);
+        } else if (passDTO.getPerson() != null) {
+            return modelMapper.map(passDTO, PassWalk.class);
+        }
+        throw new IllegalArgumentException("Ошибка при конвертации passDTO (не содержит car или person)");
     }
-    public PassDTO toPassDTO(Pass pass) {
+  
+    public static PassDTO toPassDTO(Pass pass) {
         return modelMapper.map(pass, PassDTO.class);
     }
-    public List<PassDTO> toPassDTO(List<Pass> pass) {
+    public static List<PassDTO> toPassDTO(List<Pass> pass) {
         return pass.stream()
                 .map(e -> modelMapper.map(e, PassDTO.class))
                 .toList();
@@ -104,45 +95,55 @@ public class Mapper {
         return modelMapper.map(user, UserAuthDTO.class);
     }
 
+    /**
+     * Метод для конвертации временного пользователя в основного.
+     * При маппинге игнорируется поле id, так как идентификатор основного пользователя назначается при сохранении в базу данных.
+     *
+     * @param temporaryUser временный пользователь, который будет конвертирован в основного пользователя.
+     * @return User - основной пользователь.
+     *
+     * @see TemporaryUser
+     * @see User
+     */
+    public static User toUser(TemporaryUser temporaryUser) {
+        PropertyMap<TemporaryUser, User> propertyMap = new PropertyMap<>() {
+            protected void configure() {
+                skip(destination.getId());
+            }
+        };
+        modelMapper.addMappings(propertyMap);
+        return modelMapper.map(temporaryUser, User.class);
+    }
+
+    public static TemporaryUser toTemporaryUser(UserAuthDTO userAuthDTO) {
+        return modelMapper.map(userAuthDTO, TemporaryUser.class);
+    }
+
     /* Phone mapping */
-    public Phone toPhone(PhoneDTO phoneDTO) {
+    public static Phone toPhone(PhoneDTO phoneDTO) {
         return modelMapper.map(phoneDTO, Phone.class);
     }
 
-    public PhoneDTO toPhoneDTO(Phone phone) {
+    public static PhoneDTO toPhoneDTO(Phone phone) {
         return modelMapper.map(phone, PhoneDTO.class);
     }
 
-    public List<PhoneDTO> toPhonesDTO(Collection<Phone> phones) {
+    public static List<PhoneDTO> toPhonesDTO(Collection<Phone> phones) {
         return phones.stream()
                 .map(p -> modelMapper.map(p, PhoneDTO.class))
                 .toList();
     }
 
-
     /* Crossing mapping */
-    public Crossing toCrossing(CrossingDTO crossingDTO) {
-        Crossing crossing = new Crossing();
-        Optional<Pass> optionalPass = passRepository.findById(crossingDTO.getPassId());
-        Pass pass = optionalPass.orElseThrow(
-                () -> new PassNotFoundException("Pass not found for ID " + crossingDTO.getPassId()));
-
-        Optional<Checkpoint> optionalCheckpoint = checkpointRepository.findById(crossingDTO.getCheckpointId());
-        Checkpoint checkpoint = optionalCheckpoint.orElseThrow(
-                () -> new CheckpointNotFoundException("Checkpoint not found for ID " + crossingDTO.getCheckpointId()));
-
-        crossing.setPass(pass);
-        crossing.setCheckpoint(checkpoint);
-        crossing.setDirection(crossingDTO.getDirection());
-
-        return crossing;
+    public static Crossing toCrossing(CrossingDTO crossingDTO) {
+        return modelMapper.map(crossingDTO, Crossing.class);
     }
 
-    public CrossingDTO toCrossingDTO(Crossing crossing) {
+    public static CrossingDTO toCrossingDTO(Crossing crossing) {
         return modelMapper.map(crossing, CrossingDTO.class);
     }
 
-    public List<CrossingDTO> toCrossingsDTO(Collection<Crossing> crossings) {
+    public static List<CrossingDTO> toCrossingsDTO(Collection<Crossing> crossings) {
         return crossings.stream()
                 .map(crossing -> modelMapper.map(crossing, CrossingDTO.class))
                 .toList();

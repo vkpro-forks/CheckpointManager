@@ -1,6 +1,7 @@
 package ru.ac.checkpointmanager.controller;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,14 +12,13 @@ import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.UserDTO;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
-import ru.ac.checkpointmanager.service.TerritoryService;
+import ru.ac.checkpointmanager.service.territories.TerritoryService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
-
-import jakarta.validation.*;
-import ru.ac.checkpointmanager.utils.Mapper;
 
 import java.util.List;
 import java.util.UUID;
+
+import static ru.ac.checkpointmanager.utils.Mapper.*;
 
 @RestController
 @RequestMapping("chpman/territory")
@@ -28,7 +28,6 @@ import java.util.UUID;
 public class TerritoryController {
 
     private final TerritoryService service;
-    private final Mapper mapper;
 
     /* CREATE */
     @PostMapping
@@ -38,8 +37,8 @@ public class TerritoryController {
             return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
         }
 
-        Territory newTerritory = service.addTerritory(mapper.toTerritory(territoryDTO));
-        return ResponseEntity.ok(mapper.toTerritoryDTO(newTerritory));
+        Territory newTerritory = service.addTerritory(toTerritory(territoryDTO));
+        return ResponseEntity.ok(toTerritoryDTO(newTerritory));
     }
 
     /* READ */
@@ -49,7 +48,7 @@ public class TerritoryController {
         if (territory == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(mapper.toTerritoryDTO(territory));
+        return ResponseEntity.ok(toTerritoryDTO(territory));
     }
 
     @GetMapping("/{territoryId}/users")
@@ -58,7 +57,7 @@ public class TerritoryController {
         if (users.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(mapper.toUsersDTO(users));
+        return ResponseEntity.ok(toUsersDTO(users));
     }
 
     @GetMapping("/name")
@@ -67,7 +66,7 @@ public class TerritoryController {
         if (territories.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(mapper.toTerritoriesDTO(territories));
+        return ResponseEntity.ok(toTerritoriesDTO(territories));
     }
 
     @GetMapping
@@ -76,7 +75,7 @@ public class TerritoryController {
         if (territories.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(mapper.toTerritoriesDTO(territories));
+        return ResponseEntity.ok(toTerritoriesDTO(territories));
     }
 
     /* UPDATE */
@@ -91,8 +90,8 @@ public class TerritoryController {
         if (currentTerritory == null) {
             return ResponseEntity.notFound().build();
         }
-        Territory updatedTerritory = service.updateTerritory(mapper.toTerritory(territoryDTO));
-        return ResponseEntity.ok(mapper.toTerritoryDTO(updatedTerritory));
+        Territory updatedTerritory = service.updateTerritory(toTerritory(territoryDTO));
+        return ResponseEntity.ok(toTerritoryDTO(updatedTerritory));
     }
 
     @PatchMapping("/{territoryId}/user/{userId}")

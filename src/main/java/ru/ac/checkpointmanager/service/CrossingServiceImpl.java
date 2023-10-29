@@ -11,9 +11,10 @@ import ru.ac.checkpointmanager.model.Checkpoint;
 import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.model.Pass;
 import ru.ac.checkpointmanager.model.Person;
+import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.enums.Direction;
-import ru.ac.checkpointmanager.model.enums.PassStatus;
-import ru.ac.checkpointmanager.model.enums.PassTypeTime;
+import ru.ac.checkpointmanager.model.passes.PassStatus;
+import ru.ac.checkpointmanager.model.passes.PassTypeTime;
 import ru.ac.checkpointmanager.repository.CheckpointRepository;
 import ru.ac.checkpointmanager.repository.CrossingRepository;
 import ru.ac.checkpointmanager.repository.PassRepository;
@@ -29,7 +30,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class CrossingServiceImpl implements CrossingService {
-
 
     private final PassRepository passRepository;
     private final CrossingRepository crossingRepository;
@@ -120,7 +120,7 @@ public class CrossingServiceImpl implements CrossingService {
             }
 
             if (currentDirection.equals(Direction.OUT)) {
-                passRepository.completedStatusById(pass.getId());
+                pass.setStatus(PassStatus.COMPLETED);
             }
         }
     }

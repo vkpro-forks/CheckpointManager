@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import ru.ac.checkpointmanager.model.enums.CarColor;
 import ru.ac.checkpointmanager.model.enums.CarType;
@@ -16,12 +17,14 @@ import java.util.UUID;
 @Entity
 @Table(name = "cars")
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class Car {
 
     @Id
-    @GeneratedValue
+    @EqualsAndHashCode.Include
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @NotNull
@@ -47,7 +50,7 @@ public class Car {
     private CarColor color;
 
     @Column(name = "year")
-    private int year;
+    private Integer year;
 
     public void setLicensePlate(String licensePlate) {
         this.licensePlate = licensePlate.toUpperCase();

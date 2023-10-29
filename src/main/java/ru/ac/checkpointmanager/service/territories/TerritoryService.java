@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.service;
+package ru.ac.checkpointmanager.service.territories;
 
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;

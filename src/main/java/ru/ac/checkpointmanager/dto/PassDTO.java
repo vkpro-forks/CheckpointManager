@@ -1,15 +1,21 @@
 package ru.ac.checkpointmanager.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 import ru.ac.checkpointmanager.model.Person;
 import ru.ac.checkpointmanager.model.enums.PassStatus;
 import ru.ac.checkpointmanager.model.enums.PassTypeTime;
+import ru.ac.checkpointmanager.model.Person;
+import ru.ac.checkpointmanager.model.car.Car;
+import ru.ac.checkpointmanager.model.passes.PassStatus;
+import ru.ac.checkpointmanager.model.passes.PassTypeTime;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class PassDTO {
 
     private UUID id;
@@ -38,9 +44,12 @@ public class PassDTO {
     @Future
     private LocalDateTime endTime;
 
-//    private Car car;
+    private String dtype;
 
     @NotNull
     private PersonDTO person;
+    private Car car;
+
+    private Person person;
 
 }

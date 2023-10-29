@@ -1,13 +1,14 @@
-package ru.ac.checkpointmanager.model;
+package ru.ac.checkpointmanager.model.passes;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SourceType;
-import ru.ac.checkpointmanager.model.enums.PassStatus;
-import ru.ac.checkpointmanager.model.enums.PassTypeTime;
+import ru.ac.checkpointmanager.model.Territory;
+import ru.ac.checkpointmanager.model.User;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -15,10 +16,14 @@ import java.util.UUID;
 @Entity
 @Table(name = "passes")
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @RequiredArgsConstructor
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name="dtype", discriminatorType = DiscriminatorType.STRING)
 public class Pass {
 
     @Id
+    @EqualsAndHashCode.Include
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
@@ -57,4 +62,6 @@ public class Pass {
 //    @ManyToOne
 //    @JoinColumn(name = "car_id")
 //    private Car car;
+    @Column(insertable=false, updatable=false)
+    private String dtype;
 }

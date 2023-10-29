@@ -10,10 +10,12 @@ import java.util.UUID;
 
 @Entity
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Table(name = "checkpoints")
 public class Checkpoint {
 
     @Id
+    @EqualsAndHashCode.Include
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 

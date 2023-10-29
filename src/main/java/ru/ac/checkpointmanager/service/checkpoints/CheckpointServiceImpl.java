@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.service;
+package ru.ac.checkpointmanager.service.checkpoints;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.ac.checkpointmanager.exception.CheckpointNotFoundException;
 import ru.ac.checkpointmanager.model.Checkpoint;
 import ru.ac.checkpointmanager.repository.CheckpointRepository;
+import ru.ac.checkpointmanager.service.avatar.AvatarService;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.time.LocalDate;
@@ -20,6 +21,7 @@ import static ru.ac.checkpointmanager.utils.StringTrimmer.trimThemAll;
 public class CheckpointServiceImpl implements CheckpointService {
 
     private final CheckpointRepository repository;
+    private final AvatarService avatarService;
 
     @Override
     public Checkpoint addCheckpoint(Checkpoint checkpoint) {
@@ -84,6 +86,7 @@ public class CheckpointServiceImpl implements CheckpointService {
             throw new CheckpointNotFoundException(String.format("Checkpoint not found [Id=%s]", id));
         }
         repository.deleteById(id);
+        avatarService.deleteAvatarIfExists(id);
     }
 
 }

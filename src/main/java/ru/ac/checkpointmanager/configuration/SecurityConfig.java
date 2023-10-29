@@ -1,8 +1,6 @@
 package ru.ac.checkpointmanager.configuration;
 
-import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
 import org.springframework.http.HttpStatus;
@@ -26,8 +24,9 @@ import java.util.Arrays;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Configuration
-@EnableWebSecurity(debug = true)
-@EnableMethodSecurity(prePostEnabled = true)
+@EnableWebSecurity(debug = false)
+@EnableMethodSecurity
+@Slf4j
 public class SecurityConfig {
 
     @Autowired
@@ -42,13 +41,11 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
     private final CorsFilter corsFilter;
-    private final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
-
 
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        logger.info("filter chain started");
+        log.info("filter chain started");
         CharacterEncodingFilter filter = new CharacterEncodingFilter();
         filter.setEncoding("UTF-8");
         filter.setForceEncoding(true);
@@ -113,5 +110,3 @@ public class SecurityConfig {
         return new CorsFilter(source);
     }
 }
-
-

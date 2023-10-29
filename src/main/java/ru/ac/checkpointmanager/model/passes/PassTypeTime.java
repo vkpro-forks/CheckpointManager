@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.model.enums;
+package ru.ac.checkpointmanager.model.passes;
 
 public enum PassTypeTime {
     ONETIME,

@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.security;
+package ru.ac.checkpointmanager.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

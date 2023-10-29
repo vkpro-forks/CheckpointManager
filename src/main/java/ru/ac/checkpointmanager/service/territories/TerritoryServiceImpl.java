@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.service;
+package ru.ac.checkpointmanager.service.territories;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +9,7 @@ import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
+import ru.ac.checkpointmanager.service.avatar.AvatarService;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.time.LocalDate;
@@ -24,6 +25,7 @@ public class TerritoryServiceImpl implements TerritoryService {
 
     private final TerritoryRepository repository;
     private final UserRepository userRepository;
+    private final AvatarService avatarService;
 
     @Override
     public Territory addTerritory(Territory territory) {
@@ -81,7 +83,7 @@ public class TerritoryServiceImpl implements TerritoryService {
         log.info("Method {}, user - {}, terr - {}", MethodLog.getMethodName(), userId, territoryId);
 
         if (repository.checkUserTerritoryRelation(userId, territoryId)) {
-            String message = String.format("User [%s] and territory [%s] are already connected");
+            String message = String.format("User [%s] and territory [%s] are already connected", userId, territoryId);
             log.warn(message);
             throw new IllegalArgumentException(message);
         }
@@ -103,6 +105,7 @@ public class TerritoryServiceImpl implements TerritoryService {
             throw new TerritoryNotFoundException(String.format("Territory not found [Id=%s]", id));
         }
         repository.deleteById(id);
+        avatarService.deleteAvatarIfExists(id);
     }
 
     @Override
@@ -110,7 +113,7 @@ public class TerritoryServiceImpl implements TerritoryService {
         log.info("Method {}, user - {}, terr - {}", MethodLog.getMethodName(), userId, territoryId);
 
         if (!repository.checkUserTerritoryRelation(userId, territoryId)) {
-            String message = String.format("User [%s] and territory [%s] have no connection");
+            String message = String.format("User [%s] and territory [%s] have no connection", userId, territoryId);
             log.warn(message);
             throw new IllegalArgumentException(message);
         }
