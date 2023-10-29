@@ -30,13 +30,6 @@ ALTER TABLE passes
 ALTER TABLE passes
     ADD COLUMN car_id UUID;
 
--- changeset Ldv236:70.3
-CREATE TABLE persons
-(
-    id UUID DEFAULT gen_random_uuid(),
-    name TEXT,
-    CONSTRAINT person_pk PRIMARY KEY (id)
-);
 
 -- changeset Ldv236:70.4
 ALTER TABLE passes
