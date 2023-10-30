@@ -47,7 +47,7 @@ public class TemporaryUserServiceImpl implements TemporaryUserService {
      *
      * @see TemporaryUser
      */
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(cron = "0 * * * * ?")
     @Transactional
     public void cleanup() {
         LocalDateTime now = LocalDateTime.now();
