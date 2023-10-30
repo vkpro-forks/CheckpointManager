@@ -27,10 +27,6 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public Car addCar(Car car) {
-        int currentYear = LocalDate.now().getYear();
-        if (car.getYear() < 1950 || car.getYear() > currentYear) {
-            throw new IllegalArgumentException("Year should be between 1950 and " + currentYear);
-        }
         return carRepository.save(car);
     }
 
@@ -60,9 +56,6 @@ public class CarServiceImpl implements CarService {
 
             existingCar.setLicensePlate(updateCar.getLicensePlate());
             existingCar.setBrand(updateCar.getBrand());
-            existingCar.setType(updateCar.getType());
-            existingCar.setColor(updateCar.getColor());
-            existingCar.setYear(updateCar.getYear());
 
             return carRepository.save(existingCar);
         } catch (Exception exception) {

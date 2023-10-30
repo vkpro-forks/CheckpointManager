@@ -9,10 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import ru.ac.checkpointmanager.model.enums.CarColor;
-import ru.ac.checkpointmanager.model.enums.CarType;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
-import ru.ac.checkpointmanager.model.passes.PassWalk;
 
 import java.util.List;
 import java.util.UUID;
@@ -40,16 +37,6 @@ public class Car {
     @JoinColumn(name = "brand_id")
     private CarBrand brand;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "type")
-    private CarType type;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "color")
-    private CarColor color;
-
-    @Column(name = "year")
-    private Integer year;
 
     @OneToMany(mappedBy = "car")
     private List<PassAuto> passes;

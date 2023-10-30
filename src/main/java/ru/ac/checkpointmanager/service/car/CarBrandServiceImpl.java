@@ -44,14 +44,6 @@ public class CarBrandServiceImpl implements CarBrandService {
         carBrandRepository.deleteById(brandId);
     }
 
-    //удаляем бренд и все модели которые к нему привязаны
-    @Override
-    public void deleteBrandAndAllModelsByBrand(Long brandId) {
-        CarBrand carBrand = carBrandRepository.findById(brandId)
-                .orElseThrow(() -> new CarBrandNotFoundException("Car brand not found with ID: " + brandId));
-
-        carBrandRepository.deleteById(brandId);
-    }
 
     @Override
     public CarBrand updateBrand(Long brandId, CarBrand carBrand) {

@@ -9,7 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.ac.checkpointmanager.model.Person;
-import ru.ac.checkpointmanager.service.PersonService;
+import ru.ac.checkpointmanager.service.person.PersonService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
 
 import java.util.List;
