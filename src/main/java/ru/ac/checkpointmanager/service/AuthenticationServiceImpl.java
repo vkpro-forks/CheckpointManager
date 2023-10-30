@@ -202,8 +202,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                         request.getPassword()
                 )
         );
+
         User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() ->
-                new UsernameNotFoundException(String.format("User with email - '%s', not found  ", request.getEmail())));
+                new UserNotFoundException(String.format("User with email - '%s', not found  ", request.getEmail())));
 
         String jwtToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
