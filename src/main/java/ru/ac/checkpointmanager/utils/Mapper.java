@@ -6,6 +6,7 @@ import org.modelmapper.PropertyMap;
 import org.springframework.stereotype.Component;
 import ru.ac.checkpointmanager.dto.*;
 import ru.ac.checkpointmanager.model.*;
+import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
 import ru.ac.checkpointmanager.model.passes.*;
 
 import java.util.Collection;

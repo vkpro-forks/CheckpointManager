@@ -2,7 +2,7 @@ package ru.ac.checkpointmanager.dto;
 
 import jakarta.validation.constraints.*;
 import lombok.Data;
-import ru.ac.checkpointmanager.model.enums.CheckpointType;
+import ru.ac.checkpointmanager.model.checkpoints.CheckpointType;
 
 import java.util.UUID;
 

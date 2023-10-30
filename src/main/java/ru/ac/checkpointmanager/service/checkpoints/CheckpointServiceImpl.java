@@ -4,11 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.ac.checkpointmanager.exception.CheckpointNotFoundException;
-import ru.ac.checkpointmanager.model.Checkpoint;
+import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
 import ru.ac.checkpointmanager.repository.CheckpointRepository;
+import ru.ac.checkpointmanager.service.territories.TerritoryService;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,12 +20,13 @@ import static ru.ac.checkpointmanager.utils.StringTrimmer.trimThemAll;
 public class CheckpointServiceImpl implements CheckpointService {
 
     private final CheckpointRepository repository;
+    private final TerritoryService territoryService;
 
     @Override
     public Checkpoint addCheckpoint(Checkpoint checkpoint) {
         log.info("Method {}, UUID - {}", MethodLog.getMethodName(), checkpoint.getId());
+        territoryService.findTerritoryById(checkpoint.getTerritory().getId());
         trimThemAll(checkpoint);
-        checkpoint.setAddedAt(LocalDate.now());
         return repository.save(checkpoint);
     }
 
@@ -85,5 +86,4 @@ public class CheckpointServiceImpl implements CheckpointService {
         }
         repository.deleteById(id);
     }
-
 }
