@@ -31,11 +31,10 @@ public class CrossingServiceImpl implements CrossingService {
     private final PassRepository passRepository;
     private final CrossingRepository crossingRepository;
     private final CheckpointRepository checkpointRepository;
-    private final Logger logger = LoggerFactory.getLogger(CrossingServiceImpl.class);
 
     @Override
     public Crossing markCrossing(Crossing crossing) {
-        logger.info("Attempting to mark crossing for pass ID: {}", crossing.getPass().getId());
+        log.info("Attempting to mark crossing for pass ID: {}", crossing.getPass().getId());
 
         Pass pass = validatePass(crossing.getPass().getId());
         Checkpoint checkpoint = validateCheckpoint(crossing.getCheckpoint().getId(), pass.getTerritory().getId());
@@ -48,11 +47,11 @@ public class CrossingServiceImpl implements CrossingService {
         crossing.setPass(pass);
         crossing.setCheckpoint(checkpoint);
 
-        logger.info("Local DateTime before setting: {}", crossing.getLocalDateTime());
+        log.info("Local DateTime before setting: {}", crossing.getLocalDateTime());
         crossing.setLocalDateTime(LocalDateTime.now(ZoneId.of("Europe/Moscow")));
-        logger.info("Local DateTime after setting: {}", crossing.getLocalDateTime());
+        log.info("Local DateTime after setting: {}", crossing.getLocalDateTime());
 
-        logger.info("Successfully marked crossing for pass ID: {}", crossing.getPass().getId());
+        log.info("Successfully marked crossing for pass ID: {}", crossing.getPass().getId());
         return crossingRepository.save(crossing);
     }
 
@@ -72,7 +71,7 @@ public class CrossingServiceImpl implements CrossingService {
 
     // проверяет, существует ли пропуск с данным ID и активен ли он
     private Pass validatePass(UUID passId) {
-        logger.debug("Validating pass with ID: {}", passId);
+        log.debug("Validating pass with ID: {}", passId);
 
         return passRepository.findById(passId)
                 .filter(p -> p.getStatus() == PassStatus.ACTIVE)
@@ -81,7 +80,7 @@ public class CrossingServiceImpl implements CrossingService {
 
     //проверяет, существует ли КПП с данным ID и принадлежит ли он территории пропуска
     private Checkpoint validateCheckpoint(UUID checkpointId, UUID territoryIdFromPass) {
-        logger.debug("Validating checkpoint with ID: {}", checkpointId);
+        log.debug("Validating checkpoint with ID: {}", checkpointId);
 
         return checkpointRepository.findById(checkpointId)
                 .filter(cp -> cp.getTerritory().getId().equals(territoryIdFromPass))
@@ -91,7 +90,7 @@ public class CrossingServiceImpl implements CrossingService {
     //проверяет последнее пересечение для данного пропуска, если оно существует
     //т.е. проверяет, не пытается ли пользователь проехать/пройти два раза в одном и том же направлении
     private void validateCrossing(Direction direction, Optional<Crossing> lastCrossingOpt, UUID passId) {
-        logger.debug("Validating crossing for pass ID: {} with direction: {}", passId, direction);
+        log.debug("Validating crossing for pass ID: {} with direction: {}", passId, direction);
 
         if (lastCrossingOpt.isPresent()) {
             Crossing lastCrossing = lastCrossingOpt.get();
@@ -105,7 +104,7 @@ public class CrossingServiceImpl implements CrossingService {
     //логико для одноразовых пропусков(не был ли уже использован пропуск для въезда, активирован ли пропуск(для случая выезда без предварительного въезда))
     //если направление — выезд, меняет статус пропуска на "завершенный"
     private void manageOneTimePass(Direction currentDirection, Optional<Crossing> lastCrossingOpt, Pass pass) {
-        logger.debug("Managing one-time pass for pass ID: {}", pass.getId());
+        log.debug("Managing one-time pass for pass ID: {}", pass.getId());
 
         if (pass.getTypeTime() == PassTypeTime.ONETIME) {
             if (isDoubleEntry(currentDirection, lastCrossingOpt)) {
