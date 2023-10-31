@@ -12,7 +12,7 @@ import ru.ac.checkpointmanager.model.car.Car;
 @DiscriminatorValue("AUTO")
 public class PassAuto extends Pass {
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})
     @JoinColumn(name = "car_id")
     private Car car;
 }
