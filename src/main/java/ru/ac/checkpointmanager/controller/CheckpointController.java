@@ -22,6 +22,8 @@ import ru.ac.checkpointmanager.service.checkpoints.CheckpointService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
 
 import jakarta.validation.*;
+import ru.ac.checkpointmanager.utils.Mapper;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -38,6 +40,7 @@ import static ru.ac.checkpointmanager.utils.Mapper.*;
 public class  CheckpointController {
 
     private final CheckpointService service;
+    private final Mapper mapper;
 
     /* CREATE */
     @Operation(summary = "Добавить новый КПП")
@@ -53,8 +56,8 @@ public class  CheckpointController {
             return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
         }
 
-        Checkpoint newCheckpoint = service.addCheckpoint(toCheckpoint(checkpointDTO));
-        return ResponseEntity.ok(toCheckpointDTO(newCheckpoint));
+        Checkpoint newCheckpoint = service.addCheckpoint(mapper.toCheckpoint(checkpointDTO));
+        return ResponseEntity.ok(mapper.toCheckpointDTO(newCheckpoint));
     }
 
     /* READ */
@@ -70,7 +73,7 @@ public class  CheckpointController {
         if (foundCheckpoint == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(toCheckpointDTO(foundCheckpoint));
+        return ResponseEntity.ok(mapper.toCheckpointDTO(foundCheckpoint));
     }
 
     @Operation(summary = "Найти список КПП по названию")
@@ -86,7 +89,7 @@ public class  CheckpointController {
         if (checkpoints.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(toCheckpointsDTO(checkpoints));
+        return ResponseEntity.ok(mapper.toCheckpointsDTO(checkpoints));
     }
 
     @Operation(summary = "Получить список всех КПП")
@@ -101,7 +104,7 @@ public class  CheckpointController {
         if (checkpoints.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(toCheckpointsDTO(checkpoints));
+        return ResponseEntity.ok(mapper.toCheckpointsDTO(checkpoints));
     }
 
     @Operation(summary = "Получить список КПП, привязанных к указанной территории")
@@ -118,7 +121,7 @@ public class  CheckpointController {
         if (checkpoints.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(toCheckpointsDTO(checkpoints));
+        return ResponseEntity.ok(mapper.toCheckpointsDTO(checkpoints));
     }
 
     /* UPDATE */
@@ -136,8 +139,8 @@ public class  CheckpointController {
             return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
         }
 
-        Checkpoint updatedCheckpoint = service.updateCheckpoint(toCheckpoint(checkpointDTO));
-        return ResponseEntity.ok(toCheckpointDTO(updatedCheckpoint));
+        Checkpoint updatedCheckpoint = service.updateCheckpoint(mapper.toCheckpoint(checkpointDTO));
+        return ResponseEntity.ok(mapper.toCheckpointDTO(updatedCheckpoint));
     }
 
     /* DELETE */
