@@ -194,7 +194,7 @@ public class Mapper {
         return modelMapper.map(person, PersonDTO.class);
     }
 
-    public List<PersonDTO> toPersonDTO(Collection<Person> person) {
+    public static List<PersonDTO> toPersonDTO(Collection<Person> person) {
         return person.stream()
                 .map(p -> modelMapper.map(p, PersonDTO.class))
                 .toList();

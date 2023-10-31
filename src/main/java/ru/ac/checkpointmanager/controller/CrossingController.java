@@ -1,6 +1,9 @@
 package ru.ac.checkpointmanager.controller;
 
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +33,12 @@ public class CrossingController {
 
     private final CrossingService crossingService;
 
+    @Operation(summary = "Отметить пересечение")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Пересечение успешно отмечено"),
+            @ApiResponse(responseCode = "400", description = "Неверный запрос"),
+            @ApiResponse(responseCode = "401", description = "Не авторизован")
+    })
     @PostMapping("/mark")
     public ResponseEntity<?> markCrossing(@Valid @RequestBody CrossingDTO crossingDTO, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
@@ -39,6 +48,11 @@ public class CrossingController {
         return new ResponseEntity<>(toCrossingDTO(crossing), HttpStatus.OK);
     }
 
+    @Operation(summary = "Получить информацию о пересечении по ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Пересечение найдено"),
+            @ApiResponse(responseCode = "401", description = "Не авторизован")
+    })
     @GetMapping("/{id}")
     public ResponseEntity<?> getCrossing(@PathVariable UUID id) {
         Crossing existCrossing = crossingService.getCrossing(id);

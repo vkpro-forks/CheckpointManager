@@ -1,5 +1,8 @@
 package ru.ac.checkpointmanager.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -8,9 +11,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import ru.ac.checkpointmanager.dto.PersonDTO;
 import ru.ac.checkpointmanager.model.Person;
 import ru.ac.checkpointmanager.service.person.PersonService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
+import ru.ac.checkpointmanager.utils.Mapper;
 
 import java.util.List;
 import java.util.UUID;
@@ -24,56 +29,101 @@ public class PersonController {
 
     private final PersonService personService;
 
+    @Operation(summary = "Добавить новую личность")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Личность успешно добавлена"),
+            @ApiResponse(responseCode = "400", description = "Неверный запрос"),
+            @ApiResponse(responseCode = "401", description = "Не авторизован")
+    })
     @PostMapping
-    public ResponseEntity<?> addPerson(@Valid @RequestBody Person person, BindingResult bindingResult) {
+    public ResponseEntity<?> addPerson(@Valid @RequestBody PersonDTO personDTO, BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
             return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
         }
-        Person newPerson = personService.addPerson(person);
-        return new ResponseEntity<>(newPerson, HttpStatus.CREATED);
+
+        Person newPerson = personService.addPerson(Mapper.toPerson(personDTO));
+        return new ResponseEntity<>(Mapper.toPersonDTO(newPerson), HttpStatus.CREATED);
     }
 
+    @Operation(summary = "Получить личность по ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Личность найдена"),
+            @ApiResponse(responseCode = "401", description = "Не авторизован")
+    })
     @GetMapping("/{id}")
     public ResponseEntity<?> getPerson(@PathVariable UUID id) {
         Person existPerson = personService.getPerson(id);
-        return new ResponseEntity<>(existPerson, HttpStatus.OK);
+        return new ResponseEntity<>(Mapper.toPersonDTO(existPerson), HttpStatus.OK);
     }
 
+    @Operation(summary = "Обновить информацию о личности по ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Личность успешно обновлена"),
+            @ApiResponse(responseCode = "400", description = "Неверный запрос"),
+            @ApiResponse(responseCode = "401", description = "Не авторизован")
+    })
     @PutMapping("/{id}")
-    public ResponseEntity<?> updatePerson(@PathVariable UUID id, @RequestBody Person person,
+    public ResponseEntity<?> updatePerson(@PathVariable UUID id, @RequestBody PersonDTO personDTO,
                                           BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
         }
 
+        Person person = Mapper.toPerson(personDTO);
         Person updatePerson = personService.updatePerson(id, person);
-        return new ResponseEntity<>(updatePerson, HttpStatus.OK);
+        return new ResponseEntity<>(Mapper.toPersonDTO(updatePerson), HttpStatus.OK);
     }
 
+    @Operation(summary = "Удалить личность по ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Личность успешно удалена"),
+            @ApiResponse(responseCode = "401", description = "Не авторизован")
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deletePerson(@PathVariable UUID id) {
         personService.deletePerson(id);
         return new ResponseEntity<>("Person deleted " + id, HttpStatus.OK);
     }
 
+    @Operation(summary = "Найти личности по номеру телефона")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Личности найдены"),
+            @ApiResponse(responseCode = "401", description = "Не авторизован")
+    })
     @GetMapping("/phone")
-    public ResponseEntity<List<Person>> searchByPhone(@RequestParam String phone) {
+    public ResponseEntity<List<PersonDTO>> searchByPhone(@RequestParam String phone) {
         List<Person> persons = personService.findByPhonePart(phone);
-        return new ResponseEntity<>(persons, HttpStatus.OK);
+        List<PersonDTO> personDTOS = persons.stream()
+                .map(person -> Mapper.toPersonDTO(person)).toList();
+        return new ResponseEntity<>(personDTOS, HttpStatus.OK);
     }
 
+    @Operation(summary = "Найти личности по имени")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Личности найдены"),
+            @ApiResponse(responseCode = "401", description = "Не авторизован")
+    })
     @GetMapping("/name")
-    public ResponseEntity<List<Person>> searchByName(@RequestParam String name) {
+    public ResponseEntity<List<PersonDTO>> searchByName(@RequestParam String name) {
         List<Person> persons = personService.findByNamePart(name);
-        return new ResponseEntity<>(persons, HttpStatus.OK);
+        List<PersonDTO> personDTOs = persons.stream()
+                .map(person -> Mapper.toPersonDTO(person))
+                .toList();
+        return new ResponseEntity<>(personDTOs, HttpStatus.OK);
     }
 
+    @Operation(summary = "Найти личность по ID пропуска")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Личность найдена"),
+            @ApiResponse(responseCode = "404", description = "Личность не найдена"),
+            @ApiResponse(responseCode = "401", description = "Не авторизован")
+    })
     @GetMapping("/pass")
     public ResponseEntity<?> searchByPass(@RequestParam UUID uuid) {
         Person existPerson = personService.findByPassId(uuid).orElse(null);
         if (uuid != null) {
-            return new ResponseEntity<>(existPerson, HttpStatus.OK);
+            return new ResponseEntity<>(Mapper.toPersonDTO(existPerson), HttpStatus.OK);
         }
         return new ResponseEntity<>("There is no such person in any pass! ", HttpStatus.NOT_FOUND);
     }
