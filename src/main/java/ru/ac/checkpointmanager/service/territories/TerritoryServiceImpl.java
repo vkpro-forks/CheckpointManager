@@ -9,6 +9,7 @@ import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
+import ru.ac.checkpointmanager.service.avatar.AvatarService;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.util.List;
@@ -23,6 +24,7 @@ public class TerritoryServiceImpl implements TerritoryService {
 
     private final TerritoryRepository repository;
     private final UserRepository userRepository;
+    private final AvatarService avatarService;
 
     @Override
     public Territory addTerritory(Territory territory) {
@@ -101,6 +103,7 @@ public class TerritoryServiceImpl implements TerritoryService {
             throw new TerritoryNotFoundException(String.format("Territory not found [Id=%s]", id));
         }
         repository.deleteById(id);
+        avatarService.deleteAvatarIfExists(id);
     }
 
     @Override

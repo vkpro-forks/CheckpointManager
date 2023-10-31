@@ -8,7 +8,7 @@ spring:
     password: chpmanPass%
   servlet:
     multipart:
-      max-file-size: 6MB
+      max-file-size: 5MB
   jpa:
     properties:
       hibernate:
@@ -49,3 +49,4 @@ application:
 avatars:
   dir:
     path: ./avatars
+  extensions: jpg, jpeg, png, ico, gif, eps, svg, bmp

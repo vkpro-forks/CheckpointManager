@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import ru.ac.checkpointmanager.exception.CarTrailerNotFoundException;
 import ru.ac.checkpointmanager.model.car.Trailer;
 import ru.ac.checkpointmanager.repository.car.TrailerRepository;
+import ru.ac.checkpointmanager.service.avatar.AvatarService;
 
 import java.util.UUID;
 
@@ -11,9 +12,12 @@ import java.util.UUID;
 public class TrailerServiceImpl implements TrailerService {
 
     private final TrailerRepository trailerRepository;
+    private final AvatarService avatarService;
 
-    public TrailerServiceImpl(TrailerRepository trailerRepository) {
+    public TrailerServiceImpl(TrailerRepository trailerRepository,
+                              AvatarService avatarService) {
         this.trailerRepository = trailerRepository;
+        this.avatarService = avatarService;
     }
 
     @Override
@@ -34,6 +38,7 @@ public class TrailerServiceImpl implements TrailerService {
         } else {
             throw new CarTrailerNotFoundException("dTrailer not found with id: " + id);
         }
+        avatarService.deleteAvatarIfExists(id);
     }
 
     @Override

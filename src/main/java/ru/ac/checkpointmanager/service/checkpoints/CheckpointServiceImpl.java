@@ -7,6 +7,7 @@ import ru.ac.checkpointmanager.exception.CheckpointNotFoundException;
 import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
 import ru.ac.checkpointmanager.repository.CheckpointRepository;
 import ru.ac.checkpointmanager.service.territories.TerritoryService;
+import ru.ac.checkpointmanager.service.avatar.AvatarService;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.util.List;
@@ -21,6 +22,7 @@ public class CheckpointServiceImpl implements CheckpointService {
 
     private final CheckpointRepository repository;
     private final TerritoryService territoryService;
+    private final AvatarService avatarService;
 
     @Override
     public Checkpoint addCheckpoint(Checkpoint checkpoint) {
@@ -88,5 +90,6 @@ public class CheckpointServiceImpl implements CheckpointService {
             throw new CheckpointNotFoundException(String.format("Checkpoint not found [Id=%s]", id));
         }
         repository.deleteById(id);
+        avatarService.deleteAvatarIfExists(id);
     }
 }

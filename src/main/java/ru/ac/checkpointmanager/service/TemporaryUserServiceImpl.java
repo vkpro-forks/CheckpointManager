@@ -47,7 +47,7 @@ public class TemporaryUserServiceImpl implements TemporaryUserService {
      *
      * @see TemporaryUser
      */
-    @Scheduled(fixedRate = 30000)
+    @Scheduled(cron = "0 * * * * ?")
     @Transactional
     public void cleanup() {
         LocalDateTime now = LocalDateTime.now();
@@ -55,7 +55,7 @@ public class TemporaryUserServiceImpl implements TemporaryUserService {
             hourForLogInScheduledCheck = now.getHour();
             log.debug("Scheduled method 'cleanup' for temporary_users table continues to work");
         }
-        LocalDateTime cutoffTime = now.minusMinutes(15);
+        LocalDateTime cutoffTime = now.minusHours(1);
         repository.deleteByAddedAtBefore(cutoffTime);
     }
 }

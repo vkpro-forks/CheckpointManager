@@ -10,6 +10,7 @@ import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.model.car.CarModel;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
 import ru.ac.checkpointmanager.repository.car.CarModelRepository;
+import ru.ac.checkpointmanager.service.avatar.AvatarService;
 
 import java.util.List;
 import java.util.Set;
