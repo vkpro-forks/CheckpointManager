@@ -1,5 +1,8 @@
 package ru.ac.checkpointmanager.controller.car;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +32,12 @@ public class CarController {
     private final CarService carService;
     private final CarBrandService carBrandService;
 
+    @Operation(summary = "Добавить новый автомобиль")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Автомобиль успешно добавлен"),
+            @ApiResponse(responseCode = "400", description = "Неверный запрос"),
+            @ApiResponse(responseCode = "401", description = "Нужно авторизоваться")
+    })
     @PostMapping
     public ResponseEntity<?> addCar(@Valid @RequestBody CarDTO carDTO, BindingResult result) {
         if (result.hasErrors()) {
@@ -47,6 +56,12 @@ public class CarController {
         }
     }
 
+    @Operation(summary = "Обновить данные автомобиля")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Данные автомобиля успешно обновлены"),
+            @ApiResponse(responseCode = "400", description = "Неверный запрос"),
+            @ApiResponse(responseCode = "401", description = "Нужно авторизоваться")
+    })
     @PutMapping("/{carId}")
     public ResponseEntity<?> updateCar(@Valid @PathVariable UUID carId, @RequestBody CarDTO updateCarDto, BindingResult result) {
         if (result.hasErrors()) {
@@ -59,12 +74,24 @@ public class CarController {
         return ResponseEntity.ok(updated);
     }
 
+    @Operation(summary = "Удалить автомобиль по ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Автомобиль успешно удален"),
+            @ApiResponse(responseCode = "404", description = "Нет такого Автомобиля по этому id"),
+            @ApiResponse(responseCode = "401", description = "Нужно авторизоваться")
+    })
     @DeleteMapping("/{carId}")
     public ResponseEntity<Void> deletedCar(@PathVariable UUID carId) {
         carService.deleteCar(carId);
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Получить список всех автомобилей")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Список автомобилей найден"),
+            @ApiResponse(responseCode = "204", description = "Автомобили не найдены"),
+            @ApiResponse(responseCode = "401", description = "Нужно авторизоваться")
+    })
     @GetMapping
     public ResponseEntity<List<CarDTO>> getAllCars() {
         List<Car> carList = carService.getAllCars();

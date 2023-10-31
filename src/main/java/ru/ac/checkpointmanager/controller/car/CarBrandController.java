@@ -1,5 +1,8 @@
 package ru.ac.checkpointmanager.controller.car;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +26,12 @@ public class CarBrandController {
 
     private final CarBrandService carBrandService;
 
+    @Operation(summary = "Создание нового бренда")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Создание произошло успешно"),
+            @ApiResponse(responseCode = "400", description = "Не уадалось создать бренд"),
+            @ApiResponse(responseCode = "401", description = "Нужно авторизоваться")
+    })
     @PostMapping("/brands")
     public ResponseEntity<?> createBrand(@Valid @RequestBody CarBrand brand, BindingResult result) {
         if (result.hasErrors()) {
@@ -33,21 +42,38 @@ public class CarBrandController {
         return new ResponseEntity<>(carBrand, HttpStatus.CREATED);
     }
 
+    @Operation(summary = "Получение бренда по id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Бренд получен"),
+            @ApiResponse(responseCode = "404", description = "Такого бренда не существует."),
+            @ApiResponse(responseCode = "401", description = "Нужно авторизоваться")
+    })
     @GetMapping("/brands/{id}")
     public ResponseEntity<CarBrand> getCarBrandById(@PathVariable Long id) {
         CarBrand brand = carBrandService.getBrandById(id);
         return new ResponseEntity<>(brand, HttpStatus.OK);
     }
 
-    //удалить бренд можно только в том случае, если у этого бренда в бд нет ни одной модели
+
+    @Operation(summary = "Удалить брен по Id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Удалось удалить бренд"),
+            @ApiResponse(responseCode = "400", description = "Неправильный запрос"),
+            @ApiResponse(responseCode = "404", description = "Нет такого бренда по этому Id"),
+            @ApiResponse(responseCode = "401", description = "Нужно авторизоваться")
+    })
     @DeleteMapping("/brands/{id}")
     public ResponseEntity<String> deleteCarBrandById(@PathVariable Long id) {
             carBrandService.deleteBrand(id);
             return ResponseEntity.noContent().build();
     }
 
-    //удаляем бренд и все модели которые к нему привязаны
-
+    @Operation(summary = "Обновление бренда по ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Бренд обновлен благополучно"),
+            @ApiResponse(responseCode = "400", description = "Не удалось обновить бренд"),
+            @ApiResponse(responseCode = "401", description = "Нужно авторизоваться")
+    })
     @PutMapping("/brands/{id}")
     public ResponseEntity<?> updateCarBrand(@Valid @PathVariable Long id,
                                             @RequestBody CarBrand carBrandDetails,
@@ -59,6 +85,13 @@ public class CarBrandController {
             CarBrand carBrand = carBrandService.updateBrand(id, carBrandDetails);
             return new ResponseEntity<>(carBrand, HttpStatus.OK);
     }
+
+    @Operation(summary = "Вывести список всех брендов")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Список брендов успешно создан"),
+            @ApiResponse(responseCode = "404", description = "Нет ни одного бренда в бд"),
+            @ApiResponse(responseCode = "401", description = "Нужно авторизоваться")
+    })
     @GetMapping("/brands/all")
     public ResponseEntity<List<CarBrand>> getAllBrands() {
         List<CarBrand> allBrands = carBrandService.getAllBrands();
@@ -68,6 +101,12 @@ public class CarBrandController {
         return new ResponseEntity<>(allBrands, HttpStatus.OK);
     }
 
+    @Operation(summary = "Поиск бренда по имени или части имени")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Бренд найден>"),
+            @ApiResponse(responseCode = "404", description = "Бренд не найден>"),
+            @ApiResponse(responseCode = "401", description = "Нужно авторизоваться")
+    })
     @GetMapping("/brands-name")
     public ResponseEntity<List<CarBrand>> getBrandsByName(@RequestParam String brandNamePart) {
         List<CarBrand> brands = carBrandService.findByBrandsContainingIgnoreCase(brandNamePart);
