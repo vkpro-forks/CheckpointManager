@@ -1,21 +1,41 @@
 package ru.ac.checkpointmanager.utils;
 
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.ac.checkpointmanager.dto.*;
+import ru.ac.checkpointmanager.exception.CheckpointNotFoundException;
+import ru.ac.checkpointmanager.exception.PassNotFoundException;
 import ru.ac.checkpointmanager.model.*;
+import ru.ac.checkpointmanager.model.car.Car;
 import ru.ac.checkpointmanager.model.passes.*;
+import ru.ac.checkpointmanager.repository.CheckpointRepository;
+import ru.ac.checkpointmanager.repository.PassRepository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
 public class Mapper {
 
+    private static Mapper instance;
     private static final ModelMapper modelMapper = new ModelMapper();
+
+    private static CheckpointRepository checkpointRepository;
+
+    private static PassRepository passRepository;
+
+    @Autowired
+    public Mapper(CheckpointRepository checkpointRepository, PassRepository passRepository) {
+        this.checkpointRepository = checkpointRepository;
+        this.passRepository = passRepository;
+        instance = this;
+    }
 
     /* Checkpoint mapping */
     public static Checkpoint toCheckpoint(CheckpointDTO checkpointDTO) {
@@ -62,7 +82,7 @@ public class Mapper {
         }
         throw new IllegalArgumentException("Ошибка при конвертации passDTO (не содержит car или person)");
     }
-  
+
     public static PassDTO toPassDTO(Pass pass) {
         return modelMapper.map(pass, PassDTO.class);
     }
@@ -136,8 +156,25 @@ public class Mapper {
 
     /* Crossing mapping */
     public static Crossing toCrossing(CrossingDTO crossingDTO) {
-        return modelMapper.map(crossingDTO, Crossing.class);
+        // теперь можно использовать instance для доступа к репозиториям
+        Optional<Pass> optionalPass = instance.passRepository.findById(crossingDTO.getPassId());
+        Pass pass = optionalPass.orElseThrow(
+                () -> new PassNotFoundException("Pass not found for ID " + crossingDTO.getPassId())
+        );
+
+        Optional<Checkpoint> optionalCheckpoint = instance.checkpointRepository.findById(crossingDTO.getCheckpointId());
+        Checkpoint checkpoint = optionalCheckpoint.orElseThrow(
+                () -> new CheckpointNotFoundException("Checkpoint not found for ID " + crossingDTO.getCheckpointId())
+        );
+
+        Crossing crossing = new Crossing();
+        crossing.setPass(pass);
+        crossing.setCheckpoint(checkpoint);
+        crossing.setDirection(crossingDTO.getDirection());
+
+        return crossing;
     }
+
 
     public static CrossingDTO toCrossingDTO(Crossing crossing) {
         return modelMapper.map(crossing, CrossingDTO.class);
@@ -160,6 +197,20 @@ public class Mapper {
     public List<PersonDTO> toPersonDTO(Collection<Person> person) {
         return person.stream()
                 .map(p -> modelMapper.map(p, PersonDTO.class))
+                .toList();
+    }
+
+    public Car toCar(CarDTO carDTO) {
+        return modelMapper.map(carDTO, Car.class);
+    }
+
+    public CarDTO toCarDTO(Car car) {
+        return modelMapper.map(car, CarDTO.class);
+    }
+
+    public List<CarDTO> toCarDTO(Collection<Car> cars) {
+        return cars.stream()
+                .map(p -> modelMapper.map(p, CarDTO.class))
                 .toList();
     }
 }

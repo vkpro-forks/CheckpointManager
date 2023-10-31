@@ -8,6 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.exception.PassNotFoundException;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.model.Crossing;
+import ru.ac.checkpointmanager.model.Person;
+import ru.ac.checkpointmanager.model.car.Car;
 import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
@@ -20,6 +22,7 @@ import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static ru.ac.checkpointmanager.utils.StringTrimmer.trimThemAll;
 
@@ -35,7 +38,6 @@ public class PassServiceImpl implements PassService{
 
     private final PassRepository repository;
     private final CrossingRepository crossingRepository;
-    private final PersonService personService;
 
     private int hourForLogInScheduledCheck;
 
@@ -48,6 +50,8 @@ public class PassServiceImpl implements PassService{
 
         trimThemAll(pass);
         pass.setStatus(PassStatus.ACTIVE);
+
+
         return repository.save(pass);
     }
 
@@ -192,19 +196,26 @@ public class PassServiceImpl implements PassService{
      */
     void checkOverlapTime(Pass newPass) {
         List<Pass> passesByUser = repository.findPassesByUserIdOrderByAddedAtDesc(newPass.getUser().getId());
+        List<Pass> filteredPassesByUser = passesByUser.stream()
+                .filter(pass -> pass.getClass().equals(newPass.getClass()))
+                .collect(Collectors.toList());
 
-        Optional<Pass> overlapPass = passesByUser.stream()
+
+        Optional<Pass> overlapPass = filteredPassesByUser.stream()
                 //чтобы сравнить car или person в зависимости от типа пропуска, необходимо привести сравниваемые
                 //пропуска к соответствующему типу (т.к. в PassWalk нет поля Car и метода getCar, и наоборот)
                 .filter(existPass -> {
+                    if (newPass.getClass() != existPass.getClass()) {
+                        throw new IllegalArgumentException("Types of newPass and existPass should be the same");
+                    }
                     if (existPass instanceof PassAuto) {
                         PassAuto newPassAuto = (PassAuto) newPass;
                         PassAuto existPassAuto = (PassAuto) existPass;
-                        return Objects.equals(newPassAuto.getCar(), existPassAuto.getCar());
+                        return Objects.equals(newPassAuto.getCar().getLicensePlate(), existPassAuto.getCar().getLicensePlate());
                     } else if (existPass instanceof PassWalk) {
                          PassWalk newPassWalk = (PassWalk) newPass;
                         PassWalk existPassWalk = (PassWalk) existPass;
-                        return Objects.equals(newPassWalk.getPerson(), existPassWalk.getPerson());
+                        return Objects.equals(newPassWalk.getPerson().getName(), existPassWalk.getPerson().getName());
                     } else {
                         return false; // Обработка других типов объектов Pass
                     }

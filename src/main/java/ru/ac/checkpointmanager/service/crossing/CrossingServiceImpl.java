@@ -75,8 +75,13 @@ public class CrossingServiceImpl implements CrossingService {
 
         return passRepository.findById(passId)
                 .filter(p -> p.getStatus() == PassStatus.ACTIVE)
-                .orElseThrow(() -> new InactivePassException("The pass is not active"));
+                .filter(p -> {
+                    LocalDateTime now = LocalDateTime.now();
+                    return now.isAfter(p.getStartTime()) && now.isBefore(p.getEndTime());
+                })
+                .orElseThrow(() -> new InactivePassException("The pass is not active or not valid for the current time"));
     }
+
 
     //проверяет, существует ли КПП с данным ID и принадлежит ли он территории пропуска
     private Checkpoint validateCheckpoint(UUID checkpointId, UUID territoryIdFromPass) {

@@ -34,8 +34,8 @@ public class CarController {
         }
 
         try {
-            CarBrand existingBrand = carBrandService.getBrandById(carRequest.getBrand().getId());
-            carRequest.setBrand(existingBrand);
+//            CarBrand existingBrand = carBrandService.getBrandById(carRequest.getBrand().getId());
+//            carRequest.setBrand(existingBrand);
             Car newCar = carService.addCar(carRequest);
             return new ResponseEntity<>(newCar, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {

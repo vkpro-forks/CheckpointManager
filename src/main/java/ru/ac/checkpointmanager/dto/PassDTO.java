@@ -42,9 +42,8 @@ public class PassDTO {
 
     private String dtype;
 
-    @NotNull
     private PersonDTO person;
 
-    private Car car;
+    private CarDTO car;
 
 }
