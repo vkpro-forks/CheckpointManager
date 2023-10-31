@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.ac.checkpointmanager.dto.AuthenticationRequest;
 import ru.ac.checkpointmanager.dto.AuthenticationResponse;
 import ru.ac.checkpointmanager.dto.UserAuthDTO;
-import ru.ac.checkpointmanager.service.AuthenticationService;
+import ru.ac.checkpointmanager.service.auth.AuthenticationService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
 
 import java.io.IOException;

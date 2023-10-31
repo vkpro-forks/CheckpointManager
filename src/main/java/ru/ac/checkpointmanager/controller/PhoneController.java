@@ -10,7 +10,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.exception.PhoneNumberNotFoundException;
-import ru.ac.checkpointmanager.service.PhoneService;
+import ru.ac.checkpointmanager.service.phone.PhoneService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
 
 import java.util.Collection;

@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.service;
+package ru.ac.checkpointmanager.service.email;
 
 public interface EmailService {
 

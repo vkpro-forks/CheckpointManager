@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import ru.ac.checkpointmanager.service.email.EmailServiceImpl;
 
 import java.util.Properties;
 
@@ -52,7 +53,7 @@ public class EmailConfig {
      * Метод также устанавливает дополнительные свойства {@code JavaMailSenderImpl}, такие, как: протокол, аутентификация, включение TLS и SSL.
      *
      * @return настроенный экземпляр JavaMailSender для отправки электронной почты
-     * @see ru.ac.checkpointmanager.service.EmailServiceImpl
+     * @see EmailServiceImpl
      */
     @Bean
     public JavaMailSender getJavaMailSender() {

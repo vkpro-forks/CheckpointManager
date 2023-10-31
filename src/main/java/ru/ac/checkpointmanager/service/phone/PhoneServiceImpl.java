@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.service;
+package ru.ac.checkpointmanager.service.phone;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -6,6 +6,7 @@ import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.exception.PhoneNumberNotFoundException;
 import ru.ac.checkpointmanager.model.Phone;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
+import ru.ac.checkpointmanager.service.phone.PhoneService;
 
 import java.util.Collection;
 import java.util.UUID;

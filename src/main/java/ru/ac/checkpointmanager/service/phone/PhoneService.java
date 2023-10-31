@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.service;
+package ru.ac.checkpointmanager.service.phone;
 
 import ru.ac.checkpointmanager.dto.PhoneDTO;
 
