@@ -186,11 +186,11 @@ public class Mapper {
                 .toList();
     }
 
-    public Person toPerson(PersonDTO personDTO) {
+    public static Person toPerson(PersonDTO personDTO) {
         return modelMapper.map(personDTO, Person.class);
     }
 
-    public PersonDTO toPersonDTO(Person person) {
+    public static PersonDTO toPersonDTO(Person person) {
         return modelMapper.map(person, PersonDTO.class);
     }
 
@@ -200,15 +200,15 @@ public class Mapper {
                 .toList();
     }
 
-    public Car toCar(CarDTO carDTO) {
+    public static Car toCar(CarDTO carDTO) {
         return modelMapper.map(carDTO, Car.class);
     }
 
-    public CarDTO toCarDTO(Car car) {
+    public static CarDTO toCarDTO(Car car) {
         return modelMapper.map(car, CarDTO.class);
     }
 
-    public List<CarDTO> toCarDTO(Collection<Car> cars) {
+    public static List<CarDTO> toCarDTO(Collection<Car> cars) {
         return cars.stream()
                 .map(p -> modelMapper.map(p, CarDTO.class))
                 .toList();
