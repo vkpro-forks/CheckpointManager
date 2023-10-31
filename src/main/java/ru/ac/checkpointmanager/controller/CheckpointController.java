@@ -1,6 +1,7 @@
 package ru.ac.checkpointmanager.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -79,7 +80,8 @@ public class  CheckpointController {
                             array = @ArraySchema(schema = @Schema(implementation = CheckpointDTO.class)))),
             @ApiResponse(responseCode = "404", description = "КПП не найдены")})
     @GetMapping("/name")
-    public ResponseEntity<List<CheckpointDTO>> getCheckpointsByName(@RequestParam String name) {
+    public ResponseEntity<List<CheckpointDTO>> getCheckpointsByName(@Parameter(description = "Часть названия")
+                                                                    @RequestParam String name) {
         List<Checkpoint> checkpoints = service.findCheckpointsByName(name);
         if (checkpoints.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -107,10 +109,11 @@ public class  CheckpointController {
             @ApiResponse(responseCode = "200", description = "КПП найдены",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = CheckpointDTO.class)))),
-            @ApiResponse(responseCode = "404", description = "КПП не найдены"),
-            @ApiResponse(responseCode = "400", description = "Не найдена указанная территория")})
+            @ApiResponse(responseCode = "400", description = "Не найдена указанная территория"),
+            @ApiResponse(responseCode = "404", description = "КПП не найдены")})
     @GetMapping("/territory/{territoryId}")
-    public ResponseEntity<List<CheckpointDTO>> getCheckpointsByTerritoryId(@PathVariable UUID territoryId) {
+    public ResponseEntity<List<CheckpointDTO>> getCheckpointsByTerritoryId(@Parameter(description = "ID территории")
+                                                                               @PathVariable UUID territoryId) {
         List<Checkpoint> checkpoints = service.findCheckpointsByTerritoryId(territoryId);
         if (checkpoints.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -119,27 +122,32 @@ public class  CheckpointController {
     }
 
     /* UPDATE */
+    @Operation(summary = "Изменить существующий КПП")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "КПП успешно изменем",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = CheckpointDTO.class))}),
+            @ApiResponse(responseCode = "400", description = "Неуспешная валидаци полей; не найдена указанная территория"),
+            @ApiResponse(responseCode = "404", description = "КПП не найден")})
     @PutMapping
     public ResponseEntity<?> editCheckpoint(@RequestBody @Valid CheckpointDTO checkpointDTO,
                                                         BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
         }
-        Checkpoint currentCheckpoint = service.findCheckpointById(checkpointDTO.getId());
-        if (currentCheckpoint == null) {
-            return ResponseEntity.notFound().build();
-        }
+
         Checkpoint updatedCheckpoint = service.updateCheckpoint(toCheckpoint(checkpointDTO));
         return ResponseEntity.ok(toCheckpointDTO(updatedCheckpoint));
     }
 
     /* DELETE */
+    @Operation(summary = "Удалить КПП")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "КПП успешно удален"),
+            @ApiResponse(responseCode = "404", description = "КПП не найден")})
     @DeleteMapping("{id}")
     public ResponseEntity<Void> deleteCheckpoint(@PathVariable UUID id) {
-        Checkpoint currentCheckpoint = service.findCheckpointById(id);
-        if (currentCheckpoint == null) {
-            return ResponseEntity.notFound().build();
-        }
+
         service.deleteCheckpointById(id);
         return ResponseEntity.ok().build();
     }

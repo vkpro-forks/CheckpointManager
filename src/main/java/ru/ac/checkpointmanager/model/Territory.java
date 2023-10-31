@@ -3,6 +3,7 @@ package ru.ac.checkpointmanager.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
 import ru.ac.checkpointmanager.model.passes.Pass;
 
@@ -27,6 +28,7 @@ public class Territory {
 
     private String note;
 
+    @CreationTimestamp
     private LocalDate addedAt;
 
     @JsonIgnore

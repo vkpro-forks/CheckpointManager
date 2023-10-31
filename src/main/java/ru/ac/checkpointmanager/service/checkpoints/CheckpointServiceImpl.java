@@ -33,6 +33,7 @@ public class CheckpointServiceImpl implements CheckpointService {
     @Override
     public Checkpoint findCheckpointById(UUID id) {
         log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), id);
+
         return repository.findById(id).orElseThrow(
                 () -> new CheckpointNotFoundException(String.format("Checkpoint not found [userId=%s]", id)));
     }
@@ -64,10 +65,12 @@ public class CheckpointServiceImpl implements CheckpointService {
     @Override
     public Checkpoint updateCheckpoint(Checkpoint checkpoint) {
         log.info("Method {}, UUID - {}", MethodLog.getMethodName(), checkpoint.getId());
-        trimThemAll(checkpoint);
         Checkpoint foundCheckpoint = repository.findById(checkpoint.getId())
                         .orElseThrow(() -> new CheckpointNotFoundException
                                 (String.format("Checkpoint not found [Id=%s]", checkpoint.getId())));
+
+        territoryService.findTerritoryById(checkpoint.getTerritory().getId());
+        trimThemAll(checkpoint);
 
         foundCheckpoint.setName(checkpoint.getName());
         foundCheckpoint.setType(checkpoint.getType());
