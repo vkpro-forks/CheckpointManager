@@ -5,19 +5,26 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
 import org.springframework.stereotype.Component;
 import ru.ac.checkpointmanager.dto.*;
+import ru.ac.checkpointmanager.exception.CheckpointNotFoundException;
+import ru.ac.checkpointmanager.exception.PassNotFoundException;
 import ru.ac.checkpointmanager.model.*;
 import ru.ac.checkpointmanager.model.car.Car;
 import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
 import ru.ac.checkpointmanager.model.passes.*;
+import ru.ac.checkpointmanager.repository.CheckpointRepository;
+import ru.ac.checkpointmanager.repository.PassRepository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
 public class Mapper {
 
     private final ModelMapper modelMapper = new ModelMapper();
+    private final PassRepository passRepository;
+    private final CheckpointRepository checkpointRepository;
 
     /* Checkpoint mapping */
     public Checkpoint toCheckpoint(CheckpointDTO checkpointDTO) {
@@ -166,7 +173,20 @@ public class Mapper {
 
     /* Crossing mapping */
     public Crossing toCrossing(CrossingDTO crossingDTO) {
-        return modelMapper.map(crossingDTO, Crossing.class);
+        Crossing crossing = new Crossing();
+        Optional<Pass> optionalPass = passRepository.findById(crossingDTO.getPassId());
+        Pass pass = optionalPass.orElseThrow(
+                () -> new PassNotFoundException("Pass not found for ID " + crossingDTO.getPassId()));
+
+        Optional<Checkpoint> optionalCheckpoint = checkpointRepository.findById(crossingDTO.getCheckpointId());
+        Checkpoint checkpoint = optionalCheckpoint.orElseThrow(
+                () -> new CheckpointNotFoundException("Checkpoint not found for ID " + crossingDTO.getCheckpointId()));
+
+        crossing.setPass(pass);
+        crossing.setCheckpoint(checkpoint);
+        crossing.setDirection(crossingDTO.getDirection());
+
+        return crossing;
     }
 
     public CrossingDTO toCrossingDTO(Crossing crossing) {
