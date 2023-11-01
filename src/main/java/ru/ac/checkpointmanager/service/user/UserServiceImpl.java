@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.service;
+package ru.ac.checkpointmanager.service.user;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
@@ -82,7 +82,7 @@ public class UserServiceImpl implements UserService {
         foundUser.setFullName(userDTO.getFullName());
         foundUser.setDateOfBirth(userDTO.getDateOfBirth());
         foundUser.setMainNumber(cleanPhone(userDTO.getMainNumber()));
-        foundUser.setEmail(userDTO.getEmail());
+//        foundUser.setEmail(userDTO.getEmail()); TODO: добавить отдельную ручку для смены почты
 
         userRepository.save(foundUser);
 
@@ -127,8 +127,6 @@ public class UserServiceImpl implements UserService {
         userRepository.save(existingUser);
     }
 
-    //    два варианта блокировки пользователя
-    //    первый: с помощью одного метода можно и заблокировать и разблокировать по айди
     @Override
     public UserDTO updateBlockStatus(UUID id, Boolean isBlocked) {
         User existingUser = userRepository.findById(id)
@@ -187,6 +185,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Collection<String> findUsersPhoneNumbers(UUID userId) {
+        if (userRepository.findById(userId).isEmpty()) {
+            throw new UserNotFoundException("Error getting users phones with ID" + userId);
+        }
         return phoneRepository.getNumbersByUserId(userId);
     }
 }

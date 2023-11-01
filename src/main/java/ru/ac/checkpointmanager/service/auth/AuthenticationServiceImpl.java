@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.service;
+package ru.ac.checkpointmanager.service.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,6 +29,9 @@ import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.model.enums.TokenType;
 import ru.ac.checkpointmanager.repository.TokenRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
+import ru.ac.checkpointmanager.service.email.EmailService;
+import ru.ac.checkpointmanager.service.phone.PhoneService;
+import ru.ac.checkpointmanager.service.user.TemporaryUserService;
 import ru.ac.checkpointmanager.utils.Mapper;
 
 import java.io.IOException;
@@ -203,8 +206,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                         request.getPassword()
                 )
         );
+
         User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() ->
-                new UsernameNotFoundException(String.format("User with email - '%s', not found  ", request.getEmail())));
+                new UserNotFoundException(String.format("User with email - '%s', not found  ", request.getEmail())));
 
         String jwtToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
