@@ -8,12 +8,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailSendException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import ru.ac.checkpointmanager.exception.*;
 
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @ControllerAdvice
@@ -149,6 +155,14 @@ public class GlobalExceptionHandler {
         log.warn(message);
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(PersonNotFoundException.class)
+    public ResponseEntity<String> handlePersonNotFoundException(PersonNotFoundException e) {
+        String message = String.format("Exception %s: %s", e.getClass(), e.getMessage());
+        log.info(message);
+        return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
+    }
+
 
     @ExceptionHandler(MailSendException.class)
     public ResponseEntity<String> handleMailSendException(MailSendException e) {

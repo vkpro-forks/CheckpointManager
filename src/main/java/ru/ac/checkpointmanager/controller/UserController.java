@@ -21,10 +21,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@RestController
-@RequestMapping("chpman/user")
-@RequiredArgsConstructor
-@SecurityRequirement(name = "bearerAuth")
+    @RestController
+    @RequestMapping("chpman/user")
+    @RequiredArgsConstructor
+    @SecurityRequirement(name = "bearerAuth")
 public class UserController {
 
     private final UserService userService;

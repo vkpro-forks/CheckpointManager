@@ -18,6 +18,7 @@ import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.service.avatar.AvatarService;
+import ru.ac.checkpointmanager.utils.Mapper;
 
 import java.security.Principal;
 import java.util.Collection;
@@ -31,6 +32,8 @@ import static ru.ac.checkpointmanager.utils.FieldsValidation.validateDOB;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
+
+    private final Mapper mapper;
     private final UserRepository userRepository;
     private final PhoneRepository phoneRepository;
     private final PasswordEncoder passwordEncoder;
@@ -49,7 +52,7 @@ public class UserServiceImpl implements UserService {
         if (territories.isEmpty()) {
             throw new TerritoryNotFoundException(String.format("Territory for User not found [user_id=%s]", userId));
         }
-        return toTerritoriesDTO(territories);
+        return mapper.toTerritoriesDTO(territories);
     }
 
     @Override

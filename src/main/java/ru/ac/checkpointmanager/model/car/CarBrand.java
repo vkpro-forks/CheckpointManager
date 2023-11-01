@@ -36,9 +36,4 @@ public class CarBrand {
     @OneToMany(mappedBy = "brand", fetch = FetchType.LAZY)
     private List<Car> cars = new ArrayList<>();
 
-    @JsonIgnore
-    @ToString.Exclude
-    @OneToMany(mappedBy = "brand")
-    private List<CarModel> models = new ArrayList<>();
-
 }
