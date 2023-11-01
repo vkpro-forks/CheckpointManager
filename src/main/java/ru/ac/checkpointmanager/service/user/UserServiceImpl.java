@@ -18,6 +18,7 @@ import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.service.avatar.AvatarService;
+import ru.ac.checkpointmanager.utils.Mapper;
 
 import java.security.Principal;
 import java.util.Collection;
@@ -26,12 +27,13 @@ import java.util.UUID;
 
 import static ru.ac.checkpointmanager.utils.FieldsValidation.cleanPhone;
 import static ru.ac.checkpointmanager.utils.FieldsValidation.validateDOB;
-import static ru.ac.checkpointmanager.utils.Mapper.*;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
+
+    private final Mapper mapper;
     private final UserRepository userRepository;
     private final PhoneRepository phoneRepository;
     private final PasswordEncoder passwordEncoder;
@@ -41,7 +43,7 @@ public class UserServiceImpl implements UserService {
     public UserDTO findById(UUID id) {
         User foundUser = userRepository.findById(id).orElseThrow(
                 () -> new UserNotFoundException(String.format("User not found [id=%s]", id)));
-        return toUserDTO(foundUser);
+        return mapper.toUserDTO(foundUser);
     }
 
     @Override
@@ -50,12 +52,12 @@ public class UserServiceImpl implements UserService {
         if (territories.isEmpty()) {
             throw new TerritoryNotFoundException(String.format("Territory for User not found [user_id=%s]", userId));
         }
-        return toTerritoriesDTO(territories);
+        return mapper.toTerritoriesDTO(territories);
     }
 
     @Override
     public Collection<UserDTO> findByName(String name) {
-        Collection<UserDTO> userDTOS = toUsersDTO(userRepository
+        Collection<UserDTO> userDTOS = mapper.toUsersDTO(userRepository
                 .findUserByFullNameContainingIgnoreCase(name));
 
         if (userDTOS.isEmpty()) {
@@ -84,7 +86,7 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(foundUser);
 
-        return toUserDTO(foundUser);
+        return mapper.toUserDTO(foundUser);
     }
 
     @Override
@@ -135,7 +137,7 @@ public class UserServiceImpl implements UserService {
         } else {
             throw new IllegalStateException(String.format("User already %s [id=%s]", isBlocked ? "blocked" : "unblocked", id));
         }
-        return toUserDTO(existingUser);
+        return mapper.toUserDTO(existingUser);
     }
 
     //    второй: два разных метода для блокировки или разблокировки по айди,
@@ -173,7 +175,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Collection<UserDTO> getAll() {
-        Collection<UserDTO> userDTOS = toUsersDTO(userRepository.findAll());
+        Collection<UserDTO> userDTOS = mapper.toUsersDTO(userRepository.findAll());
 
         if (userDTOS.isEmpty()) {
             throw new UserNotFoundException("There is no user in DB");

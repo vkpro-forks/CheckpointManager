@@ -9,12 +9,18 @@ import org.springframework.mail.MailSendException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import ru.ac.checkpointmanager.exception.*;
 
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @ControllerAdvice
@@ -37,31 +43,33 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ApiError> handleEntityNotFoundException(EntityNotFoundException ex) {
+        log.warn("Handling EntityNotFoundException: " + ex.getMessage());
         return new ResponseEntity<>(new ApiError(HttpStatus.NOT_FOUND, ex.getMessage(),
                 (List<String>) null), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleGeneralException(Exception ex) {
+        log.warn("Handling Exception: " + ex.getMessage());
         return new ResponseEntity<>(new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(),
                 (List<String>) null), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(EntranceWasAlreadyException.class)
     public ResponseEntity<String> handleEntranceWasAlreadyException(EntranceWasAlreadyException e) {
-        log.warn("Handling EntranceWasAlreadyException");
+        log.warn("Handling EntranceWasAlreadyException: " + e.getMessage());
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(InactivePassException.class)
     public ResponseEntity<String> handleNoActivePassException(InactivePassException e) {
-        log.warn("Handling NoActivePassException");
+        log.warn("Handling NoActivePassException: " + e.getMessage());
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(TerritoryNotFoundException.class)
     public ResponseEntity<String> handleTerritoryNotFoundException(TerritoryNotFoundException e) {
-        log.warn("Handling TerritoryNotFoundException");
+        log.warn("Handling TerritoryNotFoundException: " + e.getMessage());
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
@@ -148,6 +156,14 @@ public class GlobalExceptionHandler {
         log.warn(message);
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(PersonNotFoundException.class)
+    public ResponseEntity<String> handlePersonNotFoundException(PersonNotFoundException e) {
+        String message = String.format("Exception %s: %s", e.getClass(), e.getMessage());
+        log.info(message);
+        return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
+    }
+
 
     @ExceptionHandler(MailSendException.class)
     public ResponseEntity<String> handleMailSendException(MailSendException e) {

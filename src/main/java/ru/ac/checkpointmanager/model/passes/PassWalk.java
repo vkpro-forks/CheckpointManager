@@ -11,7 +11,7 @@ import ru.ac.checkpointmanager.model.Person;
 @DiscriminatorValue("WALK")
 public class PassWalk extends Pass {
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "person_id")
     private Person person;
 }

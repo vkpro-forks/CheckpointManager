@@ -12,7 +12,6 @@ import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.service.avatar.AvatarService;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,7 +30,6 @@ public class TerritoryServiceImpl implements TerritoryService {
     public Territory addTerritory(Territory territory) {
         log.info("Method {}, UUID - {}", MethodLog.getMethodName(), territory.getId());
         trimThemAll(territory);
-        territory.setAddedAt(LocalDate.now());
         return repository.save(territory);
     }
 

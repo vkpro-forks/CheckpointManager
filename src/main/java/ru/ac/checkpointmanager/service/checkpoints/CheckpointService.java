@@ -1,6 +1,6 @@
 package ru.ac.checkpointmanager.service.checkpoints;
 
-import ru.ac.checkpointmanager.model.Checkpoint;
+import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
 
 import java.util.List;
 import java.util.UUID;

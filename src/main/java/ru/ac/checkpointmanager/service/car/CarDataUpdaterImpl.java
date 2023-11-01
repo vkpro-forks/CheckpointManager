@@ -10,9 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.model.car.CarData;
-import ru.ac.checkpointmanager.model.car.CarModel;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
-import ru.ac.checkpointmanager.repository.car.CarModelRepository;
 
 import java.util.*;
 
@@ -23,7 +21,6 @@ import java.util.*;
 public class CarDataUpdaterImpl implements CarDataUpdater {
 
     private final CarBrandRepository carBrandRepository;
-    private final CarModelRepository carModelRepository;
     private final CarDataApiService carDataApiService;
 
     @Override
@@ -76,19 +73,6 @@ public class CarDataUpdaterImpl implements CarDataUpdater {
                 carBrand = new CarBrand();
                 carBrand.setBrand(carData.getBrandName());
                 carBrandRepository.save(carBrand);
-            }
-
-            CarModel carModel = carModelRepository.findByModel(carData.getModelName());
-            if (carModel == null) {
-                carModel = new CarModel();
-                carModel.setModel(carData.getModelName());
-                carModel.setBrand(carBrand);
-                carModelRepository.save(carModel);
-            } else {
-                log.info("CarModel with brand "
-                        + carBrand + " and model "
-                        + carData.getModelName()
-                        + " already exists. Skipping.");
             }
         }
     }
