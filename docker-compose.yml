@@ -38,5 +38,5 @@ services:
       - ./avatars:/usr/share/nginx/html:ro # локальная папка монтируется в /usr/share/nginx/html
     ports:
       - "8081:80" # nginx будет доступен на порту 8081
-    entrypoint:
+    environment:
       - TZ=UTC

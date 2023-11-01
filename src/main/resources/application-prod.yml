@@ -1,6 +1,4 @@
 spring:
-  profiles:
-    active: prod
   mail:
     host: smtp.yandex.ru
     port: 465
