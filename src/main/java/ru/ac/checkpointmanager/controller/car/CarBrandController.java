@@ -57,7 +57,7 @@ public class CarBrandController {
     }
 
 
-    @Operation(summary = "Удалить брен по Id")
+    @Operation(summary = "Удалить бренд по Id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Удалось удалить бренд"),
             @ApiResponse(responseCode = "400", description = "Неправильный запрос"),
