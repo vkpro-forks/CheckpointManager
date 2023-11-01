@@ -48,7 +48,7 @@ public class CrossingServiceImpl implements CrossingService {
         crossing.setCheckpoint(checkpoint);
 
         log.info("Local DateTime before setting: {}", crossing.getLocalDateTime());
-        crossing.setLocalDateTime(LocalDateTime.now(ZoneId.of("Europe/Moscow")));
+        crossing.setLocalDateTime(LocalDateTime.now());
         log.info("Local DateTime after setting: {}", crossing.getLocalDateTime());
 
         log.info("Successfully marked crossing for pass ID: {}", crossing.getPass().getId());

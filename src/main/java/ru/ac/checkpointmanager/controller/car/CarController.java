@@ -27,6 +27,8 @@ import java.util.UUID;
 @RequestMapping("chpman/car")
 @RequiredArgsConstructor
 @Tag(name = "Car (Машина)", description = "Администрирование списка машин")
+@ApiResponses(value = {@ApiResponse(responseCode = "401",
+        description = "Произошла ошибка, Нужно авторизоваться")})
 @SecurityRequirement(name = "bearerAuth")
 @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
 public class CarController {
@@ -39,7 +41,6 @@ public class CarController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Автомобиль успешно добавлен"),
             @ApiResponse(responseCode = "400", description = "Неверный запрос"),
-            @ApiResponse(responseCode = "401", description = "Нужно авторизоваться")
     })
     @PostMapping
     public ResponseEntity<?> addCar(@Valid @RequestBody CarDTO carDTO, BindingResult result) {
@@ -63,7 +64,6 @@ public class CarController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Данные автомобиля успешно обновлены"),
             @ApiResponse(responseCode = "400", description = "Неверный запрос"),
-            @ApiResponse(responseCode = "401", description = "Нужно авторизоваться")
     })
     @PutMapping("/{carId}")
     public ResponseEntity<?> updateCar(@Valid @PathVariable UUID carId, @RequestBody CarDTO updateCarDto, BindingResult result) {
@@ -81,7 +81,6 @@ public class CarController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Автомобиль успешно удален"),
             @ApiResponse(responseCode = "404", description = "Нет такого Автомобиля по этому id"),
-            @ApiResponse(responseCode = "401", description = "Нужно авторизоваться")
     })
     @DeleteMapping("/{carId}")
     public ResponseEntity<Void> deletedCar(@PathVariable UUID carId) {
@@ -93,7 +92,6 @@ public class CarController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Список автомобилей найден"),
             @ApiResponse(responseCode = "204", description = "Автомобили не найдены"),
-            @ApiResponse(responseCode = "401", description = "Нужно авторизоваться")
     })
     @GetMapping
     public ResponseEntity<List<CarDTO>> getAllCars() {

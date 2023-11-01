@@ -23,6 +23,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "CarBrand (Бренд Авто)", description = "Администрирование списка Брендов Авто")
+@ApiResponses(value = {@ApiResponse(responseCode = "401",
+        description = "Произошла ошибка, Нужно авторизоваться")})
 @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
 public class CarBrandController {
 
@@ -32,7 +34,6 @@ public class CarBrandController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Создание произошло успешно"),
             @ApiResponse(responseCode = "400", description = "Не уадалось создать бренд"),
-            @ApiResponse(responseCode = "401", description = "Нужно авторизоваться")
     })
     @PostMapping("/brands")
     public ResponseEntity<?> createBrand(@Valid @RequestBody CarBrand brand, BindingResult result) {
@@ -48,7 +49,6 @@ public class CarBrandController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Бренд получен"),
             @ApiResponse(responseCode = "404", description = "Такого бренда не существует."),
-            @ApiResponse(responseCode = "401", description = "Нужно авторизоваться")
     })
     @GetMapping("/brands/{id}")
     public ResponseEntity<CarBrand> getCarBrandById(@PathVariable Long id) {
@@ -62,7 +62,6 @@ public class CarBrandController {
             @ApiResponse(responseCode = "204", description = "Удалось удалить бренд"),
             @ApiResponse(responseCode = "400", description = "Неправильный запрос"),
             @ApiResponse(responseCode = "404", description = "Нет такого бренда по этому Id"),
-            @ApiResponse(responseCode = "401", description = "Нужно авторизоваться")
     })
     @DeleteMapping("/brands/{id}")
     public ResponseEntity<String> deleteCarBrandById(@PathVariable Long id) {
@@ -74,7 +73,6 @@ public class CarBrandController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Бренд обновлен благополучно"),
             @ApiResponse(responseCode = "400", description = "Не удалось обновить бренд"),
-            @ApiResponse(responseCode = "401", description = "Нужно авторизоваться")
     })
     @PutMapping("/brands/{id}")
     public ResponseEntity<?> updateCarBrand(@Valid @PathVariable Long id,
@@ -92,7 +90,6 @@ public class CarBrandController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Список брендов успешно создан"),
             @ApiResponse(responseCode = "404", description = "Нет ни одного бренда в бд"),
-            @ApiResponse(responseCode = "401", description = "Нужно авторизоваться")
     })
     @GetMapping("/brands/all")
     public ResponseEntity<List<CarBrand>> getAllBrands() {
@@ -107,7 +104,6 @@ public class CarBrandController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Бренд найден>"),
             @ApiResponse(responseCode = "404", description = "Бренд не найден>"),
-            @ApiResponse(responseCode = "401", description = "Нужно авторизоваться")
     })
     @GetMapping("/brands-name")
     public ResponseEntity<List<CarBrand>> getBrandsByName(@RequestParam String brandNamePart) {

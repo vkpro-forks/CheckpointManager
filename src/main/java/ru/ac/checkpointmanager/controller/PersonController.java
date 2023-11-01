@@ -27,6 +27,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "Person (Гость)", description = "Администрирование списка гостей")
+@ApiResponse(responseCode = "401", description = "Не авторизован")
 @SecurityRequirement(name = "bearerAuth")
 @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
 public class PersonController {
@@ -38,7 +39,6 @@ public class PersonController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Личность успешно добавлена"),
             @ApiResponse(responseCode = "400", description = "Неверный запрос"),
-            @ApiResponse(responseCode = "401", description = "Не авторизован")
     })
     @PostMapping
     public ResponseEntity<?> addPerson(@Valid @RequestBody PersonDTO personDTO, BindingResult bindingResult) {
@@ -54,7 +54,6 @@ public class PersonController {
     @Operation(summary = "Получить личность по ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Личность найдена"),
-            @ApiResponse(responseCode = "401", description = "Не авторизован")
     })
     @GetMapping("/{id}")
     public ResponseEntity<?> getPerson(@PathVariable UUID id) {
@@ -66,7 +65,6 @@ public class PersonController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Личность успешно обновлена"),
             @ApiResponse(responseCode = "400", description = "Неверный запрос"),
-            @ApiResponse(responseCode = "401", description = "Не авторизован")
     })
     @PutMapping("/{id}")
     public ResponseEntity<?> updatePerson(@PathVariable UUID id, @RequestBody PersonDTO personDTO,
@@ -83,7 +81,6 @@ public class PersonController {
     @Operation(summary = "Удалить личность по ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Личность успешно удалена"),
-            @ApiResponse(responseCode = "401", description = "Не авторизован")
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deletePerson(@PathVariable UUID id) {
@@ -94,7 +91,6 @@ public class PersonController {
     @Operation(summary = "Найти личности по номеру телефона")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Личности найдены"),
-            @ApiResponse(responseCode = "401", description = "Не авторизован")
     })
     @GetMapping("/phone")
     public ResponseEntity<List<PersonDTO>> searchByPhone(@RequestParam String phone) {
@@ -107,7 +103,6 @@ public class PersonController {
     @Operation(summary = "Найти личности по имени")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Личности найдены"),
-            @ApiResponse(responseCode = "401", description = "Не авторизован")
     })
     @GetMapping("/name")
     public ResponseEntity<List<PersonDTO>> searchByName(@RequestParam String name) {
@@ -122,7 +117,6 @@ public class PersonController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Личность найдена"),
             @ApiResponse(responseCode = "404", description = "Личность не найдена"),
-            @ApiResponse(responseCode = "401", description = "Не авторизован")
     })
     @GetMapping("/pass")
     public ResponseEntity<?> searchByPass(@RequestParam UUID uuid) {

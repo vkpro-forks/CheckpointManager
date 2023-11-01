@@ -15,7 +15,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=chpman
       - SPRING_DATASOURCE_PASSWORD=chpmanPass%
       - AVATAR_STORAGE_PATH=/avatars # указание на папку в контейнере avatars-storage
-      - TZ=Europe/Moscow
+      - TZ=UTC
 
   # Сервис для базы данных PostgreSQL
   postgres-db:
@@ -26,7 +26,7 @@ services:
       - POSTGRES_DB=chpmanDB
       - POSTGRES_USER=chpman
       - POSTGRES_PASSWORD=chpmanPass%
-      - TZ=Europe/Moscow
+      - TZ=UTC
 
   # Сервис для хранения аватаров
   avatars-storage:
@@ -36,4 +36,4 @@ services:
     ports:
       - "8081:80" # nginx будет доступен на порту 8081
     environment:
-      - TZ=Europe/Moscow
+      - TZ=UTC

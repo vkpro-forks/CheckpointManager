@@ -27,6 +27,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Crossing (Пересечение)", description = "Администрирование пересечений")
+@ApiResponse(responseCode = "401", description = "Нужно авторизоваться")
 @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
 //я предполагаю, что этот эндпоинт будет вызываться когда будет открываться шлагбаум(например) и тем самым фиксироваться пересечение
 public class CrossingController {
@@ -38,7 +39,6 @@ public class CrossingController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пересечение успешно отмечено"),
             @ApiResponse(responseCode = "400", description = "Неверный запрос"),
-            @ApiResponse(responseCode = "401", description = "Не авторизован")
     })
     @PostMapping("/mark")
     public ResponseEntity<?> markCrossing(@Valid @RequestBody CrossingDTO crossingDTO, BindingResult bindingResult) {
@@ -52,7 +52,6 @@ public class CrossingController {
     @Operation(summary = "Получить информацию о пересечении по ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пересечение найдено"),
-            @ApiResponse(responseCode = "401", description = "Не авторизован")
     })
     @GetMapping("/{id}")
     public ResponseEntity<?> getCrossing(@PathVariable UUID id) {

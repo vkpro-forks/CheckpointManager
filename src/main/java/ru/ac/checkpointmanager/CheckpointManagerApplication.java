@@ -12,7 +12,7 @@ import java.util.TimeZone;
 public class CheckpointManagerApplication {
 
     public static void main(String[] args) {
-        TimeZone.setDefault(TimeZone.getTimeZone("Europe/Moscow"));
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         SpringApplication.run(CheckpointManagerApplication.class, args);
     }
 }
