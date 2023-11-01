@@ -16,7 +16,7 @@ spring:
         show_sql: true
         ddl-auto: validate
       jdbc:
-        time-zone: Europe/Moscow
+        time-zone: UTC
   jackson:
     time-zone: Europe/Moscow
     hibernate:

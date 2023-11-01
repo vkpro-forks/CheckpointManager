@@ -34,8 +34,9 @@ public class PassController {
         if (bindingResult.hasErrors()) {
             return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
         }
-        Pass newPass = service.addPass(toPass(passDTO));
-        System.out.println("newPass class: " + newPass.getClass());
+        Pass pass = toPass(passDTO);
+        Pass newPass = service.addPass(pass);
+
         return ResponseEntity.ok(toPassDTO(newPass));
     }
 

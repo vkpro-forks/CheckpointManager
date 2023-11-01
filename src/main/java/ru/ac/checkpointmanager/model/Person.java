@@ -1,6 +1,7 @@
 package ru.ac.checkpointmanager.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -17,6 +18,7 @@ import java.util.UUID;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Table(name = "persons")
 @NoArgsConstructor
+@AllArgsConstructor
 public class Person {
 
 
@@ -35,18 +37,5 @@ public class Person {
     private List<PassWalk> passes;
 
     private String note;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Person p = (Person) o;
-        return Objects.equals(id, p.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
 
 }

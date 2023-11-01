@@ -198,16 +198,15 @@ public class PassServiceImpl implements PassService{
         List<Pass> passesByUser = repository.findPassesByUserIdOrderByAddedAtDesc(newPass.getUser().getId());
         List<Pass> filteredPassesByUser = passesByUser.stream()
                 .filter(pass -> pass.getClass().equals(newPass.getClass()))
-                .collect(Collectors.toList());
-
+                .toList();
 
         Optional<Pass> overlapPass = filteredPassesByUser.stream()
                 //чтобы сравнить car или person в зависимости от типа пропуска, необходимо привести сравниваемые
                 //пропуска к соответствующему типу (т.к. в PassWalk нет поля Car и метода getCar, и наоборот)
                 .filter(existPass -> {
-                    if (newPass.getClass() != existPass.getClass()) {
-                        throw new IllegalArgumentException("Types of newPass and existPass should be the same");
-                    }
+//                    if (newPass.getClass() != existPass.getClass()) {
+//                        throw new IllegalArgumentException("Types of newPass and existPass should be the same");
+//                    }
                     if (existPass instanceof PassAuto) {
                         PassAuto newPassAuto = (PassAuto) newPass;
                         PassAuto existPassAuto = (PassAuto) existPass;
@@ -215,7 +214,12 @@ public class PassServiceImpl implements PassService{
                     } else if (existPass instanceof PassWalk) {
                          PassWalk newPassWalk = (PassWalk) newPass;
                         PassWalk existPassWalk = (PassWalk) existPass;
-                        return Objects.equals(newPassWalk.getPerson().getName(), existPassWalk.getPerson().getName());
+                        try {
+                            return Objects.equals(newPassWalk.getPerson().getName(), existPassWalk.getPerson().getName());
+                        } catch (NullPointerException e) {
+                            log.warn(e.getMessage(), e);
+                        }
+                        return false;
                     } else {
                         return false; // Обработка других типов объектов Pass
                     }

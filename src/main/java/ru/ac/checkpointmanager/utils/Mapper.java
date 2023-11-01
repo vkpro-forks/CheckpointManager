@@ -2,6 +2,7 @@ package ru.ac.checkpointmanager.utils;
 
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,21 +21,17 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
-@RequiredArgsConstructor
 public class Mapper {
 
-    private static Mapper instance;
     private static final ModelMapper modelMapper = new ModelMapper();
 
     private static CheckpointRepository checkpointRepository;
-
     private static PassRepository passRepository;
 
     @Autowired
-    public Mapper(CheckpointRepository checkpointRepository, PassRepository passRepository) {
-        this.checkpointRepository = checkpointRepository;
-        this.passRepository = passRepository;
-        instance = this;
+    public Mapper(CheckpointRepository checkpointRepo, PassRepository passRepo) {
+        checkpointRepository = checkpointRepo;
+        passRepository = passRepo;
     }
 
     /* Checkpoint mapping */
@@ -75,8 +72,10 @@ public class Mapper {
 
     /* Pass mapping */
     public static Pass toPass(PassDTO passDTO) {
+
         if (passDTO.getCar() != null) {
             return modelMapper.map(passDTO, PassAuto.class);
+
         } else if (passDTO.getPerson() != null) {
             return modelMapper.map(passDTO, PassWalk.class);
         }
@@ -157,17 +156,15 @@ public class Mapper {
     /* Crossing mapping */
     public static Crossing toCrossing(CrossingDTO crossingDTO) {
         // теперь можно использовать instance для доступа к репозиториям
-        Optional<Pass> optionalPass = instance.passRepository.findById(crossingDTO.getPassId());
-        Pass pass = optionalPass.orElseThrow(
-                () -> new PassNotFoundException("Pass not found for ID " + crossingDTO.getPassId())
-        );
-
-        Optional<Checkpoint> optionalCheckpoint = instance.checkpointRepository.findById(crossingDTO.getCheckpointId());
-        Checkpoint checkpoint = optionalCheckpoint.orElseThrow(
-                () -> new CheckpointNotFoundException("Checkpoint not found for ID " + crossingDTO.getCheckpointId())
-        );
-
         Crossing crossing = new Crossing();
+        Optional<Pass> optionalPass = passRepository.findById(crossingDTO.getPassId());
+        Pass pass = optionalPass.orElseThrow(
+                () -> new PassNotFoundException("Pass not found for ID " + crossingDTO.getPassId()));
+
+        Optional<Checkpoint> optionalCheckpoint = checkpointRepository.findById(crossingDTO.getCheckpointId());
+        Checkpoint checkpoint = optionalCheckpoint.orElseThrow(
+                () -> new CheckpointNotFoundException("Checkpoint not found for ID " + crossingDTO.getCheckpointId()));
+
         crossing.setPass(pass);
         crossing.setCheckpoint(checkpoint);
         crossing.setDirection(crossingDTO.getDirection());
