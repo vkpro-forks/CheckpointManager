@@ -42,31 +42,33 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ApiError> handleEntityNotFoundException(EntityNotFoundException ex) {
+        log.warn("Handling EntityNotFoundException: " + ex.getMessage());
         return new ResponseEntity<>(new ApiError(HttpStatus.NOT_FOUND, ex.getMessage(),
                 (List<String>) null), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleGeneralException(Exception ex) {
+        log.warn("Handling Exception: " + ex.getMessage());
         return new ResponseEntity<>(new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(),
                 (List<String>) null), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(EntranceWasAlreadyException.class)
     public ResponseEntity<String> handleEntranceWasAlreadyException(EntranceWasAlreadyException e) {
-        log.warn("Handling EntranceWasAlreadyException");
+        log.warn("Handling EntranceWasAlreadyException: " + e.getMessage());
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(InactivePassException.class)
     public ResponseEntity<String> handleNoActivePassException(InactivePassException e) {
-        log.warn("Handling NoActivePassException");
+        log.warn("Handling NoActivePassException: " + e.getMessage());
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(TerritoryNotFoundException.class)
     public ResponseEntity<String> handleTerritoryNotFoundException(TerritoryNotFoundException e) {
-        log.warn("Handling TerritoryNotFoundException");
+        log.warn("Handling TerritoryNotFoundException: " + e.getMessage());
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 

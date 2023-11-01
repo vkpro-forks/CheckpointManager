@@ -18,8 +18,6 @@ import ru.ac.checkpointmanager.service.crossing.CrossingService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
 import ru.ac.checkpointmanager.utils.Mapper;
 
-import static ru.ac.checkpointmanager.utils.Mapper.*;
-
 import java.util.UUID;
 
 
@@ -32,6 +30,7 @@ import java.util.UUID;
 public class CrossingController {
 
     private final CrossingService crossingService;
+    private final Mapper mapper;
 
     @Operation(summary = "Отметить пересечение")
     @ApiResponses(value = {
@@ -44,8 +43,8 @@ public class CrossingController {
         if (bindingResult.hasErrors()) {
             return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
         }
-        Crossing crossing = crossingService.markCrossing(toCrossing(crossingDTO));
-        return new ResponseEntity<>(toCrossingDTO(crossing), HttpStatus.OK);
+        Crossing crossing = crossingService.markCrossing(mapper.toCrossing(crossingDTO));
+        return new ResponseEntity<>(mapper.toCrossingDTO(crossing), HttpStatus.OK);
     }
 
     @Operation(summary = "Получить информацию о пересечении по ID")
