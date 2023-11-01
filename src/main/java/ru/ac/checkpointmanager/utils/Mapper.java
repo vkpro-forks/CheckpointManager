@@ -6,6 +6,7 @@ import org.modelmapper.PropertyMap;
 import org.springframework.stereotype.Component;
 import ru.ac.checkpointmanager.dto.*;
 import ru.ac.checkpointmanager.model.*;
+import ru.ac.checkpointmanager.model.car.Car;
 import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
 import ru.ac.checkpointmanager.model.passes.*;
 
@@ -85,6 +86,34 @@ public class Mapper {
     public List<UserDTO> toUsersDTO(Collection<User> users) {
         return users.stream()
                 .map(e -> modelMapper.map(e, UserDTO.class))
+                .toList();
+    }
+
+    public Car toCar(CarDTO carDTO) {
+        return modelMapper.map(carDTO, Car.class);
+    }
+
+    public CarDTO toCarDTO(Car car) {
+        return modelMapper.map(car, CarDTO.class);
+    }
+
+    public List<CarDTO> toCarDTO(Collection<Car> cars) {
+        return cars.stream()
+                .map(e -> modelMapper.map(e, CarDTO.class))
+                .toList();
+    }
+
+    public Person toPerson(PersonDTO personDTO) {
+        return modelMapper.map(personDTO, Person.class);
+    }
+
+    public PersonDTO toPersonDTO(Person person) {
+        return modelMapper.map(person, PersonDTO.class);
+    }
+
+    public List<PersonDTO> toPersonDTO(Collection<Person> people) {
+        return people.stream()
+                .map(e -> modelMapper.map(e, PersonDTO.class))
                 .toList();
     }
 

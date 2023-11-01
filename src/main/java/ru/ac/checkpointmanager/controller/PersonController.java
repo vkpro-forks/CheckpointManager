@@ -30,6 +30,7 @@ import java.util.UUID;
 public class PersonController {
 
     private final PersonService personService;
+    private final Mapper mapper;
 
     @Operation(summary = "Добавить новую личность")
     @ApiResponses(value = {
@@ -44,8 +45,8 @@ public class PersonController {
             return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
         }
 
-        Person newPerson = personService.addPerson(Mapper.toPerson(personDTO));
-        return new ResponseEntity<>(Mapper.toPersonDTO(newPerson), HttpStatus.CREATED);
+        Person newPerson = personService.addPerson(mapper.toPerson(personDTO));
+        return new ResponseEntity<>(mapper.toPersonDTO(newPerson), HttpStatus.CREATED);
     }
 
     @Operation(summary = "Получить личность по ID")
@@ -56,7 +57,7 @@ public class PersonController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getPerson(@PathVariable UUID id) {
         Person existPerson = personService.getPerson(id);
-        return new ResponseEntity<>(Mapper.toPersonDTO(existPerson), HttpStatus.OK);
+        return new ResponseEntity<>(mapper.toPersonDTO(existPerson), HttpStatus.OK);
     }
 
     @Operation(summary = "Обновить информацию о личности по ID")
@@ -72,9 +73,9 @@ public class PersonController {
             return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
         }
 
-        Person person = Mapper.toPerson(personDTO);
+        Person person = mapper.toPerson(personDTO);
         Person updatePerson = personService.updatePerson(id, person);
-        return new ResponseEntity<>(Mapper.toPersonDTO(updatePerson), HttpStatus.OK);
+        return new ResponseEntity<>(mapper.toPersonDTO(updatePerson), HttpStatus.OK);
     }
 
     @Operation(summary = "Удалить личность по ID")
@@ -97,7 +98,7 @@ public class PersonController {
     public ResponseEntity<List<PersonDTO>> searchByPhone(@RequestParam String phone) {
         List<Person> persons = personService.findByPhonePart(phone);
         List<PersonDTO> personDTOS = persons.stream()
-                .map(person -> Mapper.toPersonDTO(person)).toList();
+                .map(person -> mapper.toPersonDTO(person)).toList();
         return new ResponseEntity<>(personDTOS, HttpStatus.OK);
     }
 
@@ -110,7 +111,7 @@ public class PersonController {
     public ResponseEntity<List<PersonDTO>> searchByName(@RequestParam String name) {
         List<Person> persons = personService.findByNamePart(name);
         List<PersonDTO> personDTOs = persons.stream()
-                .map(person -> Mapper.toPersonDTO(person))
+                .map(person -> mapper.toPersonDTO(person))
                 .toList();
         return new ResponseEntity<>(personDTOs, HttpStatus.OK);
     }
@@ -125,7 +126,7 @@ public class PersonController {
     public ResponseEntity<?> searchByPass(@RequestParam UUID uuid) {
         Person existPerson = personService.findByPassId(uuid).orElse(null);
         if (uuid != null) {
-            return new ResponseEntity<>(Mapper.toPersonDTO(existPerson), HttpStatus.OK);
+            return new ResponseEntity<>(mapper.toPersonDTO(existPerson), HttpStatus.OK);
         }
         return new ResponseEntity<>("There is no such person in any pass! ", HttpStatus.NOT_FOUND);
     }

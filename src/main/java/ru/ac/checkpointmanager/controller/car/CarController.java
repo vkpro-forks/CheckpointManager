@@ -29,6 +29,7 @@ import java.util.UUID;
 @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
 public class CarController {
 
+    private final Mapper mapper;
     private final CarService carService;
     private final CarBrandService carBrandService;
 
@@ -44,13 +45,13 @@ public class CarController {
             return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
         }
 
-        Car car = Mapper.toCar(carDTO);
+        Car car = mapper.toCar(carDTO);
 
         try {
             CarBrand existingBrand = carBrandService.getBrandById(carDTO.getBrand().getId());
             carDTO.setBrand(existingBrand);
             Car newCar = carService.addCar(car);
-            return new ResponseEntity<>(Mapper.toCarDTO(newCar), HttpStatus.CREATED);
+            return new ResponseEntity<>(mapper.toCarDTO(newCar), HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
@@ -68,7 +69,7 @@ public class CarController {
             return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
         }
 
-        Car car = Mapper.toCar(updateCarDto);
+        Car car = mapper.toCar(updateCarDto);
 
         Car updated =  carService.updateCar(carId, car);
         return ResponseEntity.ok(updated);
@@ -98,6 +99,6 @@ public class CarController {
         if (carList.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
-        return ResponseEntity.ok(Mapper.toCarDTO(carList));
+        return ResponseEntity.ok(mapper.toCarDTO(carList));
     }
 }
