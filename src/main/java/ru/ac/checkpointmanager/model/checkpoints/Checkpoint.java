@@ -1,8 +1,9 @@
-package ru.ac.checkpointmanager.model;
+package ru.ac.checkpointmanager.model.checkpoints;
 
 import jakarta.persistence.*;
 import lombok.*;
-import ru.ac.checkpointmanager.model.enums.CheckpointType;
+import org.hibernate.annotations.CreationTimestamp;
+import ru.ac.checkpointmanager.model.Territory;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -26,6 +27,7 @@ public class Checkpoint {
 
     private String note;
 
+    @CreationTimestamp
     private LocalDate addedAt;
 
     @ManyToOne

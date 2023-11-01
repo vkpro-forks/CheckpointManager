@@ -29,6 +29,7 @@ import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.model.enums.TokenType;
 import ru.ac.checkpointmanager.repository.TokenRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
+import ru.ac.checkpointmanager.utils.Mapper;
 
 import java.io.IOException;
 import java.util.List;
@@ -37,8 +38,6 @@ import java.util.UUID;
 import static ru.ac.checkpointmanager.model.enums.PhoneNumberType.MOBILE;
 import static ru.ac.checkpointmanager.utils.FieldsValidation.cleanPhone;
 import static ru.ac.checkpointmanager.utils.FieldsValidation.validateDOB;
-import static ru.ac.checkpointmanager.utils.Mapper.toTemporaryUser;
-import static ru.ac.checkpointmanager.utils.Mapper.toUser;
 
 /**
  * Сервис регистрации и аутентификации пользователей.
@@ -58,6 +57,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+
+    private final Mapper mapper;
 
     /**
      * Предварительная регистрация нового пользователя в системе.
@@ -105,7 +106,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     ("Phone number %s already exist", userAuthDTO.getMainNumber()));
         }
 
-        TemporaryUser temporaryUser = toTemporaryUser(userAuthDTO);
+        TemporaryUser temporaryUser = mapper.toTemporaryUser(userAuthDTO);
         temporaryUser.setMainNumber(cleanPhone(temporaryUser.getMainNumber()));
 
         String encodedPassword = passwordEncoder.encode(temporaryUser.getPassword());
@@ -149,7 +150,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         TemporaryUser tempUser = temporaryUserService.findByVerifiedToken(token);
 
         if (tempUser != null) {
-            User user = toUser(tempUser);
+            User user = mapper.toUser(tempUser);
             user.setRole(Role.USER);
             user.setIsBlocked(false);
 
