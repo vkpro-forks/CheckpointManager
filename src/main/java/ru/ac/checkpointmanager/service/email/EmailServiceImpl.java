@@ -8,7 +8,6 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
-import ru.ac.checkpointmanager.service.email.EmailService;
 
 /**
  * Сервис для отправки электронных писем.

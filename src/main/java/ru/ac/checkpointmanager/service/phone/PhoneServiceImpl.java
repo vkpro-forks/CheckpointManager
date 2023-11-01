@@ -2,11 +2,12 @@ package ru.ac.checkpointmanager.service.phone;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.PhoneDTO;
+import ru.ac.checkpointmanager.exception.PhoneAlreadyExistException;
 import ru.ac.checkpointmanager.exception.PhoneNumberNotFoundException;
 import ru.ac.checkpointmanager.model.Phone;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
-import ru.ac.checkpointmanager.service.phone.PhoneService;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -21,8 +22,14 @@ public class PhoneServiceImpl implements PhoneService {
     private final PhoneRepository phoneRepository;
 
     @Override
+    @Transactional
     public PhoneDTO createPhoneNumber(PhoneDTO phoneDTO) {
         phoneDTO.setNumber(cleanPhone(phoneDTO.getNumber()));
+
+        if (phoneRepository.existsByNumber(phoneDTO.getNumber())) {
+            throw new PhoneAlreadyExistException(String.format
+                    ("Phone number %s already exist", phoneDTO.getNumber()));
+        }
         Phone phone = phoneRepository.save(toPhone(phoneDTO));
         return toPhoneDTO(phone);
     }
@@ -39,6 +46,10 @@ public class PhoneServiceImpl implements PhoneService {
         Phone foundPhone = phoneRepository.findById(phoneDTO.getId()).orElseThrow(
                 () -> new PhoneNumberNotFoundException("The number by this id does not exist"));
 
+        if (phoneRepository.existsByNumber(phoneDTO.getNumber())) {
+            throw new PhoneAlreadyExistException(String.format
+                    ("Phone number %s already exist", phoneDTO.getNumber()));
+        }
         foundPhone.setNumber(cleanPhone(phoneDTO.getNumber()));
         foundPhone.setType(phoneDTO.getType());
         foundPhone.setNote(phoneDTO.getNote());

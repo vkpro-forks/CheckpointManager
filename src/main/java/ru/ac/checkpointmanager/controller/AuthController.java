@@ -104,8 +104,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    @Operation(
-            summary = "Аутентификация пользователя",
+    @Operation(summary = "Аутентификация пользователя",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
@@ -134,8 +133,7 @@ public class AuthController {
     }
 
     @PostMapping("/refresh-token")
-    @Operation(
-            summary = "Обновление токена",
+    @Operation(summary = "Обновление токена",
             description = "Эндпоинт для обновления токена доступа, используя токен обновления",
             responses = {
                     @ApiResponse(

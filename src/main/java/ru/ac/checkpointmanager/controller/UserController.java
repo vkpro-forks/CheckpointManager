@@ -35,7 +35,13 @@ import java.util.UUID;
 @RequestMapping("chpman/user")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
-@Tag(name = "Пользователи", description = "Операции с пользователями")
+@Tag(name = "Пользовательский интерфейс", description = "Комплекс операций по управлению жизненным циклом " +
+        "пользовательских учетных записей, включая создание, модификацию, просмотр и удаление аккаунтов")
+@ApiResponses(value = {
+        @ApiResponse(responseCode = "401",
+                description = "UNAUTHORIZED: пользователь не авторизован"),
+        @ApiResponse(responseCode = "500",
+                description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса")})
 public class UserController {
 
     private final UserService userService;
@@ -52,10 +58,6 @@ public class UserController {
                             examples = {
                                     @ExampleObject(value = "{\n\"id\": \"123e4567-e89b-12d3-a456-426614174001\",\n\"name\": \"John Doe\",\n\"email\": \"john.doe@example.com\"\n}")
                             })
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "UNAUTHORIZED: пользователь не авторизован"
             ),
             @ApiResponse(
                     responseCode = "404",
@@ -79,12 +81,7 @@ public class UserController {
                     responseCode = "200",
                     description = "OK: возвращется список привязанных территорий",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            array = @ArraySchema(schema = @Schema(implementation = TerritoryDTO.class))
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "UNAUTHORIZED: пользователь не авторизован"
+                            array = @ArraySchema(schema = @Schema(implementation = TerritoryDTO.class)))
             ),
             @ApiResponse(
                     responseCode = "404",
@@ -108,12 +105,7 @@ public class UserController {
                     responseCode = "200",
                     description = "OK: возвращает список пользователей, имена которых содержат указанный в параметрах запроса элемент",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            array = @ArraySchema(schema = @Schema(implementation = UserDTO.class))
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "UNAUTHORIZED: пользователь не авторизован"
+                            array = @ArraySchema(schema = @Schema(implementation = UserDTO.class)))
             ),
             @ApiResponse(
                     responseCode = "404",
@@ -137,12 +129,7 @@ public class UserController {
                     responseCode = "200",
                     description = "OK: возвращает список пользователей",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            array = @ArraySchema(schema = @Schema(implementation = UserDTO.class))
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "UNAUTHORIZED: пользователь не авторизован"
+                            array = @ArraySchema(schema = @Schema(implementation = UserDTO.class)))
             ),
             @ApiResponse(
                     responseCode = "403",
@@ -168,12 +155,7 @@ public class UserController {
                     responseCode = "200",
                     description = "OK: возвращает список номеров, привязанных к пользователю",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            array = @ArraySchema(schema = @Schema(implementation = String.class))
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "UNAUTHORIZED: пользователь не авторизован"
+                            array = @ArraySchema(schema = @Schema(implementation = String.class)))
             ),
             @ApiResponse(
                     responseCode = "404",
@@ -197,8 +179,7 @@ public class UserController {
                     responseCode = "200",
                     description = "OK: данные пользователя успешно изменены",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = UserDTO.class)
-                    )
+                            schema = @Schema(implementation = UserDTO.class))
             ),
             @ApiResponse(
                     responseCode = "400",
@@ -207,10 +188,6 @@ public class UserController {
                             Имя: только латиница/кириллица, каждое новое слово начинается с заглавной;
                             Дата рождения: не больше текущей даты;
                             Телефон: 11-20 символов"""
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "UNAUTHORIZED: пользователь не авторизован"
             ),
             @ApiResponse(
                     responseCode = "403",
@@ -241,10 +218,6 @@ public class UserController {
                     description = "OK: пароль пользователя успешно изменен"
             ),
             @ApiResponse(
-                    responseCode = "401",
-                    description = "UNAUTHORIZED: пользователь не авторизован"
-            ),
-            @ApiResponse(
                     responseCode = "409",
                     description = """
                             CONFLICT:
@@ -273,10 +246,6 @@ public class UserController {
             @ApiResponse(
                     responseCode = "200",
                     description = "OK: роль пользователя успешно изменена"
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "UNAUTHORIZED: пользователь не авторизован"
             ),
             @ApiResponse(
                     responseCode = "403",
@@ -312,10 +281,6 @@ public class UserController {
                     description = "OK: статус блокировки пользователя успешно изменен"
             ),
             @ApiResponse(
-                    responseCode = "401",
-                    description = "UNAUTHORIZED: пользователь не авторизован"
-            ),
-            @ApiResponse(
                     responseCode = "403",
                     description = "FORBIDDEN: роль пользователя не предоставляет доступ к данному api"
             ),
@@ -348,10 +313,6 @@ public class UserController {
                     description = "OK: пользователь заблокирован"
             ),
             @ApiResponse(
-                    responseCode = "401",
-                    description = "UNAUTHORIZED: пользователь не авторизован"
-            ),
-            @ApiResponse(
                     responseCode = "403",
                     description = "FORBIDDEN: роль пользователя не предоставляет доступ к данному api"
             ),
@@ -380,10 +341,6 @@ public class UserController {
             @ApiResponse(
                     responseCode = "200",
                     description = "OK: пользователь разблокирован"
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "UNAUTHORIZED: пользователь не авторизован"
             ),
             @ApiResponse(
                     responseCode = "403",
@@ -415,10 +372,6 @@ public class UserController {
             @ApiResponse(
                     responseCode = "200",
                     description = "OK: пользователь удален"
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "UNAUTHORIZED: пользователь не авторизован"
             ),
             @ApiResponse(
                     responseCode = "403",
