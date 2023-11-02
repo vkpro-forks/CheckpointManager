@@ -1,6 +1,7 @@
 package ru.ac.checkpointmanager.utils;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,7 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class Mapper {
 
     private final ModelMapper modelMapper = new ModelMapper();
@@ -143,14 +145,17 @@ public class Mapper {
      * @see User
      */
     public User toUser(TemporaryUser temporaryUser) {
+        ModelMapper modelMapper = new ModelMapper();
         PropertyMap<TemporaryUser, User> propertyMap = new PropertyMap<>() {
             protected void configure() {
                 skip(destination.getId());
             }
         };
         modelMapper.addMappings(propertyMap);
+        log.info("конвертация в основного юзера прошла");
         return modelMapper.map(temporaryUser, User.class);
     }
+
 
     public TemporaryUser toTemporaryUser(UserAuthDTO userAuthDTO) {
         return modelMapper.map(userAuthDTO, TemporaryUser.class);
