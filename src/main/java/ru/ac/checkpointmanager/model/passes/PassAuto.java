@@ -7,7 +7,6 @@ import ru.ac.checkpointmanager.model.car.Car;
 
 import java.util.Objects;
 
-
 @Entity
 @Setter
 @Getter
