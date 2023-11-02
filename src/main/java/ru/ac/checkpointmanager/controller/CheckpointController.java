@@ -27,14 +27,12 @@ import ru.ac.checkpointmanager.utils.Mapper;
 import java.util.List;
 import java.util.UUID;
 
-import static ru.ac.checkpointmanager.utils.Mapper.*;
-
 @RestController
 @RequestMapping("chpman/checkpoint")
 @RequiredArgsConstructor
 @Tag(name = "Checkpoint (КПП)", description = "Администрирование списка КПП для обслуживаемых территорий")
-@ApiResponses(value = {@ApiResponse(responseCode = "500",
-        description = "Произошла ошибка, не зависящая от вызывающей стороны")})
+@ApiResponses(value = {@ApiResponse(responseCode = "401", description = "UNAUTHORIZED: пользователь не авторизован"),
+        @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса")})
 @SecurityRequirement(name = "bearerAuth")
 @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
 public class  CheckpointController {

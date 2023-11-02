@@ -7,12 +7,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.exception.PassNotFoundException;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
+import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.repository.CrossingRepository;
 import ru.ac.checkpointmanager.repository.PassRepository;
+import ru.ac.checkpointmanager.repository.TerritoryRepository;
+import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.time.LocalDateTime;
@@ -32,6 +35,8 @@ public class PassServiceImpl implements PassService{
 
     private final PassRepository repository;
     private final CrossingRepository crossingRepository;
+    private final UserRepository userRepository;
+    private final TerritoryRepository territoryRepository;
 
     private int hourForLogInScheduledCheck;
 
@@ -39,6 +44,14 @@ public class PassServiceImpl implements PassService{
     public Pass addPass(Pass pass) {
         log.info("Method {}, UUID - {}", MethodLog.getMethodName(), pass.getId());
 
+        if (userRepository.findById(pass.getUser().getId()).isEmpty()) {
+            throw new UserNotFoundException(String.format("User not found [id=%s]", pass.getUser().getId()));
+        }
+        if (territoryRepository.findById(pass.getTerritory().getId()).isEmpty()) {
+            throw new UserNotFoundException(String.format("Territory not found [id=%s]", pass.getTerritory().getId()));
+        }
+
+        checkPassTime(pass);
         checkUserTerritoryRelation(pass);
         checkOverlapTime(pass);
 
@@ -64,10 +77,13 @@ public class PassServiceImpl implements PassService{
     @Override
     public List<Pass> findPassesByUser(UUID userId) {
         log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), userId);
-        List<Pass> foundPasses = repository.findPassesByUserIdOrderByAddedAtDesc(userId);
+        if (userRepository.findById(userId).isEmpty()) {
+            throw new UserNotFoundException(String.format("User not found [id=%s]", userId));
+        }
 
+        List<Pass> foundPasses = repository.findPassesByUserIdOrderByAddedAtDesc(userId);
         if (foundPasses.isEmpty()) {
-            throw new PassNotFoundException(String.format("For User [id=%s] not exist any Passes", userId));
+            throw new PassNotFoundException(String.format("For User [id=%s] not exist any passes", userId));
         }
         return foundPasses;
     }
@@ -86,12 +102,13 @@ public class PassServiceImpl implements PassService{
     @Override
     public Pass updatePass(Pass pass) {
         log.info("Method {}, UUID - {}", MethodLog.getMethodName(), pass.getId());
-        checkUserTerritoryRelation(pass);
+
         checkOverlapTime(pass);
+        checkPassTime(pass);
 
         trimThemAll(pass);
-        Pass foundPass = findPass(pass.getId());
 
+        Pass foundPass = findPass(pass.getId());
         if (!foundPass.getStatus().equals(PassStatus.ACTIVE)) {
             throw new IllegalStateException("This pass is not active, it cannot be changed. " +
                     "You can only change the active pass");
@@ -99,7 +116,6 @@ public class PassServiceImpl implements PassService{
 
         foundPass.setName(pass.getName());
         foundPass.setTypeTime(pass.getTypeTime());
-        foundPass.setTerritory(pass.getTerritory());
         foundPass.setNote(pass.getNote());
         foundPass.setStartTime(pass.getStartTime());
         foundPass.setEndTime(pass.getEndTime());
@@ -111,8 +127,8 @@ public class PassServiceImpl implements PassService{
     @Transactional
     public Pass cancelPass(UUID id) {
         log.info("Method {}, UUID - {}", MethodLog.getMethodName(), id);
-        Pass pass = findPass(id);
 
+        Pass pass = findPass(id);
         if (!pass.getStatus().equals(PassStatus.ACTIVE)) {
             throw new IllegalStateException("You can only cancel an active Pass");
         }
@@ -146,8 +162,8 @@ public class PassServiceImpl implements PassService{
     @Override
     public Pass unWarningPass(UUID id) {
         log.info("Method {}, UUID - {}", MethodLog.getMethodName(), id);
-        Pass pass = findPass(id);
 
+        Pass pass = findPass(id);
         if (!pass.getStatus().equals(PassStatus.WARNING)) {
             throw new IllegalStateException("You can only to unwarnining a previously warninged pass");
         }
@@ -177,6 +193,20 @@ public class PassServiceImpl implements PassService{
             String message = String.format("Reject operation: user [%s] not have permission to create passes " +
                     "for this territory [%s]", userId, territoryId);
             log.warn(message);
+            throw new IllegalArgumentException(message);
+        }
+    }
+
+    /**
+     * Проверяет, что в добавляемом или изменяемом пропуске
+     * время окончания больше чем время начала
+     * @param newPass добавляемый или изменяемый пропуск
+     * @exception IllegalArgumentException "The start time must be earlier than the end time"
+     */
+    private void checkPassTime(Pass newPass) {
+        if (!newPass.getStartTime().isBefore(newPass.getEndTime())) {
+            String message = "The start time must be earlier than the end time";
+            log.info(message);
             throw new IllegalArgumentException(message);
         }
     }
