@@ -51,7 +51,8 @@ public class PhoneController {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "BAD_REQUEST: номер уже существует"
+                    description = "BAD_REQUEST: номер уже существует; " +
+                            "\nОшибка валидации: 11-20 символов, только цифры, пробелы и символы '(', ')', '-', '+';"
             )
     })
     @PostMapping

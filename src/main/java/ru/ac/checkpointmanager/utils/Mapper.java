@@ -2,6 +2,7 @@ package ru.ac.checkpointmanager.utils;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.MappingException;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
 import org.springframework.stereotype.Component;
@@ -11,7 +12,9 @@ import ru.ac.checkpointmanager.exception.PassNotFoundException;
 import ru.ac.checkpointmanager.model.*;
 import ru.ac.checkpointmanager.model.car.Car;
 import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
-import ru.ac.checkpointmanager.model.passes.*;
+import ru.ac.checkpointmanager.model.passes.Pass;
+import ru.ac.checkpointmanager.model.passes.PassAuto;
+import ru.ac.checkpointmanager.model.passes.PassWalk;
 import ru.ac.checkpointmanager.repository.CheckpointRepository;
 import ru.ac.checkpointmanager.repository.PassRepository;
 
@@ -73,10 +76,11 @@ public class Mapper {
         }
         throw new IllegalArgumentException("Ошибка при конвертации passDTO (не содержит car или person)");
     }
-  
+
     public PassDTO toPassDTO(Pass pass) {
         return modelMapper.map(pass, PassDTO.class);
     }
+
     public List<PassDTO> toPassDTO(List<Pass> pass) {
         return pass.stream()
                 .map(e -> modelMapper.map(e, PassDTO.class))
@@ -140,7 +144,6 @@ public class Mapper {
      *
      * @param temporaryUser временный пользователь, который будет конвертирован в основного пользователя.
      * @return User - основной пользователь.
-     *
      * @see TemporaryUser
      * @see User
      */
@@ -149,13 +152,19 @@ public class Mapper {
         PropertyMap<TemporaryUser, User> propertyMap = new PropertyMap<>() {
             protected void configure() {
                 skip(destination.getId());
+                skip(destination.getAddedAt());
             }
         };
         modelMapper.addMappings(propertyMap);
-        log.info("конвертация в основного юзера прошла");
-        return modelMapper.map(temporaryUser, User.class);
+        try {
+            User user = modelMapper.map(temporaryUser, User.class);
+            log.info("Конвертация в основного пользователя прошла успешно");
+            return user;
+        } catch (MappingException e) {
+            log.error("Ошибка при конвертации TemporaryUser в User", e);
+            throw new RuntimeException("Ошибка при конвертации TemporaryUser в User", e);
+        }
     }
-
 
     public TemporaryUser toTemporaryUser(UserAuthDTO userAuthDTO) {
         return modelMapper.map(userAuthDTO, TemporaryUser.class);

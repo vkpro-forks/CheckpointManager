@@ -9,18 +9,12 @@ import org.springframework.mail.MailSendException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import ru.ac.checkpointmanager.exception.*;
 
-
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @ControllerAdvice
@@ -174,6 +168,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<String> handleBadCredentialsException(BadCredentialsException e) {
+        String message = String.format("Exception %s: %s", e.getClass(), e.getMessage());
+        log.warn(message);
+        return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(InvalidPhoneNumberException.class)
+    public ResponseEntity<String> handleInvalidPhoneNumberException(InvalidPhoneNumberException e) {
         String message = String.format("Exception %s: %s", e.getClass(), e.getMessage());
         log.warn(message);
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
