@@ -1,9 +1,11 @@
 package ru.ac.checkpointmanager.service.phone;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.PhoneDTO;
+import ru.ac.checkpointmanager.exception.InvalidPhoneNumberException;
 import ru.ac.checkpointmanager.exception.PhoneAlreadyExistException;
 import ru.ac.checkpointmanager.exception.PhoneNumberNotFoundException;
 import ru.ac.checkpointmanager.model.Phone;
@@ -14,9 +16,11 @@ import java.util.Collection;
 import java.util.UUID;
 
 import static ru.ac.checkpointmanager.utils.FieldsValidation.cleanPhone;
+import static ru.ac.checkpointmanager.utils.FieldsValidation.isValidPhoneNumber;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PhoneServiceImpl implements PhoneService {
 
     private final PhoneRepository phoneRepository;
@@ -25,9 +29,16 @@ public class PhoneServiceImpl implements PhoneService {
     @Override
     @Transactional
     public PhoneDTO createPhoneNumber(PhoneDTO phoneDTO) {
+        log.info("method createPhoneNumber was invoked");
+
+        if (!isValidPhoneNumber(phoneDTO.getNumber())) {
+            log.warn("Invalid phone number");
+            throw new InvalidPhoneNumberException(String.format("Phone number %s contains invalid characters", phoneDTO.getNumber()));
+        }
         phoneDTO.setNumber(cleanPhone(phoneDTO.getNumber()));
 
         if (phoneRepository.existsByNumber(phoneDTO.getNumber())) {
+            log.error("phone already exist or NULL");
             throw new PhoneAlreadyExistException(String.format
                     ("Phone number %s already exist", phoneDTO.getNumber()));
         }

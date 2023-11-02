@@ -20,6 +20,7 @@ import ru.ac.checkpointmanager.dto.AuthenticationResponse;
 import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.dto.UserAuthDTO;
 import ru.ac.checkpointmanager.exception.DateOfBirthFormatException;
+import ru.ac.checkpointmanager.exception.InvalidPhoneNumberException;
 import ru.ac.checkpointmanager.exception.PhoneAlreadyExistException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.model.TemporaryUser;
@@ -39,8 +40,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static ru.ac.checkpointmanager.model.enums.PhoneNumberType.MOBILE;
-import static ru.ac.checkpointmanager.utils.FieldsValidation.cleanPhone;
-import static ru.ac.checkpointmanager.utils.FieldsValidation.validateDOB;
+import static ru.ac.checkpointmanager.utils.FieldsValidation.*;
 
 /**
  * Сервис регистрации и аутентификации пользователей.
@@ -103,14 +103,20 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new DateOfBirthFormatException("Date of birth should not be greater than the current date");
         }
 
-        if (phoneService.existsByNumber(cleanPhone(userAuthDTO.getMainNumber()))) {
+        String cleanedPhoneNumber = cleanPhone(userAuthDTO.getMainNumber());
+        if (!isValidPhoneNumber(cleanedPhoneNumber)) {
+            log.warn("Invalid phone number");
+            throw new InvalidPhoneNumberException(String.format("Phone number %s contains invalid characters", userAuthDTO.getMainNumber()));
+        }
+
+        if (phoneService.existsByNumber(cleanedPhoneNumber)) {
             log.warn("Phone already taken");
             throw new PhoneAlreadyExistException(String.format
-                    ("Phone number %s already exist", userAuthDTO.getMainNumber()));
+                    ("Phone number %s already exist", cleanedPhoneNumber));
         }
 
         TemporaryUser temporaryUser = mapper.toTemporaryUser(userAuthDTO);
-        temporaryUser.setMainNumber(cleanPhone(temporaryUser.getMainNumber()));
+        temporaryUser.setMainNumber(cleanedPhoneNumber);
 
         String encodedPassword = passwordEncoder.encode(temporaryUser.getPassword());
         temporaryUser.setPassword(encodedPassword);
@@ -146,7 +152,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
      * @see User
      * @see JwtService
      */
-    @Transactional
+    @Transactional(timeout = 60)
     @Override
     public void confirmRegistration(String token) {
         log.info("Method confirmRegistration was invoked");
