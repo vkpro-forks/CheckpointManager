@@ -51,7 +51,6 @@ public class PassServiceImpl implements PassService{
         trimThemAll(pass);
         pass.setStatus(PassStatus.ACTIVE);
 
-
         return repository.save(pass);
     }
 
@@ -203,9 +202,12 @@ public class PassServiceImpl implements PassService{
      */
     void checkOverlapTime(Pass newPass) {
         List<Pass> passesByUser = repository.findPassesByUserIdOrderByAddedAtDesc(newPass.getUser().getId());
-        List<Pass> filteredPassesByUser = filterPassesByType(passesByUser, newPass.getClass());
 
-        Optional<Pass> overlapPass = findOverlappingPass(filteredPassesByUser, newPass);
+        Optional<Pass> overlapPass = passesByUser.stream()
+                .filter(existPass -> existPass.getClass().equals(newPass.getClass()))
+                .filter(existPass -> existPass.getStatus().equals(PassStatus.ACTIVE))
+                .filter(existPass -> existPass.compareByFields(newPass))
+                .findFirst();
 
         if (overlapPass.isPresent()) {
             String message = String.format("Reject operation: user [%s] already has such a pass with " +
@@ -222,11 +224,12 @@ public class PassServiceImpl implements PassService{
      * @param type   Тип пропуска для фильтрации.
      * @return Отфильтрованный список пропусков указанного типа.
      */
-    List<Pass> filterPassesByType(List<Pass> passes, Class<?> type) {
-        return passes.stream()
-                .filter(pass -> pass.getClass().equals(type))
-                .toList();
-    }
+//    List<Pass> filterPassesByType(List<Pass> passes, Class<?> type) {
+//        return passes.stream()
+//                .filter(pass -> pass.getClass().equals(type))
+//                .filter(pass -> Objects.equals(pass.getStatus(), PassStatus.ACTIVE))
+//                .toList();
+//    }
 
     /**
      * Ищет пропуск, пересекающийся по времени с новым пропуском.
@@ -235,17 +238,21 @@ public class PassServiceImpl implements PassService{
      * @param newPass Новый пропуск для проверки.
      * @return Optional, содержащий пересекающийся пропуск, если таковой найден.
      */
-    Optional<Pass> findOverlappingPass(List<Pass> passes, Pass newPass) {
-        return passes.stream()
-                .filter(existPass -> hasSameIdentifier(newPass, existPass))
-                .filter(existPass -> Objects.equals(existPass.getStatus(), PassStatus.ACTIVE))
-                .filter(existPass -> !Objects.equals(newPass.getId(), existPass.getId()))
-                .filter(existPass -> Objects.equals(newPass.getTerritory(), existPass.getTerritory()))
-                .filter(existPass -> newPass.getEndTime().isAfter(existPass.getStartTime()) &&
-                        newPass.getStartTime().isBefore(existPass.getEndTime()))
-                .findFirst();
-    }
-
+//    Optional<Pass> findOverlappingPass(List<Pass> passes, Pass newPass) {
+//        return passes.stream()
+//                .filter(existPass -> existPass.compareByFields(newPass))
+//                .findFirst();
+//    }
+//    Optional<Pass> findOverlappingPass(List<Pass> passes, Pass newPass) {
+//        return passes.stream()
+//                .filter(existPass -> hasSameIdentifier(newPass, existPass))
+//                .filter(existPass -> Objects.equals(existPass.getStatus(), PassStatus.ACTIVE))
+//                .filter(existPass -> !Objects.equals(newPass.getId(), existPass.getId()))
+//                .filter(existPass -> Objects.equals(newPass.getTerritory(), existPass.getTerritory()))
+//                .filter(existPass -> newPass.getEndTime().isAfter(existPass.getStartTime()) &&
+//                        newPass.getStartTime().isBefore(existPass.getEndTime()))
+//                .findFirst();
+//    }
     /**
      * Проверяет, имеют ли два пропуска один и тот же идентификатор (например, номер автомобиля или имя человека).
      *
@@ -253,16 +260,16 @@ public class PassServiceImpl implements PassService{
      * @param existPass Существующий пропуск для проверки.
      * @return true, если пропуски имеют одинаковые идентификаторы, иначе false.
      */
-    boolean hasSameIdentifier(Pass newPass, Pass existPass) {
-        if (existPass instanceof PassAuto) {
-            return Objects.equals(((PassAuto) newPass).getCar().getLicensePlate(),
-                    ((PassAuto) existPass).getCar().getLicensePlate());
-        } else if (existPass instanceof PassWalk) {
-            return Objects.equals(((PassWalk) newPass).getPerson().getName(),
-                    ((PassWalk) existPass).getPerson().getName());
-        }
-        return false; // Обработка других типов объектов Pass может быть добавлена здесь
-    }
+//    boolean hasSameIdentifier(Pass newPass, Pass existPass) {
+//        if (existPass instanceof PassAuto) {
+//            return Objects.equals(((PassAuto) newPass).getCar().getLicensePlate(),
+//                    ((PassAuto) existPass).getCar().getLicensePlate());
+//        } else if (existPass instanceof PassWalk) {
+//            return Objects.equals(((PassWalk) newPass).getPerson().getName(),
+//                    ((PassWalk) existPass).getPerson().getName());
+//        }
+//        return false; // Обработка других типов объектов Pass может быть добавлена здесь
+//    }
 
 //    void checkOverlapTime(Pass newPass) {
 //        List<Pass> passesByUser = repository.findPassesByUserIdOrderByAddedAtDesc(newPass.getUser().getId());
