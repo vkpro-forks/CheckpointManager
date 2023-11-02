@@ -152,7 +152,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
      * @see User
      * @see JwtService
      */
-    @Transactional(timeout = 60)
+    @Transactional
     @Override
     public void confirmRegistration(String token) {
         log.info("Method confirmRegistration was invoked");
