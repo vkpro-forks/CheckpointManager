@@ -3,7 +3,7 @@ package ru.ac.checkpointmanager.model.checkpoints;
 public enum CheckpointType {
     UNIVERSAL("Универсальный"),
     AUTO("Автомобильный"),
-    WALKING("Пешеходный");
+    WALK("Пешеходный");
 
     private final String description;
 

@@ -3,12 +3,11 @@ package ru.ac.checkpointmanager.service.crossing;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ru.ac.checkpointmanager.exception.*;
 import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
 import ru.ac.checkpointmanager.model.Crossing;
+import ru.ac.checkpointmanager.model.checkpoints.CheckpointType;
 import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
@@ -18,7 +17,6 @@ import ru.ac.checkpointmanager.repository.CrossingRepository;
 import ru.ac.checkpointmanager.repository.PassRepository;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -38,6 +36,13 @@ public class CrossingServiceImpl implements CrossingService {
 
         Pass pass = validatePass(crossing.getPass().getId());
         Checkpoint checkpoint = validateCheckpoint(crossing.getCheckpoint().getId(), pass.getTerritory().getId());
+
+        if (checkpoint.getType() != CheckpointType.UNIVERSAL &&
+                !pass.getDtype().equals(checkpoint.getType().toString())) {
+            log.warn(String.format("Conflict between the types of pass and checkpoint " +
+                    "[crossing - %s], [pass - %s, %s], [checkpoint - %s, %s]",
+                    crossing.getId(), pass.getId(), pass.getDtype(), checkpoint.getId(), checkpoint.getType()));
+        }
 
         Optional<Crossing> lastCrossingOpt = crossingRepository.findTopByPassOrderByIdDesc(pass);
         validateCrossing(crossing.getDirection(), lastCrossingOpt, crossing.getPass().getId());
