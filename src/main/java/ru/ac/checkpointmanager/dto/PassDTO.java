@@ -21,7 +21,6 @@ public class PassDTO {
 
     String name;
 
-    @NotNull()
     private PassStatus status;
 
     @NotNull()

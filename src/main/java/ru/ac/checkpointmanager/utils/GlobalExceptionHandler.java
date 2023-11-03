@@ -23,7 +23,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(CarBrandNotFoundException.class)
     public ResponseEntity<String> handleCarBrandNotFoundException(CarBrandNotFoundException e) {
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.I_AM_A_TEAPOT);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -38,8 +38,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ApiError> handleEntityNotFoundException(EntityNotFoundException ex) {
         log.warn("Handling EntityNotFoundException: " + ex.getMessage());
-        return new ResponseEntity<>(new ApiError(HttpStatus.NOT_FOUND, ex.getMessage(),
-                (List<String>) null), HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(new ApiError(HttpStatus.I_AM_A_TEAPOT, ex.getMessage(),
+                (List<String>) null), HttpStatus.I_AM_A_TEAPOT);
     }
 
     @ExceptionHandler(Exception.class)
@@ -64,7 +64,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(TerritoryNotFoundException.class)
     public ResponseEntity<String> handleTerritoryNotFoundException(TerritoryNotFoundException e) {
         log.warn("Handling TerritoryNotFoundException: " + e.getMessage());
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.I_AM_A_TEAPOT);
+    }
+
+    @ExceptionHandler(PassNotFoundException.class)
+    public ResponseEntity<String> handlePassNotFoundException(PassNotFoundException e) {
+        log.info("Handling PassNotFoundException: " + e.getMessage());
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.I_AM_A_TEAPOT);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
@@ -85,7 +91,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiError> handleAvatarNotFoundException(AvatarNotFoundException e) {
         String message = String.format("Exception %s: %s", e.getClass(), e.getMessage());
         log.warn(message);
-        return new ResponseEntity<>(new ApiError(HttpStatus.NOT_FOUND, message), HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(new ApiError(HttpStatus.I_AM_A_TEAPOT, message), HttpStatus.I_AM_A_TEAPOT);
     }
 
     @ExceptionHandler(AvatarIsEmptyException.class)
@@ -113,7 +119,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleUserNotFoundException(UserNotFoundException e) {
         String message = String.format("Exception %s: %s", e.getClass(), e.getMessage());
         log.warn(message);
-        return new ResponseEntity<>(message, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(message, HttpStatus.I_AM_A_TEAPOT);
     }
 
     @ExceptionHandler(DateOfBirthFormatException.class)

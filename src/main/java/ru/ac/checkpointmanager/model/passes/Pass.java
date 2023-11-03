@@ -1,27 +1,25 @@
 package ru.ac.checkpointmanager.model.passes;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SourceType;
-import ru.ac.checkpointmanager.model.Person;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
 @Table(name = "passes")
-@Data
+@Getter
+@Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @RequiredArgsConstructor
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="dtype", discriminatorType = DiscriminatorType.STRING)
-public class Pass {
+public abstract class Pass {
 
     @Id
     @EqualsAndHashCode.Include
@@ -55,4 +53,24 @@ public class Pass {
 
     @Column(insertable=false, updatable=false)
     private String dtype;
+
+    public boolean compareByFields(Pass other) {
+        return  (Objects.equals(this.getUser(), other.getUser()) &&
+                !Objects.equals(this.getId(), other.getId()) &&
+                Objects.equals(this.getTerritory(), other.getTerritory()) &&
+                this.getEndTime().isAfter(other.getStartTime()) &&
+                this.getStartTime().isBefore(other.getEndTime()));
+    }
+
+    @Override
+    public String toString() {
+        return  "id=" + id +
+                ", u=" + user.getId() +
+                ", " + status +
+                ", " + typeTime +
+                ", s=" + startTime +
+                ", e=" + endTime +
+                ", t=" + territory.getId() +
+                ", dtype=" + dtype;
+    }
 }
