@@ -48,7 +48,7 @@ public class PassServiceImpl implements PassService{
             throw new UserNotFoundException(String.format("User not found [id=%s]", pass.getUser().getId()));
         }
         if (territoryRepository.findById(pass.getTerritory().getId()).isEmpty()) {
-            throw new UserNotFoundException(String.format("Territory not found [id=%s]", pass.getTerritory().getId()));
+            throw new TerritoryNotFoundException(String.format("Territory not found [id=%s]", pass.getTerritory().getId()));
         }
 
         checkPassTime(pass);
