@@ -68,22 +68,22 @@ public class Mapper {
     }
 
     /* Pass mapping */
-    public Pass toPass(PassDTO passDTO) {
-        if (passDTO.getCar() != null) {
-            return modelMapper.map(passDTO, PassAuto.class);
-        } else if (passDTO.getPerson() != null) {
-            return modelMapper.map(passDTO, PassWalk.class);
+    public Pass toPass(PassDTOin passDTOin) {
+        if (passDTOin.getCar() != null) {
+            return modelMapper.map(passDTOin, PassAuto.class);
+        } else if (passDTOin.getPerson() != null) {
+            return modelMapper.map(passDTOin, PassWalk.class);
         }
         throw new IllegalArgumentException("Ошибка при конвертации passDTO (не содержит car или person)");
     }
 
-    public PassDTO toPassDTO(Pass pass) {
-        return modelMapper.map(pass, PassDTO.class);
+    public PassDTOout toPassDTO(Pass pass) {
+        return modelMapper.map(pass, PassDTOout.class);
     }
 
-    public List<PassDTO> toPassDTO(List<Pass> pass) {
+    public List<PassDTOout> toPassDTO(List<Pass> pass) {
         return pass.stream()
-                .map(e -> modelMapper.map(e, PassDTO.class))
+                .map(e -> modelMapper.map(e, PassDTOout.class))
                 .toList();
     }
 
