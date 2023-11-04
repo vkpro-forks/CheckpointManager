@@ -1,22 +1,17 @@
 package ru.ac.checkpointmanager.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.media.*;
+import io.swagger.v3.oas.annotations.responses.*;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import ru.ac.checkpointmanager.dto.PassDTO;
+import ru.ac.checkpointmanager.dto.*;
 import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.service.passes.PassService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
@@ -43,18 +38,18 @@ public class PassController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуск успешно добавлен",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = PassDTO.class))}),
+                            schema = @Schema(implementation = PassDTOout.class))}),
             @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей; пользователь не имеет права " +
                     "создавать пропуск на эту территорию; у пользователя найден накладывающийся пропуск"),
             @ApiResponse(responseCode = "404", description = "Не найден пользователь или территория")})
     @PostMapping
-    public ResponseEntity<?> addPass(@RequestBody @Valid PassDTO passDTO,
+    public ResponseEntity<?> addPass(@RequestBody @Valid PassDTOin passDTOin,
                                            BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
         }
 
-        Pass newPass = service.addPass(mapper.toPass(passDTO));
+        Pass newPass = service.addPass(mapper.toPass(passDTOin));
         return ResponseEntity.ok(mapper.toPassDTO(newPass));
     }
 
@@ -63,10 +58,10 @@ public class PassController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуска найдены",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            array = @ArraySchema(schema = @Schema(implementation = PassDTO.class)))),
+                            array = @ArraySchema(schema = @Schema(implementation = PassDTOout.class)))),
             @ApiResponse(responseCode = "404", description = "Пропуска не найдены")})
     @GetMapping
-    public ResponseEntity<List<PassDTO>> getPasses() {
+    public ResponseEntity<List<PassDTOout>> getPasses() {
         List<Pass> passes = service.findPasses();
         if (passes.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -78,10 +73,10 @@ public class PassController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуск найден",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = PassDTO.class))}),
+                            schema = @Schema(implementation = PassDTOout.class))}),
             @ApiResponse(responseCode = "404", description = "Пропуск не найден")})
     @GetMapping("/{id}")
-    public ResponseEntity<PassDTO> getPass(@PathVariable("id") UUID id) {
+    public ResponseEntity<PassDTOout> getPass(@PathVariable("id") UUID id) {
         Pass foundPass = service.findPass(id);
         return ResponseEntity.ok(mapper.toPassDTO(foundPass));
     }
@@ -90,10 +85,10 @@ public class PassController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуска найдены",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            array = @ArraySchema(schema = @Schema(implementation = PassDTO.class)))),
+                            array = @ArraySchema(schema = @Schema(implementation = PassDTOout.class)))),
             @ApiResponse(responseCode = "404", description = "Пропуска не найдены; пользователь не найден")})
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<PassDTO>> getPassesByUserId(@PathVariable UUID userId) {
+    public ResponseEntity<List<PassDTOout>> getPassesByUserId(@PathVariable UUID userId) {
         List<Pass> passes = service.findPassesByUser(userId);
         if (passes.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -105,10 +100,10 @@ public class PassController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуска найдены",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            array = @ArraySchema(schema = @Schema(implementation = PassDTO.class)))),
+                            array = @ArraySchema(schema = @Schema(implementation = PassDTOout.class)))),
             @ApiResponse(responseCode = "404", description = "Пропуска не найдены; территория не найдена")})
     @GetMapping("/territory/{territoryId}")
-    public ResponseEntity<List<PassDTO>> getPassesByTerritoryId(@PathVariable UUID territoryId) {
+    public ResponseEntity<List<PassDTOout>> getPassesByTerritoryId(@PathVariable UUID territoryId) {
         List<Pass> passes = service.findPassesByTerritory(territoryId);
         if (passes.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -121,21 +116,21 @@ public class PassController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуск успешно изменен",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = PassDTO.class))}),
+                            schema = @Schema(implementation = PassDTOout.class))}),
             @ApiResponse(responseCode = "400", description = "Неуспешная валидаци полей; пользователь не имеет права " +
                     "создавать пропуск на эту территорию; у пользователя найден накладывающийся пропуск"),
             @ApiResponse(responseCode = "404", description = "Не найден пользователь или территория")})
     @PutMapping
-    public ResponseEntity<?> editPass(@RequestBody @Valid PassDTO passDTO,
+    public ResponseEntity<?> editPass(@RequestBody @Valid PassDTOin passDTOin,
                                             BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
         }
-        Pass currentPass = service.findPass(passDTO.getId());
+        Pass currentPass = service.findPass(passDTOin.getId());
         if (currentPass == null) {
             return ResponseEntity.notFound().build();
         }
-        Pass updatedPass = service.updatePass(mapper.toPass(passDTO));
+        Pass updatedPass = service.updatePass(mapper.toPass(passDTOin));
         return ResponseEntity.ok(mapper.toPassDTO(updatedPass));
     }
 
@@ -143,11 +138,11 @@ public class PassController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуск отменен",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = PassDTO.class))}),
+                            schema = @Schema(implementation = PassDTOout.class))}),
             @ApiResponse(responseCode = "400", description = "Пропуск не является активным"),
             @ApiResponse(responseCode = "404", description = "Пропуск не найден")})
     @PatchMapping("/{id}/cancel")
-    public ResponseEntity<PassDTO> cancelPass(@PathVariable UUID id) {
+    public ResponseEntity<PassDTOout> cancelPass(@PathVariable UUID id) {
 
         Pass cancelledPass = service.cancelPass(id);
         return ResponseEntity.ok(mapper.toPassDTO(cancelledPass));
@@ -157,11 +152,11 @@ public class PassController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуск активирован",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = PassDTO.class))}),
+                            schema = @Schema(implementation = PassDTOout.class))}),
             @ApiResponse(responseCode = "400", description = "Пропуск не является отмененным; время действия пропуска истекло"),
             @ApiResponse(responseCode = "404", description = "Пропуск не найден")})
     @PatchMapping("/{id}/activate")
-    public ResponseEntity<PassDTO> activatePass(@PathVariable UUID id) {
+    public ResponseEntity<PassDTOout> activatePass(@PathVariable UUID id) {
 
         Pass activatedPass = service.activateCancelledPass(id);
         return ResponseEntity.ok(mapper.toPassDTO(activatedPass));
@@ -171,11 +166,11 @@ public class PassController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуск отмечен выполненным",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = PassDTO.class))}),
+                            schema = @Schema(implementation = PassDTOout.class))}),
             @ApiResponse(responseCode = "400", description = "Стутус отличен от Warning"),
             @ApiResponse(responseCode = "404", description = "Пропуск не найден")})
     @PatchMapping("/{id}/unwarning")
-    public ResponseEntity<PassDTO> unWarningPass(@PathVariable UUID id) {
+    public ResponseEntity<PassDTOout> unWarningPass(@PathVariable UUID id) {
 
         Pass completedPass = service.unWarningPass(id);
         return ResponseEntity.ok(mapper.toPassDTO(completedPass));

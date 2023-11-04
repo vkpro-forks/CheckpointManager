@@ -1,48 +1,39 @@
 package ru.ac.checkpointmanager.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.*;
 import lombok.Data;
-import ru.ac.checkpointmanager.model.car.Car;
-import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.model.passes.PassTypeTime;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class PassDTO {
+public class PassDTOin {
 
     private UUID id;
 
-    @NotNull()
-    private UserDTO user;
+    @NotNull
+    private UUID userId;
 
     String name;
 
-    private PassStatus status;
-
-    @NotNull()
+    @NotNull
     private PassTypeTime typeTime;
 
-    @NotNull()
-    private TerritoryDTO territory;
+    @NotNull
+    private UUID territoryId;
 
     private String note;
 
-    @NotNull()
-    @Future
+    @NotNull
+    @FutureOrPresent
     private LocalDateTime startTime;
 
-    @NotNull()
+    @NotNull
     @Future
     private LocalDateTime endTime;
-
-    private String dtype;
 
     private PersonDTO person;
 
     private CarDTO car;
-
 }
