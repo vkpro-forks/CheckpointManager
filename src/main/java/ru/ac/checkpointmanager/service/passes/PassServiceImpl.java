@@ -56,7 +56,12 @@ public class PassServiceImpl implements PassService{
         checkOverlapTime(pass);
 
         trimThemAll(pass);
-        pass.setStatus(PassStatus.ACTIVE);
+
+        if (pass.getStartTime().isBefore(LocalDateTime.now())) {
+            pass.setStatus(PassStatus.ACTIVE);
+        } else {
+            pass.setStatus(PassStatus.DELAYED);
+        }
 
         return repository.save(pass);
     }
@@ -109,9 +114,8 @@ public class PassServiceImpl implements PassService{
         trimThemAll(pass);
 
         Pass foundPass = findPass(pass.getId());
-        if (!foundPass.getStatus().equals(PassStatus.ACTIVE)) {
-            throw new IllegalStateException("This pass is not active, it cannot be changed. " +
-                    "You can only change the active pass");
+        if (!foundPass.getStatus().equals(PassStatus.ACTIVE) && !foundPass.getStatus().equals(PassStatus.DELAYED)) {
+            throw new IllegalStateException("This pass is not active or delayed, it cannot be changed");
         }
 
         foundPass.setName(pass.getName());
@@ -129,17 +133,20 @@ public class PassServiceImpl implements PassService{
         log.info("Method {}, UUID - {}", MethodLog.getMethodName(), id);
 
         Pass pass = findPass(id);
-        if (!pass.getStatus().equals(PassStatus.ACTIVE)) {
-            throw new IllegalStateException("You can only cancel an active Pass");
+        if (!pass.getStatus().equals(PassStatus.ACTIVE) && !pass.getStatus().equals(PassStatus.DELAYED)) {
+            throw new IllegalStateException("You can only cancel an active or delayed pass");
         }
 
-        if (crossingRepository.findCrossingsByPassId(id).size() > 0) {
-            pass.setStatus(PassStatus.COMPLETED);
-            return pass;
+        List<Crossing> passCrossings = crossingRepository.findCrossingsByPassId(pass.getId());
+        if (passCrossings.isEmpty()) {
+            pass.setStatus(PassStatus.CANCELLED);
+        } else {
+            pass.setStatus(
+                    changeStatusForPassWithCrossings(passCrossings));
         }
-
-        pass.setStatus(PassStatus.CANCELLED);
-        return pass;
+        log.info("Pass [UUID - {}], exist {} crossings, changed status on {}",
+                pass.getId(), passCrossings.size(), pass.getStatus());
+        return repository.save(pass);
     }
 
     @Override
@@ -155,7 +162,12 @@ public class PassServiceImpl implements PassService{
             throw new IllegalStateException("This pass has already expired");
         }
 
-        pass.setStatus(PassStatus.ACTIVE);
+        if (pass.getStartTime().isBefore(LocalDateTime.now())) {
+            pass.setStatus(PassStatus.ACTIVE);
+        } else {
+            pass.setStatus(PassStatus.DELAYED);
+        }
+
         return pass;
     }
 
@@ -222,7 +234,8 @@ public class PassServiceImpl implements PassService{
 
         Optional<Pass> overlapPass = passesByUser.stream()
                 .filter(existPass -> existPass.getClass().equals(newPass.getClass()))
-                .filter(existPass -> existPass.getStatus().equals(PassStatus.ACTIVE))
+                .filter(existPass -> existPass.getStatus().equals(PassStatus.ACTIVE) ||
+                        existPass.getStatus().equals(PassStatus.DELAYED))
                 .filter(existPass -> existPass.compareByFields(newPass))
                 .findFirst();
 
@@ -235,45 +248,84 @@ public class PassServiceImpl implements PassService{
     }
 
     /**
-     * Каждую минуту ищет все активные пропуска с истекшим временем действия,
-     * затем по каждому найденному пропуску ищет зафиксированные пересечения.
-     * Если пересечений не было, присваивает пропуску статус "устаревший" (PassStatus.OUTDATED).
-     * Если пересечения были, и последнее было на выезд - статус "выполнен" (PassStatus.COMPLETED).
-     * Если пересечения были, и последнее было на въезд - статус "предупреждение" (PassStatus.WARNING).
-     * После этого сохраняет пропуск и вызывает метод оповещения фронтенда об изменениях (пока нет :).
+     * Каждую минуту обновляет статусы активных и отложенных пропусков
      */
     @Scheduled(cron = "0 * * * * ?")
-    public void checkPassesOnEndTimeReached() {
+//    @Scheduled(fixedDelay = 5000)
+    public void updatePassStatusByScheduler() {
         if (LocalDateTime.now().getHour() != hourForLogInScheduledCheck) {
             hourForLogInScheduledCheck = LocalDateTime.now().getHour();
-            log.debug("Scheduled method 'checkPassesOnEndTimeReached' continues to work");
+            log.debug("Method {} continues to work", MethodLog.getMethodName());
         }
-      
-        List<Pass> passes = repository.findByEndTimeIsBeforeAndStatusLike(LocalDateTime.now(), PassStatus.ACTIVE);
+
+        updateDelayedPassesOnStartTimeReached();
+        updateActivePassesOnEndTimeReached();
+    }
+
+    /**
+     * Ищет все отложенные пропуска с начавшимся временем действия,
+     * присваивает им статус "активный" (PassStatus.ACTIVE)
+     */
+    public void updateDelayedPassesOnStartTimeReached() {
+        List<Pass> passes = repository.findPassesByStatusAndTimeBefore(PassStatus.DELAYED.toString(),
+                "startTime", LocalDateTime.now());
+        if (passes.isEmpty()) {return;}
+
+        log.info("Method {}, startTime reached on {} delayed pass(es)", MethodLog.getMethodName(), passes.size());
+
+        for (Pass pass : passes) {
+            pass.setStatus(PassStatus.ACTIVE);
+            repository.save(pass);
+
+            log.debug("Pass [UUID - {}], changed status on {}",
+                    pass.getId(), pass.getStatus());
+        }
+    }
+
+    /**
+     * Ищет все активные пропуска с истекшим временем действия,
+     * затем по каждому найденному пропуску ищет зафиксированные пересечения.
+     * Если пересечений не было, присваивает пропуску статус "устаревший" (PassStatus.OUTDATED),
+     * в противном случае присваивает статус с помощью метода {@code changeStatusForPassWithCrossings}
+     */
+    public void updateActivePassesOnEndTimeReached() {
+        List<Pass> passes = repository.findPassesByStatusAndTimeBefore(PassStatus.ACTIVE.toString(),
+                "endTime", LocalDateTime.now());
         if (passes.isEmpty()) {return;}
 
         log.info("Method {}, endTime reached on {} active pass(es)", MethodLog.getMethodName(), passes.size());
 
         for (Pass pass : passes) {
             List<Crossing> passCrossings = crossingRepository.findCrossingsByPassId(pass.getId());
-
             if (passCrossings.isEmpty()) {
                 pass.setStatus(PassStatus.OUTDATED);
             } else {
-                Crossing lastCrossing = passCrossings.stream()
-                        .max(Comparator.comparing(Crossing::getLocalDateTime))
-                        .orElse(null);
-                if (lastCrossing.getDirection().equals(Direction.OUT)) {
-                    pass.setStatus(PassStatus.COMPLETED);
-                } else if (lastCrossing.getDirection().equals(Direction.IN)) {
-                    pass.setStatus(PassStatus.WARNING);
-                }
+                pass.setStatus(
+                        changeStatusForPassWithCrossings(passCrossings));
             }
             repository.save(pass);
 
             log.info("Pass [UUID - {}], exist {} crossings, changed status on {}",
-                    pass.getId(),passes.size(), pass.getStatus());
-            //отправка сообщения на фронт о том, что данные пропусков изменены?
+                    pass.getId(), passCrossings.size(), pass.getStatus());
+        }
+    }
+
+    /**
+     * Возвращает статус для отменяемого или истекшего пропуска:
+     * Если пересечения были, и последнее было на выезд - статус "выполнен" (PassStatus.COMPLETED).
+     * Если пересечения были, и последнее было на въезд - статус "предупреждение" (PassStatus.WARNING).
+     * @param crossings список пересечений по проверяемому пропуску
+     * @return {@code PassStatus}
+     */
+    private PassStatus changeStatusForPassWithCrossings (List<Crossing> crossings) {
+        Crossing lastCrossing = crossings.stream()
+                .max(Comparator.comparing(Crossing::getLocalDateTime))
+                .get();
+
+        if (lastCrossing.getDirection().equals(Direction.OUT)) {
+            return PassStatus.COMPLETED;
+        } else {
+            return PassStatus.WARNING;
         }
     }
 }
