@@ -34,6 +34,7 @@ import ru.ac.checkpointmanager.service.email.EmailService;
 import ru.ac.checkpointmanager.service.phone.PhoneService;
 import ru.ac.checkpointmanager.service.user.TemporaryUserService;
 import ru.ac.checkpointmanager.utils.Mapper;
+import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.io.IOException;
 import java.util.List;
@@ -91,10 +92,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Transactional
     @Override
     public TemporaryUser preRegister(UserAuthDTO userAuthDTO) {
-        log.info("Method preRegister was invoked");
+        log.debug("Method {} was invoked", MethodLog.getMethodName());
         boolean userExist = userRepository.findByEmail(userAuthDTO.getEmail()).isPresent();
         if (userExist) {
-            log.warn("Email already taken");
+            log.warn("Email {} already taken", userAuthDTO.getEmail());
             throw new IllegalStateException(String.format("Email %s already taken", userAuthDTO.getEmail()));
         }
 
@@ -110,7 +111,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
 
         if (phoneService.existsByNumber(cleanedPhoneNumber)) {
-            log.warn("Phone already taken");
+            log.warn("Phone {} already taken", cleanedPhoneNumber);
             throw new PhoneAlreadyExistException(String.format
                     ("Phone number %s already exist", cleanedPhoneNumber));
         }
@@ -126,13 +127,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         try {
             emailService.send(userAuthDTO.getEmail(), token);
-            log.info("Mail message was sent");
+            log.info("Mail message was sent to {}", userAuthDTO.getEmail());
         } catch (MailException e) {
-            log.error("Email sending failed");
+            log.error("Email sending failed for {}. Error: {}", userAuthDTO.getEmail(), e.getMessage());
             throw new MailSendException("Email sending failed", e);
         }
 
         temporaryUserService.create(temporaryUser);
+        log.debug("Temporary user {} was saved", temporaryUser.getEmail());
         return temporaryUser;
     }
 
@@ -155,7 +157,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Transactional
     @Override
     public void confirmRegistration(String token) {
-        log.info("Method confirmRegistration was invoked");
+        log.debug("Method {} was invoked", MethodLog.getMethodName());
         TemporaryUser tempUser = temporaryUserService.findByVerifiedToken(token);
 
         if (tempUser != null) {
@@ -164,24 +166,26 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             user.setIsBlocked(false);
 
             userRepository.save(user);
-            log.info("User saved");
+            log.debug("User registration completed successfully for {}", user.getEmail());
 
             temporaryUserService.delete(tempUser);
-            log.info("tempUser deleted");
+            log.debug("Temporary user {} was deleted", tempUser.getEmail());
 
             String jwtToken = jwtService.generateToken(user);
             saveUserToken(user, jwtToken);
+            log.debug("Access token for {} created and saved", user.getEmail());
 
             PhoneDTO phoneDTO = createPhoneDTO(user);
             phoneService.createPhoneNumber(phoneDTO);
-            log.info("Phone saved");
+            log.debug("Phone {} for {} saved", user.getMainNumber(), user.getEmail());
         } else {
-            log.error("Email not confirmed");
+            log.error("Email not confirmed. Error: temporary user with token {} not found", token);
             throw new UserNotFoundException(String.format("User with token - '%s', not found  ", token));
         }
     }
 
     private PhoneDTO createPhoneDTO(User user) {
+        log.info("Method {} was invoked", MethodLog.getMethodName());
         PhoneDTO phoneDTO = new PhoneDTO();
         phoneDTO.setUserId(user.getId());
         phoneDTO.setNumber(user.getMainNumber());
@@ -206,20 +210,25 @@ public class AuthenticationServiceImpl implements AuthenticationService {
      */
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
+        log.debug("Method {} was invoked", MethodLog.getMethodName());
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
                         request.getPassword()
-                )
-        );
+                ));
 
         User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() ->
                 new UserNotFoundException(String.format("User with email - '%s', not found  ", request.getEmail())));
 
         String jwtToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
+        log.debug("Access and refresh tokens for {} created", user.getEmail());
+
         revokeAllUserTokens(user);
+        log.debug("Previous user {} tokens was revoked", user.getEmail());
+
         saveUserToken(user, jwtToken);
+        log.debug("Access token for {} saved", user.getEmail());
 
         AuthenticationResponse response = new AuthenticationResponse();
         response.setAccessToken(jwtToken);
@@ -228,6 +237,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     private void saveUserToken(User user, String jwtToken) {
+        log.info("Method {} was invoked", MethodLog.getMethodName());
         Token token = new Token();
         token.setUser(user);
         token.setToken(jwtToken);
@@ -247,6 +257,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
      * @param user пользователь, токены которого должны быть отозваны.
      */
     private void revokeAllUserTokens(User user) {
+        log.info("Method {} was invoked", MethodLog.getMethodName());
         List<Token> validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
         if (validUserTokens.isEmpty())
             return;
@@ -275,10 +286,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
      */
     @Override
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        log.debug("Method {} was invoked", MethodLog.getMethodName());
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         final String refreshToken;
         final String userEmail;
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            log.warn("Authorization header is missing or does not start with Bearer String");
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Token is missing or invalid");
             return;
         }
 
@@ -296,7 +310,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
                 AuthenticationResponse authResponse = new AuthenticationResponse(accessToken, refreshToken);
                 new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
+            } else {
+                log.warn("Refresh token is not valid for user {}", userEmail);
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid Refresh Token");
             }
+        } else {
+            log.warn("User email could not be extracted from refresh token");
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid Refresh Token");
         }
     }
 }

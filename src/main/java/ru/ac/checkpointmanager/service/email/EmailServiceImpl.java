@@ -8,6 +8,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
+import ru.ac.checkpointmanager.utils.MethodLog;
 
 /**
  * Сервис для отправки электронных писем.
@@ -46,7 +47,7 @@ public class EmailServiceImpl implements EmailService {
     @Override
     @Async
     public void send(String to, String token) {
-        log.info("Method 'send' mail was invoked");
+        log.debug("Method {}", MethodLog.getMethodName());
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(prodEmail);
         message.setTo(to);
