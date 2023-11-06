@@ -33,6 +33,7 @@ services:
     image: nginx:latest
     volumes:
       - ./avatars:/usr/share/nginx/html:ro # локальная папка монтируется в /usr/share/nginx/html
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro # добавь эту строку для монтирования кастомного конфига
     ports:
       - "8081:80" # nginx будет доступен на порту 8081
     environment:

@@ -31,6 +31,7 @@ scp docker-compose.prod.yml root@84.252.74.180:~
 scp Dockerfile root@84.252.74.180:~
 scp deploy.sh root@84.252.74.180:~
 scp build/libs/app.jar root@84.252.74.180:~
+scp nginx.conf root@84.252.74.180:~
 
 #Шаг 9: Передача версии на уделнный сервер
 ssh root@84.252.74.180 "PROJECT_VERSION=$PROJECT_VERSION bash -s" < deploy.sh
