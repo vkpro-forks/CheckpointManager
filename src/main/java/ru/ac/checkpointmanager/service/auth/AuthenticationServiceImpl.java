@@ -210,7 +210,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
      */
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        log.debug("Method {} was invoked", MethodLog.getMethodName());
+        log.debug("Method {}, Username {}", MethodLog.getMethodName(), request.getEmail());
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),

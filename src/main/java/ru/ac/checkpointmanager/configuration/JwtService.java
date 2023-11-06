@@ -54,7 +54,7 @@ public class JwtService {
     }
 
     public String generateToken(UserDetails userDetails) { // используется при регистрации, аунтетификации и обновления токена в ауф-сервисе
-        log.debug("Method {} was invoked", MethodLog.getMethodName());
+        log.debug("Method {}, User {}", MethodLog.getMethodName(), userDetails.getUsername());
         return generateToken(new HashMap<>(), userDetails);
     }
 
@@ -64,12 +64,12 @@ public class JwtService {
     }
 
     public String generateRefreshToken(UserDetails userDetails) { // при регистрации и аунтетификации
-        log.debug("Method {} was invoked", MethodLog.getMethodName());
+        log.debug("Method {}, User {}", MethodLog.getMethodName(), userDetails.getUsername());
         return buildToken(new HashMap<>(), userDetails, refreshExpiration);
     }
 
     private String buildToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration) {
-        log.debug("Method {} was invoked", MethodLog.getMethodName());
+        log.debug("Method {}, User {}", MethodLog.getMethodName(), userDetails.getUsername());
         List<String> rolesList = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
@@ -86,7 +86,7 @@ public class JwtService {
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        log.debug("Method {} was invoked", MethodLog.getMethodName());
+        log.debug("Method {}, User {}", MethodLog.getMethodName(), userDetails.getUsername());
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }

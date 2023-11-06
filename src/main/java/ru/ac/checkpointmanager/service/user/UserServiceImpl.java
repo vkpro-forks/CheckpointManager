@@ -68,7 +68,7 @@ public class UserServiceImpl implements UserService {
                 .findUserByFullNameContainingIgnoreCase(name));
 
         if (userDTOS.isEmpty()) {
-            log.warn("here is no user with name containing {}", name);
+            log.debug("here is no user with name containing {}", name);
             throw new UserNotFoundException("There is no user with name containing " + name);
         }
         return userDTOS;
@@ -219,7 +219,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Collection<String> findUsersPhoneNumbers(UUID userId) {
-        log.debug("Method {}", MethodLog.getMethodName());
+        log.debug("Method {}, UUID {}", MethodLog.getMethodName(), userId);
         if (userRepository.findById(userId).isEmpty()) {
             log.warn("Error getting users {} phones with", userId);
             throw new UserNotFoundException(String.format("Error getting users %s phones", userId));
