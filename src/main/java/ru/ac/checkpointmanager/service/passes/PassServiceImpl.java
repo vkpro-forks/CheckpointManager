@@ -287,7 +287,7 @@ public class PassServiceImpl implements PassService{
      */
     public void updateDelayedPassesOnStartTimeReached() {
         List<Pass> passes = repository.findPassesByStatusAndTimeBefore(PassStatus.DELAYED.toString(),
-                "startTime", LocalDateTime.now().minusMinutes(1));
+                "startTime", LocalDateTime.now().plusMinutes(1));
         if (passes.isEmpty()) {return;}
 
         log.info("Method {}, startTime reached on {} delayed pass(es)", MethodLog.getMethodName(), passes.size());
