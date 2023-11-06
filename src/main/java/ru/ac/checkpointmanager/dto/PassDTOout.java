@@ -2,8 +2,6 @@ package ru.ac.checkpointmanager.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
-import ru.ac.checkpointmanager.model.passes.PassStatus;
-import ru.ac.checkpointmanager.model.passes.PassTypeTime;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -18,9 +16,9 @@ public class PassDTOout {
 
     String name;
 
-    private PassStatus status;
+    private String statusDescription;
 
-    private PassTypeTime typeTime;
+    private String typeTimeDescription;
 
     private TerritoryDTO territory;
 

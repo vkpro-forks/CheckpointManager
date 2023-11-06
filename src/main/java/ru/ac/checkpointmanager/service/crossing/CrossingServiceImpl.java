@@ -80,11 +80,7 @@ public class CrossingServiceImpl implements CrossingService {
 
         return passRepository.findById(passId)
                 .filter(p -> p.getStatus() == PassStatus.ACTIVE)
-                .filter(p -> {
-                    LocalDateTime now = LocalDateTime.now();
-                    return now.isAfter(p.getStartTime()) && now.isBefore(p.getEndTime());
-                })
-                .orElseThrow(() -> new InactivePassException("The pass is not active or not valid for the current time"));
+                .orElseThrow(() -> new InactivePassException("The pass is not active now, passId - " + passId));
     }
 
 
