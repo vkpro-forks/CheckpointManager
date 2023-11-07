@@ -52,9 +52,10 @@ public class CarController {
 
         try {
             CarBrand existingBrand = carBrandService.getBrandById(carDTO.getBrand().getId());
-            carDTO.setBrand(existingBrand);
+            car.setBrand(existingBrand);
             Car newCar = carService.addCar(car);
-            return new ResponseEntity<>(mapper.toCarDTO(newCar), HttpStatus.CREATED);
+            CarDTO newCarDTO = mapper.toCarDTO(newCar);
+            return new ResponseEntity<>(newCarDTO, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }

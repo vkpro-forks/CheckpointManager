@@ -1,5 +1,8 @@
 package ru.ac.checkpointmanager.dto;
 
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import ru.ac.checkpointmanager.model.car.CarBrand;
@@ -10,7 +13,7 @@ import java.util.UUID;
 public class CarDTO {
 
 
-    private UUID uuid;
+    private UUID id;
 
     @NotNull
     private String licensePlate;
