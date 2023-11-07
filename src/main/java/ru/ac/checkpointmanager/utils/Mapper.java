@@ -212,4 +212,5 @@ public class Mapper {
                 .map(crossing -> modelMapper.map(crossing, CrossingDTO.class))
                 .toList();
     }
+
 }

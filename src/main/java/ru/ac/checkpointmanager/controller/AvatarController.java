@@ -7,14 +7,19 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ru.ac.checkpointmanager.dto.UserDTO;
 import ru.ac.checkpointmanager.exception.AvatarNotFoundException;
 import ru.ac.checkpointmanager.model.Avatar;
+import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.service.avatar.AvatarService;
+import ru.ac.checkpointmanager.service.user.UserService;
+import ru.ac.checkpointmanager.utils.Mapper;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -27,17 +32,26 @@ import java.util.UUID;
         @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса")})
 @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
 public class AvatarController {
-    private final AvatarService service;
 
-    @Operation(summary = "Загрузить аватар")
+    private final AvatarService service;
+    private final UserService userService;
+    private final Mapper mapper;
+
+    @Operation(summary = "Загрузить аватар пользователю(выбрать id пользователя и картинку).")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Аватар успешно загружен"),
             @ApiResponse(responseCode = "400", description = "Некорректный запрос, проверьте данные"),
     })
-    @PostMapping(value = "/{entityID}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public void uploadAvatar(@PathVariable UUID entityID,
-                             @RequestBody MultipartFile avatarFile) throws IOException {
-        service.uploadAvatar(entityID, avatarFile);
+    @PostMapping(value = "/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> uploadAvatar(@PathVariable UUID userId,
+                                               @RequestBody MultipartFile avatarFile) throws IOException {
+        try {
+            Avatar avatar = service.uploadAvatar(userId, avatarFile);
+            userService.assignAvatarToUser(userId, avatar);
+            return ResponseEntity.ok("Аватар загружен и назначен пользователю.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Произошла ошибка при загрузке аватара: " + e.getMessage());
+        }
     }
 
     @Operation(summary = "Получить аватар по Id")

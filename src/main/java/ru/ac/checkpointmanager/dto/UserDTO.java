@@ -42,6 +42,6 @@ public class UserDTO {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Role role;
 
-    private AvatarDTOout avatarDTOout;
+    private AvatarDTO avatarDTO;
 }
 

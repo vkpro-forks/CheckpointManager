@@ -11,6 +11,7 @@ import ru.ac.checkpointmanager.exception.AvatarIsEmptyException;
 import ru.ac.checkpointmanager.exception.AvatarNotFoundException;
 import ru.ac.checkpointmanager.exception.BadAvatarExtensionException;
 import ru.ac.checkpointmanager.model.Avatar;
+import ru.ac.checkpointmanager.model.AvatarProperties;
 import ru.ac.checkpointmanager.repository.AvatarRepository;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
@@ -34,6 +35,7 @@ import static java.nio.file.StandardOpenOption.CREATE_NEW;
 public class AvatarServiceImpl implements AvatarService {
 
     private final AvatarRepository repository;
+    private final AvatarProperties avatarProperties;
 
     @Value("${avatars.dir.path}")
     private String avatarsDir;
@@ -48,10 +50,10 @@ public class AvatarServiceImpl implements AvatarService {
     private int maxHeight;
 
     @Value("${avatars.max-size}")
-    private long maxFileSize;
+    private String maxFileSize;
 
     @Override
-    public void uploadAvatar(UUID entityID, MultipartFile avatarFile) throws IOException {
+    public Avatar uploadAvatar(UUID entityID, MultipartFile avatarFile) throws IOException {
         log.info("Method uploadAvatar invoked for entityID: {}", entityID);
 
         logWhenMethodInvoked(MethodLog.getMethodName());
@@ -65,7 +67,7 @@ public class AvatarServiceImpl implements AvatarService {
         log.debug("Created Avatar object with fileSize: {} and mediaType: {}", avatarFile.getSize(), avatarFile.getContentType());
 
         // Проверяем размер файла
-        if (avatarFile.getSize() > maxFileSize) {
+        if (avatarFile.getSize() > avatarProperties.getMaxSizeInBytes()) {
             log.warn("File size {} exceeds the maximum allowed size of {}", avatarFile.getSize(), maxFileSize);
             throw new IOException("Слишком большой файл");
         }
@@ -99,8 +101,8 @@ public class AvatarServiceImpl implements AvatarService {
             avatar.setPreview(baos.toByteArray());
         }
 
-        repository.save(avatar);
         log.info("Avatar object saved in the repository for entityID: {}", entityID);
+        return repository.save(avatar);
     }
 
     @Override
@@ -193,17 +195,26 @@ public class AvatarServiceImpl implements AvatarService {
     }
 
     private BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight) {
-        log.debug("Resizing image to width: {} and height: {}", targetWidth, targetHeight);
-        Image resultingImage = originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_SMOOTH);
-        BufferedImage outputImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_ARGB);
+        int originalWidth = originalImage.getWidth();
+        int originalHeight = originalImage.getHeight();
+        log.debug("Original image size: width = {}, height = {}", originalWidth, originalHeight);
+
+        float ratio = Math.min((float) targetWidth / originalWidth, (float) targetHeight / originalHeight);
+        int newWidth = Math.round(originalWidth * ratio);
+        int newHeight = Math.round(originalHeight * ratio);
+        log.debug("Resizing image to width: {} and height: {} with aspect ratio maintained", newWidth, newHeight);
+
+        Image resultingImage = originalImage.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH);
+        BufferedImage outputImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
 
         Graphics2D g2d = outputImage.createGraphics();
         g2d.drawImage(resultingImage, 0, 0, null);
         g2d.dispose();
 
-        log.info("Image resized successfully.");
+        log.info("Image resized with aspect ratio maintained successfully.");
         return outputImage;
     }
+
 
     private String getExtension(String fileName) {
         log.debug("Attempting to extract file extension from: {}", fileName);

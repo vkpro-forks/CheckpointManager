@@ -2,7 +2,7 @@ package ru.ac.checkpointmanager.dto;
 
 import java.util.UUID;
 
-public class AvatarDTOout {
+public class AvatarDTO {
 
     private UUID avatarId;
 }

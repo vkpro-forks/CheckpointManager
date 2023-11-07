@@ -21,7 +21,7 @@ public interface AvatarService {
      * @param avatarFile avatar file
      * @throws IOException when I/O errors occurs
      */
-    void uploadAvatar(UUID entityID, MultipartFile avatarFile) throws IOException;
+    Avatar uploadAvatar(UUID entityID, MultipartFile avatarFile) throws IOException;
 
     void getAvatar(UUID entityID, HttpServletResponse response) throws IOException;
 
