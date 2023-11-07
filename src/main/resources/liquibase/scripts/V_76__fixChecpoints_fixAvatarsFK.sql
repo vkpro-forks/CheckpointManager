@@ -9,7 +9,7 @@ WHERE type = 'PEDESTRIAN';
 DELETE
 FROM checkpoints
 WHERE type = 'AUTO'
-  AND id = '16820297-5469-4a40-ab97-d44ebc7dc861';
+  AND name = 'kpp4';
 
 -- changeset x3imal:76.2
 DROP TABLE IF EXISTS avatars;

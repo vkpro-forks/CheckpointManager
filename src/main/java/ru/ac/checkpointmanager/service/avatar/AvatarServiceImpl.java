@@ -20,6 +20,8 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -38,131 +40,117 @@ public class AvatarServiceImpl implements AvatarService {
     @Value("${avatars.extensions}")
     private String extensions;
 
+    @Value("${avatars.image.max-width}")
+    private int maxWidth;
+
+    @Value("${avatars.image.max-height}")
+    private int maxHeight;
+
+    @Value("${avatars.max-size}")
+    private long maxFileSize;
+
     @Override
     public void uploadAvatar(UUID entityID, MultipartFile avatarFile) throws IOException {
         logWhenMethodInvoked(MethodLog.getMethodName());
         validateAvatar(avatarFile);
 
-        log.debug("Creating directory if absent, deleting image f already exists");
-        Path filePath = Path.of(avatarsDir, entityID + "." +
-                getExtension(avatarFile.getOriginalFilename()));
-        Files.createDirectories(filePath.getParent());
-        Files.deleteIfExists(filePath);
-        try (
-                InputStream is = avatarFile.getInputStream();
-                OutputStream os = Files.newOutputStream(filePath, CREATE_NEW);
-                BufferedInputStream bis = new BufferedInputStream(is, 1024);
-                BufferedOutputStream bos = new BufferedOutputStream(os, 1024)
-        ) {
-            bis.transferTo(bos);
-        }
-        log.debug("Filling avatar object with values and saving in repository");
+        // Создаем новый объект Avatar
         Avatar avatar = new Avatar();
-//        avatar.setAvatarHolder(entityID);
-        avatar.setFilePath(filePath.toString());
         avatar.setFileSize(avatarFile.getSize());
         avatar.setMediaType(avatarFile.getContentType());
-        avatar.setPreview(generateImagePreview(filePath));
+
+        // Проверяем размер файла
+        if (avatarFile.getSize() > maxFileSize) {
+            throw new IOException("Слишком большой файл"); // Или другое исключение, которое ты обрабатываешь
+        }
+
+        // Читаем изображение из файла
+        BufferedImage image = ImageIO.read(avatarFile.getInputStream());
+        if (image == null) {
+            throw new IllegalArgumentException("Файл не является изображением.");
+        }
+
+        // Проверяем разрешение изображения
+        if (image.getWidth() > maxWidth || image.getHeight() > maxHeight) {
+            // Сохраняем большое изображение в файловой системе
+            log.debug("Saving large image to file system");
+            Path filePath = saveImageToFileSystem(entityID, avatarFile);
+            avatar.setFilePath(filePath.toString());
+
+            // Создаем уменьшенную версию изображения для БД
+            BufferedImage resizedImage = resizeImage(image, maxWidth, maxHeight);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ImageIO.write(resizedImage, "png", baos);
+            avatar.setPreview(baos.toByteArray());
+        } else {
+            // Сохраняем маленькое изображение напрямую в БД
+            log.debug("Storing small image as preview in database");
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ImageIO.write(image, "png", baos);
+            avatar.setPreview(baos.toByteArray());
+        }
+
+        log.debug("Saving avatar object in repository");
         repository.save(avatar);
+    }
+
+    private BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight) {
+        Image resultingImage = originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_SMOOTH);
+        BufferedImage outputImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = outputImage.createGraphics();
+        g2d.drawImage(resultingImage, 0, 0, null);
+        g2d.dispose();
+        return outputImage;
     }
 
     @Override
     public void getAvatar(UUID entityID, HttpServletResponse response) throws IOException {
-        logWhenMethodInvoked(MethodLog.getMethodName());
-        Avatar avatar = findAvatarOrThrow(entityID);
-        try (
-                InputStream is = Files.newInputStream(Path.of(avatar.getFilePath()));
-                BufferedInputStream bis = new BufferedInputStream(is, 1024);
-                BufferedOutputStream bos = new BufferedOutputStream(response.getOutputStream(), 1024)
-        ) {
-            response.setContentType(avatar.getMediaType());
-            response.setContentLength(avatar.getFileSize().intValue());
-            response.setStatus(HttpServletResponse.SC_OK);
-            bis.transferTo(bos);
-        }
+
     }
 
     @Override
     public Avatar deleteAvatarIfExists(UUID entityID) {
-        logWhenMethodInvoked(MethodLog.getMethodName());
-        Avatar avatar = repository.findById(entityID).orElse(null);
-        if (avatar == null) {
-            log.debug("Method returns because entity has no avatar");
-            return null;
-        }
-        Path filePath = Path.of(avatarsDir, entityID + "." +
-                getExtension(avatar.getFilePath()));
-        try {
-            Files.delete(filePath);
-        } catch (IOException e) {
-            log.error("I/O error occurred");
-        }
-        repository.delete(avatar);
-        return avatar;
+        return null;
     }
 
     @Override
     public Avatar findAvatarOrThrow(UUID entityID) {
-        Optional<Avatar> avatar = repository.findById(entityID);
-        if (avatar.isPresent()) {
-            return avatar.get();
-        }
-        log.info("Entity with UUID = {} has no avatar", entityID);
-        throw new AvatarNotFoundException("Avatar for this entity is not uploaded yet");
-    }
-
-    /**
-     * Generate byte array of compressed avatar image of given file path.
-     * @param filePath path to image file
-     * @return byte array of compressed avatar
-     * @throws IOException if file is not found
-     */
-    private byte[] generateImagePreview(Path filePath) throws IOException {
-        logWhenMethodInvoked(MethodLog.getMethodName());
-        try (
-                InputStream is = Files.newInputStream(filePath);
-                BufferedInputStream bis = new BufferedInputStream(is, 1024);
-                ByteArrayOutputStream baos = new ByteArrayOutputStream()
-        ) {
-            BufferedImage image = ImageIO.read(bis);
-
-            log.debug("Creating avatar preview and return result of it as byte array");
-            int height = image.getHeight() / (image.getWidth() / 100);
-            BufferedImage preview = new BufferedImage(100, height, image.getType());
-            Graphics2D graphics = preview.createGraphics();
-            graphics.drawImage(image, 0, 0, 100, height, null);
-            graphics.dispose();
-            ImageIO.write(preview, getExtension(filePath.getFileName().toString()), baos);
-            return baos.toByteArray();
-        }
-    }
-
-    /**
-     * Utility method which is responsible for extracting extension of the file name
-     * @param fileName file name for getting extension
-     * @return String that represents extension of file
-     */
-    private String getExtension(String fileName) {
-        return fileName.substring(fileName.lastIndexOf(".") + 1);
-    }
-
-    /**
-     * Utility method that validates the avatar file. Will throw one of exceptions if
-     * condition is triggered.
-     * @param avatarFile file that needs to be validated
-     * @throws AvatarIsEmptyException if file was not passed
-     * @throws BadAvatarExtensionException if file is of not allowed extension
-     */
-    private void validateAvatar(MultipartFile avatarFile) {
-        if (avatarFile == null) {
-            throw new AvatarIsEmptyException("When uploading avatar you need to choose the file");
-        }
-        if (!(extensions.contains(getExtension(avatarFile.getOriginalFilename())))) {
-            throw new BadAvatarExtensionException("Extension of your file must be one of these: " + extensions);
-        }
+        return null;
     }
 
     private void logWhenMethodInvoked(String methodName) {
         log.info("Method '{}' was invoked", methodName);
     }
+
+    private void validateAvatar(MultipartFile avatarFile) {
+        if (avatarFile == null || avatarFile.isEmpty()) {
+            throw new IllegalArgumentException("Файл аватара не может быть пустым.");
+        }
+
+        String fileExtension = getExtension(avatarFile.getOriginalFilename());
+        if (!extensions.contains(fileExtension)) {
+            throw new IllegalArgumentException("Расширение файла должно быть одним из допустимых: " + extensions);
+        }
+
+        if (!avatarFile.getContentType().startsWith("image/")) {
+            throw new IllegalArgumentException("Файл должен быть изображением.");
+        }
+    }
+
+    private Path saveImageToFileSystem(UUID entityID, MultipartFile avatarFile) throws IOException {
+        String fileName = entityID + "." + getExtension(avatarFile.getOriginalFilename());
+        Path filePath = Paths.get(avatarsDir, fileName);
+        Files.createDirectories(filePath.getParent());
+        Files.write(filePath, avatarFile.getBytes(), StandardOpenOption.CREATE);
+        return filePath;
+    }
+
+    private String getExtension(String fileName) {
+        try {
+            return fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Ошибка при определении расширения файла.");
+        }
+    }
+
 }
