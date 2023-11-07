@@ -26,7 +26,7 @@ import java.util.UUID;
 @RequestMapping("chpman/person")
 @RequiredArgsConstructor
 @Slf4j
-@Tag(name = "Person (Гость)", description = "Администрирование списка гостей")
+@Tag(name = "Person (Гость)", description = "Работа со списком гостей")
 @ApiResponse(responseCode = "401", description = "Не авторизован")
 @SecurityRequirement(name = "bearerAuth")
 @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")

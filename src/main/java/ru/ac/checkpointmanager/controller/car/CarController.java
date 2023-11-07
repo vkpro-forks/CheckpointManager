@@ -26,7 +26,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("chpman/car")
 @RequiredArgsConstructor
-@Tag(name = "Car (Машина)", description = "Администрирование списка машин")
+@Tag(name = "Car (Машина)", description = "Для обработки списка машин")
 @ApiResponses(value = {@ApiResponse(responseCode = "401",
         description = "Произошла ошибка, Нужно авторизоваться")})
 @SecurityRequirement(name = "bearerAuth")

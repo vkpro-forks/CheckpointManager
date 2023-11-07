@@ -58,7 +58,7 @@ public class AvatarServiceImpl implements AvatarService {
         }
         log.debug("Filling avatar object with values and saving in repository");
         Avatar avatar = new Avatar();
-        avatar.setAvatarHolder(entityID);
+//        avatar.setAvatarHolder(entityID);
         avatar.setFilePath(filePath.toString());
         avatar.setFileSize(avatarFile.getSize());
         avatar.setMediaType(avatarFile.getContentType());

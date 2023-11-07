@@ -22,7 +22,7 @@ import java.util.List;
 @RequestMapping("chpman/car")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
-@Tag(name = "CarBrand (Бренд Авто)", description = "Администрирование списка Брендов Авто")
+@Tag(name = "CarBrand (Бренд Авто)", description = "Для обработки Брендов Авто")
 @ApiResponses(value = {@ApiResponse(responseCode = "401",
         description = "Произошла ошибка, Нужно авторизоваться")})
 @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
