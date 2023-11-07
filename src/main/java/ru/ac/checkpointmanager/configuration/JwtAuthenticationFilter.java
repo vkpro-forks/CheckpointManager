@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -15,6 +16,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import ru.ac.checkpointmanager.repository.TokenRepository;
+import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.io.IOException;
 import java.util.stream.Collectors;
@@ -22,6 +24,7 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
@@ -34,7 +37,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
+        log.debug("Method {} was invoked", MethodLog.getMethodName());
         if (request.getServletPath().contains("/chpman/authentication")) { // содержит ли путь сервлета в запросе /authentication
+            log.debug("Authentication path '{}' requested, passing through the filter chain.", request.getRequestURI());
             filterChain.doFilter(request, response); // если содержит, вызывается doFilter для разрешения продолжения обработки запроса следующему фильтру или сервлету в цепочке
             return;
         }
@@ -42,6 +47,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String jwt;
         final String userEmail;
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            log.debug("No Bearer token found in the request header, passing through the filter chain.");
             filterChain.doFilter(request, response);
             return;
         }
@@ -53,6 +59,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     .map(t -> !t.isExpired() && !t.isRevoked())//  isExpired() - не истек лисрок действия токена.  isRevoked() - не был ли токен отозван
                     .orElse(false);
             if (jwtService.isTokenValid(jwt, userDetails) && isTokenValid) { // если токен валидный создаем объект для секурити контекст холдера
+                log.info("JWT is valid for user '{}', setting the security context.", userEmail);
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken( // представляет аутентификацию пользователя
                         userDetails,
                         null, // пароль не передается, так как аутентификация осуществляется с помощью токена
