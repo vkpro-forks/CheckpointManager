@@ -52,6 +52,17 @@ public class AvatarServiceImpl implements AvatarService {
     @Value("${avatars.max-size}")
     private String maxFileSize;
 
+    /**
+     * Загружает и сохраняет аватар пользователя на основе предоставленного файла изображения.
+     * В процессе загрузки проверяется размер файла и разрешение изображения.
+     * Если изображение превышает установленные ограничения, оно автоматически изменяется до допустимых размеров.
+     *
+     * @param entityID    Уникальный идентификатор сущности, для которой загружается аватар.
+     * @param avatarFile  Файл изображения, который будет использоваться как аватар.
+     * @return            Объект Avatar, содержащий данные о загруженном изображении.
+     * @throws IOException                Если возникает ошибка при чтении файла изображения.
+     * @throws IllegalArgumentException   Если файл не является изображением или изображение не соответствует требованиям.
+     */
     @Override
     public Avatar uploadAvatar(UUID entityID, MultipartFile avatarFile) throws IOException {
         log.info("Method uploadAvatar invoked for entityID: {}", entityID);
@@ -105,6 +116,16 @@ public class AvatarServiceImpl implements AvatarService {
         return repository.save(avatar);
     }
 
+
+    /**
+     * Отправляет аватар пользователя в ответ клиенту.
+     * Если у аватара есть путь к файлу, изображение будет загружено из файловой системы.
+     * В противном случае будет отправлено изображение-превью, сохраненное в базе данных.
+     *
+     * @param entityID  Уникальный идентификатор сущности, аватар которой запрашивается.
+     * @param response  Объект HttpServletResponse, используемый для отправки изображения.
+     * @throws IOException Если возникает ошибка ввода-вывода при отправке файла.
+     */
     @Override
     public void getAvatar(UUID entityID, HttpServletResponse response) throws IOException {
         log.debug("Fetching avatar for entity ID: {}", entityID);
@@ -126,7 +147,13 @@ public class AvatarServiceImpl implements AvatarService {
         }
     }
 
-
+    /**
+     * Удаляет аватар пользователя, если он существует, и возвращает удаленный аватар.
+     * Если аватар для указанного идентификатора сущности не найден, ничего не делает и возвращает null.
+     *
+     * @param entityID Уникальный идентификатор сущности, аватар которой нужно удалить.
+     * @return Удаленный объект Avatar или null, если аватар не был найден.
+     */
     @Override
     public Avatar deleteAvatarIfExists(UUID entityID) {
         log.debug("Attempting to delete avatar for entity ID: {}", entityID);
@@ -148,12 +175,18 @@ public class AvatarServiceImpl implements AvatarService {
                 .orElseThrow(() -> new AvatarNotFoundException("Аватар с ID " + entityID + " не найден."));
     }
 
-
-
     private void logWhenMethodInvoked(String methodName) {
         log.info("Method '{}' was invoked", methodName);
     }
 
+    /**
+     * Проверяет файл аватара на предмет корректности: файл не должен быть пустым или null,
+     * должен иметь допустимое расширение файла и тип содержимого, начинающийся с "image/".
+     * В случае обнаружения некорректности файла выбрасывает IllegalArgumentException.
+     *
+     * @param avatarFile Мультипарт-файл, представляющий аватар, который нужно проверить.
+     * @throws IllegalArgumentException если файл аватара не проходит валидацию.
+     */
     private void validateAvatar(MultipartFile avatarFile) {
         log.debug("Validating avatar file...");
         if (avatarFile == null || avatarFile.isEmpty()) {
@@ -177,6 +210,16 @@ public class AvatarServiceImpl implements AvatarService {
         log.info("Avatar file validation successful.");
     }
 
+    /**
+     * Сохраняет изображение, полученное от пользователя, в файловую систему.
+     * Имя файла генерируется путем объединения идентификатора сущности с оригинальным расширением файла.
+     * Создает необходимые директории, если они еще не существуют.
+     *
+     * @param entityID    Идентификатор сущности, для которой сохраняется изображение.
+     * @param avatarFile  Мультипарт-файл, содержащий данные изображения.
+     * @return            Путь к файлу в файловой системе, где было сохранено изображение.
+     * @throws IOException Если возникают проблемы при сохранении файла.
+     */
     private Path saveImageToFileSystem(UUID entityID, MultipartFile avatarFile) throws IOException {
         log.debug("Saving image to the file system for entityID: {}", entityID);
         String fileName = entityID + "." + getExtension(avatarFile.getOriginalFilename());
@@ -194,6 +237,15 @@ public class AvatarServiceImpl implements AvatarService {
         return filePath;
     }
 
+    /**
+     * Изменяет размер переданного изображения, сохраняя его пропорции.
+     * Размер изменяется в соответствии с заданными целевыми шириной и высотой.
+     *
+     * @param originalImage Исходное изображение для изменения размера.
+     * @param targetWidth   Целевая ширина для исходного изображения.
+     * @param targetHeight  Целевая высота для исходного изображения.
+     * @return BufferedImage Измененное изображение с новыми размерами.
+     */
     private BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight) {
         int originalWidth = originalImage.getWidth();
         int originalHeight = originalImage.getHeight();
@@ -215,7 +267,14 @@ public class AvatarServiceImpl implements AvatarService {
         return outputImage;
     }
 
-
+    /**
+     * Возвращает расширение файла из полного имени файла.
+     * Расширение извлекается как подстрока после последней точки в имени файла.
+     *
+     * @param fileName Имя файла для извлечения расширения.
+     * @return String Расширение файла.
+     * @throws IllegalArgumentException если имя файла не содержит расширения.
+     */
     private String getExtension(String fileName) {
         log.debug("Attempting to extract file extension from: {}", fileName);
         try {
