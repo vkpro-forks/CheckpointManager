@@ -32,6 +32,7 @@ import static java.nio.file.StandardOpenOption.CREATE_NEW;
 @RequiredArgsConstructor
 @Slf4j
 public class AvatarServiceImpl implements AvatarService {
+
     private final AvatarRepository repository;
 
     @Value("${avatars.dir.path}")
@@ -104,18 +105,48 @@ public class AvatarServiceImpl implements AvatarService {
 
     @Override
     public void getAvatar(UUID entityID, HttpServletResponse response) throws IOException {
+        log.debug("Fetching avatar for entity ID: {}", entityID);
+        Avatar avatar = findAvatarOrThrow(entityID);
 
+        if (avatar.getFilePath() != null && !avatar.getFilePath().isEmpty()) {
+            // Загружаем файл из файловой системы
+            Path filePath = Paths.get(avatar.getFilePath());
+            File file = filePath.toFile();
+            response.setContentType(avatar.getMediaType());
+            response.setContentLength((int) file.length());
+            Files.copy(filePath, response.getOutputStream());
+            log.info("Avatar served from file system for entity ID: {}", entityID);
+        } else {
+            // Отправляем предварительный просмотр из базы данных
+            response.setContentType(avatar.getMediaType());
+            response.getOutputStream().write(avatar.getPreview());
+            log.info("Preview avatar served from database for entity ID: {}", entityID);
+        }
     }
+
 
     @Override
     public Avatar deleteAvatarIfExists(UUID entityID) {
-        return null;
+        log.debug("Attempting to delete avatar for entity ID: {}", entityID);
+        Avatar avatar = findAvatarOrThrow(entityID);
+        if (avatar != null) {
+            repository.delete(avatar);
+            log.info("Avatar deleted for entity ID: {}", entityID);
+            return avatar;
+        } else {
+            log.info("No avatar found for entity ID: {}, nothing to delete", entityID);
+            return null;
+        }
     }
+
 
     @Override
     public Avatar findAvatarOrThrow(UUID entityID) {
-        return null;
+        return repository.findById(entityID)
+                .orElseThrow(() -> new AvatarNotFoundException("Аватар с ID " + entityID + " не найден."));
     }
+
+
 
     private void logWhenMethodInvoked(String methodName) {
         log.info("Method '{}' was invoked", methodName);
