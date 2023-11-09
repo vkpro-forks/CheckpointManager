@@ -22,6 +22,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.ac.checkpointmanager.dto.AuthenticationRequest;
 import ru.ac.checkpointmanager.dto.AuthenticationResponse;
+import ru.ac.checkpointmanager.dto.IsAuthenticatedResponse;
 import ru.ac.checkpointmanager.dto.UserAuthDTO;
 import ru.ac.checkpointmanager.service.auth.AuthenticationService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
@@ -156,5 +157,24 @@ public class AuthController {
     public void refreshToken(HttpServletRequest request, HttpServletResponse response
     ) throws IOException {
         authenticationService.refreshToken(request, response);
+    }
+
+    @Operation(summary = "Проверка: является ли клиент пользователем приложения")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "OK: Ответ получен",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = IsAuthenticatedResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "BAD_REQUEST: Параметры не были переданы"
+            )
+    })
+    @GetMapping("/is-authenticated")
+    public ResponseEntity<?> isUserAuthenticated(@RequestParam String email) {
+        IsAuthenticatedResponse response = authenticationService.isUserAuthenticated(email);
+        return ResponseEntity.ok(response);
     }
 }
