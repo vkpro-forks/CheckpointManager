@@ -193,7 +193,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public IsAuthenticatedResponse isUserAuthenticated(String email) {
-        log.debug("Method {}", MethodLog.getMethodName());
+        log.debug("Method {}, email {}", MethodLog.getMethodName(), email);
         Optional<User> foundUser = userRepository.findByEmail(email);
         return foundUser.map(user -> new IsAuthenticatedResponse(true, user.getFullName()))
                 .orElseGet(() -> new IsAuthenticatedResponse(false, null));

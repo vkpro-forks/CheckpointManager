@@ -159,7 +159,7 @@ public class AuthController {
         authenticationService.refreshToken(request, response);
     }
 
-    @Operation(summary = "Проверка: является ли клиент пользователем приложения")
+    @Operation(summary = "Проверка регистрации при входе в сервис")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
