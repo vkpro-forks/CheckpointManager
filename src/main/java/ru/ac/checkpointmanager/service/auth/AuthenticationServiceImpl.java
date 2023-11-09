@@ -215,7 +215,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
      * @see UsernamePasswordAuthenticationToken
      */
     @Override
-    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+    public LoginResponse authenticate(AuthenticationRequest request) {
         log.debug("Method {}, Username {}", MethodLog.getMethodName(), request.getEmail());
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -236,7 +236,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         saveUserToken(user, jwtToken);
         log.debug("Access token for {} saved", user.getEmail());
 
-        AuthenticationResponse response = new AuthenticationResponse();
+        LoginResponse response = mapper.toLoginResponse(user);
         response.setAccessToken(jwtToken);
         response.setRefreshToken(refreshToken);
         return response;

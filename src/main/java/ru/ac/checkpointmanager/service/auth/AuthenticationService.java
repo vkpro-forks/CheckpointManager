@@ -3,8 +3,8 @@ package ru.ac.checkpointmanager.service.auth;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ru.ac.checkpointmanager.dto.AuthenticationRequest;
-import ru.ac.checkpointmanager.dto.AuthenticationResponse;
 import ru.ac.checkpointmanager.dto.IsAuthenticatedResponse;
+import ru.ac.checkpointmanager.dto.LoginResponse;
 import ru.ac.checkpointmanager.dto.UserAuthDTO;
 import ru.ac.checkpointmanager.model.TemporaryUser;
 
@@ -18,7 +18,7 @@ public interface AuthenticationService {
 
     IsAuthenticatedResponse isUserAuthenticated(String email);
 
-    AuthenticationResponse authenticate(AuthenticationRequest request);
+    LoginResponse authenticate(AuthenticationRequest request);
 
     void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException;
 }
