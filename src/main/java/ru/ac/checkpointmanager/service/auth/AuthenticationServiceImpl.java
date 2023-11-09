@@ -15,10 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.configuration.JwtService;
-import ru.ac.checkpointmanager.dto.AuthenticationRequest;
-import ru.ac.checkpointmanager.dto.AuthenticationResponse;
-import ru.ac.checkpointmanager.dto.PhoneDTO;
-import ru.ac.checkpointmanager.dto.UserAuthDTO;
+import ru.ac.checkpointmanager.dto.*;
 import ru.ac.checkpointmanager.exception.DateOfBirthFormatException;
 import ru.ac.checkpointmanager.exception.InvalidPhoneNumberException;
 import ru.ac.checkpointmanager.exception.PhoneAlreadyExistException;
@@ -38,6 +35,7 @@ import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static ru.ac.checkpointmanager.model.enums.PhoneNumberType.MOBILE;
@@ -191,6 +189,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         phoneDTO.setNumber(user.getMainNumber());
         phoneDTO.setType(MOBILE);
         return phoneDTO;
+    }
+
+    @Override
+    public IsAuthenticatedResponse isUserAuthenticated(String email) {
+        log.debug("Method {}, email {}", MethodLog.getMethodName(), email);
+        Optional<User> foundUser = userRepository.findByEmail(email);
+        return foundUser.map(user -> new IsAuthenticatedResponse(true, user.getFullName()))
+                .orElseGet(() -> new IsAuthenticatedResponse(false, null));
     }
 
     /**

@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ru.ac.checkpointmanager.dto.AuthenticationRequest;
 import ru.ac.checkpointmanager.dto.AuthenticationResponse;
+import ru.ac.checkpointmanager.dto.IsAuthenticatedResponse;
 import ru.ac.checkpointmanager.dto.UserAuthDTO;
 import ru.ac.checkpointmanager.model.TemporaryUser;
 
@@ -14,6 +15,8 @@ public interface AuthenticationService {
     TemporaryUser preRegister(UserAuthDTO userAuthDTO);
 
     void confirmRegistration(String token);
+
+    IsAuthenticatedResponse isUserAuthenticated(String email);
 
     AuthenticationResponse authenticate(AuthenticationRequest request);
 
