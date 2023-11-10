@@ -14,3 +14,5 @@ spring:
           starttls:
             enable: true
   confirmation-link: https://checkpoint-manager.ru/chpman/authentication/confirm?token=
+logging:
+  config: classpath:logback-prod.xml

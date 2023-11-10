@@ -97,6 +97,8 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
         config.setAllowedOrigins(Arrays.asList(
+                "http://localhost:3000",
+                "http://192.168.1.37:3000",
                 "https://checkpoint-manager.ru",
                 "https://www.checkpoint-manager.ru",
                 "https://pipolapopala.github.io"

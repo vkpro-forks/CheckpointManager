@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+    <property name="LOG_PATH" value="${LOG_PATH:-./logs}"/>
+    <property name="DB_URL" value="${DB_URL:-jdbc:postgresql://localhost:5432/chpmanDB}"/>
+    <property name="DB_USER" value="${DB_USER:-chpman}"/>
+    <property name="DB_PASS" value="${DB_PASS:-chpmanPass%}"/>
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
@@ -8,9 +12,9 @@
     </appender>
 
     <appender name="DB" class="ru.ac.checkpointmanager.configuration.DBAppender">
-        <url>jdbc:postgresql://localhost:5432/chpmanDB</url>
-        <username>chpman</username>
-        <password>chpmanPass%</password>
+        <url>${DB_URL}</url>
+        <username>${DB_USER}</username>
+        <password>${DB_PASS}</password>
     </appender>
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -19,7 +23,7 @@
         </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- daily rollover -->
-            <fileNamePattern>logFile.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>${LOG_PATH}/logFile.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>30</maxHistory>
             <totalSizeCap>500MB</totalSizeCap>
         </rollingPolicy>
@@ -30,11 +34,11 @@
 
     <root level="info">
         <appender-ref ref="STDOUT"/>
-        <appender-ref ref="FILE" />
+        <appender-ref ref="FILE"/>
     </root>
 
     <logger name="ru.ac.checkpointmanager" level="debug">
-        <appender-ref ref="DB" />
+        <appender-ref ref="DB"/>
     </logger>
 
 </configuration>

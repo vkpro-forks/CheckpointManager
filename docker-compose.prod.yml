@@ -9,12 +9,17 @@ services:
     depends_on:
       - postgres-db
       - avatars-storage
+    volumes:
+      - logs:/path/to/remote/logs # Использование именованного тома для логов
     environment:
+      - LOGGING_CONFIG=classpath:logback-prod-docker.xml
+      - LOG_PATH=/path/to/remote/logs
+      - DB_URL=jdbc:postgresql://postgres-db:5432/chpmanDB
       - SPRING_PROFILES_ACTIVE=prod
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/chpmanDB
       - SPRING_DATASOURCE_USERNAME=chpman
       - SPRING_DATASOURCE_PASSWORD=chpmanPass%
-      - AVATAR_STORAGE_PATH=/avatars # указание на папку в контейнере avatars-storage
+      - AVATAR_STORAGE_PATH=/avatars
       - TZ=UTC
 
   # Сервис для базы данных PostgreSQL
@@ -32,9 +37,14 @@ services:
   avatars-storage:
     image: nginx:latest
     volumes:
-      - ./avatars:/usr/share/nginx/html:ro # локальная папка монтируется в /usr/share/nginx/html
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro # добавь эту строку для монтирования кастомного конфига
+      - avatars:/usr/share/nginx/html:ro # Использование именованного тома для аватаров
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro # Монтирование конфигурационного файла nginx
+      - logs:/var/log/nginx # Путь к логам nginx внутри контейнера
     ports:
-      - "8081:80" # nginx будет доступен на порту 8081
+      - "8081:80"
     environment:
       - TZ=UTC
+
+volumes:
+  avatars: # Определение именованного тома для аватаров
+  logs: # Определение именованного тома для логов

@@ -5,19 +5,24 @@ services:
   spring-app:
     image: checkpoint-manager:${PROJECT_VERSION}
     build:
-      context: .  # Путь до вашего Spring Boot проекта
-      dockerfile: Dockerfile # Указание файла Dockerfile для вашего приложения
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "8080:8080"
     depends_on:
       - postgres-db
       - avatars-storage
+    volumes:
+      - ./logs:/logs # Монтирование локальной директории для логов
     environment:
+      - LOGGING_CONFIG=classpath:logback-local-docker.xml # Для запуска с Docker
+      - LOG_PATH=/logs
+      - DB_URL=jdbc:postgresql://postgres-db:5432/chpmanDB
       - SPRING_PROFILES_ACTIVE=dev
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/chpmanDB
       - SPRING_DATASOURCE_USERNAME=chpman
       - SPRING_DATASOURCE_PASSWORD=chpmanPass%
-      - AVATAR_STORAGE_PATH=/avatars # указание на папку в контейнере avatars-storage
+      - AVATAR_STORAGE_PATH=/avatars
       - TZ=UTC
 
   # Сервис для базы данных PostgreSQL
@@ -35,8 +40,8 @@ services:
   avatars-storage:
     image: nginx:latest
     volumes:
-      - ./avatars:/usr/share/nginx/html:ro # локальная папка монтируется в /usr/share/nginx/html
+      - ./avatars:/usr/share/nginx/html:ro
     ports:
-      - "8081:80" # nginx будет доступен на порту 8081
+      - "8081:80"
     environment:
       - TZ=UTC
