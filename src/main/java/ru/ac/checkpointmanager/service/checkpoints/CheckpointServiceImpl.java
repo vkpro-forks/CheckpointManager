@@ -22,7 +22,6 @@ public class CheckpointServiceImpl implements CheckpointService {
 
     private final CheckpointRepository repository;
     private final TerritoryService territoryService;
-    private final AvatarService avatarService;
 
     @Override
     public Checkpoint addCheckpoint(Checkpoint checkpoint) {
@@ -90,6 +89,5 @@ public class CheckpointServiceImpl implements CheckpointService {
             throw new CheckpointNotFoundException(String.format("Checkpoint not found [Id=%s]", id));
         }
         repository.deleteById(id);
-        avatarService.deleteAvatarIfExists(id);
     }
 }

@@ -9,5 +9,4 @@ import java.util.UUID;
 @Repository
 public interface AvatarRepository extends JpaRepository<Avatar, UUID> {
 
-
 }

@@ -1,9 +1,11 @@
 package ru.ac.checkpointmanager.service.car;
 
+import lombok.AllArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import ru.ac.checkpointmanager.exception.CarNotFoundException;
 import ru.ac.checkpointmanager.model.car.Car;
+import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
 import ru.ac.checkpointmanager.repository.car.CarRepository;
 import ru.ac.checkpointmanager.service.avatar.AvatarService;
 
@@ -12,18 +14,10 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@AllArgsConstructor
 public class CarServiceImpl implements CarService {
 
     private final CarRepository carRepository;
-    private final AvatarService avatarService;
-
-    public CarServiceImpl(CarRepository carRepository,
-                          CarBrandService carBrandService,
-                          AvatarService avatarService) {
-        this.carRepository = carRepository;
-        this.avatarService = avatarService;
-    }
-
 
     @Override
     public Car addCar(Car car) {
@@ -45,7 +39,6 @@ public class CarServiceImpl implements CarService {
         } catch (Exception exception) {
             throw new RuntimeException("Error deleting car with ID " + carId);
         }
-        avatarService.deleteAvatarIfExists(carId);
     }
 
     @Override

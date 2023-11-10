@@ -17,7 +17,7 @@ import java.util.Set;
 public class CarBrandServiceImpl implements CarBrandService {
 
     private final CarBrandRepository carBrandRepository;
-        private final Validator validator;
+    private final Validator validator;
 
     @Override
     public CarBrand getBrandById(Long id) {
