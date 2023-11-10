@@ -16,14 +16,14 @@ _ERD, UML, BPMN etc_
 ## Наша команда 
 _указывайте контакты и ссылки какие хотите_
 
-|             |            |                                  |                                         |   |
-|:-----------:|:----------:|:--------------------------------:|:---------------------------------------:|:-:|
-|   Backend   |  Дмитрий   | [Telegram](https://t.me/Burko20) |  [GitHub](https://github.com/Ldv236)    |   |
-|   Backend   |  Алексей   |           [Telegram]()           |  [GitHub](https://github.com/x3imal)    |   |
-|   Backend   | Александра |           [Telegram](https://t.me/fifimova)           | [GitHub](https://github.com/fifimova)   |   |
-|  Frontend   |  Евгений   | [Telegram](https://t.me/lepehun) |[GitHub](https://github.com/PipolaPopala)|   |
-|  Frontend   |   Софья    |           [Telegram]()           |     [GitHub](https://github.com/)       |   |
-|     QA      |  Алексей   |           [Telegram]()           |     [что-то](https://github.com/)       |   |
-|     QA      | Александр  |           [Telegram]()           |     [что-то](https://github.com/)       |   |
-|   Design    |   Сергей   |           [Telegram]()           |     [что-то](https://github.com/)       |   |
+|             |            |                                   |                                         |   |
+|:-----------:|:----------:|:---------------------------------:|:---------------------------------------:|:-:|
+|   Backend   |  Дмитрий   | [Telegram](https://t.me/Burko20)  |  [GitHub](https://github.com/Ldv236)    |   |
+|   Backend   |  Алексей   | [Telegram](https://t.me/DiabluSun)|  [GitHub](https://github.com/x3imal)    |   |
+|   Backend   | Александра | [Telegram](https://t.me/fifimova) | [GitHub](https://github.com/fifimova)   |   |
+|  Frontend   |  Евгений   | [Telegram](https://t.me/lepehun)  |[GitHub](https://github.com/PipolaPopala)|   |
+|  Frontend   |   Софья    |           [Telegram]()            |     [GitHub](https://github.com/)       |   |
+|     QA      |  Алексей   |           [Telegram]()            |     [что-то](https://github.com/)       |   |
+|     QA      | Александр  |           [Telegram]()            |     [что-то](https://github.com/)       |   |
+|   Design    |   Сергей   |           [Telegram]()            |     [что-то](https://github.com/)       |   |
 
