@@ -103,7 +103,6 @@ public class TerritoryServiceImpl implements TerritoryService {
             throw new TerritoryNotFoundException(String.format("Territory not found [Id=%s]", id));
         }
         repository.deleteById(id);
-        avatarService.deleteAvatarIfExists(id);
     }
 
     @Override

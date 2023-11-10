@@ -7,12 +7,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import ru.ac.checkpointmanager.dto.AvatarDTO;
+import ru.ac.checkpointmanager.dto.UserDTO;
 import ru.ac.checkpointmanager.exception.AvatarIsEmptyException;
 import ru.ac.checkpointmanager.exception.AvatarNotFoundException;
 import ru.ac.checkpointmanager.exception.BadAvatarExtensionException;
+import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.model.Avatar;
 import ru.ac.checkpointmanager.model.AvatarProperties;
+import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.repository.AvatarRepository;
+import ru.ac.checkpointmanager.repository.UserRepository;
+import ru.ac.checkpointmanager.service.user.UserService;
+import ru.ac.checkpointmanager.utils.Mapper;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
 import javax.imageio.ImageIO;
@@ -36,6 +43,8 @@ public class AvatarServiceImpl implements AvatarService {
 
     private final AvatarRepository repository;
     private final AvatarProperties avatarProperties;
+    private final UserRepository userRepository;
+    private final Mapper mapper;
 
     @Value("${avatars.dir.path}")
     private String avatarsDir;
@@ -57,11 +66,11 @@ public class AvatarServiceImpl implements AvatarService {
      * В процессе загрузки проверяется размер файла и разрешение изображения.
      * Если изображение превышает установленные ограничения, оно автоматически изменяется до допустимых размеров.
      *
-     * @param entityID    Уникальный идентификатор сущности, для которой загружается аватар.
-     * @param avatarFile  Файл изображения, который будет использоваться как аватар.
-     * @return            Объект Avatar, содержащий данные о загруженном изображении.
-     * @throws IOException                Если возникает ошибка при чтении файла изображения.
-     * @throws IllegalArgumentException   Если файл не является изображением или изображение не соответствует требованиям.
+     * @param entityID   Уникальный идентификатор сущности, для которой загружается аватар.
+     * @param avatarFile Файл изображения, который будет использоваться как аватар.
+     * @return Объект Avatar, содержащий данные о загруженном изображении.
+     * @throws IOException              Если возникает ошибка при чтении файла изображения.
+     * @throws IllegalArgumentException Если файл не является изображением или изображение не соответствует требованиям.
      */
     @Override
     public Avatar uploadAvatar(UUID entityID, MultipartFile avatarFile) throws IOException {
@@ -119,15 +128,24 @@ public class AvatarServiceImpl implements AvatarService {
     /**
      * Возвращает аватар для указанного идентификатора сущности.
      *
-     * @param entityID Уникальный идентификатор сущности, аватар которой нужно получить.
+     * @param userId Уникальный идентификатор сущности, аватар которой нужно получить.
      * @return Объект Avatar, соответствующий указанному идентификатору сущности.
      * @throws IOException если возникают проблемы при чтении файла аватара.
      */
     @Override
-    public Avatar getAvatar(UUID entityID) throws IOException {
-        log.debug("Fetching avatar for entity ID: {}", entityID);
-        return findAvatarOrThrow(entityID);
+    public Avatar getAvatarByUserId(UUID userId) {
+        log.debug("Fetching avatar for user ID: {}", userId);
+        UUID avatarId = userRepository.findAvatarIdByUserId(userId);
+        if (avatarId == null) {
+            log.info("У пользователя с ID {} нет аватара.", userId);
+            throw new AvatarNotFoundException("У пользователя с ID " + userId + " нет аватара.");
+        }
+
+        log.debug("Поиск аватара с ID {}", avatarId);
+        return repository.findById(avatarId)
+                .orElseThrow(() -> new AvatarNotFoundException("Аватар с ID " + avatarId + " не найден."));
     }
+
 
     /**
      * Удаляет аватар пользователя, если он существует, и возвращает удаленный аватар.
@@ -136,18 +154,18 @@ public class AvatarServiceImpl implements AvatarService {
      * @param entityID Уникальный идентификатор сущности, аватар которой нужно удалить.
      * @return Удаленный объект Avatar или null, если аватар не был найден.
      */
-    @Override
-    public void deleteAvatarIfExists(UUID entityID) throws IOException {
-        Avatar avatar = getAvatar(entityID);
-        repository.delete(avatar);
+    public Avatar deleteAvatarIfExists(UUID entityID) {
+        log.debug("Attempting to delete avatar for entity ID: {}", entityID);
+        return findAvatarOrThrow(entityID);
     }
 
-
     @Override
-    public Avatar findAvatarOrThrow(UUID entityID) {
-        return repository.findById(entityID)
-                .orElseThrow(() -> new AvatarNotFoundException("Аватар с ID " + entityID + " не найден."));
+    public Avatar findAvatarOrThrow(UUID avatarId) {
+        log.debug("Searching for avatar with ID: {}", avatarId);
+        return repository.findById(avatarId).orElseThrow(
+                () -> new AvatarNotFoundException("Аватар с ID " + avatarId + " не найден."));
     }
+
 
     /**
      * Проверяет файл аватара на предмет корректности: файл не должен быть пустым или null,
@@ -185,9 +203,9 @@ public class AvatarServiceImpl implements AvatarService {
      * Имя файла генерируется путем объединения идентификатора сущности с оригинальным расширением файла.
      * Создает необходимые директории, если они еще не существуют.
      *
-     * @param entityID    Идентификатор сущности, для которой сохраняется изображение.
-     * @param avatarFile  Мультипарт-файл, содержащий данные изображения.
-     * @return            Путь к файлу в файловой системе, где было сохранено изображение.
+     * @param entityID   Идентификатор сущности, для которой сохраняется изображение.
+     * @param avatarFile Мультипарт-файл, содержащий данные изображения.
+     * @return Путь к файлу в файловой системе, где было сохранено изображение.
      * @throws IOException Если возникают проблемы при сохранении файла.
      */
     private Path saveImageToFileSystem(UUID entityID, MultipartFile avatarFile) throws IOException {

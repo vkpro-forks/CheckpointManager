@@ -37,4 +37,9 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     @Modifying
     @Query("update User u set u.avatar = :avatar where u.id = :userId")
     void setAvatarForUser(@Param("avatar") Avatar avatar, @Param("userId") UUID userId);
+
+    @Query(value = "SELECT avatar_id FROM users WHERE id = :userId", nativeQuery = true)
+    UUID findAvatarIdByUserId(@Param("userId") UUID userId);
+
+
 }

@@ -58,4 +58,6 @@ avatars:
   image:
     max-width: 400 # максимальная ширина изображения
     max-height: 400 # максимальная высота изображения
+logging:
+  config: classpath:logback-local.xml
 

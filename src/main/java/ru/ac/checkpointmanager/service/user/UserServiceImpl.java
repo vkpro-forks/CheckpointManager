@@ -42,7 +42,6 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PhoneRepository phoneRepository;
     private final PasswordEncoder passwordEncoder;
-    private final AvatarService avatarService;
 
     @Override
     public UserDTO findById(UUID id) {
@@ -203,7 +202,6 @@ public class UserServiceImpl implements UserService {
         }
         userRepository.deleteById(id);
         log.debug("User {} successfully deleted", id);
-        avatarService.deleteAvatarIfExists(id);
         log.debug("Users {} avatar successfully deleted", id);
     }
 
