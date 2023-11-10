@@ -62,7 +62,7 @@ public class AvatarController {
     @GetMapping("/{entityID}")
     public void getAvatar(@PathVariable UUID entityID,
                           HttpServletResponse response) throws IOException {
-        service.getAvatar(entityID, response);
+        service.getAvatar(entityID);
     }
     @Operation(summary = "Получить привью аватара по Id")
     @ApiResponses(value = {

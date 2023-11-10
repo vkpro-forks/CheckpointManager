@@ -23,7 +23,7 @@ public interface AvatarService {
      */
     Avatar uploadAvatar(UUID entityID, MultipartFile avatarFile) throws IOException;
 
-    void getAvatar(UUID entityID, HttpServletResponse response) throws IOException;
+    Avatar getAvatar(UUID entityID) throws IOException;
 
     /**
      * Method searches for avatar in table by entity id.
@@ -33,7 +33,7 @@ public interface AvatarService {
      * @param entityID id of entity, which avatar needs to deleted
      * @return
      */
-    Avatar deleteAvatarIfExists(UUID entityID);
+    void deleteAvatarIfExists(UUID entityID) throws IOException;
 
     /**
      * If avatar is present in DB then it will be returned

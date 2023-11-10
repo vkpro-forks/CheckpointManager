@@ -67,7 +67,6 @@ public class AvatarServiceImpl implements AvatarService {
     public Avatar uploadAvatar(UUID entityID, MultipartFile avatarFile) throws IOException {
         log.info("Method uploadAvatar invoked for entityID: {}", entityID);
 
-        logWhenMethodInvoked(MethodLog.getMethodName());
         validateAvatar(avatarFile);
         log.debug("Avatar file validated successfully.");
 
@@ -118,33 +117,16 @@ public class AvatarServiceImpl implements AvatarService {
 
 
     /**
-     * Отправляет аватар пользователя в ответ клиенту.
-     * Если у аватара есть путь к файлу, изображение будет загружено из файловой системы.
-     * В противном случае будет отправлено изображение-превью, сохраненное в базе данных.
+     * Возвращает аватар для указанного идентификатора сущности.
      *
-     * @param entityID  Уникальный идентификатор сущности, аватар которой запрашивается.
-     * @param response  Объект HttpServletResponse, используемый для отправки изображения.
-     * @throws IOException Если возникает ошибка ввода-вывода при отправке файла.
+     * @param entityID Уникальный идентификатор сущности, аватар которой нужно получить.
+     * @return Объект Avatar, соответствующий указанному идентификатору сущности.
+     * @throws IOException если возникают проблемы при чтении файла аватара.
      */
     @Override
-    public void getAvatar(UUID entityID, HttpServletResponse response) throws IOException {
+    public Avatar getAvatar(UUID entityID) throws IOException {
         log.debug("Fetching avatar for entity ID: {}", entityID);
-        Avatar avatar = findAvatarOrThrow(entityID);
-
-        if (avatar.getFilePath() != null && !avatar.getFilePath().isEmpty()) {
-            // Загружаем файл из файловой системы
-            Path filePath = Paths.get(avatar.getFilePath());
-            File file = filePath.toFile();
-            response.setContentType(avatar.getMediaType());
-            response.setContentLength((int) file.length());
-            Files.copy(filePath, response.getOutputStream());
-            log.info("Avatar served from file system for entity ID: {}", entityID);
-        } else {
-            // Отправляем предварительный просмотр из базы данных
-            response.setContentType(avatar.getMediaType());
-            response.getOutputStream().write(avatar.getPreview());
-            log.info("Preview avatar served from database for entity ID: {}", entityID);
-        }
+        return findAvatarOrThrow(entityID);
     }
 
     /**
@@ -155,17 +137,9 @@ public class AvatarServiceImpl implements AvatarService {
      * @return Удаленный объект Avatar или null, если аватар не был найден.
      */
     @Override
-    public Avatar deleteAvatarIfExists(UUID entityID) {
-        log.debug("Attempting to delete avatar for entity ID: {}", entityID);
-        Avatar avatar = findAvatarOrThrow(entityID);
-        if (avatar != null) {
-            repository.delete(avatar);
-            log.info("Avatar deleted for entity ID: {}", entityID);
-            return avatar;
-        } else {
-            log.info("No avatar found for entity ID: {}, nothing to delete", entityID);
-            return null;
-        }
+    public void deleteAvatarIfExists(UUID entityID) throws IOException {
+        Avatar avatar = getAvatar(entityID);
+        repository.delete(avatar);
     }
 
 
@@ -173,10 +147,6 @@ public class AvatarServiceImpl implements AvatarService {
     public Avatar findAvatarOrThrow(UUID entityID) {
         return repository.findById(entityID)
                 .orElseThrow(() -> new AvatarNotFoundException("Аватар с ID " + entityID + " не найден."));
-    }
-
-    private void logWhenMethodInvoked(String methodName) {
-        log.info("Method '{}' was invoked", methodName);
     }
 
     /**
