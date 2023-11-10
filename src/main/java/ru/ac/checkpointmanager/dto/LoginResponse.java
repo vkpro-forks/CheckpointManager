@@ -3,6 +3,7 @@ package ru.ac.checkpointmanager.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.ac.checkpointmanager.model.enums.Role;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -22,6 +23,10 @@ public class LoginResponse {
     private String email;
 
     private String password;
+
+    private Boolean isBlocked;
+
+    private Role role;
 
     @JsonProperty("access_token")
     private String accessToken;
