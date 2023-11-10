@@ -20,10 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import ru.ac.checkpointmanager.dto.AuthenticationRequest;
-import ru.ac.checkpointmanager.dto.AuthenticationResponse;
-import ru.ac.checkpointmanager.dto.IsAuthenticatedResponse;
-import ru.ac.checkpointmanager.dto.UserAuthDTO;
+import ru.ac.checkpointmanager.dto.*;
 import ru.ac.checkpointmanager.service.auth.AuthenticationService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
 
@@ -111,7 +108,7 @@ public class AuthController {
                             responseCode = "200",
                             description = "OK: Аутентификация прошла успешно",
                             content = @Content(
-                                    schema = @Schema(implementation = AuthenticationResponse.class)
+                                    schema = @Schema(implementation = LoginResponse.class)
                             )
                     ),
                     @ApiResponse(
@@ -165,7 +162,7 @@ public class AuthController {
                     responseCode = "200",
                     description = "OK: Ответ получен",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = IsAuthenticatedResponse.class))
+                            schema = @Schema(implementation = IsAuthenticatedResponse.class))
             ),
             @ApiResponse(
                     responseCode = "400",

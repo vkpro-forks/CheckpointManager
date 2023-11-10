@@ -170,6 +170,10 @@ public class Mapper {
         return modelMapper.map(userAuthDTO, TemporaryUser.class);
     }
 
+    public LoginResponse toLoginResponse(User user) {
+        return modelMapper.map(user, LoginResponse.class);
+    }
+
     /* Phone mapping */
     public Phone toPhone(PhoneDTO phoneDTO) {
         return modelMapper.map(phoneDTO, Phone.class);
