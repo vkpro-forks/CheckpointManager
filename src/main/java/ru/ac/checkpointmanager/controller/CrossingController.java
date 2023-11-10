@@ -26,7 +26,7 @@ import java.util.UUID;
 @RequestMapping("chpman/crossing")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
-@Tag(name = "Crossing (Пересечение)", description = "Работа с пересечений")
+@Tag(name = "Crossing (Пересечение)", description = "Работа с пересечениями")
 @ApiResponse(responseCode = "401", description = "Нужно авторизоваться")
 @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
 //я предполагаю, что этот эндпоинт будет вызываться когда будет открываться шлагбаум(например) и тем самым фиксироваться пересечение
