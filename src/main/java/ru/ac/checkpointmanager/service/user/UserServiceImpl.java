@@ -6,6 +6,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.ChangePasswordRequest;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.UserDTO;
@@ -13,6 +14,7 @@ import ru.ac.checkpointmanager.exception.DateOfBirthFormatException;
 import ru.ac.checkpointmanager.exception.PhoneNumberNotFoundException;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
+import ru.ac.checkpointmanager.model.Avatar;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.enums.Role;
@@ -225,5 +227,11 @@ public class UserServiceImpl implements UserService {
             throw new UserNotFoundException(String.format("Error getting users %s phones", userId));
         }
         return phoneRepository.getNumbersByUserId(userId);
+    }
+
+    @Override
+    @Transactional
+    public void assignAvatarToUser(UUID userId, Avatar avatar) {
+        userRepository.setAvatarForUser(avatar, userId);
     }
 }

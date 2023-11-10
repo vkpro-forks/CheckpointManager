@@ -71,6 +71,11 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Pass> pass;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "avatar_id", referencedColumnName = "id", nullable = true)
+    private Avatar avatar;
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

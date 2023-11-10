@@ -21,13 +21,17 @@ public class Avatar {
      * UUID of Entity related to the avatar
      */
     @Id
-    private UUID avatarHolder;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     private String mediaType;
 
-    private String filePath;
+    private String filePath; // Путь к файлу большого изображения
 
     private Long fileSize;
 
-    private byte[] preview;
+    private byte[] preview; // Данные маленького превью изображения
+
+    @OneToOne(mappedBy = "avatar", fetch = FetchType.LAZY, optional = false)
+    private User user;
 }

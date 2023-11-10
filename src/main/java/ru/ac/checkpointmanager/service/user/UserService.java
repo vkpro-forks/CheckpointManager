@@ -3,6 +3,7 @@ package ru.ac.checkpointmanager.service.user;
 import ru.ac.checkpointmanager.dto.ChangePasswordRequest;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.UserDTO;
+import ru.ac.checkpointmanager.model.Avatar;
 import ru.ac.checkpointmanager.model.enums.Role;
 
 import java.security.Principal;
@@ -35,4 +36,5 @@ public interface UserService {
     Collection<UserDTO> getAll();
 
     Collection<String> findUsersPhoneNumbers(UUID userId);
+    public void assignAvatarToUser(UUID userId, Avatar avatar);
 }

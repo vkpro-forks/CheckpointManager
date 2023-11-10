@@ -54,3 +54,8 @@ avatars:
   dir:
     path: ./avatars
   extensions: jpg, jpeg, png, ico, gif, eps, svg, bmp
+  max-size: 5MB # Максимальный размер файла
+  image:
+    max-width: 400 # максимальная ширина изображения
+    max-height: 400 # максимальная высота изображения
+
