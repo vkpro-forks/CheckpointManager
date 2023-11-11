@@ -12,6 +12,10 @@ DELETE FROM databasechangelog WHERE filename = 'liquibase/insert_demo_data.sql';
 DO $$
     DECLARE
         -- Объявление переменных
+        -- замечено: при добавлении через Идею время ставится по гринвичу, и тогда изменение статусов работает как надо сразу
+        -- а через пгАдмин время ставится текущее как в системе, и тогда придется ждать 3 часа (в мск поясе)
+        -- поэтому при работе через пгАдмин надо ставить коррекцию в этой переменной ('3 hour')
+        nowDT timestamp = now() - interval '0 hour';
         ter1_id UUID := uuid_generate_v4();
         ter2_id UUID := uuid_generate_v4();
         ter3_id UUID := uuid_generate_v4();
@@ -38,15 +42,15 @@ DO $$
 
     BEGIN
         INSERT INTO territories (id, name, note, added_at)
-        VALUES (ter1_id, 'territory1', 'описание1', now()),
-               (ter2_id, 'territory2', 'описание2', now()),
-               (ter3_id, 'territory3', 'описание3', now());
+        VALUES (ter1_id, 'territory1', 'описание1', nowDT),
+               (ter2_id, 'territory2', 'описание2', nowDT),
+               (ter3_id, 'territory3', 'описание3', nowDT);
 
         INSERT INTO checkpoints (id, name, type, note, added_at, territory_id)
-        VALUES (chp1_id, 'kpp1', 'UNIVERSAL',   'тер1 - универс',   now(), ter1_id),
-               (chp2_id, 'kpp2', 'AUTO',        'тер1 - авто',      now(), ter1_id),
-               (chp3_id, 'kpp3', 'WALK',        'тер1 - пешех',     now(), ter1_id),
-               (chp4_id, 'kpp4', 'UNIVERSAL',   'тер2 - универс',   now(), ter2_id);
+        VALUES (chp1_id, 'kpp1', 'UNIVERSAL',   'тер1 - универс',   nowDT, ter1_id),
+               (chp2_id, 'kpp2', 'AUTO',        'тер1 - авто',      nowDT, ter1_id),
+               (chp3_id, 'kpp3', 'WALK',        'тер1 - пешех',     nowDT, ter1_id),
+               (chp4_id, 'kpp4', 'UNIVERSAL',   'тер2 - универс',   nowDT, ter2_id);
 
         INSERT INTO users (id, full_name, date_of_birth, email, password, is_blocked, role, main_number, added_at)
         VALUES (user1_id, 'User', '2000-10-10', 'user@chp.com',
@@ -85,43 +89,42 @@ DO $$
 
                -- АКТИВНЫЕ ПРОПУСКА НА НЕДЕЛЮ, без пересечений, с ними можно проверять пересечения
                -- автомобильный разовый
-        VALUES (pass1_id, user1_id, 'ACTIVE', 'ONETIME', ter1_id, 'note1', now()
-               , now(), now() + interval '7 day', 'ACTIVE FOR WEEK', car1_id, null, 'AUTO'),
+        VALUES (pass1_id, user1_id, 'ACTIVE', 'ONETIME', ter1_id, 'note1', nowDT
+               , nowDT, nowDT + interval '7 day', 'ACTIVE FOR WEEK', car1_id, null, 'AUTO'),
 
                -- автомобильный постоянный
-               (pass2_id, user1_id, 'ACTIVE', 'PERMANENT', ter2_id, null, now()
-               , now(), now() + interval '7 day', 'ACTIVE FOR WEEK', car2_id, null, 'AUTO'),
+               (pass2_id, user1_id, 'ACTIVE', 'PERMANENT', ter2_id, null, nowDT
+               , nowDT, nowDT + interval '7 day', 'ACTIVE FOR WEEK', car2_id, null, 'AUTO'),
 
                -- пешеходный разовый
-               (pass3_id, user1_id, 'ACTIVE', 'ONETIME', ter1_id, 'note3', now()
-               , now(), now() + interval '7 day', 'ACTIVE FOR WEEK', null, person1_id, 'WALK'),
+               (pass3_id, user1_id, 'ACTIVE', 'ONETIME', ter1_id, 'note3', nowDT
+               , nowDT, nowDT + interval '7 day', 'ACTIVE FOR WEEK', null, person1_id, 'WALK'),
 
                -- пешеходный постоянный
-               (pass4_id, user1_id, 'ACTIVE', 'PERMANENT', ter2_id, null, now()
-               , now(), now() + interval '7 day', 'ACTIVE FOR WEEK', null, person2_id, 'WALK'),
+               (pass4_id, user1_id, 'ACTIVE', 'PERMANENT', ter2_id, null, nowDT
+               , nowDT, nowDT + interval '7 day', 'ACTIVE FOR WEEK', null, person2_id, 'WALK'),
 
 
                -- ПРОПУСКА НА МИНУТУ, они должны поменять статус при проверке
-               -- (в ближайшую ровно минуту проверится DELAYED, еще через минуту проверятся активные)
                -- активный автомобильный разовый, нет пересечений - должен УСТАРЕТЬ
-               (pass5_id, user2_id, 'ACTIVE', 'ONETIME', ter1_id, null, now()
-               , now() - interval '1 hour', now() + interval '1 minute', 'should be OUTDATED', car1_id, null, 'AUTO'),
+               (pass5_id, user2_id, 'ACTIVE', 'ONETIME', ter1_id, null, nowDT
+               , nowDT - interval '1 hour', nowDT, 'should be OUTDATED', car1_id, null, 'AUTO'),
 
                -- активный автомобильный разовый, одно пересечение на въезд - должен стать ВАРНИНГ
-               (pass6_id, user2_id, 'ACTIVE', 'ONETIME', ter1_id, null, now()
-               , now() - interval '1 hour', now() + interval '1 minute', 'should be WARNING', car2_id, null, 'AUTO'),
+               (pass6_id, user2_id, 'ACTIVE', 'ONETIME', ter1_id, null, nowDT
+               , nowDT - interval '1 hour', nowDT, 'should be WARNING', car2_id, null, 'AUTO'),
 
                -- активный пешеходный постоянный, пересечения на въезд и на выезд - должен стать ВЫПОЛНЕН
-               (pass7_id, user2_id, 'ACTIVE', 'ONETIME', ter1_id, null, now()
-               , now() - interval '1 hour', now() + interval '1 minute', 'should be COMPLETED', null, person1_id, 'WALK'),
+               (pass7_id, user2_id, 'ACTIVE', 'ONETIME', ter1_id, null, nowDT
+               , nowDT - interval '1 hour', nowDT, 'should be COMPLETED', null, person1_id, 'WALK'),
 
                -- отложенный пешеходный разовый, должен стать АКТИВНЫМ на сутки
-               (pass8_id, user2_id, 'DELAYED', 'ONETIME', ter1_id, null, now()
-               , now() + interval '1 minute', now() + interval '1 day', 'should be ACTIVE', null, person2_id, 'WALK');
+               (pass8_id, user2_id, 'DELAYED', 'ONETIME', ter1_id, null, nowDT
+               , nowDT + interval '1 minute', nowDT + interval '1 day', 'should be ACTIVE', null, person2_id, 'WALK');
 
         INSERT INTO crossings (pass_id, checkpoint_id, local_date_time, direction)
-        VALUES (pass6_id, chp1_id, now(), 'IN'),
-               (pass7_id, chp1_id, now() - interval '1 minute', 'IN'),
-               (pass7_id, chp1_id, now(), 'OUT');
+        VALUES (pass6_id, chp1_id, nowDT, 'IN'),
+               (pass7_id, chp1_id, nowDT - interval '1 minute', 'IN'),
+               (pass7_id, chp1_id, nowDT, 'OUT');
     END $$;
 
