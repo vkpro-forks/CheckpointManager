@@ -49,3 +49,8 @@ databaseChangeLog:
       file: liquibase/scripts/V_74__delete_fk_model_and_all_model_add_data_brands.sql
   - include:
       file: liquibase/scripts/V_76__fixChecpoints_fixAvatarsFK.sql
+
+
+## ВНЕСЕНИЕ ДЕМО-ДАННЫХ, ОСТАВЛЯЙТЕ ВСЕГДА В КОНЦЕ ФАЙЛА
+  - include:
+      file: liquibase/insert_demo_data.sql

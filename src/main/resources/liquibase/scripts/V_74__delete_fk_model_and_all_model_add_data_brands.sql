@@ -46,19 +46,3 @@ CREATE TABLE car_brand (
 -- changeset x3imal:74.6
 ALTER TABLE cars ADD CONSTRAINT cars_brand_id_fkey FOREIGN KEY (brand_id) REFERENCES car_brand(id);
 
--- changeset x3imal:74.7
--- Добавляем новые бренды
-INSERT INTO car_brand (brand) VALUES ('Toyota');
-INSERT INTO car_brand (brand) VALUES ('Ford');
-INSERT INTO car_brand (brand) VALUES ('Honda');
-INSERT INTO car_brand (brand) VALUES ('Nissan');
-INSERT INTO car_brand (brand) VALUES ('Chevrolet');
-INSERT INTO car_brand (brand) VALUES ('Volkswagen');
-INSERT INTO car_brand (brand) VALUES ('Hyundai');
-INSERT INTO car_brand (brand) VALUES ('BMW');
-INSERT INTO car_brand (brand) VALUES ('Mercedes-Benz');
-INSERT INTO car_brand (brand) VALUES ('Audi');
-INSERT INTO car_brand (brand) VALUES ('Kia');
-INSERT INTO car_brand (brand) VALUES ('Jeep');
-INSERT INTO car_brand (brand) VALUES ('Subaru');
-INSERT INTO car_brand (brand) VALUES ('Mazda');
