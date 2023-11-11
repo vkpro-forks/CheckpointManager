@@ -72,7 +72,7 @@ public class PassServiceImpl implements PassService{
     @Override
     public List<Pass> findPasses() {
         log.debug("Method {}", MethodLog.getMethodName());
-        return repository.findAll();
+        return sortPassListBeforeSend(repository.findAll());
     }
 
     @Override
@@ -93,7 +93,8 @@ public class PassServiceImpl implements PassService{
         if (foundPasses.isEmpty()) {
             throw new PassNotFoundException(String.format("For User [id=%s] not exist any passes", userId));
         }
-        return foundPasses;
+
+        return sortPassListBeforeSend(foundPasses);
     }
 
     @Override
@@ -104,15 +105,16 @@ public class PassServiceImpl implements PassService{
         if (foundPasses.isEmpty()) {
             throw new PassNotFoundException(String.format("For Territory [id=%s] not exist any Passes", terId));
         }
-        return foundPasses;
+        return sortPassListBeforeSend(foundPasses);
     }
 
     @Override
     public Pass updatePass(Pass pass) {
         log.info("Method {} [UUID - {}]", MethodLog.getMethodName(), pass.getId());
 
-        checkOverlapTime(pass);
         checkPassTime(pass);
+        checkUserTerritoryRelation(pass);
+        checkOverlapTime(pass);
 
         trimThemAll(pass);
 
@@ -264,6 +266,14 @@ public class PassServiceImpl implements PassService{
             log.info(message);
             throw new IllegalArgumentException(message);
         }
+    }
+
+    private List<Pass> sortPassListBeforeSend (List<Pass> source) {
+        //порядок статусов для сортировки списка
+        List<String> statusOrder = Arrays.asList("WARNING", "ACTIVE", "DELAYED", "COMPLETED", "OUTDATED", "CANCELLED");
+        source.sort(Comparator.comparingInt((Pass p) ->
+                statusOrder.indexOf(p.getStatus().toString())).thenComparing(Pass::getStartTime));
+        return source;
     }
 
     /**
