@@ -125,7 +125,7 @@ public class  CheckpointController {
     /* UPDATE */
     @Operation(summary = "Изменить существующий КПП")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "КПП успешно изменем",
+            @ApiResponse(responseCode = "200", description = "КПП успешно изменен",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CheckpointDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Неуспешная валидаци полей; не найдена указанная территория"),
