@@ -268,11 +268,22 @@ public class PassServiceImpl implements PassService{
         }
     }
 
+    /**
+     * Сортирует список найденных пропусков перед отправкой по статусу (порядок задается списком {@code statusOrder},
+     * при одинаковом статусе в хронологическом порядке по значению поля startTime
+     * @param source список найденных пропусков
+     * @return отсортированный список
+     */
     private List<Pass> sortPassListBeforeSend (List<Pass> source) {
-        //порядок статусов для сортировки списка
-        List<String> statusOrder = Arrays.asList("WARNING", "ACTIVE", "DELAYED", "COMPLETED", "OUTDATED", "CANCELLED");
+        List<PassStatus> statusOrder = List.of(
+                PassStatus.WARNING,
+                PassStatus.ACTIVE,
+                PassStatus.DELAYED,
+                PassStatus.COMPLETED,
+                PassStatus.OUTDATED,
+                PassStatus.CANCELLED);
         source.sort(Comparator.comparingInt((Pass p) ->
-                statusOrder.indexOf(p.getStatus().toString())).thenComparing(Pass::getStartTime));
+                statusOrder.indexOf(p.getStatus())).thenComparing(Pass::getStartTime));
         return source;
     }
 
