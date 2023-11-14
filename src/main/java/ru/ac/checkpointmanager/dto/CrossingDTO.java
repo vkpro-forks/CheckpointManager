@@ -16,7 +16,6 @@ public class CrossingDTO {
     @NotNull
     private UUID checkpointId;
 
-    @NotNull
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private LocalDateTime localDateTime;
 
