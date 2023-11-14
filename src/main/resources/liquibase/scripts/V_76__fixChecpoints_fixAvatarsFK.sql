@@ -1,16 +1,5 @@
 -- liquibase formatted sql
 
--- changeset x3imal:76
-UPDATE checkpoints
-SET type = 'WALK'
-WHERE type = 'PEDESTRIAN';
-
--- changeset x3imal:76.1
-DELETE
-FROM checkpoints
-WHERE type = 'AUTO'
-  AND name = 'kpp4';
-
 -- changeset x3imal:76.2
 DROP TABLE IF EXISTS avatars;
 CREATE TABLE avatars
