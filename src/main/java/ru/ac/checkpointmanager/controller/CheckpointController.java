@@ -34,19 +34,20 @@ import java.util.UUID;
 @ApiResponses(value = {@ApiResponse(responseCode = "401", description = "UNAUTHORIZED: пользователь не авторизован"),
         @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса")})
 @SecurityRequirement(name = "bearerAuth")
-@PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
 public class  CheckpointController {
 
     private final CheckpointService service;
     private final Mapper mapper;
 
     /* CREATE */
-    @Operation(summary = "Добавить новый КПП")
+    @Operation(summary = "Добавить новый КПП",
+            description = "Доступ: ADMIN.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "КПП успешно добавлен",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CheckpointDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Неуспешная валидаци полей; не найдена указанная территория")})
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @PostMapping
     public ResponseEntity<?> addCheckpoint(@RequestBody @Valid CheckpointDTO checkpointDTO,
                                                        BindingResult bindingResult) {
@@ -59,12 +60,14 @@ public class  CheckpointController {
     }
 
     /* READ */
-    @Operation(summary = "Найти КПП по id")
+    @Operation(summary = "Найти КПП по id",
+            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "КПП найден",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CheckpointDTO.class))}),
             @ApiResponse(responseCode = "404", description = "КПП не найден")})
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @GetMapping("/{id}")
     public ResponseEntity<CheckpointDTO> getCheckpoint(@PathVariable("id") UUID id) {
         Checkpoint foundCheckpoint = service.findCheckpointById(id);
@@ -74,12 +77,14 @@ public class  CheckpointController {
         return ResponseEntity.ok(mapper.toCheckpointDTO(foundCheckpoint));
     }
 
-    @Operation(summary = "Найти список КПП по названию")
+    @Operation(summary = "Найти список КПП по названию",
+            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "КПП найдены",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = CheckpointDTO.class)))),
             @ApiResponse(responseCode = "404", description = "КПП не найдены")})
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @GetMapping("/name")
     public ResponseEntity<List<CheckpointDTO>> getCheckpointsByName(@Parameter(description = "Часть названия")
                                                                     @RequestParam String name) {
@@ -90,12 +95,14 @@ public class  CheckpointController {
         return ResponseEntity.ok(mapper.toCheckpointsDTO(checkpoints));
     }
 
-    @Operation(summary = "Получить список всех КПП")
+    @Operation(summary = "Получить список всех КПП",
+            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "КПП найдены",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = CheckpointDTO.class)))),
             @ApiResponse(responseCode = "404", description = "КПП не найдены")})
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @GetMapping
     public ResponseEntity<List<CheckpointDTO>> getCheckpoints() {
         List<Checkpoint> checkpoints = service.findAllCheckpoints();
@@ -105,13 +112,15 @@ public class  CheckpointController {
         return ResponseEntity.ok(mapper.toCheckpointsDTO(checkpoints));
     }
 
-    @Operation(summary = "Получить список КПП, привязанных к указанной территории")
+    @Operation(summary = "Получить список КПП, привязанных к указанной территории",
+            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "КПП найдены",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = CheckpointDTO.class)))),
             @ApiResponse(responseCode = "400", description = "Не найдена указанная территория"),
             @ApiResponse(responseCode = "404", description = "КПП не найдены")})
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @GetMapping("/territory/{territoryId}")
     public ResponseEntity<List<CheckpointDTO>> getCheckpointsByTerritoryId(@Parameter(description = "ID территории")
                                                                                @PathVariable UUID territoryId) {
@@ -123,13 +132,15 @@ public class  CheckpointController {
     }
 
     /* UPDATE */
-    @Operation(summary = "Изменить существующий КПП")
+    @Operation(summary = "Изменить существующий КПП",
+            description = "Доступ: ADMIN, MANAGER.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "КПП успешно изменен",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CheckpointDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Неуспешная валидаци полей; не найдена указанная территория"),
             @ApiResponse(responseCode = "404", description = "КПП не найден")})
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @PutMapping
     public ResponseEntity<?> editCheckpoint(@RequestBody @Valid CheckpointDTO checkpointDTO,
                                                         BindingResult bindingResult) {
@@ -142,10 +153,12 @@ public class  CheckpointController {
     }
 
     /* DELETE */
-    @Operation(summary = "Удалить КПП")
+    @Operation(summary = "Удалить КПП",
+            description = "Доступ: ADMIN.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "КПП успешно удален"),
             @ApiResponse(responseCode = "404", description = "КПП не найден")})
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @DeleteMapping("{id}")
     public ResponseEntity<Void> deleteCheckpoint(@PathVariable UUID id) {
 

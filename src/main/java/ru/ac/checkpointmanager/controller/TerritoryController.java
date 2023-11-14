@@ -35,19 +35,20 @@ import java.util.UUID;
 @ApiResponses(value = {@ApiResponse(responseCode = "401", description = "UNAUTHORIZED: пользователь не авторизован"),
         @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса")})
 @SecurityRequirement(name = "bearerAuth")
-@PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
 public class TerritoryController {
 
     private final TerritoryService service;
     private final Mapper mapper;
 
     /* CREATE */
-    @Operation(summary = "Добавить новую территорию")
+    @Operation(summary = "Добавить новую территорию",
+            description = "Доступ: ADMIN.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Территория успешно добавлена",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = TerritoryDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Неуспешная валидаци полей")})
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @PostMapping
     public ResponseEntity<?> addTerritory(@RequestBody @Valid TerritoryDTO territoryDTO,
                                            BindingResult bindingResult) {
@@ -60,12 +61,14 @@ public class TerritoryController {
     }
 
     /* READ */
-    @Operation(summary = "Найти ткрриторию по id")
+    @Operation(summary = "Найти территорию по id",
+            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Территория найдена",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = TerritoryDTO.class))}),
             @ApiResponse(responseCode = "404", description = "Территория не найдена")})
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @GetMapping("/{territoryId}")
     public ResponseEntity<TerritoryDTO> getTerritory(@PathVariable("territoryId") UUID territoryId) {
         Territory territory = service.findTerritoryById(territoryId);
@@ -73,12 +76,14 @@ public class TerritoryController {
         return ResponseEntity.ok(mapper.toTerritoryDTO(territory));
     }
 
-    @Operation(summary = "Найти список пользователей, привязанных к территории")
+    @Operation(summary = "Найти список пользователей, привязанных к территории",
+            description = "Доступ: ADMIN, MANAGER.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пользователи найдены",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = UserDTO.class)))),
             @ApiResponse(responseCode = "404", description = "Территория или пользователи не найдены")})
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @GetMapping("/{territoryId}/users")
     public ResponseEntity<List<UserDTO>> getUsersByTerritory(@PathVariable UUID territoryId) {
         List<User> users = service.findUsersByTerritoryId(territoryId);
@@ -86,12 +91,14 @@ public class TerritoryController {
         return ResponseEntity.ok(mapper.toUsersDTO(users));
     }
 
-    @Operation(summary = "Найти список территорий по названию")
+    @Operation(summary = "Найти список территорий по названию",
+            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Территории найдены",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = TerritoryDTO.class)))),
             @ApiResponse(responseCode = "404", description = "Территории не найдены")})
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @GetMapping("/name")
     public ResponseEntity<List<TerritoryDTO>> getTerritoriesByName(@RequestParam String name) {
         List<Territory> territories = service.findTerritoriesByName(name);
@@ -101,12 +108,14 @@ public class TerritoryController {
         return ResponseEntity.ok(mapper.toTerritoriesDTO(territories));
     }
 
-    @Operation(summary = "Получить список всех территорий")
+    @Operation(summary = "Получить список всех территорий",
+            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Территории найдены",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = CheckpointDTO.class)))),
             @ApiResponse(responseCode = "404", description = "Территории не найдены")})
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @GetMapping
     public ResponseEntity<List<TerritoryDTO>> getTerritories() {
         List<Territory> territories = service.findAllTerritories();
@@ -117,13 +126,15 @@ public class TerritoryController {
     }
 
     /* UPDATE */
-    @Operation(summary = "Обновить данные территории")
+    @Operation(summary = "Обновить данные территории",
+            description = "Доступ: ADMIN, MANAGER.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Данные успешно изменены",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CheckpointDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Неуспешная валидаци полей"),
             @ApiResponse(responseCode = "404", description = "Территория не найдена")})
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @PutMapping
     public ResponseEntity<?> editTerritory(@RequestBody @Valid TerritoryDTO territoryDTO,
                                             BindingResult bindingResult) {
@@ -135,11 +146,13 @@ public class TerritoryController {
         return ResponseEntity.ok(mapper.toTerritoryDTO(updatedTerritory));
     }
 
-    @Operation(summary = "Прикрепить пользователя к территории (дать право создавать пропуска)")
+    @Operation(summary = "Прикрепить пользователя к территории (дать право создавать пропуска)",
+            description = "Доступ: ADMIN, MANAGER.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пользователь присоединен"),
             @ApiResponse(responseCode = "400", description = "Указанные пользователь и территория уже соединены"),
             @ApiResponse(responseCode = "404", description = "Пользователь или территория не найдены")})
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @PatchMapping("/{territoryId}/user/{userId}")
     public ResponseEntity<?> attachUserToTerritory(@PathVariable UUID territoryId,
                                                  @PathVariable UUID userId) {
@@ -149,10 +162,12 @@ public class TerritoryController {
     }
 
     /* DELETE */
-    @Operation(summary = "Удалить территорию")
+    @Operation(summary = "Удалить территорию",
+            description = "Доступ: ADMIN.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Территория удалена"),
             @ApiResponse(responseCode = "404", description = "Территория не найдена")})
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @DeleteMapping("{id}")
     public ResponseEntity<Void> deleteTerritory(@PathVariable UUID id) {
 
@@ -160,11 +175,13 @@ public class TerritoryController {
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "Открепить пользователя от территории (если утрачено право создавать пропуска)")
+    @Operation(summary = "Открепить пользователя от территории (если утрачено право создавать пропуска)",
+            description = "Доступ: ADMIN, MANAGER.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пользователь отсоединен"),
             @ApiResponse(responseCode = "400", description = "Указанные пользователь и территория не соединены"),
             @ApiResponse(responseCode = "404", description = "Пользователь или территория не найдены")})
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @DeleteMapping("/{territoryId}/user/{userId}")
     public ResponseEntity<?> detachUserFromTerritory(@PathVariable UUID territoryId,
                                                  @PathVariable UUID userId) {
