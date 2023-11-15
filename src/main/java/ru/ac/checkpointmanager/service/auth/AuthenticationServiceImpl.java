@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.configuration.JwtService;
 import ru.ac.checkpointmanager.dto.*;
 import ru.ac.checkpointmanager.exception.DateOfBirthFormatException;
-import ru.ac.checkpointmanager.exception.InvalidPhoneNumberException;
 import ru.ac.checkpointmanager.exception.PhoneAlreadyExistException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.model.TemporaryUser;
@@ -38,9 +37,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static ru.ac.checkpointmanager.model.enums.PhoneNumberType.MOBILE;
-import static ru.ac.checkpointmanager.utils.FieldsValidation.*;
-
 /**
  * Сервис регистрации и аутентификации пользователей.
  *
@@ -51,7 +47,6 @@ import static ru.ac.checkpointmanager.utils.FieldsValidation.*;
 @Slf4j
 public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserRepository userRepository;
-    private final PhoneService phoneService;
     private final TokenRepository tokenRepository;
     private final JwtService jwtService;
     private final EmailService emailService;
@@ -97,25 +92,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new IllegalStateException(String.format("Email %s already taken", userAuthDTO.getEmail()));
         }
 
-        if (!validateDOB(userAuthDTO.getDateOfBirth())) {
-            log.warn("Invalid date of birth");
-            throw new DateOfBirthFormatException("Date of birth should not be greater than the current date");
-        }
-
-        String cleanedPhoneNumber = cleanPhone(userAuthDTO.getMainNumber());
-        if (!isValidPhoneNumber(cleanedPhoneNumber)) {
-            log.warn("Invalid phone number");
-            throw new InvalidPhoneNumberException(String.format("Phone number %s contains invalid characters", userAuthDTO.getMainNumber()));
-        }
-
-        if (phoneService.existsByNumber(cleanedPhoneNumber)) {
-            log.warn("Phone {} already taken", cleanedPhoneNumber);
-            throw new PhoneAlreadyExistException(String.format
-                    ("Phone number %s already exist", cleanedPhoneNumber));
-        }
-
         TemporaryUser temporaryUser = mapper.toTemporaryUser(userAuthDTO);
-        temporaryUser.setMainNumber(cleanedPhoneNumber);
 
         String encodedPassword = passwordEncoder.encode(temporaryUser.getPassword());
         temporaryUser.setPassword(encodedPassword);
@@ -173,22 +150,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             saveUserToken(user, jwtToken);
             log.debug("Access token for {} created and saved", user.getEmail());
 
-            PhoneDTO phoneDTO = createPhoneDTO(user);
-            phoneService.createPhoneNumber(phoneDTO);
-            log.debug("Phone {} for {} saved", user.getMainNumber(), user.getEmail());
         } else {
             log.error("Email not confirmed. Error: temporary user with token {} not found", token);
             throw new UserNotFoundException(String.format("User with token - '%s', not found  ", token));
         }
-    }
-
-    private PhoneDTO createPhoneDTO(User user) {
-        log.info("Method {} was invoked", MethodLog.getMethodName());
-        PhoneDTO phoneDTO = new PhoneDTO();
-        phoneDTO.setUserId(user.getId());
-        phoneDTO.setNumber(user.getMainNumber());
-        phoneDTO.setType(MOBILE);
-        return phoneDTO;
     }
 
     @Override

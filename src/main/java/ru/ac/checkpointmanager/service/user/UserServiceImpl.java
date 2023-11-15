@@ -30,8 +30,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static ru.ac.checkpointmanager.utils.FieldsValidation.cleanPhone;
-import static ru.ac.checkpointmanager.utils.FieldsValidation.validateDOB;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -81,10 +79,6 @@ public class UserServiceImpl implements UserService {
         User foundUser = userRepository.findById(userDTO.getId())
                 .orElseThrow(() -> new UserNotFoundException(
                         String.format("User not found [id=%s]", userDTO.getId())));
-        if (!validateDOB(userDTO.getDateOfBirth())) {
-            log.warn("Invalid date of birth");
-            throw new DateOfBirthFormatException("Date of birth should not be greater than the current date");
-        }
 
         if (!findUsersPhoneNumbers(userDTO.getId()).contains(cleanPhone(userDTO.getMainNumber()))) {
             log.warn("Phone {} does not exist", userDTO.getMainNumber());
@@ -92,7 +86,6 @@ public class UserServiceImpl implements UserService {
                     ("Phone number %s does not exist", userDTO.getMainNumber()));
         }
         foundUser.setFullName(userDTO.getFullName());
-        foundUser.setDateOfBirth(userDTO.getDateOfBirth());
         foundUser.setMainNumber(cleanPhone(userDTO.getMainNumber()));
 //        foundUser.setEmail(userDTO.getEmail()); TODO: добавить отдельную ручку для смены почты
 

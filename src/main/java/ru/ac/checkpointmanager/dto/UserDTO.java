@@ -7,10 +7,8 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-import ru.ac.checkpointmanager.model.Avatar;
 import ru.ac.checkpointmanager.model.enums.Role;
 
-import java.time.LocalDate;
 import java.util.UUID;
 
 @Getter
@@ -26,9 +24,6 @@ public class UserDTO {
                     "Example: \"Ivanov Ivan Jovanovich\"")
     private String fullName;
 
-    private LocalDate dateOfBirth;
-
-    @NotEmpty
     @Size(min = 11, max = 20)
     private String mainNumber;
 

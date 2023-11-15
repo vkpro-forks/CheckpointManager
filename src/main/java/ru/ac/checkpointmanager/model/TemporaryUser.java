@@ -34,9 +34,6 @@ public class TemporaryUser {
     @Column(name = "full_name")
     private String fullName;
 
-    @Column(name = "date_of_birth")
-    private LocalDate dateOfBirth;
-
     @Column(name = "main_number")
     private String mainNumber;
 
