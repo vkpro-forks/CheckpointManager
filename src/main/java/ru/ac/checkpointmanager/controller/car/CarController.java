@@ -102,4 +102,16 @@ public class CarController {
         }
         return ResponseEntity.ok(mapper.toCarDTO(carList));
     }
+
+    @Operation(summary = "Найти машины из пропусков пользователя")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Возвращен список машин"),
+            @ApiResponse(responseCode = "404", description = "Пользователь не найден"),
+    })
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<CarDTO>> searchByUserId(@PathVariable UUID userId) {
+        List<Car> cars = carService.findByUserId(userId);
+        List<CarDTO> carDTOs = mapper.toCarDTO(cars);
+        return new ResponseEntity<>(carDTOs, HttpStatus.OK);
+    }
 }
