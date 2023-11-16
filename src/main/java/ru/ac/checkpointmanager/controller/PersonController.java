@@ -126,4 +126,16 @@ public class PersonController {
         }
         return new ResponseEntity<>("There is no such person in any pass! ", HttpStatus.NOT_FOUND);
     }
+
+    @Operation(summary = "Найти личности из пропусков пользователя")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Возвращен список личностей"),
+            @ApiResponse(responseCode = "404", description = "Пользователь не найден"),
+    })
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<PersonDTO>> searchByUserId(@PathVariable UUID userId) {
+        List<Person> persons = personService.findByUserId(userId);
+        List<PersonDTO> personDTOs = mapper.toPersonDTO(persons);
+        return new ResponseEntity<>(personDTOs, HttpStatus.OK);
+    }
 }

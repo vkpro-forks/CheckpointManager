@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import ru.ac.checkpointmanager.exception.PersonNotFoundException;
 import ru.ac.checkpointmanager.model.Person;
 import ru.ac.checkpointmanager.repository.PersonRepository;
+import ru.ac.checkpointmanager.service.user.UserService;
+import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,7 +18,8 @@ import java.util.UUID;
 @Slf4j
 public class PersonServiceImpl implements PersonService {
 
-    private final PersonRepository personRepository;
+    private final PersonRepository repository;
+    private final UserService userService;
 
     @Override
     public Person addPerson(Person person) {
@@ -25,7 +28,7 @@ public class PersonServiceImpl implements PersonService {
             throw new IllegalArgumentException("Person cannot be null");
         }
         log.info("Adding new Person: {}", person);
-        return personRepository.save(person);
+        return repository.save(person);
     }
 
     @Override
@@ -34,7 +37,7 @@ public class PersonServiceImpl implements PersonService {
             log.warn("Attempt to get Person with null UUID");
             throw new IllegalArgumentException("UUID cannot be null");
         }
-        Optional<Person> personOptional = personRepository.findById(uuid);
+        Optional<Person> personOptional = repository.findById(uuid);
         return personOptional.orElseThrow(() -> {
             log.warn("Person not found for UUID: {}", uuid);
             return new PersonNotFoundException("Person not found");
@@ -52,7 +55,7 @@ public class PersonServiceImpl implements PersonService {
         existPerson.setName(person.getName());
         existPerson.setPhone(person.getPhone());
         existPerson.setNote(person.getNote());
-        return personRepository.save(existPerson);
+        return repository.save(existPerson);
     }
 
     @Override
@@ -63,7 +66,7 @@ public class PersonServiceImpl implements PersonService {
         }
         Person existPerson = getPerson(uuid);
         log.info("Deleting Person with UUID: {}", uuid);
-        personRepository.delete(existPerson);
+        repository.delete(existPerson);
     }
 
     @Override
@@ -73,7 +76,7 @@ public class PersonServiceImpl implements PersonService {
             throw new IllegalArgumentException("Name part cannot be null or empty");
         }
         log.info("Searching for Persons with name containing: {}", name);
-        return personRepository.findByNameContainingIgnoreCase(name);
+        return repository.findByNameContainingIgnoreCase(name);
     }
 
     @Override
@@ -83,7 +86,7 @@ public class PersonServiceImpl implements PersonService {
             throw new IllegalArgumentException("Phone part cannot be null or empty");
         }
         log.info("Searching for Persons with phone containing: {}", phone);
-        return personRepository.findByPhoneContaining(phone);
+        return repository.findByPhoneContaining(phone);
     }
 
     @Override
@@ -93,6 +96,16 @@ public class PersonServiceImpl implements PersonService {
             throw new IllegalArgumentException("Pass ID cannot be null");
         }
         log.info("Searching for Person with Pass ID: {}", passId);
-        return personRepository.findPersonByPasses_Id(passId);
+        return repository.findPersonByPasses_Id(passId);
+    }
+
+    @Override
+    public List<Person> findByUserId(UUID userId) {
+        log.debug("Method {} [UUID - {}]", MethodLog.getMethodName(), userId);
+        userService.findById(userId);
+
+        List<Person> foundPersons = repository.findPersonsByUserId(userId);
+        log.debug("Find {} persons for user [UUID - {}]", foundPersons.size(), userId);
+        return foundPersons;
     }
 }
