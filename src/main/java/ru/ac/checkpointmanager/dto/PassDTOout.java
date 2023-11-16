@@ -30,6 +30,8 @@ public class PassDTOout {
 
     private String dtype;
 
+    private Boolean favorite;
+
     private PersonDTO person;
 
     private CarDTO car;

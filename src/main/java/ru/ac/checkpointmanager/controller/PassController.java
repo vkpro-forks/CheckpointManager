@@ -176,6 +176,26 @@ public class PassController {
         return ResponseEntity.ok(mapper.toPassDTO(completedPass));
     }
 
+    @Operation(summary = "Отметить пропуск как избранный")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Отмечен"),
+            @ApiResponse(responseCode = "404", description = "Не найден")})
+    @PatchMapping("{id}/favorite")
+    public ResponseEntity<Void> markFavorite(@PathVariable UUID id) {
+        service.markFavorite(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Отметить пропуск как НЕизбранный")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Отмечен"),
+            @ApiResponse(responseCode = "404", description = "Не найден")})
+    @PatchMapping("{id}/not_favorite")
+    public ResponseEntity<Void> unmarkFavorite(@PathVariable UUID id) {
+        service.unmarkFavorite(id);
+        return ResponseEntity.ok().build();
+    }
+
     /* DELETE */
     @Operation(summary = "Удалить пропуск")
     @ApiResponses(value = {

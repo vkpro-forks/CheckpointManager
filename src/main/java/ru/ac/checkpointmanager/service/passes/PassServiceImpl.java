@@ -202,6 +202,24 @@ public class PassServiceImpl implements PassService{
     }
 
     @Override
+    public void markFavorite(UUID id) {
+        log.info("Method {} [UUID - {}]", MethodLog.getMethodName(), id);
+        Pass pass = findPass(id);
+        pass.setFavorite(true);
+        repository.save(pass);
+        log.info("Pass [UUID - {}] marked favorite", id);
+    }
+
+    @Override
+    public void unmarkFavorite(UUID id) {
+        log.info("Method {} [UUID - {}]", MethodLog.getMethodName(), id);
+        Pass pass = findPass(id);
+        pass.setFavorite(false);
+        repository.save(pass);
+        log.info("Pass [UUID - {}] unmarked favorite", id);
+    }
+
+    @Override
     public void deletePass(UUID id) {
         log.info("Method {} [UUID - {}]", MethodLog.getMethodName(), id);
         if (repository.findById(id).isEmpty()) {

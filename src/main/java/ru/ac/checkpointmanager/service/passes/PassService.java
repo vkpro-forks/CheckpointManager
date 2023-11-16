@@ -25,6 +25,10 @@ public interface PassService {
 
     Pass unWarningPass(UUID id);
 
+    void markFavorite(UUID id);
+
+    void unmarkFavorite(UUID id);
+
     void deletePass(UUID id);
 
 }
