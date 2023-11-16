@@ -53,14 +53,14 @@ DO $$
                (chp3_id, 'kpp3', 'WALK',        'тер1 - пешех',     nowDT, ter1_id),
                (chp4_id, 'kpp4', 'UNIVERSAL',   'тер2 - универс',   nowDT, ter2_id);
 
-        INSERT INTO users (id, full_name, date_of_birth, email, password, is_blocked, role, main_number, added_at)
-        VALUES (user1_id, 'User', '2000-10-10', 'user@chp.com',
+        INSERT INTO users (id, full_name, email, password, is_blocked, role, main_number, added_at)
+        VALUES (user1_id, 'User', 'user@chp.com',
                 '$2a$12$Zl8XNWuzG9QZmXHHZjtvdufgbzbu2jbBpQqhVeaj6RYQmgB5acIX2', false, 'USER', '89997776655', '2023-09-25'),
-               (user2_id, 'Manager', '1999-10-10', 'manager@chp.com',
+               (user2_id, 'Manager', 'manager@chp.com',
                 '$2a$12$Zl8XNWuzG9QZmXHHZjtvdufgbzbu2jbBpQqhVeaj6RYQmgB5acIX2', false, 'MANAGER', '89997776654', '2023-09-25'),
-               (user3_id, 'Admin', '1998-10-10', 'admin@chp.com',
+               (user3_id, 'Admin', 'admin@chp.com',
                 '$2a$12$Zl8XNWuzG9QZmXHHZjtvdufgbzbu2jbBpQqhVeaj6RYQmgB5acIX2', false, 'ADMIN', '89897776653', '2023-09-25'),
-               (user4_id, 'Security', '1998-10-10', 'security@chp.com',
+               (user4_id, 'Security', 'security@chp.com',
                 '$2a$12$Zl8XNWuzG9QZmXHHZjtvdufgbzbu2jbBpQqhVeaj6RYQmgB5acIX2', false, 'SECURITY', '89117776653', '2023-09-25');
 
         insert into user_territory (user_id, territory_id)

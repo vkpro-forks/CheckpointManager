@@ -2,6 +2,7 @@ package ru.ac.checkpointmanager.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
+import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -12,7 +13,7 @@ public class PassDTOout {
 
     private UUID id;
 
-    private UserDTO user;
+    private UserResponseDTO user;
 
     String name;
 

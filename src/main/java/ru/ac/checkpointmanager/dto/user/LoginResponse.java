@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.dto;
+package ru.ac.checkpointmanager.dto.user;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;

@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.ChangePasswordRequest;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
-import ru.ac.checkpointmanager.dto.UserDTO;
-import ru.ac.checkpointmanager.exception.DateOfBirthFormatException;
+import ru.ac.checkpointmanager.dto.user.UserPutDTO;
+import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.exception.PhoneNumberNotFoundException;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
@@ -20,7 +20,6 @@ import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
-import ru.ac.checkpointmanager.service.avatar.AvatarService;
 import ru.ac.checkpointmanager.utils.Mapper;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
@@ -30,6 +29,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static ru.ac.checkpointmanager.utils.FieldsValidation.cleanPhone;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -42,7 +42,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public UserDTO findById(UUID id) {
+    public UserResponseDTO findById(UUID id) {
         log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), id);
         User foundUser = userRepository.findById(id).orElseThrow(
                 () -> new UserNotFoundException(String.format("User not found [id=%s]", id)));
@@ -61,33 +61,37 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Collection<UserDTO> findByName(String name) {
+    public Collection<UserResponseDTO> findByName(String name) {
         log.info("Method {} was invoked", MethodLog.getMethodName());
-        Collection<UserDTO> userDTOS = mapper.toUsersDTO(userRepository
+        Collection<UserResponseDTO> userResponseDTOS = mapper.toUsersDTO(userRepository
                 .findUserByFullNameContainingIgnoreCase(name));
 
-        if (userDTOS.isEmpty()) {
+        if (userResponseDTOS.isEmpty()) {
             log.debug("here is no user with name containing {}", name);
             throw new UserNotFoundException("There is no user with name containing " + name);
         }
-        return userDTOS;
+        return userResponseDTOS;
     }
 
     @Override
-    public UserDTO updateUser(UserDTO userDTO) {
-        log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), userDTO.getId());
-        User foundUser = userRepository.findById(userDTO.getId())
+    public UserResponseDTO updateUser(UserPutDTO userPutDTO) {
+        log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), userPutDTO.getId());
+        User foundUser = userRepository.findById(userPutDTO.getId())
                 .orElseThrow(() -> new UserNotFoundException(
-                        String.format("User not found [id=%s]", userDTO.getId())));
+                        String.format("User not found [id=%s]", userPutDTO.getId())));
 
-        if (!findUsersPhoneNumbers(userDTO.getId()).contains(cleanPhone(userDTO.getMainNumber()))) {
-            log.warn("Phone {} does not exist", userDTO.getMainNumber());
-            throw new PhoneNumberNotFoundException(String.format
-                    ("Phone number %s does not exist", userDTO.getMainNumber()));
+        if (userPutDTO.getFullName() != null) {
+            foundUser.setFullName(userPutDTO.getFullName());
         }
-        foundUser.setFullName(userDTO.getFullName());
-        foundUser.setMainNumber(cleanPhone(userDTO.getMainNumber()));
-//        foundUser.setEmail(userDTO.getEmail()); TODO: добавить отдельную ручку для смены почты
+
+        if (userPutDTO.getMainNumber() != null && !userPutDTO.getMainNumber().isEmpty()) {
+            if (!findUsersPhoneNumbers(userPutDTO.getId()).contains(cleanPhone(userPutDTO.getMainNumber()))) {
+                log.warn("Phone {} does not exist", userPutDTO.getMainNumber());
+                throw new PhoneNumberNotFoundException(String.format
+                        ("Phone number %s does not exist", userPutDTO.getMainNumber()));
+            }
+            foundUser.setMainNumber(cleanPhone(userPutDTO.getMainNumber()));
+        }
 
         userRepository.save(foundUser);
         log.debug("User {} saved", foundUser.getId());
@@ -142,7 +146,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDTO updateBlockStatus(UUID id, Boolean isBlocked) {
+    public UserResponseDTO updateBlockStatus(UUID id, Boolean isBlocked) {
         log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), id);
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(String.format("User not found [Id=%s]", id)));
@@ -195,19 +199,18 @@ public class UserServiceImpl implements UserService {
         }
         userRepository.deleteById(id);
         log.debug("User {} successfully deleted", id);
-        log.debug("Users {} avatar successfully deleted", id);
     }
 
     @Override
-    public Collection<UserDTO> getAll() {
+    public Collection<UserResponseDTO> getAll() {
         log.debug("Method {}", MethodLog.getMethodName());
-        Collection<UserDTO> userDTOS = mapper.toUsersDTO(userRepository.findAll());
+        Collection<UserResponseDTO> userResponseDTOS = mapper.toUsersDTO(userRepository.findAll());
 
-        if (userDTOS.isEmpty()) {
+        if (userResponseDTOS.isEmpty()) {
             log.warn("There is no user in DB");
             throw new UserNotFoundException("There is no user in DB");
         }
-        return userDTOS;
+        return userResponseDTOS;
     }
 
     @Override

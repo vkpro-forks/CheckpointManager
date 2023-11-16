@@ -16,8 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.configuration.JwtService;
 import ru.ac.checkpointmanager.dto.*;
-import ru.ac.checkpointmanager.exception.DateOfBirthFormatException;
-import ru.ac.checkpointmanager.exception.PhoneAlreadyExistException;
+import ru.ac.checkpointmanager.dto.user.LoginResponse;
+import ru.ac.checkpointmanager.dto.user.UserAuthDTO;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.model.TemporaryUser;
 import ru.ac.checkpointmanager.model.Token;
@@ -27,7 +27,6 @@ import ru.ac.checkpointmanager.model.enums.TokenType;
 import ru.ac.checkpointmanager.repository.TokenRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.service.email.EmailService;
-import ru.ac.checkpointmanager.service.phone.PhoneService;
 import ru.ac.checkpointmanager.service.user.TemporaryUserService;
 import ru.ac.checkpointmanager.utils.Mapper;
 import ru.ac.checkpointmanager.utils.MethodLog;
@@ -60,12 +59,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     /**
      * Предварительная регистрация нового пользователя в системе.
      * <p>
-     * Метод проверяет отсутствие в базе данных указанных электронной почты и номера телефона,
-     * валидность даты рождения.
+     * Метод проверяет отсутствие электронной почты в базе данных.
      * <p>
      * Если все проверки пройдены успешно, создается объект {@code TemporaryUser} на основе переданного объекта {@code UserAuthDTO}.
-     * Номер телефона очищается от лишних символов, пароль пользователя шифруется с помощью {@link org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder},
-     * устанавливается дата и время создания.
+     * Пароль пользователя шифруется с помощью {@link org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder},
+     * устанавливается время создания.
      * Генерируется уникальный токен для верификации, который прикрепляется к письму и отправляется на электронную почту пользователя.
      * Если письмо не отправляется, регистрируется ошибка при отправке.
      * <p>
@@ -74,8 +72,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
      * @param userAuthDTO объект передачи данных пользователя.
      * @return TemporaryUser, представляющий предварительно зарегистрированного пользователя.
      * @throws IllegalStateException      если пользователь с указанным email уже существует.
-     * @throws DateOfBirthFormatException если указанная дата рождения больше текущей даты.
-     * @throws PhoneAlreadyExistException если указанный номер телефона уже занят.
      * @throws MailSendException          если отправка письма с токеном подтверждения не удалась.
      * @see TemporaryUser
      * @see UserAuthDTO

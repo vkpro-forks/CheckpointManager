@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.dto;
+package ru.ac.checkpointmanager.dto.user;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
@@ -21,9 +21,6 @@ public class UserAuthDTO {
             message = "The name has to start with a capital letter and contain only Latin or Cyrillic letters.\n" +
                     "Example: \"Ivanov Ivan Jovanovich\"")
     private String fullName;
-
-    @Size(min = 11, max = 20)
-    private String mainNumber;
 
     @Email
     @NotEmpty(message = "Email should not be empty")

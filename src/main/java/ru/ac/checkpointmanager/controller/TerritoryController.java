@@ -12,7 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
-import ru.ac.checkpointmanager.dto.UserDTO;
+import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.service.territories.TerritoryService;
@@ -56,7 +56,7 @@ public class TerritoryController {
     }
 
     @GetMapping("/{territoryId}/users")
-    public ResponseEntity<List<UserDTO>> getUsersByTerritory(@PathVariable UUID territoryId) {
+    public ResponseEntity<List<UserResponseDTO>> getUsersByTerritory(@PathVariable UUID territoryId) {
         List<User> users = service.findUsersByTerritoryId(territoryId);
 
         return ResponseEntity.ok(mapper.toUsersDTO(users));

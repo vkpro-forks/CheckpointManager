@@ -20,7 +20,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.ac.checkpointmanager.dto.ChangePasswordRequest;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
-import ru.ac.checkpointmanager.dto.UserDTO;
+import ru.ac.checkpointmanager.dto.user.UserPutDTO;
+import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.service.user.UserService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
@@ -54,7 +55,7 @@ public class UserController {
                     responseCode = "200",
                     description = "OK: возвращается найденный пользователь",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = UserDTO.class),
+                            schema = @Schema(implementation = UserResponseDTO.class),
                             examples = {
                                     @ExampleObject(value = "{\n\"id\": \"123e4567-e89b-12d3-a456-426614174001\",\n\"name\": \"John Doe\",\n\"email\": \"john.doe@example.com\"\n}")
                             })
@@ -66,10 +67,10 @@ public class UserController {
     })
     @PreAuthorize(value = "hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("{id}")
-    public ResponseEntity<UserDTO> findUserById(@Parameter(description = "Уникальный идентификатор пользователя", required = true)
+    public ResponseEntity<UserResponseDTO> findUserById(@Parameter(description = "Уникальный идентификатор пользователя", required = true)
                                                 @PathVariable UUID id
     ) {
-        Optional<UserDTO> user = Optional.ofNullable(userService.findById(id));
+        Optional<UserResponseDTO> user = Optional.ofNullable(userService.findById(id));
         return user.map(ResponseEntity::ok).orElse(ResponseEntity.noContent().build());
     }
 
@@ -105,7 +106,7 @@ public class UserController {
                     responseCode = "200",
                     description = "OK: возвращает список пользователей, имена которых содержат указанный в параметрах запроса элемент",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            array = @ArraySchema(schema = @Schema(implementation = UserDTO.class)))
+                            array = @ArraySchema(schema = @Schema(implementation = UserResponseDTO.class)))
             ),
             @ApiResponse(
                     responseCode = "404",
@@ -114,10 +115,10 @@ public class UserController {
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/name")
-    public ResponseEntity<Collection<UserDTO>> findUserByName(@Parameter(description = "имя/часть имени", required = true)
+    public ResponseEntity<Collection<UserResponseDTO>> findUserByName(@Parameter(description = "имя/часть имени", required = true)
                                                               @RequestParam String name
     ) {
-        Collection<UserDTO> foundUsers = userService.findByName(name);
+        Collection<UserResponseDTO> foundUsers = userService.findByName(name);
         return foundUsers.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(foundUsers);
     }
 
@@ -129,7 +130,7 @@ public class UserController {
                     responseCode = "200",
                     description = "OK: возвращает список пользователей",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            array = @ArraySchema(schema = @Schema(implementation = UserDTO.class)))
+                            array = @ArraySchema(schema = @Schema(implementation = UserResponseDTO.class)))
             ),
             @ApiResponse(
                     responseCode = "403",
@@ -142,8 +143,8 @@ public class UserController {
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping()
-    public ResponseEntity<Collection<UserDTO>> getAll() {
-        Collection<UserDTO> foundUsers = userService.getAll();
+    public ResponseEntity<Collection<UserResponseDTO>> getAll() {
+        Collection<UserResponseDTO> foundUsers = userService.getAll();
         return foundUsers.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(foundUsers);
     }
 
@@ -179,7 +180,7 @@ public class UserController {
                     responseCode = "200",
                     description = "OK: данные пользователя успешно изменены",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = UserDTO.class))
+                            schema = @Schema(implementation = UserResponseDTO.class))
             ),
             @ApiResponse(
                     responseCode = "400",
@@ -200,12 +201,12 @@ public class UserController {
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER')")
     @PutMapping
-    public ResponseEntity<?> updateUser(@Valid @RequestBody UserDTO userDTO, BindingResult result
+    public ResponseEntity<?> updateUser(@Valid @RequestBody UserPutDTO userPutDTO, BindingResult result
     ) {
         if (result.hasErrors()) {
             return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
         }
-        UserDTO changedUser = userService.updateUser(userDTO);
+        UserResponseDTO changedUser = userService.updateUser(userPutDTO);
         return new ResponseEntity<>(changedUser, HttpStatus.OK);
     }
 
@@ -300,7 +301,7 @@ public class UserController {
                                                @Parameter(description = "Статус блокировки: true для блокировки пользователя, false для разблокировки", required = true)
                                                @RequestParam Boolean isBlocked
     ) {
-        UserDTO changedUser = userService.updateBlockStatus(id, isBlocked);
+        UserResponseDTO changedUser = userService.updateBlockStatus(id, isBlocked);
         return ResponseEntity.ok(changedUser);
     }
 
@@ -387,7 +388,7 @@ public class UserController {
     public ResponseEntity<Void> deleteUser(@Parameter(description = "Уникальный идентификатор пользователя", required = true)
                                            @PathVariable UUID id
     ) {
-        UserDTO foundUser = userService.findById(id);
+        UserResponseDTO foundUser = userService.findById(id);
         if (foundUser == null) {
             return ResponseEntity.noContent().build();
         }
