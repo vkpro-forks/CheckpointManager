@@ -42,7 +42,7 @@ public class PassServiceImpl implements PassService{
 
     @Override
     public Pass addPass(Pass pass) {
-        log.info("Method {} [UUID - {}]", MethodLog.getMethodName(), pass.getId());
+        log.info("Method {} [{}]", MethodLog.getMethodName(), pass);
 
         if (userRepository.findById(pass.getUser().getId()).isEmpty()) {
             throw new UserNotFoundException(String.format("User not found [id=%s]", pass.getUser().getId()));
@@ -62,9 +62,9 @@ public class PassServiceImpl implements PassService{
         } else {
             pass.setStatus(PassStatus.DELAYED);
         }
-
+        pass.setFavorite(false);
         Pass savedPass = repository.save(pass);
-        log.info("Pass saved, {}", pass);
+        log.info("Pass saved [{}]", savedPass);
 
         return savedPass;
     }
