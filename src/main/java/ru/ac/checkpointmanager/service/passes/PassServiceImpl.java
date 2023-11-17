@@ -62,7 +62,7 @@ public class PassServiceImpl implements PassService{
         } else {
             pass.setStatus(PassStatus.DELAYED);
         }
-        pass.setFavorite(false);
+
         Pass savedPass = repository.save(pass);
         log.info("Pass saved [{}]", savedPass);
 
@@ -128,9 +128,10 @@ public class PassServiceImpl implements PassService{
         foundPass.setNote(pass.getNote());
         foundPass.setStartTime(pass.getStartTime());
         foundPass.setEndTime(pass.getEndTime());
+        foundPass.setAttachedEntity(pass);
 
         Pass updatedPass = repository.save(foundPass);
-        log.info("Pass updated, {}", pass);
+        log.info("Pass updated, {}", updatedPass);
         
         return updatedPass;
     }

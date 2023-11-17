@@ -20,7 +20,6 @@ import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
-import ru.ac.checkpointmanager.service.avatar.AvatarService;
 import ru.ac.checkpointmanager.utils.Mapper;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
@@ -231,5 +230,10 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void assignAvatarToUser(UUID userId, Avatar avatar) {
         userRepository.setAvatarForUser(avatar, userId);
+    }
+
+    @Override
+    public User findByPassId(UUID passId) {
+        return userRepository.findByPassId(passId);
     }
 }

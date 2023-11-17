@@ -25,4 +25,6 @@ public interface TerritoryService {
     void deleteTerritoryById(UUID id);
 
     void detachUserFromTerritory(UUID territoryId, UUID userId);
+
+    Territory findByPassId(UUID passId);
 }

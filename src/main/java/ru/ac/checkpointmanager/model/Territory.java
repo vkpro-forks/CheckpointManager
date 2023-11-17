@@ -44,4 +44,13 @@ public class Territory {
     @JsonIgnore
     @OneToMany(mappedBy = "territory", fetch = FetchType.LAZY)
     private List<Pass> pass;
+
+    @Override
+    public String toString() {
+        return "Territory{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", note='" + note + '\'' +
+                '}';
+    }
 }

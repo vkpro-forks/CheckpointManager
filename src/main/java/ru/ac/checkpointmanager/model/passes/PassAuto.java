@@ -25,6 +25,11 @@ public class PassAuto extends Pass {
     }
 
     @Override
+    public void setAttachedEntity(Pass pass) {
+        this.car = ((PassAuto) pass).getCar();
+    }
+
+    @Override
     public String toString() {
         return this.getClass() + "{" +
                 super.toString() +
