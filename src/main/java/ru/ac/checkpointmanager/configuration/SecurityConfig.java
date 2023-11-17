@@ -99,6 +99,7 @@ public class SecurityConfig {
         config.setAllowedOrigins(Arrays.asList(
                 "http://localhost:3000", //Сонин локал (удалить потом)
                 "http://192.168.1.37:3000", //Сонин ip (удалить потом)
+                "http://192.168.31.74:3000", //Сони Ip (удалить потом)
                 "https://checkpoint-manager.ru",
                 "https://www.checkpoint-manager.ru",
                 "https://pipolapopala.github.io"

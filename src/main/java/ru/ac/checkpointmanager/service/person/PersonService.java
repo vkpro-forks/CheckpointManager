@@ -22,4 +22,5 @@ public interface PersonService {
 
     Optional<Person> findByPassId(UUID passId);
 
+    List<Person> findByUserId(UUID userId);
 }

@@ -1,19 +1,18 @@
--- предлагается выполнять эти две строки при необходимости обновления демо-данных
--- а также добавлять новые таблицы в транкейт
--- (альтернатива - дропать схему, чтобы все скрипты накатывались заново, а не только этот)
 /*
--- чтобы очистить таблицы перед внесением данных заново
-TRUNCATE TABLE crossings, passes, users, user_territory, cars, car_brand, persons, checkpoints, territories CASCADE;
--- чтобы ликвибейс запустил снова этот скрипт при запуске проекта
--- (не нужно выполнять при работе напрямую в бд через pgAdmin)
+предлагается при необходимости обновления демо-данных удалять строку из таблицы ликвибейса
+(не нужно выполнять при работе напрямую в бд через pgAdmin)
 DELETE FROM databasechangelog WHERE filename = 'liquibase/insert_demo_data.sql';
 */
+-- а также не забывайте добавлять новые таблицы в транкейт
+-- (альтернатива - дропать схему, чтобы все скрипты накатывались заново, а не только этот; можно будет сделать и так)
+
+TRUNCATE TABLE crossings, passes, users, user_territory, cars, car_brand, persons, checkpoints, territories CASCADE;
 
 DO $$
     DECLARE
         -- Объявление переменных
         -- замечено: при добавлении через Идею время ставится по гринвичу, и тогда изменение статусов работает как надо сразу
-        -- а через пгАдмин время ставится текущее как в системе, и тогда придется ждать 3 часа (в мск поясе)
+        -- а через пгАдмин (локально) время ставится текущее как в системе, и тогда придется ждать 3 часа (в мск поясе)
         -- поэтому при работе через пгАдмин (локально) надо ставить коррекцию в этой переменной ('3 hour')
         -- при этом через пгАдмин на СЕРВЕРЕ все правильно работает с '0 hour'
         nowDT timestamp = now() - interval '0 hour';
@@ -86,42 +85,42 @@ DO $$
                (person2_id, 'Дон Румата Эсторский', '+79991234568', null);
 
         INSERT INTO passes (id, user_id, status, type_time, territory_id, note, added_at
-                           , start_time, end_time, name, car_id, person_id, dtype)
+                           , start_time, end_time, name, car_id, person_id, dtype, favorite)
 
                -- АКТИВНЫЕ ПРОПУСКА НА НЕДЕЛЮ, без пересечений, с ними можно проверять пересечения
                -- автомобильный разовый
         VALUES (pass1_id, user1_id, 'ACTIVE', 'ONETIME', ter1_id, 'note1', nowDT
-               , nowDT, nowDT + interval '7 day', 'ACTIVE FOR WEEK', car1_id, null, 'AUTO'),
+               , nowDT, nowDT + interval '7 day', 'ACTIVE FOR WEEK', car1_id, null, 'AUTO', true),
 
                -- автомобильный постоянный
                (pass2_id, user1_id, 'ACTIVE', 'PERMANENT', ter2_id, null, nowDT
-               , nowDT, nowDT + interval '7 day', 'ACTIVE FOR WEEK', car2_id, null, 'AUTO'),
+               , nowDT, nowDT + interval '7 day', 'ACTIVE FOR WEEK', car2_id, null, 'AUTO', false),
 
                -- пешеходный разовый
                (pass3_id, user1_id, 'ACTIVE', 'ONETIME', ter1_id, 'note3', nowDT
-               , nowDT, nowDT + interval '7 day', 'ACTIVE FOR WEEK', null, person1_id, 'WALK'),
+               , nowDT, nowDT + interval '7 day', 'ACTIVE FOR WEEK', null, person1_id, 'WALK', true),
 
                -- пешеходный постоянный
                (pass4_id, user1_id, 'ACTIVE', 'PERMANENT', ter2_id, null, nowDT
-               , nowDT, nowDT + interval '7 day', 'ACTIVE FOR WEEK', null, person2_id, 'WALK'),
+               , nowDT, nowDT + interval '7 day', 'ACTIVE FOR WEEK', null, person2_id, 'WALK', false),
 
 
                -- ПРОПУСКА НА МИНУТУ, они должны поменять статус при проверке
                -- активный автомобильный разовый, нет пересечений - должен УСТАРЕТЬ
                (pass5_id, user2_id, 'ACTIVE', 'ONETIME', ter1_id, null, nowDT
-               , nowDT - interval '1 hour', nowDT, 'should be OUTDATED', car1_id, null, 'AUTO'),
+               , nowDT - interval '1 hour', nowDT, 'should be OUTDATED', car1_id, null, 'AUTO', true),
 
                -- активный автомобильный разовый, одно пересечение на въезд - должен стать ВАРНИНГ
                (pass6_id, user2_id, 'ACTIVE', 'ONETIME', ter1_id, null, nowDT
-               , nowDT - interval '1 hour', nowDT, 'should be WARNING', car2_id, null, 'AUTO'),
+               , nowDT - interval '1 hour', nowDT, 'should be WARNING', car2_id, null, 'AUTO', false),
 
                -- активный пешеходный постоянный, пересечения на въезд и на выезд - должен стать ВЫПОЛНЕН
                (pass7_id, user2_id, 'ACTIVE', 'ONETIME', ter1_id, null, nowDT
-               , nowDT - interval '1 hour', nowDT, 'should be COMPLETED', null, person1_id, 'WALK'),
+               , nowDT - interval '1 hour', nowDT, 'should be COMPLETED', null, person1_id, 'WALK', true),
 
                -- отложенный пешеходный разовый, должен стать АКТИВНЫМ на сутки
                (pass8_id, user2_id, 'DELAYED', 'ONETIME', ter1_id, null, nowDT
-               , nowDT + interval '1 minute', nowDT + interval '1 day', 'should be ACTIVE', null, person2_id, 'WALK');
+               , nowDT + interval '1 minute', nowDT + interval '1 day', 'should be ACTIVE', null, person2_id, 'WALK', false);
 
         INSERT INTO crossings (pass_id, checkpoint_id, local_date_time, direction)
         VALUES (pass6_id, chp1_id, nowDT, 'IN'),
