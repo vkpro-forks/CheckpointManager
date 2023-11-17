@@ -16,9 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.configuration.JwtService;
 import ru.ac.checkpointmanager.dto.*;
-import ru.ac.checkpointmanager.exception.DateOfBirthFormatException;
-import ru.ac.checkpointmanager.exception.InvalidPhoneNumberException;
-import ru.ac.checkpointmanager.exception.PhoneAlreadyExistException;
+import ru.ac.checkpointmanager.dto.user.LoginResponse;
+import ru.ac.checkpointmanager.dto.user.UserAuthDTO;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.model.TemporaryUser;
 import ru.ac.checkpointmanager.model.Token;
@@ -28,7 +27,6 @@ import ru.ac.checkpointmanager.model.enums.TokenType;
 import ru.ac.checkpointmanager.repository.TokenRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.service.email.EmailService;
-import ru.ac.checkpointmanager.service.phone.PhoneService;
 import ru.ac.checkpointmanager.service.user.TemporaryUserService;
 import ru.ac.checkpointmanager.utils.Mapper;
 import ru.ac.checkpointmanager.utils.MethodLog;
@@ -37,9 +35,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
-import static ru.ac.checkpointmanager.model.enums.PhoneNumberType.MOBILE;
-import static ru.ac.checkpointmanager.utils.FieldsValidation.*;
 
 /**
  * Сервис регистрации и аутентификации пользователей.
@@ -51,7 +46,6 @@ import static ru.ac.checkpointmanager.utils.FieldsValidation.*;
 @Slf4j
 public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserRepository userRepository;
-    private final PhoneService phoneService;
     private final TokenRepository tokenRepository;
     private final JwtService jwtService;
     private final EmailService emailService;
@@ -65,11 +59,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     /**
      * Предварительная регистрация нового пользователя в системе.
      * <p>
-     * Метод проверяет отсутствие в базе данных указанных электронной почты и номера телефона,
-     * валидность даты рождения.
+     * Метод проверяет отсутствие электронной почты в базе данных.
      * <p>
      * Если все проверки пройдены успешно, создается объект {@code TemporaryUser} на основе переданного объекта {@code UserAuthDTO}.
-     * Номер телефона очищается от лишних символов, пароль пользователя шифруется с помощью {@link org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder},
+     * Пароль пользователя шифруется с помощью {@link org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder},
      * устанавливается дата и время создания.
      * Генерируется уникальный токен для верификации, который прикрепляется к письму и отправляется на электронную почту пользователя.
      * Если письмо не отправляется, регистрируется ошибка при отправке.
@@ -79,8 +72,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
      * @param userAuthDTO объект передачи данных пользователя.
      * @return TemporaryUser, представляющий предварительно зарегистрированного пользователя.
      * @throws IllegalStateException      если пользователь с указанным email уже существует.
-     * @throws DateOfBirthFormatException если указанная дата рождения больше текущей даты.
-     * @throws PhoneAlreadyExistException если указанный номер телефона уже занят.
      * @throws MailSendException          если отправка письма с токеном подтверждения не удалась.
      * @see TemporaryUser
      * @see UserAuthDTO
@@ -97,25 +88,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new IllegalStateException(String.format("Email %s already taken", userAuthDTO.getEmail()));
         }
 
-        if (!validateDOB(userAuthDTO.getDateOfBirth())) {
-            log.warn("Invalid date of birth");
-            throw new DateOfBirthFormatException("Date of birth should not be greater than the current date");
-        }
-
-        String cleanedPhoneNumber = cleanPhone(userAuthDTO.getMainNumber());
-        if (!isValidPhoneNumber(cleanedPhoneNumber)) {
-            log.warn("Invalid phone number");
-            throw new InvalidPhoneNumberException(String.format("Phone number %s contains invalid characters", userAuthDTO.getMainNumber()));
-        }
-
-        if (phoneService.existsByNumber(cleanedPhoneNumber)) {
-            log.warn("Phone {} already taken", cleanedPhoneNumber);
-            throw new PhoneAlreadyExistException(String.format
-                    ("Phone number %s already exist", cleanedPhoneNumber));
-        }
-
         TemporaryUser temporaryUser = mapper.toTemporaryUser(userAuthDTO);
-        temporaryUser.setMainNumber(cleanedPhoneNumber);
 
         String encodedPassword = passwordEncoder.encode(temporaryUser.getPassword());
         temporaryUser.setPassword(encodedPassword);
@@ -173,22 +146,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             saveUserToken(user, jwtToken);
             log.debug("Access token for {} created and saved", user.getEmail());
 
-            PhoneDTO phoneDTO = createPhoneDTO(user);
-            phoneService.createPhoneNumber(phoneDTO);
-            log.debug("Phone {} for {} saved", user.getMainNumber(), user.getEmail());
         } else {
             log.error("Email not confirmed. Error: temporary user with token {} not found", token);
             throw new UserNotFoundException(String.format("User with token - '%s', not found  ", token));
         }
-    }
-
-    private PhoneDTO createPhoneDTO(User user) {
-        log.info("Method {} was invoked", MethodLog.getMethodName());
-        PhoneDTO phoneDTO = new PhoneDTO();
-        phoneDTO.setUserId(user.getId());
-        phoneDTO.setNumber(user.getMainNumber());
-        phoneDTO.setType(MOBILE);
-        return phoneDTO;
     }
 
     @Override

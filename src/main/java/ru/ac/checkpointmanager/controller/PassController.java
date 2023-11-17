@@ -27,14 +27,14 @@ import java.util.UUID;
 @ApiResponses(value = {@ApiResponse(responseCode = "401", description = "UNAUTHORIZED: пользователь не авторизован"),
         @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса")})
 @SecurityRequirement(name = "bearerAuth")
-@PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
 public class PassController {
 
     private final PassService service;
     private final Mapper mapper;
 
     /* CREATE */
-    @Operation(summary = "Добавить новый пропуск")
+    @Operation(summary = "Добавить новый пропуск",
+            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуск успешно добавлен",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -42,6 +42,7 @@ public class PassController {
             @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей; пользователь не имеет права " +
                     "создавать пропуск на эту территорию; у пользователя найден накладывающийся пропуск"),
             @ApiResponse(responseCode = "404", description = "Не найден пользователь или территория")})
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @PostMapping
     public ResponseEntity<?> addPass(@RequestBody @Valid PassDTOin passDTOin,
                                            BindingResult bindingResult) {
@@ -54,12 +55,14 @@ public class PassController {
     }
 
     /* READ */
-    @Operation(summary = "Получить список всех пропусков")
+    @Operation(summary = "Получить список всех пропусков",
+            description = "Доступ: ADMIN.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуска найдены",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = PassDTOout.class)))),
             @ApiResponse(responseCode = "404", description = "Пропуска не найдены")})
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @GetMapping
     public ResponseEntity<List<PassDTOout>> getPasses() {
         List<Pass> passes = service.findPasses();
@@ -69,24 +72,28 @@ public class PassController {
         return ResponseEntity.ok(mapper.toPassDTO(passes));
     }
 
-    @Operation(summary = "Найти пропуск по id")
+    @Operation(summary = "Найти пропуск по id",
+            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуск найден",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = PassDTOout.class))}),
             @ApiResponse(responseCode = "404", description = "Пропуск не найден")})
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @GetMapping("/{id}")
     public ResponseEntity<PassDTOout> getPass(@PathVariable("id") UUID id) {
         Pass foundPass = service.findPass(id);
         return ResponseEntity.ok(mapper.toPassDTO(foundPass));
     }
 
-    @Operation(summary = "Получить список пропусков конкретного пользователя")
+    @Operation(summary = "Получить список пропусков конкретного пользователя",
+            description = "Доступ: ADMIN, USER.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуска найдены",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = PassDTOout.class)))),
             @ApiResponse(responseCode = "404", description = "Пропуска не найдены; пользователь не найден")})
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<PassDTOout>> getPassesByUserId(@PathVariable UUID userId) {
         List<Pass> passes = service.findPassesByUser(userId);
@@ -96,12 +103,14 @@ public class PassController {
         return ResponseEntity.ok(mapper.toPassDTO(passes));
     }
 
-    @Operation(summary = "Получить список пропусков на конкретную территорию")
+    @Operation(summary = "Получить список пропусков на конкретную территорию",
+            description = "Доступ: ADMIN, MANAGER, SECURITY.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуска найдены",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = PassDTOout.class)))),
             @ApiResponse(responseCode = "404", description = "Пропуска не найдены; территория не найдена")})
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/territory/{territoryId}")
     public ResponseEntity<List<PassDTOout>> getPassesByTerritoryId(@PathVariable UUID territoryId) {
         List<Pass> passes = service.findPassesByTerritory(territoryId);
@@ -112,7 +121,8 @@ public class PassController {
     }
 
     /* UPDATE */
-    @Operation(summary = "Изменить существующий пропуск (название, примечание, временной тип, время начала и окончания)")
+    @Operation(summary = "Изменить существующий пропуск (название, примечание, временной тип, время начала и окончания)",
+            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуск успешно изменен",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -120,6 +130,7 @@ public class PassController {
             @ApiResponse(responseCode = "400", description = "Неуспешная валидаци полей; пользователь не имеет права " +
                     "создавать пропуск на эту территорию; у пользователя найден накладывающийся пропуск"),
             @ApiResponse(responseCode = "404", description = "Не найден пользователь или территория")})
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @PutMapping
     public ResponseEntity<?> editPass(@RequestBody @Valid PassDTOin passDTOin,
                                             BindingResult bindingResult) {
@@ -134,13 +145,15 @@ public class PassController {
         return ResponseEntity.ok(mapper.toPassDTO(updatedPass));
     }
 
-    @Operation(summary = "Отменить активный пропуск")
+    @Operation(summary = "Отменить активный пропуск",
+            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуск отменен",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = PassDTOout.class))}),
             @ApiResponse(responseCode = "400", description = "Пропуск не является активным"),
             @ApiResponse(responseCode = "404", description = "Пропуск не найден")})
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @PatchMapping("/{id}/cancel")
     public ResponseEntity<PassDTOout> cancelPass(@PathVariable UUID id) {
 
@@ -148,13 +161,15 @@ public class PassController {
         return ResponseEntity.ok(mapper.toPassDTO(cancelledPass));
     }
 
-    @Operation(summary = "Активировать отмененный пропуск")
+    @Operation(summary = "Активировать отмененный пропуск",
+            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуск активирован",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = PassDTOout.class))}),
             @ApiResponse(responseCode = "400", description = "Пропуск не является отмененным; время действия пропуска истекло"),
             @ApiResponse(responseCode = "404", description = "Пропуск не найден")})
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @PatchMapping("/{id}/activate")
     public ResponseEntity<PassDTOout> activatePass(@PathVariable UUID id) {
 
@@ -162,13 +177,15 @@ public class PassController {
         return ResponseEntity.ok(mapper.toPassDTO(activatedPass));
     }
 
-    @Operation(summary = "Отметить выполненным пропуск со статусом Warning (время истекло, последнее пересечение на выезд)")
+    @Operation(summary = "Отметить выполненным пропуск со статусом Warning (время истекло, последнее пересечение на выезд)",
+            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуск отмечен выполненным",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = PassDTOout.class))}),
             @ApiResponse(responseCode = "400", description = "Стутус отличен от Warning"),
             @ApiResponse(responseCode = "404", description = "Пропуск не найден")})
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @PatchMapping("/{id}/unwarning")
     public ResponseEntity<PassDTOout> unWarningPass(@PathVariable UUID id) {
 
@@ -197,10 +214,12 @@ public class PassController {
     }
 
     /* DELETE */
-    @Operation(summary = "Удалить пропуск")
+    @Operation(summary = "Удалить пропуск",
+            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуск успешно удален"),
             @ApiResponse(responseCode = "404", description = "Пропуск не найден")})
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @DeleteMapping("{id}")
     public ResponseEntity<Void> deletePass(@PathVariable UUID id) {
         Pass currentPass = service.findPass(id);

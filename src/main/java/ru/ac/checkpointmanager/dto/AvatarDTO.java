@@ -1,6 +1,7 @@
 package ru.ac.checkpointmanager.dto;
 
 import lombok.Data;
+import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 
 import java.util.UUID;
 
@@ -8,6 +9,6 @@ import java.util.UUID;
 public class AvatarDTO {
 
     private UUID avatarId;
-    private UserDTO userDTO;
+    private UserResponseDTO userResponseDTO;
 
 }

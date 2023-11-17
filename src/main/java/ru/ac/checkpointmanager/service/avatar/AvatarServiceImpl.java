@@ -1,26 +1,17 @@
 package ru.ac.checkpointmanager.service.avatar;
 
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import ru.ac.checkpointmanager.dto.AvatarDTO;
-import ru.ac.checkpointmanager.dto.UserDTO;
-import ru.ac.checkpointmanager.exception.AvatarIsEmptyException;
 import ru.ac.checkpointmanager.exception.AvatarNotFoundException;
-import ru.ac.checkpointmanager.exception.BadAvatarExtensionException;
-import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.model.Avatar;
 import ru.ac.checkpointmanager.model.AvatarProperties;
-import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.repository.AvatarRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
-import ru.ac.checkpointmanager.service.user.UserService;
 import ru.ac.checkpointmanager.utils.Mapper;
-import ru.ac.checkpointmanager.utils.MethodLog;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -32,8 +23,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Optional;
 import java.util.UUID;
-
-import static java.nio.file.StandardOpenOption.CREATE_NEW;
 
 @Service
 @Transactional
