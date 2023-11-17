@@ -10,13 +10,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -33,14 +31,19 @@ public class JwtService {
     @Value("${application.security.jwt.refresh-token.expiration}")  // 7 дней
     private long refreshExpiration;
 
-    public String extractUsername(String token) { // извлекаем sub из токена
-        log.info("Method {} was invoked", MethodLog.getMethodName());
+    public String extractUsername(String token) {
+        log.info("Method {} [Token {}]", MethodLog.getMethodName(), token);
         return extractClaim(token, Claims::getSubject);
     }
 
-    public List<String> extractRole(String token) { // извлекаем роль из токена
-        log.info("Method {} was invoked", MethodLog.getMethodName());
+    public List<String> extractRole(String token) {
+        log.info("Method {} [Token {}]", MethodLog.getMethodName(), token);
         return extractAllClaims(token).get("role", List.class);
+    }
+
+    public UUID extractId(String token) {
+        log.info("Method {} [Token {}]", MethodLog.getMethodName(), token);
+        return extractAllClaims(token).get("id", UUID.class);
     }
 
     /* Это обобщенный метод, который принимает два аргумента:
@@ -74,6 +77,10 @@ public class JwtService {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
         extraClaims.put("role", rolesList); // добавляем в клеймы токена роль юзера
+
+        if (userDetails instanceof User user) {
+            extraClaims.put("id", user.getId());
+        }
 
         return Jwts
                 .builder()

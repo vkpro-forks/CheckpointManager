@@ -30,8 +30,11 @@ public class EmailServiceImpl implements EmailService {
     @Value("${spring.mail.username}")
     private String prodEmail;
 
-    @Value("${spring.confirmation-link}")
-    private String confirmationLink;
+    @Value("${app.confirmation-link}")
+    private String confirmationRegistrationLink;
+
+    @Value("${app.confirmation-email-link}")
+    private String emailChangeConfirmationLink;
 
     /**
      * Отправляет электронное письмо со ссылкой для подтверждения регистрации.
@@ -46,16 +49,41 @@ public class EmailServiceImpl implements EmailService {
      */
     @Override
     @Async
-    public void send(String to, String token) {
+    public void sendRegisterConfirm(String to, String token) {
         log.debug("Method {}", MethodLog.getMethodName());
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(prodEmail);
         message.setTo(to);
         message.setSubject("Registration");
         message.setText("Для подтверждения регистрации, пожалуйста, перейдите по следующей ссылке: "
-                + confirmationLink + token +
+                + confirmationRegistrationLink + token +
                 "\nЕсли, это были не вы, игнорируйте это письмо.");
 
+        mailSender.send(message);
+    }
+
+    /**
+     * Отправляет электронное письмо со ссылкой для подтверждения новой электронной почты.
+     * <p>
+     * Метод использует асинхронную отправку писем на указанный адрес со ссылкой для подтверждения почты.
+     * Ссылка для подтверждения формируется путем добавления предоставленного токена к базовой ссылке, указанной
+     * в конфигурации приложения.
+     *
+     * @param to    адрес электронной почты, на который будет отправлено письмо
+     * @param token токен, который будет добавлен к ссылке для подтверждения новой почты
+     * @see ru.ac.checkpointmanager.configuration.EmailConfig
+     */
+    @Override
+    @Async
+    public void sendEmailConfirm(String to, String token) {
+        log.info("Method sendEmailConfirm was invoked");
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(prodEmail);
+        message.setTo(to);
+        message.setSubject("Email confirmation");
+        message.setText("Чтобы подтвердить новый адрес электронной почты, перейдите по ссылке: "
+                + emailChangeConfirmationLink + token +
+                "\nЕсли, это были не вы, игнорируйте это письмо.");
         mailSender.send(message);
     }
 }

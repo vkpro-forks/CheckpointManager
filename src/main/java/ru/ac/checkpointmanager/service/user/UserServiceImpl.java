@@ -2,11 +2,14 @@ package ru.ac.checkpointmanager.service.user;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.mail.MailException;
+import org.springframework.mail.MailSendException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.ac.checkpointmanager.dto.ChangeEmailRequest;
 import ru.ac.checkpointmanager.dto.ChangePasswordRequest;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.user.UserPutDTO;
@@ -15,13 +18,16 @@ import ru.ac.checkpointmanager.exception.PhoneNumberNotFoundException;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.model.Avatar;
+import ru.ac.checkpointmanager.model.TemporaryUser;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
+import ru.ac.checkpointmanager.service.email.EmailService;
 import ru.ac.checkpointmanager.utils.Mapper;
 import ru.ac.checkpointmanager.utils.MethodLog;
+import ru.ac.checkpointmanager.utils.SecurityUtils;
 
 import java.security.Principal;
 import java.util.Collection;
@@ -40,6 +46,10 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PhoneRepository phoneRepository;
     private final PasswordEncoder passwordEncoder;
+    private final TemporaryUserService temporaryUserService;
+    private final EmailService emailService;
+//    private final JwtService jwtService;
+//    private final AuthenticationService authService;
 
     @Override
     public UserResponseDTO findById(UUID id) {
@@ -100,9 +110,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void changePassword(ChangePasswordRequest request, Principal connectedUser) { //  Principal представляет собой пользователя, который был идентифицирован в результате процесса аутентификации
-        log.debug("Method {}, Username - {}", MethodLog.getMethodName(), connectedUser.getName());
-        User user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal(); // получаем юзера из connectedUser, который представляет текущего пользователя
+    public void changePassword(ChangePasswordRequest request) {
+        User user = SecurityUtils.getCurrentUser();
+        log.debug("Method {}, Username - {}", MethodLog.getMethodName(), user.getUsername());
 
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
             log.warn("Current password not matched for {}", user.getEmail());
@@ -118,6 +128,99 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
         log.debug("Password for {} successfully changed", user.getEmail());
     }
+
+    /**
+     * Инициирует процесс изменения электронной почты пользователя.
+     * <p>
+     * Метод выполняет следующие действия:
+     * <ol>
+     * <li>Проверяет, соответствует ли текущая электронная почта пользователя электронной почте, указанной в запросе.</li>
+     * <li>Создает временного пользователя {@link TemporaryUser} на основе данных основного пользователя.</li>
+     * <li>Генерирует уникальный токен подтверждения и связывает его с временным пользователем.</li>
+     * <li>Отправляет электронное письмо с подтверждением на новую электронную почту пользователя.</li>
+     * <li>Сохраняет временного пользователя в базе данных.</li>
+     * </ol>
+     * <p>
+     * В случае ошибки при отправке электронного письма генерируется исключение {@link MailSendException}.
+     * <p>
+     * @param request объект запроса, содержащий текущую и новую электронные почты пользователя.
+     * @return объект запроса {@link ChangeEmailRequest} с обновленными данными.
+     * @throws IllegalStateException если текущая электронная почта пользователя не соответствует указанной в запросе.
+     * @throws MailSendException если происходит ошибка при отправке электронного письма.
+     */
+    @Transactional
+    @Override
+    public ChangeEmailRequest changeEmail(ChangeEmailRequest request) {
+        User user = SecurityUtils.getCurrentUser();
+
+        if (!request.getCurrentEmail().equals(user.getEmail())) {
+            throw new IllegalStateException("Wrong email");
+        }
+
+        TemporaryUser tempUser = mapper.toTemporaryUser(user);
+        tempUser.setPreviousEmail(user.getEmail());
+        tempUser.setEmail(request.getNewEmail());
+
+        String token = UUID.randomUUID().toString();
+        tempUser.setVerifiedToken(token);
+        tempUser.setEmail(request.getNewEmail());
+
+        try {
+            emailService.sendEmailConfirm(tempUser.getEmail(), token);
+            log.info("Email confirmation message was sent");
+        } catch (MailException e) {
+            log.error("Email sending failed");
+            throw new MailSendException("Email sending failed", e);
+        }
+
+        temporaryUserService.create(tempUser);
+        return request;
+    }
+
+    /**
+     * Подтверждает изменение электронной почты пользователя.
+     * <p>
+     * Метод выполняет следующие действия:
+     * <ol>
+     * <li>Ищет временного пользователя {@link TemporaryUser} по предоставленному токену.</li>
+     * <li>Если временный пользователь найден, находит основного пользователя по предыдущей электронной почте.</li>
+     * <li>Обновляет электронную почту основного пользователя на новую, указанную во временном пользователе.</li>
+     * <li>Удаляет временного пользователя из базы данных после успешного обновления.</li>
+     * </ol>
+     * <p>
+     * В случае ошибки, когда токен недействителен или истек, выводится сообщение об ошибке.
+     * <p>
+     * @param token уникальный токен подтверждения, используемый для идентификации временного пользователя.
+     * @throws UserNotFoundException если пользователь с указанной предыдущей электронной почтой не найден.
+     */
+    @Transactional
+    @Override
+    public void confirmEmail(String token) {
+        log.debug("Method {}, Temporary token {}", MethodLog.getMethodName(), token);
+        TemporaryUser tempUser = temporaryUserService.findByVerifiedToken(token);
+
+        if (tempUser != null) {
+            User user = userRepository.findByEmail(tempUser.getPreviousEmail()).orElseThrow(()
+                    -> new UserNotFoundException(String.format("User email %s not found", tempUser.getPreviousEmail())));
+
+            user.setEmail(tempUser.getEmail());
+            userRepository.save(user);
+            log.info("User email updated from {} to {}, [UUID {}]", tempUser.getPreviousEmail(), user.getEmail(), user.getId());
+
+            temporaryUserService.delete(tempUser);
+            log.info("Temporary user deleted {}", tempUser.getId());
+
+            // пока не знаю, есть ли смысл отзывать старый токен, при смене пароля этого не делается и всё работает
+            // больше вопрос о безопасности, тк в токене инфа старая зашита остается и поменяется только когда токен истечет
+
+//            String jwtToken = jwtService.generateToken(user);
+//            authService.revokeAllUserTokens(user);
+//            authService.saveUserToken(user, jwtToken);
+        } else {
+            log.error("Invalid or expired token");
+        }
+    }
+
 
     @Override
     public void changeRole(UUID id, Role role, Principal connectedUser) {

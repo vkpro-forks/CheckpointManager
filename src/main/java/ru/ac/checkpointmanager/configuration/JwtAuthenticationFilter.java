@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,10 +15,13 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.repository.TokenRepository;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 
@@ -60,16 +63,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     .orElse(false);
             if (jwtService.isTokenValid(jwt, userDetails) && isTokenValid) { // если токен валидный создаем объект для секурити контекст холдера
                 log.info("JWT is valid for user '{}', setting the security context.", userEmail);
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken( // представляет аутентификацию пользователя
-                        userDetails,
-                        null, // пароль не передается, так как аутентификация осуществляется с помощью токена
-                        jwtService.extractRole(jwt).stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList())
-                );
+                Collection<? extends GrantedAuthority> authorities = jwtService.extractRole(jwt).stream()
+                        .map(SimpleGrantedAuthority::new).collect(Collectors.toList());
 
-                authToken.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request) // собирает инфу о запросе
-                );
-                SecurityContextHolder.getContext().setAuthentication(authToken); // устанавливаем пользователя в контекст ходер
+                UUID userId = null;
+                if (userDetails instanceof User) {
+                    userId = ((User) userDetails).getId();
+                }
+
+                CustomAuthenticationToken authToken = new CustomAuthenticationToken(
+                        userDetails, null, userId, authorities);
+
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
         filterChain.doFilter(request, response);

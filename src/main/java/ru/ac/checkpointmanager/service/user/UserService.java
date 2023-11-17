@@ -1,5 +1,6 @@
 package ru.ac.checkpointmanager.service.user;
 
+import ru.ac.checkpointmanager.dto.ChangeEmailRequest;
 import ru.ac.checkpointmanager.dto.ChangePasswordRequest;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.user.UserPutDTO;
@@ -22,7 +23,11 @@ public interface UserService {
 
     UserResponseDTO updateUser(UserPutDTO userPutDTO);
 
-    void changePassword(ChangePasswordRequest request, Principal connectedUser);
+    void changePassword(ChangePasswordRequest request);
+
+    ChangeEmailRequest changeEmail(ChangeEmailRequest request);
+
+    void confirmEmail(String token);
 
     void changeRole(UUID id, Role role, Principal connectedUser);
 

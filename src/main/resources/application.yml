@@ -1,5 +1,7 @@
 app:
   version: ${version}
+  confirmation-link: http://localhost:8080/chpman/confirm/registration?token=
+  confirmation-email-link: http://localhost:8080/chpman/confirm/email?token=
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
@@ -42,7 +44,6 @@ spring:
           auth: true
           starttls:
             enable: true
-  confirmation-link: http://localhost:8080/chpman/authentication/confirm?token=
 application:
   security:
     jwt:

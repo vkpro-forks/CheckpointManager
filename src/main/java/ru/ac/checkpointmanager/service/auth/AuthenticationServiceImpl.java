@@ -15,7 +15,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.configuration.JwtService;
-import ru.ac.checkpointmanager.dto.*;
+import ru.ac.checkpointmanager.dto.AuthenticationRequest;
+import ru.ac.checkpointmanager.dto.AuthenticationResponse;
+import ru.ac.checkpointmanager.dto.IsAuthenticatedResponse;
 import ru.ac.checkpointmanager.dto.user.LoginResponse;
 import ru.ac.checkpointmanager.dto.user.UserAuthDTO;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
@@ -71,8 +73,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
      *
      * @param userAuthDTO объект передачи данных пользователя.
      * @return TemporaryUser, представляющий предварительно зарегистрированного пользователя.
-     * @throws IllegalStateException      если пользователь с указанным email уже существует.
-     * @throws MailSendException          если отправка письма с токеном подтверждения не удалась.
+     * @throws IllegalStateException если пользователь с указанным email уже существует.
+     * @throws MailSendException     если отправка письма с токеном подтверждения не удалась.
      * @see TemporaryUser
      * @see UserAuthDTO
      * @see ru.ac.checkpointmanager.utils.FieldsValidation
@@ -97,7 +99,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         temporaryUser.setVerifiedToken(token);
 
         try {
-            emailService.send(userAuthDTO.getEmail(), token);
+            emailService.sendRegisterConfirm(userAuthDTO.getEmail(), token);
             log.info("Mail message was sent to {}", userAuthDTO.getEmail());
         } catch (MailException e) {
             log.error("Email sending failed for {}. Error: {}", userAuthDTO.getEmail(), e.getMessage());
@@ -203,7 +205,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return response;
     }
 
-    private void saveUserToken(User user, String jwtToken) {
+    @Override
+    public void saveUserToken(User user, String jwtToken) {
         log.info("Method {} was invoked", MethodLog.getMethodName());
         Token token = new Token();
         token.setUser(user);
@@ -223,7 +226,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
      *
      * @param user пользователь, токены которого должны быть отозваны.
      */
-    private void revokeAllUserTokens(User user) {
+    @Override
+    public void revokeAllUserTokens(User user) {
         log.info("Method {} was invoked", MethodLog.getMethodName());
         List<Token> validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
         if (validUserTokens.isEmpty())

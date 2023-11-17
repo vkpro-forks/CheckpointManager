@@ -42,6 +42,9 @@ public class TemporaryUser {
     @Column(name = "email")
     private String email;
 
+    @Column(name = "previous_email")
+    private String previousEmail;
+
     @Column(name = "password")
     private String password;
 
