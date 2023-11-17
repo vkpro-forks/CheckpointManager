@@ -2,6 +2,7 @@ package ru.ac.checkpointmanager.dto.passes;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
+import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.PersonDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
@@ -16,7 +17,7 @@ public class PassDtoResponse {
 
     private UUID id;
 
-    private UserDTO user;
+    private UserResponseDTO user;
 
     private String name;
 

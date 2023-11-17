@@ -50,6 +50,8 @@ databaseChangeLog:
   - include:
       file: liquibase/scripts/V_76__fixChecpoints_fixAvatarsFK.sql
   - include:
+      file: liquibase/scripts/V_95__drop_user_columns.sql
+  - include:
       file: liquibase/scripts/V_102__add_favorite_pass_flag.sql
 
 ## ВНЕСЕНИЕ ДЕМО-ДАННЫХ, ОСТАВЛЯЙТЕ ВСЕГДА В КОНЦЕ ФАЙЛА

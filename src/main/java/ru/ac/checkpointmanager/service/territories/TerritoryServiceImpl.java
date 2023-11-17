@@ -41,6 +41,7 @@ public class TerritoryServiceImpl implements TerritoryService {
     @Override
     public List<User> findUsersByTerritoryId(UUID territoryId) {
         log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), territoryId);
+        findTerritoryById(territoryId);
         List<User> users = repository.findUsersByTerritoryId(territoryId);
         if (users.isEmpty()) {
             throw new UserNotFoundException(String.format("Users for Territory not found [territory_id=%s]", territoryId));
@@ -107,16 +108,16 @@ public class TerritoryServiceImpl implements TerritoryService {
     public void detachUserFromTerritory(UUID territoryId, UUID userId) {
         log.info("Method {}, user - {}, terr - {}", MethodLog.getMethodName(), userId, territoryId);
 
+        Territory territory = repository.findById(territoryId).orElseThrow(
+                () -> new TerritoryNotFoundException(String.format("Territory not found [Id=%s]", territoryId)));
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new UserNotFoundException(String.format("User not found [Id=%s]", userId)));
+
         if (!repository.checkUserTerritoryRelation(userId, territoryId)) {
             String message = String.format("User [%s] and territory [%s] have no connection", userId, territoryId);
             log.warn(message);
             throw new IllegalArgumentException(message);
         }
-
-        Territory territory = repository.findById(territoryId).orElseThrow(
-                () -> new TerritoryNotFoundException(String.format("Territory not found [Id=%s]", territoryId)));
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new UserNotFoundException(String.format("User not found [Id=%s]", userId)));
 
         territory.getUsers().remove(user);
         repository.save(territory);
