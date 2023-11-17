@@ -53,7 +53,8 @@ databaseChangeLog:
       file: liquibase/scripts/V_95__drop_user_columns.sql
   - include:
       file: liquibase/scripts/V_84__alter_temp_users.sql
-
+  - include:
+      file: liquibase/scripts/V_102__add_favorite_pass_flag.sql
 
 ## ВНЕСЕНИЕ ДЕМО-ДАННЫХ, ОСТАВЛЯЙТЕ ВСЕГДА В КОНЦЕ ФАЙЛА
   - include:

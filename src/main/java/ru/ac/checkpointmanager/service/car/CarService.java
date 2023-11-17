@@ -16,4 +16,6 @@ public interface CarService {
     Car getCarById(UUID carId);
 
     List<Car> getAllCars();
+
+    List<Car> findByUserId(UUID userId);
 }

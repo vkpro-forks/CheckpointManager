@@ -54,6 +54,8 @@ public abstract class Pass {
     @Column(insertable=false, updatable=false)
     private String dtype;
 
+    Boolean favorite;
+
     public boolean compareByFields(Pass other) {
         return  (Objects.equals(this.getUser(), other.getUser()) &&
                 !Objects.equals(this.getId(), other.getId()) &&
