@@ -7,6 +7,9 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
 import org.springframework.stereotype.Component;
 import ru.ac.checkpointmanager.dto.*;
+import ru.ac.checkpointmanager.dto.user.LoginResponse;
+import ru.ac.checkpointmanager.dto.user.UserAuthDTO;
+import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.exception.CheckpointNotFoundException;
 import ru.ac.checkpointmanager.exception.PassNotFoundException;
 import ru.ac.checkpointmanager.model.*;
@@ -88,17 +91,17 @@ public class Mapper {
     }
 
     /* User mapping */
-    public User toUser(UserDTO userDTO) {
-        return modelMapper.map(userDTO, User.class);
+    public User toUser(UserResponseDTO userResponseDTO) {
+        return modelMapper.map(userResponseDTO, User.class);
     }
 
-    public UserDTO toUserDTO(User user) {
-        return modelMapper.map(user, UserDTO.class);
+    public UserResponseDTO toUserDTO(User user) {
+        return modelMapper.map(user, UserResponseDTO.class);
     }
 
-    public List<UserDTO> toUsersDTO(Collection<User> users) {
+    public List<UserResponseDTO> toUsersDTO(Collection<User> users) {
         return users.stream()
-                .map(e -> modelMapper.map(e, UserDTO.class))
+                .map(e -> modelMapper.map(e, UserResponseDTO.class))
                 .toList();
     }
 

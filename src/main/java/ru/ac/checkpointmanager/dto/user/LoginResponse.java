@@ -1,11 +1,10 @@
-package ru.ac.checkpointmanager.dto;
+package ru.ac.checkpointmanager.dto.user;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.ac.checkpointmanager.model.enums.Role;
 
-import java.time.LocalDate;
 import java.util.UUID;
 
 @Data
@@ -15,8 +14,6 @@ public class LoginResponse {
     private UUID id;
 
     private String fullName;
-
-    private LocalDate dateOfBirth;
 
     private String mainNumber;
 

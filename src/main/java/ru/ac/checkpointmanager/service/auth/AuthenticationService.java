@@ -4,8 +4,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ru.ac.checkpointmanager.dto.AuthenticationRequest;
 import ru.ac.checkpointmanager.dto.IsAuthenticatedResponse;
-import ru.ac.checkpointmanager.dto.LoginResponse;
-import ru.ac.checkpointmanager.dto.UserAuthDTO;
+import ru.ac.checkpointmanager.dto.user.LoginResponse;
+import ru.ac.checkpointmanager.dto.user.UserAuthDTO;
 import ru.ac.checkpointmanager.model.TemporaryUser;
 
 import java.io.IOException;

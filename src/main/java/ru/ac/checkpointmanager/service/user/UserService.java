@@ -2,7 +2,8 @@ package ru.ac.checkpointmanager.service.user;
 
 import ru.ac.checkpointmanager.dto.ChangePasswordRequest;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
-import ru.ac.checkpointmanager.dto.UserDTO;
+import ru.ac.checkpointmanager.dto.user.UserPutDTO;
+import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.model.Avatar;
 import ru.ac.checkpointmanager.model.enums.Role;
 
@@ -13,19 +14,19 @@ import java.util.UUID;
 
 public interface UserService {
 
-    UserDTO findById(UUID id);
+    UserResponseDTO findById(UUID id);
 
     List<TerritoryDTO> findTerritoriesByUserId(UUID userId);
 
-    Collection<UserDTO> findByName(String name);
+    Collection<UserResponseDTO> findByName(String name);
 
-    UserDTO updateUser(UserDTO userDTO);
+    UserResponseDTO updateUser(UserPutDTO userPutDTO);
 
     void changePassword(ChangePasswordRequest request, Principal connectedUser);
 
     void changeRole(UUID id, Role role, Principal connectedUser);
 
-    UserDTO updateBlockStatus(UUID id, Boolean isBlocked);
+    UserResponseDTO updateBlockStatus(UUID id, Boolean isBlocked);
 
     void blockById(UUID id);
 
@@ -33,8 +34,9 @@ public interface UserService {
 
     void deleteUser(UUID id);
 
-    Collection<UserDTO> getAll();
+    Collection<UserResponseDTO> getAll();
 
     Collection<String> findUsersPhoneNumbers(UUID userId);
+
     public void assignAvatarToUser(UUID userId, Avatar avatar);
 }

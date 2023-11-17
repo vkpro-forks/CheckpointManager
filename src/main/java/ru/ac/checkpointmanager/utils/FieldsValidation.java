@@ -22,6 +22,7 @@ public class FieldsValidation {
         return pattern.matcher(phoneNumber).matches();
     }
 
+    @Deprecated
     public static Boolean validateDOB(LocalDate dateOfBirth) {
         LocalDate currentDate = LocalDate.now();
         if (dateOfBirth.isAfter(currentDate)) {
