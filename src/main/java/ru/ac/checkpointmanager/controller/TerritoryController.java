@@ -81,7 +81,7 @@ public class TerritoryController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пользователи найдены",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            array = @ArraySchema(schema = @Schema(implementation = UserDTO.class)))),
+                            array = @ArraySchema(schema = @Schema(implementation = UserResponseDTO.class)))),
             @ApiResponse(responseCode = "404", description = "Территория или пользователи не найдены")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @GetMapping("/{territoryId}/users")
