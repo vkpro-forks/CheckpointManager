@@ -15,7 +15,7 @@ public class PassDtoCreate {
     @NotNull
     private UUID userId;
 
-    String name;
+    private String name;
 
     @NotNull
     private PassTypeTime typeTime;

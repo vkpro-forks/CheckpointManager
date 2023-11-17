@@ -17,7 +17,7 @@ public class PassDtoUpdate {
     @NotNull
     private UUID id;
 
-    String name;
+    private String name;
 
     @NotNull
     private PassTypeTime typeTime;
