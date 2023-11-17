@@ -163,7 +163,6 @@ public class UserServiceImpl implements UserService {
 
         String token = UUID.randomUUID().toString();
         tempUser.setVerifiedToken(token);
-        tempUser.setEmail(request.getNewEmail());
 
         try {
             emailService.sendEmailConfirm(tempUser.getEmail(), token);
