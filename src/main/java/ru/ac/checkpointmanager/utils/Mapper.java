@@ -169,6 +169,25 @@ public class Mapper {
         }
     }
 
+    public TemporaryUser toTemporaryUser(User user) {
+        ModelMapper modelMapper = new ModelMapper();
+        PropertyMap<TemporaryUser, User> propertyMap = new PropertyMap<>() {
+            protected void configure() {
+                skip(destination.getId());
+                skip(destination.getAddedAt());
+            }
+        };
+        modelMapper.addMappings(propertyMap);
+        try {
+            TemporaryUser temp = modelMapper.map(user, TemporaryUser.class);
+            log.info("Конвертация во временного пользователя прошла успешно");
+            return temp;
+        } catch (MappingException e) {
+            log.error("Ошибка при конвертации User в TemporaryUser", e);
+            throw new RuntimeException("Ошибка при конвертации User в TemporaryUser", e);
+        }
+    }
+
     public TemporaryUser toTemporaryUser(UserAuthDTO userAuthDTO) {
         return modelMapper.map(userAuthDTO, TemporaryUser.class);
     }

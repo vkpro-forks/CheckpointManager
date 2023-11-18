@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import ru.ac.checkpointmanager.dto.ChangeEmailRequest;
 import ru.ac.checkpointmanager.dto.ChangePasswordRequest;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.user.UserPutDTO;
@@ -68,7 +69,7 @@ public class UserController {
     @PreAuthorize(value = "hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("{id}")
     public ResponseEntity<UserResponseDTO> findUserById(@Parameter(description = "Уникальный идентификатор пользователя", required = true)
-                                                @PathVariable UUID id
+                                                        @PathVariable UUID id
     ) {
         Optional<UserResponseDTO> user = Optional.ofNullable(userService.findById(id));
         return user.map(ResponseEntity::ok).orElse(ResponseEntity.noContent().build());
@@ -116,7 +117,7 @@ public class UserController {
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/name")
     public ResponseEntity<Collection<UserResponseDTO>> findUserByName(@Parameter(description = "имя/часть имени", required = true)
-                                                              @RequestParam String name
+                                                                      @RequestParam String name
     ) {
         Collection<UserResponseDTO> foundUsers = userService.findByName(name);
         return foundUsers.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(foundUsers);
@@ -229,14 +230,26 @@ public class UserController {
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @PatchMapping("/password")
     public ResponseEntity<?> changePassword(@RequestBody @Valid ChangePasswordRequest request,
-                                            BindingResult result,
-                                            Principal connectedUser
+                                            BindingResult result
     ) {
         if (result.hasErrors()) {
             return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
         }
 
-        userService.changePassword(request, connectedUser);
+        userService.changePassword(request);
+        return ResponseEntity.ok().build();
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
+    @PatchMapping("/email")
+    public ResponseEntity<?> changeEmail(@RequestBody @Valid ChangeEmailRequest request,
+                                         BindingResult result
+    ) {
+        if (result.hasErrors()) {
+            return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
+        }
+
+        userService.changeEmail(request);
         return ResponseEntity.ok().build();
     }
 

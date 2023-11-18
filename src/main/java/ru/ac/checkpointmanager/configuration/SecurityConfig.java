@@ -24,7 +24,7 @@ import java.util.Arrays;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Configuration
-@EnableWebSecurity(debug = false)
+@EnableWebSecurity
 @EnableMethodSecurity
 @Slf4j
 public class SecurityConfig {
@@ -58,7 +58,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((authorize) ->
                         authorize
-                                .requestMatchers("/chpman/authentication/**",
+                                .requestMatchers("/chpman/authentication/**", "/chpman/confirm/**",
                                         "/swagger-ui/**", "/v3/api-docs/**",
                                         "/error", "/webjars/**", "/swagger-ui.html"
                                 ).permitAll()

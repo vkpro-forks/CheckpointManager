@@ -1,7 +1,6 @@
 package ru.ac.checkpointmanager.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -20,7 +19,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import ru.ac.checkpointmanager.dto.*;
+import ru.ac.checkpointmanager.dto.AuthenticationRequest;
+import ru.ac.checkpointmanager.dto.AuthenticationResponse;
+import ru.ac.checkpointmanager.dto.IsAuthenticatedResponse;
 import ru.ac.checkpointmanager.dto.user.LoginResponse;
 import ru.ac.checkpointmanager.dto.user.UserAuthDTO;
 import ru.ac.checkpointmanager.service.auth.AuthenticationService;
@@ -81,26 +82,6 @@ public class AuthController {
             return new ResponseEntity<>(errorsList(result), HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>(authenticationService.preRegister(user), HttpStatus.OK);
-    }
-
-    @Operation(summary = "Подтверждение регистрации по ссылке")
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "OK: Регистрация подтверждена"
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "NOT_FOUND: Ссылка подтверждения недействительна или истек срок действия"
-            )
-    })
-    @GetMapping("/confirm")
-    public ResponseEntity<String> confirmRegistration(
-            @Parameter(description = "Токен из письма для подтверждения")
-            @RequestParam("token") String token
-    ) {
-        authenticationService.confirmRegistration(token);
-        return ResponseEntity.ok("Регистрация подтверждена, войдите, используя указанные при регистрации email и пароль");
     }
 
     @PostMapping("/login")
