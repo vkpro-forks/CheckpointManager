@@ -36,6 +36,23 @@ import java.util.UUID;
 
 import static ru.ac.checkpointmanager.utils.FieldsValidation.cleanPhone;
 
+/**
+ * Сервисный класс для управления информацией о пользователях.
+ * <p>
+ * Этот класс обеспечивает основную бизнес-логику, связанную с пользователями в приложении.
+ * Включает в себя функции поиска, обновления, блокировки/разблокировки пользователей,
+ * а также изменения их паролей и ролей. Класс использует различные репозитории и сервисы
+ * для выполнения операций с данными и для обеспечения безопасности и валидации ввода.
+ * <p>
+ *
+ * @author fifimova
+ * @author Ldv236
+ * @see User
+ * @see UserRepository
+ * @see EmailService
+ * @see Mapper
+ * @see SecurityUtils
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -51,6 +68,18 @@ public class UserServiceImpl implements UserService {
 //    private final JwtService jwtService;
 //    private final AuthenticationService authService;
 
+    /**
+     * Находит пользователя по его уникальному идентификатору (UUID).
+     * <p>
+     * Этот метод осуществляет поиск пользователя в репозитории. Если пользователь не найден,
+     * выбрасывается исключение {@link UserNotFoundException}.
+     * <p>
+     *
+     * @param id Уникальный идентификатор пользователя, который необходимо найти.
+     * @return {@link UserResponseDTO} - DTO пользователя для ответа со всеми основными полями, если он найден.
+     * @throws UserNotFoundException если пользователь с указанным UUID не найден.
+     * @see UserNotFoundException
+     */
     @Override
     public UserResponseDTO findById(UUID id) {
         log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), id);
@@ -59,6 +88,18 @@ public class UserServiceImpl implements UserService {
         return mapper.toUserDTO(foundUser);
     }
 
+    /**
+     * Находит список территорий, связанных с пользователем по его уникальному идентификатору (UUID).
+     * <p>
+     * Этот метод выполняет поиск всех территорий, которые связаны с указанным пользователем.
+     * Если территории для данного пользователя не найдены, выбрасывается исключение {@link TerritoryNotFoundException}.
+     * <p>
+     *
+     * @param userId Уникальный идентификатор пользователя, для которого нужно найти территории.
+     * @return Список {@link TerritoryDTO}, представляющий территории пользователя.
+     * @throws TerritoryNotFoundException если территории для указанного пользователя не найдены.
+     * @see TerritoryNotFoundException
+     */
     @Override
     public List<TerritoryDTO> findTerritoriesByUserId(UUID userId) {
         log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), userId);
@@ -70,6 +111,18 @@ public class UserServiceImpl implements UserService {
         return mapper.toTerritoriesDTO(territories);
     }
 
+    /**
+     * Находит пользователей по части их полного имени.
+     * <p>
+     * Этот метод выполняет поиск пользователей, чье полное имя содержит указанную строку.
+     * Поиск производится без учета регистра символов. Если пользователи не найдены, выбрасывается
+     * исключение {@link UserNotFoundException}.
+     * <p>
+     *
+     * @param name Строка, содержащаяся в полном имени пользователя, по которой будет осуществляться поиск.
+     * @return Коллекция {@link UserResponseDTO}, представляющая найденных пользователей.
+     * @throws UserNotFoundException если пользователи с именем, содержащим указанную строку, не найдены.
+     */
     @Override
     public Collection<UserResponseDTO> findByName(String name) {
         log.info("Method {} was invoked", MethodLog.getMethodName());
@@ -83,6 +136,19 @@ public class UserServiceImpl implements UserService {
         return userResponseDTOS;
     }
 
+    /**
+     * Обновляет информацию о пользователе на основе предоставленных данных.
+     * <p>
+     * Этот метод обновляет данные пользователя в репозитории. Если пользователь с указанным идентификатором
+     * не найден, выбрасывается исключение {@link UserNotFoundException}. Проверяется наличие и валидность номера
+     * телефона; если он недействителен, выбрасывается {@link PhoneNumberNotFoundException}.
+     * <p>
+     *
+     * @param userPutDTO Объект {@link UserPutDTO}, содержащий информацию для обновления пользователя.
+     * @return {@link UserResponseDTO} - DTO обновленного пользователя.
+     * @throws UserNotFoundException        если пользователь с указанным идентификатором не найден.
+     * @throws PhoneNumberNotFoundException если предоставленный номер телефона недействителен или отсутствует в базе данных.
+     */
     @Override
     public UserResponseDTO updateUser(UserPutDTO userPutDTO) {
         log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), userPutDTO.getId());
@@ -109,6 +175,19 @@ public class UserServiceImpl implements UserService {
         return mapper.toUserDTO(foundUser);
     }
 
+    /**
+     * Изменяет пароль текущего аутентифицированного пользователя.
+     * <p>
+     * Этот метод позволяет пользователю изменить свой пароль. Сначала проверяется, соответствует ли текущий пароль
+     * указанному в запросе. Если нет, выбрасывается исключение. Далее проверяется, совпадают ли новый пароль и его
+     * подтверждение; в случае несовпадения также выбрасывается исключение. После успешной проверки пароль пользователя
+     * обновляется.
+     * <p>
+     *
+     * @param request Объект {@link ChangePasswordRequest}, содержащий текущий и новый пароли.
+     * @throws IllegalStateException если текущий пароль не соответствует или новый пароль и его подтверждение не совпадают.
+     * @see SecurityUtils
+     */
     @Override
     public void changePassword(ChangePasswordRequest request) {
         User user = SecurityUtils.getCurrentUser();
@@ -143,10 +222,11 @@ public class UserServiceImpl implements UserService {
      * <p>
      * В случае ошибки при отправке электронного письма генерируется исключение {@link MailSendException}.
      * <p>
+     *
      * @param request объект запроса, содержащий текущую и новую электронные почты пользователя.
      * @return объект запроса {@link ChangeEmailRequest} с обновленными данными.
      * @throws IllegalStateException если текущая электронная почта пользователя не соответствует указанной в запросе.
-     * @throws MailSendException если происходит ошибка при отправке электронного письма.
+     * @throws MailSendException     если происходит ошибка при отправке электронного письма.
      */
     @Transactional
     @Override
@@ -189,6 +269,7 @@ public class UserServiceImpl implements UserService {
      * <p>
      * В случае ошибки, когда токен недействителен или истек, выводится сообщение об ошибке.
      * <p>
+     *
      * @param token уникальный токен подтверждения, используемый для идентификации временного пользователя.
      * @throws UserNotFoundException если пользователь с указанной предыдущей электронной почтой не найден.
      */
@@ -220,7 +301,22 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-
+    /**
+     * Изменяет роль пользователя по его идентификатору.
+     * <p>
+     * Метод позволяет изменить роль заданного пользователя. Проверяется право текущего пользователя
+     * (connectedUser) на выполнение данного действия. Если текущий пользователь не имеет права назначить
+     * или изменить роль ADMIN, выбрасывается исключение {@link AccessDeniedException}. Также исключение
+     * генерируется, если пытается измениться роль на уже существующую.
+     * <p>
+     *
+     * @param id            Идентификатор пользователя, роль которого нужно изменить.
+     * @param role          Новая роль, которую необходимо назначить пользователю.
+     * @param connectedUser Аутентифицированный пользователь, выполняющий операцию.
+     * @throws UserNotFoundException если пользователь с заданным идентификатором не найден.
+     * @throws AccessDeniedException если у пользователя, выполняющего операцию, нет прав на изменение роли.
+     * @throws IllegalStateException если пользователь уже имеет указанную роль.
+     */
     @Override
     public void changeRole(UUID id, Role role, Principal connectedUser) {
         log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), id);
@@ -247,6 +343,21 @@ public class UserServiceImpl implements UserService {
         log.debug("Role for {} successfully changed", existingUser.getId());
     }
 
+    /**
+     * Обновляет статус блокировки пользователя по его идентификатору.
+     * <p>
+     * Этот метод позволяет изменить статус блокировки пользователя. Если пользователь с указанным
+     * идентификатором не найден, выбрасывается исключение {@link UserNotFoundException}. Метод проверяет,
+     * отличается ли новый статус блокировки от текущего, и, в случае различия, обновляет его.
+     * Если статус уже соответствует указанному, генерируется {@link IllegalStateException}.
+     * <p>
+     *
+     * @param id        Идентификатор пользователя, статус блокировки которого нужно обновить.
+     * @param isBlocked Новый статус блокировки пользователя (true для блокировки, false для разблокировки).
+     * @return {@link UserResponseDTO} - DTO пользователя с обновленным статусом.
+     * @throws UserNotFoundException если пользователь с заданным идентификатором не найден.
+     * @throws IllegalStateException если статус блокировки пользователя уже соответствует указанному значению.
+     */
     @Override
     public UserResponseDTO updateBlockStatus(UUID id, Boolean isBlocked) {
         log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), id);
@@ -264,6 +375,18 @@ public class UserServiceImpl implements UserService {
         return mapper.toUserDTO(existingUser);
     }
 
+    /**
+     * Блокирует пользователя по его идентификатору.
+     * <p>
+     * Этот метод устанавливает статус блокировки пользователя на 'true'. Если пользователь
+     * с указанным идентификатором не найден, выбрасывается исключение {@link UserNotFoundException}.
+     * В случае, если пользователь уже заблокирован, выбрасывается {@link IllegalStateException}.
+     * <p>
+     *
+     * @param id Идентификатор пользователя, которого необходимо заблокировать.
+     * @throws UserNotFoundException если пользователь с указанным идентификатором не найден.
+     * @throws IllegalStateException если пользователь уже заблокирован.
+     */
     @Override
     public void blockById(UUID id) {
         log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), id);
@@ -278,6 +401,18 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    /**
+     * Разблокирует пользователя по его идентификатору.
+     * <p>
+     * Этот метод устанавливает статус блокировки пользователя на 'false'. Если пользователь
+     * с указанным идентификатором не найден, выбрасывается исключение {@link UserNotFoundException}.
+     * В случае, если пользователь уже разблокирован, выбрасывается {@link IllegalStateException}.
+     * <p>
+     *
+     * @param id Идентификатор пользователя, которого необходимо разблокировать.
+     * @throws UserNotFoundException если пользователь с указанным идентификатором не найден.
+     * @throws IllegalStateException если пользователь уже разблокирован.
+     */
     @Override
     public void unblockById(UUID id) {
         log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), id);
@@ -292,6 +427,16 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    /**
+     * Удаляет пользователя по его идентификатору.
+     * <p>
+     * Этот метод выполняет удаление пользователя из базы данных. Если пользователь
+     * с указанным идентификатором не найден, выбрасывается исключение {@link UserNotFoundException}.
+     * <p>
+     *
+     * @param id Идентификатор пользователя, которого необходимо удалить.
+     * @throws UserNotFoundException если пользователь с указанным идентификатором не найден.
+     */
     @Override
     public void deleteUser(UUID id) {
         log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), id);
@@ -303,6 +448,16 @@ public class UserServiceImpl implements UserService {
         log.debug("User {} successfully deleted", id);
     }
 
+    /**
+     * Получает список всех пользователей из базы данных.
+     * <p>
+     * Этот метод возвращает коллекцию DTO всех пользователей. Если пользователи отсутствуют
+     * в базе данных, выбрасывается исключение {@link UserNotFoundException}.
+     * <p>
+     *
+     * @return Коллекция {@link UserResponseDTO}, содержащая информацию о всех пользователях.
+     * @throws UserNotFoundException если в базе данных нет пользователей.
+     */
     @Override
     public Collection<UserResponseDTO> getAll() {
         log.debug("Method {}", MethodLog.getMethodName());
@@ -315,6 +470,17 @@ public class UserServiceImpl implements UserService {
         return userResponseDTOS;
     }
 
+    /**
+     * Находит все номера телефонов, связанные с пользователем.
+     * <p>
+     * Этот метод возвращает коллекцию номеров телефонов для указанного пользователя. Если пользователь
+     * с заданным идентификатором не найден, выбрасывается исключение {@link UserNotFoundException}.
+     * <p>
+     *
+     * @param userId Идентификатор пользователя, чьи номера телефонов нужно найти.
+     * @return Коллекция строк, представляющих номера телефонов пользователя.
+     * @throws UserNotFoundException если пользователь с указанным идентификатором не найден.
+     */
     @Override
     public Collection<String> findUsersPhoneNumbers(UUID userId) {
         log.debug("Method {}, UUID {}", MethodLog.getMethodName(), userId);
@@ -325,6 +491,15 @@ public class UserServiceImpl implements UserService {
         return phoneRepository.getNumbersByUserId(userId);
     }
 
+    /**
+     * Назначает аватар указанному пользователю.
+     * <p>
+     * Этот метод обновляет аватар пользователя в базе данных.
+     * <p>
+     *
+     * @param userId Идентификатор пользователя, которому нужно назначить аватар.
+     * @param avatar Объект {@link Avatar}, представляющий аватар пользователя.
+     */
     @Override
     @Transactional
     public void assignAvatarToUser(UUID userId, Avatar avatar) {
