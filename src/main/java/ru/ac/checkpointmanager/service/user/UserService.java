@@ -6,6 +6,7 @@ import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.user.UserPutDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.model.Avatar;
+import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.enums.Role;
 
 import java.security.Principal;
@@ -43,5 +44,7 @@ public interface UserService {
 
     Collection<String> findUsersPhoneNumbers(UUID userId);
 
-    public void assignAvatarToUser(UUID userId, Avatar avatar);
+    void assignAvatarToUser(UUID userId, Avatar avatar);
+
+    User findByPassId(UUID passId);
 }

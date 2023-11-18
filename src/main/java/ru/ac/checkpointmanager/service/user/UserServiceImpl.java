@@ -330,4 +330,9 @@ public class UserServiceImpl implements UserService {
     public void assignAvatarToUser(UUID userId, Avatar avatar) {
         userRepository.setAvatarForUser(avatar, userId);
     }
+
+    @Override
+    public User findByPassId(UUID passId) {
+        return userRepository.findByPassId(passId);
+    }
 }

@@ -1,21 +1,21 @@
-package ru.ac.checkpointmanager.dto;
+package ru.ac.checkpointmanager.dto.passes;
 
 import jakarta.validation.constraints.*;
 import lombok.Data;
+import ru.ac.checkpointmanager.dto.CarDTO;
+import ru.ac.checkpointmanager.dto.PersonDTO;
 import ru.ac.checkpointmanager.model.passes.PassTypeTime;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
-public class PassDTOin {
-
-    private UUID id;
+public class PassDtoCreate {
 
     @NotNull
     private UUID userId;
 
-    String name;
+    private String name;
 
     @NotNull
     private PassTypeTime typeTime;

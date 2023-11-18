@@ -122,4 +122,9 @@ public class TerritoryServiceImpl implements TerritoryService {
         territory.getUsers().remove(user);
         repository.save(territory);
     }
+
+    @Override
+    public Territory findByPassId(UUID passId) {
+        return repository.findByPassId(passId);
+    }
 }

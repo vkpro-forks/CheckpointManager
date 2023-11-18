@@ -25,6 +25,11 @@ public class PassWalk extends Pass {
     }
 
     @Override
+    public void setAttachedEntity(Pass pass) {
+        this.person = ((PassWalk) pass).getPerson();
+    }
+
+    @Override
     public String toString() {
         return this.getClass() + "{" +
                 super.toString() +

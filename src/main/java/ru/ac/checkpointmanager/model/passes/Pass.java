@@ -54,7 +54,7 @@ public abstract class Pass {
     @Column(insertable=false, updatable=false)
     private String dtype;
 
-    Boolean favorite;
+    Boolean favorite = false;
 
     public boolean compareByFields(Pass other) {
         return  (Objects.equals(this.getUser(), other.getUser()) &&
@@ -63,6 +63,8 @@ public abstract class Pass {
                 this.getEndTime().isAfter(other.getStartTime()) &&
                 this.getStartTime().isBefore(other.getEndTime()));
     }
+
+    public abstract void setAttachedEntity(Pass pass);
 
     @Override
     public String toString() {

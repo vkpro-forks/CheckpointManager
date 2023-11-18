@@ -20,4 +20,7 @@ public interface TerritoryRepository extends JpaRepository<Territory, UUID> {
     @Query(value = "SELECT EXISTS (SELECT FROM user_territory WHERE user_id = :uId AND territory_id = :tId)"
             , nativeQuery = true)
     boolean checkUserTerritoryRelation(@Param("uId") UUID userId, @Param("tId") UUID territoryId);
+
+    @Query(value = "SELECT t.* FROM territories t JOIN passes p on t.id = p.territory_id WHERE p.id = :passId", nativeQuery = true)
+    Territory findByPassId(@Param("passId") UUID passId);
 }
