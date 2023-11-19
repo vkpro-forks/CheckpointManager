@@ -230,7 +230,7 @@ public class UserServiceImpl implements UserService {
      */
     @Transactional
     @Override
-    public ChangeEmailRequest changeEmail(ChangeEmailRequest request) {
+    public String changeEmail(ChangeEmailRequest request) {
         User user = SecurityUtils.getCurrentUser();
 
         if (!request.getCurrentEmail().equals(user.getEmail())) {
@@ -253,7 +253,7 @@ public class UserServiceImpl implements UserService {
         }
 
         temporaryUserService.create(tempUser);
-        return request;
+        return token;
     }
 
     /**
