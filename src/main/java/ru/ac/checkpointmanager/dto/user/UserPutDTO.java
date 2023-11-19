@@ -25,6 +25,4 @@ public class UserPutDTO {
 
     private String mainNumber;
 
-    @JsonProperty("avatar")
-    private AvatarDTO avatarDTO;
 }
