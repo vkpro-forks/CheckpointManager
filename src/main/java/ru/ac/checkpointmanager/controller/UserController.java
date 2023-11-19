@@ -38,7 +38,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Пользовательский интерфейс", description = "Комплекс операций по управлению жизненным циклом " +
-        "пользовательских учетных записей, включая создание, модификацию, просмотр и удаление аккаунтов")
+                                                        "пользовательских учетных записей, включая создание, модификацию, просмотр и удаление аккаунтов")
 @ApiResponses(value = {
         @ApiResponse(responseCode = "401",
                 description = "UNAUTHORIZED: пользователь не авторизован"),
@@ -240,6 +240,19 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Изменение почты пользователя",
+            description = "Доступ: USER, ADMIN, MANAGER, SECURITY"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "OK: письмо для подтверждения отправлено"
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "CONFLICT: Передана неверная текущая почта пользователя"
+            )
+    })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @PatchMapping("/email")
     public ResponseEntity<?> changeEmail(@RequestBody @Valid ChangeEmailRequest request,
