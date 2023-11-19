@@ -35,9 +35,9 @@ public class VisitorController {
     private final VisitorService visitorService;
     private final Mapper mapper;
 
-    @Operation(summary = "Добавить новую посетитель")
+    @Operation(summary = "Добавить нового посетителя")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Посетитель успешно добавлена"),
+            @ApiResponse(responseCode = "201", description = "Посетитель успешно добавлен"),
             @ApiResponse(responseCode = "400", description = "Неверный запрос"),
     })
     @PostMapping
@@ -51,7 +51,7 @@ public class VisitorController {
         return new ResponseEntity<>(mapper.toVisitorDTO(newVisitor), HttpStatus.CREATED);
     }
 
-    @Operation(summary = "Получить посетитель по ID")
+    @Operation(summary = "Получить посетителя по ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Посетитель найден"),
     })
@@ -78,7 +78,7 @@ public class VisitorController {
         return new ResponseEntity<>(mapper.toVisitorDTO(updateVisitor), HttpStatus.OK);
     }
 
-    @Operation(summary = "Удалить посетитель по ID")
+    @Operation(summary = "Удалить посетителя по ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Посетитель успешно удален"),
     })
