@@ -24,7 +24,19 @@ import java.util.Collection;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-
+/**
+ * Фильтр для аутентификации JWT.
+ * <p>
+ * Этот фильтр проверяет JWT токены, приходящие в заголовках запросов, и устанавливает контекст
+ * безопасности Spring Security, если токен валиден. Он проверяет наличие токена, его валидность,
+ * и на основе данных токена создает объект аутентификации в контексте безопасности.
+ * <p>
+ *
+ * @author fifimova
+ * @see JwtService
+ * @see UserDetailsService
+ * @see TokenRepository
+ */
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -34,6 +46,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
     private final TokenRepository tokenRepository;
 
+    /**
+     * Фильтрует входящие HTTP запросы для аутентификации пользователя по JWT токену.
+     * <p>
+     * Метод анализирует HTTP запросы на наличие JWT в заголовке 'Authorization'.
+     * В случае наличия валидного токена происходит установка аутентификационных данных
+     * в контексте безопасности Spring Security. Запросы без токена или с невалидным токеном
+     * пропускаются без изменения контекста безопасности.
+     * <p>
+     *
+     * @param request     Объект запроса {@link HttpServletRequest}.
+     * @param response    Объект ответа {@link HttpServletResponse}.
+     * @param filterChain Цепочка фильтров {@link FilterChain}.
+     * @throws ServletException В случае ошибок фильтрации.
+     * @throws IOException      В случае ошибок ввода-вывода.
+     * @see CustomAuthenticationToken
+     * @see JwtService
+     * @see SecurityContextHolder
+     */
     @Override
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,

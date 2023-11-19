@@ -8,6 +8,16 @@ import ru.ac.checkpointmanager.model.User;
 
 import java.util.UUID;
 
+/**
+ * Утилитный класс, предоставляющий методы для работы с контекстом безопасности Spring Security.
+ * <p>
+ * Класс содержит статические методы для получения информации о текущем аутентифицированном
+ * пользователе, такие как получение самого пользователя или его уникального идентификатора (UUID).
+ * Методы класса могут выбрасывать {@link AccessDeniedException}, если пользователь не аутентифицирован.
+ * <p>
+ * @see CustomAuthenticationToken
+ * @see User
+ */
 public class SecurityUtils {
 
     /**
@@ -15,6 +25,7 @@ public class SecurityUtils {
      *
      * @return текущий аутентифицированный пользователь.
      * @throws AccessDeniedException если пользователь не аутентифицирован.
+     * @see CustomAuthenticationToken
      */
     public static User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -30,6 +41,7 @@ public class SecurityUtils {
      *
      * @return UUID.
      * @throws AccessDeniedException если пользователь не аутентифицирован.
+     * @see CustomAuthenticationToken
      */
     public static UUID getUserUUID() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
