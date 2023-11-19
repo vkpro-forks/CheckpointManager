@@ -6,7 +6,7 @@ DELETE FROM databasechangelog WHERE filename = 'liquibase/insert_demo_data.sql';
 -- а также не забывайте добавлять новые таблицы в транкейт
 -- (альтернатива - дропать схему, чтобы все скрипты накатывались заново, а не только этот; можно будет сделать и так)
 
-TRUNCATE TABLE crossings, passes, users, user_territory, cars, car_brand, persons, checkpoints, territories CASCADE;
+TRUNCATE TABLE crossings, passes, users, user_territory, cars, car_brand, visitors, checkpoints, territories CASCADE;
 
 DO $$
     DECLARE
@@ -29,8 +29,8 @@ DO $$
         user4_id UUID := uuid_generate_v4();
         car1_id UUID := uuid_generate_v4();
         car2_id UUID := uuid_generate_v4();
-        person1_id UUID := uuid_generate_v4();
-        person2_id UUID := uuid_generate_v4();
+        visitor1_id UUID := uuid_generate_v4();
+        visitor2_id UUID := uuid_generate_v4();
         pass1_id UUID := uuid_generate_v4();
         pass2_id UUID := uuid_generate_v4();
         pass3_id UUID := uuid_generate_v4();
@@ -80,12 +80,12 @@ DO $$
         VALUES (car1_id, 'А777АА77', 1),
                (car2_id, 'В666ВВ66', 2);
 
-        INSERT INTO persons (id, full_name, person_phone, note)
-        VALUES (person1_id, 'Петрович', '+79991234567', 'электрик'),
-               (person2_id, 'Дон Румата Эсторский', '+79991234568', null);
+        INSERT INTO visitors (id, full_name, visitor_phone, note)
+        VALUES (visitor1_id, 'Петрович', '+79991234567', 'электрик'),
+               (visitor2_id, 'Дон Румата Эсторский', '+79991234568', null);
 
-        INSERT INTO passes (id, user_id, status, type_time, territory_id, note, added_at
-                           , start_time, end_time, name, car_id, person_id, dtype, favorite)
+        INSERT INTO passes ( id, user_id, status, type_time, territory_id, note, added_at
+                           , start_time, end_time, name, car_id, visitor_id, dtype, favorite)
 
                -- АКТИВНЫЕ ПРОПУСКА НА НЕДЕЛЮ, без пересечений, с ними можно проверять пересечения
                -- автомобильный разовый
@@ -98,11 +98,11 @@ DO $$
 
                -- пешеходный разовый
                (pass3_id, user1_id, 'ACTIVE', 'ONETIME', ter1_id, 'note3', nowDT
-               , nowDT, nowDT + interval '7 day', 'ACTIVE FOR WEEK', null, person1_id, 'WALK', true),
+               , nowDT, nowDT + interval '7 day', 'ACTIVE FOR WEEK', null, visitor1_id, 'WALK', true),
 
                -- пешеходный постоянный
                (pass4_id, user1_id, 'ACTIVE', 'PERMANENT', ter2_id, null, nowDT
-               , nowDT, nowDT + interval '7 day', 'ACTIVE FOR WEEK', null, person2_id, 'WALK', false),
+               , nowDT, nowDT + interval '7 day', 'ACTIVE FOR WEEK', null, visitor2_id, 'WALK', false),
 
 
                -- ПРОПУСКА НА МИНУТУ, они должны поменять статус при проверке
@@ -116,11 +116,11 @@ DO $$
 
                -- активный пешеходный постоянный, пересечения на въезд и на выезд - должен стать ВЫПОЛНЕН
                (pass7_id, user2_id, 'ACTIVE', 'ONETIME', ter1_id, null, nowDT
-               , nowDT - interval '1 hour', nowDT, 'should be COMPLETED', null, person1_id, 'WALK', true),
+               , nowDT - interval '1 hour', nowDT, 'should be COMPLETED', null, visitor1_id, 'WALK', true),
 
                -- отложенный пешеходный разовый, должен стать АКТИВНЫМ на сутки
                (pass8_id, user2_id, 'DELAYED', 'ONETIME', ter1_id, null, nowDT
-               , nowDT + interval '1 minute', nowDT + interval '1 day', 'should be ACTIVE', null, person2_id, 'WALK', false);
+               , nowDT + interval '1 minute', nowDT + interval '1 day', 'should be ACTIVE', null, visitor2_id, 'WALK', false);
 
         INSERT INTO crossings (pass_id, checkpoint_id, local_date_time, direction)
         VALUES (pass6_id, chp1_id, nowDT, 'IN'),

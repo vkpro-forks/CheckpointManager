@@ -3,7 +3,7 @@ package ru.ac.checkpointmanager.dto.passes;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 import ru.ac.checkpointmanager.dto.CarDTO;
-import ru.ac.checkpointmanager.dto.PersonDTO;
+import ru.ac.checkpointmanager.dto.VisitorDTO;
 import ru.ac.checkpointmanager.model.passes.PassTypeTime;
 
 import java.time.LocalDateTime;
@@ -33,7 +33,7 @@ public class PassDtoCreate {
     @Future
     private LocalDateTime endTime;
 
-    private PersonDTO person;
+    private VisitorDTO visitor;
 
     private CarDTO car;
 }

@@ -15,7 +15,6 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import ru.ac.checkpointmanager.exception.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @ControllerAdvice
 @Slf4j
@@ -50,7 +49,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleGeneralException(Exception e) {
         String message = String.format("Exception %s: %s", e.getClass(), e.getMessage());
-        log.warn(message);
+        log.warn(message, e);
         return new ResponseEntity<>(new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, message,
                 (List<String>) null), HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -167,8 +166,8 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(PersonNotFoundException.class)
-    public ResponseEntity<String> handlePersonNotFoundException(PersonNotFoundException e) {
+    @ExceptionHandler(VisitorNotFoundException.class)
+    public ResponseEntity<String> handleVisitorNotFoundException(VisitorNotFoundException e) {
         String message = String.format("Exception %s: %s", e.getClass(), e.getMessage());
         log.info(message);
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);

@@ -97,17 +97,17 @@ public class Mapper {
                 .toList();
     }
 
-    public Person toPerson(PersonDTO personDTO) {
-        return modelMapper.map(personDTO, Person.class);
+    public Visitor toVisitor(VisitorDTO visitorDTO) {
+        return modelMapper.map(visitorDTO, Visitor.class);
     }
 
-    public PersonDTO toPersonDTO(Person person) {
-        return modelMapper.map(person, PersonDTO.class);
+    public VisitorDTO toVisitorDTO(Visitor visitor) {
+        return modelMapper.map(visitor, VisitorDTO.class);
     }
 
-    public List<PersonDTO> toPersonDTO(Collection<Person> people) {
+    public List<VisitorDTO> toVisitorDTO(Collection<Visitor> people) {
         return people.stream()
-                .map(e -> modelMapper.map(e, PersonDTO.class))
+                .map(e -> modelMapper.map(e, VisitorDTO.class))
                 .toList();
     }
 

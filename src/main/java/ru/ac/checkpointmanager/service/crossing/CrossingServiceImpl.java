@@ -66,8 +66,8 @@ public class CrossingServiceImpl implements CrossingService {
             log.warn("Attempt to get Crossing with null UUID");
             throw new IllegalArgumentException("UUID cannot be null");
         }
-        Optional<Crossing> personCrossing = crossingRepository.findById(uuid);
-        return personCrossing.orElseThrow(() -> {
+        Optional<Crossing> visitorCrossing = crossingRepository.findById(uuid);
+        return visitorCrossing.orElseThrow(() -> {
             log.warn("Crossing not found for UUID: {}", uuid);
             return new CrossingNotFoundException("Crossing not found");
         });

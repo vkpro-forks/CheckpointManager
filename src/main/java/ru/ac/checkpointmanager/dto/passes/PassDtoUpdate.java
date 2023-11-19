@@ -5,7 +5,7 @@ import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import ru.ac.checkpointmanager.dto.CarDTO;
-import ru.ac.checkpointmanager.dto.PersonDTO;
+import ru.ac.checkpointmanager.dto.VisitorDTO;
 import ru.ac.checkpointmanager.model.passes.PassTypeTime;
 
 import java.time.LocalDateTime;
@@ -32,7 +32,7 @@ public class PassDtoUpdate {
     @Future
     private LocalDateTime endTime;
 
-    private PersonDTO person;
+    private VisitorDTO visitor;
 
     private CarDTO car;
 }
