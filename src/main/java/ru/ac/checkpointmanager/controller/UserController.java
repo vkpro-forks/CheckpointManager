@@ -27,7 +27,6 @@ import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.service.user.UserService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
 
-import java.security.Principal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -38,7 +37,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Пользовательский интерфейс", description = "Комплекс операций по управлению жизненным циклом " +
-        "пользовательских учетных записей, включая создание, модификацию, просмотр и удаление аккаунтов")
+                                                        "пользовательских учетных записей, включая создание, модификацию, просмотр и удаление аккаунтов")
 @ApiResponses(value = {
         @ApiResponse(responseCode = "401",
                 description = "UNAUTHORIZED: пользователь не авторизован"),
@@ -279,10 +278,9 @@ public class UserController {
     public ResponseEntity<?> changeRole(@Parameter(description = "Уникальный идентификатор пользователя", required = true)
                                         @PathVariable UUID id,
                                         @Parameter(description = "Новая роль пользователя", required = true)
-                                        @RequestParam Role role,
-                                        Principal connectedUser
+                                        @RequestParam Role role
     ) {
-        userService.changeRole(id, role, connectedUser);
+        userService.changeRole(id, role);
         return ResponseEntity.ok().build();
     }
 
