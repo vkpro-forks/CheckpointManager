@@ -1,19 +1,19 @@
 -- liquibase formatted sql
 
 -- changeset x3imal:74
-ALTER TABLE passes DROP CONSTRAINT pass_person_fk;
-DROP TABLE IF EXISTS persons;
+ALTER TABLE passes DROP CONSTRAINT pass_visitor_fk;
+DROP TABLE IF EXISTS visitors;
 
 
 -- changeset x3imal:74.1
-CREATE TABLE persons
+CREATE TABLE visitors
 (
     id           UUID DEFAULT gen_random_uuid(),
     full_name    VARCHAR(255) NOT NULL,
-    person_phone VARCHAR(20),
+    visitor_phone VARCHAR(20),
     note         TEXT,
 
-    CONSTRAINT person_pk PRIMARY KEY (id)
+    CONSTRAINT visitor_pk PRIMARY KEY (id)
 );
 
 -- changeset x3imal:74.2

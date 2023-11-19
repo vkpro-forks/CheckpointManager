@@ -37,10 +37,10 @@ public class PassMapper {
 
         if (passDTOcreate.getCar() != null) {
             return modelMapper.map(passDTOcreate, PassAuto.class);
-        } else if (passDTOcreate.getPerson() != null) {
+        } else if (passDTOcreate.getVisitor() != null) {
             return modelMapper.map(passDTOcreate, PassWalk.class);
         }
-        throw new IllegalArgumentException("Ошибка при конвертации passDTO (не содержит car или person)");
+        throw new IllegalArgumentException("Ошибка при конвертации passDTO (не содержит car или visitor)");
     }
 
     public Pass toPass(PassDtoUpdate passDtoUpdate) {
@@ -48,10 +48,10 @@ public class PassMapper {
 
         if (passDtoUpdate.getCar() != null) {
             pass = modelMapper.map(passDtoUpdate, PassAuto.class);
-        } else if (passDtoUpdate.getPerson() != null) {
+        } else if (passDtoUpdate.getVisitor() != null) {
             pass = modelMapper.map(passDtoUpdate, PassWalk.class);
         } else {
-            throw new IllegalArgumentException("Ошибка при конвертации passDTO (не содержит car или person)");
+            throw new IllegalArgumentException("Ошибка при конвертации passDTO (не содержит car или visitor)");
         }
 
         pass.setUser(userService.findByPassId(passDtoUpdate.getId()));
