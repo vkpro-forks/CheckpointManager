@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,7 +24,7 @@ import ru.ac.checkpointmanager.utils.Mapper;
 
 import java.util.List;
 import java.util.UUID;
-
+@Slf4j
 @RestController
 @RequestMapping("chpman/car")
 @RequiredArgsConstructor
@@ -46,6 +47,7 @@ public class CarController {
     @PostMapping
     public ResponseEntity<?> addCar(@Valid @RequestBody CarDTO carDTO, BindingResult result) {
         if (result.hasErrors()) {
+            log.warn("Car creation failed due to validation errors");
             return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
         }
 
@@ -56,9 +58,12 @@ public class CarController {
             car.setBrand(existingBrand);
             Car newCar = carService.addCar(car);
             CarDTO newCarDTO = mapper.toCarDTO(newCar);
+            log.info("New car created: {}", newCar);
             return new ResponseEntity<>(newCarDTO, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
+            log.warn("Car creation failed: {}", e.getMessage());
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+
         }
     }
 
@@ -70,12 +75,14 @@ public class CarController {
     @PutMapping("/{carId}")
     public ResponseEntity<?> updateCar(@Valid @PathVariable UUID carId, @RequestBody CarDTO updateCarDto, BindingResult result) {
         if (result.hasErrors()) {
+            log.warn("Car update failed for ID {} due to validation errors", carId);
             return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
         }
 
         Car car = mapper.toCar(updateCarDto);
 
         Car updated =  carService.updateCar(carId, car);
+        log.info("Car with ID {} updated", carId);
         return ResponseEntity.ok(updated);
     }
 
@@ -86,7 +93,12 @@ public class CarController {
     })
     @DeleteMapping("/{carId}")
     public ResponseEntity<Void> deletedCar(@PathVariable UUID carId) {
+        if (!carService.existsById(carId)) {
+            log.warn("Attempt to delete non-existing car with ID {}", carId);
+            return ResponseEntity.notFound().build();
+        }
         carService.deleteCar(carId);
+        log.info("Car with ID {} deleted", carId);
         return ResponseEntity.noContent().build();
     }
 
@@ -99,8 +111,10 @@ public class CarController {
     public ResponseEntity<List<CarDTO>> getAllCars() {
         List<Car> carList = carService.getAllCars();
         if (carList.isEmpty()) {
+            log.debug("No cars found");
             return ResponseEntity.noContent().build();
         }
+        log.debug("Retrieved all cars");
         return ResponseEntity.ok(mapper.toCarDTOs(carList));
     }
 
@@ -112,7 +126,12 @@ public class CarController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<CarDTO>> searchByUserId(@PathVariable UUID userId) {
         List<Car> cars = carService.findByUserId(userId);
+        if (cars.isEmpty()) {
+            log.debug("No cars found for user ID {}", userId);
+            return ResponseEntity.noContent().build();
+        }
         List<CarDTO> carDTOs = mapper.toCarDTOs(cars);
+        log.debug("Retrieved cars for user ID {}", userId);
         return new ResponseEntity<>(carDTOs, HttpStatus.OK);
     }
 }

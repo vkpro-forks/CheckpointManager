@@ -78,4 +78,9 @@ public class CarServiceImpl implements CarService {
         log.debug("Find {} cars for user [UUID - {}]", foundCars.size(), userId);
         return foundCars;
     }
+
+    @Override
+    public boolean existsById(UUID id) {
+        return repository.existsById(id);
+    }
 }
