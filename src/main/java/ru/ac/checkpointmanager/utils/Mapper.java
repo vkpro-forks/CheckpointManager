@@ -83,19 +83,6 @@ public class Mapper {
                 .toList();
     }
 
-    public Car toCar(CarDTO carDTO) {
-        return modelMapper.map(carDTO, Car.class);
-    }
-
-    public CarDTO toCarDTO(Car car) {
-        return modelMapper.map(car, CarDTO.class);
-    }
-
-    public List<CarDTO> toCarDTOs(Collection<Car> cars) {
-        return cars.stream()
-                .map(e -> modelMapper.map(e, CarDTO.class))
-                .toList();
-    }
 
     public Visitor toVisitor(VisitorDTO visitorDTO) {
         return modelMapper.map(visitorDTO, Visitor.class);
