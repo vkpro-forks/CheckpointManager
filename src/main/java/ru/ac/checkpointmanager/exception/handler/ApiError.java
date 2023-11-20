@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.utils;
+package ru.ac.checkpointmanager.exception.handler;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
