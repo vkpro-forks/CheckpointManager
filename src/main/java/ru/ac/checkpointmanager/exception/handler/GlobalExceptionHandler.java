@@ -27,7 +27,9 @@ public class GlobalExceptionHandler {
     private static final String TIMESTAMP = "timestamp";
 
     private static final String LOG_MSG = "[Exception {}] handled with [message {}]";
+
     public static final String VALIDATION_ERROR = "Validation error";
+
     public static final String VIOLATIONS = "violations";
 
     @ExceptionHandler(CarBrandNotFoundException.class)
