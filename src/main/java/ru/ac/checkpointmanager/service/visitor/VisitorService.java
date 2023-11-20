@@ -23,4 +23,6 @@ public interface VisitorService {
     Optional<Visitor> findByPassId(UUID passId);
 
     List<Visitor> findByUserId(UUID userId);
+
+    boolean existsById(UUID id);
 }

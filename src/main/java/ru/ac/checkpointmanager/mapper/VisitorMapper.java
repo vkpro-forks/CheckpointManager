@@ -21,17 +21,17 @@ public class VisitorMapper {
     }
 
     public Visitor toVisitor(VisitorDTO visitorDTO) {
-        log.info("Converting from VisitorDTO to Visitor");
+        log.debug("Converting from VisitorDTO to Visitor");
         return modelMapper.map(visitorDTO, Visitor.class);
     }
 
     public VisitorDTO toVisitorDTO(Visitor visitor) {
-        log.info("Converting from Visitor to VisitorDTO");
+        log.debug("Converting from Visitor to VisitorDTO");
         return modelMapper.map(visitor, VisitorDTO.class);
     }
 
     public List<VisitorDTO> toVisitorDTOS(Collection<Visitor> people) {
-        log.info("Converting a list of Visitor objects to a list of VisitorDTOs");
+        log.debug("Converting a list of Visitor objects to a list of VisitorDTOs");
         return people.stream()
                 .map(e -> modelMapper.map(e, VisitorDTO.class))
                 .toList();
