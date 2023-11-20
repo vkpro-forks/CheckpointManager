@@ -95,8 +95,7 @@ public class VisitorController {
     @GetMapping("/phone")
     public ResponseEntity<List<VisitorDTO>> searchByPhone(@RequestParam String phone) {
         List<Visitor> visitors = visitorService.findByPhonePart(phone);
-        List<VisitorDTO> visitorDTOS = visitors.stream()
-                .map(visitor -> mapper.toVisitorDTO(visitor)).toList();
+        List<VisitorDTO> visitorDTOS = mapper.toVisitorDTOS(visitors);
         return new ResponseEntity<>(visitorDTOS, HttpStatus.OK);
     }
 
@@ -107,9 +106,7 @@ public class VisitorController {
     @GetMapping("/name")
     public ResponseEntity<List<VisitorDTO>> searchByName(@RequestParam String name) {
         List<Visitor> visitors = visitorService.findByNamePart(name);
-        List<VisitorDTO> visitorDTOS = visitors.stream()
-                .map(visitor -> mapper.toVisitorDTO(visitor))
-                .toList();
+        List<VisitorDTO> visitorDTOS = mapper.toVisitorDTOS(visitors);
         return new ResponseEntity<>(visitorDTOS, HttpStatus.OK);
     }
 
@@ -135,7 +132,7 @@ public class VisitorController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<VisitorDTO>> searchByUserId(@PathVariable UUID userId) {
         List<Visitor> visitors = visitorService.findByUserId(userId);
-        List<VisitorDTO> visitorDTOS = mapper.toVisitorDTO(visitors);
+        List<VisitorDTO> visitorDTOS = mapper.toVisitorDTOS(visitors);
         return new ResponseEntity<>(visitorDTOS, HttpStatus.OK);
     }
 }

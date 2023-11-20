@@ -105,7 +105,7 @@ public class Mapper {
         return modelMapper.map(visitor, VisitorDTO.class);
     }
 
-    public List<VisitorDTO> toVisitorDTO(Collection<Visitor> people) {
+    public List<VisitorDTO> toVisitorDTOS(Collection<Visitor> people) {
         return people.stream()
                 .map(e -> modelMapper.map(e, VisitorDTO.class))
                 .toList();
