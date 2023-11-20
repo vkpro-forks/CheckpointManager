@@ -13,21 +13,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-import ru.ac.checkpointmanager.exception.AvatarIsEmptyException;
-import ru.ac.checkpointmanager.exception.AvatarNotFoundException;
-import ru.ac.checkpointmanager.exception.BadAvatarExtensionException;
-import ru.ac.checkpointmanager.exception.CarBrandNotFoundException;
-import ru.ac.checkpointmanager.exception.DateOfBirthFormatException;
-import ru.ac.checkpointmanager.exception.EntranceWasAlreadyException;
-import ru.ac.checkpointmanager.exception.InactivePassException;
-import ru.ac.checkpointmanager.exception.InvalidPhoneNumberException;
-import ru.ac.checkpointmanager.exception.PassNotFoundException;
-import ru.ac.checkpointmanager.exception.PhoneAlreadyExistException;
-import ru.ac.checkpointmanager.exception.PhoneNumberNotFoundException;
-import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
-import ru.ac.checkpointmanager.exception.UserNotFoundException;
-import ru.ac.checkpointmanager.exception.VisitorNotFoundException;
+import ru.ac.checkpointmanager.exception.*;
 
 import java.time.Instant;
 import java.util.List;
@@ -85,15 +71,6 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.NOT_FOUND, e);
         problemDetail.setTitle("Entity no found");
         problemDetail.setProperty(ERROR_CODE, ErrorCode.NOT_FOUND.toString());
-        log.warn(LOG_MSG, e.getClass(), e.getMessage());
-        return problemDetail;
-    }
-
-    @ExceptionHandler(Exception.class)
-    public ProblemDetail handleGeneralException(Exception e) {
-        ProblemDetail problemDetail = createProblemDetail(HttpStatus.INTERNAL_SERVER_ERROR, e);
-        problemDetail.setTitle("Internal server error");
-        problemDetail.setProperty(ERROR_CODE, ErrorCode.INTERNAL_SERVER_ERROR.toString());
         log.warn(LOG_MSG, e.getClass(), e.getMessage());
         return problemDetail;
     }

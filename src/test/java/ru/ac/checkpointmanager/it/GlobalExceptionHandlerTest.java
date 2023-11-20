@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -14,16 +15,15 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.ac.checkpointmanager.exception.handler.ErrorCode;
 import ru.ac.checkpointmanager.it.config.CorsTestConfiguration;
+import ru.ac.checkpointmanager.it.config.OpenAllEndpointsTestConfiguration;
+import ru.ac.checkpointmanager.testcontainers.PostgresContainersConfig;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
-import ru.ac.checkpointmanager.testcontainers.PostgresContainersConfig;
-
-import java.util.UUID;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
 @AutoConfigureMockMvc
-@Import(CorsTestConfiguration.class)
+@Import({OpenAllEndpointsTestConfiguration.class, CorsTestConfiguration.class})
 @ActiveProfiles("test")
 class GlobalExceptionHandlerTest extends PostgresContainersConfig {
 
@@ -32,13 +32,16 @@ class GlobalExceptionHandlerTest extends PostgresContainersConfig {
 
     @Test
     @SneakyThrows
+    @WithMockUser
+// Mock user need to work with GlobalMethodSecurity
     void handleCarBrandNotFoundException() {
-        mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.CAR_BRANDS_URL+"/"+ UUID.randomUUID()))
+        mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.CAR_BRANDS_URL + "/1000000"))
                 .andExpect(MockMvcResultMatchers.status().isNotFound())
-                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_ERROR_CODE)
-                        .value(ErrorCode.NOT_FOUND.toString()));
-
+                        .value(ErrorCode.NOT_FOUND.toString()))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_TIMESTAMP).isNotEmpty())
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_TITLE).isNotEmpty());
     }
 
     @Test
