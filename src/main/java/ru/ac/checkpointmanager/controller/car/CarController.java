@@ -13,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.ac.checkpointmanager.dto.CarDTO;
+import ru.ac.checkpointmanager.mapper.CarMapper;
 import ru.ac.checkpointmanager.model.car.Car;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.service.car.CarBrandService;
@@ -33,7 +34,7 @@ import java.util.UUID;
 @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
 public class CarController {
 
-    private final Mapper mapper;
+    private final CarMapper mapper;
     private final CarService carService;
     private final CarBrandService carBrandService;
 
@@ -100,7 +101,7 @@ public class CarController {
         if (carList.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
-        return ResponseEntity.ok(mapper.toCarDTO(carList));
+        return ResponseEntity.ok(mapper.toCarDTOs(carList));
     }
 
     @Operation(summary = "Найти машины из пропусков пользователя")
@@ -111,7 +112,7 @@ public class CarController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<CarDTO>> searchByUserId(@PathVariable UUID userId) {
         List<Car> cars = carService.findByUserId(userId);
-        List<CarDTO> carDTOs = mapper.toCarDTO(cars);
+        List<CarDTO> carDTOs = mapper.toCarDTOs(cars);
         return new ResponseEntity<>(carDTOs, HttpStatus.OK);
     }
 }

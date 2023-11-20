@@ -29,8 +29,6 @@ import java.util.Optional;
 public class Mapper {
 
     private final ModelMapper modelMapper = new ModelMapper();
-    private final PassRepository passRepository;
-    private final CheckpointRepository checkpointRepository;
 
     /* Checkpoint mapping */
     public Checkpoint toCheckpoint(CheckpointDTO checkpointDTO) {
@@ -80,34 +78,6 @@ public class Mapper {
     public List<UserResponseDTO> toUsersDTO(Collection<User> users) {
         return users.stream()
                 .map(e -> modelMapper.map(e, UserResponseDTO.class))
-                .toList();
-    }
-
-    public Car toCar(CarDTO carDTO) {
-        return modelMapper.map(carDTO, Car.class);
-    }
-
-    public CarDTO toCarDTO(Car car) {
-        return modelMapper.map(car, CarDTO.class);
-    }
-
-    public List<CarDTO> toCarDTO(Collection<Car> cars) {
-        return cars.stream()
-                .map(e -> modelMapper.map(e, CarDTO.class))
-                .toList();
-    }
-
-    public Visitor toVisitor(VisitorDTO visitorDTO) {
-        return modelMapper.map(visitorDTO, Visitor.class);
-    }
-
-    public VisitorDTO toVisitorDTO(Visitor visitor) {
-        return modelMapper.map(visitor, VisitorDTO.class);
-    }
-
-    public List<VisitorDTO> toVisitorDTO(Collection<Visitor> people) {
-        return people.stream()
-                .map(e -> modelMapper.map(e, VisitorDTO.class))
                 .toList();
     }
 
@@ -186,34 +156,6 @@ public class Mapper {
     public List<PhoneDTO> toPhonesDTO(Collection<Phone> phones) {
         return phones.stream()
                 .map(p -> modelMapper.map(p, PhoneDTO.class))
-                .toList();
-    }
-
-    /* Crossing mapping */
-    public Crossing toCrossing(CrossingDTO crossingDTO) {
-        Crossing crossing = new Crossing();
-        Optional<Pass> optionalPass = passRepository.findById(crossingDTO.getPassId());
-        Pass pass = optionalPass.orElseThrow(
-                () -> new PassNotFoundException("Pass not found for ID " + crossingDTO.getPassId()));
-
-        Optional<Checkpoint> optionalCheckpoint = checkpointRepository.findById(crossingDTO.getCheckpointId());
-        Checkpoint checkpoint = optionalCheckpoint.orElseThrow(
-                () -> new CheckpointNotFoundException("Checkpoint not found for ID " + crossingDTO.getCheckpointId()));
-
-        crossing.setPass(pass);
-        crossing.setCheckpoint(checkpoint);
-        crossing.setDirection(crossingDTO.getDirection());
-
-        return crossing;
-    }
-
-    public CrossingDTO toCrossingDTO(Crossing crossing) {
-        return modelMapper.map(crossing, CrossingDTO.class);
-    }
-
-    public List<CrossingDTO> toCrossingsDTO(Collection<Crossing> crossings) {
-        return crossings.stream()
-                .map(crossing -> modelMapper.map(crossing, CrossingDTO.class))
                 .toList();
     }
 

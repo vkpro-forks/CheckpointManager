@@ -14,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
+import ru.ac.checkpointmanager.mapper.CrossingMapper;
 import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.service.crossing.CrossingService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
@@ -33,7 +34,7 @@ import java.util.UUID;
 public class CrossingController {
 
     private final CrossingService crossingService;
-    private final Mapper mapper;
+    private final CrossingMapper mapper;
 
     @Operation(summary = "Отметить пересечение")
     @ApiResponses(value = {

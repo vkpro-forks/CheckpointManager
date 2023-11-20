@@ -14,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.ac.checkpointmanager.dto.VisitorDTO;
+import ru.ac.checkpointmanager.mapper.VisitorMapper;
 import ru.ac.checkpointmanager.model.Visitor;
 import ru.ac.checkpointmanager.service.visitor.VisitorService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
@@ -33,7 +34,7 @@ import java.util.UUID;
 public class VisitorController {
 
     private final VisitorService visitorService;
-    private final Mapper mapper;
+    private final VisitorMapper mapper;
 
     @Operation(summary = "Добавить нового посетителя")
     @ApiResponses(value = {
@@ -95,8 +96,7 @@ public class VisitorController {
     @GetMapping("/phone")
     public ResponseEntity<List<VisitorDTO>> searchByPhone(@RequestParam String phone) {
         List<Visitor> visitors = visitorService.findByPhonePart(phone);
-        List<VisitorDTO> visitorDTOS = visitors.stream()
-                .map(visitor -> mapper.toVisitorDTO(visitor)).toList();
+        List<VisitorDTO> visitorDTOS = mapper.toVisitorDTOS(visitors);
         return new ResponseEntity<>(visitorDTOS, HttpStatus.OK);
     }
 
@@ -107,9 +107,7 @@ public class VisitorController {
     @GetMapping("/name")
     public ResponseEntity<List<VisitorDTO>> searchByName(@RequestParam String name) {
         List<Visitor> visitors = visitorService.findByNamePart(name);
-        List<VisitorDTO> visitorDTOS = visitors.stream()
-                .map(visitor -> mapper.toVisitorDTO(visitor))
-                .toList();
+        List<VisitorDTO> visitorDTOS = mapper.toVisitorDTOS(visitors);
         return new ResponseEntity<>(visitorDTOS, HttpStatus.OK);
     }
 
@@ -135,7 +133,7 @@ public class VisitorController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<VisitorDTO>> searchByUserId(@PathVariable UUID userId) {
         List<Visitor> visitors = visitorService.findByUserId(userId);
-        List<VisitorDTO> visitorDTOS = mapper.toVisitorDTO(visitors);
+        List<VisitorDTO> visitorDTOS = mapper.toVisitorDTOS(visitors);
         return new ResponseEntity<>(visitorDTOS, HttpStatus.OK);
     }
 }
