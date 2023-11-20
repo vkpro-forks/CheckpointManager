@@ -100,7 +100,7 @@ public class CarController {
         if (carList.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
-        return ResponseEntity.ok(mapper.toCarDTO(carList));
+        return ResponseEntity.ok(mapper.toCarDTOs(carList));
     }
 
     @Operation(summary = "Найти машины из пропусков пользователя")
@@ -111,7 +111,7 @@ public class CarController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<CarDTO>> searchByUserId(@PathVariable UUID userId) {
         List<Car> cars = carService.findByUserId(userId);
-        List<CarDTO> carDTOs = mapper.toCarDTO(cars);
+        List<CarDTO> carDTOs = mapper.toCarDTOs(cars);
         return new ResponseEntity<>(carDTOs, HttpStatus.OK);
     }
 }
