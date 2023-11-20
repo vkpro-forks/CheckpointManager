@@ -108,4 +108,9 @@ public class VisitorServiceImpl implements VisitorService {
         log.debug("Find {} Visitors for user [UUID - {}]", foundVisitors.size(), userId);
         return foundVisitors;
     }
+
+    @Override
+    public boolean existsById(UUID id) {
+        return repository.existsById(id);
+    }
 }
