@@ -6,8 +6,8 @@ spring:
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/chpmanDB
-    username: chpman
-    password: chpmanPass%
+    username: ENC(5HqytD0eVVx8qGMGQu8sTQ==)
+    password: ENC(9SwZkb8QRqZYzm1kOZ0VKvYgHiRKmOCR)
   servlet:
     multipart:
       max-file-size: 5MB
@@ -33,8 +33,8 @@ spring:
   mail:
     host: smtp.yandex.ru
     port: 465
-    username: anvilcoder@yandex.ru
-    password: zgvovxqtnyosjfxx
+    username: ENC(dVpBOhqGH3wL3SOmDl2H7k7OF94q4NNWmtIA7owtFIE=)
+    password: ENC(UyrF6XfE/xEJShixxamBcoBJG+DAVKy15WxgFj00KPM=)
     protocol: smtp
     properties:
       mail:
@@ -47,7 +47,7 @@ spring:
 application:
   security:
     jwt:
-      secret-key: 8790D58F7205C4C250CD67DD6D9B6F8B20D2E928FFAA6D4A2BEB2AD2189B01D1
+      secret-key: ENC(LgSa02Um+3umQ8fEpn2ftbUjAfbQ5gy9yLzM+C4H/BcjTpq3pQ/+LroJjjPOhM/dYYF6R7zFMnAsO71uUta3MXDCnKlSGg5VU9sfc5X939A=)
       expiration: 86400000 # a day
       refresh-token:
         expiration: 604800000 # 7 days
@@ -61,4 +61,3 @@ avatars:
     max-height: 400 # максимальная высота изображения
 logging:
   config: classpath:logback-local.xml
-
