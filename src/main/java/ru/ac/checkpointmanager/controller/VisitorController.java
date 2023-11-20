@@ -94,10 +94,9 @@ public class VisitorController {
             @ApiResponse(responseCode = "200", description = "Посетители найдены"),
     })
     @GetMapping("/phone")
-    public ResponseEntity<List<VisitorDTO>> searchByPhone(@RequestParam String phone) {
+    public List<VisitorDTO> searchByPhone(@RequestParam String phone) {
         List<Visitor> visitors = visitorService.findByPhonePart(phone);
-        List<VisitorDTO> visitorDTOS = mapper.toVisitorDTOS(visitors);
-        return new ResponseEntity<>(visitorDTOS, HttpStatus.OK);
+        return mapper.toVisitorDTOS(visitors);
     }
 
     @Operation(summary = "Найти посетителя по имени")

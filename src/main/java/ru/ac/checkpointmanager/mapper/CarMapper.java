@@ -1,5 +1,7 @@
 package ru.ac.checkpointmanager.mapper;
 
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
@@ -22,17 +24,17 @@ public class CarMapper {
 
 
     public Car toCar(CarDTO carDTO) {
-        log.info("Conversion from CarDTO to Car");
+        log.debug("Conversion from CarDTO to Car");
         return modelMapper.map(carDTO, Car.class);
     }
 
     public CarDTO toCarDTO(Car car) {
-        log.info("Converting from Car to CarDTO");
+        log.debug("Converting from Car to CarDTO");
         return modelMapper.map(car, CarDTO.class);
     }
 
     public List<CarDTO> toCarDTOs(Collection<Car> cars) {
-        log.info("Converting a list of Car objects to a list of CarDTOs");
+        log.debug("Converting a list of Car objects to a list of CarDTOs");
         return cars.stream()
                 .map(e -> modelMapper.map(e, CarDTO.class))
                 .toList();
