@@ -69,4 +69,9 @@ public class CarBrandServiceImpl implements CarBrandService {
         return carBrandRepository.findByBrandContainingIgnoreCase(brandName);
     }
 
+    @Override
+    public boolean existsById(Long id) {
+        return carBrandRepository.existsById(id);
+    }
+
 }
