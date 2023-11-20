@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,7 +23,7 @@ import ru.ac.checkpointmanager.utils.Mapper;
 
 import java.util.UUID;
 
-
+@Slf4j
 @RestController
 @RequestMapping("chpman/crossing")
 @RequiredArgsConstructor
@@ -44,9 +45,11 @@ public class CrossingController {
     @PostMapping("/mark")
     public ResponseEntity<?> markCrossing(@Valid @RequestBody CrossingDTO crossingDTO, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
+            log.warn("Failed to mark crossing due to validation errors");
             return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
         }
         Crossing crossing = crossingService.markCrossing(mapper.toCrossing(crossingDTO));
+        log.info("Crossing marked: {}", crossing);
         return new ResponseEntity<>(mapper.toCrossingDTO(crossing), HttpStatus.OK);
     }
 
@@ -57,6 +60,11 @@ public class CrossingController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getCrossing(@PathVariable UUID id) {
         Crossing existCrossing = crossingService.getCrossing(id);
+        if (existCrossing == null) {
+            log.warn("No crossing found with ID {}", id);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        log.debug("Retrieved crossing with ID {}", id);
         return new ResponseEntity<>(mapper.toCrossingDTO(existCrossing), HttpStatus.OK);
     }
 }
