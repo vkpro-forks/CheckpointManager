@@ -14,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.ac.checkpointmanager.dto.VisitorDTO;
+import ru.ac.checkpointmanager.mapper.VisitorMapper;
 import ru.ac.checkpointmanager.model.Visitor;
 import ru.ac.checkpointmanager.service.visitor.VisitorService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
@@ -33,7 +34,7 @@ import java.util.UUID;
 public class VisitorController {
 
     private final VisitorService visitorService;
-    private final Mapper mapper;
+    private final VisitorMapper mapper;
 
     @Operation(summary = "Добавить нового посетителя")
     @ApiResponses(value = {

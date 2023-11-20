@@ -83,21 +83,6 @@ public class Mapper {
                 .toList();
     }
 
-
-    public Visitor toVisitor(VisitorDTO visitorDTO) {
-        return modelMapper.map(visitorDTO, Visitor.class);
-    }
-
-    public VisitorDTO toVisitorDTO(Visitor visitor) {
-        return modelMapper.map(visitor, VisitorDTO.class);
-    }
-
-    public List<VisitorDTO> toVisitorDTOS(Collection<Visitor> people) {
-        return people.stream()
-                .map(e -> modelMapper.map(e, VisitorDTO.class))
-                .toList();
-    }
-
     public User toUser(UserAuthDTO userAuthDTO) {
         return modelMapper.map(userAuthDTO, User.class);
     }

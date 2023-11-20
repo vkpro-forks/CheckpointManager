@@ -17,7 +17,7 @@ public class CarMapper {
 
 
     public CarMapper(ModelMapper modelMapper) {
-        this.modelMapper = new ModelMapper();
+        this.modelMapper = modelMapper;
     }
 
 
