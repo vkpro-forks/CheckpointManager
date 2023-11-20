@@ -27,7 +27,6 @@ import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.service.user.UserService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
 
-import java.security.Principal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -292,10 +291,9 @@ public class UserController {
     public ResponseEntity<?> changeRole(@Parameter(description = "Уникальный идентификатор пользователя", required = true)
                                         @PathVariable UUID id,
                                         @Parameter(description = "Новая роль пользователя", required = true)
-                                        @RequestParam Role role,
-                                        Principal connectedUser
+                                        @RequestParam Role role
     ) {
-        userService.changeRole(id, role, connectedUser);
+        userService.changeRole(id, role);
         return ResponseEntity.ok().build();
     }
 

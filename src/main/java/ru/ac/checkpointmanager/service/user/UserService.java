@@ -9,7 +9,6 @@ import ru.ac.checkpointmanager.model.Avatar;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.enums.Role;
 
-import java.security.Principal;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -30,7 +29,7 @@ public interface UserService {
 
     void confirmEmail(String token);
 
-    void changeRole(UUID id, Role role, Principal connectedUser);
+    void changeRole(UUID id, Role role);
 
     UserResponseDTO updateBlockStatus(UUID id, Boolean isBlocked);
 

@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSendException;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +28,6 @@ import ru.ac.checkpointmanager.utils.Mapper;
 import ru.ac.checkpointmanager.utils.MethodLog;
 import ru.ac.checkpointmanager.utils.SecurityUtils;
 
-import java.security.Principal;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -318,12 +316,12 @@ public class UserServiceImpl implements UserService {
      * @throws IllegalStateException если пользователь уже имеет указанную роль.
      */
     @Override
-    public void changeRole(UUID id, Role role, Principal connectedUser) {
+    public void changeRole(UUID id, Role role) {
         log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), id);
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(String.format("User not found [Id=%s]", id)));
 
-        User user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+        User user = SecurityUtils.getCurrentUser();
 
         if (role == Role.ADMIN && !user.getRole().equals(Role.ADMIN)) {
             log.error("Users with role {} do not have permission to change the role to ADMIN", user.getRole());
