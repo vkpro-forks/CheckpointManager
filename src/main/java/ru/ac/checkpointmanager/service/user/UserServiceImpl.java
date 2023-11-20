@@ -237,6 +237,11 @@ public class UserServiceImpl implements UserService {
             throw new IllegalStateException("Wrong email");
         }
 
+        if (userRepository.findByEmail(request.getNewEmail()).isPresent()) {
+            log.warn("Email {} already taken", request.getNewEmail());
+            throw new IllegalStateException(String.format("Email %s already taken", request.getNewEmail()));
+        }
+
         TemporaryUser tempUser = mapper.toTemporaryUser(user);
         tempUser.setPreviousEmail(user.getEmail());
         tempUser.setEmail(request.getNewEmail());
