@@ -47,10 +47,10 @@ public class CarController {
     private final CarService carService;
     private final CarBrandService carBrandService;
 
-    @Operation(summary = "Добавить новый Авто",
+    @Operation(summary = "Добавить новую машину",
             description = "Доступ: ADMIN.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Авто успешно добавлен",
+            @ApiResponse(responseCode = "201", description = "Машина успешно добавлен",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = Car.class))}),
             @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей.")
@@ -79,10 +79,10 @@ public class CarController {
         }
     }
 
-    @Operation(summary = "Обновить новый Авто",
+    @Operation(summary = "Обновить новую машину",
             description = "Доступ: ADMIN.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Авто успешно обновлен",
+            @ApiResponse(responseCode = "201", description = "Машина успешно обновлена",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = Car.class))}),
             @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей.")
@@ -102,13 +102,13 @@ public class CarController {
         return ResponseEntity.ok(updated);
     }
 
-    @Operation(summary = "Удалить Авто",
+    @Operation(summary = "Удалить машину",
             description = "Доступ: ADMIN.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Авто успешно удален",
+            @ApiResponse(responseCode = "201", description = "Машина успешно удален",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = Car.class))}),
-            @ApiResponse(responseCode = "404", description = "Такого Авто не существует.")
+            @ApiResponse(responseCode = "404", description = "Такой машины не существует.")
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @DeleteMapping("/{carId}")
@@ -117,10 +117,10 @@ public class CarController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Получение всех Авто.",
+    @Operation(summary = "Получение всех машин.",
             description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Список Авто получен",
+            @ApiResponse(responseCode = "200", description = "Список машин получен",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = Car.class))}),
     })
@@ -128,18 +128,14 @@ public class CarController {
     @GetMapping
     public ResponseEntity<List<CarDTO>> getAllCars() {
         List<Car> carList = carService.getAllCars();
-        if (carList.isEmpty()) {
-            log.debug("No cars found");
-            return ResponseEntity.noContent().build();
-        }
         log.debug("Retrieved all cars");
         return ResponseEntity.ok(mapper.toCarDTOs(carList));
     }
 
-    @Operation(summary = "Получение всех Авто по user.",
+    @Operation(summary = "Получение всех машин по user.",
             description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Список Авто получен",
+            @ApiResponse(responseCode = "200", description = "Список машин получен",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = Car.class))}),
     })
@@ -147,10 +143,6 @@ public class CarController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<CarDTO>> searchByUserId(@PathVariable UUID userId) {
         List<Car> cars = carService.findByUserId(userId);
-        if (cars.isEmpty()) {
-            log.debug("No cars found for user ID {}", userId);
-            return ResponseEntity.noContent().build();
-        }
         List<CarDTO> carDTOs = mapper.toCarDTOs(cars);
         log.debug("Retrieved cars for user ID {}", userId);
         return new ResponseEntity<>(carDTOs, HttpStatus.OK);
