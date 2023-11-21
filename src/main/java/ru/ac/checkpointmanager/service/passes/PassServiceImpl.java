@@ -63,6 +63,8 @@ public class PassServiceImpl implements PassService{
             pass.setStatus(PassStatus.DELAYED);
         }
 
+        pass.setComment(pass.getComment() == null || pass.getComment().isBlank() ? "Пропуск" : pass.getComment());
+
         Pass savedPass = repository.save(pass);
         log.info("Pass saved [{}]", savedPass);
 
