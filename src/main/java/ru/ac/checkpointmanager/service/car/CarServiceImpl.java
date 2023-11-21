@@ -34,13 +34,12 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public void deleteCar(UUID carId) {
-        try {
-            repository.deleteById(carId);
-        } catch (EmptyResultDataAccessException ex) {
+        if (!repository.existsById(carId)) {
+            log.warn("Car with ID {} not found for deletion", carId);
             throw new CarNotFoundException("Car with ID " + carId + " not found");
-        } catch (Exception exception) {
-            throw new RuntimeException("Error deleting car with ID " + carId);
         }
+        repository.deleteById(carId);
+        log.info("Car with ID {} successfully deleted", carId);
     }
 
     @Override
@@ -77,5 +76,10 @@ public class CarServiceImpl implements CarService {
         List<Car> foundCars = repository.findCarsByUserId(userId);
         log.debug("Find {} cars for user [UUID - {}]", foundCars.size(), userId);
         return foundCars;
+    }
+
+    @Override
+    public boolean existsById(UUID id) {
+        return repository.existsById(id);
     }
 }

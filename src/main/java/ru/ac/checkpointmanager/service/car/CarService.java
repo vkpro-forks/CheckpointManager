@@ -18,4 +18,6 @@ public interface CarService {
     List<Car> getAllCars();
 
     List<Car> findByUserId(UUID userId);
+
+    boolean existsById(UUID id);
 }

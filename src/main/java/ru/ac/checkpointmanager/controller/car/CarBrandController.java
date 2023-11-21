@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,6 +27,7 @@ import ru.ac.checkpointmanager.utils.ErrorUtils;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("chpman/car")
 @RequiredArgsConstructor
@@ -46,10 +48,12 @@ public class CarBrandController {
     @PostMapping("/brands")
     public ResponseEntity<?> createBrand(@Valid @RequestBody CarBrand brand, BindingResult result) {
         if (result.hasErrors()) {
+            log.warn("Creation failed: Invalid CarBrand data");
             return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
         }
 
         CarBrand carBrand = carBrandService.addBrand(brand);
+        log.info("CarBrand created: {}", carBrand);
         return new ResponseEntity<>(carBrand, HttpStatus.CREATED);
     }
 
@@ -61,6 +65,11 @@ public class CarBrandController {
     @GetMapping("/brands/{id}")
     public ResponseEntity<CarBrand> getCarBrandById(@PathVariable Long id) {
         CarBrand brand = carBrandService.getBrandById(id);
+        if (brand == null) {
+            log.warn("CarBrand with ID {} not found", id);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        log.debug("Retrieved CarBrand by ID: {}", brand);
         return new ResponseEntity<>(brand, HttpStatus.OK);
     }
 
@@ -97,8 +106,10 @@ public class CarBrandController {
     public ResponseEntity<List<CarBrand>> getAllBrands() {
         List<CarBrand> allBrands = carBrandService.getAllBrands();
         if (allBrands.isEmpty()) {
+            log.warn("No CarBrands found");
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+        log.debug("Retrieved all CarBrands");
         return new ResponseEntity<>(allBrands, HttpStatus.OK);
     }
 
@@ -111,8 +122,10 @@ public class CarBrandController {
     public ResponseEntity<List<CarBrand>> getBrandsByName(@RequestParam String brandNamePart) {
         List<CarBrand> brands = carBrandService.findByBrandsContainingIgnoreCase(brandNamePart);
         if (brands == null || brands.isEmpty()) {
+            log.warn("No CarBrands found containing '{}'", brandNamePart);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+        log.debug("Retrieved CarBrands by name part: {}", brands);
         return new ResponseEntity<>(brands, HttpStatus.OK);
     }
 }
