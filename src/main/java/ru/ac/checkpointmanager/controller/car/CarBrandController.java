@@ -94,11 +94,7 @@ public class CarBrandController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @DeleteMapping("/brands/{id}")
     public ResponseEntity<String> deleteCarBrandById(@PathVariable Long id) {
-        if (!carBrandService.existsById(id)) {
-            log.warn("Deletion failed: CarBrand with ID {} not found", id);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        log.info("CarBrand with ID {} deleted", id);
+        carBrandService.deleteBrand(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -112,17 +108,9 @@ public class CarBrandController {
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @PutMapping("/brands/{id}")
-    public ResponseEntity<?> updateCarBrand(@Valid @PathVariable Long id,
-                                            @RequestBody CarBrand carBrandDetails,
-                                            BindingResult result) {
-        if (result.hasErrors()) {
-            log.warn("Update failed: Invalid CarBrand data for ID {}", id);
-            return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
-        }
-
-        CarBrand carBrand = carBrandService.updateBrand(id, carBrandDetails);
-        log.info("CarBrand updated: {}", carBrand);
-        return new ResponseEntity<>(carBrand, HttpStatus.OK);
+    public CarBrand updateCarBrand(@Valid @PathVariable Long id,
+                                   @Valid @RequestBody CarBrand carBrandDetails) {
+        return carBrandService.updateBrand(id, carBrandDetails);
     }
 
     @Operation(summary = "Получение всех брендов.",

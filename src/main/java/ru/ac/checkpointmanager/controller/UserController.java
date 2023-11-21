@@ -245,7 +245,9 @@ public class UserController {
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "OK: письмо для подтверждения отправлено"
+                    description = "OK: письмо для подтверждения отправлено",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = String.class))
             ),
             @ApiResponse(
                     responseCode = "409",
@@ -261,8 +263,7 @@ public class UserController {
             return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
         }
 
-        userService.changeEmail(request);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(userService.changeEmail(request));
     }
 
     @Operation(summary = "Изменение роли пользователя",

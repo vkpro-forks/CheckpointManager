@@ -25,7 +25,7 @@ public interface UserService {
 
     void changePassword(ChangePasswordRequest request);
 
-    ChangeEmailRequest changeEmail(ChangeEmailRequest request);
+    String changeEmail(ChangeEmailRequest request);
 
     void confirmEmail(String token);
 
