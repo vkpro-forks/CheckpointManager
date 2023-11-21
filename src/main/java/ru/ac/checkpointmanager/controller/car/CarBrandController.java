@@ -34,17 +34,17 @@ import java.util.List;
 @RequestMapping("chpman/car")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
-@Tag(name = "CarBrand (Бренд Авто)", description = "Для обработки Брендов Авто")
-@ApiResponses(value = {@ApiResponse(responseCode = "401",
-        description = "Произошла ошибка, Нужно авторизоваться")})
+@Tag(name = "CarBrand (Бренд Машины)", description = "Для обработки Брендов Авто")
+@ApiResponses(value = {@ApiResponse(responseCode = "401", description = "Произошла ошибка, Нужно авторизоваться"),
+@ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса")})
 public class CarBrandController {
 
     private final CarBrandService carBrandService;
 
-    @Operation(summary = "Добавить новый БрендАвто",
+    @Operation(summary = "Добавить новый Бренд Машины",
             description = "Доступ: ADMIN.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "БрендАвто успешно добавлен",
+            @ApiResponse(responseCode = "201", description = "Бренд Машины успешно добавлен",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = CarBrand.class))}),
             @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей.")
@@ -62,34 +62,30 @@ public class CarBrandController {
         return new ResponseEntity<>(carBrand, HttpStatus.CREATED);
     }
 
-    @Operation(summary = "Получение бренда по id",
+    @Operation(summary = "Получение Бренд Машины по id",
             description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Бренд получен",
+            @ApiResponse(responseCode = "200", description = "Бренд Машины получен.",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = CarBrand.class))}),
-            @ApiResponse(responseCode = "404", description = "Такого бренда не существует.")
+            @ApiResponse(responseCode = "404", description = "Такого Бренд Машины не существует.")
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/brands/{id}")
     public ResponseEntity<CarBrand> getCarBrandById(@PathVariable Long id) {
         CarBrand brand = carBrandService.getBrandById(id);
-        if (brand == null) {
-            log.warn("CarBrand with ID {} not found", id);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
         log.debug("Retrieved CarBrand by ID: {}", brand);
         return new ResponseEntity<>(brand, HttpStatus.OK);
     }
 
 
-    @Operation(summary = "Удалить БрендАвто",
+    @Operation(summary = "Удалить Бренд Машины",
             description = "Доступ: ADMIN.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "БрендАвто успешно удален",
+            @ApiResponse(responseCode = "201", description = "Бренд Машины успешно удален",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = CarBrand.class))}),
-            @ApiResponse(responseCode = "404", description = "Такого бренда не существует.")
+            @ApiResponse(responseCode = "404", description = "Такого Бренд Машины не существует.")
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @DeleteMapping("/brands/{id}")
@@ -98,10 +94,10 @@ public class CarBrandController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Обновить новый БрендАвто",
+    @Operation(summary = "Обновить новый Бренд Машины",
             description = "Доступ: ADMIN.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "БрендАвто успешно обновлен",
+            @ApiResponse(responseCode = "201", description = "Бренд Машины успешно обновлен",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = CarBrand.class))}),
             @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей.")
@@ -113,10 +109,10 @@ public class CarBrandController {
         return carBrandService.updateBrand(id, carBrandDetails);
     }
 
-    @Operation(summary = "Получение всех брендов.",
+    @Operation(summary = "Получение всех Бренд Машины.",
             description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Список брендов получен",
+            @ApiResponse(responseCode = "200", description = "Список Бренд Машины получен",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = CarBrand.class))}),
     })
@@ -124,17 +120,14 @@ public class CarBrandController {
     @GetMapping("/brands/all")
     public ResponseEntity<List<CarBrand>> getAllBrands() {
         List<CarBrand> allBrands = carBrandService.getAllBrands();
-        if (allBrands.isEmpty()) {
-            log.warn("No CarBrands found");
-        }
         log.debug("Retrieved all CarBrands");
         return new ResponseEntity<>(allBrands, HttpStatus.OK);
     }
 
-    @Operation(summary = "Получение брендов по части имени.",
+    @Operation(summary = "Получение Бренд Машины по части имени.",
             description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Список брендов получен",
+            @ApiResponse(responseCode = "200", description = "Список Бренд Машины получен",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = CarBrand.class))}),
     })
@@ -142,10 +135,6 @@ public class CarBrandController {
     @GetMapping("/brands-name")
     public ResponseEntity<List<CarBrand>> getBrandsByName(@RequestParam String brandNamePart) {
         List<CarBrand> brands = carBrandService.findByBrandsContainingIgnoreCase(brandNamePart);
-        if (brands == null || brands.isEmpty()) {
-            log.warn("No CarBrands found containing '{}'", brandNamePart);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
         log.debug("Retrieved CarBrands by name part: {}", brands);
         return new ResponseEntity<>(brands, HttpStatus.OK);
     }

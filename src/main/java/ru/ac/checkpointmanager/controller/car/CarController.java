@@ -36,14 +36,11 @@ import java.util.UUID;
 @RestController
 @RequestMapping("chpman/car")
 @RequiredArgsConstructor
-@Tag(name = "Car (Машина)", description = "Для обработки списка машин")
-@ApiResponses(value = {@ApiResponse(responseCode = "401", description = "Произошла ошибка, Нужно авторизоваться"),
-        @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса")
-})
-@Tag(name = "Car (Авто)", description = "Для обработки списка Авто")
-@ApiResponses(value = {@ApiResponse(responseCode = "401",
-        description = "Произошла ошибка, Нужно авторизоваться")})
 @SecurityRequirement(name = "bearerAuth")
+@Tag(name = "Car (Машина)", description = "Для обработки списка машин")
+@ApiResponses(value = {@ApiResponse(responseCode = "401", description = "UNAUTHORIZED: пользователь не авторизован"),
+        @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса")})
+
 public class CarController {
 
     private final CarMapper mapper;

@@ -82,11 +82,10 @@ public class VisitorController {
     }
 
 
-    @Operation(summary = "Обновить информацию о посетителе по ID")
-    @Operation(summary = "Обновить Визитера",
+    @Operation(summary = "Обновить информацию о посетителе по ID",
             description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Визитер успешно обновлен",
+            @ApiResponse(responseCode = "201", description = "Посетитель успешно обновлен",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = Visitor.class))}),
             @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей."),
@@ -144,8 +143,7 @@ public class VisitorController {
     }
 
 
-    @Operation(summary = "Найти посетителя по имени")
-    @Operation(summary = "Найти Визитера по имени",
+    @Operation(summary = "Найти посетителя по имени",
             description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Визитер успешно найден",
@@ -165,8 +163,6 @@ public class VisitorController {
 
     @Operation(summary = "Найти Визитера по Id пропуска",
             description = "Доступ: ADMIN, MANAGER, SECURITY.")
-
-    @Operation(summary = "Найти посетителя по ID пропуска")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Визитер успешно найден",
                     content = {@Content(mediaType = "application/json",
@@ -176,12 +172,6 @@ public class VisitorController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/pass")
     public ResponseEntity<?> searchByPassId(@RequestParam UUID uuid) {
-        Optional<Visitor> existVisitor = visitorService.findByPassId(uuid);
-        if (existVisitor.isEmpty()) {
-            log.warn("No visitor found for pass ID: {}", uuid);
-            return new ResponseEntity<>("There is no such visitor in any pass!", HttpStatus.NOT_FOUND);
-        }
-    public ResponseEntity<?> searchByPass(@RequestParam UUID uuid) {
         Visitor existVisitor = visitorService.findByPassId(uuid).orElse(null);
         log.debug("Visitor found for pass ID: {}", uuid);
         return new ResponseEntity<>(mapper.toVisitorDTO(existVisitor), HttpStatus.OK);
