@@ -28,6 +28,7 @@ spring:
     default-schema: public
     drop-first: false
     enabled: false
+    label-filter: "!demo-data"
 
   mail:
     host: smtp.yandex.ru
