@@ -37,7 +37,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Crossing (Пересечение)", description = "Управление пересечениями")
-@ApiResponse(responseCode = "401", description = "Нужно авторизоваться")
+@ApiResponses(value = {@ApiResponse(responseCode = "401", description = "Нужно авторизоваться"),
+        @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса")})
 //я предполагаю, что этот эндпоинт будет вызываться когда будет открываться шлагбаум(например) и тем самым фиксироваться пересечение
 public class CrossingController {
 
