@@ -2,6 +2,8 @@ package ru.ac.checkpointmanager.controller;
 
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -10,16 +12,22 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.GetMapping;
+import ru.ac.checkpointmanager.dto.CheckpointDTO;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
 import ru.ac.checkpointmanager.mapper.CrossingMapper;
 import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.service.crossing.CrossingService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
-import ru.ac.checkpointmanager.utils.Mapper;
 
 import java.util.UUID;
 
@@ -28,20 +36,22 @@ import java.util.UUID;
 @RequestMapping("chpman/crossing")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
-@Tag(name = "Crossing (Пересечение)", description = "Работа с пересечениями")
+@Tag(name = "Crossing (Пересечение)", description = "Управление пересечениями")
 @ApiResponse(responseCode = "401", description = "Нужно авторизоваться")
-@PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
 //я предполагаю, что этот эндпоинт будет вызываться когда будет открываться шлагбаум(например) и тем самым фиксироваться пересечение
 public class CrossingController {
 
     private final CrossingService crossingService;
     private final CrossingMapper mapper;
 
-    @Operation(summary = "Отметить пересечение")
+    @Operation(summary = "Создание пересечения, имитирует проезд или проход объекта через КПП",
+            description = "Доступ: ADMIN, SECURITY.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Пересечение успешно отмечено"),
-            @ApiResponse(responseCode = "400", description = "Неверный запрос"),
-    })
+            @ApiResponse(responseCode = "200", description = "Пересечение успешно добавлено.",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = Crossing.class))}),
+            @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей.")})
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SECURITY')")
     @PostMapping("/mark")
     public ResponseEntity<?> markCrossing(@Valid @RequestBody CrossingDTO crossingDTO, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
@@ -53,10 +63,14 @@ public class CrossingController {
         return new ResponseEntity<>(mapper.toCrossingDTO(crossing), HttpStatus.OK);
     }
 
-    @Operation(summary = "Получить информацию о пересечении по ID")
+    @Operation(summary = "Получить пересечение по Id",
+            description = "Доступ: ADMIN, SECURITY.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Пересечение найдено"),
-    })
+            @ApiResponse(responseCode = "200", description = "Пересечение успешно получено.",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = Crossing.class))}),
+            @ApiResponse(responseCode = "404", description = "Пересечения с таким Id не найдено.")})
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SECURITY')")
     @GetMapping("/{id}")
     public ResponseEntity<?> getCrossing(@PathVariable UUID id) {
         Crossing existCrossing = crossingService.getCrossing(id);
