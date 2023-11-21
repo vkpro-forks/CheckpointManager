@@ -54,7 +54,7 @@ public class CarController {
                             schema = @Schema(implementation = Car.class))}),
             @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей.")
     })
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @PostMapping
     public ResponseEntity<?> addCar(@Valid @RequestBody CarDTO carDTO, BindingResult result) {
         if (result.hasErrors()) {
