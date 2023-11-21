@@ -27,7 +27,6 @@ import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.service.user.UserService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
 
-import java.security.Principal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -246,7 +245,9 @@ public class UserController {
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "OK: письмо для подтверждения отправлено"
+                    description = "OK: письмо для подтверждения отправлено",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = String.class))
             ),
             @ApiResponse(
                     responseCode = "409",
@@ -262,8 +263,7 @@ public class UserController {
             return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
         }
 
-        userService.changeEmail(request);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(userService.changeEmail(request));
     }
 
     @Operation(summary = "Изменение роли пользователя",
@@ -292,10 +292,9 @@ public class UserController {
     public ResponseEntity<?> changeRole(@Parameter(description = "Уникальный идентификатор пользователя", required = true)
                                         @PathVariable UUID id,
                                         @Parameter(description = "Новая роль пользователя", required = true)
-                                        @RequestParam Role role,
-                                        Principal connectedUser
+                                        @RequestParam Role role
     ) {
-        userService.changeRole(id, role, connectedUser);
+        userService.changeRole(id, role);
         return ResponseEntity.ok().build();
     }
 
