@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import ru.ac.checkpointmanager.dto.AvatarImageDTO;
+import ru.ac.checkpointmanager.exception.AvatarLoadingException;
 import ru.ac.checkpointmanager.exception.AvatarNotFoundException;
 import ru.ac.checkpointmanager.model.Avatar;
 import ru.ac.checkpointmanager.model.AvatarProperties;
@@ -16,7 +18,8 @@ import ru.ac.checkpointmanager.utils.Mapper;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -30,6 +33,8 @@ import java.util.UUID;
 @Slf4j
 public class AvatarServiceImpl implements AvatarService {
 
+    public static final String AVATAR_NOT_FOUND_LOG = "[Avatar with id: {}] not found";
+    public static final String AVATAR_NOT_FOUND_MSG = "Avatar with id: %s not found";
     private final AvatarRepository repository;
     private final AvatarProperties avatarProperties;
     private final UserRepository userRepository;
@@ -119,20 +124,47 @@ public class AvatarServiceImpl implements AvatarService {
      *
      * @param userId Уникальный идентификатор сущности, аватар которой нужно получить.
      * @return Объект Avatar, соответствующий указанному идентификатору сущности.
-     * @throws IOException если возникают проблемы при чтении файла аватара.
+     * //FIXME теперь возвращается более удобная дто
+     * @throws IOException если возникают проблемы при чтении файла аватара.//FIXME теперь метод не бросает IOException
      */
     @Override
-    public Avatar getAvatarByUserId(UUID userId) {
+    public AvatarImageDTO getAvatarByUserId(UUID userId) {
         log.debug("Fetching avatar for user ID: {}", userId);
         UUID avatarId = userRepository.findAvatarIdByUserId(userId);
         if (avatarId == null) {
-            log.info("У пользователя с ID {} нет аватара.", userId);
-            throw new AvatarNotFoundException("У пользователя с ID " + userId + " нет аватара.");
+            log.warn("[User with id: {}] doesn't have avatar", userId);
+            throw new AvatarNotFoundException("User with id: %s doesn't have avatar".formatted(userId));
         }
-
-        log.debug("Поиск аватара с ID {}", avatarId);
-        return repository.findById(avatarId)
-                .orElseThrow(() -> new AvatarNotFoundException("Аватар с ID " + avatarId + " не найден."));
+        log.debug("Searching [avatar with id: {}]", avatarId);
+        Avatar avatar = repository.findById(avatarId)
+                .orElseThrow(() -> {
+                    log.warn(AVATAR_NOT_FOUND_LOG, avatarId);
+                    return new AvatarNotFoundException(AVATAR_NOT_FOUND_MSG.formatted(avatarId));
+                });
+        if (avatar.getFilePath() == null) {
+            throw new RuntimeException("avatar has no filePath");//FIXME we need to do smth to avoid this situation
+        }
+        Path path = Paths.get(avatar.getFilePath());
+        if (!Files.exists(path)) {
+            throw new RuntimeException("File not found at path: " + path);
+            //FIXME we need to do smth to avoid this situation
+        }
+        try {
+            byte[] imageData = Files.readAllBytes(path);
+            String mimeType = Files.probeContentType(path);
+            if (mimeType == null) {
+                mimeType = "application/octet-stream";
+            }
+            return new AvatarImageDTO(
+                    avatarId,
+                    mimeType,
+                    imageData,
+                    null,
+                    avatar.getFileSize()
+            );
+        } catch (IOException e) {
+            throw new AvatarLoadingException("Error occurred during read image bytes", e);
+        }
     }
 
 
@@ -145,14 +177,16 @@ public class AvatarServiceImpl implements AvatarService {
      */
     public Avatar deleteAvatarIfExists(UUID entityID) {
         log.debug("Attempting to delete avatar for entity ID: {}", entityID);
-        return findAvatarOrThrow(entityID);
+        return findAvatarById(entityID);
     }
 
     @Override
-    public Avatar findAvatarOrThrow(UUID avatarId) {
+    public Avatar findAvatarById(UUID avatarId) {
         log.debug("Searching for avatar with ID: {}", avatarId);
-        return repository.findById(avatarId).orElseThrow(
-                () -> new AvatarNotFoundException("Аватар с ID " + avatarId + " не найден."));
+        return repository.findById(avatarId).orElseThrow(() -> {
+            log.warn(AVATAR_NOT_FOUND_LOG, avatarId);
+            return new AvatarNotFoundException(AVATAR_NOT_FOUND_MSG.formatted(avatarId));
+        });
     }
 
 

@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -13,15 +12,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
+import ru.ac.checkpointmanager.dto.AvatarImageDTO;
 import ru.ac.checkpointmanager.model.Avatar;
 import ru.ac.checkpointmanager.service.avatar.AvatarService;
 import ru.ac.checkpointmanager.service.user.UserService;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.UUID;
 
 @RestController
@@ -59,29 +55,14 @@ public class AvatarController {
             @ApiResponse(responseCode = "404", description = "Аватар не найден"),
     })
     @GetMapping("/{entityID}")
-    public ResponseEntity<byte[]> getAvatar(@PathVariable UUID entityID, HttpServletResponse response) throws IOException {
-        Avatar avatar = service.getAvatarByUserId(entityID);
+    public ResponseEntity<byte[]> getAvatar(@PathVariable UUID entityID) {
+        AvatarImageDTO avatarImageDTO = service.getAvatarByUserId(entityID);
 
-        if (avatar == null || avatar.getFilePath() == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Avatar not found for user ID: " + entityID);
-        }
-
-        Path path = Paths.get(avatar.getFilePath());
-        if (!Files.exists(path)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "File not found at path: " + path);
-        }
-
-        byte[] imageData = Files.readAllBytes(path);
-
-        String mimeType = Files.probeContentType(path);
-        if (mimeType == null) {
-            mimeType = "application/octet-stream";
-        }
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.parseMediaType(mimeType));
-        headers.setContentLength(imageData.length);
+        headers.setContentType(MediaType.parseMediaType(avatarImageDTO.getMediaType()));
+        headers.setContentLength(avatarImageDTO.getImageData().length);
 
-        return ResponseEntity.ok().headers(headers).body(imageData);
+        return ResponseEntity.ok().headers(headers).body(avatarImageDTO.getImageData());
     }
 
 
@@ -92,7 +73,7 @@ public class AvatarController {
     })
     @GetMapping("/preview/{entityID}")
     public ResponseEntity<byte[]> getAvatarPreview(@PathVariable UUID entityID) {
-        Avatar avatar = service.findAvatarOrThrow(entityID);
+        Avatar avatar = service.findAvatarById(entityID);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType(avatar.getMediaType()));
         headers.setContentLength(avatar.getPreview().length);

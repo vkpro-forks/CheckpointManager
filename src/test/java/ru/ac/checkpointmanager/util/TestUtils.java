@@ -6,11 +6,15 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 
+import java.util.UUID;
+
 public class TestUtils {
 
     public static final Long CAR_BRAND_ID = 1000L;
 
     public static final String CAR_BRAND_ID_STR = CAR_BRAND_ID.toString();
+
+    public static final UUID USER_ID = UUID.randomUUID();
 
     public static final String JSON_ERROR_CODE = "$.errorCode";
 
@@ -31,7 +35,6 @@ public class TestUtils {
         ObjectMapper objectMapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
         return objectMapper.writeValueAsString(object);
     }
-
 
     private TestUtils() {
     }
