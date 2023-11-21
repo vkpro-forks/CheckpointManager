@@ -1,0 +1,63 @@
+app:
+  #version: ${version}
+  confirmation-link: http://localhost:8080/chpman/confirm/registration?token=
+  confirmation-email-link: http://localhost:8080/chpman/confirm/email?token=
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/chpmanDB
+    username: chpman
+    password: chpmanPass%
+  servlet:
+    multipart:
+      max-file-size: 5MB
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        show_sql: true
+        ddl-auto: none
+        use_sql_comments: true
+      jdbc:
+        time-zone: UTC
+  jackson:
+    time-zone: UTC
+  liquibase:
+    change-log: classpath:liquibase/changelog-master.yml
+    contexts: default
+    default-schema: public
+    drop-first: false
+    enabled: false
+
+  mail:
+    host: smtp.yandex.ru
+    port: 465
+    username: anvilcoder@yandex.ru
+    password: zgvovxqtnyosjfxx
+    protocol: smtp
+    properties:
+      mail:
+        smtp:
+          ssl:
+            enable: true
+          auth: true
+          starttls:
+            enable: true
+application:
+  security:
+    jwt:
+      secret-key: 8790D58F7205C4C250CD67DD6D9B6F8B20D2E928FFAA6D4A2BEB2AD2189B01D1
+      expiration: 86400000 # a day
+      refresh-token:
+        expiration: 604800000 # 7 days
+avatars:
+  dir:
+    path: ./avatars
+  extensions: jpg, jpeg, png, ico, gif, eps, svg, bmp
+  max-size: 5MB # Максимальный размер файла
+  image:
+    max-width: 400 # максимальная ширина изображения
+    max-height: 400 # максимальная высота изображения
+logging:
+  config: classpath:logback-test.xml
+
