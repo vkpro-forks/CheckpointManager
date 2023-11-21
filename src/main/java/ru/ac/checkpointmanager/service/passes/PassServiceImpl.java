@@ -123,9 +123,8 @@ public class PassServiceImpl implements PassService{
             throw new IllegalStateException("This pass is not active or delayed, it cannot be changed");
         }
 
-        foundPass.setName(pass.getName());
+        foundPass.setComment(pass.getComment());
         foundPass.setTypeTime(pass.getTypeTime());
-        foundPass.setNote(pass.getNote());
         foundPass.setStartTime(pass.getStartTime());
         foundPass.setEndTime(pass.getEndTime());
         foundPass.setAttachedEntity(pass);

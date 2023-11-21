@@ -15,15 +15,13 @@ public class PassDtoCreate {
     @NotNull
     private UUID userId;
 
-    private String name;
+    private String comment;
 
     @NotNull
     private PassTypeTime typeTime;
 
     @NotNull
     private UUID territoryId;
-
-    private String note;
 
     @NotNull
     @FutureOrPresent
