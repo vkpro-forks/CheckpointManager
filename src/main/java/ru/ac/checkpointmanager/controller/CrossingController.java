@@ -60,10 +60,6 @@ public class CrossingController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getCrossing(@PathVariable UUID id) {
         Crossing existCrossing = crossingService.getCrossing(id);
-        if (existCrossing == null) {
-            log.warn("No crossing found with ID {}", id);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
         log.debug("Retrieved crossing with ID {}", id);
         return new ResponseEntity<>(mapper.toCrossingDTO(existCrossing), HttpStatus.OK);
     }
