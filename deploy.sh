@@ -1,6 +1,6 @@
 #!/bin/bash
 #логин на docker hub
-docker login -u aasurov -p $DOCKER_HUB_TOKEN
+docker login -u aasurov -p "$DOCKER_HUB_TOKEN"
 
 
 # Шаг 1: Удаление ВСЕХ контейнеров и ВСЕХ образов независимо работают они или нет
