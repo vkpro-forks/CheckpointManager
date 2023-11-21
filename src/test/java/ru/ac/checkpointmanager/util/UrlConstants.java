@@ -8,7 +8,7 @@ public class UrlConstants {
 
     public static final String AVATAR_URL = "/chpman/avatars";
 
-    public static final String AVATAR_URL_PREVIEW = "/chpman/avatars/preview";
+    public static final String AVATAR_URL_PREVIEW = AVATAR_URL + "/preview";
 
 
     private UrlConstants() {
