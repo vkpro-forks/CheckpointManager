@@ -64,9 +64,12 @@ public class VisitorServiceImpl implements VisitorService {
             log.warn("Attempt to delete Visitor with null UUID");
             throw new IllegalArgumentException("UUID cannot be null");
         }
-        Visitor existVisitor = getVisitor(uuid);
+        if (!repository.existsById(uuid)) {
+            log.warn("Failed to delete visitor: No visitor found with ID {}", uuid);
+            throw new VisitorNotFoundException("Visitor with ID " + uuid + " not found");
+        }
         log.info("Deleting Visitor with UUID: {}", uuid);
-        repository.delete(existVisitor);
+        repository.deleteById(uuid);
     }
 
     @Override

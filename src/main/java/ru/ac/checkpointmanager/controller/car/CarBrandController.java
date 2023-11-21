@@ -1,6 +1,8 @@
 package ru.ac.checkpointmanager.controller.car;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -12,15 +14,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.service.car.CarBrandService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
@@ -32,19 +34,22 @@ import java.util.List;
 @RequestMapping("chpman/car")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
-@Tag(name = "CarBrand (Бренд Авто)", description = "Для обработки Брендов Авто")
-@ApiResponses(value = {@ApiResponse(responseCode = "401",
-        description = "Произошла ошибка, Нужно авторизоваться")})
-@PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
+@Tag(name = "CarBrand (Бренд Машины)", description = "Для обработки Брендов Авто")
+@ApiResponses(value = {@ApiResponse(responseCode = "401", description = "Произошла ошибка, Нужно авторизоваться"),
+@ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса")})
 public class CarBrandController {
 
     private final CarBrandService carBrandService;
 
-    @Operation(summary = "Создание нового бренда")
+    @Operation(summary = "Добавить новый Бренд Машины",
+            description = "Доступ: ADMIN.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Создание произошло успешно"),
-            @ApiResponse(responseCode = "400", description = "Не уадалось создать бренд"),
+            @ApiResponse(responseCode = "201", description = "Бренд Машины успешно добавлен",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = CarBrand.class))}),
+            @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей.")
     })
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @PostMapping("/brands")
     public ResponseEntity<?> createBrand(@Valid @RequestBody CarBrand brand, BindingResult result) {
         if (result.hasErrors()) {
@@ -57,74 +62,79 @@ public class CarBrandController {
         return new ResponseEntity<>(carBrand, HttpStatus.CREATED);
     }
 
-    @Operation(summary = "Получение бренда по id")
+    @Operation(summary = "Получение Бренд Машины по id",
+            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Бренд получен"),
-            @ApiResponse(responseCode = "404", description = "Такого бренда не существует."),
+            @ApiResponse(responseCode = "200", description = "Бренд Машины получен.",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = CarBrand.class))}),
+            @ApiResponse(responseCode = "404", description = "Такого Бренд Машины не существует.")
     })
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/brands/{id}")
     public ResponseEntity<CarBrand> getCarBrandById(@PathVariable Long id) {
         CarBrand brand = carBrandService.getBrandById(id);
-        if (brand == null) {
-            log.warn("CarBrand with ID {} not found", id);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
         log.debug("Retrieved CarBrand by ID: {}", brand);
         return new ResponseEntity<>(brand, HttpStatus.OK);
     }
 
 
-    @Operation(summary = "Удалить бренд по Id")
+    @Operation(summary = "Удалить Бренд Машины",
+            description = "Доступ: ADMIN.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Удалось удалить бренд"),
-            @ApiResponse(responseCode = "400", description = "Неправильный запрос"),
-            @ApiResponse(responseCode = "404", description = "Нет такого бренда по этому Id"),
+            @ApiResponse(responseCode = "201", description = "Бренд Машины успешно удален",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = CarBrand.class))}),
+            @ApiResponse(responseCode = "404", description = "Такого Бренд Машины не существует.")
     })
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @DeleteMapping("/brands/{id}")
     public ResponseEntity<String> deleteCarBrandById(@PathVariable Long id) {
         carBrandService.deleteBrand(id);
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Обновление бренда по ID")
+    @Operation(summary = "Обновить новый Бренд Машины",
+            description = "Доступ: ADMIN.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Бренд обновлен благополучно"),
-            @ApiResponse(responseCode = "400", description = "Не удалось обновить бренд"),
+            @ApiResponse(responseCode = "201", description = "Бренд Машины успешно обновлен",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = CarBrand.class))}),
+            @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей.")
     })
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @PutMapping("/brands/{id}")
     public CarBrand updateCarBrand(@Valid @PathVariable Long id,
                                    @Valid @RequestBody CarBrand carBrandDetails) {
         return carBrandService.updateBrand(id, carBrandDetails);
     }
 
-    @Operation(summary = "Вывести список всех брендов")
+    @Operation(summary = "Получение всех Бренд Машины.",
+            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Список брендов успешно создан"),
-            @ApiResponse(responseCode = "404", description = "Нет ни одного бренда в бд"),
+            @ApiResponse(responseCode = "200", description = "Список Бренд Машины получен",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = CarBrand.class))}),
     })
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/brands/all")
     public ResponseEntity<List<CarBrand>> getAllBrands() {
         List<CarBrand> allBrands = carBrandService.getAllBrands();
-        if (allBrands.isEmpty()) {
-            log.warn("No CarBrands found");
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
         log.debug("Retrieved all CarBrands");
         return new ResponseEntity<>(allBrands, HttpStatus.OK);
     }
 
-    @Operation(summary = "Поиск бренда по имени или части имени")
+    @Operation(summary = "Получение Бренд Машины по части имени.",
+            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Бренд найден>"),
-            @ApiResponse(responseCode = "404", description = "Бренд не найден>"),
+            @ApiResponse(responseCode = "200", description = "Список Бренд Машины получен",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = CarBrand.class))}),
     })
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/brands-name")
     public ResponseEntity<List<CarBrand>> getBrandsByName(@RequestParam String brandNamePart) {
         List<CarBrand> brands = carBrandService.findByBrandsContainingIgnoreCase(brandNamePart);
-        if (brands == null || brands.isEmpty()) {
-            log.warn("No CarBrands found containing '{}'", brandNamePart);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
         log.debug("Retrieved CarBrands by name part: {}", brands);
         return new ResponseEntity<>(brands, HttpStatus.OK);
     }
