@@ -33,22 +33,23 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@RestController
-@RequestMapping("chpman/visitor")
-@RequiredArgsConstructor
 @Slf4j
-@Tag(name = "Visitor (Посетитель)", description = "Работа со списком гостей")
-@ApiResponse(responseCode = "401", description = "Не авторизован")
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("chpman/visitor")
 @SecurityRequirement(name = "bearerAuth")
+@Tag(name = "Visitor (Посетитель)", description = "Работа со списком посетителей.")
+@ApiResponses(value = {@ApiResponse(responseCode = "401", description = "Не авторизован."),
+        @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса.")})
 public class VisitorController {
 
     private final VisitorService visitorService;
     private final VisitorMapper mapper;
 
-    @Operation(summary = "Добавить нового Визитера",
+    @Operation(summary = "Добавить нового посетителя.",
             description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Визитер успешно добавлен",
+            @ApiResponse(responseCode = "201", description = "Посетитель успешно добавлен.",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = Visitor.class))}),
             @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей.")
@@ -66,13 +67,13 @@ public class VisitorController {
         return new ResponseEntity<>(mapper.toVisitorDTO(newVisitor), HttpStatus.CREATED);
     }
 
-    @Operation(summary = "Получение Визитера по id",
+    @Operation(summary = "Получение посетителя по id.",
             description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Визитер получен",
+            @ApiResponse(responseCode = "200", description = "Посетитель получен.",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = Visitor.class))}),
-            @ApiResponse(responseCode = "404", description = "Визитера не существует.")
+            @ApiResponse(responseCode = "404", description = "Посетитель не существует.")
     })
     @GetMapping("/{id}")
     public ResponseEntity<?> getVisitor(@PathVariable UUID id) {
@@ -89,7 +90,7 @@ public class VisitorController {
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = Visitor.class))}),
             @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей."),
-            @ApiResponse(responseCode = "404", description = "Визитера с таким ID не существует.")
+            @ApiResponse(responseCode = "404", description = "Посетителя с таким ID не существует.")
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @PutMapping("/{id}")
@@ -107,30 +108,26 @@ public class VisitorController {
     }
 
 
-    @Operation(summary = "Удалить Визитера",
+    @Operation(summary = "Удалить посетителя.",
             description = "Доступ: ADMIN.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Визитер успешно удален",
+            @ApiResponse(responseCode = "200", description = "Посетитель успешно удален",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = Visitor.class))}),
-            @ApiResponse(responseCode = "404", description = "Визитера не существует.")
+            @ApiResponse(responseCode = "404", description = "Посетитель не существует.")
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteVisitor(@PathVariable UUID id) {
-        if (!visitorService.existsById(id)) {
-            log.warn("Failed to delete visitor: No visitor found with ID {}", id);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
         visitorService.deleteVisitor(id);
         log.info("Visitor with ID {} deleted", id);
         return new ResponseEntity<>("Visitor deleted " + id, HttpStatus.OK);
     }
 
-    @Operation(summary = "Найти Визитера по номеру телефона.",
+    @Operation(summary = "Найти посетителя по номеру телефона.",
             description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Визитер успешно найден",
+            @ApiResponse(responseCode = "200", description = "Посетитель успешно найден.",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = Visitor.class))}),
     })
@@ -143,10 +140,10 @@ public class VisitorController {
     }
 
 
-    @Operation(summary = "Найти посетителя по имени",
+    @Operation(summary = "Найти посетителя по имени.",
             description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Визитер успешно найден",
+            @ApiResponse(responseCode = "200", description = "Посетитель успешно найден.",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = Visitor.class))}),
     })
@@ -154,20 +151,17 @@ public class VisitorController {
     @GetMapping("/name")
     public List<VisitorDTO> searchByName(@RequestParam String name) {
         List<Visitor> visitors = visitorService.findByNamePart(name);
-        if (visitors.isEmpty()) {
-            log.warn("No visitors found with name part: {}", name);
-        }
         log.debug("Visitors found with name part: {}", name);
         return mapper.toVisitorDTOS(visitors);
     }
 
-    @Operation(summary = "Найти Визитера по Id пропуска",
+    @Operation(summary = "Найти посетителя по Id пропуска.",
             description = "Доступ: ADMIN, MANAGER, SECURITY.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Визитер успешно найден",
+            @ApiResponse(responseCode = "200", description = "Посетитель успешно найден.",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = Visitor.class))}),
-            @ApiResponse(responseCode = "404", description = "Визитера с id пропуска, не существует.")
+            @ApiResponse(responseCode = "404", description = "Посетитель с id пропуска, не существует.")
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/pass")
@@ -178,13 +172,13 @@ public class VisitorController {
     }
 
 
-    @Operation(summary = "Найти Визитера по Id user",
+    @Operation(summary = "Найти посетителя по Id user",
             description = "Доступ: ADMIN, MANAGER, SECURITY.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Визитер успешно найден",
+            @ApiResponse(responseCode = "200", description = "Посетитель успешно найден",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = Visitor.class))}),
-            @ApiResponse(responseCode = "404", description = "Визитера с id user, не существует.")
+            @ApiResponse(responseCode = "404", description = "Посетитель с id user, не существует.")
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/user/{userId}")
