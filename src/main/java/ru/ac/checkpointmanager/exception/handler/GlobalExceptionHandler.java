@@ -13,7 +13,20 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
-import ru.ac.checkpointmanager.exception.*;
+import ru.ac.checkpointmanager.exception.AvatarIsEmptyException;
+import ru.ac.checkpointmanager.exception.AvatarNotFoundException;
+import ru.ac.checkpointmanager.exception.BadAvatarExtensionException;
+import ru.ac.checkpointmanager.exception.CarBrandNotFoundException;
+import ru.ac.checkpointmanager.exception.DateOfBirthFormatException;
+import ru.ac.checkpointmanager.exception.EntranceWasAlreadyException;
+import ru.ac.checkpointmanager.exception.InactivePassException;
+import ru.ac.checkpointmanager.exception.InvalidPhoneNumberException;
+import ru.ac.checkpointmanager.exception.PassNotFoundException;
+import ru.ac.checkpointmanager.exception.PhoneAlreadyExistException;
+import ru.ac.checkpointmanager.exception.PhoneNumberNotFoundException;
+import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
+import ru.ac.checkpointmanager.exception.UserNotFoundException;
+import ru.ac.checkpointmanager.exception.VisitorNotFoundException;
 
 import java.time.Instant;
 import java.util.List;
@@ -26,7 +39,9 @@ public class GlobalExceptionHandler {
 
     private static final String TIMESTAMP = "timestamp";
 
-    private static final String LOG_MSG = "[Exception {}] handled with [message {}]";
+    private static final String LOG_MSG = "[Exception {}] handled";
+
+    private static final String LOG_MSG_DETAILS = "[Exception {} with message {}] handled";
 
     public static final String VALIDATION_ERROR = "Validation error";
 
@@ -37,7 +52,7 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.NOT_FOUND, e);
         problemDetail.setTitle("Car brand not found");
         problemDetail.setProperty(ERROR_CODE, ErrorCode.NOT_FOUND.toString());
-        log.warn(LOG_MSG, e.getClass(), e.getMessage());
+        log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }
 
@@ -47,11 +62,11 @@ public class GlobalExceptionHandler {
                 .map(v -> new ViolationError(
                         fieldNameFromPath(v.getPropertyPath().toString()),
                         v.getMessage(),
-                        v.getInvalidValue().toString()))
+                        v.getInvalidValue() != null ? v.toString() : "null"))
                 .toList();
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
         ProblemDetail configuredProblemDetails = setUpValidationDetails(problemDetail, violationErrors);
-        log.warn(LOG_MSG, e.getClass(), e.getMessage());
+        log.debug(LOG_MSG_DETAILS, e.getClass(), e.getMessage());
         return configuredProblemDetails;
     }
 
@@ -61,9 +76,10 @@ public class GlobalExceptionHandler {
                 .map(error -> new ViolationError(error.getField(), error.getDefaultMessage(),
                         error.getRejectedValue() != null ? error.getRejectedValue().toString() : "null"))
                 .toList();
-        ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation failed");
+        problemDetail.setProperty(TIMESTAMP, Instant.now());
         ProblemDetail configuredProblemDetails = setUpValidationDetails(problemDetail, violationErrors);
-        log.warn(LOG_MSG, e.getClass(), e.getMessage());
+        log.debug(LOG_MSG_DETAILS, e.getClass(), e.getMessage());
         return configuredProblemDetails;
     }
 
@@ -73,7 +89,7 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.NOT_FOUND, e);
         problemDetail.setTitle("Entity no found");
         problemDetail.setProperty(ERROR_CODE, ErrorCode.NOT_FOUND.toString());
-        log.warn(LOG_MSG, e.getClass(), e.getMessage());
+        log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }
 
@@ -82,7 +98,7 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.CONFLICT, e);
         problemDetail.setTitle("Entrance was already");
         problemDetail.setProperty(ERROR_CODE, ErrorCode.CONFLICT.toString());
-        log.warn(LOG_MSG, e.getClass(), e.getMessage());
+        log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }
 
@@ -91,7 +107,7 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
         problemDetail.setTitle("Inactive pass");
         problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
-        log.warn(LOG_MSG, e.getClass(), e.getMessage());
+        log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }
 
@@ -100,7 +116,7 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.NOT_FOUND, e);
         problemDetail.setTitle("Territory not found");
         problemDetail.setProperty(ERROR_CODE, ErrorCode.NOT_FOUND.toString());
-        log.warn(LOG_MSG, e.getClass(), e.getMessage());
+        log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }
 
@@ -109,7 +125,7 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.NOT_FOUND, e);
         problemDetail.setTitle("Pass not found");
         problemDetail.setProperty(ERROR_CODE, ErrorCode.NOT_FOUND.toString());
-        log.warn(LOG_MSG, e.getClass(), e.getMessage());
+        log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }
 
@@ -118,7 +134,7 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
         problemDetail.setTitle("Illegal argument exception occurred");//FIXME replace for more suitable exception
         problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
-        log.warn(LOG_MSG, e.getClass(), e.getMessage());
+        log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }
 
@@ -127,7 +143,7 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
         problemDetail.setTitle("Size of uploading file exceeds maximum");
         problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
-        log.warn(LOG_MSG, e.getClass(), e.getMessage());
+        log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }
 
@@ -136,7 +152,7 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.NOT_FOUND, e);
         problemDetail.setTitle("Avatar not found");
         problemDetail.setProperty(ERROR_CODE, ErrorCode.NOT_FOUND.toString());
-        log.warn(LOG_MSG, e.getClass(), e.getMessage());
+        log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }
 
@@ -145,7 +161,7 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
         problemDetail.setTitle("Avatar is empty");// FIXME No usages for this exception
         problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
-        log.warn(LOG_MSG, e.getClass(), e.getMessage());
+        log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }
 
@@ -154,7 +170,7 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
         problemDetail.setTitle("Not suitable extension for avatar");//FIXME No usages for this exception
         problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
-        log.warn(LOG_MSG, e.getClass(), e.getMessage());
+        log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }
 
@@ -163,7 +179,7 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.FORBIDDEN, e);
         problemDetail.setTitle("Access denied");
         problemDetail.setProperty(ERROR_CODE, ErrorCode.FORBIDDEN.toString());
-        log.warn(LOG_MSG, e.getClass(), e.getMessage());
+        log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }
 
@@ -172,7 +188,7 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
         problemDetail.setTitle("User not found");
         problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
-        log.warn(LOG_MSG, e.getClass(), e.getMessage());
+        log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }
 
@@ -181,7 +197,7 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
         problemDetail.setTitle("Bad format of birth date"); //FIXME no usages, may be would be better to have VALIDATION
         problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
-        log.warn(LOG_MSG, e.getClass(), e.getMessage());
+        log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }
 
@@ -190,7 +206,7 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
         problemDetail.setTitle("Illegal state exception occurred");//FIXME need new more suitable exception
         problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
-        log.warn(LOG_MSG, e.getClass(), e.getMessage());
+        log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }
 
@@ -199,7 +215,7 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.CONFLICT, e);
         problemDetail.setTitle("Phone number already exists");
         problemDetail.setProperty(ERROR_CODE, ErrorCode.CONFLICT.toString());
-        log.warn(LOG_MSG, e.getClass(), e.getMessage());
+        log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }
 
@@ -208,7 +224,7 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.NOT_FOUND, e);
         problemDetail.setTitle("Phone number not found");
         problemDetail.setProperty(ERROR_CODE, ErrorCode.NOT_FOUND.toString());
-        log.warn(LOG_MSG, e.getClass(), e.getMessage());
+        log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }
 
@@ -217,7 +233,7 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.NOT_FOUND, e);
         problemDetail.setTitle("Username not found");
         problemDetail.setProperty(ERROR_CODE, ErrorCode.NOT_FOUND.toString());
-        log.warn(LOG_MSG, e.getClass(), e.getMessage());
+        log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }
 
@@ -226,7 +242,7 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.NOT_FOUND, e);
         problemDetail.setTitle("Visitor not found");
         problemDetail.setProperty(ERROR_CODE, ErrorCode.NOT_FOUND.toString());
-        log.warn(LOG_MSG, e.getClass(), e.getMessage());
+        log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }
 
@@ -236,7 +252,7 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.INTERNAL_SERVER_ERROR, e);
         problemDetail.setTitle("Error during send mail");
         problemDetail.setProperty(ERROR_CODE, ErrorCode.INTERNAL_SERVER_ERROR.toString());
-        log.warn(LOG_MSG, e.getClass(), e.getMessage());
+        log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }
 
@@ -245,7 +261,7 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
         problemDetail.setTitle("Bad credentials");
         problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
-        log.warn(LOG_MSG, e.getClass(), e.getMessage());
+        log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }
 
@@ -254,7 +270,7 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
         problemDetail.setTitle("Invalid phone number format"); //FIXME move to validation
         problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
-        log.warn(LOG_MSG, e.getClass(), e.getMessage());
+        log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }
 

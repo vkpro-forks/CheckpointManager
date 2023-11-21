@@ -1,7 +1,5 @@
 package ru.ac.checkpointmanager.service.car;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +9,6 @@ import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
 
 import java.util.List;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +18,6 @@ public class CarBrandServiceImpl implements CarBrandService {
     public static final String CAR_BRAND_NOT_FOUND_WITH_ID_MSG = "Car brand not found with ID:";
 
     private final CarBrandRepository carBrandRepository;
-    private final Validator validator;
 
     @Override
     public CarBrand getBrandById(Long brandId) {
@@ -65,10 +61,6 @@ public class CarBrandServiceImpl implements CarBrandService {
                     log.warn(CAR_BRAND_NOT_FOUND_WITH_ID_MSG + " {}", brandId);
                     return new CarBrandNotFoundException(CAR_BRAND_NOT_FOUND_WITH_ID_MSG + " " + brandId);
                 });
-        Set<ConstraintViolation<CarBrand>> violations = validator.validate(carBrand);
-        if (!violations.isEmpty()) {
-            throw new ConstraintViolationException(violations); //TODO will be moved to global validation
-        }
         updateCarBrand.setBrand(carBrand.getBrand());
         CarBrand saved = carBrandRepository.save(updateCarBrand);
         log.info("Car brand with [id: {}] successfully updated", brandId);

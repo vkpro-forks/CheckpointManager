@@ -11,7 +11,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.service.car.CarBrandService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
@@ -65,8 +73,8 @@ public class CarBrandController {
     })
     @DeleteMapping("/brands/{id}")
     public ResponseEntity<String> deleteCarBrandById(@PathVariable Long id) {
-            carBrandService.deleteBrand(id);
-            return ResponseEntity.noContent().build();
+        carBrandService.deleteBrand(id);
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Обновление бренда по ID")
@@ -75,15 +83,9 @@ public class CarBrandController {
             @ApiResponse(responseCode = "400", description = "Не удалось обновить бренд"),
     })
     @PutMapping("/brands/{id}")
-    public ResponseEntity<?> updateCarBrand(@Valid @PathVariable Long id,
-                                            @RequestBody CarBrand carBrandDetails,
-                                            BindingResult result) {
-        if (result.hasErrors()) {
-            return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
-        }
-
-            CarBrand carBrand = carBrandService.updateBrand(id, carBrandDetails);
-            return new ResponseEntity<>(carBrand, HttpStatus.OK);
+    public CarBrand updateCarBrand(@Valid @PathVariable Long id,
+                                   @Valid @RequestBody CarBrand carBrandDetails) {
+        return carBrandService.updateBrand(id, carBrandDetails);
     }
 
     @Operation(summary = "Вывести список всех брендов")
