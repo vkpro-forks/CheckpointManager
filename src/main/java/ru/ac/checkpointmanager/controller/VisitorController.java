@@ -77,14 +77,12 @@ public class VisitorController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getVisitor(@PathVariable UUID id) {
         Visitor existVisitor = visitorService.getVisitor(id);
-        if (existVisitor == null) {
-            log.warn("Failed to find visitor with ID {}", id);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
         log.debug("Retrieved visitor with ID {}", id);
         return new ResponseEntity<>(mapper.toVisitorDTO(existVisitor), HttpStatus.OK);
     }
 
+
+    @Operation(summary = "Обновить информацию о посетителе по ID")
     @Operation(summary = "Обновить Визитера",
             description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
@@ -97,21 +95,18 @@ public class VisitorController {
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @PutMapping("/{id}")
     public ResponseEntity<?> updateVisitor(@PathVariable UUID id, @RequestBody VisitorDTO visitorDTO,
-                                          BindingResult bindingResult) {
+                                           BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             log.warn("Failed to update visitor due to validation errors");
             return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
         }
 
         Visitor visitor = mapper.toVisitor(visitorDTO);
-        Visitor updateVisitor = visitorService.updateVisitor(id, visitor);
-        if (updateVisitor == null) {
-            log.warn("Failed to update visitor with ID {}", id);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        Visitor updatedVisitor = visitorService.updateVisitor(id, visitor);
         log.info("Visitor updated with ID {}", id);
-        return new ResponseEntity<>(mapper.toVisitorDTO(updateVisitor), HttpStatus.OK);
+        return new ResponseEntity<>(mapper.toVisitorDTO(updatedVisitor), HttpStatus.OK);
     }
+
 
     @Operation(summary = "Удалить Визитера",
             description = "Доступ: ADMIN.")
@@ -144,14 +139,12 @@ public class VisitorController {
     @GetMapping("/phone")
     public List<VisitorDTO> searchByPhone(@RequestParam String phone) {
         List<Visitor> visitors = visitorService.findByPhonePart(phone);
-        if (visitors.isEmpty()) {
-            log.warn("No visitors found with phone part: {}", phone);
-        } else {
-            log.debug("Visitors found with phone part: {}", phone);
-        }
+        log.debug("Visitors found with phone part: {}", phone);
         return mapper.toVisitorDTOS(visitors);
     }
 
+
+    @Operation(summary = "Найти посетителя по имени")
     @Operation(summary = "Найти Визитера по имени",
             description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
@@ -172,6 +165,8 @@ public class VisitorController {
 
     @Operation(summary = "Найти Визитера по Id пропуска",
             description = "Доступ: ADMIN, MANAGER, SECURITY.")
+
+    @Operation(summary = "Найти посетителя по ID пропуска")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Визитер успешно найден",
                     content = {@Content(mediaType = "application/json",
@@ -186,9 +181,12 @@ public class VisitorController {
             log.warn("No visitor found for pass ID: {}", uuid);
             return new ResponseEntity<>("There is no such visitor in any pass!", HttpStatus.NOT_FOUND);
         }
+    public ResponseEntity<?> searchByPass(@RequestParam UUID uuid) {
+        Visitor existVisitor = visitorService.findByPassId(uuid).orElse(null);
         log.debug("Visitor found for pass ID: {}", uuid);
-        return new ResponseEntity<>(mapper.toVisitorDTO(existVisitor.get()), HttpStatus.OK);
+        return new ResponseEntity<>(mapper.toVisitorDTO(existVisitor), HttpStatus.OK);
     }
+
 
     @Operation(summary = "Найти Визитера по Id user",
             description = "Доступ: ADMIN, MANAGER, SECURITY.")
@@ -202,11 +200,8 @@ public class VisitorController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<VisitorDTO>> searchByUserId(@PathVariable UUID userId) {
         List<Visitor> visitors = visitorService.findByUserId(userId);
-        if (visitors.isEmpty()) {
-            log.warn("No visitors found for user ID: {}", userId);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
         log.debug("Visitors found for user ID: {}", userId);
         return new ResponseEntity<>(mapper.toVisitorDTOS(visitors), HttpStatus.OK);
     }
+
 }

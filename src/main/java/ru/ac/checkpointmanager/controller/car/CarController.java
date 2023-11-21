@@ -36,6 +36,10 @@ import java.util.UUID;
 @RestController
 @RequestMapping("chpman/car")
 @RequiredArgsConstructor
+@Tag(name = "Car (Машина)", description = "Для обработки списка машин")
+@ApiResponses(value = {@ApiResponse(responseCode = "401", description = "Произошла ошибка, Нужно авторизоваться"),
+        @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса")
+})
 @Tag(name = "Car (Авто)", description = "Для обработки списка Авто")
 @ApiResponses(value = {@ApiResponse(responseCode = "401",
         description = "Произошла ошибка, Нужно авторизоваться")})
@@ -112,12 +116,7 @@ public class CarController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @DeleteMapping("/{carId}")
     public ResponseEntity<Void> deletedCar(@PathVariable UUID carId) {
-        if (!carService.existsById(carId)) {
-            log.warn("Attempt to delete non-existing car with ID {}", carId);
-            return ResponseEntity.notFound().build();
-        }
         carService.deleteCar(carId);
-        log.info("Car with ID {} deleted", carId);
         return ResponseEntity.noContent().build();
     }
 
