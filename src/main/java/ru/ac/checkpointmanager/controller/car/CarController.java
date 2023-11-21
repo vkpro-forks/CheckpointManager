@@ -51,7 +51,7 @@ public class CarController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Авто успешно добавлен",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = CarBrand.class))}),
+                            schema = @Schema(implementation = Car.class))}),
             @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей.")
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
@@ -83,7 +83,7 @@ public class CarController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Авто успешно обновлен",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = CarBrand.class))}),
+                            schema = @Schema(implementation = Car.class))}),
             @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей.")
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
@@ -106,7 +106,7 @@ public class CarController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Авто успешно удален",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = CarBrand.class))}),
+                            schema = @Schema(implementation = Car.class))}),
             @ApiResponse(responseCode = "404", description = "Такого Авто не существует.")
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
@@ -126,7 +126,7 @@ public class CarController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Список Авто получен",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = CarBrand.class))}),
+                            schema = @Schema(implementation = Car.class))}),
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping
@@ -145,7 +145,7 @@ public class CarController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Список Авто получен",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = CarBrand.class))}),
+                            schema = @Schema(implementation = Car.class))}),
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/user/{userId}")
