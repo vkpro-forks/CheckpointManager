@@ -61,13 +61,10 @@ public class VisitorController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getVisitor(@PathVariable UUID id) {
         Visitor existVisitor = visitorService.getVisitor(id);
-        if (existVisitor == null) {
-            log.warn("Failed to find visitor with ID {}", id);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
         log.debug("Retrieved visitor with ID {}", id);
         return new ResponseEntity<>(mapper.toVisitorDTO(existVisitor), HttpStatus.OK);
     }
+
 
     @Operation(summary = "Обновить информацию о посетителе по ID")
     @ApiResponses(value = {
@@ -76,21 +73,18 @@ public class VisitorController {
     })
     @PutMapping("/{id}")
     public ResponseEntity<?> updateVisitor(@PathVariable UUID id, @RequestBody VisitorDTO visitorDTO,
-                                          BindingResult bindingResult) {
+                                           BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             log.warn("Failed to update visitor due to validation errors");
             return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
         }
 
         Visitor visitor = mapper.toVisitor(visitorDTO);
-        Visitor updateVisitor = visitorService.updateVisitor(id, visitor);
-        if (updateVisitor == null) {
-            log.warn("Failed to update visitor with ID {}", id);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        Visitor updatedVisitor = visitorService.updateVisitor(id, visitor);
         log.info("Visitor updated with ID {}", id);
-        return new ResponseEntity<>(mapper.toVisitorDTO(updateVisitor), HttpStatus.OK);
+        return new ResponseEntity<>(mapper.toVisitorDTO(updatedVisitor), HttpStatus.OK);
     }
+
 
     @Operation(summary = "Удалить посетителя по ID")
     @ApiResponses(value = {
@@ -114,13 +108,10 @@ public class VisitorController {
     @GetMapping("/phone")
     public List<VisitorDTO> searchByPhone(@RequestParam String phone) {
         List<Visitor> visitors = visitorService.findByPhonePart(phone);
-        if (visitors.isEmpty()) {
-            log.warn("No visitors found with phone part: {}", phone);
-        } else {
-            log.debug("Visitors found with phone part: {}", phone);
-        }
+        log.debug("Visitors found with phone part: {}", phone);
         return mapper.toVisitorDTOS(visitors);
     }
+
 
     @Operation(summary = "Найти посетителя по имени")
     @ApiResponses(value = {
@@ -129,13 +120,10 @@ public class VisitorController {
     @GetMapping("/name")
     public ResponseEntity<List<VisitorDTO>> searchByName(@RequestParam String name) {
         List<Visitor> visitors = visitorService.findByNamePart(name);
-        if (visitors.isEmpty()) {
-            log.warn("No visitors found with name part: {}", name);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
         log.debug("Visitors found with name part: {}", name);
         return new ResponseEntity<>(mapper.toVisitorDTOS(visitors), HttpStatus.OK);
     }
+
 
     @Operation(summary = "Найти посетителя по ID пропуска")
     @ApiResponses(value = {
@@ -144,14 +132,11 @@ public class VisitorController {
     })
     @GetMapping("/pass")
     public ResponseEntity<?> searchByPass(@RequestParam UUID uuid) {
-        Optional<Visitor> existVisitor = visitorService.findByPassId(uuid);
-        if (existVisitor.isEmpty()) {
-            log.warn("No visitor found for pass ID: {}", uuid);
-            return new ResponseEntity<>("There is no such visitor in any pass!", HttpStatus.NOT_FOUND);
-        }
+        Visitor existVisitor = visitorService.findByPassId(uuid).orElse(null);
         log.debug("Visitor found for pass ID: {}", uuid);
-        return new ResponseEntity<>(mapper.toVisitorDTO(existVisitor.get()), HttpStatus.OK);
+        return new ResponseEntity<>(mapper.toVisitorDTO(existVisitor), HttpStatus.OK);
     }
+
 
     @Operation(summary = "Найти посетителей из пропусков пользователя")
     @ApiResponses(value = {
@@ -161,11 +146,8 @@ public class VisitorController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<VisitorDTO>> searchByUserId(@PathVariable UUID userId) {
         List<Visitor> visitors = visitorService.findByUserId(userId);
-        if (visitors.isEmpty()) {
-            log.warn("No visitors found for user ID: {}", userId);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
         log.debug("Visitors found for user ID: {}", userId);
         return new ResponseEntity<>(mapper.toVisitorDTOS(visitors), HttpStatus.OK);
     }
+
 }
