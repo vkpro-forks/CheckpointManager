@@ -2,8 +2,8 @@ spring:
   mail:
     host: smtp.yandex.ru
     port: 465
-    username: anvilcoder@yandex.ru
-    password: zgvovxqtnyosjfxx
+    username: ENC(W2WL3BQ970dUP//5UzsvNBQvNKaYgz2Mr5HkvijE16lLtUKcSykRYtuq3PDnrvLSxj1vVZNA6Xv4XMzDUFb14A==)
+    password: ENC(/5wosjHaClDmWehH02RXSaT2/yTz0Ox1ZyEAQB3pQXs9k2jtn/yrtBOZgoT9MH6dRWNeiuSCPu6ds42vJkPAzg==)
     protocol: smtp
     properties:
       mail:
