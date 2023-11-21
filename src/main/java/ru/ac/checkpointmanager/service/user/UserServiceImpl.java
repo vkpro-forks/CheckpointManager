@@ -228,11 +228,16 @@ public class UserServiceImpl implements UserService {
      */
     @Transactional
     @Override
-    public ChangeEmailRequest changeEmail(ChangeEmailRequest request) {
+    public String changeEmail(ChangeEmailRequest request) {
         User user = SecurityUtils.getCurrentUser();
 
         if (!request.getCurrentEmail().equals(user.getEmail())) {
             throw new IllegalStateException("Wrong email");
+        }
+
+        if (userRepository.findByEmail(request.getNewEmail()).isPresent()) {
+            log.warn("Email {} already taken", request.getNewEmail());
+            throw new IllegalStateException(String.format("Email %s already taken", request.getNewEmail()));
         }
 
         TemporaryUser tempUser = mapper.toTemporaryUser(user);
@@ -251,7 +256,7 @@ public class UserServiceImpl implements UserService {
         }
 
         temporaryUserService.create(tempUser);
-        return request;
+        return token;
     }
 
     /**
