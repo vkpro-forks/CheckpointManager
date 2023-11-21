@@ -8,7 +8,7 @@ import ru.ac.checkpointmanager.model.car.CarBrand;
 
 public class TestUtils {
 
-    public static final Long CAR_BRAND_ID = 100000L;
+    public static final Long CAR_BRAND_ID = 1000L;
 
     public static final String CAR_BRAND_ID_STR = CAR_BRAND_ID.toString();
 
