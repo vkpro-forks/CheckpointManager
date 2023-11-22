@@ -1,21 +1,22 @@
 package ru.ac.checkpointmanager.service.passes;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import ru.ac.checkpointmanager.model.passes.Pass;
 
-import java.util.List;
 import java.util.UUID;
 
 public interface PassService {
 
     Pass addPass(Pass pass);
 
-    List<Pass> findPasses();
+    Page<Pass> findPasses(Pageable pageable);
 
     Pass findPass(UUID id);
 
-    List<Pass> findPassesByUser(UUID userId);
+    Page<Pass> findPassesByUser(UUID userId, Pageable pageable);
 
-    List<Pass> findPassesByTerritory(UUID terId);
+    Page<Pass> findPassesByTerritory(UUID terId, Pageable pageable);
 
     Pass updatePass(Pass pass);
 
