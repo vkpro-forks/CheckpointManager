@@ -17,12 +17,10 @@ public class PassDtoUpdate {
     @NotNull
     private UUID id;
 
-    private String name;
+    private String comment;
 
     @NotNull
     private PassTypeTime typeTime;
-
-    private String note;
 
     @NotNull
     @FutureOrPresent
