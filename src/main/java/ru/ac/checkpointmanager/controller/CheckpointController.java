@@ -17,12 +17,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.ac.checkpointmanager.dto.CheckpointDTO;
+import ru.ac.checkpointmanager.mapper.CheckpointMapper;
 import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
 import ru.ac.checkpointmanager.service.checkpoints.CheckpointService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
 
 import jakarta.validation.*;
-import ru.ac.checkpointmanager.utils.Mapper;
 
 import java.util.List;
 import java.util.UUID;
@@ -37,7 +37,7 @@ import java.util.UUID;
 public class  CheckpointController {
 
     private final CheckpointService service;
-    private final Mapper mapper;
+    private final CheckpointMapper mapper;
 
     /* CREATE */
     @Operation(summary = "Добавить новый КПП",
