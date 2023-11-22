@@ -11,7 +11,6 @@ import ru.ac.checkpointmanager.model.Avatar;
 import ru.ac.checkpointmanager.model.AvatarProperties;
 import ru.ac.checkpointmanager.repository.AvatarRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
-import ru.ac.checkpointmanager.utils.Mapper;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -33,7 +32,6 @@ public class AvatarServiceImpl implements AvatarService {
     private final AvatarRepository repository;
     private final AvatarProperties avatarProperties;
     private final UserRepository userRepository;
-    private final Mapper mapper;
 
     @Value("${avatars.dir.path}")
     private String avatarsDir;
