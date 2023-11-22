@@ -123,9 +123,7 @@ public class AvatarServiceImpl implements AvatarService {
      * Возвращает аватар для указанного идентификатора сущности.
      *
      * @param userId Уникальный идентификатор сущности, аватар которой нужно получить.
-     * @return Объект Avatar, соответствующий указанному идентификатору сущности.
-     * //FIXME теперь возвращается более удобная дто
-     * @throws IOException если возникают проблемы при чтении файла аватара.//FIXME теперь метод не бросает IOException
+     * @return Объект AvatarImageDTO, соответствующий указанному идентификатору сущности.
      */
     @Override
     public AvatarImageDTO getAvatarByUserId(UUID userId) {

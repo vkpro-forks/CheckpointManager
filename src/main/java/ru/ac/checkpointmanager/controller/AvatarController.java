@@ -29,7 +29,7 @@ import java.util.UUID;
 @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
 public class AvatarController {
 
-    private final AvatarService service;
+    private final AvatarService avatarService;
     private final UserService userService;
 
     @Operation(summary = "Загрузить аватар пользователю(выбрать id пользователя и картинку).")
@@ -41,7 +41,7 @@ public class AvatarController {
     public ResponseEntity<String> uploadAvatar(@PathVariable UUID userId,
                                                @RequestBody MultipartFile avatarFile) throws IOException {
         try {
-            Avatar avatar = service.uploadAvatar(userId, avatarFile);
+            Avatar avatar = avatarService.uploadAvatar(userId, avatarFile);
             userService.assignAvatarToUser(userId, avatar);
             return ResponseEntity.ok("Аватар загружен и назначен пользователю.");
         } catch (Exception e) {
@@ -56,7 +56,7 @@ public class AvatarController {
     })
     @GetMapping("/{entityID}")
     public ResponseEntity<byte[]> getAvatar(@PathVariable UUID entityID) {
-        AvatarImageDTO avatarImageDTO = service.getAvatarByUserId(entityID);
+        AvatarImageDTO avatarImageDTO = avatarService.getAvatarByUserId(entityID);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType(avatarImageDTO.getMediaType()));
@@ -73,7 +73,7 @@ public class AvatarController {
     })
     @GetMapping("/preview/{entityID}")
     public ResponseEntity<byte[]> getAvatarPreview(@PathVariable UUID entityID) {
-        Avatar avatar = service.findAvatarById(entityID);
+        Avatar avatar = avatarService.findAvatarById(entityID);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType(avatar.getMediaType()));
         headers.setContentLength(avatar.getPreview().length);
@@ -87,6 +87,6 @@ public class AvatarController {
     })
     @DeleteMapping("/{entityID}")
     public Avatar deleteAvatar(@PathVariable UUID entityID) throws IOException {
-        return service.deleteAvatarIfExists(entityID);
+        return avatarService.deleteAvatarIfExists(entityID);
     }
 }
