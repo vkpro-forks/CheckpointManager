@@ -16,6 +16,8 @@ import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.exception.PhoneNumberNotFoundException;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
+import ru.ac.checkpointmanager.mapper.TerritoryMapper;
+import ru.ac.checkpointmanager.mapper.UserMapper;
 import ru.ac.checkpointmanager.model.Avatar;
 import ru.ac.checkpointmanager.model.TemporaryUser;
 import ru.ac.checkpointmanager.model.Territory;
@@ -56,8 +58,8 @@ import static ru.ac.checkpointmanager.utils.FieldsValidation.cleanPhone;
 @Slf4j
 public class UserServiceImpl implements UserService {
 
-
-    private final Mapper mapper;
+    private final UserMapper userMapper;
+    private final TerritoryMapper territoryMapper;
     private final UserRepository userRepository;
     private final PhoneRepository phoneRepository;
     private final PasswordEncoder passwordEncoder;
@@ -83,7 +85,7 @@ public class UserServiceImpl implements UserService {
         log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), id);
         User foundUser = userRepository.findById(id).orElseThrow(
                 () -> new UserNotFoundException(String.format("User not found [id=%s]", id)));
-        return mapper.toUserDTO(foundUser);
+        return userMapper.toUserDTO(foundUser);
     }
 
     /**
@@ -106,7 +108,7 @@ public class UserServiceImpl implements UserService {
             log.warn("Territory for User {} not found", userId);
             throw new TerritoryNotFoundException(String.format("Territory for User not found [user_id=%s]", userId));
         }
-        return mapper.toTerritoriesDTO(territories);
+        return territoryMapper.toTerritoriesDTO(territories);
     }
 
     /**
@@ -124,7 +126,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Collection<UserResponseDTO> findByName(String name) {
         log.info("Method {} was invoked", MethodLog.getMethodName());
-        Collection<UserResponseDTO> userResponseDTOS = mapper.toUsersDTO(userRepository
+        Collection<UserResponseDTO> userResponseDTOS = userMapper.toUsersDTO(userRepository
                 .findUserByFullNameContainingIgnoreCase(name));
 
         if (userResponseDTOS.isEmpty()) {
@@ -170,7 +172,7 @@ public class UserServiceImpl implements UserService {
         userRepository.save(foundUser);
         log.debug("User {} saved", foundUser.getId());
 
-        return mapper.toUserDTO(foundUser);
+        return userMapper.toUserDTO(foundUser);
     }
 
     /**
@@ -240,7 +242,7 @@ public class UserServiceImpl implements UserService {
             throw new IllegalStateException(String.format("Email %s already taken", request.getNewEmail()));
         }
 
-        TemporaryUser tempUser = mapper.toTemporaryUser(user);
+        TemporaryUser tempUser = userMapper.toTemporaryUser(user);
         tempUser.setPreviousEmail(user.getEmail());
         tempUser.setEmail(request.getNewEmail());
 
@@ -375,7 +377,7 @@ public class UserServiceImpl implements UserService {
             log.warn("User {} already has block status {}", id, isBlocked);
             throw new IllegalStateException(String.format("User already %s [id=%s]", isBlocked ? "blocked" : "unblocked", id));
         }
-        return mapper.toUserDTO(existingUser);
+        return userMapper.toUserDTO(existingUser);
     }
 
     /**
@@ -464,7 +466,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Collection<UserResponseDTO> getAll() {
         log.debug("Method {}", MethodLog.getMethodName());
-        Collection<UserResponseDTO> userResponseDTOS = mapper.toUsersDTO(userRepository.findAll());
+        Collection<UserResponseDTO> userResponseDTOS = userMapper.toUsersDTO(userRepository.findAll());
 
         if (userResponseDTOS.isEmpty()) {
             log.warn("There is no user in DB");

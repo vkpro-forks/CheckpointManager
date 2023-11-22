@@ -20,6 +20,8 @@ import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.exception.PhoneNumberNotFoundException;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
+import ru.ac.checkpointmanager.mapper.TerritoryMapper;
+import ru.ac.checkpointmanager.mapper.UserMapper;
 import ru.ac.checkpointmanager.model.Avatar;
 import ru.ac.checkpointmanager.model.TemporaryUser;
 import ru.ac.checkpointmanager.model.Territory;
@@ -28,7 +30,6 @@ import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.service.email.EmailService;
-import ru.ac.checkpointmanager.utils.Mapper;
 
 import java.util.*;
 
@@ -41,7 +42,9 @@ import static org.mockito.Mockito.*;
 class UserServiceImplTest {
 
     @Mock
-    private Mapper mapper;
+    private TerritoryMapper territoryMapper;
+    @Mock
+    private UserMapper userMapper;
     @Mock
     private UserRepository userRepository;
     @Mock
@@ -66,10 +69,11 @@ class UserServiceImplTest {
     private ChangeEmailRequest emailRequest;
     private TemporaryUser tempUser;
 
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        out = new UserServiceImpl(mapper, userRepository, phoneRepository, passwordEncoder, temporaryUserService, emailService);
+        out = new UserServiceImpl(userMapper, territoryMapper, userRepository, phoneRepository, passwordEncoder, temporaryUserService, emailService);
 
         setUserArea();
         setSecurityContext();
@@ -119,7 +123,7 @@ class UserServiceImplTest {
     @Test
     void findById_UserExists_ReturnsUserResponseDTO() {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(mapper.toUserDTO(user)).thenReturn(userResponseDTO);
+        when(userMapper.toUserDTO(user)).thenReturn(userResponseDTO);
 
         UserResponseDTO result = out.findById(userId);
 
@@ -141,7 +145,7 @@ class UserServiceImplTest {
         when(userRepository.findTerritoriesByUserId(userId)).thenReturn(territories);
 
         List<TerritoryDTO> territoryDTOs = List.of(new TerritoryDTO());
-        when(mapper.toTerritoriesDTO(territories)).thenReturn(territoryDTOs);
+        when(territoryMapper.toTerritoriesDTO(territories)).thenReturn(territoryDTOs);
 
         List<TerritoryDTO> result = out.findTerritoriesByUserId(userId);
 
@@ -161,7 +165,7 @@ class UserServiceImplTest {
     @Test
     void findByName_ReturnCollectionUserResponseDTO() {
         when(userRepository.findUserByFullNameContainingIgnoreCase(anyString())).thenReturn(users);
-        when(mapper.toUsersDTO(users)).thenReturn((List<UserResponseDTO>) userResponseDTOS);
+        when(userMapper.toUsersDTO(users)).thenReturn((List<UserResponseDTO>) userResponseDTOS);
 
         Collection<UserResponseDTO> result = out.findByName("Test");
         assertNotNull(result);
@@ -184,13 +188,13 @@ class UserServiceImplTest {
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(phoneRepository.getNumbersByUserId(userId)).thenReturn(List.of("123456789"));
-        when(mapper.toUserDTO(any(User.class))).thenReturn(new UserResponseDTO());
+        when(userMapper.toUserDTO(any(User.class))).thenReturn(new UserResponseDTO());
 
         UserResponseDTO result = out.updateUser(userPutDTO);
 
         assertNotNull(result);
         verify(userRepository).save(user);
-        verify(mapper).toUserDTO(user);
+        verify(userMapper).toUserDTO(user);
     }
 
     @Test
@@ -264,7 +268,7 @@ class UserServiceImplTest {
 
     @Test
     void changeEmail_EmailSendFailure_ThrowsMailSendException() {
-        when(mapper.toTemporaryUser(user)).thenReturn(new TemporaryUser());
+        when(userMapper.toTemporaryUser(user)).thenReturn(new TemporaryUser());
         doThrow(new MailSendException("failed")).when(emailService).sendEmailConfirm(anyString(), anyString());
 
         assertThrows(MailSendException.class, () -> out.changeEmail(emailRequest),
@@ -346,7 +350,7 @@ class UserServiceImplTest {
     void updateBlockStatus_SuccessfulUpdate_ReturnsUpdatedUser() {
         user.setIsBlocked(false);
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(mapper.toUserDTO(user)).thenReturn(userResponseDTO);
+        when(userMapper.toUserDTO(user)).thenReturn(userResponseDTO);
 
         UserResponseDTO result = out.updateBlockStatus(userId, true);
 
@@ -439,13 +443,13 @@ class UserServiceImplTest {
     @Test
     void getAll_UsersExist_ReturnsUserList() {
         when(userRepository.findAll()).thenReturn((List<User>) users);
-        when(mapper.toUsersDTO(users)).thenReturn((List<UserResponseDTO>) userResponseDTOS);
+        when(userMapper.toUsersDTO(users)).thenReturn((List<UserResponseDTO>) userResponseDTOS);
 
         Collection<UserResponseDTO> result = out.getAll();
 
         assertFalse(result.isEmpty());
         verify(userRepository).findAll();
-        verify(mapper).toUsersDTO(users);
+        verify(userMapper).toUsersDTO(users);
     }
 
     @Test
