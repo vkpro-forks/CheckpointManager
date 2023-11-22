@@ -13,20 +13,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
-import ru.ac.checkpointmanager.exception.AvatarIsEmptyException;
-import ru.ac.checkpointmanager.exception.AvatarNotFoundException;
-import ru.ac.checkpointmanager.exception.BadAvatarExtensionException;
-import ru.ac.checkpointmanager.exception.CarBrandNotFoundException;
-import ru.ac.checkpointmanager.exception.DateOfBirthFormatException;
-import ru.ac.checkpointmanager.exception.EntranceWasAlreadyException;
-import ru.ac.checkpointmanager.exception.InactivePassException;
-import ru.ac.checkpointmanager.exception.InvalidPhoneNumberException;
-import ru.ac.checkpointmanager.exception.PassNotFoundException;
-import ru.ac.checkpointmanager.exception.PhoneAlreadyExistException;
-import ru.ac.checkpointmanager.exception.PhoneNumberNotFoundException;
-import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
-import ru.ac.checkpointmanager.exception.UserNotFoundException;
-import ru.ac.checkpointmanager.exception.VisitorNotFoundException;
+import ru.ac.checkpointmanager.exception.*;
 
 import java.time.Instant;
 import java.util.List;
@@ -47,10 +34,10 @@ public class GlobalExceptionHandler {
 
     public static final String VIOLATIONS = "violations";
 
-    @ExceptionHandler(CarBrandNotFoundException.class)
-    public ProblemDetail handleCarBrandNotFoundException(CarBrandNotFoundException e) {
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ProblemDetail handleEntityNotFoundException(EntityNotFoundException e) {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.NOT_FOUND, e);
-        problemDetail.setTitle("Car brand not found");
+        problemDetail.setTitle("Object not found");
         problemDetail.setProperty(ERROR_CODE, ErrorCode.NOT_FOUND.toString());
         log.debug(LOG_MSG, e.getClass());
         return problemDetail;
@@ -81,16 +68,6 @@ public class GlobalExceptionHandler {
         ProblemDetail configuredProblemDetails = setUpValidationDetails(problemDetail, violationErrors);
         log.debug(LOG_MSG_DETAILS, e.getClass(), e.getMessage());
         return configuredProblemDetails;
-    }
-
-
-    @ExceptionHandler(EntityNotFoundException.class)
-    public ProblemDetail handleEntityNotFoundException(EntityNotFoundException e) {
-        ProblemDetail problemDetail = createProblemDetail(HttpStatus.NOT_FOUND, e);
-        problemDetail.setTitle("Entity no found");
-        problemDetail.setProperty(ERROR_CODE, ErrorCode.NOT_FOUND.toString());
-        log.debug(LOG_MSG, e.getClass());
-        return problemDetail;
     }
 
     @ExceptionHandler(EntranceWasAlreadyException.class)
@@ -143,15 +120,6 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
         problemDetail.setTitle("Size of uploading file exceeds maximum");
         problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
-        log.debug(LOG_MSG, e.getClass());
-        return problemDetail;
-    }
-
-    @ExceptionHandler(AvatarNotFoundException.class)
-    public ProblemDetail handleAvatarNotFoundException(AvatarNotFoundException e) {
-        ProblemDetail problemDetail = createProblemDetail(HttpStatus.NOT_FOUND, e);
-        problemDetail.setTitle("Avatar not found");
-        problemDetail.setProperty(ERROR_CODE, ErrorCode.NOT_FOUND.toString());
         log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }
@@ -294,4 +262,5 @@ public class GlobalExceptionHandler {
         }
         return path;
     }
+
 }

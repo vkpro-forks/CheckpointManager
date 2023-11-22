@@ -1,7 +1,7 @@
 package ru.ac.checkpointmanager.service.avatar;
 
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.multipart.MultipartFile;
+import ru.ac.checkpointmanager.dto.AvatarImageDTO;
 import ru.ac.checkpointmanager.model.Avatar;
 
 import java.io.IOException;
@@ -17,13 +17,14 @@ public interface AvatarService {
      * Sets avatar image for entity whose ID is passed.
      * This method responds well on updating avatar request,
      * because it deletes previous image file associated with the entity if one is detected in the directory
-     * @param entityID ID of entity for passed avatar
+     *
+     * @param entityID   ID of entity for passed avatar
      * @param avatarFile avatar file
      * @throws IOException when I/O errors occurs
      */
     Avatar uploadAvatar(UUID entityID, MultipartFile avatarFile) throws IOException;
 
-    Avatar getAvatarByUserId(UUID entityID) throws IOException;
+    AvatarImageDTO getAvatarByUserId(UUID entityID);
 
     /**
      * Method searches for avatar in table by entity id.
@@ -35,7 +36,7 @@ public interface AvatarService {
      */
     Avatar deleteAvatarIfExists(UUID entityID) throws IOException;
 
-    Avatar findAvatarOrThrow(UUID entityID);
+    Avatar findAvatarById(UUID entityID);
 
     /**
      * If avatar is present in DB then it will be returned
