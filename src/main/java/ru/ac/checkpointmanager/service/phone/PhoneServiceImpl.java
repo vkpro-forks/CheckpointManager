@@ -8,9 +8,9 @@ import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.exception.InvalidPhoneNumberException;
 import ru.ac.checkpointmanager.exception.PhoneAlreadyExistException;
 import ru.ac.checkpointmanager.exception.PhoneNumberNotFoundException;
+import ru.ac.checkpointmanager.mapper.PhoneMapper;
 import ru.ac.checkpointmanager.model.Phone;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
-import ru.ac.checkpointmanager.utils.Mapper;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.util.Collection;
@@ -25,7 +25,7 @@ import static ru.ac.checkpointmanager.utils.FieldsValidation.isValidPhoneNumber;
 public class PhoneServiceImpl implements PhoneService {
 
     private final PhoneRepository phoneRepository;
-    private final Mapper mapper;
+    private final PhoneMapper phoneMapper;
 
     @Override
     @Transactional
@@ -43,9 +43,9 @@ public class PhoneServiceImpl implements PhoneService {
             throw new PhoneAlreadyExistException(String.format
                     ("Phone number %s already exist", phoneDTO.getNumber()));
         }
-        Phone phone = phoneRepository.save(mapper.toPhone(phoneDTO));
+        Phone phone = phoneRepository.save(phoneMapper.toPhone(phoneDTO));
         log.debug("Phone {} saved", phone.getNumber());
-        return mapper.toPhoneDTO(phone);
+        return phoneMapper.toPhoneDTO(phone);
     }
 
     @Override
@@ -53,7 +53,7 @@ public class PhoneServiceImpl implements PhoneService {
         log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), id);
         Phone foundPhone = phoneRepository.findById(id).orElseThrow(
                 () -> new PhoneNumberNotFoundException("The number by this id does not exist"));
-        return mapper.toPhoneDTO(foundPhone);
+        return phoneMapper.toPhoneDTO(foundPhone);
     }
 
     @Override
@@ -73,7 +73,7 @@ public class PhoneServiceImpl implements PhoneService {
 
         phoneRepository.save(foundPhone);
         log.debug("Phone {} saved", foundPhone.getNumber());
-        return mapper.toPhoneDTO(foundPhone);
+        return phoneMapper.toPhoneDTO(foundPhone);
     }
 
 
@@ -90,7 +90,7 @@ public class PhoneServiceImpl implements PhoneService {
     @Override
     public Collection<PhoneDTO> getAll() {
         log.debug("Method {}", MethodLog.getMethodName());
-        Collection<PhoneDTO> numbers = mapper.toPhonesDTO(phoneRepository.findAll());
+        Collection<PhoneDTO> numbers = phoneMapper.toPhonesDTO(phoneRepository.findAll());
 
         if (numbers.isEmpty()) {
             log.warn("There is no phone in DB");
