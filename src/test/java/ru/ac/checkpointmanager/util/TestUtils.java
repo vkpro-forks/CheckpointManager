@@ -19,6 +19,16 @@ public class TestUtils {
 
     public static final UUID USER_ID = UUID.randomUUID();
 
+    public static final UUID PASS_ID = UUID.randomUUID();
+
+    public static final UUID CHECKPOINT_ID = UUID.randomUUID();
+
+    public static final String CHECKPOINT_NAME = "ch_name";
+
+    public static final UUID TERR_ID = UUID.randomUUID();
+
+    public static final String TERR_NAME = "Territory";
+
     public static final String JSON_ERROR_CODE = "$.errorCode";
 
     public static final String JSON_TIMESTAMP = "$.timestamp";
@@ -32,6 +42,32 @@ public class TestUtils {
         carBrand.setId(CAR_BRAND_ID);
         carBrand.setBrand("Buhanka");
         return carBrand;
+    }
+
+    public static CrossingDTO getCrossingDTO() {
+        return new CrossingDTO(
+                PASS_ID,
+                CHECKPOINT_ID,
+                LocalDateTime.now(),
+                Direction.IN
+        );
+    }
+
+    public static TerritoryDTO getTerritoryDTO() {
+        return new TerritoryDTO(
+                TERR_ID,
+                TERR_NAME,
+                "note"
+        );
+    }
+
+    public static CheckpointDTO getCheckPointDTO() {
+        return new CheckpointDTO(
+                CHECKPOINT_ID,
+                CHECKPOINT_NAME,
+                CheckpointType.UNIVERSAL,
+                "note", getTerritoryDTO()
+        );
     }
 
     public static String jsonStringFromObject(Object object) throws JsonProcessingException {
