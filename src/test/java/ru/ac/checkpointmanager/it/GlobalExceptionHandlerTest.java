@@ -151,6 +151,15 @@ class GlobalExceptionHandlerTest extends PostgresContainersConfig {
         checkNotFoundFields(resultActions);
     }
 
+    @Test
+    @SneakyThrows
+    @WithMockUser(roles = {"ADMIN"})
+    void shouldHandleCrossingNotFoundExceptionForGetCrossing() {
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .get(UrlConstants.CROSSING_URL + "/" + TestUtils.CROSSING_ID));
+        checkNotFoundFields(resultActions);
+    }
+
     private void checkNotFoundFields(ResultActions resultActions) throws Exception {
         resultActions.andExpect(MockMvcResultMatchers.status().isNotFound())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE))

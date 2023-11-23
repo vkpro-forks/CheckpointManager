@@ -32,6 +32,8 @@ public class TestUtils {
 
     public static final String TERR_NAME = "Territory";
 
+    public static final UUID CROSSING_ID = UUID.randomUUID();
+
     public static final String JSON_ERROR_CODE = "$.errorCode";
 
     public static final String JSON_TIMESTAMP = "$.timestamp";
