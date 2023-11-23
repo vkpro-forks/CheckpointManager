@@ -4,8 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import ru.ac.checkpointmanager.dto.CarDTO;
-import ru.ac.checkpointmanager.model.car.Car;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.model.checkpoints.CheckpointType;
 import ru.ac.checkpointmanager.model.enums.Direction;
