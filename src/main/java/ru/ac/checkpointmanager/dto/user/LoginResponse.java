@@ -19,8 +19,6 @@ public class LoginResponse {
 
     private String email;
 
-    private String password;
-
     private Boolean isBlocked;
 
     private Role role;
