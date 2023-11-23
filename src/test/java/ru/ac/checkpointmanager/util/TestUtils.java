@@ -4,9 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import ru.ac.checkpointmanager.dto.CheckpointDTO;
-import ru.ac.checkpointmanager.dto.CrossingDTO;
-import ru.ac.checkpointmanager.dto.TerritoryDTO;
+import ru.ac.checkpointmanager.dto.CarDTO;
+import ru.ac.checkpointmanager.model.car.Car;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.model.checkpoints.CheckpointType;
 import ru.ac.checkpointmanager.model.enums.Direction;
@@ -22,18 +21,6 @@ public class TestUtils {
 
     public static final UUID USER_ID = UUID.randomUUID();
 
-    public static final UUID PASS_ID = UUID.randomUUID();
-
-    public static final UUID CHECKPOINT_ID = UUID.randomUUID();
-
-    public static final String CHECKPOINT_NAME = "ch_name";
-
-    public static final UUID TERR_ID = UUID.randomUUID();
-
-    public static final String TERR_NAME = "Territory";
-
-    public static final UUID CROSSING_ID = UUID.randomUUID();
-
     public static final String JSON_ERROR_CODE = "$.errorCode";
 
     public static final String JSON_TIMESTAMP = "$.timestamp";
@@ -47,32 +34,6 @@ public class TestUtils {
         carBrand.setId(CAR_BRAND_ID);
         carBrand.setBrand("Buhanka");
         return carBrand;
-    }
-
-    public static CrossingDTO getCrossingDTO() {
-        return new CrossingDTO(
-                PASS_ID,
-                CHECKPOINT_ID,
-                LocalDateTime.now(),
-                Direction.IN
-        );
-    }
-
-    public static TerritoryDTO getTerritoryDTO() {
-        return new TerritoryDTO(
-                TERR_ID,
-                TERR_NAME,
-                "note"
-        );
-    }
-
-    public static CheckpointDTO getCheckPointDTO() {
-        return new CheckpointDTO(
-                CHECKPOINT_ID,
-                CHECKPOINT_NAME,
-                CheckpointType.UNIVERSAL,
-                "note", getTerritoryDTO()
-        );
     }
 
     public static String jsonStringFromObject(Object object) throws JsonProcessingException {

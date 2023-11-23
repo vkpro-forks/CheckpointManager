@@ -113,6 +113,27 @@ class GlobalExceptionHandlerTest extends PostgresContainersConfig {
     @Test
     @SneakyThrows
     @WithMockUser(roles = {"ADMIN"})
+    void shouldHandleCarNotFoundExceptionForDeleteCar() {
+        ResultActions resultActions = mockMvc
+                .perform(MockMvcRequestBuilders.delete(UrlConstants.CAR_URL + "/" + TestUtils.CAR_ID));
+        checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockUser(roles = {"ADMIN"})
+    void shouldHandleCarNotFoundExceptionForUpdateCar() {
+        String updateCarDto = TestUtils.jsonStringFromObject(TestUtils.getCarDto());
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .put(UrlConstants.CAR_URL + "/" + TestUtils.CAR_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(updateCarDto));
+        checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockUser(roles = {"ADMIN"})
     void shouldHandleCheckPointNotFoundExceptionForMarkCrossing() {
         String crossingDto = TestUtils.jsonStringFromObject(TestUtils.getCrossingDTO());
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CROSSING_MARK_URL)
