@@ -9,8 +9,8 @@ import ru.ac.checkpointmanager.exception.PassNotFoundException;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.model.Crossing;
-import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.enums.Direction;
+import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.repository.CrossingRepository;
 import ru.ac.checkpointmanager.repository.PassRepository;
@@ -19,7 +19,10 @@ import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static ru.ac.checkpointmanager.utils.StringTrimmer.trimThemAll;
 
@@ -31,8 +34,10 @@ import static ru.ac.checkpointmanager.utils.StringTrimmer.trimThemAll;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class PassServiceImpl implements PassService{
+public class PassServiceImpl implements PassService {
 
+    public static final String PASS_NOT_FOUND_LOG = "[Pass with id: {}] not found";
+    public static final String PASS_NOT_FOUND_MSG = "Pass with id: %s not found";
     private final PassRepository repository;
     private final CrossingRepository crossingRepository;
     private final UserRepository userRepository;
@@ -83,7 +88,10 @@ public class PassServiceImpl implements PassService{
     public Pass findPass(UUID id) {
         log.debug("Method {} [UUID - {}]", MethodLog.getMethodName(), id);
         return repository.findById(id).orElseThrow(
-                () -> new PassNotFoundException(String.format("Pass not found [userId=%s]", id)));
+                () -> {
+                    log.warn(PASS_NOT_FOUND_LOG, id);
+                    return new PassNotFoundException(PASS_NOT_FOUND_MSG.formatted(id));
+                });
     }
 
     @Override
@@ -94,10 +102,6 @@ public class PassServiceImpl implements PassService{
         }
 
         List<Pass> foundPasses = repository.findPassesByUserIdOrderByAddedAtDesc(userId);
-        if (foundPasses.isEmpty()) {
-            throw new PassNotFoundException(String.format("For User [id=%s] not exist any passes", userId));
-        }
-
         return sortPassListBeforeSend(foundPasses);
     }
 
@@ -105,27 +109,20 @@ public class PassServiceImpl implements PassService{
     public List<Pass> findPassesByTerritory(UUID terId) {
         log.debug("Method {} [UUID - {}]", MethodLog.getMethodName(), terId);
         List<Pass> foundPasses = repository.findPassesByTerritoryIdOrderByAddedAtDesc(terId);
-
-        if (foundPasses.isEmpty()) {
-            throw new PassNotFoundException(String.format("For Territory [id=%s] not exist any Passes", terId));
-        }
         return sortPassListBeforeSend(foundPasses);
     }
 
     @Override
     public Pass updatePass(Pass pass) {
         log.info("Method {} [UUID - {}]", MethodLog.getMethodName(), pass.getId());
-
-        checkPassTime(pass);
-        checkUserTerritoryRelation(pass);
-        checkOverlapTime(pass);
-
-        trimThemAll(pass);
-
         Pass foundPass = findPass(pass.getId());
         if (!foundPass.getStatus().equals(PassStatus.ACTIVE) && !foundPass.getStatus().equals(PassStatus.DELAYED)) {
             throw new IllegalStateException("This pass is not active or delayed, it cannot be changed");
         }
+        checkPassTime(pass);
+        checkUserTerritoryRelation(pass);
+        checkOverlapTime(pass);
+        trimThemAll(pass);
 
         foundPass.setComment(pass.getComment());
         foundPass.setTypeTime(pass.getTypeTime());
@@ -135,7 +132,7 @@ public class PassServiceImpl implements PassService{
 
         Pass updatedPass = repository.save(foundPass);
         log.info("Pass updated, {}", updatedPass);
-        
+
         return updatedPass;
     }
 
@@ -156,11 +153,11 @@ public class PassServiceImpl implements PassService{
             pass.setStatus(
                     changeStatusForPassWithCrossings(passCrossings));
         }
-        
+
         Pass cancelledPass = repository.save(pass);
         log.info("Pass [UUID - {}], exist {} crossings, changed status on {}",
                 pass.getId(), passCrossings.size(), pass.getStatus());
-        
+
         return cancelledPass;
     }
 
@@ -182,10 +179,10 @@ public class PassServiceImpl implements PassService{
         } else {
             pass.setStatus(PassStatus.DELAYED);
         }
-        
+
         Pass activatedPass = repository.save(pass);
         log.info("Pass [UUID - {}], changed status on {}", pass.getId(), pass.getStatus());
-        
+
         return activatedPass;
     }
 
@@ -201,7 +198,7 @@ public class PassServiceImpl implements PassService{
 
         Pass completedPass = repository.save(pass);
         log.info("Pass [UUID - {}], changed status on {}", pass.getId(), pass.getStatus());
-        
+
         return completedPass;
     }
 
@@ -227,17 +224,19 @@ public class PassServiceImpl implements PassService{
     public void deletePass(UUID id) {
         log.info("Method {} [UUID - {}]", MethodLog.getMethodName(), id);
         if (repository.findById(id).isEmpty()) {
-            throw new PassNotFoundException(String.format("Pass not found [Id=%s]", id));
+            log.warn(PASS_NOT_FOUND_LOG, id);
+            throw new PassNotFoundException(PASS_NOT_FOUND_MSG.formatted(id));
         }
         repository.deleteById(id);
-        log.info("Pass deleted [UUID - {}]", id);
+        log.info("[Pass with id: {}] successfully deleted", id);
     }
 
     /**
      * Проверяет, что в добавляемом или изменяемом пропуске
      * время окончания больше чем время начала
+     *
      * @param newPass добавляемый или изменяемый пропуск
-     * @exception IllegalArgumentException "The start time must be earlier than the end time"
+     * @throws IllegalArgumentException "The start time must be earlier than the end time"
      */
     private void checkPassTime(Pass newPass) {
         if (!newPass.getStartTime().isBefore(newPass.getEndTime())) {
@@ -251,8 +250,8 @@ public class PassServiceImpl implements PassService{
 
     /**
      * @param newPass добавляемый или изменяемый пропуск
-     * @exception TerritoryNotFoundException, если указанный юзер не имеет связи с указанной территорией,
-     * т.е. не имеет права создавать пропуска для этой территории
+     * @throws TerritoryNotFoundException, если указанный юзер не имеет связи с указанной территорией,
+     *                                     т.е. не имеет права создавать пропуска для этой территории
      */
     private void checkUserTerritoryRelation(Pass newPass) {
         UUID userId = newPass.getUser().getId();
@@ -268,9 +267,9 @@ public class PassServiceImpl implements PassService{
 
     /**
      * @param newPass добавляемый или изменяемый пропуск
-     * @exception IllegalArgumentException, если в системе существует другой активный пропуск,
-     * созданный тем же юзером, в котором совпадает территория, данные машины/человека
-     * и пересекается (накладывается) время действия
+     * @throws IllegalArgumentException, если в системе существует другой активный пропуск,
+     *                                   созданный тем же юзером, в котором совпадает территория, данные машины/человека
+     *                                   и пересекается (накладывается) время действия
      */
     void checkOverlapTime(Pass newPass) {
         List<Pass> passesByUser = repository.findPassesByUserIdOrderByAddedAtDesc(newPass.getUser().getId());
@@ -293,10 +292,11 @@ public class PassServiceImpl implements PassService{
     /**
      * Сортирует список найденных пропусков перед отправкой по статусу (порядок задается списком {@code statusOrder},
      * при одинаковом статусе в хронологическом порядке по значению поля startTime
+     *
      * @param source список найденных пропусков
      * @return отсортированный список
      */
-    private List<Pass> sortPassListBeforeSend (List<Pass> source) {
+    private List<Pass> sortPassListBeforeSend(List<Pass> source) {
         List<PassStatus> statusOrder = List.of(
                 PassStatus.WARNING,
                 PassStatus.ACTIVE,
@@ -331,7 +331,9 @@ public class PassServiceImpl implements PassService{
     public void updateDelayedPassesOnStartTimeReached() {
         List<Pass> passes = repository.findPassesByStatusAndTimeBefore(PassStatus.DELAYED.toString(),
                 "startTime", LocalDateTime.now().plusMinutes(1));
-        if (passes.isEmpty()) {return;}
+        if (passes.isEmpty()) {
+            return;
+        }
 
         log.info("Method {}, startTime reached on {} delayed pass(es)", MethodLog.getMethodName(), passes.size());
 
@@ -353,7 +355,9 @@ public class PassServiceImpl implements PassService{
     public void updateActivePassesOnEndTimeReached() {
         List<Pass> passes = repository.findPassesByStatusAndTimeBefore(PassStatus.ACTIVE.toString(),
                 "endTime", LocalDateTime.now());
-        if (passes.isEmpty()) {return;}
+        if (passes.isEmpty()) {
+            return;
+        }
 
         log.info("Method {}, endTime reached on {} active pass(es)", MethodLog.getMethodName(), passes.size());
 
@@ -376,10 +380,11 @@ public class PassServiceImpl implements PassService{
      * Возвращает статус для отменяемого или истекшего пропуска:
      * Если пересечения были, и последнее было на выезд - статус "выполнен" (PassStatus.COMPLETED).
      * Если пересечения были, и последнее было на въезд - статус "предупреждение" (PassStatus.WARNING).
+     *
      * @param crossings список пересечений по проверяемому пропуску
      * @return {@code PassStatus}
      */
-    private PassStatus changeStatusForPassWithCrossings (List<Crossing> crossings) {
+    private PassStatus changeStatusForPassWithCrossings(List<Crossing> crossings) {
         Crossing lastCrossing = crossings.stream()
                 .max(Comparator.comparing(Crossing::getLocalDateTime))
                 .get();

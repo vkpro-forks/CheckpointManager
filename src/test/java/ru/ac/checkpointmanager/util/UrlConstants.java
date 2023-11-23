@@ -16,6 +16,8 @@ public class UrlConstants {
 
     public static final String CHECKPOINT_URL = "/chpman/checkpoint";
 
+    public static final String PASS_URL = "/chpman/pass";
+
 
 
     private UrlConstants() {

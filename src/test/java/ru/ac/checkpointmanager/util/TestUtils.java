@@ -7,6 +7,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.model.checkpoints.CheckpointType;
 import ru.ac.checkpointmanager.model.enums.Direction;
+import ru.ac.checkpointmanager.model.passes.PassTypeTime;
+import ru.ac.checkpointmanager.model.checkpoints.CheckpointType;
+import ru.ac.checkpointmanager.model.enums.Direction;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
