@@ -110,6 +110,47 @@ class GlobalExceptionHandlerTest extends PostgresContainersConfig {
         checkNotFoundFields(resultActions);
     }
 
+    @Test
+    @SneakyThrows
+    @WithMockUser(roles = {"ADMIN"})
+    void shouldHandleCheckPointNotFoundExceptionForMarkCrossing() {
+        String crossingDto = TestUtils.jsonStringFromObject(TestUtils.getCrossingDTO());
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CROSSING_MARK_URL)
+                .content(crossingDto)
+                .contentType(MediaType.APPLICATION_JSON));
+        checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockUser(roles = {"ADMIN"})
+    void shouldHandleCheckPointNotFoundExceptionForGetCheckPoint() {
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .get(UrlConstants.CHECKPOINT_URL + "/" + TestUtils.CHECKPOINT_ID));
+        checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockUser(roles = {"ADMIN"})
+    void shouldHandleCheckPointNotFoundExceptionForUpdateCheckPoint() {
+        String checkPointDto = TestUtils.jsonStringFromObject(TestUtils.getCheckPointDTO());
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .put(UrlConstants.CHECKPOINT_URL)
+                .content(checkPointDto)
+                .contentType(MediaType.APPLICATION_JSON));
+        checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockUser(roles = {"ADMIN"})
+    void shouldHandleCheckPointNotFoundExceptionForDeleteCheckPoint() {
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .delete(UrlConstants.CHECKPOINT_URL + "/" + TestUtils.CHECKPOINT_ID));
+        checkNotFoundFields(resultActions);
+    }
+
     private void checkNotFoundFields(ResultActions resultActions) throws Exception {
         resultActions.andExpect(MockMvcResultMatchers.status().isNotFound())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE))

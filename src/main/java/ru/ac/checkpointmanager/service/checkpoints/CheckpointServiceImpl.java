@@ -7,7 +7,6 @@ import ru.ac.checkpointmanager.exception.CheckpointNotFoundException;
 import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
 import ru.ac.checkpointmanager.repository.CheckpointRepository;
 import ru.ac.checkpointmanager.service.territories.TerritoryService;
-import ru.ac.checkpointmanager.service.avatar.AvatarService;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.util.List;
@@ -20,7 +19,9 @@ import static ru.ac.checkpointmanager.utils.StringTrimmer.trimThemAll;
 @RequiredArgsConstructor
 public class CheckpointServiceImpl implements CheckpointService {
 
-    private final CheckpointRepository repository;
+    public static final String CHECKPOINT_NOT_FOUND_LOG = "[Checkpoint with id: {}] not found";
+    public static final String CHECKPOINT_NOT_FOUND_MSG = "Checkpoint with id: %s not found";
+    private final CheckpointRepository checkpointRepository;
     private final TerritoryService territoryService;
 
     @Override
@@ -28,47 +29,48 @@ public class CheckpointServiceImpl implements CheckpointService {
         log.info("Method {}, UUID - {}", MethodLog.getMethodName(), checkpoint.getId());
         territoryService.findTerritoryById(checkpoint.getTerritory().getId());
         trimThemAll(checkpoint);
-        return repository.save(checkpoint);
+        return checkpointRepository.save(checkpoint);
     }
 
     @Override
     public Checkpoint findCheckpointById(UUID id) {
         log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), id);
-
-        return repository.findById(id).orElseThrow(
-                () -> new CheckpointNotFoundException(String.format("Checkpoint not found [userId=%s]", id)));
+        return checkpointRepository.findById(id).orElseThrow(
+                () -> {
+                    log.warn(CHECKPOINT_NOT_FOUND_LOG, id);
+                    return new CheckpointNotFoundException(CHECKPOINT_NOT_FOUND_MSG.formatted(id));
+                });
     }
 
     @Override
     public List<Checkpoint> findCheckpointsByName(String name) {
         log.debug("Method {}, name - {}", MethodLog.getMethodName(), name);
-        return repository.findCheckpointsByNameContainingIgnoreCase(name);
+        return checkpointRepository.findCheckpointsByNameContainingIgnoreCase(name);
     }
 
     @Override
     public List<Checkpoint> findAllCheckpoints() {
         log.debug("Method {}", MethodLog.getMethodName());
-        return repository.findAll();
+        return checkpointRepository.findAll();
     }
 
     @Override
     public List<Checkpoint> findCheckpointsByTerritoryId(UUID id) {
         log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), id);
-
-        List<Checkpoint> foundCheckpoints = repository.findCheckpointsByTerritoryIdOrderByName(id);
-
-        if (foundCheckpoints.isEmpty()) {
-            throw new CheckpointNotFoundException(String.format("For Territory [id=%s] not exist any Checkpoints", id));
-        }
+        List<Checkpoint> foundCheckpoints = checkpointRepository.findCheckpointsByTerritoryIdOrderByName(id);
+        log.debug("Checkpoint for [territory with id: {}] retrieved from repo", id);
         return foundCheckpoints;
     }
 
     @Override
     public Checkpoint updateCheckpoint(Checkpoint checkpoint) {
-        log.info("Method {}, UUID - {}", MethodLog.getMethodName(), checkpoint.getId());
-        Checkpoint foundCheckpoint = repository.findById(checkpoint.getId())
-                        .orElseThrow(() -> new CheckpointNotFoundException
-                                (String.format("Checkpoint not found [Id=%s]", checkpoint.getId())));
+        UUID checkpointId = checkpoint.getId();
+        log.info("Method {}, UUID - {}", MethodLog.getMethodName(), checkpointId);
+        Checkpoint foundCheckpoint = checkpointRepository.findById(checkpointId)
+                .orElseThrow(() -> {
+                    log.warn(CHECKPOINT_NOT_FOUND_LOG, checkpointId);
+                    return new CheckpointNotFoundException(CHECKPOINT_NOT_FOUND_MSG.formatted(checkpointId));
+                });
 
         territoryService.findTerritoryById(checkpoint.getTerritory().getId());
         trimThemAll(checkpoint);
@@ -78,16 +80,19 @@ public class CheckpointServiceImpl implements CheckpointService {
         foundCheckpoint.setNote(checkpoint.getNote());
         foundCheckpoint.setTerritory(checkpoint.getTerritory());
 
-        return repository.save(foundCheckpoint);
+        Checkpoint updated = checkpointRepository.save(foundCheckpoint);
+        log.info("[Checkpoint with id: {}] was successfully updated", checkpointId);
+        return updated;
     }
 
     @Override
     public void deleteCheckpointById(UUID id) {
         log.info("Method {}, UUID - {}", MethodLog.getMethodName(), id);
-
-        if (repository.findById(id).isEmpty()) {
-            throw new CheckpointNotFoundException(String.format("Checkpoint not found [Id=%s]", id));
+        if (checkpointRepository.findById(id).isEmpty()) {
+            log.warn(CHECKPOINT_NOT_FOUND_LOG, id);
+            throw new CheckpointNotFoundException(CHECKPOINT_NOT_FOUND_MSG.formatted(id));
         }
-        repository.deleteById(id);
+        checkpointRepository.deleteById(id);
+        log.info("[Checkpoint with id: {}] successfully deleted", id);
     }
 }

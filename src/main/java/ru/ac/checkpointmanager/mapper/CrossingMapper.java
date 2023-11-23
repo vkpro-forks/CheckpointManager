@@ -38,8 +38,8 @@ public class CrossingMapper {
 
         Optional<Checkpoint> optionalCheckpoint = checkpointRepository.findById(crossingDTO.getCheckpointId());
         Checkpoint checkpoint = optionalCheckpoint.orElseThrow(
-                () -> new CheckpointNotFoundException("Checkpoint not found for ID " + crossingDTO.getCheckpointId()));
-
+                () -> new CheckpointNotFoundException("Checkpoint with id %s not found"
+                        .formatted(crossingDTO.getCheckpointId())));
         crossing.setPass(pass);
         crossing.setCheckpoint(checkpoint);
         crossing.setDirection(crossingDTO.getDirection());
