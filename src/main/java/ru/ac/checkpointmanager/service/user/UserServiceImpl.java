@@ -158,7 +158,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new UserNotFoundException(
                         String.format("User not found [id=%s]", userPutDTO.getId())));
 
-        Optional.ofNullable(userPutDTO.getFullName()).ifPresent(foundUser::setFullName);
+        foundUser.setFullName(userPutDTO.getFullName());
 
         Optional.ofNullable(userPutDTO.getMainNumber())
                 .filter(mainNumber -> !mainNumber.isEmpty())
