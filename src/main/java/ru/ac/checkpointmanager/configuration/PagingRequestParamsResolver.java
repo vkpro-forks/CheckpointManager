@@ -4,6 +4,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.lang.NonNull;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.annotation.RequestParamMethodArgumentResolver;
+import ru.ac.checkpointmanager.annotation.PagingParam;
 import ru.ac.checkpointmanager.dto.passes.PagingParams;
 
 public class PagingRequestParamsResolver extends RequestParamMethodArgumentResolver {
@@ -39,6 +40,6 @@ public class PagingRequestParamsResolver extends RequestParamMethodArgumentResol
 
     private Integer resolveSize(NativeWebRequest request) {
         String size = request.getParameter(SIZE);
-        return size == null ? 10 : Integer.parseInt(size);
+        return size == null ? 20 : Integer.parseInt(size);
     }
 }

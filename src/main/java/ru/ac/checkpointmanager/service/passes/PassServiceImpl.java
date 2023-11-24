@@ -93,21 +93,6 @@ public class PassServiceImpl implements PassService{
         return foundPasses;
     }
 
-//    @Override
-//    public Page<Pass> findPasses(Pageable pageable) {
-//        log.debug("Method {}", MethodLog.getMethodName());
-//
-//        Page<Pass> foundPasses = repository.findAll(pageable);
-//        if (!foundPasses.hasContent()) {
-//            throw new PassNotFoundException(String.format(
-//                    "Page %d (size - %d) does not contain passes, total pages - %d, total elements - %d",
-//                    pageable.getPageNumber(), pageable.getPageSize(),
-//                    foundPasses.getTotalPages(), foundPasses.getTotalElements()));
-//        }
-//
-//        return foundPasses;
-//    }
-
     @Override
     public Pass findPass(UUID id) {
         log.debug("Method {} [UUID - {}]", MethodLog.getMethodName(), id);
@@ -116,8 +101,9 @@ public class PassServiceImpl implements PassService{
     }
 
     @Override
-    public Page<Pass> findPassesByUser(UUID userId, Pageable pageable) {
+    public Page<Pass> findPassesByUser(UUID userId, PagingParams pagingParams) {
         log.debug("Method {} [UUID - {}]", MethodLog.getMethodName(), userId);
+        Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
         if (userRepository.findById(userId).isEmpty()) {
             throw new UserNotFoundException(String.format("User not found [id=%s]", userId));
         }
@@ -134,8 +120,9 @@ public class PassServiceImpl implements PassService{
     }
 
     @Override
-    public Page<Pass> findPassesByTerritory(UUID terId, Pageable pageable) {
+    public Page<Pass> findPassesByTerritory(UUID terId, PagingParams pagingParams) {
         log.debug("Method {} [UUID - {}]", MethodLog.getMethodName(), terId);
+        Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
         if (territoryRepository.findById(terId).isEmpty()) {
             throw new TerritoryNotFoundException(String.format("Territory not found [id=%s]", terId));
         }

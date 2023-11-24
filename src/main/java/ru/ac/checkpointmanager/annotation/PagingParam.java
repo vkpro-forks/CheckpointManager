@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.configuration;
+package ru.ac.checkpointmanager.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -6,8 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marking object that receive Request parameters page= size= and convert to parameters in
- * PagingRequestParamResolver
+ * Помечает объект, который получает параметры запроса page и size
+ * и преобразует их в параметры в PagingRequestParamResolver
  */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)

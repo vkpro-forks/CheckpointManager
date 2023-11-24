@@ -18,5 +18,4 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
         resolvers.add(new PagingRequestParamsResolver(true));
         log.trace("Setting up Request Param resolvers");
     }
-
 }
