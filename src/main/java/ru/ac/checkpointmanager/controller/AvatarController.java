@@ -1,11 +1,13 @@
 package ru.ac.checkpointmanager.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -13,17 +15,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
+import ru.ac.checkpointmanager.dto.AvatarDTO;
+import ru.ac.checkpointmanager.mapper.AvatarMapper;
 import ru.ac.checkpointmanager.model.Avatar;
 import ru.ac.checkpointmanager.service.avatar.AvatarService;
 import ru.ac.checkpointmanager.service.user.UserService;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/chpman/avatars")
@@ -35,21 +36,32 @@ public class AvatarController {
 
     private final AvatarService service;
     private final UserService userService;
+    private final AvatarMapper avatarMapper;
 
-    @Operation(summary = "Загрузить аватар пользователю(выбрать id пользователя и картинку).")
+    @Operation(summary = "Добавить новый аватар. Если аватар уже есть, то новый перезаписывает старого.",
+            description = "Доступ: USER, ADMIN, MANAGER, SECURITY.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Аватар успешно загружен"),
-            @ApiResponse(responseCode = "400", description = "Некорректный запрос, проверьте данные"),
-    })
+            @ApiResponse(responseCode = "200", description = "Аватар успешно добавлен",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = AvatarDTO.class))}),
+            @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей.")})
     @PostMapping(value = "/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> uploadAvatar(@PathVariable UUID userId,
+    public ResponseEntity<AvatarDTO> uploadAvatar(@PathVariable UUID userId,
                                                @RequestBody MultipartFile avatarFile) throws IOException {
         try {
             Avatar avatar = service.uploadAvatar(userId, avatarFile);
+
+            if (avatar.getPreview() == null) {
+                log.warn("Preview image is null after uploading avatar");
+            } else {
+                log.info("Preview image size: {}", avatar.getPreview().length);
+            }
+
+            AvatarDTO avatarDTO = avatarMapper.toAvatarDTO(avatar);
             userService.assignAvatarToUser(userId, avatar);
-            return ResponseEntity.ok("Аватар загружен и назначен пользователю.");
+            return ResponseEntity.ok(avatarDTO);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Произошла ошибка при загрузке аватара: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -58,54 +70,24 @@ public class AvatarController {
             @ApiResponse(responseCode = "200", description = "Аватар получен"),
             @ApiResponse(responseCode = "404", description = "Аватар не найден"),
     })
-    @GetMapping("/{entityID}")
-    public ResponseEntity<byte[]> getAvatar(@PathVariable UUID entityID, HttpServletResponse response) throws IOException {
-        Avatar avatar = service.getAvatarByUserId(entityID);
+    @GetMapping("/{userId}")
+    public ResponseEntity<byte[]> getAvatar(@PathVariable UUID userId) throws IOException {
+        byte[] imageData = service.getAvatarByUserId(userId);
 
-        if (avatar == null || avatar.getFilePath() == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Avatar not found for user ID: " + entityID);
-        }
-
-        Path path = Paths.get(avatar.getFilePath());
-        if (!Files.exists(path)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "File not found at path: " + path);
-        }
-
-        byte[] imageData = Files.readAllBytes(path);
-
-        String mimeType = Files.probeContentType(path);
-        if (mimeType == null) {
-            mimeType = "application/octet-stream";
-        }
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.parseMediaType(mimeType));
+        headers.setContentType(MediaType.IMAGE_JPEG);
         headers.setContentLength(imageData.length);
 
         return ResponseEntity.ok().headers(headers).body(imageData);
     }
 
-
-    @Operation(summary = "Получить привью аватара по Id")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Привью получено"),
-            @ApiResponse(responseCode = "404", description = "Аватар не найден"),
-    })
-    @GetMapping("/preview/{entityID}")
-    public ResponseEntity<byte[]> getAvatarPreview(@PathVariable UUID entityID) {
-        Avatar avatar = service.findAvatarOrThrow(entityID);
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.parseMediaType(avatar.getMediaType()));
-        headers.setContentLength(avatar.getPreview().length);
-        return ResponseEntity.ok().headers(headers).body(avatar.getPreview());
-    }
-
     @Operation(summary = "Удалить аватара по Id")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Аватар удален"),
-            @ApiResponse(responseCode = "404", description = "Аватар не найден"),
+            @ApiResponse(responseCode = "200", description = "Аватар удален."),
+            @ApiResponse(responseCode = "404", description = "Аватар не найден."),
     })
-    @DeleteMapping("/{entityID}")
-    public Avatar deleteAvatar(@PathVariable UUID entityID) throws IOException {
-        return service.deleteAvatarIfExists(entityID);
+    @DeleteMapping("/{avatarId}")
+    public void deleteAvatar(@PathVariable UUID avatarId) throws IOException {
+        service.deleteAvatarIfExists(avatarId);
     }
 }

@@ -23,7 +23,7 @@ public interface AvatarService {
      */
     Avatar uploadAvatar(UUID entityID, MultipartFile avatarFile) throws IOException;
 
-    Avatar getAvatarByUserId(UUID entityID) throws IOException;
+    byte[] getAvatarByUserId(UUID userId) throws IOException;
 
     /**
      * Method searches for avatar in table by entity id.

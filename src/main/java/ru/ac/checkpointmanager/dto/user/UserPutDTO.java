@@ -1,12 +1,10 @@
 package ru.ac.checkpointmanager.dto.user;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.ac.checkpointmanager.dto.AvatarDTO;
 
 import java.util.UUID;
 

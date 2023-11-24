@@ -7,8 +7,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.ac.checkpointmanager.exception.AvatarNotFoundException;
+import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.model.Avatar;
 import ru.ac.checkpointmanager.model.AvatarProperties;
+import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.repository.AvatarRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.utils.Mapper;
@@ -33,10 +35,7 @@ public class AvatarServiceImpl implements AvatarService {
     private final AvatarRepository repository;
     private final AvatarProperties avatarProperties;
     private final UserRepository userRepository;
-    private final Mapper mapper;
 
-    @Value("${avatars.dir.path}")
-    private String avatarsDir;
 
     @Value("${avatars.extensions}")
     private String extensions;
@@ -51,15 +50,13 @@ public class AvatarServiceImpl implements AvatarService {
     private String maxFileSize;
 
     /**
-     * Загружает и сохраняет аватар пользователя на основе предоставленного файла изображения.
-     * В процессе загрузки проверяется размер файла и разрешение изображения.
-     * Если изображение превышает установленные ограничения, оно автоматически изменяется до допустимых размеров.
+     * Загружает и сохраняет аватар пользователя. Если для данного пользователя уже существует аватар,
+     * он будет обновлен новым изображением. В противном случае будет создан новый аватар.
      *
-     * @param entityID   Уникальный идентификатор сущности, для которой загружается аватар.
-     * @param avatarFile Файл изображения, который будет использоваться как аватар.
-     * @return Объект Avatar, содержащий данные о загруженном изображении.
-     * @throws IOException              Если возникает ошибка при чтении файла изображения.
-     * @throws IllegalArgumentException Если файл не является изображением или изображение не соответствует требованиям.
+     * @param entityID    идентификатор пользователя, для которого загружается аватар.
+     * @param avatarFile  файл аватара, который нужно загрузить.
+     * @return            объект Avatar, представляющий загруженный или обновленный аватар.
+     * @throws IOException если происходит ошибка ввода-вывода при обработке файла аватара.
      */
     @Override
     public Avatar uploadAvatar(UUID entityID, MultipartFile avatarFile) throws IOException {
@@ -68,8 +65,15 @@ public class AvatarServiceImpl implements AvatarService {
         validateAvatar(avatarFile);
         log.debug("Avatar file validated successfully.");
 
+        Avatar avatar = repository.findByUserId(entityID)
+                .orElse(new Avatar());
+
+        //смотрим, является ли аватар новым
+        boolean isNewAvatar = avatar.getId() == null;
+        log.debug("Avatar object {} for entityID: {}", isNewAvatar ? "created" : "found", entityID);
+
+
         // Создаем новый объект Avatar
-        Avatar avatar = new Avatar();
         avatar.setFileSize(avatarFile.getSize());
         avatar.setMediaType(avatarFile.getContentType());
         log.debug("Created Avatar object with fileSize: {} and mediaType: {}", avatarFile.getSize(), avatarFile.getContentType());
@@ -88,29 +92,25 @@ public class AvatarServiceImpl implements AvatarService {
         }
 
         // Проверяем разрешение изображения
-        if (image.getWidth() > maxWidth || image.getHeight() > maxHeight) {
-            // Сохраняем большое изображение в файловой системе
-            log.debug("The image size is larger than allowed, resizing is required.");
-            Path filePath = saveImageToFileSystem(entityID, avatarFile);
-            avatar.setFilePath(filePath.toString());
-            log.info("Large image saved to filesystem for entityID: {}", entityID);
+        BufferedImage processedImage = (image.getWidth() > maxWidth || image.getHeight() > maxHeight)
+                ? resizeImage(image, maxWidth, maxHeight)
+                : image;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(processedImage, "png", baos);
+        avatar.setPreview(baos.toByteArray());
+        log.debug("Avatar image processed and set for entityID: {}", entityID);
 
-            // Создаем уменьшенную версию изображения для БД
-            BufferedImage resizedImage = resizeImage(image, maxWidth, maxHeight);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ImageIO.write(resizedImage, "png", baos);
-            avatar.setPreview(baos.toByteArray());
-            log.debug("Resized image created and set as avatar preview for entityID: {}", entityID);
-        } else {
-            // Сохраняем маленькое изображение напрямую в БД
-            log.debug("Image is within the allowed size, saving directly to the database.");
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ImageIO.write(image, "png", baos);
-            avatar.setPreview(baos.toByteArray());
-        }
+        //Сохраняем изобра
+        log.info("Avatar object saved/updated in the repository for entityID: {}", entityID);
+        avatar = repository.save(avatar);
 
-        log.info("Avatar object saved in the repository for entityID: {}", entityID);
-        return repository.save(avatar);
+        User user = userRepository.findById(entityID).orElseThrow(() ->
+                new UserNotFoundException("Пользователь с ID " + entityID + " не найден."));
+        user.setAvatar(avatar);
+        userRepository.save(user);
+
+        log.info("Avatar ID updated for user {}", entityID);
+        return avatar;
     }
 
 
@@ -122,18 +122,26 @@ public class AvatarServiceImpl implements AvatarService {
      * @throws IOException если возникают проблемы при чтении файла аватара.
      */
     @Override
-    public Avatar getAvatarByUserId(UUID userId) {
+    public byte[] getAvatarByUserId(UUID userId) {
         log.debug("Fetching avatar for user ID: {}", userId);
-        UUID avatarId = userRepository.findAvatarIdByUserId(userId);
-        if (avatarId == null) {
-            log.info("У пользователя с ID {} нет аватара.", userId);
-            throw new AvatarNotFoundException("У пользователя с ID " + userId + " нет аватара.");
+
+        UUID avatarId = userRepository.findAvatarIdByUserId(userId)
+                .orElseThrow(() -> new AvatarNotFoundException("Avatar not found for user ID: " + userId));
+
+        Avatar avatar = repository.findById(avatarId)
+                .orElseThrow(() -> new AvatarNotFoundException("Avatar with ID " + avatarId + " not found"));
+
+
+        byte[] imageData = avatar.getPreview();
+        if (imageData == null || imageData.length == 0) {
+            log.warn("No image data available for avatar of user ID: {}", userId);
+            throw new AvatarNotFoundException("Изображение аватара для пользователя с ID " + userId + " отсутствует.");
         }
 
-        log.debug("Поиск аватара с ID {}", avatarId);
-        return repository.findById(avatarId)
-                .orElseThrow(() -> new AvatarNotFoundException("Аватар с ID " + avatarId + " не найден."));
+        log.debug("Avatar image fetched successfully for user ID: {}", userId);
+        return imageData;
     }
+
 
 
     /**
@@ -187,32 +195,6 @@ public class AvatarServiceImpl implements AvatarService {
         log.info("Avatar file validation successful.");
     }
 
-    /**
-     * Сохраняет изображение, полученное от пользователя, в файловую систему.
-     * Имя файла генерируется путем объединения идентификатора сущности с оригинальным расширением файла.
-     * Создает необходимые директории, если они еще не существуют.
-     *
-     * @param entityID   Идентификатор сущности, для которой сохраняется изображение.
-     * @param avatarFile Мультипарт-файл, содержащий данные изображения.
-     * @return Путь к файлу в файловой системе, где было сохранено изображение.
-     * @throws IOException Если возникают проблемы при сохранении файла.
-     */
-    private Path saveImageToFileSystem(UUID entityID, MultipartFile avatarFile) throws IOException {
-        log.debug("Saving image to the file system for entityID: {}", entityID);
-        String fileName = entityID + "." + getExtension(avatarFile.getOriginalFilename());
-        Path filePath = Paths.get(avatarsDir, fileName);
-
-        try {
-            Files.createDirectories(filePath.getParent());
-            Files.write(filePath, avatarFile.getBytes(), StandardOpenOption.CREATE);
-            log.info("Image saved to the file system at: {}", filePath);
-        } catch (IOException e) {
-            log.error("Failed to save image to the file system for entityID: {}", entityID, e);
-            throw e;
-        }
-
-        return filePath;
-    }
 
     /**
      * Изменяет размер переданного изображения, сохраняя его пропорции.
