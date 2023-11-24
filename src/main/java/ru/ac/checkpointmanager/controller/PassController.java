@@ -28,6 +28,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import ru.ac.checkpointmanager.configuration.PagingParam;
+import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.dto.passes.PassDtoCreate;
 import ru.ac.checkpointmanager.dto.passes.PassDtoResponse;
 import ru.ac.checkpointmanager.dto.passes.PassDtoUpdate;
@@ -82,10 +84,12 @@ public class PassController {
             @ApiResponse(responseCode = "404", description = "Пропуска не найдены")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @GetMapping
-    public ResponseEntity<Page<PassDtoResponse>> getPasses(@RequestParam(defaultValue = "0") int page,
-                                                           @RequestParam(defaultValue = "20") int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Pass> passPage = service.findPasses(pageable);
+    public ResponseEntity<Page<PassDtoResponse>> getPasses(@Valid @PagingParam PagingParams pagingParams
+                                                           /*@RequestParam(defaultValue = "0") int page,
+                                                           @RequestParam(defaultValue = "20") int size*/) {
+//        Pageable pageable = PageRequest.of(page, size);
+//        Page<Pass> passPage = service.findPasses(pageable);
+        Page<Pass> passPage = service.findPasses(pagingParams);
         return ResponseEntity.ok(passPage.map(mapper::toPassDTO));
     }
 

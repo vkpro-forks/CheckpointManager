@@ -3,10 +3,12 @@ package ru.ac.checkpointmanager.service.passes;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.exception.PassNotFoundException;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
@@ -76,9 +78,10 @@ public class PassServiceImpl implements PassService{
     }
 
     @Override
-    public Page<Pass> findPasses(Pageable pageable) {
+    public Page<Pass> findPasses(PagingParams pagingParams) {
         log.debug("Method {}", MethodLog.getMethodName());
 
+        Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
         Page<Pass> foundPasses = repository.findAll(pageable);
         if (!foundPasses.hasContent()) {
             throw new PassNotFoundException(String.format(
@@ -89,6 +92,21 @@ public class PassServiceImpl implements PassService{
 
         return foundPasses;
     }
+
+//    @Override
+//    public Page<Pass> findPasses(Pageable pageable) {
+//        log.debug("Method {}", MethodLog.getMethodName());
+//
+//        Page<Pass> foundPasses = repository.findAll(pageable);
+//        if (!foundPasses.hasContent()) {
+//            throw new PassNotFoundException(String.format(
+//                    "Page %d (size - %d) does not contain passes, total pages - %d, total elements - %d",
+//                    pageable.getPageNumber(), pageable.getPageSize(),
+//                    foundPasses.getTotalPages(), foundPasses.getTotalElements()));
+//        }
+//
+//        return foundPasses;
+//    }
 
     @Override
     public Pass findPass(UUID id) {
