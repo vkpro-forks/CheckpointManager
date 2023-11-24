@@ -1,6 +1,7 @@
 package ru.ac.checkpointmanager.service.avatar;
 
 import org.springframework.web.multipart.MultipartFile;
+import ru.ac.checkpointmanager.dto.AvatarDTO;
 import ru.ac.checkpointmanager.dto.AvatarImageDTO;
 import ru.ac.checkpointmanager.model.Avatar;
 
@@ -22,7 +23,7 @@ public interface AvatarService {
      * @param avatarFile avatar file
      * @throws IOException when I/O errors occurs
      */
-    Avatar uploadAvatar(UUID entityID, MultipartFile avatarFile) throws IOException;
+    AvatarDTO uploadAvatar(UUID entityID, MultipartFile avatarFile) throws IOException;
 
     byte[] getAvatarByUserId(UUID userId) throws IOException;
 

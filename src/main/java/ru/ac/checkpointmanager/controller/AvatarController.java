@@ -43,9 +43,7 @@ import java.util.UUID;
 @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
 public class AvatarController {
 
-    private final AvatarService avatarService;
-    private final UserService userService;
-    private final AvatarMapper avatarMapper;
+    private final AvatarService service;
 
     @Operation(summary = "Добавить новый аватар.")
     @ApiResponses(value = {
@@ -57,23 +55,9 @@ public class AvatarController {
     })
     @PostMapping(value = "/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<AvatarDTO> uploadAvatar(@PathVariable UUID userId,
-                                               @RequestBody MultipartFile avatarFile) {
-        try {
-            Avatar avatar = service.uploadAvatar(userId, avatarFile);
-
-            if (avatar.getPreview() == null) {
-                log.warn("Preview image is null after uploading avatar");
-            } else {
-                log.info("Preview image size: {}", avatar.getPreview().length);
-            }
-
-            AvatarDTO avatarDTO = avatarMapper.toAvatarDTO(avatar);
-
-            userService.assignAvatarToUser(userId, avatar);
-            return ResponseEntity.ok(avatarDTO);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+                                               @RequestBody MultipartFile avatarFile) throws IOException {
+        AvatarDTO avatarDTO = service.uploadAvatar(userId, avatarFile);
+        return ResponseEntity.ok(avatarDTO);
     }
 
     @Operation(summary = "Получить аватар по Id пользователя")
@@ -91,7 +75,7 @@ public class AvatarController {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.IMAGE_JPEG);
         headers.setContentLength(imageData.length);
-  
+
         return ResponseEntity.ok().headers(headers).body(avatarImageDTO.getImageData());
     }
 
@@ -104,6 +88,5 @@ public class AvatarController {
     @DeleteMapping("/{avatarId}")
     public void deleteAvatar(@PathVariable UUID avatarId) throws IOException {
         service.deleteAvatarIfExists(avatarId);
-
     }
 }

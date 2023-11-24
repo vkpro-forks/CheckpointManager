@@ -8,14 +8,16 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.ac.checkpointmanager.dto.AvatarImageDTO;
 import ru.ac.checkpointmanager.exception.AvatarLoadingException;
+import ru.ac.checkpointmanager.dto.AvatarDTO;
 import ru.ac.checkpointmanager.exception.AvatarNotFoundException;
+import ru.ac.checkpointmanager.exception.AvatarProcessingException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
+import ru.ac.checkpointmanager.mapper.AvatarMapper;
 import ru.ac.checkpointmanager.model.Avatar;
 import ru.ac.checkpointmanager.model.AvatarProperties;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.repository.AvatarRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
-import ru.ac.checkpointmanager.utils.Mapper;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -26,6 +28,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.io.*;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -40,6 +43,7 @@ public class AvatarServiceImpl implements AvatarService {
     private final AvatarRepository repository;
     private final AvatarProperties avatarProperties;
     private final UserRepository userRepository;
+    private final AvatarMapper avatarMapper;
 
 
     @Value("${avatars.extensions}")
@@ -58,64 +62,24 @@ public class AvatarServiceImpl implements AvatarService {
      * Загружает и сохраняет аватар пользователя. Если для данного пользователя уже существует аватар,
      * он будет обновлен новым изображением. В противном случае будет создан новый аватар.
      *
-     * @param entityID    идентификатор пользователя, для которого загружается аватар.
-     * @param avatarFile  файл аватара, который нужно загрузить.
-     * @return            объект Avatar, представляющий загруженный или обновленный аватар.
+     * @param entityID   идентификатор пользователя, для которого загружается аватар.
+     * @param avatarFile файл аватара, который нужно загрузить.
+     * @return объект Avatar, представляющий загруженный или обновленный аватар.
      * @throws IOException если происходит ошибка ввода-вывода при обработке файла аватара.
      */
     @Override
-    public Avatar uploadAvatar(UUID entityID, MultipartFile avatarFile) throws IOException {
-        log.info("Method uploadAvatar invoked for entityID: {}", entityID);
+    public AvatarDTO uploadAvatar(UUID entityId, MultipartFile avatarFile) {
+        log.info("Method uploadAvatar invoked for entityId: {}", entityId);
 
         validateAvatar(avatarFile);
-        log.debug("Avatar file validated successfully.");
+        Avatar avatar = getOrCreateAvatar(entityId);
+        configureAvatar(avatar, avatarFile);
+        processAndSetAvatarImage(avatar, avatarFile);
+        avatar = saveAvatar(avatar);
+        updateUserAvatar(entityId, avatar);
 
-        Avatar avatar = repository.findByUserId(entityID)
-                .orElse(new Avatar());
-
-        //смотрим, является ли аватар новым
-        boolean isNewAvatar = avatar.getId() == null;
-        log.debug("Avatar object {} for entityID: {}", isNewAvatar ? "created" : "found", entityID);
-
-
-        // Создаем новый объект Avatar
-        avatar.setFileSize(avatarFile.getSize());
-        avatar.setMediaType(avatarFile.getContentType());
-        log.debug("Created Avatar object with fileSize: {} and mediaType: {}", avatarFile.getSize(), avatarFile.getContentType());
-
-        // Проверяем размер файла
-        if (avatarFile.getSize() > avatarProperties.getMaxSizeInBytes()) {
-            log.warn("File size {} exceeds the maximum allowed size of {}", avatarFile.getSize(), maxFileSize);
-            throw new IOException("Слишком большой файл");
-        }
-
-        // Читаем изображение из файла
-        BufferedImage image = ImageIO.read(avatarFile.getInputStream());
-        if (image == null) {
-            log.warn("The file uploaded for entityID: {} is not an image.", entityID);
-            throw new IllegalArgumentException("Файл не является изображением.");
-        }
-
-        // Проверяем разрешение изображения
-        BufferedImage processedImage = (image.getWidth() > maxWidth || image.getHeight() > maxHeight)
-                ? resizeImage(image, maxWidth, maxHeight)
-                : image;
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ImageIO.write(processedImage, "png", baos);
-        avatar.setPreview(baos.toByteArray());
-        log.debug("Avatar image processed and set for entityID: {}", entityID);
-
-        //Сохраняем изобра
-        log.info("Avatar object saved/updated in the repository for entityID: {}", entityID);
-        avatar = repository.save(avatar);
-
-        User user = userRepository.findById(entityID).orElseThrow(() ->
-                new UserNotFoundException("Пользователь с ID " + entityID + " не найден."));
-        user.setAvatar(avatar);
-        userRepository.save(user);
-
-        log.info("Avatar ID updated for user {}", entityID);
-        return avatar;
+        log.info("Avatar ID updated for user {}", entityId);
+        return avatarMapper.toAvatarDTO(avatar);
     }
 
 
@@ -147,7 +111,6 @@ public class AvatarServiceImpl implements AvatarService {
     }
 
 
-
     /**
      * Удаляет аватар пользователя, если он существует, и возвращает удаленный аватар.
      * Если аватар для указанного идентификатора сущности не найден, ничего не делает и возвращает null.
@@ -169,6 +132,63 @@ public class AvatarServiceImpl implements AvatarService {
         });
     }
 
+
+    private Avatar getOrCreateAvatar(UUID entityId) {
+        return repository.findByUserId(entityId).orElse(new Avatar());
+    }
+
+    private void configureAvatar(Avatar avatar, MultipartFile avatarFile) {
+        avatar.setFileSize(avatarFile.getSize());
+        avatar.setMediaType(avatarFile.getContentType());
+    }
+
+    private void processAndSetAvatarImage(Avatar avatar, MultipartFile avatarFile) {
+        // Проверяем размер файла
+        try {
+            if (avatarFile.getSize() > avatarProperties.getMaxSizeInBytes()) {
+                log.warn("File size {} exceeds the maximum allowed size of {}", avatarFile.getSize(), maxFileSize);
+                throw new IOException("Слишком большой файл");
+            }
+
+            // Читаем изображение из файла
+            BufferedImage image = ImageIO.read(avatarFile.getInputStream());
+            if (image == null) {
+                log.warn("The file uploaded for entityID: {} is not an image.", avatar.getId());
+                throw new IllegalArgumentException("Файл не является изображением.");
+            }
+
+            // Проверяем и обрабатываем разрешение изображения
+            BufferedImage processedImage = processImage(image);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ImageIO.write(processedImage, "png", baos);
+            avatar.setPreview(baos.toByteArray());
+            log.debug("Avatar image processed and set for entityID: {}", avatar.getId());
+        } catch (IOException e) {
+            throw new AvatarProcessingException("Error processing avatar",e); //нужно обратить внимание
+        }
+
+
+    }
+
+    private BufferedImage processImage(BufferedImage originalImage) {
+        // Проверяем разрешение изображения
+        if (originalImage.getWidth() > maxWidth || originalImage.getHeight() > maxHeight) {
+            return resizeImage(originalImage, maxWidth, maxHeight);
+        } else {
+            return originalImage;
+        }
+    }
+
+    private Avatar saveAvatar(Avatar avatar) {
+        return repository.save(avatar);
+    }
+
+    private void updateUserAvatar(UUID entityId, Avatar avatar) {
+        User user = userRepository.findById(entityId)
+                .orElseThrow(() -> new UserNotFoundException("Пользователь с ID " + entityId + " не найден."));
+        user.setAvatar(avatar);
+        userRepository.save(user);
+    }
 
     /**
      * Проверяет файл аватара на предмет корректности: файл не должен быть пустым или null,
