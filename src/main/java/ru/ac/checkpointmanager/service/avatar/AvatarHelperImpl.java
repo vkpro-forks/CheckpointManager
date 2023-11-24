@@ -1,17 +1,16 @@
 package ru.ac.checkpointmanager.service.avatar;
 
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import ru.ac.checkpointmanager.dto.AvatarImageDTO;
+import ru.ac.checkpointmanager.dto.avatar.AvatarImageDTO;
 import ru.ac.checkpointmanager.exception.AvatarLoadingException;
 import ru.ac.checkpointmanager.exception.AvatarProcessingException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
-import ru.ac.checkpointmanager.model.Avatar;
-import ru.ac.checkpointmanager.model.AvatarProperties;
+import ru.ac.checkpointmanager.model.avatar.Avatar;
+import ru.ac.checkpointmanager.model.avatar.AvatarProperties;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.repository.AvatarRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
@@ -47,12 +46,12 @@ class AvatarHelperImpl implements AvatarHelper {
 
 
     /**
-     * Возвращает расширение файла из полного имени файла.
-     * Расширение извлекается как подстрока после последней точки в имени файла.
+     * Извлекает расширение файла из его полного имени.
+     * Расширение определяется как подстрока после последней точки в имени файла.
      *
-     * @param fileName Имя файла для извлечения расширения.
-     * @return String Расширение файла.
-     * @throws IllegalArgumentException если имя файла не содержит расширения.
+     * @param fileName Имя файла, для которого необходимо извлечь расширение.
+     * @return Расширение файла в нижнем регистре.
+     * @throws IllegalArgumentException если имя файла не содержит точку или расширение.
      */
     @Override
     public String getExtension(String fileName) {
@@ -61,23 +60,23 @@ class AvatarHelperImpl implements AvatarHelper {
             String extension = Optional.ofNullable(fileName)
                     .filter(f -> f.contains("."))
                     .map(f -> f.substring(fileName.lastIndexOf(".") + 1).toLowerCase())
-                    .orElseThrow(() -> new IllegalArgumentException("Файл не содержит расширения."));
+                    .orElseThrow(() -> new IllegalArgumentException("The file does not contain an extension."));
             log.info("File extension '{}' extracted successfully.", extension);
             return extension;
         } catch (Exception e) {
             log.error("Error determining file extension for file: {}", fileName, e);
-            throw new IllegalArgumentException("Ошибка при определении расширения файла.", e);
+            throw new IllegalArgumentException("There was an error determining the file extension.", e);
         }
     }
 
     /**
-     * Изменяет размер переданного изображения, сохраняя его пропорции.
-     * Размер изменяется в соответствии с заданными целевыми шириной и высотой.
+     * Изменяет размер переданного изображения с сохранением пропорций.
+     * Размеры изменяются в соответствии с заданными целевыми шириной и высотой.
      *
      * @param originalImage Исходное изображение для изменения размера.
-     * @param targetWidth   Целевая ширина для исходного изображения.
-     * @param targetHeight  Целевая высота для исходного изображения.
-     * @return BufferedImage Измененное изображение с новыми размерами.
+     * @param targetWidth Целевая ширина изображения.
+     * @param targetHeight Целевая высота изображения.
+     * @return Изменённое изображение с новыми размерами.
      */
     @Override
     public BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight) {
@@ -102,62 +101,82 @@ class AvatarHelperImpl implements AvatarHelper {
     }
 
     /**
-     * Проверяет файл аватара на предмет корректности: файл не должен быть пустым или null,
-     * должен иметь допустимое расширение файла и тип содержимого, начинающийся с "image/".
-     * В случае обнаружения некорректности файла выбрасывает IllegalArgumentException.
+     * Проверяет файл аватара на соответствие определенным требованиям:
+     * файл не должен быть пустым или null, должен иметь допустимое расширение
+     * и тип содержимого, начинающийся с "image/".
      *
-     * @param avatarFile Мультипарт-файл, представляющий аватар, который нужно проверить.
-     * @throws IllegalArgumentException если файл аватара не проходит валидацию.
+     * @param avatarFile Мультипарт-файл, представляющий аватар.
+     * @throws IllegalArgumentException если файл не проходит проверку.
      */
     @Override
     public void validateAvatar(MultipartFile avatarFile) {
         log.debug("Validating avatar file...");
         if (avatarFile == null || avatarFile.isEmpty()) {
             log.warn("Validation failed: the avatar file is empty or null.");
-            throw new IllegalArgumentException("Файл аватара не может быть пустым.");
+            throw new IllegalArgumentException("Avatar file cannot be empty.");
         }
 
         log.debug("Checking file extension...");
         String fileExtension = getExtension(avatarFile.getOriginalFilename());
         if (!extensions.contains(fileExtension)) {
             log.warn("Validation failed: file extension '{}' is not one of the allowed: {}", fileExtension, extensions);
-            throw new IllegalArgumentException("Расширение файла должно быть одним из допустимых: " + extensions);
+            throw new IllegalArgumentException("The file extension must be one of the valid ones: " + extensions);
         }
 
         log.debug("Checking file content type...");
         if (!avatarFile.getContentType().startsWith("image/")) {
             log.warn("Validation failed: file content type '{}' is not an image.", avatarFile.getContentType());
-            throw new IllegalArgumentException("Файл должен быть изображением.");
+            throw new IllegalArgumentException("The file must be an image.");
         }
-
         log.info("Avatar file validation successful.");
     }
 
+    /**
+     * Получает существующий аватар пользователя или создает новый, если он не существует.
+     *
+     * @param userId Идентификатор пользователя.
+     * @return Найденный или созданный объект Avatar.
+     */
     @Override
-    public Avatar getOrCreateAvatar(UUID entityId) {
-        return repository.findByUserId(entityId).orElse(new Avatar());
+    public Avatar getOrCreateAvatar(UUID userId) {
+        return repository.findByUserId(userId).orElse(new Avatar());
     }
 
+    /**
+     * Конфигурирует объект Avatar, устанавливая размер файла и тип медиа.
+     *
+     * @param avatar Объект Avatar для конфигурации.
+     * @param avatarFile Мультипарт-файл, содержащий данные аватара.
+     */
     @Override
     public void configureAvatar(Avatar avatar, MultipartFile avatarFile) {
         avatar.setFileSize(avatarFile.getSize());
         avatar.setMediaType(avatarFile.getContentType());
     }
 
+    /**
+     * Обрабатывает изображение аватара, проверяя его размер и формат,
+     * и устанавливает обработанное изображение в объект Avatar.
+     *
+     * @param avatar Объект Avatar для установки изображения.
+     * @param avatarFile Мультипарт-файл, содержащий изображение аватара.
+     * @throws IOException если происходит ошибка ввода-вывода.   FIXME we need to do smth to avoid this situation
+     * @throws IllegalArgumentException если файл не является изображением.
+     */
     @Override
     public void processAndSetAvatarImage(Avatar avatar, MultipartFile avatarFile) {
         // Проверяем размер файла
         try {
             if (avatarFile.getSize() > avatarProperties.getMaxSizeInBytes()) {
                 log.warn("File size {} exceeds the maximum allowed size of {}", avatarFile.getSize(), maxFileSize);
-                throw new IOException("Слишком большой файл");
+                throw new IOException("File too big");
             }
 
             // Читаем изображение из файла
             BufferedImage image = ImageIO.read(avatarFile.getInputStream());
             if (image == null) {
                 log.warn("The file uploaded for entityID: {} is not an image.", avatar.getId());
-                throw new IllegalArgumentException("Файл не является изображением.");
+                throw new IllegalArgumentException("The file is not an image.");
             }
 
             // Проверяем и обрабатываем разрешение изображения
@@ -167,35 +186,70 @@ class AvatarHelperImpl implements AvatarHelper {
             avatar.setPreview(baos.toByteArray());
             log.debug("Avatar image processed and set for entityID: {}", avatar.getId());
         } catch (IOException e) {
-            throw new AvatarProcessingException("Error processing avatar", e); //нужно обратить внимание
+            throw new AvatarProcessingException("Error processing avatar", e);  //FIXME we need to do smth to avoid this situation
         }
-
-
     }
 
+    /**
+     * Обрабатывает изображение, изменяя его размер в соответствии с максимально допустимыми размерами,
+     * если необходимо, сохраняя при этом пропорции изображения.
+     *
+     * @param originalImage Оригинальное изображение для обработки.
+     * @return Обработанное изображение, соответствующее максимально допустимым размерам.
+     */
     @Override
     public BufferedImage processImage(BufferedImage originalImage) {
+        log.debug("Processing image with original size: width = {}, height = {}", originalImage.getWidth(), originalImage.getHeight());
         // Проверяем разрешение изображения
         if (originalImage.getWidth() > maxWidth || originalImage.getHeight() > maxHeight) {
-            return resizeImage(originalImage, maxWidth, maxHeight);
+            log.info("Image size exceeds max dimensions ({}x{}), resizing required.", maxWidth, maxHeight);
+            BufferedImage resizedImage = resizeImage(originalImage, maxWidth, maxHeight);
+            log.debug("Image resized to: width = {}, height = {}", resizedImage.getWidth(), resizedImage.getHeight());
+            return resizedImage;
         } else {
+            log.debug("Image size is within max dimensions, no resizing required.");
             return originalImage;
         }
     }
 
+    /**
+     * Сохраняет объект Avatar в репозитории.
+     *
+     * @param avatar Объект Avatar для сохранения.
+     * @return Сохраненный объект Avatar.
+     */
     @Override
     public Avatar saveAvatar(Avatar avatar) {
         return repository.save(avatar);
     }
 
+    /**
+     * Обновляет аватар для заданного пользователя. Если пользователь не найден, выбрасывает исключение.
+     *
+     * @param userId Идентификатор пользователя, для которого нужно обновить аватар.
+     * @param avatar Объект Avatar, который будет установлен как аватар пользователя.
+     * @throws UserNotFoundException если пользователь с данным идентификатором не найден.
+     */
     @Override
-    public void updateUserAvatar(UUID entityId, Avatar avatar) {
-        User user = userRepository.findById(entityId)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь с ID " + entityId + " не найден."));
+    public void updateUserAvatar(UUID userId, Avatar avatar) {
+        log.debug("Attempting to update avatar for user ID: {}", userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> {
+                    log.error("User not found with ID: {}", userId);
+                    return new UserNotFoundException("User with ID " + userId + " not found.");
+                });
         user.setAvatar(avatar);
         userRepository.save(user);
+        log.info("Avatar updated successfully for user ID: {}", userId);
     }
 
+    /**
+     * Создает DTO для изображения аватара. Если данные изображения пусты, выбрасывает исключение.
+     *
+     * @param avatar Объект Avatar, содержащий данные изображения.
+     * @return AvatarImageDTO, содержащий данные изображения аватара.
+     * @throws AvatarLoadingException если данные изображения аватара пусты.
+     */
     @Override
     public AvatarImageDTO createAvatarImageDTO(Avatar avatar) {
         byte[] imageData = avatar.getPreview();

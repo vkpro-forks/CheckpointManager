@@ -1,8 +1,8 @@
 package ru.ac.checkpointmanager.service.avatar;
 
 import org.springframework.web.multipart.MultipartFile;
-import ru.ac.checkpointmanager.dto.AvatarImageDTO;
-import ru.ac.checkpointmanager.model.Avatar;
+import ru.ac.checkpointmanager.dto.avatar.AvatarImageDTO;
+import ru.ac.checkpointmanager.model.avatar.Avatar;
 
 import java.awt.image.BufferedImage;
 import java.util.UUID;
@@ -15,7 +15,7 @@ interface AvatarHelper {
 
     void validateAvatar(MultipartFile avatarFile);
 
-    Avatar getOrCreateAvatar(UUID entityId);
+    Avatar getOrCreateAvatar(UUID userId);
 
     void configureAvatar(Avatar avatar, MultipartFile avatarFile);
 
@@ -25,7 +25,7 @@ interface AvatarHelper {
 
     Avatar saveAvatar(Avatar avatar);
 
-    void updateUserAvatar(UUID entityId, Avatar avatar);
+    void updateUserAvatar(UUID userId, Avatar avatar);
 
     AvatarImageDTO createAvatarImageDTO(Avatar avatar);
 }

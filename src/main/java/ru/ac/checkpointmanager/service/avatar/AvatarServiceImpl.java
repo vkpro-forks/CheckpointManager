@@ -2,29 +2,17 @@ package ru.ac.checkpointmanager.service.avatar;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import ru.ac.checkpointmanager.dto.AvatarImageDTO;
-import ru.ac.checkpointmanager.exception.AvatarLoadingException;
-import ru.ac.checkpointmanager.dto.AvatarDTO;
+import ru.ac.checkpointmanager.dto.avatar.AvatarImageDTO;
+import ru.ac.checkpointmanager.dto.avatar.AvatarDTO;
 import ru.ac.checkpointmanager.exception.AvatarNotFoundException;
-import ru.ac.checkpointmanager.exception.AvatarProcessingException;
-import ru.ac.checkpointmanager.exception.UserNotFoundException;
-import ru.ac.checkpointmanager.mapper.AvatarMapper;
-import ru.ac.checkpointmanager.model.Avatar;
-import ru.ac.checkpointmanager.model.AvatarProperties;
-import ru.ac.checkpointmanager.model.User;
+import ru.ac.checkpointmanager.mapper.avatar.AvatarMapper;
+import ru.ac.checkpointmanager.model.avatar.Avatar;
 import ru.ac.checkpointmanager.repository.AvatarRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -41,15 +29,14 @@ public class AvatarServiceImpl implements AvatarService {
     private final AvatarHelper avatarHelper;
 
 
-
     /**
-     * Загружает и сохраняет аватар пользователя. Если для данного пользователя уже существует аватар,
-     * он будет обновлен новым изображением. В противном случае будет создан новый аватар.
+     * Загружает и сохраняет аватар пользователя. Если аватар для пользователя уже существует,
+     * обновляет его новым изображением, иначе создает новый.
      *
-     * @param userId     идентификатор пользователя, для которого загружается аватар.
-     * @param avatarFile файл аватара, который нужно загрузить.
-     * @return объект Avatar, представляющий загруженный или обновленный аватар.
-     * @throws IOException если происходит ошибка ввода-вывода при обработке файла аватара.
+     * @param userId      идентификатор пользователя, для которого загружается аватар.
+     * @param avatarFile  файл аватара, который нужно загрузить.
+     * @return объект AvatarDTO, представляющий загруженный или обновленный аватар.
+     * @throws IOException если происходит ошибка ввода-вывода при обработке файла аватара. FIXME we need to do smth to avoid this situation
      */
     @Override
     public AvatarDTO uploadAvatar(UUID userId, MultipartFile avatarFile) {
@@ -66,12 +53,12 @@ public class AvatarServiceImpl implements AvatarService {
         return avatarMapper.toAvatarDTO(avatar);
     }
 
-
     /**
-     * Возвращает аватар для указанного идентификатора сущности.
+     * Получает изображение аватара пользователя по идентификатору пользователя.
      *
-     * @param userId Уникальный идентификатор сущности, аватар которой нужно получить.
-     * @return Объект AvatarImageDTO, соответствующий указанному идентификатору сущности.
+     * @param userId Уникальный идентификатор пользователя.
+     * @return AvatarImageDTO, содержащий данные изображения аватара пользователя.
+     * @throws AvatarNotFoundException если аватар для указанного пользователя не найден.
      */
     @Override
     public AvatarImageDTO getAvatarByUserId(UUID userId) {
@@ -87,19 +74,24 @@ public class AvatarServiceImpl implements AvatarService {
         return avatarHelper.createAvatarImageDTO(avatar);
     }
 
-
     /**
-     * Удаляет аватар пользователя, если он существует, и возвращает удаленный аватар.
-     * Если аватар для указанного идентификатора сущности не найден, ничего не делает и возвращает null.
+     * Удаляет аватар пользователя, если он существует.
      *
-     * @param entityID Уникальный идентификатор сущности, аватар которой нужно удалить.
-     * @return Удаленный объект Avatar или null, если аватар не был найден.
+     * @param avatarId Уникальный идентификатор сущности, аватар которой нужно удалить.
+     * @return Удаленный объект Avatar, если он существует, иначе возвращает null.
      */
-    public Avatar deleteAvatarIfExists(UUID entityID) {
-        log.debug("Attempting to delete avatar for entity ID: {}", entityID);
-        return findAvatarById(entityID);
+    public Avatar deleteAvatarIfExists(UUID avatarId) {
+        log.debug("Attempting to delete avatar for entity ID: {}", avatarId);
+        return findAvatarById(avatarId);
     }
 
+    /**
+     * Получает изображение аватара по его уникальному идентификатору.
+     *
+     * @param avatarId Уникальный идентификатор аватара.
+     * @return AvatarImageDTO, содержащий данные изображения аватара.
+     * @throws AvatarNotFoundException если аватар с указанным идентификатором не найден.
+     */
     @Override
     public AvatarImageDTO getAvatarImageByAvatarId(UUID avatarId) {
         log.debug("Fetching avatar image for avatar ID: {}", avatarId);
@@ -108,6 +100,13 @@ public class AvatarServiceImpl implements AvatarService {
         return avatarHelper.createAvatarImageDTO(avatar);
     }
 
+    /**
+     * Находит аватар по его уникальному идентификатору.
+     *
+     * @param avatarId Уникальный идентификатор аватара.
+     * @return Найденный объект Avatar.
+     * @throws AvatarNotFoundException если аватар с указанным идентификатором не найден.
+     */
     @Override
     public Avatar findAvatarById(UUID avatarId) {
         log.debug("Searching for avatar with ID: {}", avatarId);

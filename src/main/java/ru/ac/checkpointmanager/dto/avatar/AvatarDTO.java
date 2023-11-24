@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.dto;
+package ru.ac.checkpointmanager.dto.avatar;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

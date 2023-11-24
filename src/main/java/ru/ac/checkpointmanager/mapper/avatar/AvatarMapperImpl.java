@@ -1,19 +1,18 @@
-package ru.ac.checkpointmanager.mapper;
+package ru.ac.checkpointmanager.mapper.avatar;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.stereotype.Component;
-import ru.ac.checkpointmanager.dto.AvatarDTO;
-import ru.ac.checkpointmanager.model.Avatar;
+import org.springframework.stereotype.Service;
+import ru.ac.checkpointmanager.dto.avatar.AvatarDTO;
+import ru.ac.checkpointmanager.model.avatar.Avatar;
 
 import java.util.Collection;
 import java.util.List;
-
-@Component
-public class AvatarMapper {
+@Service
+public class AvatarMapperImpl implements AvatarMapper {
 
     private final ModelMapper mapper;
 
-    public AvatarMapper(ModelMapper mapper) {
+    public AvatarMapperImpl(ModelMapper mapper) {
         this.mapper = mapper;
     }
 

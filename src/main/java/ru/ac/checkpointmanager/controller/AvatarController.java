@@ -15,8 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.ac.checkpointmanager.dto.AvatarDTO;
-import ru.ac.checkpointmanager.dto.AvatarImageDTO;
+import ru.ac.checkpointmanager.dto.avatar.AvatarDTO;
+import ru.ac.checkpointmanager.dto.avatar.AvatarImageDTO;
 import ru.ac.checkpointmanager.exception.AvatarNotFoundException;
 import ru.ac.checkpointmanager.service.avatar.AvatarService;
 
