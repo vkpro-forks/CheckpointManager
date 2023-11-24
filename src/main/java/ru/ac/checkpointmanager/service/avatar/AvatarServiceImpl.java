@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import ru.ac.checkpointmanager.dto.AvatarImageDTO;
+import ru.ac.checkpointmanager.exception.AvatarLoadingException;
 import ru.ac.checkpointmanager.exception.AvatarNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.model.Avatar;
@@ -18,7 +20,8 @@ import ru.ac.checkpointmanager.utils.Mapper;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -32,6 +35,8 @@ import java.util.UUID;
 @Slf4j
 public class AvatarServiceImpl implements AvatarService {
 
+    public static final String AVATAR_NOT_FOUND_LOG = "[Avatar with id: {}] not found";
+    public static final String AVATAR_NOT_FOUND_MSG = "Avatar with id: %s not found";
     private final AvatarRepository repository;
     private final AvatarProperties avatarProperties;
     private final UserRepository userRepository;
@@ -118,8 +123,7 @@ public class AvatarServiceImpl implements AvatarService {
      * Возвращает аватар для указанного идентификатора сущности.
      *
      * @param userId Уникальный идентификатор сущности, аватар которой нужно получить.
-     * @return Объект Avatar, соответствующий указанному идентификатору сущности.
-     * @throws IOException если возникают проблемы при чтении файла аватара.
+     * @return Объект AvatarImageDTO, соответствующий указанному идентификатору сущности.
      */
     @Override
     public byte[] getAvatarByUserId(UUID userId) {
@@ -153,14 +157,16 @@ public class AvatarServiceImpl implements AvatarService {
      */
     public Avatar deleteAvatarIfExists(UUID entityID) {
         log.debug("Attempting to delete avatar for entity ID: {}", entityID);
-        return findAvatarOrThrow(entityID);
+        return findAvatarById(entityID);
     }
 
     @Override
-    public Avatar findAvatarOrThrow(UUID avatarId) {
+    public Avatar findAvatarById(UUID avatarId) {
         log.debug("Searching for avatar with ID: {}", avatarId);
-        return repository.findById(avatarId).orElseThrow(
-                () -> new AvatarNotFoundException("Аватар с ID " + avatarId + " не найден."));
+        return repository.findById(avatarId).orElseThrow(() -> {
+            log.warn(AVATAR_NOT_FOUND_LOG, avatarId);
+            return new AvatarNotFoundException(AVATAR_NOT_FOUND_MSG.formatted(avatarId));
+        });
     }
 
 

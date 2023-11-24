@@ -18,15 +18,13 @@ public class PassDtoResponse {
 
     private UserResponseDTO user;
 
-    private String name;
+    private String comment;
 
     private String statusDescription;
 
     private String typeTimeDescription;
 
     private TerritoryDTO territory;
-
-    private String note;
 
     private LocalDateTime startTime;
 

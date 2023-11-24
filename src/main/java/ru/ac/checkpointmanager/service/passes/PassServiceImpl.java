@@ -63,6 +63,10 @@ public class PassServiceImpl implements PassService{
             pass.setStatus(PassStatus.DELAYED);
         }
 
+        if (pass.getComment() == null || pass.getComment().isBlank()) {
+            pass.setComment("Пропуск-" + pass.getId().toString().substring(32));
+        }
+
         Pass savedPass = repository.save(pass);
         log.info("Pass saved [{}]", savedPass);
 
@@ -123,9 +127,8 @@ public class PassServiceImpl implements PassService{
             throw new IllegalStateException("This pass is not active or delayed, it cannot be changed");
         }
 
-        foundPass.setName(pass.getName());
+        foundPass.setComment(pass.getComment());
         foundPass.setTypeTime(pass.getTypeTime());
-        foundPass.setNote(pass.getNote());
         foundPass.setStartTime(pass.getStartTime());
         foundPass.setEndTime(pass.getEndTime());
         foundPass.setAttachedEntity(pass);

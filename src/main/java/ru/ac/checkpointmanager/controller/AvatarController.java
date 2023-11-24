@@ -43,7 +43,7 @@ import java.util.UUID;
 @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
 public class AvatarController {
 
-    private final AvatarService service;
+    private final AvatarService avatarService;
     private final UserService userService;
     private final AvatarMapper avatarMapper;
 
@@ -68,6 +68,7 @@ public class AvatarController {
             }
 
             AvatarDTO avatarDTO = avatarMapper.toAvatarDTO(avatar);
+
             userService.assignAvatarToUser(userId, avatar);
             return ResponseEntity.ok(avatarDTO);
         } catch (Exception e) {
@@ -90,8 +91,8 @@ public class AvatarController {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.IMAGE_JPEG);
         headers.setContentLength(imageData.length);
-
-        return ResponseEntity.ok().headers(headers).body(imageData);
+  
+        return ResponseEntity.ok().headers(headers).body(avatarImageDTO.getImageData());
     }
 
     @Operation(summary = "Удалить аватара по Id")
@@ -103,5 +104,6 @@ public class AvatarController {
     @DeleteMapping("/{avatarId}")
     public void deleteAvatar(@PathVariable UUID avatarId) throws IOException {
         service.deleteAvatarIfExists(avatarId);
+
     }
 }

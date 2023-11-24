@@ -1,7 +1,11 @@
 package ru.ac.checkpointmanager.exception;
 
-public class AvatarNotFoundException extends RuntimeException {
+import jakarta.persistence.EntityNotFoundException;
+
+public class AvatarNotFoundException extends EntityNotFoundException {
+    
     public AvatarNotFoundException(String message) {
         super(message);
     }
+    
 }
