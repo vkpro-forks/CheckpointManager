@@ -23,9 +23,9 @@ public interface AvatarService {
      * @param avatarFile avatar file
      * @throws IOException when I/O errors occurs
      */
-    AvatarDTO uploadAvatar(UUID entityID, MultipartFile avatarFile) throws IOException;
+    AvatarDTO uploadAvatar(UUID entityID, MultipartFile avatarFile);
 
-    byte[] getAvatarByUserId(UUID userId) throws IOException;
+    AvatarImageDTO getAvatarByUserId(UUID userId);
 
 
     /**
@@ -36,7 +36,9 @@ public interface AvatarService {
      * @param entityID id of entity, which avatar needs to deleted
      * @return
      */
-    Avatar deleteAvatarIfExists(UUID entityID) throws IOException;
+    Avatar deleteAvatarIfExists(UUID entityID);
+
+    AvatarImageDTO getAvatarImageByAvatarId(UUID avatarId);
 
     Avatar findAvatarById(UUID entityID);
 

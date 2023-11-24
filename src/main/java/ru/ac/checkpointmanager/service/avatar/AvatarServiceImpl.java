@@ -24,11 +24,6 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.io.*;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -62,23 +57,23 @@ public class AvatarServiceImpl implements AvatarService {
      * Загружает и сохраняет аватар пользователя. Если для данного пользователя уже существует аватар,
      * он будет обновлен новым изображением. В противном случае будет создан новый аватар.
      *
-     * @param entityID   идентификатор пользователя, для которого загружается аватар.
+     * @param userId     идентификатор пользователя, для которого загружается аватар.
      * @param avatarFile файл аватара, который нужно загрузить.
      * @return объект Avatar, представляющий загруженный или обновленный аватар.
      * @throws IOException если происходит ошибка ввода-вывода при обработке файла аватара.
      */
     @Override
-    public AvatarDTO uploadAvatar(UUID entityId, MultipartFile avatarFile) {
-        log.info("Method uploadAvatar invoked for entityId: {}", entityId);
+    public AvatarDTO uploadAvatar(UUID userId, MultipartFile avatarFile) {
+        log.info("Method uploadAvatar invoked for entityId: {}", userId);
 
         validateAvatar(avatarFile);
-        Avatar avatar = getOrCreateAvatar(entityId);
+        Avatar avatar = getOrCreateAvatar(userId);
         configureAvatar(avatar, avatarFile);
         processAndSetAvatarImage(avatar, avatarFile);
         avatar = saveAvatar(avatar);
-        updateUserAvatar(entityId, avatar);
+        updateUserAvatar(userId, avatar);
 
-        log.info("Avatar ID updated for user {}", entityId);
+        log.info("Avatar ID updated for user {}", userId);
         return avatarMapper.toAvatarDTO(avatar);
     }
 
@@ -90,24 +85,37 @@ public class AvatarServiceImpl implements AvatarService {
      * @return Объект AvatarImageDTO, соответствующий указанному идентификатору сущности.
      */
     @Override
-    public byte[] getAvatarByUserId(UUID userId) {
+    public AvatarImageDTO getAvatarByUserId(UUID userId) {
         log.debug("Fetching avatar for user ID: {}", userId);
-
-        UUID avatarId = userRepository.findAvatarIdByUserId(userId)
-                .orElseThrow(() -> new AvatarNotFoundException("Avatar not found for user ID: " + userId));
-
+        UUID avatarId = userRepository.findAvatarIdByUserId(userId);
+        if (avatarId == null) {
+            log.warn("[User with id: {}] doesn't have avatar", userId);
+            throw new AvatarNotFoundException("User with id: %s doesn't have avatar".formatted(userId));
+        }
+        log.debug("Searching [avatar with id: {}]", avatarId);
         Avatar avatar = repository.findById(avatarId)
-                .orElseThrow(() -> new AvatarNotFoundException("Avatar with ID " + avatarId + " not found"));
-
+                .orElseThrow(() -> {
+                    log.warn(AVATAR_NOT_FOUND_LOG, avatarId);
+                    return new AvatarNotFoundException(AVATAR_NOT_FOUND_MSG.formatted(avatarId));
+                });
 
         byte[] imageData = avatar.getPreview();
         if (imageData == null || imageData.length == 0) {
-            log.warn("No image data available for avatar of user ID: {}", userId);
-            throw new AvatarNotFoundException("Изображение аватара для пользователя с ID " + userId + " отсутствует.");
+            log.warn("Avatar image data is empty for user ID: {}", userId);
+            throw new AvatarLoadingException("Avatar image data is empty");
         }
 
-        log.debug("Avatar image fetched successfully for user ID: {}", userId);
-        return imageData;
+        String mimeType = avatar.getMediaType();
+        if (mimeType == null) {
+            mimeType = "application/octet-stream";
+        }
+            return new AvatarImageDTO(
+                    avatarId,
+                    mimeType,
+                    imageData,
+                    null,
+                    avatar.getFileSize()
+            );
     }
 
 
@@ -121,6 +129,34 @@ public class AvatarServiceImpl implements AvatarService {
     public Avatar deleteAvatarIfExists(UUID entityID) {
         log.debug("Attempting to delete avatar for entity ID: {}", entityID);
         return findAvatarById(entityID);
+    }
+
+    @Override
+    public AvatarImageDTO getAvatarImageByAvatarId(UUID avatarId) {
+        log.debug("Fetching avatar image for avatar ID: {}", avatarId);
+        Avatar avatar = repository.findById(avatarId)
+                .orElseThrow(() -> {
+                    log.warn(AVATAR_NOT_FOUND_LOG, avatarId);
+                    return new AvatarNotFoundException(AVATAR_NOT_FOUND_MSG.formatted(avatarId));
+                });
+
+        byte[] imageData = avatar.getPreview();
+        if (imageData == null || imageData.length == 0) {
+            log.warn("Avatar image data is empty for avatar ID: {}", avatarId);
+            throw new AvatarLoadingException("Avatar image data is empty for avatar ID: " + avatarId);
+        }
+
+        String mimeType = avatar.getMediaType();
+        mimeType = (mimeType != null) ? mimeType : "application/octet-stream";
+
+
+        return new AvatarImageDTO(
+                avatarId,
+                mimeType,
+                imageData,
+                null,
+                avatar.getFileSize()
+        );
     }
 
     @Override
@@ -164,7 +200,7 @@ public class AvatarServiceImpl implements AvatarService {
             avatar.setPreview(baos.toByteArray());
             log.debug("Avatar image processed and set for entityID: {}", avatar.getId());
         } catch (IOException e) {
-            throw new AvatarProcessingException("Error processing avatar",e); //нужно обратить внимание
+            throw new AvatarProcessingException("Error processing avatar", e); //нужно обратить внимание
         }
 
 

@@ -9,22 +9,17 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.ac.checkpointmanager.dto.AvatarDTO;
+import ru.ac.checkpointmanager.dto.AvatarImageDTO;
 import ru.ac.checkpointmanager.exception.AvatarNotFoundException;
-import ru.ac.checkpointmanager.mapper.AvatarMapper;
-import ru.ac.checkpointmanager.model.Avatar;
 import ru.ac.checkpointmanager.service.avatar.AvatarService;
-import ru.ac.checkpointmanager.service.user.UserService;
 
-import java.io.IOException;
 import java.util.UUID;
 
 @Slf4j
@@ -45,7 +40,7 @@ public class AvatarController {
 
     private final AvatarService service;
 
-    @Operation(summary = "Добавить новый аватар.")
+    @Operation(summary = "Загрузить аватар пользователю(выбрать id пользователя и картинку).")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Аватар успешно добавлен",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -55,7 +50,7 @@ public class AvatarController {
     })
     @PostMapping(value = "/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<AvatarDTO> uploadAvatar(@PathVariable UUID userId,
-                                               @RequestBody MultipartFile avatarFile) throws IOException {
+                                               @RequestBody MultipartFile avatarFile) {
         AvatarDTO avatarDTO = service.uploadAvatar(userId, avatarFile);
         return ResponseEntity.ok(avatarDTO);
     }
@@ -69,24 +64,43 @@ public class AvatarController {
                     content = @Content(schema = @Schema(implementation = AvatarNotFoundException.class))),
     })
     @GetMapping("/{userId}")
-    public ResponseEntity<byte[]> getAvatar(@PathVariable UUID userId) throws IOException {
-        byte[] imageData = service.getAvatarByUserId(userId);
+    public ResponseEntity<byte[]> getAvatar(@PathVariable UUID userId) {
+        AvatarImageDTO avatarImageDTO = service.getAvatarByUserId(userId);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.IMAGE_JPEG);
-        headers.setContentLength(imageData.length);
+        headers.setContentType(MediaType.parseMediaType(avatarImageDTO.getMediaType()));
+        headers.setContentLength(avatarImageDTO.getImageData().length);
 
         return ResponseEntity.ok().headers(headers).body(avatarImageDTO.getImageData());
     }
 
     @Operation(summary = "Удалить аватара по Id")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Аватар удален"),
+            @ApiResponse(responseCode = "200", description = "Аватар получен. Контент содержит изображение в формате JPEG."),
             @ApiResponse(responseCode = "404", description = "NOT_FOUND: Аватар не найден",
                     content = @Content(schema = @Schema(implementation = AvatarNotFoundException.class))),
     })
     @DeleteMapping("/{avatarId}")
-    public void deleteAvatar(@PathVariable UUID avatarId) throws IOException {
+    public void deleteAvatar(@PathVariable UUID avatarId) {
         service.deleteAvatarIfExists(avatarId);
+    }
+
+    @Operation(summary = "Получить аватар по Id аватара.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Аватар получен. Контент содержит изображение в формате JPEG.",
+                    content = @Content(mediaType = MediaType.IMAGE_JPEG_VALUE,
+                            schema = @Schema(implementation = byte[].class))),
+            @ApiResponse(responseCode = "404", description = "NOT_FOUND: Аватар не найден",
+                    content = @Content(schema = @Schema(implementation = AvatarNotFoundException.class))),
+    })
+    @GetMapping("/avatars/{avatarId}")
+    public ResponseEntity<byte[]> getAvatarById(@PathVariable UUID avatarId) {
+        AvatarImageDTO avatarImageDTO = service.getAvatarImageByAvatarId(avatarId);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType(avatarImageDTO.getMediaType()));
+        headers.setContentLength(avatarImageDTO.getImageData().length);
+
+        return ResponseEntity.ok().headers(headers).body(avatarImageDTO.getImageData());
     }
 }
