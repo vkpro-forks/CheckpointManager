@@ -11,11 +11,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.ac.checkpointmanager.dto.AvatarDTO;
+import ru.ac.checkpointmanager.exception.AvatarNotFoundException;
 import ru.ac.checkpointmanager.mapper.AvatarMapper;
 import ru.ac.checkpointmanager.model.Avatar;
 import ru.ac.checkpointmanager.service.avatar.AvatarService;
@@ -29,8 +32,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @RequestMapping("/chpman/avatars")
 @SecurityRequirement(name = "bearerAuth")
-@ApiResponses(value = {@ApiResponse(responseCode = "401", description = "UNAUTHORIZED: пользователь не авторизован"),
-        @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса")})
+@ApiResponses(value = {
+        @ApiResponse(responseCode = "401", description = "UNAUTHORIZED: пользователь не авторизован",
+                content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(responseCode = "403", description = "FORBIDDEN: доступ запрещен",
+                content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса",
+                content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+})
 @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
 public class AvatarController {
 
@@ -38,16 +47,17 @@ public class AvatarController {
     private final UserService userService;
     private final AvatarMapper avatarMapper;
 
-    @Operation(summary = "Добавить новый аватар. Если аватар уже есть, то новый перезаписывает старого.",
-            description = "Доступ: USER, ADMIN, MANAGER, SECURITY.")
+    @Operation(summary = "Добавить новый аватар.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Аватар успешно добавлен",
-                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = AvatarDTO.class))}),
-            @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей.")})
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = AvatarDTO.class))),
+            @ApiResponse(responseCode = "400", description = "BAD_REQUEST: Неверные данные запроса",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+    })
     @PostMapping(value = "/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<AvatarDTO> uploadAvatar(@PathVariable UUID userId,
-                                               @RequestBody MultipartFile avatarFile) throws IOException {
+                                               @RequestBody MultipartFile avatarFile) {
         try {
             Avatar avatar = service.uploadAvatar(userId, avatarFile);
 
@@ -67,8 +77,11 @@ public class AvatarController {
 
     @Operation(summary = "Получить аватар по Id пользователя")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Аватар получен"),
-            @ApiResponse(responseCode = "404", description = "Аватар не найден"),
+            @ApiResponse(responseCode = "200", description = "Аватар получен. Контент содержит изображение в формате JPEG.",
+                    content = @Content(mediaType = MediaType.IMAGE_JPEG_VALUE,
+                            schema = @Schema(implementation = byte[].class))),
+            @ApiResponse(responseCode = "404", description = "NOT_FOUND: Аватар не найден",
+                    content = @Content(schema = @Schema(implementation = AvatarNotFoundException.class))),
     })
     @GetMapping("/{userId}")
     public ResponseEntity<byte[]> getAvatar(@PathVariable UUID userId) throws IOException {
@@ -83,8 +96,9 @@ public class AvatarController {
 
     @Operation(summary = "Удалить аватара по Id")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Аватар удален."),
-            @ApiResponse(responseCode = "404", description = "Аватар не найден."),
+            @ApiResponse(responseCode = "200", description = "Аватар удален"),
+            @ApiResponse(responseCode = "404", description = "NOT_FOUND: Аватар не найден",
+                    content = @Content(schema = @Schema(implementation = AvatarNotFoundException.class))),
     })
     @DeleteMapping("/{avatarId}")
     public void deleteAvatar(@PathVariable UUID avatarId) throws IOException {
