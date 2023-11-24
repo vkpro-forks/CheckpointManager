@@ -66,12 +66,7 @@ public class AvatarController {
     @GetMapping("/{userId}")
     public ResponseEntity<byte[]> getAvatar(@PathVariable UUID userId) {
         AvatarImageDTO avatarImageDTO = service.getAvatarByUserId(userId);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.parseMediaType(avatarImageDTO.getMediaType()));
-        headers.setContentLength(avatarImageDTO.getImageData().length);
-
-        return ResponseEntity.ok().headers(headers).body(avatarImageDTO.getImageData());
+        return createResponseEntity(avatarImageDTO);
     }
 
     @Operation(summary = "Удалить аватара по Id")
@@ -96,11 +91,14 @@ public class AvatarController {
     @GetMapping("/avatars/{avatarId}")
     public ResponseEntity<byte[]> getAvatarById(@PathVariable UUID avatarId) {
         AvatarImageDTO avatarImageDTO = service.getAvatarImageByAvatarId(avatarId);
+        return createResponseEntity(avatarImageDTO);
+    }
 
+
+    private ResponseEntity<byte[]> createResponseEntity(AvatarImageDTO avatarImageDTO) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType(avatarImageDTO.getMediaType()));
         headers.setContentLength(avatarImageDTO.getImageData().length);
-
         return ResponseEntity.ok().headers(headers).body(avatarImageDTO.getImageData());
     }
 }
