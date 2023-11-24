@@ -18,6 +18,15 @@ public class UrlConstants {
 
     public static final String PASS_URL = "/chpman/pass";
 
+    public static final String PASS_URL_CANCEL = PASS_URL + "/%s/cancel";
+
+    public static final String PASS_URL_ACTIVATE = PASS_URL + "/%s/activate";
+
+    public static final String PASS_URL_UNWARNING = PASS_URL + "/%s/unwarning";
+
+    public static final String PASS_URL_FAVORITE = PASS_URL + "/%s/favorite";
+
+    public static final String PASS_URL_NOT_FAVORITE = PASS_URL + "/%s/not_favorite";
 
 
     private UrlConstants() {

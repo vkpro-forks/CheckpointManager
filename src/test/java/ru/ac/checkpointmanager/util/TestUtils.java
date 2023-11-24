@@ -4,12 +4,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import ru.ac.checkpointmanager.dto.CarDTO;
+import ru.ac.checkpointmanager.dto.CheckpointDTO;
+import ru.ac.checkpointmanager.dto.CrossingDTO;
+import ru.ac.checkpointmanager.dto.TerritoryDTO;
+import ru.ac.checkpointmanager.dto.passes.PassDtoUpdate;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.model.checkpoints.CheckpointType;
 import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.passes.PassTypeTime;
-import ru.ac.checkpointmanager.model.checkpoints.CheckpointType;
-import ru.ac.checkpointmanager.model.enums.Direction;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -32,11 +35,18 @@ public class TestUtils {
 
     public static final String TERR_NAME = "Territory";
 
+    public static final UUID CAR_ID = UUID.randomUUID();
+
+    public static final String LICENSE_PLATE = "А420ВХ799";
+
+    public static final UUID CROSSING_ID = UUID.randomUUID();
+
     public static final String JSON_ERROR_CODE = "$.errorCode";
 
     public static final String JSON_TIMESTAMP = "$.timestamp";
 
     public static final String JSON_VIOLATIONS_FIELD = "$.violations[0].fieldName";
+
     public static final String JSON_TITLE = "$.title";
 
 
@@ -70,6 +80,26 @@ public class TestUtils {
                 CHECKPOINT_NAME,
                 CheckpointType.UNIVERSAL,
                 "note", getTerritoryDTO()
+        );
+    }
+
+    public static CarDTO getCarDto() {
+        return new CarDTO(
+                CAR_ID,
+                LICENSE_PLATE,
+                getCarBrand()
+        );
+    }
+
+    public static PassDtoUpdate getPassUpdateDto() {
+        return new PassDtoUpdate(
+                PASS_ID,
+                "comment",
+                PassTypeTime.ONETIME,
+                LocalDateTime.now().plusHours(1),
+                LocalDateTime.now().plusHours(7),
+                null,
+                getCarDto()
         );
     }
 

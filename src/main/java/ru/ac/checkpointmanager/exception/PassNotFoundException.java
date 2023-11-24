@@ -1,6 +1,8 @@
 package ru.ac.checkpointmanager.exception;
 
-public class PassNotFoundException extends RuntimeException {
+import jakarta.persistence.EntityNotFoundException;
+
+public class PassNotFoundException extends EntityNotFoundException {
 
     public PassNotFoundException(String message) {
         super(message);

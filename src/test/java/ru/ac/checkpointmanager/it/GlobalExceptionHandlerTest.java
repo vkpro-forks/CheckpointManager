@@ -1,7 +1,10 @@
 package ru.ac.checkpointmanager.it;
 
 import lombok.SneakyThrows;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -20,18 +23,23 @@ import ru.ac.checkpointmanager.exception.handler.ErrorCode;
 import ru.ac.checkpointmanager.it.config.CorsTestConfiguration;
 import ru.ac.checkpointmanager.it.config.OpenAllEndpointsTestConfiguration;
 import ru.ac.checkpointmanager.model.car.CarBrand;
+import ru.ac.checkpointmanager.model.passes.PassAuto;
+import ru.ac.checkpointmanager.repository.PassRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.testcontainers.PostgresContainersConfig;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 
+import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
 @AutoConfigureMockMvc
 @Import({OpenAllEndpointsTestConfiguration.class, CorsTestConfiguration.class})
 @ActiveProfiles("test")
+@WithMockUser(roles = {"ADMIN"})
 class GlobalExceptionHandlerTest extends PostgresContainersConfig {
 
     @Autowired
@@ -40,10 +48,11 @@ class GlobalExceptionHandlerTest extends PostgresContainersConfig {
     @MockBean
     UserRepository userRepository;
 
+    @MockBean
+    PassRepository passRepository;
+
     @Test
     @SneakyThrows
-    @WithMockUser
-        // Mock user need to work with GlobalMethodSecurity
     void handleCarBrandNotFoundExceptionForGetCarBrand() {
         mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.CAR_BRANDS_URL + "/" + TestUtils.CAR_BRAND_ID_STR))
                 .andExpect(MockMvcResultMatchers.status().isNotFound())
@@ -56,8 +65,6 @@ class GlobalExceptionHandlerTest extends PostgresContainersConfig {
 
     @Test
     @SneakyThrows
-    @WithMockUser
-        // Mock user need to work with GlobalMethodSecurity
     void handleCarBrandNotFoundExceptionForUpdateCarBrand() {
         CarBrand carBrand = TestUtils.getCarBrand();
         String contentString = TestUtils.jsonStringFromObject(carBrand);
@@ -70,8 +77,6 @@ class GlobalExceptionHandlerTest extends PostgresContainersConfig {
 
     @Test
     @SneakyThrows
-    @WithMockUser
-        // Mock user need to work with GlobalMethodSecurity
     void handleCarBrandNotFoundExceptionForDeleteCarBrand() {
         ResultActions resultActions = mockMvc
                 .perform(MockMvcRequestBuilders.delete(UrlConstants.CAR_BRANDS_URL + "/" + TestUtils.CAR_BRAND_ID_STR));
@@ -80,7 +85,6 @@ class GlobalExceptionHandlerTest extends PostgresContainersConfig {
 
     @Test
     @SneakyThrows
-    @WithMockUser
     void shouldHandleAvatarNotFoundExceptionForGetAvatar() {
         Mockito.when(userRepository.findAvatarIdByUserId(Mockito.any()))
                 .thenReturn(UUID.randomUUID());
@@ -91,7 +95,6 @@ class GlobalExceptionHandlerTest extends PostgresContainersConfig {
 
     @Test
     @SneakyThrows
-    @WithMockUser
     void shouldHandleAvatarNotFoundExceptionIfUserDoesntHaveAvatar() {
         Mockito.when(userRepository.findAvatarIdByUserId(Mockito.any())).thenReturn(null);
         ResultActions resultActions = mockMvc
@@ -101,7 +104,6 @@ class GlobalExceptionHandlerTest extends PostgresContainersConfig {
 
     @Test
     @SneakyThrows
-    @WithMockUser
     void shouldHandleAvatarNotFoundExceptionForGetAvatarPreview() {
         Mockito.when(userRepository.findAvatarIdByUserId(Mockito.any()))
                 .thenReturn(UUID.randomUUID());
@@ -112,18 +114,20 @@ class GlobalExceptionHandlerTest extends PostgresContainersConfig {
 
     @Test
     @SneakyThrows
-    @WithMockUser(roles = {"ADMIN"})
     void shouldHandleCheckPointNotFoundExceptionForMarkCrossing() {
+        Mockito.when(passRepository.findById(TestUtils.PASS_ID)).thenReturn(Optional.of(
+                new PassAuto()
+        ));
         String crossingDto = TestUtils.jsonStringFromObject(TestUtils.getCrossingDTO());
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CROSSING_MARK_URL)
-                .content(crossingDto)
-                .contentType(MediaType.APPLICATION_JSON));
+                        .content(crossingDto)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.detail").value(Matchers.startsWith("Checkpoint")));
         checkNotFoundFields(resultActions);
     }
 
     @Test
     @SneakyThrows
-    @WithMockUser(roles = {"ADMIN"})
     void shouldHandleCheckPointNotFoundExceptionForGetCheckPoint() {
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                 .get(UrlConstants.CHECKPOINT_URL + "/" + TestUtils.CHECKPOINT_ID));
@@ -132,7 +136,6 @@ class GlobalExceptionHandlerTest extends PostgresContainersConfig {
 
     @Test
     @SneakyThrows
-    @WithMockUser(roles = {"ADMIN"})
     void shouldHandleCheckPointNotFoundExceptionForUpdateCheckPoint() {
         String checkPointDto = TestUtils.jsonStringFromObject(TestUtils.getCheckPointDTO());
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
@@ -144,7 +147,6 @@ class GlobalExceptionHandlerTest extends PostgresContainersConfig {
 
     @Test
     @SneakyThrows
-    @WithMockUser(roles = {"ADMIN"})
     void shouldHandleCheckPointNotFoundExceptionForDeleteCheckPoint() {
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                 .delete(UrlConstants.CHECKPOINT_URL + "/" + TestUtils.CHECKPOINT_ID));
@@ -153,7 +155,6 @@ class GlobalExceptionHandlerTest extends PostgresContainersConfig {
 
     @Test
     @SneakyThrows
-    @WithMockUser(roles = {"ADMIN"})
     void shouldHandleCrossingNotFoundExceptionForGetCrossing() {
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                 .get(UrlConstants.CROSSING_URL + "/" + TestUtils.CROSSING_ID));
@@ -162,7 +163,6 @@ class GlobalExceptionHandlerTest extends PostgresContainersConfig {
 
     @Test
     @SneakyThrows
-    @WithMockUser(roles = {"ADMIN"})
     void shouldHandleCarNotFoundExceptionForDeleteCar() {
         ResultActions resultActions = mockMvc
                 .perform(MockMvcRequestBuilders.delete(UrlConstants.CAR_URL + "/" + TestUtils.CAR_ID));
@@ -171,13 +171,61 @@ class GlobalExceptionHandlerTest extends PostgresContainersConfig {
 
     @Test
     @SneakyThrows
-    @WithMockUser(roles = {"ADMIN"})
     void shouldHandleCarNotFoundExceptionForUpdateCar() {
         String updateCarDto = TestUtils.jsonStringFromObject(TestUtils.getCarDto());
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                 .put(UrlConstants.CAR_URL + "/" + TestUtils.CAR_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(updateCarDto));
+        checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    void handlePassNotFoundExceptionForGetCrossing() {
+        Mockito.when(passRepository.findById(TestUtils.PASS_ID)).thenReturn(Optional.empty());
+        String crossingDto = TestUtils.jsonStringFromObject(TestUtils.getCrossingDTO());
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CROSSING_MARK_URL)
+                        .content(crossingDto)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.detail")
+                        .value(Matchers.startsWith("Pass")));
+        checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldHandlePassNotFoundExceptionForGetPass() {
+        ResultActions resultActions = mockMvc
+                .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_URL + "/" + TestUtils.PASS_ID));
+        checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldHandlePassNotFoundExceptionForUpdatePass() {
+        String passUpdateDto = TestUtils.jsonStringFromObject(TestUtils.getPassUpdateDto());
+        ResultActions resultActions = mockMvc
+                .perform(MockMvcRequestBuilders.put(UrlConstants.PASS_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(passUpdateDto));
+        checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldHandlePassNotFoundExceptionForDeletePass() {
+        ResultActions resultActions = mockMvc
+                .perform(MockMvcRequestBuilders.delete(UrlConstants.PASS_URL + "/" + TestUtils.PASS_ID));
+        checkNotFoundFields(resultActions);
+    }
+
+    @ParameterizedTest
+    @MethodSource("passUrlsForPatchMethodsArguments")
+    @SneakyThrows
+    void shouldHandlePassNotFoundExceptionsForPatchPassMethods(String url) {
+        ResultActions resultActions = mockMvc
+                .perform(MockMvcRequestBuilders.patch(url.formatted(TestUtils.PASS_ID)));
         checkNotFoundFields(resultActions);
     }
 
@@ -188,6 +236,16 @@ class GlobalExceptionHandlerTest extends PostgresContainersConfig {
                         .value(ErrorCode.NOT_FOUND.toString()))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_TIMESTAMP).isNotEmpty())
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_TITLE).isNotEmpty());
+    }
+
+    private static Stream<String> passUrlsForPatchMethodsArguments() {
+        return Stream.of(
+                UrlConstants.PASS_URL_FAVORITE,
+                UrlConstants.PASS_URL_UNWARNING,
+                UrlConstants.PASS_URL_ACTIVATE,
+                UrlConstants.PASS_URL_CANCEL,
+                UrlConstants.PASS_URL_NOT_FAVORITE
+        );
     }
 
 }
