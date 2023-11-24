@@ -30,8 +30,6 @@ import java.util.UUID;
 @ApiResponses(value = {
         @ApiResponse(responseCode = "401", description = "UNAUTHORIZED: пользователь не авторизован",
                 content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
-        @ApiResponse(responseCode = "403", description = "FORBIDDEN: доступ запрещен",
-                content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса",
                 content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
 })
