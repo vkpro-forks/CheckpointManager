@@ -64,7 +64,7 @@ class AvatarHelperImpl implements AvatarHelper {
             log.info("File extension '{}' extracted successfully.", extension);
             return extension;
         } catch (Exception e) {
-            log.error("Error determining file extension for file: {}", fileName, e);
+            log.warn("Error determining file extension for file: {}", fileName, e);
             throw new IllegalArgumentException("There was an error determining the file extension.", e);
         }
     }
