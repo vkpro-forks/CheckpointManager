@@ -18,7 +18,7 @@ public interface AvatarService {
     AvatarImageDTO getAvatarByUserId(UUID userId);
 
 
-    Avatar deleteAvatarIfExists(UUID avatarId);
+    void deleteAvatarIfExists(UUID avatarId);
 
     AvatarImageDTO getAvatarImageByAvatarId(UUID avatarId);
 

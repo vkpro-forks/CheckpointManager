@@ -80,9 +80,11 @@ public class AvatarServiceImpl implements AvatarService {
      * @param avatarId Уникальный идентификатор сущности, аватар которой нужно удалить.
      * @return Удаленный объект Avatar, если он существует, иначе возвращает null.
      */
-    public Avatar deleteAvatarIfExists(UUID avatarId) {
-        log.debug("Attempting to delete avatar for entity ID: {}", avatarId);
-        return findAvatarById(avatarId);
+    public void deleteAvatarIfExists(UUID avatarId) {
+        log.debug("Attempting to delete avatar for avatarId ID: {}", avatarId);
+        Avatar avatar =  findAvatarById(avatarId);
+        repository.delete(avatar);
+        log.info("Avatar with ID: {} deleted successfully", avatarId);
     }
 
     /**
