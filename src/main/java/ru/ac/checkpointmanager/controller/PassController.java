@@ -40,7 +40,7 @@ import ru.ac.checkpointmanager.utils.ErrorUtils;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("chpman/pass")
+@RequestMapping("api/v1/pass")
 @RequiredArgsConstructor
 @Tag(name = "Pass (пропуска)", description = "Операции с пропусками для машин и людей")
 @ApiResponses(value = {@ApiResponse(responseCode = "401", description = "UNAUTHORIZED: пользователь не авторизован"),

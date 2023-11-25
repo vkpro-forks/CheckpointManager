@@ -14,7 +14,7 @@ spring:
           starttls:
             enable: true
 app:
-  confirmation-link: http://localhost:8080/chpman/confirm/registration?token=
-  confirmation-email-link: http://localhost:8080/chpman/confirm/email?token=
+  confirmation-link: https://checkpoint-manager.ru/api/v1/confirm/registration?token=
+  confirmation-email-link: https://checkpoint-manager.ru/api/v1/confirm/email?token=
 logging:
   config: classpath:logback-prod.xml

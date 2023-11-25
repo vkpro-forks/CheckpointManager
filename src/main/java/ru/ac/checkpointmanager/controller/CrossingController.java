@@ -32,7 +32,7 @@ import java.util.UUID;
 
 @Slf4j
 @RestController
-@RequestMapping("chpman/crossing")
+@RequestMapping("api/v1/crossing")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Crossing (Пересечение)", description = "Управление пересечениями")

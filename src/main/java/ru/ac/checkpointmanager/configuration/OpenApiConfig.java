@@ -39,8 +39,8 @@ public class OpenApiConfig {
     @Bean
     public GroupedOpenApi publicApi() {
         return GroupedOpenApi.builder()
-                .group("chpman")
-                .pathsToMatch("/chpman/**")
+                .group("божественная апишечка") //TODO потом сменить
+                .pathsToMatch("/api/**")
                 .build();
     }
 }

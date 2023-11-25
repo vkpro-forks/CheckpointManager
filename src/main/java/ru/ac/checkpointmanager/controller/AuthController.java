@@ -33,7 +33,7 @@ import static ru.ac.checkpointmanager.utils.ErrorUtils.errorsList;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("chpman/authentication")
+@RequestMapping("api/v1/authentication")
 @Tag(name = "Регистрация и аутентификация", description = "Точка входа в приложение")
 @SecuritySchemes({
         @SecurityScheme(
