@@ -58,9 +58,9 @@ public class PassController {
             @ApiResponse(responseCode = "404", description = "Не найден пользователь или территория")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @PostMapping
-    public ResponseEntity<?> addPass(@RequestBody @Valid PassDtoCreate passDTOcreate) {
+    public PassDtoResponse addPass(@RequestBody @Valid PassDtoCreate passDTOcreate) {
         Pass newPass = service.addPass(mapper.toPass(passDTOcreate));
-        return ResponseEntity.ok(mapper.toPassDTO(newPass));
+        return mapper.toPassDTO(newPass);
     }
 
     /* READ */
@@ -141,9 +141,9 @@ public class PassController {
             @ApiResponse(responseCode = "404", description = "Не найден пользователь или территория")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @PutMapping
-    public ResponseEntity<?> updatePass(@RequestBody @Valid PassDtoUpdate passDtoUpdate) {
+    public PassDtoResponse updatePass(@RequestBody @Valid PassDtoUpdate passDtoUpdate) {
         Pass updatedPass = service.updatePass(mapper.toPass(passDtoUpdate));
-        return ResponseEntity.ok(mapper.toPassDTO(updatedPass));
+        return mapper.toPassDTO(updatedPass);
     }
 
     @Operation(summary = "Отменить активный пропуск",
