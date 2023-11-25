@@ -1,5 +1,7 @@
 package ru.ac.checkpointmanager.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,25 +21,57 @@ import java.util.UUID;
 public interface PassRepository extends JpaRepository<Pass, UUID> {
 
     /**
-     * Search for all the passes available in the database that create by specified user
-     * @param userId requested user
-     * @return list of found passes
+     * Фрагмент SQL, определяющий логику сортировки списка пропусков.
+     * Эта логика сортирует сущности в первую очередь на основе их статуса в определённом порядке:
+     * WARNING, ACTIVE, DELAYED, за которыми следуют все остальные статусы.
+     * При одинаковых статусах сортируются по времени начала действия в порядке убывания
      */
-    List<Pass> findPassesByUserIdOrderByAddedAtDesc(UUID userId);
+    String SORT_LOGIC = "ORDER BY CASE " +
+            "p.status WHEN 'WARNING' THEN 1 WHEN 'ACTIVE' THEN 2 WHEN 'DELAYED' THEN 3 ELSE 4 END, " +
+            "p.start_time DESC";
 
     /**
-     * Search for all the passes available in the database that relate to the specified territory
-     * @param territoryId current territory in the user script
-     * @return list of found passes
+     * Получает страницу объектов Pass, отсортированных по заданной логике.
+     * @param pageable объект {@link Pageable}, содержащий информацию о пагинации
+     * @return {@link Page} объектов Pass, отсортированных в соответствии с заданной логикой
      */
-    List<Pass> findPassesByTerritoryIdOrderByAddedAtDesc(UUID territoryId);
+    @Query(value = "SELECT * FROM passes p " + SORT_LOGIC, nativeQuery = true)
+    Page<Pass> findAll(Pageable pageable);
 
     /**
-     * Search passes by status and reached start- or end-time
-     * @param status It is supposed to transmit the value PassStatus.?.toString()
-     * @param timeColumn string value of column name to compare time
-     * @param time date and time to compare with timeColumn
-     * @return list of found passes
+     * Получает страницу объектов Pass для конкретного пользователя
+     * для проверки перекрытия пропусков при добавлении нового пропуска.
+     * @param userId запрашиваемый пользователь
+     * @return список найденных пропусков
+     */
+    List<Pass> findAllPassesByUserId(UUID userId);
+
+    /**
+     * Получает страницу объектов Pass для конкретного пользователя, отсортированных по заданной логике
+     * @param userId UUID пользователя.
+     * @param pageable объект {@link Pageable}, содержащий информацию о пагинации
+     * @return {@link Page} объектов Pass, связанных с указанным пользователем
+     * и отсортированных в соответствии с заданной логикой
+     */
+    @Query(value = "SELECT * FROM passes p WHERE p.user_id = :userId " + SORT_LOGIC, nativeQuery = true)
+    Page<Pass> findPassesByUserId(UUID userId, Pageable pageable);
+
+    /**
+     * Получает страницу объектов Pass для конкретной территории, отсортированных по заданной логике.
+     * @param territoryId UUID территории.
+     * @param pageable объект {@link Pageable}, содержащий информацию о пагинации
+     * @return {@link Page} объектов Pass, связанных с указанной территорией
+     * и отсортированных в соответствии с заданной логикой
+     */
+    @Query(value = "SELECT * FROM passes p WHERE p.territory_id = :territoryId " + SORT_LOGIC, nativeQuery = true)
+    Page<Pass> findPassesByTerritoryId(UUID territoryId, Pageable pageable);
+
+    /**
+     * Ищет пропуски по статусу и достигнутому времени начала или окончания.
+     * @param status Предполагается передача значения PassStatus.?.toString().
+     * @param timeColumn строковое значение имени столбца для сравнения времени.
+     * @param time дата и время для сравнения со столбцом timeColumn.
+     * @return список найденных пропусков.
      */
     @Query(value = "SELECT * FROM passes WHERE status = :status AND " +
             "CASE WHEN :column = 'startTime' THEN start_time " +
@@ -47,11 +81,11 @@ public interface PassRepository extends JpaRepository<Pass, UUID> {
             , @Param("column") String timeColumn, @Param("time") LocalDateTime time);
 
     /**
-     * checks the connection between the user and the territories
-     * (the user's permission to create a pass to this territory)
-     * @param userId id проверяемого пользователя
-     * @param territoryId id проверяемой территории
-     * @return bool result of check
+     * Проверяет связь между пользователем и территориями
+     * (разрешение пользователя на создание пропуска на эту территорию).
+     * @param userId ID проверяемого пользователя
+     * @param territoryId ID проверяемой территории
+     * @return boolean результат проверки
      */
     @Query(value = "SELECT EXISTS (SELECT FROM user_territory WHERE user_id = :uId AND territory_id = :tId)"
             , nativeQuery = true)

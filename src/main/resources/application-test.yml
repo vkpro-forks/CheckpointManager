@@ -1,7 +1,7 @@
 app:
   #version: ${version}
-  confirmation-link: http://localhost:8080/chpman/confirm/registration?token=
-  confirmation-email-link: http://localhost:8080/chpman/confirm/email?token=
+  confirmation-link: http://localhost:8080/api/v1/confirm/registration?token=
+  confirmation-email-link: http://localhost:8080/api/v1/confirm/email?token=
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver

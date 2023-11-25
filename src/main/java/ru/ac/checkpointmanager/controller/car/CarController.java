@@ -36,7 +36,7 @@ import java.util.UUID;
 
 @Slf4j
 @RestController
-@RequestMapping("chpman/car")
+@RequestMapping("api/v1/car")
 @RequiredArgsConstructor
 @Validated
 @SecurityRequirement(name = "bearerAuth")

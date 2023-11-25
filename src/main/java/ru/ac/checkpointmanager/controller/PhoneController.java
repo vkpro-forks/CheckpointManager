@@ -27,7 +27,7 @@ import java.util.UUID;
 
 
 @RestController
-@RequestMapping("chpman/phone")
+@RequestMapping("api/v1/phone")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
