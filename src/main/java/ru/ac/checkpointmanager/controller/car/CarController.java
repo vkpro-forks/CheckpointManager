@@ -14,14 +14,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.mapper.CarMapper;
 import ru.ac.checkpointmanager.model.car.Car;
@@ -32,10 +33,12 @@ import ru.ac.checkpointmanager.utils.ErrorUtils;
 
 import java.util.List;
 import java.util.UUID;
+
 @Slf4j
 @RestController
 @RequestMapping("chpman/car")
 @RequiredArgsConstructor
+@Validated
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Car (Машина)", description = "Для обработки списка машин")
 @ApiResponses(value = {@ApiResponse(responseCode = "401", description = "UNAUTHORIZED: пользователь не авторизован"),
@@ -89,16 +92,16 @@ public class CarController {
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @PutMapping("/{carId}")
-    public ResponseEntity<?> updateCar(@Valid @PathVariable UUID carId, @RequestBody CarDTO updateCarDto, BindingResult result) {
+    public ResponseEntity<?> updateCar(@org.hibernate.validator.constraints.UUID
+                                       @PathVariable String carId,
+                                       @Valid @RequestBody CarDTO updateCarDto,
+                                       BindingResult result) {
         if (result.hasErrors()) {
             log.warn("Car update failed for ID {} due to validation errors", carId);
             return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
         }
-
-        Car car = mapper.toCar(updateCarDto);
-
-        Car updated =  carService.updateCar(carId, car);
-        log.info("Car with ID {} updated", carId);
+        Car updated = carService.updateCar(carId, updateCarDto);
+        log.info("[Car with id {}] updated", carId);
         return ResponseEntity.ok(updated);
     }
 

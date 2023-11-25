@@ -32,10 +32,10 @@ import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.dto.passes.PassDtoCreate;
 import ru.ac.checkpointmanager.dto.passes.PassDtoResponse;
 import ru.ac.checkpointmanager.dto.passes.PassDtoUpdate;
+import ru.ac.checkpointmanager.mapper.PassMapper;
 import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.service.passes.PassService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
-import ru.ac.checkpointmanager.mapper.PassMapper;
 
 import java.util.UUID;
 
@@ -64,7 +64,7 @@ public class PassController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @PostMapping
     public ResponseEntity<?> addPass(@RequestBody @Valid PassDtoCreate passDTOcreate,
-                                           BindingResult bindingResult) {
+                                     BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
         }
@@ -160,15 +160,7 @@ public class PassController {
             @ApiResponse(responseCode = "404", description = "Не найден пользователь или территория")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @PutMapping
-    public ResponseEntity<?> editPass(@RequestBody @Valid PassDtoUpdate passDtoUpdate,
-                                            BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
-        }
-        Pass currentPass = service.findPass(passDtoUpdate.getId());
-        if (currentPass == null) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<?> updatePass(@RequestBody @Valid PassDtoUpdate passDtoUpdate) {
         Pass updatedPass = service.updatePass(mapper.toPass(passDtoUpdate));
         return ResponseEntity.ok(mapper.toPassDTO(updatedPass));
     }
@@ -250,10 +242,6 @@ public class PassController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @DeleteMapping("{id}")
     public ResponseEntity<Void> deletePass(@PathVariable UUID id) {
-        Pass currentPass = service.findPass(id);
-        if (currentPass == null) {
-            return ResponseEntity.notFound().build();
-        }
         service.deletePass(id);
         return ResponseEntity.ok().build();
     }

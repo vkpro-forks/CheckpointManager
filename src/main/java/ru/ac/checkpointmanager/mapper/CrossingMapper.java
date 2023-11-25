@@ -15,6 +15,7 @@ import ru.ac.checkpointmanager.repository.PassRepository;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -32,14 +33,21 @@ public class CrossingMapper {
 
     public Crossing toCrossing(CrossingDTO crossingDTO) {
         Crossing crossing = new Crossing();
-        Optional<Pass> optionalPass = passRepository.findById(crossingDTO.getPassId());
+        UUID passId = crossingDTO.getPassId();
+        Optional<Pass> optionalPass = passRepository.findById(passId);
         Pass pass = optionalPass.orElseThrow(
-                () -> new PassNotFoundException("Pass not found for ID " + crossingDTO.getPassId()));
+                () -> {
+                    log.warn("[Pass with id: {}] not found", passId);
+                    return new PassNotFoundException("Pass with id: %s not found".formatted(passId));
+                });
 
         Optional<Checkpoint> optionalCheckpoint = checkpointRepository.findById(crossingDTO.getCheckpointId());
         Checkpoint checkpoint = optionalCheckpoint.orElseThrow(
-                () -> new CheckpointNotFoundException("Checkpoint not found for ID " + crossingDTO.getCheckpointId()));
-
+                () -> {
+                    log.warn("[Checkpoint with id: {}] not found", crossingDTO.getCheckpointId());
+                    return new CheckpointNotFoundException("Checkpoint with id %s not found"
+                            .formatted(crossingDTO.getCheckpointId()));
+                });
         crossing.setPass(pass);
         crossing.setCheckpoint(checkpoint);
         crossing.setDirection(crossingDTO.getDirection());

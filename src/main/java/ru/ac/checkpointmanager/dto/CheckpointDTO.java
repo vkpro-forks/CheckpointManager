@@ -1,12 +1,14 @@
 package ru.ac.checkpointmanager.dto;
 
 import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import ru.ac.checkpointmanager.model.checkpoints.CheckpointType;
 
 import java.util.UUID;
 
 @Data
+@AllArgsConstructor
 public class CheckpointDTO {
 
     private UUID id;

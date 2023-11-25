@@ -2,8 +2,8 @@ package ru.ac.checkpointmanager.service.car;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
+import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.exception.CarNotFoundException;
 import ru.ac.checkpointmanager.model.car.Car;
 import ru.ac.checkpointmanager.repository.car.CarRepository;
@@ -18,6 +18,8 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CarServiceImpl implements CarService {
 
+    public static final String CAR_NOT_FOUND_LOG = "[Car with id: {}] not found";
+    public static final String CAR_NOT_FOUND_MSG = "Car with id %s not found";
     private final CarRepository repository;
     private final UserService userService;
 
@@ -28,33 +30,37 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public Car getCarById(UUID carId) {
-        return repository.findById(carId)
-                .orElseThrow(()-> new CarNotFoundException("Car with ID " + carId + " not found"));
+        Car car = repository.findById(carId)
+                .orElseThrow(() -> {
+                    log.warn(CAR_NOT_FOUND_LOG, carId);
+                    return new CarNotFoundException(CAR_NOT_FOUND_MSG.formatted(carId));
+                });
+        log.debug("[Car with id: {}] successfully retrieved from repo", car);
+        return car;
     }
 
     @Override
     public void deleteCar(UUID carId) {
         if (!repository.existsById(carId)) {
-            log.warn("Car with ID {} not found for deletion", carId);
-            throw new CarNotFoundException("Car with ID " + carId + " not found");
+            log.warn(CAR_NOT_FOUND_LOG, carId);
+            throw new CarNotFoundException(CAR_NOT_FOUND_MSG.formatted(carId));
         }
         repository.deleteById(carId);
-        log.info("Car with ID {} successfully deleted", carId);
+        log.info("[Car with id: {}] successfully deleted", carId);
     }
 
     @Override
-    public Car updateCar(UUID carId, Car updateCar) {
-        try {
-            Car existingCar = repository.findById(carId)
-                    .orElseThrow(() -> new CarNotFoundException("Car with ID " + carId + " not found"));
-
-            existingCar.setLicensePlate(updateCar.getLicensePlate());
-            existingCar.setBrand(updateCar.getBrand());
-
-            return repository.save(existingCar);
-        } catch (Exception exception) {
-            throw new RuntimeException("Error updating car with ID " + carId);
-        }
+    public Car updateCar(String carId, CarDTO updateCar) {
+        Car existingCar = repository.findById(UUID.fromString(carId))
+                .orElseThrow(() -> {
+                    log.warn(CAR_NOT_FOUND_LOG, carId);
+                    return new CarNotFoundException(CAR_NOT_FOUND_MSG.formatted(carId));
+                });
+        existingCar.setLicensePlate(updateCar.getLicensePlate());
+        existingCar.setBrand(updateCar.getBrand());
+        Car saved = repository.save(existingCar);
+        log.info("[Car with id: {}] successfully updated", carId);
+        return saved;
     }
 
     @Override

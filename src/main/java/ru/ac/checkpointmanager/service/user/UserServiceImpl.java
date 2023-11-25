@@ -10,29 +10,31 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.ChangeEmailRequest;
 import ru.ac.checkpointmanager.dto.ChangePasswordRequest;
+import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.user.UserPutDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
-import ru.ac.checkpointmanager.exception.PhoneNumberNotFoundException;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.model.Avatar;
 import ru.ac.checkpointmanager.model.TemporaryUser;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
+import ru.ac.checkpointmanager.model.enums.PhoneNumberType;
 import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.service.email.EmailService;
+import ru.ac.checkpointmanager.service.phone.PhoneService;
+import ru.ac.checkpointmanager.utils.FieldsValidation;
 import ru.ac.checkpointmanager.utils.Mapper;
 import ru.ac.checkpointmanager.utils.MethodLog;
 import ru.ac.checkpointmanager.utils.SecurityUtils;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
-
-import static ru.ac.checkpointmanager.utils.FieldsValidation.cleanPhone;
 
 /**
  * Сервисный класс для управления информацией о пользователях.
@@ -63,8 +65,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final TemporaryUserService temporaryUserService;
     private final EmailService emailService;
-//    private final JwtService jwtService;
-//    private final AuthenticationService authService;
+    private final PhoneService phoneService;
 
     /**
      * Находит пользователя по его уникальному идентификатору (UUID).
@@ -137,40 +138,57 @@ public class UserServiceImpl implements UserService {
     /**
      * Обновляет информацию о пользователе на основе предоставленных данных.
      * <p>
-     * Этот метод обновляет данные пользователя в репозитории. Если пользователь с указанным идентификатором
-     * не найден, выбрасывается исключение {@link UserNotFoundException}. Проверяется наличие и валидность номера
-     * телефона; если он недействителен, выбрасывается {@link PhoneNumberNotFoundException}.
-     * <p>
+     * Этот метод выполняет обновление данных пользователя, включая его полное имя и основной номер телефона.
+     * Если предоставленный основной номер телефона не пуст, он также очищается и обновляется.
+     * После обновления данных пользователя, эти изменения сохраняются в базе данных.
+     * </p>
      *
-     * @param userPutDTO Объект {@link UserPutDTO}, содержащий информацию для обновления пользователя.
-     * @return {@link UserResponseDTO} - DTO обновленного пользователя.
-     * @throws UserNotFoundException        если пользователь с указанным идентификатором не найден.
-     * @throws PhoneNumberNotFoundException если предоставленный номер телефона недействителен или отсутствует в базе данных.
+     * @param userPutDTO DTO пользователя, содержащее обновленные данные. Должно включать идентификатор пользователя,
+     *                   а также может включать новое полное имя и основной номер телефона.
+     * @return UserResponseDTO, содержащий обновленные данные пользователя.
+     * @throws UserNotFoundException если пользователь с предоставленным идентификатором не найден.
+     * @see UserPutDTO
+     * @see UserResponseDTO
      */
     @Override
+    @Transactional
     public UserResponseDTO updateUser(UserPutDTO userPutDTO) {
-        log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), userPutDTO.getId());
+        log.debug("Updating user with [UUID - {}]", userPutDTO.getId());
         User foundUser = userRepository.findById(userPutDTO.getId())
                 .orElseThrow(() -> new UserNotFoundException(
                         String.format("User not found [id=%s]", userPutDTO.getId())));
 
-        if (userPutDTO.getFullName() != null) {
-            foundUser.setFullName(userPutDTO.getFullName());
-        }
+        foundUser.setFullName(userPutDTO.getFullName());
 
-        if (userPutDTO.getMainNumber() != null && !userPutDTO.getMainNumber().isEmpty()) {
-            if (!findUsersPhoneNumbers(userPutDTO.getId()).contains(cleanPhone(userPutDTO.getMainNumber()))) {
-                log.warn("Phone {} does not exist", userPutDTO.getMainNumber());
-                throw new PhoneNumberNotFoundException(String.format
-                        ("Phone number %s does not exist", userPutDTO.getMainNumber()));
-            }
-            foundUser.setMainNumber(cleanPhone(userPutDTO.getMainNumber()));
-        }
+        Optional.ofNullable(userPutDTO.getMainNumber())
+                .filter(mainNumber -> !mainNumber.isEmpty())
+                .map(FieldsValidation::cleanPhone)
+                .ifPresent(newMainNumber -> {
+                    foundUser.setMainNumber(newMainNumber);
+                    phoneService.createPhoneNumber(createPhoneDTO(foundUser));
+                });
 
         userRepository.save(foundUser);
-        log.debug("User {} saved", foundUser.getId());
+        log.info("[User {}] updated", foundUser.getId());
 
         return mapper.toUserDTO(foundUser);
+    }
+
+    /**
+     * Создает DTO телефона на основе данных пользователя.
+     * <p>
+     * Этот вспомогательный метод используется для создания DTO телефона из данных пользователя.
+     * </p>
+     *
+     * @param user Объект пользователя, для которого создается DTO телефона.
+     * @return PhoneDTO, содержащий данные телефона пользователя.
+     */
+    private PhoneDTO createPhoneDTO(User user) {
+        PhoneDTO phoneDTO = new PhoneDTO();
+        phoneDTO.setNumber(user.getMainNumber());
+        phoneDTO.setType(PhoneNumberType.MOBILE);
+        phoneDTO.setUserId(user.getId());
+        return phoneDTO;
     }
 
     /**
@@ -292,15 +310,8 @@ public class UserServiceImpl implements UserService {
 
             temporaryUserService.delete(tempUser);
             log.info("Temporary user deleted {}", tempUser.getId());
-
-            // пока не знаю, есть ли смысл отзывать старый токен, при смене пароля этого не делается и всё работает
-            // больше вопрос о безопасности, тк в токене инфа старая зашита остается и поменяется только когда токен истечет
-
-//            String jwtToken = jwtService.generateToken(user);
-//            authService.revokeAllUserTokens(user);
-//            authService.saveUserToken(user, jwtToken);
         } else {
-            log.error("Invalid or expired token");
+            log.warn("Invalid or expired token");
         }
     }
 
@@ -313,9 +324,8 @@ public class UserServiceImpl implements UserService {
      * генерируется, если пытается измениться роль на уже существующую.
      * <p>
      *
-     * @param id            Идентификатор пользователя, роль которого нужно изменить.
-     * @param role          Новая роль, которую необходимо назначить пользователю.
-     * @param connectedUser Аутентифицированный пользователь, выполняющий операцию.
+     * @param id   Идентификатор пользователя, роль которого нужно изменить.
+     * @param role Новая роль, которую необходимо назначить пользователю.
      * @throws UserNotFoundException если пользователь с заданным идентификатором не найден.
      * @throws AccessDeniedException если у пользователя, выполняющего операцию, нет прав на изменение роли.
      * @throws IllegalStateException если пользователь уже имеет указанную роль.
