@@ -8,12 +8,14 @@ import lombok.Data;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.VisitorDTO;
 import ru.ac.checkpointmanager.model.passes.PassTypeTime;
+import ru.ac.checkpointmanager.validation.annotation.CarOrVisitor;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
 @AllArgsConstructor
+@CarOrVisitor
 public class PassDtoUpdate {
 
     @NotNull
