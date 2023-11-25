@@ -71,7 +71,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
         log.debug("Method {} was invoked", MethodLog.getMethodName());
-        if (request.getServletPath().contains("/chpman/authentication")) { // содержит ли путь сервлета в запросе /authentication
+        if (request.getServletPath().contains("/api/v1/authentication")) { // содержит ли путь сервлета в запросе /authentication
             log.debug("Authentication path '{}' requested, passing through the filter chain.", request.getRequestURI());
             filterChain.doFilter(request, response); // если содержит, вызывается doFilter для разрешения продолжения обработки запроса следующему фильтру или сервлету в цепочке
             return;

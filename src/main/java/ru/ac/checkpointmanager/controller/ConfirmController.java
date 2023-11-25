@@ -20,7 +20,7 @@ import ru.ac.checkpointmanager.service.user.UserService;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("chpman/confirm")
+@RequestMapping("api/v1/confirm")
 @Tag(name = "Подтверждение данных", description = "Api, на которые переходят ссылки из писем")
 @SecuritySchemes({
         @SecurityScheme(

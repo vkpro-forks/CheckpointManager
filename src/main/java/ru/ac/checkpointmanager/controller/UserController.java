@@ -33,7 +33,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("chpman/user")
+@RequestMapping("api/v1/user")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Пользовательский интерфейс", description = "Комплекс операций по управлению жизненным циклом " +
