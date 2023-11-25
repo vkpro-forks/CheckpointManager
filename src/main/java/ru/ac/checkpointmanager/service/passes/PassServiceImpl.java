@@ -323,7 +323,7 @@ public class PassServiceImpl implements PassService {
         }
     }
 
-     * Каждую минуту обновляет статусы активных и отложенных пропусков
+     /* Каждую минуту обновляет статусы активных и отложенных пропусков
      */
     @Scheduled(cron = "0 * * * * ?")
     public void updatePassStatusByScheduler() {
