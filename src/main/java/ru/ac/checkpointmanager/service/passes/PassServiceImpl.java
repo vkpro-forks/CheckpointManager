@@ -323,7 +323,10 @@ public class PassServiceImpl implements PassService {
         }
     }
 
-     /* Каждую минуту обновляет статусы активных и отложенных пропусков
+     /**
+      * Каждую минуту запускает проверку отложенных и активных пропусков с целью актуальзации их статусов
+      * @see PassServiceImpl#updateDelayedPassesOnStartTimeReached
+      * @see PassServiceImpl#updateActivePassesOnEndTimeReached
      */
     @Scheduled(cron = "0 * * * * ?")
     public void updatePassStatusByScheduler() {
@@ -337,8 +340,9 @@ public class PassServiceImpl implements PassService {
     }
 
     /**
-     * Ищет все отложенные пропуска с начавшимся временем действия,
-     * присваивает им статус "активный" (PassStatus.ACTIVE)
+     * Обновляет статусы отложенных пропусков, время начала которых уже наступило, делая их активными
+     * (время начала меньше текущего времени плюс одна минута)
+     * @see PassStatus
      */
     public void updateDelayedPassesOnStartTimeReached() {
         List<Pass> passes = repository.findPassesByStatusAndTimeBefore(PassStatus.DELAYED.toString(),
@@ -359,10 +363,11 @@ public class PassServiceImpl implements PassService {
     }
 
     /**
-     * Ищет все активные пропуска с истекшим временем действия,
-     * затем по каждому найденному пропуску ищет зафиксированные пересечения.
-     * Если пересечений не было, присваивает пропуску статус "устаревший" (PassStatus.OUTDATED),
+     * Обновляет статусы активных пропусковс истекшим временем действия:
+     * по каждому активному пропуску ищет зафиксированные пересечения,
+     * если пересечений не было, присваивает пропуску статус OUTDATED,
      * в противном случае присваивает статус с помощью метода {@code changeStatusForPassWithCrossings}
+     * @see PassStatus
      */
     public void updateActivePassesOnEndTimeReached() {
         List<Pass> passes = repository.findPassesByStatusAndTimeBefore(PassStatus.ACTIVE.toString(),
@@ -390,8 +395,9 @@ public class PassServiceImpl implements PassService {
 
     /**
      * Возвращает статус для отменяемого или истекшего пропуска:
-     * Если пересечения были, и последнее было на выезд - статус "выполнен" (PassStatus.COMPLETED).
-     * Если пересечения были, и последнее было на въезд - статус "предупреждение" (PassStatus.WARNING).
+     * Если пересечения были, и последнее было на выезд - статус COMPLETED.
+     * Если пересечения были, и последнее было на въезд - статус WARNING.
+     * @see PassStatus
      *
      * @param crossings список пересечений по проверяемому пропуску
      * @return {@code PassStatus}
