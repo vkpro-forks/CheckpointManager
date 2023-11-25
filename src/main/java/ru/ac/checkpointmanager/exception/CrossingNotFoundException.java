@@ -1,6 +1,8 @@
 package ru.ac.checkpointmanager.exception;
 
-public class CrossingNotFoundException extends RuntimeException {
+import jakarta.persistence.EntityNotFoundException;
+
+public class CrossingNotFoundException extends EntityNotFoundException {
 
     public CrossingNotFoundException() {
     }
@@ -9,7 +11,4 @@ public class CrossingNotFoundException extends RuntimeException {
         super(message);
     }
 
-    public CrossingNotFoundException(String message, Throwable cause) {
-        super(message, cause);
-    }
 }

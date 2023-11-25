@@ -1,5 +1,6 @@
 package ru.ac.checkpointmanager.service.car;
 
+import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.model.car.Car;
 
 import java.util.List;
@@ -11,7 +12,7 @@ public interface CarService {
 
     void deleteCar(UUID carId);
 
-    Car updateCar(UUID carId, Car car);
+    Car updateCar(String carId, CarDTO updateCar);
 
     Car getCarById(UUID carId);
 

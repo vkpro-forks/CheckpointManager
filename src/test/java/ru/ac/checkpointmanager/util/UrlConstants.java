@@ -10,6 +10,24 @@ public class UrlConstants {
 
     public static final String AVATAR_URL_PREVIEW = AVATAR_URL + "/preview";
 
+    public static final String CROSSING_URL = "/chpman/crossing";
+
+    public static final String CROSSING_MARK_URL = CROSSING_URL + "/mark";
+
+    public static final String CHECKPOINT_URL = "/chpman/checkpoint";
+
+    public static final String PASS_URL = "/chpman/pass";
+
+    public static final String PASS_URL_CANCEL = PASS_URL + "/%s/cancel";
+
+    public static final String PASS_URL_ACTIVATE = PASS_URL + "/%s/activate";
+
+    public static final String PASS_URL_UNWARNING = PASS_URL + "/%s/unwarning";
+
+    public static final String PASS_URL_FAVORITE = PASS_URL + "/%s/favorite";
+
+    public static final String PASS_URL_NOT_FAVORITE = PASS_URL + "/%s/not_favorite";
+
 
     private UrlConstants() {
 

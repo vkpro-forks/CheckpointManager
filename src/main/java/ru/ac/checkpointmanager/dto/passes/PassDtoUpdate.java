@@ -3,6 +3,7 @@ package ru.ac.checkpointmanager.dto.passes;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.VisitorDTO;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
+@AllArgsConstructor
 public class PassDtoUpdate {
 
     @NotNull
