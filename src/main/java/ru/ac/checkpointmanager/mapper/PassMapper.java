@@ -16,7 +16,7 @@ import ru.ac.checkpointmanager.service.user.UserService;
 
 @Component
 @Slf4j
-public class PassMapper {
+public class    PassMapper {
 
     private final ModelMapper modelMapper;
     private final UserService userService;
