@@ -72,6 +72,7 @@ public class PassServiceImpl implements PassService {
             pass.setStatus(PassStatus.DELAYED);
         }
 
+        pass.setId(UUID.randomUUID());
         if (pass.getComment() == null || pass.getComment().isBlank()) {
             pass.setComment("Пропуск-" + pass.getId().toString().substring(32));
         }
