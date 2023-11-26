@@ -21,6 +21,8 @@ import java.util.UUID;
 @Component
 public class CrossingMapper {
 
+    //сделай уже что-нибудь с этим методом!
+
     private final ModelMapper modelMapper;
     private final PassRepository passRepository;
     private final CheckpointRepository checkpointRepository;
