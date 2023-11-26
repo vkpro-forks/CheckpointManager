@@ -204,7 +204,7 @@ class GlobalExceptionHandlerTest extends PostgresContainersConfig {
     @Test
     @SneakyThrows
     void shouldHandlePassNotFoundExceptionForUpdatePass() {
-        String passUpdateDto = TestUtils.jsonStringFromObject(TestUtils.getPassUpdateDto());
+        String passUpdateDto = TestUtils.jsonStringFromObject(TestUtils.getPassDtoUpdate());
         ResultActions resultActions = mockMvc
                 .perform(MockMvcRequestBuilders.put(UrlConstants.PASS_URL)
                         .contentType(MediaType.APPLICATION_JSON)

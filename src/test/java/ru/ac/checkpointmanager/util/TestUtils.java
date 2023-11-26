@@ -8,6 +8,7 @@ import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.CheckpointDTO;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
+import ru.ac.checkpointmanager.dto.passes.PassDtoCreate;
 import ru.ac.checkpointmanager.dto.passes.PassDtoUpdate;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.model.checkpoints.CheckpointType;
@@ -45,7 +46,7 @@ public class TestUtils {
 
     public static final String JSON_TIMESTAMP = "$.timestamp";
 
-    public static final String JSON_VIOLATIONS_FIELD = "$.violations[0].fieldName";
+    public static final String JSON_VIOLATIONS_FIELD = "$.violations[%s].fieldName";
 
     public static final String JSON_TITLE = "$.title";
 
@@ -91,11 +92,24 @@ public class TestUtils {
         );
     }
 
-    public static PassDtoUpdate getPassUpdateDto() {
+    public static PassDtoUpdate getPassDtoUpdate() {
         return new PassDtoUpdate(
                 PASS_ID,
                 "comment",
                 PassTypeTime.ONETIME,
+                LocalDateTime.now().plusHours(1),
+                LocalDateTime.now().plusHours(7),
+                null,
+                getCarDto()
+        );
+    }
+
+    public static PassDtoCreate getPassDtoCreate() {
+        return new PassDtoCreate(
+                PASS_ID,
+                "comment",
+                PassTypeTime.ONETIME,
+                TERR_ID,
                 LocalDateTime.now().plusHours(1),
                 LocalDateTime.now().plusHours(7),
                 null,

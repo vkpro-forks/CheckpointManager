@@ -49,7 +49,7 @@ public class GlobalExceptionHandler {
                 .map(v -> new ViolationError(
                         fieldNameFromPath(v.getPropertyPath().toString()),
                         v.getMessage(),
-                        v.getInvalidValue() != null ? v.toString() : "null"))
+                        v.getInvalidValue() != null ? v.getInvalidValue().toString() : "null"))
                 .toList();
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
         ProblemDetail configuredProblemDetails = setUpValidationDetails(problemDetail, violationErrors);
