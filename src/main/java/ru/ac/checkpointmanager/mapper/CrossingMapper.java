@@ -1,7 +1,13 @@
 package ru.ac.checkpointmanager.mapper;
 
+import jakarta.annotation.PostConstruct;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.PropertyMap;
+import org.modelmapper.convention.MatchingStrategies;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
 import ru.ac.checkpointmanager.exception.CheckpointNotFoundException;
@@ -11,6 +17,9 @@ import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
 import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.repository.CheckpointRepository;
 import ru.ac.checkpointmanager.repository.PassRepository;
+import ru.ac.checkpointmanager.service.checkpoints.CheckpointService;
+import ru.ac.checkpointmanager.service.passes.PassService;
+import ru.ac.checkpointmanager.service.passes.PassServiceImpl;
 
 import java.util.Collection;
 import java.util.List;
@@ -19,40 +28,27 @@ import java.util.UUID;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class CrossingMapper {
 
-    //сделай уже что-нибудь с этим методом!
-
     private final ModelMapper modelMapper;
-    private final PassRepository passRepository;
-    private final CheckpointRepository checkpointRepository;
+    private final PassService passService;
+    private final CheckpointService checkpointService;
 
-    public CrossingMapper(ModelMapper modelMapper, PassRepository passRepository, CheckpointRepository checkpointRepository) {
-        this.modelMapper = modelMapper;
-        this.passRepository = passRepository;
-        this.checkpointRepository = checkpointRepository;
-    }
 
     public Crossing toCrossing(CrossingDTO crossingDTO) {
-        Crossing crossing = new Crossing();
-        UUID passId = crossingDTO.getPassId();
-        Optional<Pass> optionalPass = passRepository.findById(passId);
-        Pass pass = optionalPass.orElseThrow(
-                () -> {
-                    log.warn("[Pass with id: {}] not found", passId);
-                    return new PassNotFoundException("Pass with id: %s not found".formatted(passId));
-                });
+        log.debug("Mapping CrossingDTO to Crossing");
+        Crossing crossing = modelMapper.map(crossingDTO, Crossing.class);
 
-        Optional<Checkpoint> optionalCheckpoint = checkpointRepository.findById(crossingDTO.getCheckpointId());
-        Checkpoint checkpoint = optionalCheckpoint.orElseThrow(
-                () -> {
-                    log.warn("[Checkpoint with id: {}] not found", crossingDTO.getCheckpointId());
-                    return new CheckpointNotFoundException("Checkpoint with id %s not found"
-                            .formatted(crossingDTO.getCheckpointId()));
-                });
+        UUID passId = crossingDTO.getPassId();
+        log.debug("Fetching Pass with ID: {}", passId);
+        Pass pass = passService.findPassById(passId);
         crossing.setPass(pass);
+
+        UUID checkpointId = crossingDTO.getCheckpointId();
+        log.debug("Fetching Checkpoint with ID: {}", checkpointId);
+        Checkpoint checkpoint = checkpointService.findCheckpointById(checkpointId);
         crossing.setCheckpoint(checkpoint);
-        crossing.setDirection(crossingDTO.getDirection());
 
         return crossing;
     }
@@ -65,5 +61,18 @@ public class CrossingMapper {
         return crossings.stream()
                 .map(crossing -> modelMapper.map(crossing, CrossingDTO.class))
                 .toList();
+    }
+
+    @PostConstruct
+    private void configureModelMapper() {
+        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+        modelMapper.addMappings(new PropertyMap<CrossingDTO, Crossing>() {
+            @Override
+            protected void configure() {
+                skip(destination.getPass());
+                skip(destination.getCheckpoint());
+            }
+        });
+        log.debug("ModelMapper has been configured");
     }
 }

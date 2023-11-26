@@ -139,9 +139,9 @@ public class PassServiceImpl implements PassService {
 
         if (!foundPasses.hasContent()) {
             throw new PassNotFoundException(String.format(
-                "Page %d (size - %d) does not contain passes, total pages - %d, total elements - %d  [territory id %s]",
-                pageable.getPageNumber(), pageable.getPageSize(),
-                foundPasses.getTotalPages(), foundPasses.getTotalElements(), terId));
+                    "Page %d (size - %d) does not contain passes, total pages - %d, total elements - %d  [territory id %s]",
+                    pageable.getPageNumber(), pageable.getPageSize(),
+                    foundPasses.getTotalPages(), foundPasses.getTotalElements(), terId));
         }
         return foundPasses;
     }
@@ -323,10 +323,11 @@ public class PassServiceImpl implements PassService {
         }
     }
 
-     /**
-      * Каждую минуту запускает проверку отложенных и активных пропусков с целью актуальзации их статусов
-      * @see PassServiceImpl#updateDelayedPassesOnStartTimeReached
-      * @see PassServiceImpl#updateActivePassesOnEndTimeReached
+    /**
+     * Каждую минуту запускает проверку отложенных и активных пропусков с целью актуальзации их статусов
+     *
+     * @see PassServiceImpl#updateDelayedPassesOnStartTimeReached
+     * @see PassServiceImpl#updateActivePassesOnEndTimeReached
      */
     @Scheduled(cron = "0 * * * * ?")
     public void updatePassStatusByScheduler() {
@@ -342,6 +343,7 @@ public class PassServiceImpl implements PassService {
     /**
      * Обновляет статусы отложенных пропусков, время начала которых уже наступило, делая их активными
      * (время начала меньше текущего времени плюс одна минута)
+     *
      * @see PassStatus
      */
     public void updateDelayedPassesOnStartTimeReached() {
@@ -367,6 +369,7 @@ public class PassServiceImpl implements PassService {
      * по каждому активному пропуску ищет зафиксированные пересечения,
      * если пересечений не было, присваивает пропуску статус OUTDATED,
      * в противном случае присваивает статус с помощью метода {@code changeStatusForPassWithCrossings}
+     *
      * @see PassStatus
      */
     public void updateActivePassesOnEndTimeReached() {
@@ -397,10 +400,10 @@ public class PassServiceImpl implements PassService {
      * Возвращает статус для отменяемого или истекшего пропуска:
      * Если пересечения были, и последнее было на выезд - статус COMPLETED.
      * Если пересечения были, и последнее было на въезд - статус WARNING.
-     * @see PassStatus
      *
      * @param crossings список пересечений по проверяемому пропуску
      * @return {@code PassStatus}
+     * @see PassStatus
      */
     private PassStatus changeStatusForPassWithCrossings(List<Crossing> crossings) {
         Crossing lastCrossing = crossings.stream()
@@ -412,5 +415,15 @@ public class PassServiceImpl implements PassService {
         } else {
             return PassStatus.WARNING;
         }
+    }
+
+    @Override
+    public Pass findPassById(UUID id) {
+        log.debug("Searching for Pass with UUID: {}", id);
+        return repository.findById(id).orElseThrow(
+                () -> {
+                    log.warn(PASS_NOT_FOUND_LOG, id);
+                    return new PassNotFoundException(PASS_NOT_FOUND_MSG.formatted(id));
+                });
     }
 }
