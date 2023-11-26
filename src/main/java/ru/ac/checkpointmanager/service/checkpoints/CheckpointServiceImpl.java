@@ -27,7 +27,7 @@ public class CheckpointServiceImpl implements CheckpointService {
     @Override
     public Checkpoint addCheckpoint(Checkpoint checkpoint) {
         log.info("Method {}, UUID - {}", MethodLog.getMethodName(), checkpoint.getId());
-        territoryService.findTerritoryById(checkpoint.getTerritory().getId());
+        territoryService.findById(checkpoint.getTerritory().getId());
         trimThemAll(checkpoint);
         return checkpointRepository.save(checkpoint);
     }
@@ -72,7 +72,7 @@ public class CheckpointServiceImpl implements CheckpointService {
                     return new CheckpointNotFoundException(CHECKPOINT_NOT_FOUND_MSG.formatted(checkpointId));
                 });
 
-        territoryService.findTerritoryById(checkpoint.getTerritory().getId());
+        territoryService.findById(checkpoint.getTerritory().getId());
         trimThemAll(checkpoint);
 
         foundCheckpoint.setName(checkpoint.getName());

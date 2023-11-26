@@ -10,10 +10,9 @@ public interface PassService {
 
     Pass addPass(Pass pass);
 
-//    Page<Pass> findPasses(Pageable pageable);
     Page<Pass> findPasses(PagingParams pagingParams);
 
-    Pass findPass(UUID id);
+    Pass findById(UUID id);
 
     Page<Pass> findPassesByUser(UUID userId, PagingParams pagingParams);
 

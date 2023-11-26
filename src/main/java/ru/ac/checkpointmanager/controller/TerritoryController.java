@@ -71,7 +71,7 @@ public class TerritoryController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @GetMapping("/{territoryId}")
     public ResponseEntity<TerritoryDTO> getTerritory(@PathVariable("territoryId") UUID territoryId) {
-        Territory territory = service.findTerritoryById(territoryId);
+        Territory territory = service.findById(territoryId);
 
         return ResponseEntity.ok(mapper.toTerritoryDTO(territory));
     }
