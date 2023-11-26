@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import ru.ac.checkpointmanager.model.Avatar;
+import ru.ac.checkpointmanager.model.avatar.Avatar;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 
@@ -43,4 +43,5 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     @Query(value = "SELECT u.* FROM users u JOIN passes p on u.id = p.user_id WHERE p.id = :passId", nativeQuery = true)
     User findByPassId(@Param("passId") UUID passId);
+
 }

@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.dto;
+package ru.ac.checkpointmanager.dto.avatar;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;

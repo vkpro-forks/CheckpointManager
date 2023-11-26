@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.ac.checkpointmanager.dto.AvatarDTO;
+import ru.ac.checkpointmanager.dto.avatar.AvatarDTO;
 import ru.ac.checkpointmanager.model.enums.Role;
 
 import java.util.UUID;
