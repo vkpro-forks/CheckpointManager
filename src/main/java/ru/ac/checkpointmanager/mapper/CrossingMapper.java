@@ -1,8 +1,5 @@
 package ru.ac.checkpointmanager.mapper;
 
-import jakarta.annotation.PostConstruct;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
@@ -10,46 +7,33 @@ import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
-import ru.ac.checkpointmanager.exception.CheckpointNotFoundException;
-import ru.ac.checkpointmanager.exception.PassNotFoundException;
 import ru.ac.checkpointmanager.model.Crossing;
-import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
-import ru.ac.checkpointmanager.model.passes.Pass;
-import ru.ac.checkpointmanager.repository.CheckpointRepository;
-import ru.ac.checkpointmanager.repository.PassRepository;
 import ru.ac.checkpointmanager.service.checkpoints.CheckpointService;
 import ru.ac.checkpointmanager.service.passes.PassService;
-import ru.ac.checkpointmanager.service.passes.PassServiceImpl;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class CrossingMapper {
 
     private final ModelMapper modelMapper;
     private final PassService passService;
     private final CheckpointService checkpointService;
 
+    @Autowired
+    public CrossingMapper(PassService passService, CheckpointService checkpointService) {
+        this.modelMapper = new ModelMapper();
+        this.passService = passService;
+        this.checkpointService = checkpointService;
+        configureModelMapper();
+    }
+
 
     public Crossing toCrossing(CrossingDTO crossingDTO) {
-        log.debug("Mapping CrossingDTO to Crossing");
         Crossing crossing = modelMapper.map(crossingDTO, Crossing.class);
-
-        UUID passId = crossingDTO.getPassId();
-        log.debug("Fetching Pass with ID: {}", passId);
-        Pass pass = passService.findPassById(passId);
-        crossing.setPass(pass);
-
-        UUID checkpointId = crossingDTO.getCheckpointId();
-        log.debug("Fetching Checkpoint with ID: {}", checkpointId);
-        Checkpoint checkpoint = checkpointService.findCheckpointById(checkpointId);
-        crossing.setCheckpoint(checkpoint);
-
+        crossing.setDirection(crossingDTO.getDirection());
         return crossing;
     }
 
@@ -63,16 +47,23 @@ public class CrossingMapper {
                 .toList();
     }
 
-    @PostConstruct
     private void configureModelMapper() {
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+        modelMapper.addMappings(new PropertyMap<Crossing, CrossingDTO>() {
+            @Override
+            protected void configure() {
+                map(source.getPass().getId(), destination.getPassId());
+                map(source.getCheckpoint().getId(), destination.getCheckpointId());
+            }
+        });
         modelMapper.addMappings(new PropertyMap<CrossingDTO, Crossing>() {
             @Override
             protected void configure() {
-                skip(destination.getPass());
-                skip(destination.getCheckpoint());
+                using(ctx -> passService.findPassById(((CrossingDTO) ctx.getSource()).getPassId()))
+                        .map(source, destination.getPass());
+                using(ctx -> checkpointService.findCheckpointById(((CrossingDTO) ctx.getSource()).getCheckpointId()))
+                        .map(source, destination.getCheckpoint());
             }
         });
-        log.debug("ModelMapper has been configured");
     }
 }
