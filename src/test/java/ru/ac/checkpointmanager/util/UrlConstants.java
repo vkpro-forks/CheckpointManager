@@ -2,21 +2,21 @@ package ru.ac.checkpointmanager.util;
 
 public class UrlConstants {
 
-    public static final String CAR_URL = "/chpman/car";
+    public static final String CAR_URL = "/api/v1/car";
 
     public static final String CAR_BRANDS_URL = CAR_URL + "/brands";
 
-    public static final String AVATAR_URL = "/chpman/avatars";
+    public static final String AVATAR_URL = "/api/v1/avatars";
 
     public static final String AVATAR_URL_PREVIEW = AVATAR_URL + "/preview";
 
-    public static final String CROSSING_URL = "/chpman/crossing";
+    public static final String CROSSING_URL = "/api/v1/crossing";
 
     public static final String CROSSING_MARK_URL = CROSSING_URL + "/mark";
 
-    public static final String CHECKPOINT_URL = "/chpman/checkpoint";
+    public static final String CHECKPOINT_URL = "/api/v1/checkpoint";
 
-    public static final String PASS_URL = "/chpman/pass";
+    public static final String PASS_URL = "/api/v1/pass";
 
     public static final String PASS_URL_CANCEL = PASS_URL + "/%s/cancel";
 
