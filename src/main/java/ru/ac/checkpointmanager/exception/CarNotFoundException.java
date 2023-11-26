@@ -1,6 +1,8 @@
 package ru.ac.checkpointmanager.exception;
 
-public class CarNotFoundException extends RuntimeException {
+import jakarta.persistence.EntityNotFoundException;
+
+public class CarNotFoundException extends EntityNotFoundException {
     public CarNotFoundException() {
     }
 
@@ -8,7 +10,4 @@ public class CarNotFoundException extends RuntimeException {
         super(message);
     }
 
-    public CarNotFoundException(String message, Throwable cause) {
-        super(message, cause);
-    }
 }

@@ -22,7 +22,7 @@ public class OpenApiConfig {
         return new OpenAPI()
                 .addServersItem(new Server().url("http://localhost:8080"))
                 .info(new Info().title("Checkpoint Manager")
-                        .description("Наши бэкэндеры лучшие!")
+                        .description("Enjoy using our API")
                         .version(appVersion));
     }
 
@@ -32,15 +32,15 @@ public class OpenApiConfig {
         return new OpenAPI()
                 .addServersItem(new Server().url("https://checkpoint-manager.ru"))
                 .info(new Info().title("Checkpoint Manager")
-                        .description("Наши бэкэндеры лучшие!")
+                        .description("Enjoy using our API")
                         .version(appVersion));
     }
 
     @Bean
     public GroupedOpenApi publicApi() {
         return GroupedOpenApi.builder()
-                .group("chpman")
-                .pathsToMatch("/chpman/**")
+                .group("божественная апишечка") //TODO потом сменить
+                .pathsToMatch("/api/**")
                 .build();
     }
 }

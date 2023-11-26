@@ -14,7 +14,6 @@ import ru.ac.checkpointmanager.model.passes.PassWalk;
 import ru.ac.checkpointmanager.service.territories.TerritoryService;
 import ru.ac.checkpointmanager.service.user.UserService;
 
-import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -63,21 +62,15 @@ public class PassMapper {
         return modelMapper.map(pass, PassDtoResponse.class);
     }
 
-    public List<PassDtoResponse> toPassDTO(List<Pass> pass) {
-        return pass.stream()
-                .map(e -> modelMapper.map(e, PassDtoResponse.class))
-                .toList();
-    }
-
     private void configureModelMapper() {
-        PropertyMap<PassDtoCreate, PassAuto> passAutoMapCreate = new PropertyMap<PassDtoCreate, PassAuto>() {
+        PropertyMap<PassDtoCreate, PassAuto> passAutoMapCreate = new PropertyMap<>() {
             @Override
             protected void configure() {
                 map().setId(UUID.randomUUID());
             }
         };
 
-        PropertyMap<PassDtoCreate, PassWalk> passWalkMapCreate = new PropertyMap<PassDtoCreate, PassWalk>() {
+        PropertyMap<PassDtoCreate, PassWalk> passWalkMapCreate = new PropertyMap<>() {
             @Override
             protected void configure() {
                 map().setId(UUID.randomUUID());

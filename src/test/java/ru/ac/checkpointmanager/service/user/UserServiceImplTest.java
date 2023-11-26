@@ -20,9 +20,13 @@ import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.exception.PhoneNumberNotFoundException;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
+
 import ru.ac.checkpointmanager.mapper.TerritoryMapper;
 import ru.ac.checkpointmanager.mapper.UserMapper;
 import ru.ac.checkpointmanager.model.Avatar;
+
+import ru.ac.checkpointmanager.model.avatar.Avatar;
+
 import ru.ac.checkpointmanager.model.TemporaryUser;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
@@ -30,6 +34,10 @@ import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.service.email.EmailService;
+
+
+import ru.ac.checkpointmanager.service.phone.PhoneService;
+import ru.ac.checkpointmanager.utils.Mapper;
 
 import java.util.*;
 
@@ -55,6 +63,8 @@ class UserServiceImplTest {
     private TemporaryUserService temporaryUserService;
     @Mock
     private EmailService emailService;
+    @Mock
+    private PhoneService phoneService;
 
     private UserService out;
 
@@ -73,6 +83,7 @@ class UserServiceImplTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+
         out = new UserServiceImpl(userMapper, territoryMapper, userRepository, phoneRepository, passwordEncoder, temporaryUserService, emailService);
 
         setUserArea();

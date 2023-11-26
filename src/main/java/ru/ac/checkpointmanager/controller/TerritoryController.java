@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("chpman/territory")
+@RequestMapping("api/v1/territory")
 @RequiredArgsConstructor
 @Tag(name = "Territory (территория)", description = "Администрирование списка территорий")
 @ApiResponses(value = {@ApiResponse(responseCode = "401", description = "UNAUTHORIZED: пользователь не авторизован"),

@@ -84,42 +84,42 @@ DO $$
         VALUES (visitor1_id, 'Петрович', '+79991234567', 'электрик'),
                (visitor2_id, 'Дон Румата Эсторский', '+79991234568', null);
 
-        INSERT INTO passes ( id, user_id, status, type_time, territory_id, note, added_at
-                           , start_time, end_time, name, car_id, visitor_id, dtype, favorite)
+        INSERT INTO passes ( id, user_id, status, type_time, territory_id, added_at
+                           , start_time, end_time, comment, car_id, visitor_id, dtype, favorite)
 
                -- АКТИВНЫЕ ПРОПУСКА НА НЕДЕЛЮ, без пересечений, с ними можно проверять пересечения
                -- автомобильный разовый
-        VALUES (pass1_id, user1_id, 'ACTIVE', 'ONETIME', ter1_id, 'note1', nowDT
+        VALUES (pass1_id, user1_id, 'ACTIVE', 'ONETIME', ter1_id, nowDT
                , nowDT, nowDT + interval '7 day', 'ACTIVE FOR WEEK', car1_id, null, 'AUTO', true),
 
                -- автомобильный постоянный
-               (pass2_id, user1_id, 'ACTIVE', 'PERMANENT', ter2_id, null, nowDT
+               (pass2_id, user1_id, 'ACTIVE', 'PERMANENT', ter2_id, nowDT
                , nowDT, nowDT + interval '7 day', 'ACTIVE FOR WEEK', car2_id, null, 'AUTO', false),
 
                -- пешеходный разовый
-               (pass3_id, user1_id, 'ACTIVE', 'ONETIME', ter1_id, 'note3', nowDT
+               (pass3_id, user1_id, 'ACTIVE', 'ONETIME', ter1_id, nowDT
                , nowDT, nowDT + interval '7 day', 'ACTIVE FOR WEEK', null, visitor1_id, 'WALK', true),
 
                -- пешеходный постоянный
-               (pass4_id, user1_id, 'ACTIVE', 'PERMANENT', ter2_id, null, nowDT
+               (pass4_id, user1_id, 'ACTIVE', 'PERMANENT', ter2_id, nowDT
                , nowDT, nowDT + interval '7 day', 'ACTIVE FOR WEEK', null, visitor2_id, 'WALK', false),
 
 
                -- ПРОПУСКА НА МИНУТУ, они должны поменять статус при проверке
                -- активный автомобильный разовый, нет пересечений - должен УСТАРЕТЬ
-               (pass5_id, user2_id, 'ACTIVE', 'ONETIME', ter1_id, null, nowDT
+               (pass5_id, user2_id, 'ACTIVE', 'ONETIME', ter1_id, nowDT
                , nowDT - interval '1 hour', nowDT, 'should be OUTDATED', car1_id, null, 'AUTO', true),
 
                -- активный автомобильный разовый, одно пересечение на въезд - должен стать ВАРНИНГ
-               (pass6_id, user2_id, 'ACTIVE', 'ONETIME', ter1_id, null, nowDT
+               (pass6_id, user2_id, 'ACTIVE', 'ONETIME', ter1_id, nowDT
                , nowDT - interval '1 hour', nowDT, 'should be WARNING', car2_id, null, 'AUTO', false),
 
                -- активный пешеходный постоянный, пересечения на въезд и на выезд - должен стать ВЫПОЛНЕН
-               (pass7_id, user2_id, 'ACTIVE', 'ONETIME', ter1_id, null, nowDT
+               (pass7_id, user2_id, 'ACTIVE', 'ONETIME', ter1_id, nowDT
                , nowDT - interval '1 hour', nowDT, 'should be COMPLETED', null, visitor1_id, 'WALK', true),
 
                -- отложенный пешеходный разовый, должен стать АКТИВНЫМ на сутки
-               (pass8_id, user2_id, 'DELAYED', 'ONETIME', ter1_id, null, nowDT
+               (pass8_id, user2_id, 'DELAYED', 'ONETIME', ter1_id, nowDT
                , nowDT + interval '1 minute', nowDT + interval '1 day', 'should be ACTIVE', null, visitor2_id, 'WALK', false);
 
         INSERT INTO crossings (pass_id, checkpoint_id, local_date_time, direction)

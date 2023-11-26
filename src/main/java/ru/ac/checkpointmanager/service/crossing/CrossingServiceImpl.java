@@ -4,12 +4,15 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.ac.checkpointmanager.exception.*;
-import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
+import ru.ac.checkpointmanager.exception.CrossingNotFoundException;
+import ru.ac.checkpointmanager.exception.EntranceWasAlreadyException;
+import ru.ac.checkpointmanager.exception.InactivePassException;
+import ru.ac.checkpointmanager.exception.MismatchedTerritoryException;
 import ru.ac.checkpointmanager.model.Crossing;
+import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
 import ru.ac.checkpointmanager.model.checkpoints.CheckpointType;
-import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.enums.Direction;
+import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.model.passes.PassTypeTime;
 import ru.ac.checkpointmanager.repository.CheckpointRepository;
@@ -40,7 +43,7 @@ public class CrossingServiceImpl implements CrossingService {
         if (checkpoint.getType() != CheckpointType.UNIVERSAL &&
                 !pass.getDtype().equals(checkpoint.getType().toString())) {
             log.warn(String.format("Conflict between the types of pass and checkpoint " +
-                    "[crossing - %s], [pass - %s, %s], [checkpoint - %s, %s]",
+                            "[crossing - %s], [pass - %s, %s], [checkpoint - %s, %s]",
                     crossing.getId(), pass.getId(), pass.getDtype(), checkpoint.getId(), checkpoint.getType()));
         }
 
@@ -61,16 +64,13 @@ public class CrossingServiceImpl implements CrossingService {
     }
 
     @Override
-    public Crossing getCrossing(UUID uuid) {
-        if (uuid == null) {
-            log.warn("Attempt to get Crossing with null UUID");
-            throw new IllegalArgumentException("UUID cannot be null");
-        }
-        Optional<Crossing> visitorCrossing = crossingRepository.findById(uuid);
-        return visitorCrossing.orElseThrow(() -> {
-            log.warn("Crossing not found for UUID: {}", uuid);
-            return new CrossingNotFoundException("Crossing not found");
+    public Crossing getCrossing(UUID crossingId) {
+        Crossing crossing = crossingRepository.findById(crossingId).orElseThrow(() -> {
+            log.warn("[Crossing with id: {}] not found", crossingId);
+            return new CrossingNotFoundException("Crossing with id %s not found".formatted(crossingId));
         });
+        log.debug("Retrieved crossing with id {}", crossingId);
+        return crossing;
     }
 
 

@@ -58,7 +58,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((authorize) ->
                         authorize
-                                .requestMatchers("/chpman/authentication/**", "/chpman/confirm/**",
+                                .requestMatchers("/api/v1/authentication/**", "/api/v1/confirm/**",
                                         "/swagger-ui/**", "/v3/api-docs/**",
                                         "/error", "/webjars/**", "/swagger-ui.html"
                                 ).permitAll()

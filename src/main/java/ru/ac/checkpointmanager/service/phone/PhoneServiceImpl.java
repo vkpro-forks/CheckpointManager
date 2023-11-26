@@ -39,7 +39,7 @@ public class PhoneServiceImpl implements PhoneService {
         phoneDTO.setNumber(cleanPhone(phoneDTO.getNumber()));
 
         if (phoneRepository.existsByNumber(phoneDTO.getNumber())) {
-            log.error("Phone {} already exist or NULL", phoneDTO.getNumber());
+            log.warn("Phone {} already exist or NULL", phoneDTO.getNumber());
             throw new PhoneAlreadyExistException(String.format
                     ("Phone number %s already exist", phoneDTO.getNumber()));
         }

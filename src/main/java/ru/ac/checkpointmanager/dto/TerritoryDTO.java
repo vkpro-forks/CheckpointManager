@@ -1,7 +1,11 @@
 package ru.ac.checkpointmanager.dto;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.UUID;
@@ -9,6 +13,8 @@ import java.util.UUID;
 
 @Setter
 @Getter
+@AllArgsConstructor
+@NoArgsConstructor
 public class TerritoryDTO {
 
     private UUID id;

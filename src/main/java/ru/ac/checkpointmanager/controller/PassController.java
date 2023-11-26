@@ -1,30 +1,46 @@
 package ru.ac.checkpointmanager.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.*;
-import io.swagger.v3.oas.annotations.responses.*;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.*;
+import org.springframework.data.domain.Page;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import ru.ac.checkpointmanager.annotation.PagingParam;
+import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.dto.passes.PassDtoCreate;
 import ru.ac.checkpointmanager.dto.passes.PassDtoResponse;
 import ru.ac.checkpointmanager.dto.passes.PassDtoUpdate;
+import ru.ac.checkpointmanager.mapper.PassMapper;
 import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.service.passes.PassService;
-import ru.ac.checkpointmanager.utils.ErrorUtils;
-import ru.ac.checkpointmanager.mapper.PassMapper;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("chpman/pass")
+@RequestMapping("api/v1/pass")
 @RequiredArgsConstructor
+@Validated
 @Tag(name = "Pass (пропуска)", description = "Операции с пропусками для машин и людей")
 @ApiResponses(value = {@ApiResponse(responseCode = "401", description = "UNAUTHORIZED: пользователь не авторизован"),
         @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса")})
@@ -46,19 +62,18 @@ public class PassController {
             @ApiResponse(responseCode = "404", description = "Не найден пользователь или территория")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @PostMapping
-    public ResponseEntity<?> addPass(@RequestBody @Valid PassDtoCreate passDTOcreate,
-                                           BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
-        }
-
+    public PassDtoResponse addPass(@RequestBody @Valid PassDtoCreate passDTOcreate) {
         Pass newPass = service.addPass(mapper.toPass(passDTOcreate));
-        return ResponseEntity.ok(mapper.toPassDTO(newPass));
+        return mapper.toPassDTO(newPass);
     }
 
     /* READ */
     @Operation(summary = "Получить список всех пропусков",
-            description = "Доступ: ADMIN.")
+            description = "Доступ: ADMIN.",
+    parameters = {
+            @Parameter(in = ParameterIn.QUERY, name = "page", example = "0"),
+            @Parameter(in = ParameterIn.QUERY, name = "size", example = "20")
+    })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуска найдены",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -66,12 +81,11 @@ public class PassController {
             @ApiResponse(responseCode = "404", description = "Пропуска не найдены")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @GetMapping
-    public ResponseEntity<List<PassDtoResponse>> getPasses() {
-        List<Pass> passes = service.findPasses();
-        if (passes.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(mapper.toPassDTO(passes));
+    public ResponseEntity<Page<PassDtoResponse>> getPasses(@Schema(hidden = true)
+                                                           @Valid @PagingParam PagingParams pagingParams) {
+
+        Page<Pass> passPage = service.findPasses(pagingParams);
+        return ResponseEntity.ok(passPage.map(mapper::toPassDTO));
     }
 
     @Operation(summary = "Найти пропуск по id",
@@ -89,7 +103,11 @@ public class PassController {
     }
 
     @Operation(summary = "Получить список пропусков конкретного пользователя",
-            description = "Доступ: ADMIN, USER.")
+            description = "Доступ: ADMIN, USER.",
+            parameters = {
+                    @Parameter(in = ParameterIn.QUERY, name = "page", example = "0"),
+                    @Parameter(in = ParameterIn.QUERY, name = "size", example = "20")
+            })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуска найдены",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -97,16 +115,19 @@ public class PassController {
             @ApiResponse(responseCode = "404", description = "Пропуска не найдены; пользователь не найден")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<PassDtoResponse>> getPassesByUserId(@PathVariable UUID userId) {
-        List<Pass> passes = service.findPassesByUser(userId);
-        if (passes.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(mapper.toPassDTO(passes));
+    public ResponseEntity<Page<PassDtoResponse>> getPassesByUserId(@PathVariable UUID userId, @Schema(hidden = true)
+                                                                   @Valid @PagingParam PagingParams pagingParams) {
+
+        Page<Pass> passPage = service.findPassesByUser(userId, pagingParams);
+        return ResponseEntity.ok(passPage.map(mapper::toPassDTO));
     }
 
     @Operation(summary = "Получить список пропусков на конкретную территорию",
-            description = "Доступ: ADMIN, MANAGER, SECURITY.")
+            description = "Доступ: ADMIN, MANAGER, SECURITY.",
+            parameters = {
+                    @Parameter(in = ParameterIn.QUERY, name = "page", example = "0"),
+                    @Parameter(in = ParameterIn.QUERY, name = "size", example = "20")
+            })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуска найдены",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -114,12 +135,11 @@ public class PassController {
             @ApiResponse(responseCode = "404", description = "Пропуска не найдены; территория не найдена")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/territory/{territoryId}")
-    public ResponseEntity<List<PassDtoResponse>> getPassesByTerritoryId(@PathVariable UUID territoryId) {
-        List<Pass> passes = service.findPassesByTerritory(territoryId);
-        if (passes.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(mapper.toPassDTO(passes));
+    public ResponseEntity<Page<PassDtoResponse>> getPassesByTerritoryId(@PathVariable UUID territoryId, @Schema(hidden = true)
+                                                                        @Valid @PagingParam PagingParams pagingParams) {
+
+        Page<Pass> passPage = service.findPassesByTerritory(territoryId, pagingParams);
+        return ResponseEntity.ok(passPage.map(mapper::toPassDTO));
     }
 
     /* UPDATE */
@@ -134,17 +154,9 @@ public class PassController {
             @ApiResponse(responseCode = "404", description = "Не найден пользователь или территория")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @PutMapping
-    public ResponseEntity<?> editPass(@RequestBody @Valid PassDtoUpdate passDtoUpdate,
-                                            BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
-        }
-        Pass currentPass = service.findPass(passDtoUpdate.getId());
-        if (currentPass == null) {
-            return ResponseEntity.notFound().build();
-        }
+    public PassDtoResponse updatePass(@RequestBody @Valid PassDtoUpdate passDtoUpdate) {
         Pass updatedPass = service.updatePass(mapper.toPass(passDtoUpdate));
-        return ResponseEntity.ok(mapper.toPassDTO(updatedPass));
+        return mapper.toPassDTO(updatedPass);
     }
 
     @Operation(summary = "Отменить активный пропуск",
@@ -224,10 +236,6 @@ public class PassController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @DeleteMapping("{id}")
     public ResponseEntity<Void> deletePass(@PathVariable UUID id) {
-        Pass currentPass = service.findPass(id);
-        if (currentPass == null) {
-            return ResponseEntity.notFound().build();
-        }
         service.deletePass(id);
         return ResponseEntity.ok().build();
     }
