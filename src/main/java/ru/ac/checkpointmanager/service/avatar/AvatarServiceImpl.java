@@ -25,8 +25,10 @@ public class AvatarServiceImpl implements AvatarService {
     public static final String AVATAR_NOT_FOUND_MSG = "Avatar with id: %s not found";
     private final AvatarRepository repository;
     private final UserRepository userRepository;
+
     private final AvatarMapper avatarMapper;
     private final AvatarHelper avatarHelper;
+
 
 
     /**
