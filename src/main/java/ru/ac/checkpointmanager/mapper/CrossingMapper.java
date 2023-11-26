@@ -3,7 +3,6 @@ package ru.ac.checkpointmanager.mapper;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
-import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
@@ -51,7 +50,7 @@ public class CrossingMapper {
         PropertyMap<CrossingDTO, Crossing> crossingMap = new PropertyMap<>() {
             @Override
             protected void configure() {
-                map().setId(null);
+                skip(destination.getId());
 
                 using(ctx -> {
                     UUID checkpointId = ((CrossingDTO) ctx.getSource()).getCheckpointId();
@@ -60,7 +59,7 @@ public class CrossingMapper {
 
                 using(ctx -> {
                     UUID passId = ((CrossingDTO) ctx.getSource()).getPassId();
-                    return passService.findPassById(passId);
+                    return passService.findPass(passId);
                 }).map(source, destination.getPass());
             }
         };

@@ -34,5 +34,4 @@ public interface PassService {
 
     void deletePass(UUID id);
 
-    Pass findPassById(UUID id);
 }

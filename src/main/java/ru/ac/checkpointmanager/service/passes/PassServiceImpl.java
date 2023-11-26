@@ -416,14 +416,4 @@ public class PassServiceImpl implements PassService {
             return PassStatus.WARNING;
         }
     }
-
-    @Override
-    public Pass findPassById(UUID id) {
-        log.debug("Searching for Pass with UUID: {}", id);
-        return repository.findById(id).orElseThrow(
-                () -> {
-                    log.warn(PASS_NOT_FOUND_LOG, id);
-                    return new PassNotFoundException(PASS_NOT_FOUND_MSG.formatted(id));
-                });
-    }
 }
