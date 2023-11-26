@@ -13,6 +13,7 @@ import ru.ac.checkpointmanager.service.passes.PassService;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -32,10 +33,9 @@ public class CrossingMapper {
 
 
     public Crossing toCrossing(CrossingDTO crossingDTO) {
-        Crossing crossing = modelMapper.map(crossingDTO, Crossing.class);
-        crossing.setDirection(crossingDTO.getDirection());
-        return crossing;
+        return modelMapper.map(crossingDTO, Crossing.class);
     }
+
 
     public CrossingDTO toCrossingDTO(Crossing crossing) {
         return modelMapper.map(crossing, CrossingDTO.class);
@@ -48,22 +48,24 @@ public class CrossingMapper {
     }
 
     private void configureModelMapper() {
-        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-        modelMapper.addMappings(new PropertyMap<Crossing, CrossingDTO>() {
+        PropertyMap<CrossingDTO, Crossing> crossingMap = new PropertyMap<>() {
             @Override
             protected void configure() {
-                map(source.getPass().getId(), destination.getPassId());
-                map(source.getCheckpoint().getId(), destination.getCheckpointId());
+                map().setId(null);
+
+                using(ctx -> {
+                    UUID checkpointId = ((CrossingDTO) ctx.getSource()).getCheckpointId();
+                    return checkpointService.findCheckpointById(checkpointId);
+                }).map(source, destination.getCheckpoint());
+
+                using(ctx -> {
+                    UUID passId = ((CrossingDTO) ctx.getSource()).getPassId();
+                    return passService.findPassById(passId);
+                }).map(source, destination.getPass());
             }
-        });
-        modelMapper.addMappings(new PropertyMap<CrossingDTO, Crossing>() {
-            @Override
-            protected void configure() {
-                using(ctx -> passService.findPassById(((CrossingDTO) ctx.getSource()).getPassId()))
-                        .map(source, destination.getPass());
-                using(ctx -> checkpointService.findCheckpointById(((CrossingDTO) ctx.getSource()).getCheckpointId()))
-                        .map(source, destination.getCheckpoint());
-            }
-        });
+        };
+
+        modelMapper.addMappings(crossingMap);
     }
+
 }
