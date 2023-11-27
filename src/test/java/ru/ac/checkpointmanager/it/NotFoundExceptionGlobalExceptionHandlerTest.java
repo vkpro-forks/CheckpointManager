@@ -357,12 +357,31 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
     @SneakyThrows
     void shouldHandleTerritoryNotFoundExceptionForAttachUserToTerritory() {
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
-                        .patch(UrlConstants.TERR_ATTACH_URL.formatted(TestUtils.TERR_ID, TestUtils.USER_ID)))
+                        .patch(UrlConstants.TERR_ATTACH_DETACH_URL.formatted(TestUtils.TERR_ID, TestUtils.USER_ID)))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith(TERRITORY)));
         checkNotFoundFields(resultActions);
     }
 
+    @Test
+    @SneakyThrows
+    void shouldHandleTerritoryNotFoundExceptionForDeleteTerritory() {
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                        .delete(UrlConstants.TERR_URL + "/" + TestUtils.TERR_ID))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(Matchers.startsWith(TERRITORY)));
+        checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldHandleTerritoryNotFoundExceptionForDetachUserToTerritory() {
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                        .delete(UrlConstants.TERR_ATTACH_DETACH_URL.formatted(TestUtils.TERR_ID, TestUtils.USER_ID)))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(Matchers.startsWith(TERRITORY)));
+        checkNotFoundFields(resultActions);
+    }
 
     private void checkNotFoundFields(ResultActions resultActions) throws Exception {
         resultActions.andExpect(MockMvcResultMatchers.status().isNotFound())

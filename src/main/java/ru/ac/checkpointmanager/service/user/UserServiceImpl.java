@@ -100,13 +100,9 @@ public class UserServiceImpl implements UserService {
      * @see TerritoryNotFoundException
      */
     @Override
-    public List<TerritoryDTO> findTerritoriesByUserId(UUID userId) {
+    public List<TerritoryDTO> findTerritoriesByUserId(UUID userId) {//FIXME this guy should be in territoryService :)
         log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), userId);
         List<Territory> territories = userRepository.findTerritoriesByUserId(userId);
-        if (territories.isEmpty()) {
-            log.warn("Territory for User {} not found", userId);
-            throw new TerritoryNotFoundException(String.format("Territory for User not found [user_id=%s]", userId));
-        }
         return territoryMapper.toTerritoriesDTO(territories);
     }
 

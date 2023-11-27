@@ -24,6 +24,7 @@ public class TerritoryServiceImpl implements TerritoryService {
     private static final String TERRITORY_NOT_FOUND_MSG = "Territory with id: %s not found";
     private static final String TERRITORY_NOT_FOUND_LOG = "Territory with id: {} not found";
     private static final String METHOD_CALLED_UUID_LOG = "Method {}, UUID - {}";
+    public static final String METHOD_USER_TERR = "Method {}, user - {}, terr - {}";
 
     private final TerritoryRepository territoryRepository;
 
@@ -89,7 +90,7 @@ public class TerritoryServiceImpl implements TerritoryService {
 
     @Override//FIXME transaction?
     public void attachUserToTerritory(UUID territoryId, UUID userId) {
-        log.debug("Method {}, user - {}, terr - {}", MethodLog.getMethodName(), userId, territoryId);
+        log.debug(METHOD_USER_TERR, MethodLog.getMethodName(), userId, territoryId);
         Territory territory = territoryRepository.findById(territoryId).orElseThrow(
                 () -> {
                     log.warn(TERRITORY_NOT_FOUND_LOG, territoryId);
@@ -112,20 +113,23 @@ public class TerritoryServiceImpl implements TerritoryService {
     @Override
     public void deleteTerritoryById(UUID id) {
         log.debug(METHOD_CALLED_UUID_LOG, MethodLog.getMethodName(), id);
-
         if (territoryRepository.findById(id).isEmpty()) {
             log.warn(TERRITORY_NOT_FOUND_LOG, id);
             throw new TerritoryNotFoundException(TERRITORY_NOT_FOUND_MSG.formatted(id));
         }
+        log.info("Territory with [id: {}] was successfully deleted", id);
         territoryRepository.deleteById(id);
     }
 
     @Override
     public void detachUserFromTerritory(UUID territoryId, UUID userId) {
-        log.debug("Method {}, user - {}, terr - {}", MethodLog.getMethodName(), userId, territoryId);
+        log.debug(METHOD_USER_TERR, MethodLog.getMethodName(), userId, territoryId);
 
         Territory territory = territoryRepository.findById(territoryId).orElseThrow(
-                () -> new TerritoryNotFoundException(String.format("Territory not found [Id=%s]", territoryId)));
+                () -> {
+                    log.warn(TERRITORY_NOT_FOUND_LOG, territoryId);
+                    return new TerritoryNotFoundException(TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
+                });
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new UserNotFoundException(String.format("User not found [Id=%s]", userId)));
 

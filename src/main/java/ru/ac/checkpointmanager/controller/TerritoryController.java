@@ -177,7 +177,7 @@ public class TerritoryController {
             @ApiResponse(responseCode = "200", description = "Территория удалена"),
             @ApiResponse(responseCode = "404", description = "Территория не найдена")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")//FIXME TESTED
     public ResponseEntity<Void> deleteTerritory(@PathVariable UUID id) {
 
         territoryService.deleteTerritoryById(id);

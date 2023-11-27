@@ -34,7 +34,7 @@ public class UrlConstants {
 
     public static final String TERR_USERS_URL = TERR_URL + "/%s/users";
 
-    public static final String TERR_ATTACH_URL = TERR_URL + "/%s/user/%s";
+    public static final String TERR_ATTACH_DETACH_URL = TERR_URL + "/%s/user/%s";
 
 
     private UrlConstants() {
