@@ -30,9 +30,6 @@ import ru.ac.checkpointmanager.mapper.CheckpointMapper;
 import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
 import ru.ac.checkpointmanager.service.checkpoints.CheckpointService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
-import jakarta.validation.*;
-import ru.ac.checkpointmanager.utils.Mapper;
-
 
 import java.util.List;
 import java.util.UUID;
