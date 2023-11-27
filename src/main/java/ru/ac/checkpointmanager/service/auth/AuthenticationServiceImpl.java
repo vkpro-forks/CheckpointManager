@@ -21,6 +21,7 @@ import ru.ac.checkpointmanager.dto.IsAuthenticatedResponse;
 import ru.ac.checkpointmanager.dto.user.LoginResponse;
 import ru.ac.checkpointmanager.dto.user.UserAuthDTO;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
+import ru.ac.checkpointmanager.mapper.UserMapper;
 import ru.ac.checkpointmanager.model.TemporaryUser;
 import ru.ac.checkpointmanager.model.Token;
 import ru.ac.checkpointmanager.model.User;
@@ -30,7 +31,6 @@ import ru.ac.checkpointmanager.repository.TokenRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.service.email.EmailService;
 import ru.ac.checkpointmanager.service.user.TemporaryUserService;
-import ru.ac.checkpointmanager.utils.Mapper;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.io.IOException;
@@ -56,7 +56,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
 
-    private final Mapper mapper;
+    private final UserMapper userMapper;
 
     /**
      * Предварительная регистрация нового пользователя в системе.
@@ -90,7 +90,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new IllegalStateException(String.format("Email %s already taken", userAuthDTO.getEmail()));
         }
 
-        TemporaryUser temporaryUser = mapper.toTemporaryUser(userAuthDTO);
+        TemporaryUser temporaryUser = userMapper.toTemporaryUser(userAuthDTO);
 
         String encodedPassword = passwordEncoder.encode(temporaryUser.getPassword());
         temporaryUser.setPassword(encodedPassword);
@@ -134,7 +134,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         TemporaryUser tempUser = temporaryUserService.findByVerifiedToken(token);
 
         if (tempUser != null) {
-            User user = mapper.toUser(tempUser);
+            User user = userMapper.toUser(tempUser);
             user.setRole(Role.USER);
             user.setIsBlocked(false);
 
@@ -199,7 +199,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         saveUserToken(user, jwtToken);
         log.debug("Access token for {} saved", user.getEmail());
 
-        LoginResponse response = mapper.toLoginResponse(user);
+        LoginResponse response = userMapper.toLoginResponse(user);
         response.setAccessToken(jwtToken);
         response.setRefreshToken(refreshToken);
         return response;

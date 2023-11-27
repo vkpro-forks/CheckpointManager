@@ -28,11 +28,12 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.dto.CheckpointDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
+import ru.ac.checkpointmanager.mapper.TerritoryMapper;
+import ru.ac.checkpointmanager.mapper.UserMapper;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.service.territories.TerritoryService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
-import ru.ac.checkpointmanager.utils.Mapper;
 
 import java.util.List;
 import java.util.UUID;
@@ -47,7 +48,8 @@ import java.util.UUID;
 public class TerritoryController {
 
     private final TerritoryService service;
-    private final Mapper mapper;
+    private final TerritoryMapper territoryMapper;
+    private final UserMapper userMapper;
 
     /* CREATE */
     @Operation(summary = "Добавить новую территорию",
@@ -65,8 +67,8 @@ public class TerritoryController {
             return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
         }
 
-        Territory newTerritory = service.addTerritory(mapper.toTerritory(territoryDTO));
-        return ResponseEntity.ok(mapper.toTerritoryDTO(newTerritory));
+        Territory newTerritory = service.addTerritory(territoryMapper.toTerritory(territoryDTO));
+        return ResponseEntity.ok(territoryMapper.toTerritoryDTO(newTerritory));
     }
 
     /* READ */
@@ -81,7 +83,7 @@ public class TerritoryController {
     @GetMapping("/{territoryId}")
     public ResponseEntity<TerritoryDTO> getTerritory(@PathVariable("territoryId") UUID territoryId) {
         Territory territory = service.findTerritoryById(territoryId);
-        return ResponseEntity.ok(mapper.toTerritoryDTO(territory));
+       return ResponseEntity.ok(territoryMapper.toTerritoryDTO(territory));
     }
 
     @Operation(summary = "Найти список пользователей, привязанных к территории",
@@ -96,7 +98,7 @@ public class TerritoryController {
     public ResponseEntity<List<UserResponseDTO>> getUsersByTerritory(@PathVariable UUID territoryId) {
         List<User> users = service.findUsersByTerritoryId(territoryId);
 
-        return ResponseEntity.ok(mapper.toUsersDTO(users));
+        return ResponseEntity.ok(userMapper.toUsersDTO(users));
     }
 
     @Operation(summary = "Найти список территорий по названию",
@@ -113,7 +115,7 @@ public class TerritoryController {
         if (territories.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(mapper.toTerritoriesDTO(territories));
+        return ResponseEntity.ok(territoryMapper.toTerritoriesDTO(territories));
     }
 
     @Operation(summary = "Получить список всех территорий",
@@ -130,7 +132,7 @@ public class TerritoryController {
         if (territories.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(mapper.toTerritoriesDTO(territories));
+        return ResponseEntity.ok(territoryMapper.toTerritoriesDTO(territories));
     }
 
     /* UPDATE */
@@ -150,8 +152,8 @@ public class TerritoryController {
             return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
         }
 
-        Territory updatedTerritory = service.updateTerritory(mapper.toTerritory(territoryDTO));
-        return ResponseEntity.ok(mapper.toTerritoryDTO(updatedTerritory));
+        Territory updatedTerritory = service.updateTerritory(territoryMapper.toTerritory(territoryDTO));
+        return ResponseEntity.ok(territoryMapper.toTerritoryDTO(updatedTerritory));
     }
 
     @Operation(summary = "Прикрепить пользователя к территории (дать право создавать пропуска)",

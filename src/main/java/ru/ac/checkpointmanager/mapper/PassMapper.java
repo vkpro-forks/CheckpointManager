@@ -14,11 +14,9 @@ import ru.ac.checkpointmanager.model.passes.PassWalk;
 import ru.ac.checkpointmanager.service.territories.TerritoryService;
 import ru.ac.checkpointmanager.service.user.UserService;
 
-import java.util.UUID;
-
 @Component
 @Slf4j
-public class PassMapper {
+public class    PassMapper {
 
     private final ModelMapper modelMapper;
     private final UserService userService;
@@ -66,14 +64,14 @@ public class PassMapper {
         PropertyMap<PassDtoCreate, PassAuto> passAutoMapCreate = new PropertyMap<>() {
             @Override
             protected void configure() {
-                map().setId(UUID.randomUUID());
+                map().setId(null);
             }
         };
 
         PropertyMap<PassDtoCreate, PassWalk> passWalkMapCreate = new PropertyMap<>() {
             @Override
             protected void configure() {
-                map().setId(UUID.randomUUID());
+                map().setId(null);
             }
         };
 
