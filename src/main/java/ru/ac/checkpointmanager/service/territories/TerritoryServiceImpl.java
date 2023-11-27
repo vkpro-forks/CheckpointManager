@@ -70,7 +70,7 @@ public class TerritoryServiceImpl implements TerritoryService {
         return territoryRepository.findAll();
     }
 
-    @Override//FIXME transaction?
+    @Override
     public Territory updateTerritory(Territory territory) {
         UUID territoryId = territory.getId();
         log.debug(METHOD_CALLED_UUID_LOG, MethodLog.getMethodName(), territoryId);
@@ -88,7 +88,7 @@ public class TerritoryServiceImpl implements TerritoryService {
         return territoryRepository.save(foundTerritory);
     }
 
-    @Override//FIXME transaction?
+    @Override
     public void attachUserToTerritory(UUID territoryId, UUID userId) {
         log.debug(METHOD_USER_TERR, MethodLog.getMethodName(), userId, territoryId);
         Territory territory = territoryRepository.findById(territoryId).orElseThrow(
@@ -98,7 +98,6 @@ public class TerritoryServiceImpl implements TerritoryService {
                 });
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new UserNotFoundException(String.format("User not found [Id=%s]", userId)));
-        //FIXME if territory and user dont exist, why should i check it's relations? moved up
         if (territoryRepository.checkUserTerritoryRelation(userId, territoryId)) {
             String message = String.format("User [%s] and territory [%s] are already connected", userId, territoryId);
             log.warn(message);

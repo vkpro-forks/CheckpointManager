@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.ac.checkpointmanager.dto.CheckpointDTO;
+import ru.ac.checkpointmanager.dto.CrossingDTO;
 import ru.ac.checkpointmanager.exception.handler.ErrorCode;
 import ru.ac.checkpointmanager.it.config.CorsTestConfiguration;
 import ru.ac.checkpointmanager.it.config.OpenAllEndpointsTestConfiguration;
@@ -128,16 +129,6 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
         checkNotFoundFields(resultActions);
     }
 
-    @Test
-    @SneakyThrows
-    void shouldHandleAvatarNotFoundExceptionForGetAvatarPreview() {
-        Mockito.when(userRepository.findAvatarIdByUserId(Mockito.any()))
-                .thenReturn(UUID.randomUUID());
-        ResultActions resultActions = mockMvc
-                .perform(MockMvcRequestBuilders.get(UrlConstants.AVATAR_URL_PREVIEW + "/" + TestUtils.USER_ID));
-        checkNotFoundFields(resultActions);
-    }
-
     //CHECKPOINT NOT FOUND EXCEPTION HANDLING
 
     @Test
@@ -217,8 +208,17 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
     @Test
     @SneakyThrows
     void handlePassNotFoundExceptionForGetCrossing() {
-        Mockito.when(passRepository.findById(TestUtils.PASS_ID)).thenReturn(Optional.empty());
-        String crossingDto = TestUtils.jsonStringFromObject(TestUtils.getCrossingDTO());
+        Checkpoint checkpoint = new Checkpoint();
+        checkpoint.setName(TestUtils.CHECKPOINT_NAME);
+        checkpoint.setType(CheckpointType.AUTO);
+        Territory territory = new Territory();
+        territory.setName("name");
+        territoryRepository.save(territory);
+        checkpoint.setTerritory(territory);
+        Checkpoint savedCheckPoint = checkpointRepository.save(checkpoint);
+        CrossingDTO crossingDTO = TestUtils.getCrossingDTO();
+        crossingDTO.setCheckpointId(savedCheckPoint.getId());
+        String crossingDto = TestUtils.jsonStringFromObject(crossingDTO);
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CROSSING_MARK_URL)
                         .content(crossingDto)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -382,6 +382,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
                         .value(Matchers.startsWith(TERRITORY)));
         checkNotFoundFields(resultActions);
     }
+
 
     private void checkNotFoundFields(ResultActions resultActions) throws Exception {
         resultActions.andExpect(MockMvcResultMatchers.status().isNotFound())

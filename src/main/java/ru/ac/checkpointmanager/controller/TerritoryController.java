@@ -80,7 +80,7 @@ public class TerritoryController {
                             schema = @Schema(implementation = TerritoryDTO.class))}),
             @ApiResponse(responseCode = "404", description = "Территория не найдена")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
-    @GetMapping("/{territoryId}")//FIXME TESTED
+    @GetMapping("/{territoryId}")
     public ResponseEntity<TerritoryDTO> getTerritory(@PathVariable("territoryId") UUID territoryId) {
         Territory territory = territoryService.findTerritoryById(territoryId);
         return ResponseEntity.ok(territoryMapper.toTerritoryDTO(territory));
@@ -94,7 +94,7 @@ public class TerritoryController {
                             array = @ArraySchema(schema = @Schema(implementation = UserResponseDTO.class)))),
             @ApiResponse(responseCode = "404", description = "Территория или пользователи не найдены")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
-    @GetMapping("/{territoryId}/users")//FIXME TESTED
+    @GetMapping("/{territoryId}/users")
     public ResponseEntity<List<UserResponseDTO>> getUsersByTerritory(@PathVariable UUID territoryId) {
         List<User> users = territoryService.findUsersByTerritoryId(territoryId);
         return ResponseEntity.ok(userMapper.toUsersDTO(users));
@@ -145,7 +145,7 @@ public class TerritoryController {
             @ApiResponse(responseCode = "404", description = "Территория не найдена")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @PutMapping
-    public ResponseEntity<?> updateTerritory(@RequestBody @Valid TerritoryDTO territoryDTO,//FIXME TESTED
+    public ResponseEntity<?> updateTerritory(@RequestBody @Valid TerritoryDTO territoryDTO,
                                              BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
@@ -162,7 +162,7 @@ public class TerritoryController {
             @ApiResponse(responseCode = "400", description = "Указанные пользователь и территория уже соединены"),
             @ApiResponse(responseCode = "404", description = "Пользователь или территория не найдены")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
-    @PatchMapping("/{territoryId}/user/{userId}")//FIXME TESTED
+    @PatchMapping("/{territoryId}/user/{userId}")
     public ResponseEntity<?> attachUserToTerritory(@PathVariable UUID territoryId,
                                                    @PathVariable UUID userId) {
 
@@ -177,9 +177,8 @@ public class TerritoryController {
             @ApiResponse(responseCode = "200", description = "Территория удалена"),
             @ApiResponse(responseCode = "404", description = "Территория не найдена")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    @DeleteMapping("/{id}")//FIXME TESTED
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTerritory(@PathVariable UUID id) {
-
         territoryService.deleteTerritoryById(id);
         return ResponseEntity.ok().build();
     }
