@@ -56,7 +56,7 @@ public class CheckpointController {
             @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей; не найдена указанная территория")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @PostMapping
-    public ResponseEntity<?> addCheckpoint(@RequestBody @Valid CheckpointDTO checkpointDTO,//FIXME TESTED
+    public ResponseEntity<?> addCheckpoint(@RequestBody @Valid CheckpointDTO checkpointDTO,
                                            BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
@@ -148,7 +148,7 @@ public class CheckpointController {
             @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей; не найдена указанная территория"),
             @ApiResponse(responseCode = "404", description = "КПП не найден")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
-    @PutMapping//FIXME TESTED
+    @PutMapping
     public ResponseEntity<?> updateCheckpoint(@RequestBody @Valid CheckpointDTO checkpointDTO,
                                               BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
