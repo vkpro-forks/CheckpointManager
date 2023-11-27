@@ -42,10 +42,17 @@ public class PassServiceImpl implements PassService {
 
     public static final String PASS_NOT_FOUND_LOG = "[Pass with id: {}] not found";
     public static final String PASS_NOT_FOUND_MSG = "Pass with id: %s not found";
-    private final PassRepository repository;
+    public static final String TERRITORY_NOT_FOUND_MSG = "Territory with id: %s not found";
+    private static final String TERRITORY_NOT_FOUND_LOG = "Territory with id: {} not found";
+
+    private final PassRepository passRepository;
+
     private final CrossingRepository crossingRepository;
+
     private final UserRepository userRepository;
+
     private final TerritoryRepository territoryRepository;
+
 
     private int hourForLogInScheduledCheck;
 
@@ -56,8 +63,10 @@ public class PassServiceImpl implements PassService {
         if (userRepository.findById(pass.getUser().getId()).isEmpty()) {
             throw new UserNotFoundException(String.format("User not found [id=%s]", pass.getUser().getId()));
         }
-        if (territoryRepository.findById(pass.getTerritory().getId()).isEmpty()) {
-            throw new TerritoryNotFoundException(String.format("Territory not found [id=%s]", pass.getTerritory().getId()));
+        UUID territoryId = pass.getTerritory().getId();
+        if (territoryRepository.findById(territoryId).isEmpty()) {
+            log.warn(TERRITORY_NOT_FOUND_LOG, territoryId);
+            throw new TerritoryNotFoundException(TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
         }
 
         checkPassTime(pass);
@@ -76,7 +85,7 @@ public class PassServiceImpl implements PassService {
             pass.setComment("Пропуск-" + pass.getId().toString().substring(32));
         }
 
-        Pass savedPass = repository.save(pass);
+        Pass savedPass = passRepository.save(pass);
         log.info("Pass saved [{}]", savedPass);
 
         return savedPass;
@@ -87,7 +96,7 @@ public class PassServiceImpl implements PassService {
         log.debug("Method {}", MethodLog.getMethodName());
 
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
-        Page<Pass> foundPasses = repository.findAll(pageable);
+        Page<Pass> foundPasses = passRepository.findAll(pageable);
         if (!foundPasses.hasContent()) {
             throw new PassNotFoundException(String.format(
                     "Page %d (size - %d) does not contain passes, total pages - %d, total elements - %d",
@@ -101,7 +110,7 @@ public class PassServiceImpl implements PassService {
     @Override
     public Pass findPass(UUID id) {
         log.debug("Method {} [UUID - {}]", MethodLog.getMethodName(), id);
-        return repository.findById(id).orElseThrow(
+        return passRepository.findById(id).orElseThrow(
                 () -> {
                     log.warn(PASS_NOT_FOUND_LOG, id);
                     return new PassNotFoundException(PASS_NOT_FOUND_MSG.formatted(id));
@@ -116,7 +125,7 @@ public class PassServiceImpl implements PassService {
             throw new UserNotFoundException(String.format("User not found [id=%s]", userId));
         }
 
-        Page<Pass> foundPasses = repository.findPassesByUserId(userId, pageable);
+        Page<Pass> foundPasses = passRepository.findPassesByUserId(userId, pageable);
         if (!foundPasses.hasContent()) {
             throw new PassNotFoundException(String.format(
                     "Page %d (size - %d) does not contain passes, total pages - %d, total elements - %d  [user id %s]",
@@ -135,13 +144,13 @@ public class PassServiceImpl implements PassService {
             throw new TerritoryNotFoundException(String.format("Territory not found [id=%s]", terId));
         }
 
-        Page<Pass> foundPasses = repository.findPassesByTerritoryId(terId, pageable);
+        Page<Pass> foundPasses = passRepository.findPassesByTerritoryId(terId, pageable);
 
         if (!foundPasses.hasContent()) {
             throw new PassNotFoundException(String.format(
-                "Page %d (size - %d) does not contain passes, total pages - %d, total elements - %d  [territory id %s]",
-                pageable.getPageNumber(), pageable.getPageSize(),
-                foundPasses.getTotalPages(), foundPasses.getTotalElements(), terId));
+                    "Page %d (size - %d) does not contain passes, total pages - %d, total elements - %d  [territory id %s]",
+                    pageable.getPageNumber(), pageable.getPageSize(),
+                    foundPasses.getTotalPages(), foundPasses.getTotalElements(), terId));
         }
         return foundPasses;
     }
@@ -164,7 +173,7 @@ public class PassServiceImpl implements PassService {
         foundPass.setEndTime(pass.getEndTime());
         foundPass.setAttachedEntity(pass);
 
-        Pass updatedPass = repository.save(foundPass);
+        Pass updatedPass = passRepository.save(foundPass);
         log.info("Pass updated, {}", updatedPass);
 
         return updatedPass;
@@ -188,7 +197,7 @@ public class PassServiceImpl implements PassService {
                     changeStatusForPassWithCrossings(passCrossings));
         }
 
-        Pass cancelledPass = repository.save(pass);
+        Pass cancelledPass = passRepository.save(pass);
         log.info("Pass [UUID - {}], exist {} crossings, changed status on {}",
                 pass.getId(), passCrossings.size(), pass.getStatus());
 
@@ -214,7 +223,7 @@ public class PassServiceImpl implements PassService {
             pass.setStatus(PassStatus.DELAYED);
         }
 
-        Pass activatedPass = repository.save(pass);
+        Pass activatedPass = passRepository.save(pass);
         log.info("Pass [UUID - {}], changed status on {}", pass.getId(), pass.getStatus());
 
         return activatedPass;
@@ -230,7 +239,7 @@ public class PassServiceImpl implements PassService {
         }
         pass.setStatus(PassStatus.COMPLETED);
 
-        Pass completedPass = repository.save(pass);
+        Pass completedPass = passRepository.save(pass);
         log.info("Pass [UUID - {}], changed status on {}", pass.getId(), pass.getStatus());
 
         return completedPass;
@@ -241,7 +250,7 @@ public class PassServiceImpl implements PassService {
         log.info("Method {} [UUID - {}]", MethodLog.getMethodName(), id);
         Pass pass = findPass(id);
         pass.setFavorite(true);
-        repository.save(pass);
+        passRepository.save(pass);
         log.info("Pass [UUID - {}] marked favorite", id);
     }
 
@@ -250,18 +259,18 @@ public class PassServiceImpl implements PassService {
         log.info("Method {} [UUID - {}]", MethodLog.getMethodName(), id);
         Pass pass = findPass(id);
         pass.setFavorite(false);
-        repository.save(pass);
+        passRepository.save(pass);
         log.info("Pass [UUID - {}] unmarked favorite", id);
     }
 
     @Override
     public void deletePass(UUID id) {
         log.info("Method {} [UUID - {}]", MethodLog.getMethodName(), id);
-        if (repository.findById(id).isEmpty()) {
+        if (passRepository.findById(id).isEmpty()) {
             log.warn(PASS_NOT_FOUND_LOG, id);
             throw new PassNotFoundException(PASS_NOT_FOUND_MSG.formatted(id));
         }
-        repository.deleteById(id);
+        passRepository.deleteById(id);
         log.info("[Pass with id: {}] successfully deleted", id);
     }
 
@@ -291,7 +300,7 @@ public class PassServiceImpl implements PassService {
         UUID userId = newPass.getUser().getId();
         UUID territoryId = newPass.getTerritory().getId();
 
-        if (!repository.checkUserTerritoryRelation(userId, territoryId)) {
+        if (!passRepository.checkUserTerritoryRelation(userId, territoryId)) {
             String message = String.format("Reject operation: user [%s] not have permission to create passes " +
                     "for this territory [%s]", userId, territoryId);
             log.warn(message);
@@ -306,7 +315,7 @@ public class PassServiceImpl implements PassService {
      *                                   и пересекается (накладывается) время действия
      */
     void checkOverlapTime(Pass newPass) {
-        List<Pass> passesByUser = repository.findAllPassesByUserId(newPass.getUser().getId());
+        List<Pass> passesByUser = passRepository.findAllPassesByUserId(newPass.getUser().getId());
 
         Optional<Pass> overlapPass = passesByUser.stream()
                 .filter(existPass -> existPass.getClass().equals(newPass.getClass()))
@@ -323,10 +332,11 @@ public class PassServiceImpl implements PassService {
         }
     }
 
-     /**
-      * Каждую минуту запускает проверку отложенных и активных пропусков с целью актуальзации их статусов
-      * @see PassServiceImpl#updateDelayedPassesOnStartTimeReached
-      * @see PassServiceImpl#updateActivePassesOnEndTimeReached
+    /**
+     * Каждую минуту запускает проверку отложенных и активных пропусков с целью актуальзации их статусов
+     *
+     * @see PassServiceImpl#updateDelayedPassesOnStartTimeReached
+     * @see PassServiceImpl#updateActivePassesOnEndTimeReached
      */
     @Scheduled(cron = "0 * * * * ?")
     public void updatePassStatusByScheduler() {
@@ -342,10 +352,11 @@ public class PassServiceImpl implements PassService {
     /**
      * Обновляет статусы отложенных пропусков, время начала которых уже наступило, делая их активными
      * (время начала меньше текущего времени плюс одна минута)
+     *
      * @see PassStatus
      */
     public void updateDelayedPassesOnStartTimeReached() {
-        List<Pass> passes = repository.findPassesByStatusAndTimeBefore(PassStatus.DELAYED.toString(),
+        List<Pass> passes = passRepository.findPassesByStatusAndTimeBefore(PassStatus.DELAYED.toString(),
                 "startTime", LocalDateTime.now().plusMinutes(1));
         if (passes.isEmpty()) {
             return;
@@ -355,7 +366,7 @@ public class PassServiceImpl implements PassService {
 
         for (Pass pass : passes) {
             pass.setStatus(PassStatus.ACTIVE);
-            repository.save(pass);
+            passRepository.save(pass);
 
             log.debug("Pass [UUID - {}], changed status on {}",
                     pass.getId(), pass.getStatus());
@@ -367,10 +378,11 @@ public class PassServiceImpl implements PassService {
      * по каждому активному пропуску ищет зафиксированные пересечения,
      * если пересечений не было, присваивает пропуску статус OUTDATED,
      * в противном случае присваивает статус с помощью метода {@code changeStatusForPassWithCrossings}
+     *
      * @see PassStatus
      */
     public void updateActivePassesOnEndTimeReached() {
-        List<Pass> passes = repository.findPassesByStatusAndTimeBefore(PassStatus.ACTIVE.toString(),
+        List<Pass> passes = passRepository.findPassesByStatusAndTimeBefore(PassStatus.ACTIVE.toString(),
                 "endTime", LocalDateTime.now());
         if (passes.isEmpty()) {
             return;
@@ -386,7 +398,7 @@ public class PassServiceImpl implements PassService {
                 pass.setStatus(
                         changeStatusForPassWithCrossings(passCrossings));
             }
-            repository.save(pass);
+            passRepository.save(pass);
 
             log.info("Pass [UUID - {}], exist {} crossings, changed status on {}",
                     pass.getId(), passCrossings.size(), pass.getStatus());
@@ -397,10 +409,10 @@ public class PassServiceImpl implements PassService {
      * Возвращает статус для отменяемого или истекшего пропуска:
      * Если пересечения были, и последнее было на выезд - статус COMPLETED.
      * Если пересечения были, и последнее было на въезд - статус WARNING.
-     * @see PassStatus
      *
      * @param crossings список пересечений по проверяемому пропуску
      * @return {@code PassStatus}
+     * @see PassStatus
      */
     private PassStatus changeStatusForPassWithCrossings(List<Crossing> crossings) {
         Crossing lastCrossing = crossings.stream()

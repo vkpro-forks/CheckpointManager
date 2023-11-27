@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.ac.checkpointmanager.exception.handler.ErrorCode;
 import ru.ac.checkpointmanager.it.config.CorsTestConfiguration;
 import ru.ac.checkpointmanager.it.config.OpenAllEndpointsTestConfiguration;
+import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.repository.PassRepository;
@@ -228,6 +229,20 @@ class GlobalExceptionHandlerTest extends PostgresContainersConfig {
                 .perform(MockMvcRequestBuilders.patch(url.formatted(TestUtils.PASS_ID)));
         checkNotFoundFields(resultActions);
     }
+
+    @Test
+    @SneakyThrows
+    void shouldHandleTerritoryNotFoundExceptionForAddPass() {
+        Mockito.when(userRepository.findById(Mockito.any())).thenReturn(Optional.of(new User()));
+        String passDtoCreate = TestUtils.jsonStringFromObject(TestUtils.getPassDtoCreate());
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(passDtoCreate))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.detail")
+                        .value(Matchers.startsWith("Territory")));
+        checkNotFoundFields(resultActions);
+    }
+
 
     private void checkNotFoundFields(ResultActions resultActions) throws Exception {
         resultActions.andExpect(MockMvcResultMatchers.status().isNotFound())
