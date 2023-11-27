@@ -28,6 +28,8 @@ public class UrlConstants {
 
     public static final String PASS_URL_NOT_FAVORITE = PASS_URL + "/%s/not_favorite";
 
+    public static final String PASS_URL_TERRITORY = PASS_URL + "/territory/%s";
+
 
     private UrlConstants() {
 

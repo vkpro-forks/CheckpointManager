@@ -41,7 +41,7 @@ import java.util.stream.Stream;
 @Import({OpenAllEndpointsTestConfiguration.class, CorsTestConfiguration.class})
 @ActiveProfiles("test")
 @WithMockUser(roles = {"ADMIN"})
-class GlobalExceptionHandlerTest extends PostgresContainersConfig {
+class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConfig {
 
     @Autowired
     MockMvc mockMvc;
@@ -240,6 +240,14 @@ class GlobalExceptionHandlerTest extends PostgresContainersConfig {
                         .content(passDtoCreate))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.detail")
                         .value(Matchers.startsWith("Territory")));
+        checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldHandleTerritoryNotFoundExceptionForGetPassesByTerritory() {
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .get(UrlConstants.PASS_URL_TERRITORY.formatted(TestUtils.TERR_ID)));
         checkNotFoundFields(resultActions);
     }
 

@@ -141,12 +141,11 @@ public class PassServiceImpl implements PassService {
         log.debug("Method {} [UUID - {}]", MethodLog.getMethodName(), terId);
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
         if (territoryRepository.findById(terId).isEmpty()) {
-            throw new TerritoryNotFoundException(String.format("Territory not found [id=%s]", terId));
+            log.warn(TERRITORY_NOT_FOUND_LOG, terId);
+            throw new TerritoryNotFoundException(TERRITORY_NOT_FOUND_MSG.formatted(terId));
         }
-
         Page<Pass> foundPasses = passRepository.findPassesByTerritoryId(terId, pageable);
-
-        if (!foundPasses.hasContent()) {
+        if (!foundPasses.hasContent()) {//FIXME return Collection, not Page, no Exception for empty Collection
             throw new PassNotFoundException(String.format(
                     "Page %d (size - %d) does not contain passes, total pages - %d, total elements - %d  [territory id %s]",
                     pageable.getPageNumber(), pageable.getPageSize(),
