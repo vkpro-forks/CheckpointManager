@@ -90,7 +90,7 @@ public class TerritoryController {
     public ResponseEntity<List<UserResponseDTO>> getUsersByTerritory(@PathVariable UUID territoryId) {
         List<User> users = service.findUsersByTerritoryId(territoryId);
 
-        return ResponseEntity.ok(userMapper.toUsersDTO(users));
+        return ResponseEntity.ok(userMapper.toUserResponseDTOs(users));
     }
 
     @Operation(summary = "Найти список территорий по названию",

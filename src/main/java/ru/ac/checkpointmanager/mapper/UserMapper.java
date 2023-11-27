@@ -19,18 +19,19 @@ import java.util.List;
 public class UserMapper {
     private final ModelMapper modelMapper;
 
-    public UserMapper(ModelMapper modelMapper) {
-        this.modelMapper = modelMapper;
+    public UserMapper() {
+        this.modelMapper = new ModelMapper();
     }
+
     public User toUser(UserResponseDTO userResponseDTO) {
         return modelMapper.map(userResponseDTO, User.class);
     }
 
-    public UserResponseDTO toUserDTO(User user) {
+    public UserResponseDTO toUserResponseDTO(User user) {
         return modelMapper.map(user, UserResponseDTO.class);
     }
 
-    public List<UserResponseDTO> toUsersDTO(Collection<User> users) {
+    public List<UserResponseDTO> toUserResponseDTOs(Collection<User> users) {
         return users.stream()
                 .map(e -> modelMapper.map(e, UserResponseDTO.class))
                 .toList();
@@ -54,7 +55,6 @@ public class UserMapper {
      * @see User
      */
     public User toUser(TemporaryUser temporaryUser) {
-        ModelMapper modelMapper = new ModelMapper();
         PropertyMap<TemporaryUser, User> propertyMap = new PropertyMap<>() {
             protected void configure() {
                 skip(destination.getId());
@@ -73,7 +73,6 @@ public class UserMapper {
     }
 
     public TemporaryUser toTemporaryUser(User user) {
-        ModelMapper modelMapper = new ModelMapper();
         PropertyMap<TemporaryUser, User> propertyMap = new PropertyMap<>() {
             protected void configure() {
                 skip(destination.getId());

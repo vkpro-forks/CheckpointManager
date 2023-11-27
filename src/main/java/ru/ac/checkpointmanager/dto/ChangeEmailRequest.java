@@ -6,8 +6,6 @@ import lombok.Data;
 @Data
 public class ChangeEmailRequest {
 
-    private String currentEmail;
-
     @Email
     private String newEmail;
 }
