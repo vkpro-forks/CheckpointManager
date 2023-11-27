@@ -47,7 +47,7 @@ import java.util.UUID;
 @SecurityRequirement(name = "bearerAuth")
 public class TerritoryController {
 
-    private final TerritoryService service;
+    private final TerritoryService territoryService;
     private final TerritoryMapper territoryMapper;
     private final UserMapper userMapper;
 
@@ -67,7 +67,7 @@ public class TerritoryController {
             return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
         }
 
-        Territory newTerritory = service.addTerritory(territoryMapper.toTerritory(territoryDTO));
+        Territory newTerritory = territoryService.addTerritory(territoryMapper.toTerritory(territoryDTO));
         return ResponseEntity.ok(territoryMapper.toTerritoryDTO(newTerritory));
     }
 
@@ -82,7 +82,7 @@ public class TerritoryController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @GetMapping("/{territoryId}")//FIXME TESTED
     public ResponseEntity<TerritoryDTO> getTerritory(@PathVariable("territoryId") UUID territoryId) {
-        Territory territory = service.findTerritoryById(territoryId);
+        Territory territory = territoryService.findTerritoryById(territoryId);
         return ResponseEntity.ok(territoryMapper.toTerritoryDTO(territory));
     }
 
@@ -96,7 +96,7 @@ public class TerritoryController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @GetMapping("/{territoryId}/users")//FIXME TESTED
     public ResponseEntity<List<UserResponseDTO>> getUsersByTerritory(@PathVariable UUID territoryId) {
-        List<User> users = service.findUsersByTerritoryId(territoryId);
+        List<User> users = territoryService.findUsersByTerritoryId(territoryId);
         return ResponseEntity.ok(userMapper.toUsersDTO(users));
     }
 
@@ -110,7 +110,7 @@ public class TerritoryController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @GetMapping("/name")
     public ResponseEntity<List<TerritoryDTO>> getTerritoriesByName(@RequestParam String name) {
-        List<Territory> territories = service.findTerritoriesByName(name);
+        List<Territory> territories = territoryService.findTerritoriesByName(name);
         if (territories.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
@@ -127,7 +127,7 @@ public class TerritoryController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @GetMapping
     public ResponseEntity<List<TerritoryDTO>> getTerritories() {
-        List<Territory> territories = service.findAllTerritories();
+        List<Territory> territories = territoryService.findAllTerritories();
         if (territories.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
@@ -151,7 +151,7 @@ public class TerritoryController {
             return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
         }
 
-        Territory updatedTerritory = service.updateTerritory(territoryMapper.toTerritory(territoryDTO));
+        Territory updatedTerritory = territoryService.updateTerritory(territoryMapper.toTerritory(territoryDTO));
         return ResponseEntity.ok(territoryMapper.toTerritoryDTO(updatedTerritory));
     }
 
@@ -162,11 +162,11 @@ public class TerritoryController {
             @ApiResponse(responseCode = "400", description = "Указанные пользователь и территория уже соединены"),
             @ApiResponse(responseCode = "404", description = "Пользователь или территория не найдены")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
-    @PatchMapping("/{territoryId}/user/{userId}")
+    @PatchMapping("/{territoryId}/user/{userId}")//FIXME TESTED
     public ResponseEntity<?> attachUserToTerritory(@PathVariable UUID territoryId,
                                                    @PathVariable UUID userId) {
 
-        service.attachUserToTerritory(territoryId, userId);
+        territoryService.attachUserToTerritory(territoryId, userId);
         return ResponseEntity.ok().build();
     }
 
@@ -180,7 +180,7 @@ public class TerritoryController {
     @DeleteMapping("{id}")
     public ResponseEntity<Void> deleteTerritory(@PathVariable UUID id) {
 
-        service.deleteTerritoryById(id);
+        territoryService.deleteTerritoryById(id);
         return ResponseEntity.ok().build();
     }
 
@@ -195,7 +195,7 @@ public class TerritoryController {
     public ResponseEntity<?> detachUserFromTerritory(@PathVariable UUID territoryId,
                                                      @PathVariable UUID userId) {
 
-        service.detachUserFromTerritory(territoryId, userId);
+        territoryService.detachUserFromTerritory(territoryId, userId);
         return ResponseEntity.ok().build();
     }
 }

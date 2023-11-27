@@ -90,9 +90,11 @@ public class TerritoryServiceImpl implements TerritoryService {
     @Override//FIXME transaction?
     public void attachUserToTerritory(UUID territoryId, UUID userId) {
         log.debug("Method {}, user - {}, terr - {}", MethodLog.getMethodName(), userId, territoryId);
-
         Territory territory = territoryRepository.findById(territoryId).orElseThrow(
-                () -> new TerritoryNotFoundException(String.format("Territory not found [Id=%s]", territoryId)));
+                () -> {
+                    log.warn(TERRITORY_NOT_FOUND_LOG, territoryId);
+                    return new TerritoryNotFoundException(TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
+                });
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new UserNotFoundException(String.format("User not found [Id=%s]", userId)));
         //FIXME if territory and user dont exist, why should i check it's relations? moved up
@@ -101,7 +103,6 @@ public class TerritoryServiceImpl implements TerritoryService {
             log.warn(message);
             throw new IllegalArgumentException(message);
         }
-
 
 
         territory.getUsers().add(user);
@@ -113,7 +114,8 @@ public class TerritoryServiceImpl implements TerritoryService {
         log.debug(METHOD_CALLED_UUID_LOG, MethodLog.getMethodName(), id);
 
         if (territoryRepository.findById(id).isEmpty()) {
-            throw new TerritoryNotFoundException(String.format("Territory not found [Id=%s]", id));
+            log.warn(TERRITORY_NOT_FOUND_LOG, id);
+            throw new TerritoryNotFoundException(TERRITORY_NOT_FOUND_MSG.formatted(id));
         }
         territoryRepository.deleteById(id);
     }
