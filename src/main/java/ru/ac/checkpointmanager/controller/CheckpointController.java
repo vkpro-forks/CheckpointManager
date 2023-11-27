@@ -43,7 +43,7 @@ import java.util.UUID;
 @SecurityRequirement(name = "bearerAuth")
 public class CheckpointController {
 
-    private final CheckpointService service;
+    private final CheckpointService checkpointService;
     private final CheckpointMapper checkpointMapper;
 
     /* CREATE */
@@ -53,16 +53,16 @@ public class CheckpointController {
             @ApiResponse(responseCode = "200", description = "КПП успешно добавлен",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CheckpointDTO.class))}),
-            @ApiResponse(responseCode = "400", description = "Неуспешная валидаци полей; не найдена указанная территория")})
+            @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей; не найдена указанная территория")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @PostMapping
-    public ResponseEntity<?> addCheckpoint(@RequestBody @Valid CheckpointDTO checkpointDTO,
+    public ResponseEntity<?> addCheckpoint(@RequestBody @Valid CheckpointDTO checkpointDTO,//FIXME TESTED
                                            BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
         }
 
-        Checkpoint newCheckpoint = service.addCheckpoint(checkpointMapper.toCheckpoint(checkpointDTO));
+        Checkpoint newCheckpoint = checkpointService.addCheckpoint(checkpointMapper.toCheckpoint(checkpointDTO));
         return ResponseEntity.ok(checkpointMapper.toCheckpointDTO(newCheckpoint));
     }
 
@@ -77,7 +77,7 @@ public class CheckpointController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @GetMapping("/{id}")
     public ResponseEntity<CheckpointDTO> getCheckpoint(@PathVariable("id") UUID id) {
-        Checkpoint foundCheckpoint = service.findCheckpointById(id);
+        Checkpoint foundCheckpoint = checkpointService.findCheckpointById(id);
         if (foundCheckpoint == null) {
             return ResponseEntity.notFound().build();
         }
@@ -95,7 +95,7 @@ public class CheckpointController {
     @GetMapping("/name")
     public ResponseEntity<List<CheckpointDTO>> getCheckpointsByName(@Parameter(description = "Часть названия")
                                                                     @RequestParam String name) {
-        List<Checkpoint> checkpoints = service.findCheckpointsByName(name);
+        List<Checkpoint> checkpoints = checkpointService.findCheckpointsByName(name);
         if (checkpoints.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
@@ -112,7 +112,7 @@ public class CheckpointController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @GetMapping
     public ResponseEntity<List<CheckpointDTO>> getCheckpoints() {
-        List<Checkpoint> checkpoints = service.findAllCheckpoints();
+        List<Checkpoint> checkpoints = checkpointService.findAllCheckpoints();
         if (checkpoints.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
@@ -131,7 +131,7 @@ public class CheckpointController {
     @GetMapping("/territory/{territoryId}")
     public ResponseEntity<List<CheckpointDTO>> getCheckpointsByTerritoryId(@Parameter(description = "ID территории")
                                                                            @PathVariable UUID territoryId) {
-        List<Checkpoint> checkpoints = service.findCheckpointsByTerritoryId(territoryId);
+        List<Checkpoint> checkpoints = checkpointService.findCheckpointsByTerritoryId(territoryId);
         if (checkpoints.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
@@ -145,17 +145,17 @@ public class CheckpointController {
             @ApiResponse(responseCode = "200", description = "КПП успешно изменен",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CheckpointDTO.class))}),
-            @ApiResponse(responseCode = "400", description = "Неуспешная валидаци полей; не найдена указанная территория"),
+            @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей; не найдена указанная территория"),
             @ApiResponse(responseCode = "404", description = "КПП не найден")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
-    @PutMapping
+    @PutMapping//FIXME TESTED
     public ResponseEntity<?> updateCheckpoint(@RequestBody @Valid CheckpointDTO checkpointDTO,
                                               BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
         }
 
-        Checkpoint updatedCheckpoint = service.updateCheckpoint(checkpointMapper.toCheckpoint(checkpointDTO));
+        Checkpoint updatedCheckpoint = checkpointService.updateCheckpoint(checkpointMapper.toCheckpoint(checkpointDTO));
         return ResponseEntity.ok(checkpointMapper.toCheckpointDTO(updatedCheckpoint));
     }
 
@@ -169,7 +169,7 @@ public class CheckpointController {
     @DeleteMapping("{id}")
     public ResponseEntity<Void> deleteCheckpoint(@PathVariable UUID id) {
 
-        service.deleteCheckpointById(id);
+        checkpointService.deleteCheckpointById(id);
         return ResponseEntity.ok().build();
     }
 }

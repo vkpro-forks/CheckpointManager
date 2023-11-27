@@ -32,6 +32,8 @@ public class UrlConstants {
 
     public static final String TERR_URL = "/api/v1/territory";
 
+    public static final String TERR_USERS_URL = TERR_URL+"/%s/users";
+
 
     private UrlConstants() {
 

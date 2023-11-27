@@ -80,10 +80,10 @@ public class TerritoryController {
                             schema = @Schema(implementation = TerritoryDTO.class))}),
             @ApiResponse(responseCode = "404", description = "Территория не найдена")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
-    @GetMapping("/{territoryId}")
+    @GetMapping("/{territoryId}")//FIXME TESTED
     public ResponseEntity<TerritoryDTO> getTerritory(@PathVariable("territoryId") UUID territoryId) {
         Territory territory = service.findTerritoryById(territoryId);
-       return ResponseEntity.ok(territoryMapper.toTerritoryDTO(territory));
+        return ResponseEntity.ok(territoryMapper.toTerritoryDTO(territory));
     }
 
     @Operation(summary = "Найти список пользователей, привязанных к территории",
@@ -94,10 +94,9 @@ public class TerritoryController {
                             array = @ArraySchema(schema = @Schema(implementation = UserResponseDTO.class)))),
             @ApiResponse(responseCode = "404", description = "Территория или пользователи не найдены")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
-    @GetMapping("/{territoryId}/users")
+    @GetMapping("/{territoryId}/users")//FIXME TESTED
     public ResponseEntity<List<UserResponseDTO>> getUsersByTerritory(@PathVariable UUID territoryId) {
         List<User> users = service.findUsersByTerritoryId(territoryId);
-
         return ResponseEntity.ok(userMapper.toUsersDTO(users));
     }
 
@@ -146,8 +145,8 @@ public class TerritoryController {
             @ApiResponse(responseCode = "404", description = "Территория не найдена")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @PutMapping
-    public ResponseEntity<?> editTerritory(@RequestBody @Valid TerritoryDTO territoryDTO,
-                                           BindingResult bindingResult) {
+    public ResponseEntity<?> updateTerritory(@RequestBody @Valid TerritoryDTO territoryDTO,//FIXME TESTED
+                                             BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
         }

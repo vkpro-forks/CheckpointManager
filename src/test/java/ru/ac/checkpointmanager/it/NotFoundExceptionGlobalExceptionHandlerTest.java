@@ -50,6 +50,8 @@ import java.util.stream.Stream;
 @WithMockUser(roles = {"ADMIN"})
 class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConfig {
 
+    private static final String TERRITORY = "Territory";
+
     @Autowired
     MockMvc mockMvc;
 
@@ -148,7 +150,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CROSSING_MARK_URL)
                         .content(crossingDto)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.detail").value(Matchers.startsWith("Checkpoint")));
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL).value(Matchers.startsWith("Checkpoint")));
         checkNotFoundFields(resultActions);
     }
 
@@ -220,7 +222,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CROSSING_MARK_URL)
                         .content(crossingDto)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.detail")
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith("Pass")));
         checkNotFoundFields(resultActions);
     }
@@ -271,8 +273,8 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(passDtoCreate))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.detail")
-                        .value(Matchers.startsWith("Territory")));
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(Matchers.startsWith(TERRITORY)));
         checkNotFoundFields(resultActions);
     }
 
@@ -294,6 +296,20 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
 
     @Test
     @SneakyThrows
+    void shouldHandleTerritoryNotFoundExceptionForAddCheckPoint() {
+        CheckpointDTO checkPointDTO = TestUtils.getCheckPointDTO();
+        String checkPointDto = TestUtils.jsonStringFromObject(checkPointDTO);
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                        .post(UrlConstants.CHECKPOINT_URL)
+                        .content(checkPointDto)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(Matchers.startsWith(TERRITORY)));
+        checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
     void shouldHandleTerritoryNotFoundExceptionForUpdateCheckPoint() {
         Checkpoint checkpoint = new Checkpoint();
         checkpoint.setName(TestUtils.CHECKPOINT_NAME);
@@ -310,8 +326,30 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
                         .put(UrlConstants.CHECKPOINT_URL)
                         .content(checkPointDto)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.detail")
-                        .value(Matchers.startsWith("Territory")));
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(Matchers.startsWith(TERRITORY)));
+        checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldHandleTerritoryNotFoundExceptionForGetUsersByTerritory() {
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                        .get(UrlConstants.TERR_USERS_URL.formatted(TestUtils.TERR_ID)))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(Matchers.startsWith(TERRITORY)));
+        checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldHandleTerritoryNotFoundExceptionForUpdateTerritory() {
+        String territoryDto = TestUtils.jsonStringFromObject(TestUtils.getTerritoryDTO());
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.put(UrlConstants.TERR_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(territoryDto))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(Matchers.startsWith(TERRITORY)));
         checkNotFoundFields(resultActions);
     }
 

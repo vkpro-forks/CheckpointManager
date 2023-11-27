@@ -23,7 +23,7 @@ public class TerritoryServiceImpl implements TerritoryService {
 
     private static final String TERRITORY_NOT_FOUND_MSG = "Territory with id: %s not found";
     private static final String TERRITORY_NOT_FOUND_LOG = "Territory with id: {} not found";
-
+    private static final String METHOD_CALLED_UUID_LOG = "Method {}, UUID - {}";
 
     private final TerritoryRepository territoryRepository;
 
@@ -31,14 +31,14 @@ public class TerritoryServiceImpl implements TerritoryService {
 
     @Override
     public Territory addTerritory(Territory territory) {
-        log.info("Method {}, UUID - {}", MethodLog.getMethodName(), territory.getId());
+        log.debug(METHOD_CALLED_UUID_LOG, MethodLog.getMethodName(), territory.getId());
         trimThemAll(territory);
         return territoryRepository.save(territory);
     }
 
     @Override
     public Territory findTerritoryById(UUID id) {
-        log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), id);
+        log.debug(METHOD_CALLED_UUID_LOG, MethodLog.getMethodName(), id);
         return territoryRepository.findById(id).orElseThrow(
                 () -> {
                     log.warn(TERRITORY_NOT_FOUND_LOG, id);
@@ -47,8 +47,8 @@ public class TerritoryServiceImpl implements TerritoryService {
     }
 
     @Override
-    public List<User> findUsersByTerritoryId(UUID territoryId) {
-        log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), territoryId);
+    public List<User> findUsersByTerritoryId(UUID territoryId) {//FIXME this is about users, should be in UserService
+        log.debug(METHOD_CALLED_UUID_LOG, MethodLog.getMethodName(), territoryId);
         findTerritoryById(territoryId);
         List<User> users = territoryRepository.findUsersByTerritoryId(territoryId);
         if (users.isEmpty()) {
@@ -69,13 +69,17 @@ public class TerritoryServiceImpl implements TerritoryService {
         return territoryRepository.findAll();
     }
 
-    @Override
+    @Override//FIXME transaction?
     public Territory updateTerritory(Territory territory) {
-        log.info("Method {}, UUID - {}", MethodLog.getMethodName(), territory.getId());
+        UUID territoryId = territory.getId();
+        log.debug(METHOD_CALLED_UUID_LOG, MethodLog.getMethodName(), territoryId);
         trimThemAll(territory);
-        Territory foundTerritory = territoryRepository.findById(territory.getId())
-                .orElseThrow(() -> new TerritoryNotFoundException
-                        (String.format("Territory not found [Id=%s]", territory.getId())));
+        Territory foundTerritory = territoryRepository.findById(territoryId)
+                .orElseThrow(() -> {
+                            log.warn(TERRITORY_NOT_FOUND_LOG, territoryId);
+                            return new TerritoryNotFoundException(TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
+                        }
+                );
 
         foundTerritory.setName(territory.getName());
         foundTerritory.setNote(territory.getNote());
@@ -83,20 +87,22 @@ public class TerritoryServiceImpl implements TerritoryService {
         return territoryRepository.save(foundTerritory);
     }
 
-    @Override
+    @Override//FIXME transaction?
     public void attachUserToTerritory(UUID territoryId, UUID userId) {
-        log.info("Method {}, user - {}, terr - {}", MethodLog.getMethodName(), userId, territoryId);
+        log.debug("Method {}, user - {}, terr - {}", MethodLog.getMethodName(), userId, territoryId);
 
+        Territory territory = territoryRepository.findById(territoryId).orElseThrow(
+                () -> new TerritoryNotFoundException(String.format("Territory not found [Id=%s]", territoryId)));
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new UserNotFoundException(String.format("User not found [Id=%s]", userId)));
+        //FIXME if territory and user dont exist, why should i check it's relations? moved up
         if (territoryRepository.checkUserTerritoryRelation(userId, territoryId)) {
             String message = String.format("User [%s] and territory [%s] are already connected", userId, territoryId);
             log.warn(message);
             throw new IllegalArgumentException(message);
         }
 
-        Territory territory = territoryRepository.findById(territoryId).orElseThrow(
-                () -> new TerritoryNotFoundException(String.format("Territory not found [Id=%s]", territoryId)));
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new UserNotFoundException(String.format("User not found [Id=%s]", userId)));
+
 
         territory.getUsers().add(user);
         territoryRepository.save(territory);
@@ -104,7 +110,7 @@ public class TerritoryServiceImpl implements TerritoryService {
 
     @Override
     public void deleteTerritoryById(UUID id) {
-        log.info("Method {}, UUID - {}", MethodLog.getMethodName(), id);
+        log.debug(METHOD_CALLED_UUID_LOG, MethodLog.getMethodName(), id);
 
         if (territoryRepository.findById(id).isEmpty()) {
             throw new TerritoryNotFoundException(String.format("Territory not found [Id=%s]", id));
@@ -114,7 +120,7 @@ public class TerritoryServiceImpl implements TerritoryService {
 
     @Override
     public void detachUserFromTerritory(UUID territoryId, UUID userId) {
-        log.info("Method {}, user - {}, terr - {}", MethodLog.getMethodName(), userId, territoryId);
+        log.debug("Method {}, user - {}, terr - {}", MethodLog.getMethodName(), userId, territoryId);
 
         Territory territory = territoryRepository.findById(territoryId).orElseThrow(
                 () -> new TerritoryNotFoundException(String.format("Territory not found [Id=%s]", territoryId)));
