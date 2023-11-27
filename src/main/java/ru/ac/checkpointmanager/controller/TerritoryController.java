@@ -15,7 +15,16 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.dto.CheckpointDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
@@ -51,7 +60,7 @@ public class TerritoryController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @PostMapping
     public ResponseEntity<?> addTerritory(@RequestBody @Valid TerritoryDTO territoryDTO,
-                                           BindingResult bindingResult) {
+                                          BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
         }
@@ -72,7 +81,6 @@ public class TerritoryController {
     @GetMapping("/{territoryId}")
     public ResponseEntity<TerritoryDTO> getTerritory(@PathVariable("territoryId") UUID territoryId) {
         Territory territory = service.findTerritoryById(territoryId);
-
         return ResponseEntity.ok(mapper.toTerritoryDTO(territory));
     }
 
@@ -137,7 +145,7 @@ public class TerritoryController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @PutMapping
     public ResponseEntity<?> editTerritory(@RequestBody @Valid TerritoryDTO territoryDTO,
-                                            BindingResult bindingResult) {
+                                           BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
         }
@@ -155,7 +163,7 @@ public class TerritoryController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @PatchMapping("/{territoryId}/user/{userId}")
     public ResponseEntity<?> attachUserToTerritory(@PathVariable UUID territoryId,
-                                                 @PathVariable UUID userId) {
+                                                   @PathVariable UUID userId) {
 
         service.attachUserToTerritory(territoryId, userId);
         return ResponseEntity.ok().build();
@@ -184,7 +192,7 @@ public class TerritoryController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @DeleteMapping("/{territoryId}/user/{userId}")
     public ResponseEntity<?> detachUserFromTerritory(@PathVariable UUID territoryId,
-                                                 @PathVariable UUID userId) {
+                                                     @PathVariable UUID userId) {
 
         service.detachUserFromTerritory(territoryId, userId);
         return ResponseEntity.ok().build();

@@ -251,6 +251,14 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
         checkNotFoundFields(resultActions);
     }
 
+    @Test
+    @SneakyThrows
+    void shouldHandleTerritoryNotFoundExceptionForGetTerritory() {
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .get(UrlConstants.TERR_URL + "/" + TestUtils.TERR_ID));
+        checkNotFoundFields(resultActions);
+    }
+
 
     private void checkNotFoundFields(ResultActions resultActions) throws Exception {
         resultActions.andExpect(MockMvcResultMatchers.status().isNotFound())

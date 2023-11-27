@@ -40,9 +40,9 @@ import static ru.ac.checkpointmanager.utils.StringTrimmer.trimThemAll;
 @RequiredArgsConstructor
 public class PassServiceImpl implements PassService {
 
-    public static final String PASS_NOT_FOUND_LOG = "[Pass with id: {}] not found";
-    public static final String PASS_NOT_FOUND_MSG = "Pass with id: %s not found";
-    public static final String TERRITORY_NOT_FOUND_MSG = "Territory with id: %s not found";
+    private static final String PASS_NOT_FOUND_LOG = "[Pass with id: {}] not found";
+    private static final String PASS_NOT_FOUND_MSG = "Pass with id: %s not found";
+    private static final String TERRITORY_NOT_FOUND_MSG = "Territory with id: %s not found";
     private static final String TERRITORY_NOT_FOUND_LOG = "Territory with id: {} not found";
 
     private final PassRepository passRepository;
@@ -53,13 +53,11 @@ public class PassServiceImpl implements PassService {
 
     private final TerritoryRepository territoryRepository;
 
-
     private int hourForLogInScheduledCheck;
 
     @Override
     public Pass addPass(Pass pass) {
         log.info("Method {} [{}]", MethodLog.getMethodName(), pass);
-
         if (userRepository.findById(pass.getUser().getId()).isEmpty()) {
             throw new UserNotFoundException(String.format("User not found [id=%s]", pass.getUser().getId()));
         }

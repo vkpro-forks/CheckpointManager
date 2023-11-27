@@ -30,6 +30,8 @@ public class UrlConstants {
 
     public static final String PASS_URL_TERRITORY = PASS_URL + "/territory/%s";
 
+    public static final String TERR_URL = "/api/v1/territory";
+
 
     private UrlConstants() {
 
