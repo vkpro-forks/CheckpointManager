@@ -2,6 +2,7 @@ package ru.ac.checkpointmanager.it;
 
 import lombok.SneakyThrows;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -19,13 +20,19 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import ru.ac.checkpointmanager.dto.CheckpointDTO;
 import ru.ac.checkpointmanager.exception.handler.ErrorCode;
 import ru.ac.checkpointmanager.it.config.CorsTestConfiguration;
 import ru.ac.checkpointmanager.it.config.OpenAllEndpointsTestConfiguration;
+import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.car.CarBrand;
+import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
+import ru.ac.checkpointmanager.model.checkpoints.CheckpointType;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
+import ru.ac.checkpointmanager.repository.CheckpointRepository;
 import ru.ac.checkpointmanager.repository.PassRepository;
+import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.testcontainers.PostgresContainersConfig;
 import ru.ac.checkpointmanager.util.TestUtils;
@@ -51,6 +58,20 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
 
     @MockBean
     PassRepository passRepository;
+
+    @Autowired
+    CheckpointRepository checkpointRepository;
+
+    @Autowired
+    TerritoryRepository territoryRepository;
+
+    @AfterEach
+    void clear() {
+        checkpointRepository.deleteAll();
+        territoryRepository.deleteAll();
+    }
+
+    //CAR BRAND NOT FOUND EXCEPTION HANDLING
 
     @Test
     @SneakyThrows
@@ -84,6 +105,8 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
         checkNotFoundFields(resultActions);
     }
 
+    //AVATAR NOT FOUND EXCEPTION HANDLING
+
     @Test
     @SneakyThrows
     void shouldHandleAvatarNotFoundExceptionForGetAvatar() {
@@ -112,6 +135,8 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
                 .perform(MockMvcRequestBuilders.get(UrlConstants.AVATAR_URL_PREVIEW + "/" + TestUtils.USER_ID));
         checkNotFoundFields(resultActions);
     }
+
+    //CHECKPOINT NOT FOUND EXCEPTION HANDLING
 
     @Test
     @SneakyThrows
@@ -154,6 +179,8 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
         checkNotFoundFields(resultActions);
     }
 
+    //CROSSING NOT FOUND EXCEPTION HANDLING
+
     @Test
     @SneakyThrows
     void shouldHandleCrossingNotFoundExceptionForGetCrossing() {
@@ -161,6 +188,8 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
                 .get(UrlConstants.CROSSING_URL + "/" + TestUtils.CROSSING_ID));
         checkNotFoundFields(resultActions);
     }
+
+    //CAR NOT FOUND EXCEPTION HANDLING
 
     @Test
     @SneakyThrows
@@ -180,6 +209,8 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
                 .content(updateCarDto));
         checkNotFoundFields(resultActions);
     }
+
+    //PASS NOT FOUND EXCEPTION HANDLING
 
     @Test
     @SneakyThrows
@@ -230,6 +261,8 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
         checkNotFoundFields(resultActions);
     }
 
+//TERRITORY NOT FOUND EXCEPTION HANDLING
+
     @Test
     @SneakyThrows
     void shouldHandleTerritoryNotFoundExceptionForAddPass() {
@@ -256,6 +289,29 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
     void shouldHandleTerritoryNotFoundExceptionForGetTerritory() {
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                 .get(UrlConstants.TERR_URL + "/" + TestUtils.TERR_ID));
+        checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldHandleTerritoryNotFoundExceptionForUpdateCheckPoint() {
+        Checkpoint checkpoint = new Checkpoint();
+        checkpoint.setName(TestUtils.CHECKPOINT_NAME);
+        checkpoint.setType(CheckpointType.AUTO);
+        Territory territory = new Territory();
+        territory.setName("name");
+        territoryRepository.save(territory);
+        checkpoint.setTerritory(territory);
+        Checkpoint savedCheckPoint = checkpointRepository.save(checkpoint);
+        CheckpointDTO checkPointDTO = TestUtils.getCheckPointDTO();
+        checkPointDTO.setId(savedCheckPoint.getId());
+        String checkPointDto = TestUtils.jsonStringFromObject(checkPointDTO);
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                        .put(UrlConstants.CHECKPOINT_URL)
+                        .content(checkPointDto)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.detail")
+                        .value(Matchers.startsWith("Territory")));
         checkNotFoundFields(resultActions);
     }
 
