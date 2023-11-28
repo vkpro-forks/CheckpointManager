@@ -34,7 +34,9 @@ public class TerritoryServiceImpl implements TerritoryService {
     public Territory addTerritory(Territory territory) {
         log.debug(METHOD_CALLED_UUID_LOG, MethodLog.getMethodName(), territory.getId());
         trimThemAll(territory);
-        return territoryRepository.save(territory);
+        Territory saved = territoryRepository.save(territory);
+        log.info("Territory with [id: {}] was saved", territory.getId());
+        return saved;
     }
 
     @Override
@@ -48,7 +50,7 @@ public class TerritoryServiceImpl implements TerritoryService {
     }
 
     @Override
-    public List<User> findUsersByTerritoryId(UUID territoryId) {//FIXME this is about users, should be in UserService
+    public List<User> findUsersByTerritoryId(UUID territoryId) {
         log.debug(METHOD_CALLED_UUID_LOG, MethodLog.getMethodName(), territoryId);
         findTerritoryById(territoryId);
         List<User> users = territoryRepository.findUsersByTerritoryId(territoryId);

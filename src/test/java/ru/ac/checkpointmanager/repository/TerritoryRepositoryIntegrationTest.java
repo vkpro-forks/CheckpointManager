@@ -1,5 +1,6 @@
 package ru.ac.checkpointmanager.repository;
 
+import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.instancio.Instancio;
 import org.instancio.Model;
@@ -20,10 +21,11 @@ import ru.ac.checkpointmanager.util.TestUtils;
 import java.util.List;
 
 @Import({CorsTestConfiguration.class})
-@DataJpaTest(properties = "spring.jpa.properties.hibernate.generate_statistics=true")
+@DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")
-public class TerritoryRepositoryIntegrationTest extends PostgresContainersConfig {
+@Slf4j
+class TerritoryRepositoryIntegrationTest extends PostgresContainersConfig {
 
     @Autowired
     UserRepository userRepository;
@@ -53,10 +55,10 @@ public class TerritoryRepositoryIntegrationTest extends PostgresContainersConfig
         List<User> savedUsers = userRepository.saveAllAndFlush(users);
         territory.setUsers(savedUsers);
         Territory savedTerritory = territoryRepository.saveAndFlush(territory);
-
+        log.warn("!!!!!!!!!!!!BEFORE METHOD findUsersByTerritoryId!!!!!!!!!!!");
         List<User> usersByTerritoryId = territoryRepository.findUsersByTerritoryId(savedTerritory.getId());
+        log.warn("!!!!!!!!!!!!AFTER METHOD findUsersByTerritoryId!!!!!!!!!!!");
         Assertions.assertThat(usersByTerritoryId).hasSize(10);
     }
-
 
 }
