@@ -50,6 +50,8 @@ public class TestUtils {
 
     public static final String JSON_TITLE = "$.title";
 
+    public static final String JSON_DETAIL = "$.detail";
+
 
     public static CarBrand getCarBrand() {
         CarBrand carBrand = new CarBrand();

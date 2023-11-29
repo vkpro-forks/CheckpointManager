@@ -88,15 +88,6 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
-    @ExceptionHandler(TerritoryNotFoundException.class)
-    public ProblemDetail handleTerritoryNotFoundException(TerritoryNotFoundException e) {
-        ProblemDetail problemDetail = createProblemDetail(HttpStatus.NOT_FOUND, e);
-        problemDetail.setTitle("Territory not found");
-        problemDetail.setProperty(ERROR_CODE, ErrorCode.NOT_FOUND.toString());
-        log.debug(LOG_MSG, e.getClass());
-        return problemDetail;
-    }
-
     @ExceptionHandler(IllegalArgumentException.class)
     public ProblemDetail handleIllegalArgumentException(IllegalArgumentException e) {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);

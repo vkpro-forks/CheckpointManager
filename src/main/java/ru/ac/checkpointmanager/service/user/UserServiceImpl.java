@@ -58,13 +58,23 @@ import java.util.UUID;
 @Slf4j
 public class UserServiceImpl implements UserService {
 
+    private static final String METHOD_UUID = "Method {}, UUID - {}";
+    private static final String USER_NOT_FOUND_MSG = "User with [id=%s] not found";
+
     private final UserMapper userMapper;
+
     private final TerritoryMapper territoryMapper;
+
     private final UserRepository userRepository;
+
     private final PhoneRepository phoneRepository;
+
     private final PasswordEncoder passwordEncoder;
+
     private final TemporaryUserService temporaryUserService;
+
     private final EmailService emailService;
+
     private final PhoneService phoneService;
 
     /**
@@ -81,9 +91,9 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public UserResponseDTO findById(UUID id) {
-        log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), id);
+        log.debug(METHOD_UUID, MethodLog.getMethodName(), id);
         User foundUser = userRepository.findById(id).orElseThrow(
-                () -> new UserNotFoundException(String.format("User not found [id=%s]", id)));
+                () -> new UserNotFoundException(String.format(USER_NOT_FOUND_MSG, id)));
         return userMapper.toUserDTO(foundUser);
     }
 
@@ -101,12 +111,8 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public List<TerritoryDTO> findTerritoriesByUserId(UUID userId) {
-        log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), userId);
+        log.debug(METHOD_UUID, MethodLog.getMethodName(), userId);
         List<Territory> territories = userRepository.findTerritoriesByUserId(userId);
-        if (territories.isEmpty()) {
-            log.warn("Territory for User {} not found", userId);
-            throw new TerritoryNotFoundException(String.format("Territory for User not found [user_id=%s]", userId));
-        }
         return territoryMapper.toTerritoriesDTO(territories);
     }
 
@@ -156,7 +162,7 @@ public class UserServiceImpl implements UserService {
         log.debug("Updating user with [UUID - {}]", userPutDTO.getId());
         User foundUser = userRepository.findById(userPutDTO.getId())
                 .orElseThrow(() -> new UserNotFoundException(
-                        String.format("User not found [id=%s]", userPutDTO.getId())));
+                        String.format(USER_NOT_FOUND_MSG, userPutDTO.getId())));
 
         foundUser.setFullName(userPutDTO.getFullName());
 
@@ -332,7 +338,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public void changeRole(UUID id, Role role) {
-        log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), id);
+        log.debug(METHOD_UUID, MethodLog.getMethodName(), id);
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(String.format("User not found [Id=%s]", id)));
 
@@ -373,7 +379,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public UserResponseDTO updateBlockStatus(UUID id, Boolean isBlocked) {
-        log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), id);
+        log.debug(METHOD_UUID, MethodLog.getMethodName(), id);
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(String.format("User not found [Id=%s]", id)));
 
@@ -402,9 +408,9 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public void blockById(UUID id) {
-        log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), id);
+        log.debug(METHOD_UUID, MethodLog.getMethodName(), id);
         User existingUser = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(String.format("User not found [id=%s]", id)));
+                .orElseThrow(() -> new UserNotFoundException(String.format(USER_NOT_FOUND_MSG, id)));
         if (!existingUser.getIsBlocked()) {
             userRepository.blockById(id);
             log.debug("User {} successfully blocked", id);
@@ -428,9 +434,9 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public void unblockById(UUID id) {
-        log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), id);
+        log.debug(METHOD_UUID, MethodLog.getMethodName(), id);
         User existingUser = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(String.format("User not found [id=%s]", id)));
+                .orElseThrow(() -> new UserNotFoundException(String.format(USER_NOT_FOUND_MSG, id)));
         if (existingUser.getIsBlocked()) {
             userRepository.unblockById(id);
             log.debug("User {} successfully unblocked", id);
@@ -452,7 +458,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public void deleteUser(UUID id) {
-        log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), id);
+        log.debug(METHOD_UUID, MethodLog.getMethodName(), id);
         if (userRepository.findById(id).isEmpty()) {
             log.warn("Error deleting user {}", id);
             throw new UserNotFoundException("Error deleting user with ID" + id);
