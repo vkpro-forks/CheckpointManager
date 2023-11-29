@@ -28,6 +28,14 @@ public class UrlConstants {
 
     public static final String PASS_URL_NOT_FAVORITE = PASS_URL + "/%s/not_favorite";
 
+    public static final String PASS_URL_TERRITORY = PASS_URL + "/territory/%s";
+
+    public static final String TERR_URL = "/api/v1/territory";
+
+    public static final String TERR_USERS_URL = TERR_URL + "/%s/users";
+
+    public static final String TERR_ATTACH_DETACH_URL = TERR_URL + "/%s/user/%s";
+
 
     private UrlConstants() {
 

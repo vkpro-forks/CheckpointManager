@@ -19,14 +19,17 @@ import static ru.ac.checkpointmanager.utils.StringTrimmer.trimThemAll;
 @RequiredArgsConstructor
 public class CheckpointServiceImpl implements CheckpointService {
 
-    public static final String CHECKPOINT_NOT_FOUND_LOG = "[Checkpoint with id: {}] not found";
-    public static final String CHECKPOINT_NOT_FOUND_MSG = "Checkpoint with id: %s not found";
+    private static final String CHECKPOINT_NOT_FOUND_LOG = "[Checkpoint with id: {}] not found";
+    private static final String CHECKPOINT_NOT_FOUND_MSG = "Checkpoint with id: %s not found";
+    private static final String METHOD_CALLED_LOG = "Method {}, UUID - {}";
+
     private final CheckpointRepository checkpointRepository;
+
     private final TerritoryService territoryService;
 
     @Override
     public Checkpoint addCheckpoint(Checkpoint checkpoint) {
-        log.info("Method {}, UUID - {}", MethodLog.getMethodName(), checkpoint.getId());
+        log.info(METHOD_CALLED_LOG, MethodLog.getMethodName(), checkpoint.getId());
         territoryService.findTerritoryById(checkpoint.getTerritory().getId());
         trimThemAll(checkpoint);
         return checkpointRepository.save(checkpoint);
@@ -34,7 +37,7 @@ public class CheckpointServiceImpl implements CheckpointService {
 
     @Override
     public Checkpoint findCheckpointById(UUID id) {
-        log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), id);
+        log.debug(METHOD_CALLED_LOG, MethodLog.getMethodName(), id);
         return checkpointRepository.findById(id).orElseThrow(
                 () -> {
                     log.warn(CHECKPOINT_NOT_FOUND_LOG, id);
@@ -56,7 +59,7 @@ public class CheckpointServiceImpl implements CheckpointService {
 
     @Override
     public List<Checkpoint> findCheckpointsByTerritoryId(UUID id) {
-        log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), id);
+        log.debug(METHOD_CALLED_LOG, MethodLog.getMethodName(), id);
         List<Checkpoint> foundCheckpoints = checkpointRepository.findCheckpointsByTerritoryIdOrderByName(id);
         log.debug("Checkpoint for [territory with id: {}] retrieved from repo", id);
         return foundCheckpoints;
@@ -65,13 +68,14 @@ public class CheckpointServiceImpl implements CheckpointService {
     @Override
     public Checkpoint updateCheckpoint(Checkpoint checkpoint) {
         UUID checkpointId = checkpoint.getId();
-        log.info("Method {}, UUID - {}", MethodLog.getMethodName(), checkpointId);
+        log.info(METHOD_CALLED_LOG, MethodLog.getMethodName(), checkpointId);
         Checkpoint foundCheckpoint = checkpointRepository.findById(checkpointId)
                 .orElseThrow(() -> {
                     log.warn(CHECKPOINT_NOT_FOUND_LOG, checkpointId);
                     return new CheckpointNotFoundException(CHECKPOINT_NOT_FOUND_MSG.formatted(checkpointId));
                 });
-
+        //FIXME It would be better to find entity here and bind it to checkpoint
+        //FIXME we don't need to go to DB if territory shouldn't change
         territoryService.findTerritoryById(checkpoint.getTerritory().getId());
         trimThemAll(checkpoint);
 
@@ -87,7 +91,7 @@ public class CheckpointServiceImpl implements CheckpointService {
 
     @Override
     public void deleteCheckpointById(UUID id) {
-        log.info("Method {}, UUID - {}", MethodLog.getMethodName(), id);
+        log.info(METHOD_CALLED_LOG, MethodLog.getMethodName(), id);
         if (checkpointRepository.findById(id).isEmpty()) {
             log.warn(CHECKPOINT_NOT_FOUND_LOG, id);
             throw new CheckpointNotFoundException(CHECKPOINT_NOT_FOUND_MSG.formatted(id));

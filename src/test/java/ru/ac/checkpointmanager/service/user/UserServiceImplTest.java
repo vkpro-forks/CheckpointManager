@@ -87,7 +87,8 @@ class UserServiceImplTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        out = new UserServiceImpl(userMapper, territoryMapper, userRepository, phoneRepository, passwordEncoder, temporaryUserService, emailService, phoneService);
+        out = new UserServiceImpl(userMapper, territoryMapper, userRepository, phoneRepository, passwordEncoder,
+                temporaryUserService, emailService, phoneService);
 
         setUserArea();
         setSecurityContext();
