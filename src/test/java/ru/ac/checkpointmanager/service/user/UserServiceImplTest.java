@@ -17,7 +17,6 @@ import ru.ac.checkpointmanager.dto.ChangePasswordRequest;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.user.UserPutDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
-import ru.ac.checkpointmanager.exception.PhoneNumberNotFoundException;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.mapper.TerritoryMapper;
@@ -126,7 +125,6 @@ class UserServiceImplTest {
 
     void setChangeEmailRequest() {
         emailRequest = new ChangeEmailRequest();
-        emailRequest.setCurrentEmail("test@example.com");
         emailRequest.setNewEmail("newEmail@example.com");
     }
 
@@ -139,7 +137,7 @@ class UserServiceImplTest {
     @Test
     void findById_UserExists_ReturnsUserResponseDTO() {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(userMapper.toUserDTO(user)).thenReturn(userResponseDTO);
+        when(userMapper.toUserResponseDTO(user)).thenReturn(userResponseDTO);
 
         UserResponseDTO result = out.findById(userId);
 
@@ -181,7 +179,7 @@ class UserServiceImplTest {
     @Test
     void findByName_ReturnCollectionUserResponseDTO() {
         when(userRepository.findUserByFullNameContainingIgnoreCase(anyString())).thenReturn(users);
-        when(userMapper.toUsersDTO(users)).thenReturn((List<UserResponseDTO>) userResponseDTOS);
+        when(userMapper.toUserResponseDTOs(users)).thenReturn((List<UserResponseDTO>) userResponseDTOS);
 
         Collection<UserResponseDTO> result = out.findByName("Test");
         assertNotNull(result);
@@ -203,14 +201,13 @@ class UserServiceImplTest {
         userPutDTO.setMainNumber("123456789");
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(phoneRepository.getNumbersByUserId(userId)).thenReturn(List.of("123456789"));
-        when(userMapper.toUserDTO(any(User.class))).thenReturn(new UserResponseDTO());
+        when(userMapper.toUserResponseDTO(any(User.class))).thenReturn(new UserResponseDTO());
 
         UserResponseDTO result = out.updateUser(userPutDTO);
 
         assertNotNull(result);
         verify(userRepository).save(user);
-        verify(userMapper).toUserDTO(user);
+        verify(userMapper).toUserResponseDTO(user);
     }
 
     @Test
@@ -221,18 +218,6 @@ class UserServiceImplTest {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         assertThrows(UserNotFoundException.class, () -> out.updateUser(userPutDTO));
-    }
-
-    @Test
-    void updateUser_PhoneNumberNotFound_ThrowsPhoneNumberNotFoundException() {
-        UserPutDTO userPutDTO = new UserPutDTO();
-        userPutDTO.setId(userId);
-        userPutDTO.setMainNumber("123456789");
-
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(phoneRepository.getNumbersByUserId(userId)).thenReturn(Collections.emptyList());
-
-        assertThrows(PhoneNumberNotFoundException.class, () -> out.updateUser(userPutDTO));
     }
 
     @Test
@@ -274,13 +259,6 @@ class UserServiceImplTest {
         verify(temporaryUserService).create(any(TemporaryUser.class));
     }*/
 
-    @Test
-    void changeEmail_CurrentEmailMismatch_ThrowsException() {
-        emailRequest.setCurrentEmail("mismatch@example.com");
-
-        assertThrows(IllegalStateException.class, () -> out.changeEmail(emailRequest),
-                "Should throw IllegalStateException for mismatched current email");
-    }
 
     @Test
     void changeEmail_EmailSendFailure_ThrowsMailSendException() {
@@ -366,7 +344,7 @@ class UserServiceImplTest {
     void updateBlockStatus_SuccessfulUpdate_ReturnsUpdatedUser() {
         user.setIsBlocked(false);
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(userMapper.toUserDTO(user)).thenReturn(userResponseDTO);
+        when(userMapper.toUserResponseDTO(user)).thenReturn(userResponseDTO);
 
         UserResponseDTO result = out.updateBlockStatus(userId, true);
 
@@ -459,13 +437,13 @@ class UserServiceImplTest {
     @Test
     void getAll_UsersExist_ReturnsUserList() {
         when(userRepository.findAll()).thenReturn((List<User>) users);
-        when(userMapper.toUsersDTO(users)).thenReturn((List<UserResponseDTO>) userResponseDTOS);
+        when(userMapper.toUserResponseDTOs(users)).thenReturn((List<UserResponseDTO>) userResponseDTOS);
 
         Collection<UserResponseDTO> result = out.getAll();
 
         assertFalse(result.isEmpty());
         verify(userRepository).findAll();
-        verify(userMapper).toUsersDTO(users);
+        verify(userMapper).toUserResponseDTOs(users);
     }
 
     @Test

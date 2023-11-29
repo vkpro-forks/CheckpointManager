@@ -96,8 +96,11 @@ public class TerritoryController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @GetMapping("/{territoryId}/users")
     public ResponseEntity<List<UserResponseDTO>> getUsersByTerritory(@PathVariable UUID territoryId) {
-        List<User> users = territoryService.findUsersByTerritoryId(territoryId);
-        return ResponseEntity.ok(userMapper.toUsersDTO(users));
+
+        List<User> users = service.findUsersByTerritoryId(territoryId);
+
+        return ResponseEntity.ok(userMapper.toUserResponseDTOs(users));
+
     }
 
     @Operation(summary = "Найти список территорий по названию",

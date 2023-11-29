@@ -93,8 +93,8 @@ public class UserServiceImpl implements UserService {
     public UserResponseDTO findById(UUID id) {
         log.debug(METHOD_UUID, MethodLog.getMethodName(), id);
         User foundUser = userRepository.findById(id).orElseThrow(
-                () -> new UserNotFoundException(String.format(USER_NOT_FOUND_MSG, id)));
-        return userMapper.toUserDTO(foundUser);
+                () -> new UserNotFoundException(String.format("User not found [id=%s]", id)));
+        return userMapper.toUserResponseDTO(foundUser);
     }
 
     /**
@@ -131,7 +131,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Collection<UserResponseDTO> findByName(String name) {
         log.info("Method {} was invoked", MethodLog.getMethodName());
-        Collection<UserResponseDTO> userResponseDTOS = userMapper.toUsersDTO(userRepository
+        Collection<UserResponseDTO> userResponseDTOS = userMapper.toUserResponseDTOs(userRepository
                 .findUserByFullNameContainingIgnoreCase(name));
 
         if (userResponseDTOS.isEmpty()) {
@@ -177,7 +177,7 @@ public class UserServiceImpl implements UserService {
         userRepository.save(foundUser);
         log.info("[User {}] updated", foundUser.getId());
 
-        return userMapper.toUserDTO(foundUser);
+        return userMapper.toUserResponseDTO(foundUser);
     }
 
     /**
@@ -254,13 +254,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public String changeEmail(ChangeEmailRequest request) {
         User user = SecurityUtils.getCurrentUser();
-
-        if (!request.getCurrentEmail().equals(user.getEmail())) {
-            throw new IllegalStateException("Wrong email");
-        }
+        log.debug("[Method {}], [Username - {}]", MethodLog.getMethodName(), user.getUsername());
 
         if (userRepository.findByEmail(request.getNewEmail()).isPresent()) {
-            log.warn("Email {} already taken", request.getNewEmail());
+            log.warn("[Email {}] already taken", request.getNewEmail());
             throw new IllegalStateException(String.format("Email %s already taken", request.getNewEmail()));
         }
 
@@ -303,7 +300,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public void confirmEmail(String token) {
-        log.debug("Method {}, Temporary token {}", MethodLog.getMethodName(), token);
+        log.debug("[Method {}], [Temporary token {}]", MethodLog.getMethodName(), token);
         TemporaryUser tempUser = temporaryUserService.findByVerifiedToken(token);
 
         if (tempUser != null) {
@@ -315,7 +312,7 @@ public class UserServiceImpl implements UserService {
             log.info("User email updated from {} to {}, [UUID {}]", tempUser.getPreviousEmail(), user.getEmail(), user.getId());
 
             temporaryUserService.delete(tempUser);
-            log.info("Temporary user deleted {}", tempUser.getId());
+            log.info("[Temporary user {}] deleted", tempUser.getId());
         } else {
             log.warn("Invalid or expired token");
         }
@@ -391,7 +388,7 @@ public class UserServiceImpl implements UserService {
             log.warn("User {} already has block status {}", id, isBlocked);
             throw new IllegalStateException(String.format("User already %s [id=%s]", isBlocked ? "blocked" : "unblocked", id));
         }
-        return userMapper.toUserDTO(existingUser);
+        return userMapper.toUserResponseDTO(existingUser);
     }
 
     /**
@@ -480,7 +477,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Collection<UserResponseDTO> getAll() {
         log.debug("Method {}", MethodLog.getMethodName());
-        Collection<UserResponseDTO> userResponseDTOS = userMapper.toUsersDTO(userRepository.findAll());
+        Collection<UserResponseDTO> userResponseDTOS = userMapper.toUserResponseDTOs(userRepository.findAll());
 
         if (userResponseDTOS.isEmpty()) {
             log.warn("There is no user in DB");
