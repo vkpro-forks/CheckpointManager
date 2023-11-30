@@ -34,7 +34,6 @@ import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.service.territories.TerritoryService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
-import ru.ac.checkpointmanager.utils.Mapper;
 
 import java.util.List;
 import java.util.UUID;
