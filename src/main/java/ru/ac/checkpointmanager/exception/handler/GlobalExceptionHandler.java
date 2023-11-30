@@ -49,7 +49,7 @@ public class GlobalExceptionHandler {
                 .map(v -> new ViolationError(
                         fieldNameFromPath(v.getPropertyPath().toString()),
                         v.getMessage(),
-                        v.getInvalidValue() != null ? v.toString() : "null"))
+                        v.getInvalidValue() != null ? v.getInvalidValue().toString() : "null"))
                 .toList();
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
         ProblemDetail configuredProblemDetails = setUpValidationDetails(problemDetail, violationErrors);
@@ -84,15 +84,6 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
         problemDetail.setTitle("Inactive pass");
         problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
-        log.debug(LOG_MSG, e.getClass());
-        return problemDetail;
-    }
-
-    @ExceptionHandler(TerritoryNotFoundException.class)
-    public ProblemDetail handleTerritoryNotFoundException(TerritoryNotFoundException e) {
-        ProblemDetail problemDetail = createProblemDetail(HttpStatus.NOT_FOUND, e);
-        problemDetail.setTitle("Territory not found");
-        problemDetail.setProperty(ERROR_CODE, ErrorCode.NOT_FOUND.toString());
         log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }

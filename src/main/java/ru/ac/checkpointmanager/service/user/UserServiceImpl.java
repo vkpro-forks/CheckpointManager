@@ -16,10 +16,12 @@ import ru.ac.checkpointmanager.dto.user.UserPutDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
-import ru.ac.checkpointmanager.model.Avatar;
+import ru.ac.checkpointmanager.mapper.TerritoryMapper;
+import ru.ac.checkpointmanager.mapper.UserMapper;
 import ru.ac.checkpointmanager.model.TemporaryUser;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
+import ru.ac.checkpointmanager.model.avatar.Avatar;
 import ru.ac.checkpointmanager.model.enums.PhoneNumberType;
 import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
@@ -27,7 +29,6 @@ import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.service.email.EmailService;
 import ru.ac.checkpointmanager.service.phone.PhoneService;
 import ru.ac.checkpointmanager.utils.FieldsValidation;
-import ru.ac.checkpointmanager.utils.Mapper;
 import ru.ac.checkpointmanager.utils.MethodLog;
 import ru.ac.checkpointmanager.utils.SecurityUtils;
 
@@ -50,7 +51,6 @@ import java.util.UUID;
  * @see User
  * @see UserRepository
  * @see EmailService
- * @see Mapper
  * @see SecurityUtils
  */
 @Service
@@ -58,13 +58,23 @@ import java.util.UUID;
 @Slf4j
 public class UserServiceImpl implements UserService {
 
+    private static final String METHOD_UUID = "Method {}, UUID - {}";
+    private static final String USER_NOT_FOUND_MSG = "User with [id=%s] not found";
 
-    private final Mapper mapper;
+    private final UserMapper userMapper;
+
+    private final TerritoryMapper territoryMapper;
+
     private final UserRepository userRepository;
+
     private final PhoneRepository phoneRepository;
+
     private final PasswordEncoder passwordEncoder;
+
     private final TemporaryUserService temporaryUserService;
+
     private final EmailService emailService;
+
     private final PhoneService phoneService;
 
     /**
@@ -81,10 +91,10 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public UserResponseDTO findById(UUID id) {
-        log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), id);
+        log.debug(METHOD_UUID, MethodLog.getMethodName(), id);
         User foundUser = userRepository.findById(id).orElseThrow(
                 () -> new UserNotFoundException(String.format("User not found [id=%s]", id)));
-        return mapper.toUserDTO(foundUser);
+        return userMapper.toUserResponseDTO(foundUser);
     }
 
     /**
@@ -101,13 +111,9 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public List<TerritoryDTO> findTerritoriesByUserId(UUID userId) {
-        log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), userId);
+        log.debug(METHOD_UUID, MethodLog.getMethodName(), userId);
         List<Territory> territories = userRepository.findTerritoriesByUserId(userId);
-        if (territories.isEmpty()) {
-            log.warn("Territory for User {} not found", userId);
-            throw new TerritoryNotFoundException(String.format("Territory for User not found [user_id=%s]", userId));
-        }
-        return mapper.toTerritoriesDTO(territories);
+        return territoryMapper.toTerritoriesDTO(territories);
     }
 
     /**
@@ -125,7 +131,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Collection<UserResponseDTO> findByName(String name) {
         log.info("Method {} was invoked", MethodLog.getMethodName());
-        Collection<UserResponseDTO> userResponseDTOS = mapper.toUsersDTO(userRepository
+        Collection<UserResponseDTO> userResponseDTOS = userMapper.toUserResponseDTOs(userRepository
                 .findUserByFullNameContainingIgnoreCase(name));
 
         if (userResponseDTOS.isEmpty()) {
@@ -156,7 +162,7 @@ public class UserServiceImpl implements UserService {
         log.debug("Updating user with [UUID - {}]", userPutDTO.getId());
         User foundUser = userRepository.findById(userPutDTO.getId())
                 .orElseThrow(() -> new UserNotFoundException(
-                        String.format("User not found [id=%s]", userPutDTO.getId())));
+                        String.format(USER_NOT_FOUND_MSG, userPutDTO.getId())));
 
         foundUser.setFullName(userPutDTO.getFullName());
 
@@ -171,7 +177,7 @@ public class UserServiceImpl implements UserService {
         userRepository.save(foundUser);
         log.info("[User {}] updated", foundUser.getId());
 
-        return mapper.toUserDTO(foundUser);
+        return userMapper.toUserResponseDTO(foundUser);
     }
 
     /**
@@ -248,17 +254,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public String changeEmail(ChangeEmailRequest request) {
         User user = SecurityUtils.getCurrentUser();
-
-        if (!request.getCurrentEmail().equals(user.getEmail())) {
-            throw new IllegalStateException("Wrong email");
-        }
+        log.debug("[Method {}], [Username - {}]", MethodLog.getMethodName(), user.getUsername());
 
         if (userRepository.findByEmail(request.getNewEmail()).isPresent()) {
-            log.warn("Email {} already taken", request.getNewEmail());
+            log.warn("[Email {}] already taken", request.getNewEmail());
             throw new IllegalStateException(String.format("Email %s already taken", request.getNewEmail()));
         }
 
-        TemporaryUser tempUser = mapper.toTemporaryUser(user);
+        TemporaryUser tempUser = userMapper.toTemporaryUser(user);
         tempUser.setPreviousEmail(user.getEmail());
         tempUser.setEmail(request.getNewEmail());
 
@@ -297,7 +300,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public void confirmEmail(String token) {
-        log.debug("Method {}, Temporary token {}", MethodLog.getMethodName(), token);
+        log.debug("[Method {}], [Temporary token {}]", MethodLog.getMethodName(), token);
         TemporaryUser tempUser = temporaryUserService.findByVerifiedToken(token);
 
         if (tempUser != null) {
@@ -309,7 +312,7 @@ public class UserServiceImpl implements UserService {
             log.info("User email updated from {} to {}, [UUID {}]", tempUser.getPreviousEmail(), user.getEmail(), user.getId());
 
             temporaryUserService.delete(tempUser);
-            log.info("Temporary user deleted {}", tempUser.getId());
+            log.info("[Temporary user {}] deleted", tempUser.getId());
         } else {
             log.warn("Invalid or expired token");
         }
@@ -332,7 +335,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public void changeRole(UUID id, Role role) {
-        log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), id);
+        log.debug(METHOD_UUID, MethodLog.getMethodName(), id);
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(String.format("User not found [Id=%s]", id)));
 
@@ -373,7 +376,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public UserResponseDTO updateBlockStatus(UUID id, Boolean isBlocked) {
-        log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), id);
+        log.debug(METHOD_UUID, MethodLog.getMethodName(), id);
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(String.format("User not found [Id=%s]", id)));
 
@@ -385,7 +388,7 @@ public class UserServiceImpl implements UserService {
             log.warn("User {} already has block status {}", id, isBlocked);
             throw new IllegalStateException(String.format("User already %s [id=%s]", isBlocked ? "blocked" : "unblocked", id));
         }
-        return mapper.toUserDTO(existingUser);
+        return userMapper.toUserResponseDTO(existingUser);
     }
 
     /**
@@ -402,9 +405,9 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public void blockById(UUID id) {
-        log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), id);
+        log.debug(METHOD_UUID, MethodLog.getMethodName(), id);
         User existingUser = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(String.format("User not found [id=%s]", id)));
+                .orElseThrow(() -> new UserNotFoundException(String.format(USER_NOT_FOUND_MSG, id)));
         if (!existingUser.getIsBlocked()) {
             userRepository.blockById(id);
             log.debug("User {} successfully blocked", id);
@@ -428,9 +431,9 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public void unblockById(UUID id) {
-        log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), id);
+        log.debug(METHOD_UUID, MethodLog.getMethodName(), id);
         User existingUser = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(String.format("User not found [id=%s]", id)));
+                .orElseThrow(() -> new UserNotFoundException(String.format(USER_NOT_FOUND_MSG, id)));
         if (existingUser.getIsBlocked()) {
             userRepository.unblockById(id);
             log.debug("User {} successfully unblocked", id);
@@ -452,7 +455,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public void deleteUser(UUID id) {
-        log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), id);
+        log.debug(METHOD_UUID, MethodLog.getMethodName(), id);
         if (userRepository.findById(id).isEmpty()) {
             log.warn("Error deleting user {}", id);
             throw new UserNotFoundException("Error deleting user with ID" + id);
@@ -474,7 +477,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Collection<UserResponseDTO> getAll() {
         log.debug("Method {}", MethodLog.getMethodName());
-        Collection<UserResponseDTO> userResponseDTOS = mapper.toUsersDTO(userRepository.findAll());
+        Collection<UserResponseDTO> userResponseDTOS = userMapper.toUserResponseDTOs(userRepository.findAll());
 
         if (userResponseDTOS.isEmpty()) {
             log.warn("There is no user in DB");

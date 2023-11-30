@@ -53,7 +53,6 @@ application:
         expiration: 604800000 # 7 days
 avatars:
   dir:
-    path: ./avatars
   extensions: jpg, jpeg, png, ico, gif, eps, svg, bmp
   max-size: 5MB # Максимальный размер файла
   image:

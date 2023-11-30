@@ -1,15 +1,11 @@
 package ru.ac.checkpointmanager.exception;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import jakarta.persistence.EntityNotFoundException;
 
-@ResponseStatus(HttpStatus.BAD_REQUEST)
-public class TerritoryNotFoundException extends RuntimeException {
+public class TerritoryNotFoundException extends EntityNotFoundException {
 
     public TerritoryNotFoundException(String message) {
         super(message);
     }
-    public TerritoryNotFoundException(String message, Throwable cause) {
-        super(message, cause);
-    }
+
 }

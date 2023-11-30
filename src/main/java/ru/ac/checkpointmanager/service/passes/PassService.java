@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.model.passes.Pass;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public interface PassService {

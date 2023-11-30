@@ -1,8 +1,9 @@
-package ru.ac.checkpointmanager.model;
+package ru.ac.checkpointmanager.model.avatar;
 
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.ac.checkpointmanager.model.User;
 
 import java.util.UUID;
 

@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
@@ -36,8 +37,12 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Crossing (Пересечение)", description = "Управление пересечениями")
-@ApiResponses(value = {@ApiResponse(responseCode = "401", description = "Нужно авторизоваться"),
-        @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса")})
+@ApiResponses(value = {
+        @ApiResponse(responseCode = "401", description = "UNAUTHORIZED: пользователь не авторизован",
+                content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса",
+                content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+})
 //я предполагаю, что этот эндпоинт будет вызываться когда будет открываться шлагбаум(например) и тем самым фиксироваться пересечение
 public class CrossingController {
 
@@ -49,8 +54,10 @@ public class CrossingController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пересечение успешно добавлено.",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = Crossing.class))}),
-            @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей.")})
+                            schema = @Schema(implementation = CrossingDTO.class))}),
+            @ApiResponse(responseCode = "400", description = "BAD_REQUEST: Неверные данные запроса",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+    })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SECURITY')")
     @PostMapping("/mark")
     public ResponseEntity<?> markCrossing(@Valid @RequestBody CrossingDTO crossingDTO, BindingResult bindingResult) {
@@ -69,7 +76,9 @@ public class CrossingController {
             @ApiResponse(responseCode = "200", description = "Пересечение успешно получено.",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = Crossing.class))}),
-            @ApiResponse(responseCode = "404", description = "Пересечения с таким Id не найдено.")})
+            @ApiResponse(responseCode = "400", description = "BAD_REQUEST: Неверные данные запроса",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+    })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SECURITY')")
     @GetMapping("/{id}")
     public ResponseEntity<?> getCrossing(@PathVariable UUID id) {
