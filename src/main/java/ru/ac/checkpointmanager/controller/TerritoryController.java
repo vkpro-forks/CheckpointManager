@@ -82,7 +82,7 @@ public class TerritoryController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @GetMapping("/{territoryId}")
     public ResponseEntity<TerritoryDTO> getTerritory(@PathVariable("territoryId") UUID territoryId) {
-        Territory territory = territoryService.findTerritoryById(territoryId);
+        Territory territory = territoryService.findById(territoryId);
         return ResponseEntity.ok(territoryMapper.toTerritoryDTO(territory));
     }
 
@@ -97,7 +97,7 @@ public class TerritoryController {
     @GetMapping("/{territoryId}/users")
     public ResponseEntity<List<UserResponseDTO>> getUsersByTerritory(@PathVariable UUID territoryId) {
 
-        List<User> users = service.findUsersByTerritoryId(territoryId);
+        List<User> users = territoryService.findUsersByTerritoryId(territoryId);
 
         return ResponseEntity.ok(userMapper.toUserResponseDTOs(users));
 

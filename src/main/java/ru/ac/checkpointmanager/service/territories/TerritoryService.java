@@ -10,7 +10,7 @@ public interface TerritoryService {
 
     Territory addTerritory(Territory territory);
 
-    Territory findTerritoryById(UUID id);
+    Territory findById(UUID id);
 
     List<User> findUsersByTerritoryId(UUID territoryId);
 

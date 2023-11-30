@@ -107,7 +107,7 @@ public class PassServiceImpl implements PassService {
     }
 
     @Override
-    public Pass findPass(UUID id) {
+    public Pass findById(UUID id) {
         log.debug("Method {} [UUID - {}]", MethodLog.getMethodName(), id);
         return passRepository.findById(id).orElseThrow(
                 () -> {
@@ -156,7 +156,7 @@ public class PassServiceImpl implements PassService {
     @Override
     public Pass updatePass(Pass pass) {
         log.info("Method {} [UUID - {}]", MethodLog.getMethodName(), pass.getId());
-        Pass foundPass = findPass(pass.getId());
+        Pass foundPass = findById(pass.getId());
         if (!foundPass.getStatus().equals(PassStatus.ACTIVE) && !foundPass.getStatus().equals(PassStatus.DELAYED)) {
             throw new IllegalStateException("This pass is not active or delayed, it cannot be changed");
         }
@@ -182,7 +182,7 @@ public class PassServiceImpl implements PassService {
     public Pass cancelPass(UUID id) {
         log.info("Method {} [UUID - {}]", MethodLog.getMethodName(), id);
 
-        Pass pass = findPass(id);
+        Pass pass = findById(id);
         if (!pass.getStatus().equals(PassStatus.ACTIVE) && !pass.getStatus().equals(PassStatus.DELAYED)) {
             throw new IllegalStateException("You can only cancel an active or delayed pass");
         }
@@ -205,7 +205,7 @@ public class PassServiceImpl implements PassService {
     @Override
     public Pass activateCancelledPass(UUID id) {
         log.info("Method {} [UUID - {}]", MethodLog.getMethodName(), id);
-        Pass pass = findPass(id);
+        Pass pass = findById(id);
 
         if (!pass.getStatus().equals(PassStatus.CANCELLED)) {
             throw new IllegalStateException("You can only activate a previously cancelled pass");
@@ -231,7 +231,7 @@ public class PassServiceImpl implements PassService {
     public Pass unWarningPass(UUID id) {
         log.info("Method {} [UUID - {}]", MethodLog.getMethodName(), id);
 
-        Pass pass = findPass(id);
+        Pass pass = findById(id);
         if (!pass.getStatus().equals(PassStatus.WARNING)) {
             throw new IllegalStateException("You can only to unwarnining a previously warninged pass");
         }
@@ -246,7 +246,7 @@ public class PassServiceImpl implements PassService {
     @Override
     public void markFavorite(UUID id) {
         log.info("Method {} [UUID - {}]", MethodLog.getMethodName(), id);
-        Pass pass = findPass(id);
+        Pass pass = findById(id);
         pass.setFavorite(true);
         passRepository.save(pass);
         log.info("Pass [UUID - {}] marked favorite", id);
@@ -255,7 +255,7 @@ public class PassServiceImpl implements PassService {
     @Override
     public void unmarkFavorite(UUID id) {
         log.info("Method {} [UUID - {}]", MethodLog.getMethodName(), id);
-        Pass pass = findPass(id);
+        Pass pass = findById(id);
         pass.setFavorite(false);
         passRepository.save(pass);
         log.info("Pass [UUID - {}] unmarked favorite", id);
