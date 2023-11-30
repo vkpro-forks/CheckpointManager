@@ -36,6 +36,8 @@ public class UrlConstants {
 
     public static final String TERR_ATTACH_DETACH_URL = TERR_URL + "/%s/user/%s";
 
+    public static final String PHONE_URL = "/api/v1/phone";
+
 
     private UrlConstants() {
 

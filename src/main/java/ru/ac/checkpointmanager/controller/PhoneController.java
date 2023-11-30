@@ -16,13 +16,19 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.service.phone.PhoneService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
 
 import java.util.Collection;
-import java.util.Optional;
 import java.util.UUID;
 
 
@@ -80,12 +86,10 @@ public class PhoneController {
                     description = "NOT_FOUND: номера с таким id не найдено"
             )
     })
-    @GetMapping("{id}")
-    public ResponseEntity<PhoneDTO> findById(@Parameter(description = "Уникальный идентификатор телефона")
-                                             @PathVariable UUID id
-    ) {
-        Optional<PhoneDTO> foundPhone = Optional.ofNullable(phoneService.findById(id));
-        return foundPhone.map(ResponseEntity::ok).orElse(ResponseEntity.noContent().build());
+    @GetMapping("/{id}")//FIXME здесь никогда не было бы null
+    public PhoneDTO findById(@Parameter(description = "Уникальный идентификатор телефона")
+                             @PathVariable UUID id) {
+        return phoneService.findById(id);
     }
 
     @Operation(summary = "Получить список всех номеров")
@@ -148,14 +152,9 @@ public class PhoneController {
                     description = "NOT_FOUND: телефон не найден"
             )
     })
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")//FIXME телефон итак ищется в репо, и не вернет null никогда
     public ResponseEntity<Void> deleteNumber(@Parameter(description = "Уникальный идентификатор телефона")
-                                             @PathVariable UUID id
-    ) {
-        PhoneDTO foundPhone = phoneService.findById(id);
-        if (foundPhone == null) {
-            return ResponseEntity.noContent().build();
-        }
+                                             @PathVariable UUID id) {
         phoneService.deletePhoneNumber(id);
         return ResponseEntity.ok().build();
     }

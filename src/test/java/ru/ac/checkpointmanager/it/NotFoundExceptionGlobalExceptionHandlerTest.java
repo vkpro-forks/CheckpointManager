@@ -52,6 +52,7 @@ import java.util.stream.Stream;
 class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConfig {
 
     private static final String TERRITORY = "Territory";
+    public static final String PHONE = "Phone";
 
     @Autowired
     MockMvc mockMvc;
@@ -380,6 +381,41 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
                         .delete(UrlConstants.TERR_ATTACH_DETACH_URL.formatted(TestUtils.TERR_ID, TestUtils.USER_ID)))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith(TERRITORY)));
+        checkNotFoundFields(resultActions);
+    }
+
+    //PHONE NOT FOUND EXCEPTION HANDLING
+    @Test
+    @SneakyThrows
+    void shouldHandlePhoneNotFoundExceptionForGetNumber() {
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                        .get(UrlConstants.PHONE_URL + "/" + TestUtils.PHONE_ID))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(Matchers.startsWith(PHONE)));
+        checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldHandlePhoneNotFoundExceptionForDeleteNumber() {
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                        .delete(UrlConstants.PHONE_URL + "/" + TestUtils.PHONE_ID))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(Matchers.startsWith(PHONE)));
+        checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldHandlePhoneNotFoundExceptionForUpdateNumber() {
+        String phoneDto = TestUtils.jsonStringFromObject(TestUtils.getPhoneDto());
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                        .put(UrlConstants.PHONE_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(phoneDto)
+                )
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(Matchers.startsWith(PHONE)));
         checkNotFoundFields(resultActions);
     }
 

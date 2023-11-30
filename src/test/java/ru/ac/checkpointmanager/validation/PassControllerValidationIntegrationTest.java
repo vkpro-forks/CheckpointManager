@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -33,7 +34,8 @@ import ru.ac.checkpointmanager.util.UrlConstants;
 @WebMvcTest(PassController.class)
 @Import({OpenAllEndpointsTestConfiguration.class, CorsTestConfiguration.class})
 @WithMockUser(roles = {"ADMIN"})
-public class PassControllerValidationIntegrationTest {
+@ActiveProfiles("test")
+class PassControllerValidationIntegrationTest {
 
     @Autowired
     MockMvc mockMvc;

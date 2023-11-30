@@ -7,12 +7,14 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.CheckpointDTO;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
+import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.passes.PassDtoCreate;
 import ru.ac.checkpointmanager.dto.passes.PassDtoUpdate;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.model.checkpoints.CheckpointType;
 import ru.ac.checkpointmanager.model.enums.Direction;
+import ru.ac.checkpointmanager.model.enums.PhoneNumberType;
 import ru.ac.checkpointmanager.model.passes.PassTypeTime;
 
 import java.time.LocalDateTime;
@@ -41,6 +43,10 @@ public class TestUtils {
     public static final String LICENSE_PLATE = "А420ВХ799";
 
     public static final UUID CROSSING_ID = UUID.randomUUID();
+
+    public static final UUID PHONE_ID = UUID.randomUUID();
+
+    public static final String PHONE_NUM = "+79167868124";
 
     public static final String JSON_ERROR_CODE = "$.errorCode";
 
@@ -116,6 +122,16 @@ public class TestUtils {
                 LocalDateTime.now().plusHours(7),
                 null,
                 getCarDto()
+        );
+    }
+
+    public static PhoneDTO getPhoneDto() {
+        return new PhoneDTO(
+                PHONE_ID,
+                PHONE_NUM,
+                PhoneNumberType.HOME,
+                USER_ID,
+                "note"
         );
     }
 

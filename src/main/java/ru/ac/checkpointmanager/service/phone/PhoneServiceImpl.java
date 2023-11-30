@@ -24,13 +24,19 @@ import static ru.ac.checkpointmanager.utils.FieldsValidation.isValidPhoneNumber;
 @Slf4j
 public class PhoneServiceImpl implements PhoneService {
 
+    private static final String PHONE_NUMBER_NOT_FOUND_MSG = "Phone number with id: %s doesn't exist";
+
+    private static final String PHONE_NUMBER_NOT_FOUND_LOG = "Phone number with [id: {}] doesn't exist";
+    public static final String METHOD_CALLED = "Method {}";
+
     private final PhoneRepository phoneRepository;
+
     private final PhoneMapper phoneMapper;
 
     @Override
     @Transactional
     public PhoneDTO createPhoneNumber(PhoneDTO phoneDTO) {
-        log.info("Method {}", MethodLog.getMethodName());
+        log.debug(METHOD_CALLED, MethodLog.getMethodName());
 
         if (!isValidPhoneNumber(phoneDTO.getNumber())) {
             log.warn("Phone number {} contains invalid characters", phoneDTO.getNumber());
@@ -44,7 +50,7 @@ public class PhoneServiceImpl implements PhoneService {
                     ("Phone number %s already exist", phoneDTO.getNumber()));
         }
         Phone phone = phoneRepository.save(phoneMapper.toPhone(phoneDTO));
-        log.debug("Phone {} saved", phone.getNumber());
+        log.info("Phone {} saved", phone.getNumber());
         return phoneMapper.toPhoneDTO(phone);
     }
 
@@ -52,16 +58,22 @@ public class PhoneServiceImpl implements PhoneService {
     public PhoneDTO findById(UUID id) {
         log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), id);
         Phone foundPhone = phoneRepository.findById(id).orElseThrow(
-                () -> new PhoneNumberNotFoundException("The number by this id does not exist"));
+                () -> {
+                    log.warn(PHONE_NUMBER_NOT_FOUND_LOG, id);
+                    return new PhoneNumberNotFoundException(PHONE_NUMBER_NOT_FOUND_MSG.formatted(id));
+                });
         return phoneMapper.toPhoneDTO(foundPhone);
     }
 
     @Override
-    public PhoneDTO updatePhoneNumber(PhoneDTO phoneDTO) {
-        log.debug("Method {}", MethodLog.getMethodName());
-        Phone foundPhone = phoneRepository.findById(phoneDTO.getId()).orElseThrow(
-                () -> new PhoneNumberNotFoundException("The number by this id does not exist"));
-
+    public PhoneDTO updatePhoneNumber(PhoneDTO phoneDTO) {//TODO есть смысл проверить принадлежит ли этот телефон юзеру?
+        log.debug(METHOD_CALLED, MethodLog.getMethodName());
+        UUID phoneId = phoneDTO.getId();
+        Phone foundPhone = phoneRepository.findById(phoneId).orElseThrow(
+                () -> {
+                    log.warn(PHONE_NUMBER_NOT_FOUND_LOG, phoneId);
+                    return new PhoneNumberNotFoundException(PHONE_NUMBER_NOT_FOUND_MSG.formatted(phoneId));
+                });
         if (phoneRepository.existsByNumber(phoneDTO.getNumber())) {
             log.warn("Phone {} already taken", phoneDTO.getNumber());
             throw new PhoneAlreadyExistException(String.format
@@ -72,7 +84,7 @@ public class PhoneServiceImpl implements PhoneService {
         foundPhone.setNote(phoneDTO.getNote());
 
         phoneRepository.save(foundPhone);
-        log.debug("Phone {} saved", foundPhone.getNumber());
+        log.info("Phone {} saved", foundPhone.getNumber());
         return phoneMapper.toPhoneDTO(foundPhone);
     }
 
@@ -81,27 +93,24 @@ public class PhoneServiceImpl implements PhoneService {
     public void deletePhoneNumber(UUID id) {
         log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), id);
         if (phoneRepository.findById(id).isEmpty()) {
-            log.warn("Error deleting phone {}", id);
-            throw new PhoneNumberNotFoundException("Error deleting phone number with ID" + id);
+            log.warn(PHONE_NUMBER_NOT_FOUND_LOG, id);
+            throw new PhoneNumberNotFoundException(PHONE_NUMBER_NOT_FOUND_MSG.formatted(id));
         }
         phoneRepository.deleteById(id);
+        log.info("Phone with [id: {}] was successfully deleted", id);
     }
 
     @Override
     public Collection<PhoneDTO> getAll() {
-        log.debug("Method {}", MethodLog.getMethodName());
+        log.debug(METHOD_CALLED, MethodLog.getMethodName());
         Collection<PhoneDTO> numbers = phoneMapper.toPhonesDTO(phoneRepository.findAll());
-
-        if (numbers.isEmpty()) {
-            log.warn("There is no phone in DB");
-            throw new PhoneNumberNotFoundException("There is no phone number in DB");
-        }
+        //TODO просто возвращаем пустую коллекцию, или новый эксепшн
         return numbers;
     }
 
     @Override
     public Boolean existsByNumber(String number) {
-        log.debug("Method {}", MethodLog.getMethodName());
+        log.debug(METHOD_CALLED, MethodLog.getMethodName());
         return phoneRepository.existsByNumber(number);
     }
 }
