@@ -97,7 +97,7 @@ public class TerritoryController {
     @GetMapping("/{territoryId}/users")
     public ResponseEntity<List<UserResponseDTO>> getUsersByTerritory(@PathVariable UUID territoryId) {
 
-        List<User> users = service.findUsersByTerritoryId(territoryId);
+        List<User> users = territoryService.findUsersByTerritoryId(territoryId);
 
         return ResponseEntity.ok(userMapper.toUserResponseDTOs(users));
 

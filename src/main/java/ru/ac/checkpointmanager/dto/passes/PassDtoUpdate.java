@@ -9,6 +9,7 @@ import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.VisitorDTO;
 import ru.ac.checkpointmanager.model.passes.PassTypeTime;
 import ru.ac.checkpointmanager.validation.annotation.CarOrVisitorFieldsCheck;
+import ru.ac.checkpointmanager.validation.annotation.PassTimeCheck;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -16,6 +17,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @CarOrVisitorFieldsCheck
+@PassTimeCheck
 public class PassDtoUpdate {
 
     @NotNull
