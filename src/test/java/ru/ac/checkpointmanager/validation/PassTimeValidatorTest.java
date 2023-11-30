@@ -3,8 +3,9 @@ package ru.ac.checkpointmanager.validation;
 import jakarta.validation.ConstraintValidatorContext;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.ac.checkpointmanager.dto.passes.PassDtoCreate;
@@ -12,6 +13,7 @@ import ru.ac.checkpointmanager.dto.passes.PassDtoUpdate;
 import ru.ac.checkpointmanager.util.TestUtils;
 
 import java.time.LocalDateTime;
+import java.util.stream.Stream;
 
 @ExtendWith(MockitoExtension.class)
 class PassTimeValidatorTest {
@@ -34,48 +36,46 @@ class PassTimeValidatorTest {
         passTimeValidator = new PassTimeValidator();
     }
 
-    @Test
-    void shouldNotValidateForPassDtoCreate() {
-        PassDtoCreate passDtoCreate = TestUtils.getPassDtoCreate();
-        passDtoCreate.setEndTime(LocalDateTime.now().plusHours(1));
-        passDtoCreate.setStartTime(LocalDateTime.now().plusHours(2));
-
-        boolean valid = passTimeValidator.isValid(passDtoCreate, context);
-
-        Assertions.assertThat(valid).isFalse();
-    }
-
-    @Test
-    void shouldValidateForPassDtoCreate() {
-        PassDtoCreate passDtoCreate = TestUtils.getPassDtoCreate();
-        passDtoCreate.setStartTime(LocalDateTime.now().plusHours(1));
-        passDtoCreate.setEndTime(LocalDateTime.now().plusHours(2));
-
-        boolean valid = passTimeValidator.isValid(passDtoCreate, context);
+    @ParameterizedTest
+    @MethodSource("getCorrectPassDtoArguments")
+    void shouldValidateForCorrectPathDto(Object passDto) {
+        boolean valid = passTimeValidator.isValid(passDto, context);
 
         Assertions.assertThat(valid).isTrue();
     }
 
-    @Test
-    void shouldNotValidateForPassDtoUpdate() {
-        PassDtoUpdate passDtoUpdate = TestUtils.getPassDtoUpdate();
-        passDtoUpdate.setEndTime(LocalDateTime.now().plusHours(1));
-        passDtoUpdate.setStartTime(LocalDateTime.now().plusHours(2));
-
-        boolean valid = passTimeValidator.isValid(passDtoUpdate, context);
+    @ParameterizedTest
+    @MethodSource("getIncorrectPassDtoArguments")
+    void shouldNotValidateForIncorrectPassDto(Object passDto) {
+        boolean valid = passTimeValidator.isValid(passDto, context);
 
         Assertions.assertThat(valid).isFalse();
     }
 
-    @Test
-    void shouldValidateForPassDtoUpdate() {
+    private static Stream<Object> getCorrectPassDtoArguments() {
         PassDtoUpdate passDtoUpdate = TestUtils.getPassDtoUpdate();
         passDtoUpdate.setStartTime(LocalDateTime.now().plusHours(1));
         passDtoUpdate.setEndTime(LocalDateTime.now().plusHours(2));
+        PassDtoCreate passDtoCreate = TestUtils.getPassDtoCreate();
+        passDtoCreate.setStartTime(LocalDateTime.now().plusHours(1));
+        passDtoCreate.setEndTime(LocalDateTime.now().plusHours(2));
+        return Stream.of(
+                passDtoUpdate,
+                passDtoCreate
+        );
+    }
 
-        boolean valid = passTimeValidator.isValid(passDtoUpdate, context);
-
-        Assertions.assertThat(valid).isTrue();
+    private static Stream<Object> getIncorrectPassDtoArguments() {
+        PassDtoCreate passDtoCreate = TestUtils.getPassDtoCreate();
+        passDtoCreate.setEndTime(LocalDateTime.now().plusHours(1));
+        passDtoCreate.setStartTime(LocalDateTime.now().plusHours(2));
+        PassDtoUpdate passDtoUpdate = TestUtils.getPassDtoUpdate();
+        passDtoUpdate.setEndTime(LocalDateTime.now().plusHours(1));
+        passDtoUpdate.setStartTime(LocalDateTime.now().plusHours(2));
+        return Stream.of(
+                passDtoUpdate,
+                passDtoCreate
+        );
     }
 
 }

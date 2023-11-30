@@ -279,7 +279,7 @@ public class PassServiceImpl implements PassService {
      * @param newPass добавляемый или изменяемый пропуск
      * @throws IllegalArgumentException "The start time must be earlier than the end time"
      */
-    private void checkPassTime(Pass newPass) {
+    private void checkPassTime(Pass newPass) {//TODO we don't need on this check anymore - remove?
         if (!newPass.getStartTime().isBefore(newPass.getEndTime())) {
 
             String message = String.format("The start time is after the end time [UUID - %s], start - %s, end - %s",
