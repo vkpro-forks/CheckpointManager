@@ -169,15 +169,6 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
-    @ExceptionHandler(PhoneNumberNotFoundException.class)
-    public ProblemDetail handlePhoneNumberNotFoundException(PhoneNumberNotFoundException e) {
-        ProblemDetail problemDetail = createProblemDetail(HttpStatus.NOT_FOUND, e);
-        problemDetail.setTitle("Phone number not found");
-        problemDetail.setProperty(ERROR_CODE, ErrorCode.NOT_FOUND.toString());
-        log.debug(LOG_MSG, e.getClass());
-        return problemDetail;
-    }
-
     @ExceptionHandler(UsernameNotFoundException.class)
     public ProblemDetail handleUsernameNotFoundException(UsernameNotFoundException e) {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.NOT_FOUND, e);

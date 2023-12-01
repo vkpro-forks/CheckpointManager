@@ -8,8 +8,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.ac.checkpointmanager.dto.passes.PassDtoCreate;
-import ru.ac.checkpointmanager.dto.passes.PassDtoUpdate;
+import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
+import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.util.TestUtils;
 
 import java.time.LocalDateTime;
@@ -53,10 +53,10 @@ class PassTimeValidatorTest {
     }
 
     private static Stream<Object> getCorrectPassDtoArguments() {
-        PassDtoUpdate passDtoUpdate = TestUtils.getPassDtoUpdate();
+        PassUpdateDTO passDtoUpdate = TestUtils.getPassUpdateDTO();
         passDtoUpdate.setStartTime(LocalDateTime.now().plusHours(1));
         passDtoUpdate.setEndTime(LocalDateTime.now().plusHours(2));
-        PassDtoCreate passDtoCreate = TestUtils.getPassDtoCreate();
+        PassCreateDTO passDtoCreate = TestUtils.getPassCreateDTO();
         passDtoCreate.setStartTime(LocalDateTime.now().plusHours(1));
         passDtoCreate.setEndTime(LocalDateTime.now().plusHours(2));
         return Stream.of(
@@ -66,10 +66,10 @@ class PassTimeValidatorTest {
     }
 
     private static Stream<Object> getIncorrectPassDtoArguments() {
-        PassDtoCreate passDtoCreate = TestUtils.getPassDtoCreate();
+        PassCreateDTO passDtoCreate = TestUtils.getPassCreateDTO();
         passDtoCreate.setEndTime(LocalDateTime.now().plusHours(1));
         passDtoCreate.setStartTime(LocalDateTime.now().plusHours(2));
-        PassDtoUpdate passDtoUpdate = TestUtils.getPassDtoUpdate();
+        PassUpdateDTO passDtoUpdate = TestUtils.getPassUpdateDTO();
         passDtoUpdate.setEndTime(LocalDateTime.now().plusHours(1));
         passDtoUpdate.setStartTime(LocalDateTime.now().plusHours(2));
         return Stream.of(
