@@ -41,9 +41,17 @@ import static ru.ac.checkpointmanager.utils.StringTrimmer.trimThemAll;
 public class PassServiceImpl implements PassService {
 
     private static final String PASS_NOT_FOUND_LOG = "[Pass with id: {}] not found";
+
     private static final String PASS_NOT_FOUND_MSG = "Pass with id: %s not found";
+
     private static final String TERRITORY_NOT_FOUND_MSG = "Territory with id: %s not found";
+
     private static final String TERRITORY_NOT_FOUND_LOG = "Territory with id: {} not found";
+
+    private static final String METHOD_UUID = "Method {} [UUID - {}]";
+
+    private static final String PASS_STATUS_CHANGED_LOG = "Pass [UUID - {}], changed status on {}";
+
 
     private final PassRepository passRepository;
 
@@ -67,7 +75,6 @@ public class PassServiceImpl implements PassService {
             throw new TerritoryNotFoundException(TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
         }
 
-        checkPassTime(pass);
         checkUserTerritoryRelation(pass);
         checkOverlapTime(pass);
 
@@ -108,7 +115,7 @@ public class PassServiceImpl implements PassService {
 
     @Override
     public Pass findById(UUID id) {
-        log.debug("Method {} [UUID - {}]", MethodLog.getMethodName(), id);
+        log.debug(METHOD_UUID, MethodLog.getMethodName(), id);
         return passRepository.findById(id).orElseThrow(
                 () -> {
                     log.warn(PASS_NOT_FOUND_LOG, id);
@@ -118,7 +125,7 @@ public class PassServiceImpl implements PassService {
 
     @Override
     public Page<Pass> findPassesByUser(UUID userId, PagingParams pagingParams) {
-        log.debug("Method {} [UUID - {}]", MethodLog.getMethodName(), userId);
+        log.debug(METHOD_UUID, MethodLog.getMethodName(), userId);
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
         if (userRepository.findById(userId).isEmpty()) {
             throw new UserNotFoundException(String.format("User not found [id=%s]", userId));
@@ -137,7 +144,7 @@ public class PassServiceImpl implements PassService {
 
     @Override
     public Page<Pass> findPassesByTerritory(UUID terId, PagingParams pagingParams) {
-        log.debug("Method {} [UUID - {}]", MethodLog.getMethodName(), terId);
+        log.debug(METHOD_UUID, MethodLog.getMethodName(), terId);
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
         if (territoryRepository.findById(terId).isEmpty()) {
             log.warn(TERRITORY_NOT_FOUND_LOG, terId);
@@ -155,12 +162,12 @@ public class PassServiceImpl implements PassService {
 
     @Override
     public Pass updatePass(Pass pass) {
-        log.info("Method {} [UUID - {}]", MethodLog.getMethodName(), pass.getId());
+        log.info(METHOD_UUID, MethodLog.getMethodName(), pass.getId());
         Pass foundPass = findById(pass.getId());
         if (!foundPass.getStatus().equals(PassStatus.ACTIVE) && !foundPass.getStatus().equals(PassStatus.DELAYED)) {
             throw new IllegalStateException("This pass is not active or delayed, it cannot be changed");
         }
-        checkPassTime(pass);
+
         checkUserTerritoryRelation(pass);
         checkOverlapTime(pass);
         trimThemAll(pass);
@@ -180,7 +187,7 @@ public class PassServiceImpl implements PassService {
     @Override
     @Transactional
     public Pass cancelPass(UUID id) {
-        log.info("Method {} [UUID - {}]", MethodLog.getMethodName(), id);
+        log.info(METHOD_UUID, MethodLog.getMethodName(), id);
 
         Pass pass = findById(id);
         if (!pass.getStatus().equals(PassStatus.ACTIVE) && !pass.getStatus().equals(PassStatus.DELAYED)) {
@@ -204,7 +211,7 @@ public class PassServiceImpl implements PassService {
 
     @Override
     public Pass activateCancelledPass(UUID id) {
-        log.info("Method {} [UUID - {}]", MethodLog.getMethodName(), id);
+        log.info(METHOD_UUID, MethodLog.getMethodName(), id);
         Pass pass = findById(id);
 
         if (!pass.getStatus().equals(PassStatus.CANCELLED)) {
@@ -222,14 +229,14 @@ public class PassServiceImpl implements PassService {
         }
 
         Pass activatedPass = passRepository.save(pass);
-        log.info("Pass [UUID - {}], changed status on {}", pass.getId(), pass.getStatus());
+        log.info(PASS_STATUS_CHANGED_LOG, pass.getId(), pass.getStatus());
 
         return activatedPass;
     }
 
     @Override
     public Pass unWarningPass(UUID id) {
-        log.info("Method {} [UUID - {}]", MethodLog.getMethodName(), id);
+        log.info(METHOD_UUID, MethodLog.getMethodName(), id);
 
         Pass pass = findById(id);
         if (!pass.getStatus().equals(PassStatus.WARNING)) {
@@ -238,14 +245,14 @@ public class PassServiceImpl implements PassService {
         pass.setStatus(PassStatus.COMPLETED);
 
         Pass completedPass = passRepository.save(pass);
-        log.info("Pass [UUID - {}], changed status on {}", pass.getId(), pass.getStatus());
+        log.info(PASS_STATUS_CHANGED_LOG, pass.getId(), pass.getStatus());
 
         return completedPass;
     }
 
     @Override
     public void markFavorite(UUID id) {
-        log.info("Method {} [UUID - {}]", MethodLog.getMethodName(), id);
+        log.info(METHOD_UUID, MethodLog.getMethodName(), id);
         Pass pass = findById(id);
         pass.setFavorite(true);
         passRepository.save(pass);
@@ -254,7 +261,7 @@ public class PassServiceImpl implements PassService {
 
     @Override
     public void unmarkFavorite(UUID id) {
-        log.info("Method {} [UUID - {}]", MethodLog.getMethodName(), id);
+        log.info(METHOD_UUID, MethodLog.getMethodName(), id);
         Pass pass = findById(id);
         pass.setFavorite(false);
         passRepository.save(pass);
@@ -263,30 +270,13 @@ public class PassServiceImpl implements PassService {
 
     @Override
     public void deletePass(UUID id) {
-        log.info("Method {} [UUID - {}]", MethodLog.getMethodName(), id);
+        log.info(METHOD_UUID, MethodLog.getMethodName(), id);
         if (passRepository.findById(id).isEmpty()) {
             log.warn(PASS_NOT_FOUND_LOG, id);
             throw new PassNotFoundException(PASS_NOT_FOUND_MSG.formatted(id));
         }
         passRepository.deleteById(id);
         log.info("[Pass with id: {}] successfully deleted", id);
-    }
-
-    /**
-     * Проверяет, что в добавляемом или изменяемом пропуске
-     * время окончания больше чем время начала
-     *
-     * @param newPass добавляемый или изменяемый пропуск
-     * @throws IllegalArgumentException "The start time must be earlier than the end time"
-     */
-    private void checkPassTime(Pass newPass) {//TODO we don't need on this check anymore - remove?
-        if (!newPass.getStartTime().isBefore(newPass.getEndTime())) {
-
-            String message = String.format("The start time is after the end time [UUID - %s], start - %s, end - %s",
-                    newPass.getId(), newPass.getStartTime(), newPass.getEndTime());
-            log.info(message);
-            throw new IllegalArgumentException(message);
-        }
     }
 
     /**
@@ -366,7 +356,7 @@ public class PassServiceImpl implements PassService {
             pass.setStatus(PassStatus.ACTIVE);
             passRepository.save(pass);
 
-            log.debug("Pass [UUID - {}], changed status on {}",
+            log.debug(PASS_STATUS_CHANGED_LOG,
                     pass.getId(), pass.getStatus());
         }
     }
