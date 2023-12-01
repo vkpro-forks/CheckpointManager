@@ -57,6 +57,7 @@ public class PhoneServiceImpl implements PhoneService {
     }
 
     @Override
+    @Transactional
     public PhoneDTO updatePhoneNumber(PhoneDTO phoneDTO) {
         log.debug("Method {}", MethodLog.getMethodName());
         Phone foundPhone = phoneRepository.findById(phoneDTO.getId()).orElseThrow(

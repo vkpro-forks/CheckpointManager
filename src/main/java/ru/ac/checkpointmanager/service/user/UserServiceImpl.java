@@ -7,6 +7,7 @@ import org.springframework.mail.MailSendException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.ChangeEmailRequest;
 import ru.ac.checkpointmanager.dto.ChangePasswordRequest;
@@ -62,19 +63,13 @@ public class UserServiceImpl implements UserService {
     private static final String USER_NOT_FOUND_MSG = "User with [id=%s] not found";
 
     private final UserMapper userMapper;
-
     private final TerritoryMapper territoryMapper;
 
     private final UserRepository userRepository;
-
     private final PhoneRepository phoneRepository;
-
     private final PasswordEncoder passwordEncoder;
-
     private final TemporaryUserService temporaryUserService;
-
     private final EmailService emailService;
-
     private final PhoneService phoneService;
 
     /**
@@ -90,6 +85,7 @@ public class UserServiceImpl implements UserService {
      * @see UserNotFoundException
      */
     @Override
+    @Transactional(readOnly = true)
     public UserResponseDTO findById(UUID id) {
         log.debug(METHOD_UUID, MethodLog.getMethodName(), id);
         User foundUser = userRepository.findById(id).orElseThrow(
@@ -110,6 +106,7 @@ public class UserServiceImpl implements UserService {
      * @see TerritoryNotFoundException
      */
     @Override
+    @Transactional(readOnly = true)
     public List<TerritoryDTO> findTerritoriesByUserId(UUID userId) {
         log.debug(METHOD_UUID, MethodLog.getMethodName(), userId);
         List<Territory> territories = userRepository.findTerritoriesByUserId(userId);
@@ -129,6 +126,7 @@ public class UserServiceImpl implements UserService {
      * @throws UserNotFoundException если пользователи с именем, содержащим указанную строку, не найдены.
      */
     @Override
+    @Transactional(readOnly = true)
     public Collection<UserResponseDTO> findByName(String name) {
         log.info("Method {} was invoked", MethodLog.getMethodName());
         Collection<UserResponseDTO> userResponseDTOS = userMapper.toUserResponseDTOs(userRepository
@@ -157,7 +155,7 @@ public class UserServiceImpl implements UserService {
      * @see UserResponseDTO
      */
     @Override
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public UserResponseDTO updateUser(UserPutDTO userPutDTO) {
         log.debug("Updating user with [UUID - {}]", userPutDTO.getId());
         User foundUser = userRepository.findById(userPutDTO.getId())
@@ -211,6 +209,7 @@ public class UserServiceImpl implements UserService {
      * @see SecurityUtils
      */
     @Override
+    @Transactional
     public void changePassword(ChangePasswordRequest request) {
         User user = SecurityUtils.getCurrentUser();
         log.debug("Method {}, Username - {}", MethodLog.getMethodName(), user.getUsername());
@@ -297,7 +296,7 @@ public class UserServiceImpl implements UserService {
      * @param token уникальный токен подтверждения, используемый для идентификации временного пользователя.
      * @throws UserNotFoundException если пользователь с указанной предыдущей электронной почтой не найден.
      */
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @Override
     public void confirmEmail(String token) {
         log.debug("[Method {}], [Temporary token {}]", MethodLog.getMethodName(), token);
@@ -334,6 +333,7 @@ public class UserServiceImpl implements UserService {
      * @throws IllegalStateException если пользователь уже имеет указанную роль.
      */
     @Override
+    @Transactional
     public void changeRole(UUID id, Role role) {
         log.debug(METHOD_UUID, MethodLog.getMethodName(), id);
         User existingUser = userRepository.findById(id)
@@ -375,6 +375,7 @@ public class UserServiceImpl implements UserService {
      * @throws IllegalStateException если статус блокировки пользователя уже соответствует указанному значению.
      */
     @Override
+    @Transactional
     public UserResponseDTO updateBlockStatus(UUID id, Boolean isBlocked) {
         log.debug(METHOD_UUID, MethodLog.getMethodName(), id);
         User existingUser = userRepository.findById(id)
@@ -404,6 +405,7 @@ public class UserServiceImpl implements UserService {
      * @throws IllegalStateException если пользователь уже заблокирован.
      */
     @Override
+    @Transactional
     public void blockById(UUID id) {
         log.debug(METHOD_UUID, MethodLog.getMethodName(), id);
         User existingUser = userRepository.findById(id)
@@ -430,6 +432,7 @@ public class UserServiceImpl implements UserService {
      * @throws IllegalStateException если пользователь уже разблокирован.
      */
     @Override
+    @Transactional
     public void unblockById(UUID id) {
         log.debug(METHOD_UUID, MethodLog.getMethodName(), id);
         User existingUser = userRepository.findById(id)
@@ -454,6 +457,7 @@ public class UserServiceImpl implements UserService {
      * @throws UserNotFoundException если пользователь с указанным идентификатором не найден.
      */
     @Override
+    @Transactional
     public void deleteUser(UUID id) {
         log.debug(METHOD_UUID, MethodLog.getMethodName(), id);
         if (userRepository.findById(id).isEmpty()) {
@@ -475,6 +479,7 @@ public class UserServiceImpl implements UserService {
      * @throws UserNotFoundException если в базе данных нет пользователей.
      */
     @Override
+    @Transactional(readOnly = true)
     public Collection<UserResponseDTO> getAll() {
         log.debug("Method {}", MethodLog.getMethodName());
         Collection<UserResponseDTO> userResponseDTOS = userMapper.toUserResponseDTOs(userRepository.findAll());
@@ -498,6 +503,7 @@ public class UserServiceImpl implements UserService {
      * @throws UserNotFoundException если пользователь с указанным идентификатором не найден.
      */
     @Override
+    @Transactional(readOnly = true)
     public Collection<String> findUsersPhoneNumbers(UUID userId) {
         log.debug("Method {}, UUID {}", MethodLog.getMethodName(), userId);
         if (userRepository.findById(userId).isEmpty()) {

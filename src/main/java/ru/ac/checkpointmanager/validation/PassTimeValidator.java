@@ -2,8 +2,8 @@ package ru.ac.checkpointmanager.validation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import ru.ac.checkpointmanager.dto.passes.PassDtoCreate;
-import ru.ac.checkpointmanager.dto.passes.PassDtoUpdate;
+import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
+import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.validation.annotation.PassTimeCheck;
 
 public class PassTimeValidator implements ConstraintValidator<PassTimeCheck, Object> {
@@ -26,13 +26,12 @@ public class PassTimeValidator implements ConstraintValidator<PassTimeCheck, Obj
         if (value == null) {
             return true;//not responsibility of this annotation
         }
-        if (value instanceof PassDtoUpdate passDtoUpdate) {
+        if (value instanceof PassUpdateDTO passDtoUpdate) {
             return passDtoUpdate.getStartTime().isBefore(passDtoUpdate.getEndTime());
         }
-        if (value instanceof PassDtoCreate passDtoCreate) {
+        if (value instanceof PassCreateDTO passDtoCreate) {
             return passDtoCreate.getStartTime().isBefore(passDtoCreate.getEndTime());
         }
         return false;
     }
-
 }
