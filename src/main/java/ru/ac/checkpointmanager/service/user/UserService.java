@@ -17,6 +17,8 @@ public interface UserService {
 
     UserResponseDTO findById(UUID id);
 
+    User findUserById(UUID id);
+
     List<TerritoryDTO> findTerritoriesByUserId(UUID userId);
 
     Collection<UserResponseDTO> findByName(String name);
