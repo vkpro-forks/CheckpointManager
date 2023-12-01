@@ -74,8 +74,6 @@ public class CheckpointServiceImpl implements CheckpointService {
                     log.warn(CHECKPOINT_NOT_FOUND_LOG, checkpointId);
                     return new CheckpointNotFoundException(CHECKPOINT_NOT_FOUND_MSG.formatted(checkpointId));
                 });
-        //FIXME It would be better to find entity here and bind it to checkpoint
-        //FIXME we don't need to go to DB if territory shouldn't change
         territoryService.findTerritoryById(checkpoint.getTerritory().getId());
         trimThemAll(checkpoint);
 

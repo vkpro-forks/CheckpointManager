@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.service.phone.PhoneService;
@@ -44,7 +45,6 @@ import java.util.UUID;
         @ApiResponse(responseCode = "500",
                 description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса")})
 public class PhoneController {
-
     private final PhoneService phoneService;
 
     @Operation(summary = "Создание нового номера телефона")
@@ -86,7 +86,7 @@ public class PhoneController {
                     description = "NOT_FOUND: номера с таким id не найдено"
             )
     })
-    @GetMapping("/{id}")//FIXME здесь никогда не было бы null
+    @GetMapping("/{id}")
     public PhoneDTO findById(@Parameter(description = "Уникальный идентификатор телефона")
                              @PathVariable UUID id) {
         return phoneService.findById(id);
@@ -109,7 +109,7 @@ public class PhoneController {
     @GetMapping
     public ResponseEntity<Collection<PhoneDTO>> getAll() {
         Collection<PhoneDTO> phones = phoneService.getAll();
-        return phones.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(phones);
+        return ResponseEntity.ok(phones);
     }
 
     @Operation(summary = "Изменение параметров телефона")
@@ -144,18 +144,18 @@ public class PhoneController {
     @Operation(summary = "Удалить телефон по id")
     @ApiResponses(value = {
             @ApiResponse(
-                    responseCode = "200",
-                    description = "OK: телефон удален"
+                    responseCode = "204",
+                    description = "NO CONTENT: телефон удален"
             ),
             @ApiResponse(
                     responseCode = "404",
                     description = "NOT_FOUND: телефон не найден"
             )
     })
-    @DeleteMapping("/{id}")//FIXME телефон итак ищется в репо, и не вернет null никогда
-    public ResponseEntity<Void> deleteNumber(@Parameter(description = "Уникальный идентификатор телефона")
-                                             @PathVariable UUID id) {
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteNumber(@Parameter(description = "Уникальный идентификатор телефона")
+                             @PathVariable UUID id) {
         phoneService.deletePhoneNumber(id);
-        return ResponseEntity.ok().build();
     }
 }

@@ -23,14 +23,10 @@ import static ru.ac.checkpointmanager.utils.FieldsValidation.isValidPhoneNumber;
 @RequiredArgsConstructor
 @Slf4j
 public class PhoneServiceImpl implements PhoneService {
-
     private static final String PHONE_NUMBER_NOT_FOUND_MSG = "Phone number with id: %s doesn't exist";
-
     private static final String PHONE_NUMBER_NOT_FOUND_LOG = "Phone number with [id: {}] doesn't exist";
-    public static final String METHOD_CALLED = "Method {}";
-
+    private static final String METHOD_CALLED = "Method {}";
     private final PhoneRepository phoneRepository;
-
     private final PhoneMapper phoneMapper;
 
     @Override
@@ -66,7 +62,7 @@ public class PhoneServiceImpl implements PhoneService {
     }
 
     @Override
-    public PhoneDTO updatePhoneNumber(PhoneDTO phoneDTO) {//TODO есть смысл проверить принадлежит ли этот телефон юзеру?
+    public PhoneDTO updatePhoneNumber(PhoneDTO phoneDTO) {
         log.debug(METHOD_CALLED, MethodLog.getMethodName());
         UUID phoneId = phoneDTO.getId();
         Phone foundPhone = phoneRepository.findById(phoneId).orElseThrow(
@@ -103,9 +99,7 @@ public class PhoneServiceImpl implements PhoneService {
     @Override
     public Collection<PhoneDTO> getAll() {
         log.debug(METHOD_CALLED, MethodLog.getMethodName());
-        Collection<PhoneDTO> numbers = phoneMapper.toPhonesDTO(phoneRepository.findAll());
-        //TODO просто возвращаем пустую коллекцию, или новый эксепшн
-        return numbers;
+        return phoneMapper.toPhonesDTO(phoneRepository.findAll());
     }
 
     @Override
