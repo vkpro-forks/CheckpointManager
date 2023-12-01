@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class PassDtoResponse {
+public class PassResponseDTO {
 
     private UUID id;
 

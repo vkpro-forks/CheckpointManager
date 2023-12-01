@@ -8,8 +8,8 @@ import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.CheckpointDTO;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
-import ru.ac.checkpointmanager.dto.passes.PassDtoCreate;
-import ru.ac.checkpointmanager.dto.passes.PassDtoUpdate;
+import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
+import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.model.checkpoints.CheckpointType;
 import ru.ac.checkpointmanager.model.enums.Direction;
@@ -94,8 +94,8 @@ public class TestUtils {
         );
     }
 
-    public static PassDtoUpdate getPassDtoUpdate() {
-        return new PassDtoUpdate(
+    public static PassUpdateDTO getPassDtoUpdate() {
+        return new PassUpdateDTO(
                 PASS_ID,
                 "comment",
                 PassTypeTime.ONETIME,
@@ -106,8 +106,8 @@ public class TestUtils {
         );
     }
 
-    public static PassDtoCreate getPassDtoCreate() {
-        return new PassDtoCreate(
+    public static PassCreateDTO getPassDtoCreate() {
+        return new PassCreateDTO(
                 PASS_ID,
                 "comment",
                 PassTypeTime.ONETIME,
