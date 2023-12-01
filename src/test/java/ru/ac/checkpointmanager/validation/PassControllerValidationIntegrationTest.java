@@ -38,7 +38,6 @@ import java.time.LocalDateTime;
 @WithMockUser(roles = {"ADMIN"})
 @ActiveProfiles("test")
 class PassControllerValidationIntegrationTest {
-class PassControllerValidationIntegrationTest {
 
     private static final String CAR = "car";
 
@@ -72,7 +71,7 @@ class PassControllerValidationIntegrationTest {
     @Test
     @SneakyThrows
     void shouldReturnValidationErrorForNullCarAndVisitorFieldsForAddPass() {
-        PassCreateDTO passCreateDTO = TestUtils.getPassDtoCreate();
+        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTO();
         passCreateDTO.setCar(null);
         passCreateDTO.setVisitor(null);
         String passDtoCreateString = TestUtils.jsonStringFromObject(passCreateDTO);
@@ -85,7 +84,7 @@ class PassControllerValidationIntegrationTest {
     @Test
     @SneakyThrows
     void shouldReturnValidationErrorForBothCarAndVisitorFieldsForAddPass() {
-        PassCreateDTO passCreateDTO = TestUtils.getPassDtoCreate();
+        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTO();
         passCreateDTO.setCar(new CarDTO());
         passCreateDTO.setVisitor(new VisitorDTO());
         String passDtoCreateString = TestUtils.jsonStringFromObject(passCreateDTO);
@@ -98,7 +97,7 @@ class PassControllerValidationIntegrationTest {
     @Test
     @SneakyThrows
     void shouldReturnValidationErrorForNullCarAndVisitorFieldsForUpdatePass() {
-        PassUpdateDTO passUpdateDTO = TestUtils.getPassDtoUpdate();
+        PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTO();
         passUpdateDTO.setCar(null);
         passUpdateDTO.setVisitor(null);
         String passDtoCreateString = TestUtils.jsonStringFromObject(passUpdateDTO);
@@ -111,7 +110,7 @@ class PassControllerValidationIntegrationTest {
     @Test
     @SneakyThrows
     void shouldReturnValidationErrorForBothCarAndVisitorFieldsForUpdatePass() {
-        PassUpdateDTO passUpdateDTO = TestUtils.getPassDtoUpdate();
+        PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTO();
         passUpdateDTO.setCar(new CarDTO());
         passUpdateDTO.setVisitor(new VisitorDTO());
         String passDtoCreateString = TestUtils.jsonStringFromObject(passUpdateDTO);
@@ -124,7 +123,7 @@ class PassControllerValidationIntegrationTest {
     @Test
     @SneakyThrows
     void shouldReturnValidationErrorIncorrectStartAndEndTimeFieldsForAddPass() {
-        PassDtoCreate passDtoCreate = TestUtils.getPassDtoCreate();
+        PassCreateDTO passDtoCreate = TestUtils.getPassCreateDTO();
         passDtoCreate.setCar(new CarDTO());
         passDtoCreate.setEndTime(LocalDateTime.now().plusHours(1));
         passDtoCreate.setStartTime(LocalDateTime.now().plusHours(3));
@@ -138,7 +137,7 @@ class PassControllerValidationIntegrationTest {
     @Test
     @SneakyThrows
     void shouldReturnValidationErrorIncorrectStartAndEndTimeFieldsForUpdatePass() {
-        PassDtoUpdate passDtoUpdate = TestUtils.getPassDtoUpdate();
+        PassUpdateDTO passDtoUpdate = TestUtils.getPassUpdateDTO();
         passDtoUpdate.setCar(new CarDTO());
         passDtoUpdate.setEndTime(LocalDateTime.now().plusHours(1));
         passDtoUpdate.setStartTime(LocalDateTime.now().plusHours(3));

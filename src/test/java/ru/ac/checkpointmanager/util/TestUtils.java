@@ -100,7 +100,7 @@ public class TestUtils {
         );
     }
 
-    public static PassUpdateDTO getPassDtoUpdate() {
+    public static PassUpdateDTO getPassUpdateDTO() {
         return new PassUpdateDTO(
                 PASS_ID,
                 "comment",
@@ -112,7 +112,7 @@ public class TestUtils {
         );
     }
 
-    public static PassCreateDTO getPassDtoCreate() {
+    public static PassCreateDTO getPassCreateDTO() {
         return new PassCreateDTO(
                 PASS_ID,
                 "comment",

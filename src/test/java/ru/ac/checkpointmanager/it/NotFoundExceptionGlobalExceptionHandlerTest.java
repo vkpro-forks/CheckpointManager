@@ -239,7 +239,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
     @Test
     @SneakyThrows
     void shouldHandlePassNotFoundExceptionForUpdatePass() {
-        String passUpdateDto = TestUtils.jsonStringFromObject(TestUtils.getPassDtoUpdate());
+        String passUpdateDto = TestUtils.jsonStringFromObject(TestUtils.getPassUpdateDTO());
         ResultActions resultActions = mockMvc
                 .perform(MockMvcRequestBuilders.put(UrlConstants.PASS_URL)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -270,7 +270,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
     @SneakyThrows
     void shouldHandleTerritoryNotFoundExceptionForAddPass() {
         Mockito.when(userRepository.findById(Mockito.any())).thenReturn(Optional.of(new User()));
-        String passDtoCreate = TestUtils.jsonStringFromObject(TestUtils.getPassDtoCreate());
+        String passDtoCreate = TestUtils.jsonStringFromObject(TestUtils.getPassCreateDTO());
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(passDtoCreate))
