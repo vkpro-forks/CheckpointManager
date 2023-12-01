@@ -19,8 +19,8 @@ import ru.ac.checkpointmanager.configuration.JwtService;
 import ru.ac.checkpointmanager.controller.PassController;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.VisitorDTO;
-import ru.ac.checkpointmanager.dto.passes.PassDtoCreate;
-import ru.ac.checkpointmanager.dto.passes.PassDtoUpdate;
+import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
+import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.exception.handler.ErrorCode;
 import ru.ac.checkpointmanager.it.config.CorsTestConfiguration;
 import ru.ac.checkpointmanager.it.config.OpenAllEndpointsTestConfiguration;
@@ -69,10 +69,10 @@ class PassControllerValidationIntegrationTest {
     @Test
     @SneakyThrows
     void shouldReturnValidationErrorForNullCarAndVisitorFieldsForAddPass() {
-        PassDtoCreate passDtoCreate = TestUtils.getPassDtoCreate();
-        passDtoCreate.setCar(null);
-        passDtoCreate.setVisitor(null);
-        String passDtoCreateString = TestUtils.jsonStringFromObject(passDtoCreate);
+        PassCreateDTO passCreateDTO = TestUtils.getPassDtoCreate();
+        passCreateDTO.setCar(null);
+        passCreateDTO.setVisitor(null);
+        String passDtoCreateString = TestUtils.jsonStringFromObject(passCreateDTO);
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(passDtoCreateString));
@@ -82,10 +82,10 @@ class PassControllerValidationIntegrationTest {
     @Test
     @SneakyThrows
     void shouldReturnValidationErrorForBothCarAndVisitorFieldsForAddPass() {
-        PassDtoCreate passDtoCreate = TestUtils.getPassDtoCreate();
-        passDtoCreate.setCar(new CarDTO());
-        passDtoCreate.setVisitor(new VisitorDTO());
-        String passDtoCreateString = TestUtils.jsonStringFromObject(passDtoCreate);
+        PassCreateDTO passCreateDTO = TestUtils.getPassDtoCreate();
+        passCreateDTO.setCar(new CarDTO());
+        passCreateDTO.setVisitor(new VisitorDTO());
+        String passDtoCreateString = TestUtils.jsonStringFromObject(passCreateDTO);
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(passDtoCreateString));
@@ -95,10 +95,10 @@ class PassControllerValidationIntegrationTest {
     @Test
     @SneakyThrows
     void shouldReturnValidationErrorForNullCarAndVisitorFieldsForUpdatePass() {
-        PassDtoUpdate passDtoUpdate = TestUtils.getPassDtoUpdate();
-        passDtoUpdate.setCar(null);
-        passDtoUpdate.setVisitor(null);
-        String passDtoCreateString = TestUtils.jsonStringFromObject(passDtoUpdate);
+        PassUpdateDTO passUpdateDTO = TestUtils.getPassDtoUpdate();
+        passUpdateDTO.setCar(null);
+        passUpdateDTO.setVisitor(null);
+        String passDtoCreateString = TestUtils.jsonStringFromObject(passUpdateDTO);
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.put(UrlConstants.PASS_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(passDtoCreateString));
@@ -108,10 +108,10 @@ class PassControllerValidationIntegrationTest {
     @Test
     @SneakyThrows
     void shouldReturnValidationErrorForBothCarAndVisitorFieldsForUpdatePass() {
-        PassDtoUpdate passDtoUpdate = TestUtils.getPassDtoUpdate();
-        passDtoUpdate.setCar(new CarDTO());
-        passDtoUpdate.setVisitor(new VisitorDTO());
-        String passDtoCreateString = TestUtils.jsonStringFromObject(passDtoUpdate);
+        PassUpdateDTO passUpdateDTO = TestUtils.getPassDtoUpdate();
+        passUpdateDTO.setCar(new CarDTO());
+        passUpdateDTO.setVisitor(new VisitorDTO());
+        String passDtoCreateString = TestUtils.jsonStringFromObject(passUpdateDTO);
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.put(UrlConstants.PASS_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(passDtoCreateString));
