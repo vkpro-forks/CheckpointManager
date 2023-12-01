@@ -155,7 +155,7 @@ public class PassServiceImpl implements PassService {
 
     @Override
     public PassResponseDTO updatePass(PassUpdateDTO passUpdateDTO) {
-        log.info(METHOD_UUID, MethodLog.getMethodName(), passUpdateDTO);
+        log.debug(METHOD_UUID, MethodLog.getMethodName(), passUpdateDTO);
 
         UUID passId = passUpdateDTO.getId();
         User user = userService.findByPassId(passId);
