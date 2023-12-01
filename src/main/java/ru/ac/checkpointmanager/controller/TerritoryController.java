@@ -25,13 +25,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.ac.checkpointmanager.dto.CheckpointDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
-import ru.ac.checkpointmanager.mapper.TerritoryMapper;
-import ru.ac.checkpointmanager.mapper.UserMapper;
-import ru.ac.checkpointmanager.model.Territory;
-import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.service.territories.TerritoryService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
 
@@ -48,8 +43,6 @@ import java.util.UUID;
 public class TerritoryController {
 
     private final TerritoryService territoryService;
-    private final TerritoryMapper territoryMapper;
-    private final UserMapper userMapper;
 
     /* CREATE */
     @Operation(summary = "Добавить новую территорию",
@@ -67,8 +60,8 @@ public class TerritoryController {
             return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
         }
 
-        Territory newTerritory = territoryService.addTerritory(territoryMapper.toTerritory(territoryDTO));
-        return ResponseEntity.ok(territoryMapper.toTerritoryDTO(newTerritory));
+        TerritoryDTO newTerritory = territoryService.addTerritory(territoryDTO);
+        return ResponseEntity.ok(newTerritory);
     }
 
     /* READ */
@@ -82,8 +75,8 @@ public class TerritoryController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @GetMapping("/{territoryId}")
     public ResponseEntity<TerritoryDTO> getTerritory(@PathVariable("territoryId") UUID territoryId) {
-        Territory territory = territoryService.findById(territoryId);
-        return ResponseEntity.ok(territoryMapper.toTerritoryDTO(territory));
+        TerritoryDTO territory = territoryService.findById(territoryId);
+        return ResponseEntity.ok(territory);
     }
 
     @Operation(summary = "Найти список пользователей, привязанных к территории",
@@ -97,10 +90,9 @@ public class TerritoryController {
     @GetMapping("/{territoryId}/users")
     public ResponseEntity<List<UserResponseDTO>> getUsersByTerritory(@PathVariable UUID territoryId) {
 
-        List<User> users = territoryService.findUsersByTerritoryId(territoryId);
+        List<UserResponseDTO> users = territoryService.findUsersByTerritoryId(territoryId);
 
-        return ResponseEntity.ok(userMapper.toUserResponseDTOs(users));
-
+        return ResponseEntity.ok(users);
     }
 
     @Operation(summary = "Найти список территорий по названию",
@@ -113,11 +105,11 @@ public class TerritoryController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @GetMapping("/name")
     public ResponseEntity<List<TerritoryDTO>> getTerritoriesByName(@RequestParam String name) {
-        List<Territory> territories = territoryService.findTerritoriesByName(name);
+        List<TerritoryDTO> territories = territoryService.findTerritoriesByName(name);
         if (territories.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(territoryMapper.toTerritoriesDTO(territories));
+        return ResponseEntity.ok(territories);
     }
 
     @Operation(summary = "Получить список всех территорий",
@@ -125,16 +117,16 @@ public class TerritoryController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Территории найдены",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            array = @ArraySchema(schema = @Schema(implementation = CheckpointDTO.class)))),
+                            array = @ArraySchema(schema = @Schema(implementation = TerritoryDTO.class)))),
             @ApiResponse(responseCode = "404", description = "Территории не найдены")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @GetMapping
     public ResponseEntity<List<TerritoryDTO>> getTerritories() {
-        List<Territory> territories = territoryService.findAllTerritories();
+        List<TerritoryDTO> territories = territoryService.findAllTerritories();
         if (territories.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(territoryMapper.toTerritoriesDTO(territories));
+        return ResponseEntity.ok(territories);
     }
 
     /* UPDATE */
@@ -143,7 +135,7 @@ public class TerritoryController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Данные успешно изменены",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = CheckpointDTO.class))}),
+                            schema = @Schema(implementation = TerritoryDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Неуспешная валидаци полей"),
             @ApiResponse(responseCode = "404", description = "Территория не найдена")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
@@ -154,8 +146,8 @@ public class TerritoryController {
             return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
         }
 
-        Territory updatedTerritory = territoryService.updateTerritory(territoryMapper.toTerritory(territoryDTO));
-        return ResponseEntity.ok(territoryMapper.toTerritoryDTO(updatedTerritory));
+        TerritoryDTO updatedTerritory = territoryService.updateTerritory(territoryDTO);
+        return ResponseEntity.ok(updatedTerritory);
     }
 
     @Operation(summary = "Прикрепить пользователя к территории (дать право создавать пропуска)",

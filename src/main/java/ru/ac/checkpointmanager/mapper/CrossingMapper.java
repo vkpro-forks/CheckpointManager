@@ -54,7 +54,8 @@ public class CrossingMapper {
 
                 using(ctx -> {
                     UUID checkpointId = ((CrossingDTO) ctx.getSource()).getCheckpointId();
-                    return checkpointService.findCheckpointById(checkpointId);
+                    return checkpointService.findById(checkpointId); // тут вернется теперь ДТО чекпоинта, надо проверить как будет работать,
+                    // если что метод который сущность возвращает сделать публичным и добавить в интерфейс
                 }).map(source, destination.getCheckpoint());
 
                 using(ctx -> {

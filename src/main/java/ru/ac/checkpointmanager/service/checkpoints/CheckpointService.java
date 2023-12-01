@@ -1,23 +1,23 @@
 package ru.ac.checkpointmanager.service.checkpoints;
 
-import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
+import ru.ac.checkpointmanager.dto.CheckpointDTO;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface CheckpointService {
 
-    Checkpoint addCheckpoint(Checkpoint checkpoint);
+    CheckpointDTO addCheckpoint(CheckpointDTO checkpointDTO);
 
-    Checkpoint findCheckpointById(UUID id);
+    CheckpointDTO findById(UUID id);
 
-    List<Checkpoint> findCheckpointsByName(String name);
+    List<CheckpointDTO> findCheckpointsByName(String name);
 
-    List<Checkpoint> findAllCheckpoints();
+    List<CheckpointDTO> findAllCheckpoints();
 
-    List<Checkpoint> findCheckpointsByTerritoryId(UUID id);
+    List<CheckpointDTO> findCheckpointsByTerritoryId(UUID id);
 
-    Checkpoint updateCheckpoint(Checkpoint checkpoint);
+    CheckpointDTO updateCheckpoint(CheckpointDTO checkpointDTO);
 
     void deleteCheckpointById(UUID id);
 }
