@@ -52,7 +52,8 @@ public class CheckpointServiceImpl implements CheckpointService {
         return checkpointMapper.toCheckpointDTO(foundCheckpoint);
     }
 
-    private Checkpoint findCheckpointById(UUID id) {
+    @Override
+    public Checkpoint findCheckpointById(UUID id) {
         log.debug(METHOD_CALLED_LOG, MethodLog.getMethodName(), id);
         return checkpointRepository.findById(id).orElseThrow(
                 () -> {
