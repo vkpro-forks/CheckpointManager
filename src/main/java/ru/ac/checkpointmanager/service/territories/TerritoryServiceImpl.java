@@ -40,7 +40,7 @@ public class TerritoryServiceImpl implements TerritoryService {
     }
 
     @Override
-    public Territory findTerritoryById(UUID id) {
+    public Territory findById(UUID id) {
         log.debug(METHOD_CALLED_UUID_LOG, MethodLog.getMethodName(), id);
         return territoryRepository.findById(id).orElseThrow(
                 () -> {
@@ -52,7 +52,7 @@ public class TerritoryServiceImpl implements TerritoryService {
     @Override
     public List<User> findUsersByTerritoryId(UUID territoryId) {
         log.debug(METHOD_CALLED_UUID_LOG, MethodLog.getMethodName(), territoryId);
-        findTerritoryById(territoryId);
+        findById(territoryId);
         List<User> users = territoryRepository.findUsersByTerritoryId(territoryId);
         if (users.isEmpty()) {
             throw new UserNotFoundException(String.format("Users for Territory not found [territory_id=%s]", territoryId));

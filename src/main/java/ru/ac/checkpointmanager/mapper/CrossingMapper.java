@@ -59,7 +59,7 @@ public class CrossingMapper {
 
                 using(ctx -> {
                     UUID passId = ((CrossingDTO) ctx.getSource()).getPassId();
-                    return passService.findPass(passId);
+                    return passService.findById(passId);
                 }).map(source, destination.getPass());
             }
         };

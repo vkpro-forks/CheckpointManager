@@ -98,7 +98,7 @@ public class PassController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @GetMapping("/{id}")
     public ResponseEntity<PassDtoResponse> getPass(@PathVariable("id") UUID id) {
-        Pass foundPass = service.findPass(id);
+        Pass foundPass = service.findById(id);
         return ResponseEntity.ok(mapper.toPassDTO(foundPass));
     }
 
@@ -143,7 +143,7 @@ public class PassController {
     }
 
     /* UPDATE */
-    @Operation(summary = "Изменить существующий пропуск (название, примечание, временной тип, время начала и окончания)",
+    @Operation(summary = "Изменить существующий пропуск",
             description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуск успешно изменен",
@@ -207,20 +207,24 @@ public class PassController {
         return ResponseEntity.ok(mapper.toPassDTO(completedPass));
     }
 
-    @Operation(summary = "Отметить пропуск как избранный")
+    @Operation(summary = "Отметить пропуск как избранный",
+            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Отмечен"),
             @ApiResponse(responseCode = "404", description = "Не найден")})
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @PatchMapping("{id}/favorite")
     public ResponseEntity<Void> markFavorite(@PathVariable UUID id) {
         service.markFavorite(id);
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "Отметить пропуск как НЕизбранный")
+    @Operation(summary = "Отметить пропуск как НЕизбранный",
+            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Отмечен"),
             @ApiResponse(responseCode = "404", description = "Не найден")})
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @PatchMapping("{id}/not_favorite")
     public ResponseEntity<Void> unmarkFavorite(@PathVariable UUID id) {
         service.unmarkFavorite(id);
