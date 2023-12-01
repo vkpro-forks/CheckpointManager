@@ -62,8 +62,8 @@ public class PassController {
             @ApiResponse(responseCode = "404", description = "Не найден пользователь или территория")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @PostMapping
-    public PassResponseDTO addPass(@RequestBody @Valid PassCreateDTO passDTOcreateDTO) {
-        Pass newPass = service.addPass(mapper.toPass(passDTOcreateDTO));
+    public PassResponseDTO addPass(@RequestBody @Valid PassCreateDTO passCreateDTO) {
+        Pass newPass = service.addPass(mapper.toPass(passCreateDTO));
         return mapper.toPassDTO(newPass);
     }
 
