@@ -1,8 +1,6 @@
 package ru.ac.checkpointmanager.dto.passes;
 
-import jakarta.validation.constraints.Future;
-import jakarta.validation.constraints.FutureOrPresent;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import ru.ac.checkpointmanager.dto.CarDTO;
@@ -16,15 +14,18 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @CarOrVisitorFieldsCheck
-public class PassDtoUpdate {
+public class PassCreateDTO {
 
     @NotNull
-    private UUID id;
+    private UUID userId;
 
     private String comment;
 
     @NotNull
     private PassTypeTime typeTime;
+
+    @NotNull
+    private UUID territoryId;
 
     @NotNull
     @FutureOrPresent

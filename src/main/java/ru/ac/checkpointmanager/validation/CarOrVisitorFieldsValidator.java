@@ -2,8 +2,8 @@ package ru.ac.checkpointmanager.validation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import ru.ac.checkpointmanager.dto.passes.PassDtoCreate;
-import ru.ac.checkpointmanager.dto.passes.PassDtoUpdate;
+import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
+import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.validation.annotation.CarOrVisitorFieldsCheck;
 
 /**
@@ -36,11 +36,11 @@ public class CarOrVisitorFieldsValidator implements ConstraintValidator<CarOrVis
             return true;//not responsibility of this annotation
         }
         //true if only one of parameters is null (null+ null = false, present+present = false)
-        if (value instanceof PassDtoUpdate passDtoUpdate) {
-            return passDtoUpdate.getVisitor() != null ^ passDtoUpdate.getCar() != null;
+        if (value instanceof PassUpdateDTO passUpdateDTO) {
+            return passUpdateDTO.getVisitor() != null ^ passUpdateDTO.getCar() != null;
         }
-        if (value instanceof PassDtoCreate passDtoCreate) {
-            return passDtoCreate.getVisitor() != null ^ passDtoCreate.getCar() != null;
+        if (value instanceof PassCreateDTO passCreateDTO) {
+            return passCreateDTO.getVisitor() != null ^ passCreateDTO.getCar() != null;
         }
         return false;
     }

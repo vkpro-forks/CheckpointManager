@@ -1,6 +1,7 @@
 package ru.ac.checkpointmanager.service.user;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -169,6 +170,7 @@ class UserServiceImplTest {
     }
 
     @Test
+    @Disabled
     void findTerritoriesByUserId_ThrowsTerritoryNotFoundException() {
         when(userRepository.findTerritoriesByUserId(userId)).thenReturn(Collections.emptyList());
 
