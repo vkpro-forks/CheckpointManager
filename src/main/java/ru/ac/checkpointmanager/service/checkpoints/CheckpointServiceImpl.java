@@ -24,13 +24,12 @@ public class CheckpointServiceImpl implements CheckpointService {
     private static final String METHOD_CALLED_LOG = "Method {}, UUID - {}";
 
     private final CheckpointRepository checkpointRepository;
-
     private final TerritoryService territoryService;
 
     @Override
     public Checkpoint addCheckpoint(Checkpoint checkpoint) {
         log.info(METHOD_CALLED_LOG, MethodLog.getMethodName(), checkpoint.getId());
-        territoryService.findTerritoryById(checkpoint.getTerritory().getId());
+        territoryService.findById(checkpoint.getTerritory().getId());
         trimThemAll(checkpoint);
         return checkpointRepository.save(checkpoint);
     }
@@ -75,6 +74,9 @@ public class CheckpointServiceImpl implements CheckpointService {
                     return new CheckpointNotFoundException(CHECKPOINT_NOT_FOUND_MSG.formatted(checkpointId));
                 });
         territoryService.findTerritoryById(checkpoint.getTerritory().getId());
+        //FIXME It would be better to find entity here and bind it to checkpoint
+        //FIXME we don't need to go to DB if territory shouldn't change
+        territoryService.findById(checkpoint.getTerritory().getId());
         trimThemAll(checkpoint);
 
         foundCheckpoint.setName(checkpoint.getName());

@@ -5,14 +5,16 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ru.ac.checkpointmanager.dto.passes.PassDtoCreate;
-import ru.ac.checkpointmanager.dto.passes.PassDtoResponse;
-import ru.ac.checkpointmanager.dto.passes.PassDtoUpdate;
+import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
+import ru.ac.checkpointmanager.dto.passes.PassResponseDTO;
+import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.model.passes.PassWalk;
 import ru.ac.checkpointmanager.service.territories.TerritoryService;
 import ru.ac.checkpointmanager.service.user.UserService;
+
+import java.util.UUID;
 
 @Component
 @Slf4j
@@ -30,52 +32,78 @@ public class    PassMapper {
         configureModelMapper();
     }
 
-    public Pass toPass(PassDtoCreate passDTOcreate) {
+    public Pass toPass(PassCreateDTO passDTOcreateDTO) {
 
-        if (passDTOcreate.getCar() != null) {
-            return modelMapper.map(passDTOcreate, PassAuto.class);
-        } else if (passDTOcreate.getVisitor() != null) {
-            return modelMapper.map(passDTOcreate, PassWalk.class);
+        if (passDTOcreateDTO.getCar() != null) {
+            return modelMapper.map(passDTOcreateDTO, PassAuto.class);
+        } else {
+            return modelMapper.map(passDTOcreateDTO, PassWalk.class);
         }
-        throw new IllegalArgumentException("Ошибка при конвертации passDTO (не содержит car или visitor)");
     }
 
-    public Pass toPass(PassDtoUpdate passDtoUpdate) {
+    public Pass toPass(PassUpdateDTO passUpdateDTO) {
         Pass pass;
 
-        if (passDtoUpdate.getCar() != null) {
-            pass = modelMapper.map(passDtoUpdate, PassAuto.class);
-        } else if (passDtoUpdate.getVisitor() != null) {
-            pass = modelMapper.map(passDtoUpdate, PassWalk.class);
+        if (passUpdateDTO.getCar() != null) {
+            pass = modelMapper.map(passUpdateDTO, PassAuto.class);
         } else {
-            throw new IllegalArgumentException("Ошибка при конвертации passDTO (не содержит car или visitor)");
+            pass = modelMapper.map(passUpdateDTO, PassWalk.class);
         }
 
-        pass.setUser(userService.findByPassId(passDtoUpdate.getId()));
-        pass.setTerritory(territoryService.findByPassId(passDtoUpdate.getId()));
         return pass;
     }
 
-    public PassDtoResponse toPassDTO(Pass pass) {
-        return modelMapper.map(pass, PassDtoResponse.class);
+    public PassResponseDTO toPassDTO(Pass pass) {
+        return modelMapper.map(pass, PassResponseDTO.class);
     }
 
     private void configureModelMapper() {
-        PropertyMap<PassDtoCreate, PassAuto> passAutoMapCreate = new PropertyMap<>() {
+        PropertyMap<PassCreateDTO, PassAuto> passAutoMapCreate = new PropertyMap<>() {
             @Override
             protected void configure() {
                 map().setId(null);
             }
         };
-
-        PropertyMap<PassDtoCreate, PassWalk> passWalkMapCreate = new PropertyMap<>() {
-            @Override
-            protected void configure() {
-                map().setId(null);
-            }
-        };
-
         modelMapper.addMappings(passAutoMapCreate);
+
+        PropertyMap<PassCreateDTO, PassWalk> passWalkMapCreate = new PropertyMap<>() {
+            @Override
+            protected void configure() {
+                map().setId(null);
+            }
+        };
         modelMapper.addMappings(passWalkMapCreate);
+
+        PropertyMap<PassUpdateDTO, PassAuto> passAutoMapUpdate = new PropertyMap<>() {
+            @Override
+            protected void configure() {
+                using(ctx -> {
+                    UUID passId = ((PassUpdateDTO) ctx.getSource()).getId();
+                    return userService.findByPassId(passId);
+                }).map(source, destination.getUser());
+
+                using(ctx -> {
+                    UUID passId = ((PassUpdateDTO) ctx.getSource()).getId();
+                    return territoryService.findByPassId(passId);
+                }).map(source, destination.getTerritory());
+            }
+        };
+        modelMapper.addMappings(passAutoMapUpdate);
+
+        PropertyMap<PassUpdateDTO, PassWalk> passWalkMapUpdate = new PropertyMap<>() {
+            @Override
+            protected void configure() {
+                using(ctx -> {
+                    UUID passId = ((PassUpdateDTO) ctx.getSource()).getId();
+                    return userService.findByPassId(passId);
+                }).map(source, destination.getUser());
+
+                using(ctx -> {
+                    UUID passId = ((PassUpdateDTO) ctx.getSource()).getId();
+                    return territoryService.findByPassId(passId);
+                }).map(source, destination.getTerritory());
+            }
+        };
+        modelMapper.addMappings(passWalkMapUpdate);
     }
 }

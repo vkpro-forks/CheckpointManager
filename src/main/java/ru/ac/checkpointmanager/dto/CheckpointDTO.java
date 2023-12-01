@@ -13,11 +13,6 @@ public class CheckpointDTO {
 
     private UUID id;
 
-    //@Trimmed
-    //кастомная аннотация, проверяет отсутствие пробелов в начале и конце строки
-    //реализована классами Trimmed и TrimmedValidator в утилсах
-    //потом вместо неё сделал класс StringTrimmer с методом trimThemAll (в сервисах)
-    //чтобы не проверять, а просто убирать эти пробелы
     @NotBlank()
     @Size(min = 2, max = 60)
     @Pattern(regexp = "^(?=.*[a-zA-Zа-яА-Я]).*$",
@@ -27,6 +22,7 @@ public class CheckpointDTO {
     @NotNull()
     private CheckpointType type;
 
+    @Size(max = 200)
     private String note;
 
     @NotNull()
