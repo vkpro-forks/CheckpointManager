@@ -9,17 +9,21 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.passes.PagingParams;
+import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
+import ru.ac.checkpointmanager.dto.passes.PassResponseDTO;
+import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.exception.PassNotFoundException;
-import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
-import ru.ac.checkpointmanager.exception.UserNotFoundException;
+import ru.ac.checkpointmanager.mapper.PassMapper;
 import ru.ac.checkpointmanager.model.Crossing;
+import ru.ac.checkpointmanager.model.Territory;
+import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.repository.CrossingRepository;
 import ru.ac.checkpointmanager.repository.PassRepository;
-import ru.ac.checkpointmanager.repository.TerritoryRepository;
-import ru.ac.checkpointmanager.repository.UserRepository;
+import ru.ac.checkpointmanager.service.territories.TerritoryService;
+import ru.ac.checkpointmanager.service.user.UserService;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.time.LocalDateTime;
@@ -42,33 +46,29 @@ public class PassServiceImpl implements PassService {
 
     private static final String PASS_NOT_FOUND_LOG = "[Pass with id: {}] not found";
     private static final String PASS_NOT_FOUND_MSG = "Pass with id: %s not found";
-    private static final String TERRITORY_NOT_FOUND_MSG = "Territory with id: %s not found";
-    private static final String TERRITORY_NOT_FOUND_LOG = "Territory with id: {} not found";
+    private static final String METHOD_UUID = "Method {} [{}]";
+    private static final String PASS_STATUS_CHANGED_LOG = "Pass [UUID - {}], changed status on {}";
+
 
     private final PassRepository passRepository;
-
     private final CrossingRepository crossingRepository;
-
-    private final UserRepository userRepository;
-
-    private final TerritoryRepository territoryRepository;
+    private final UserService userService;
+    private final TerritoryService territoryService;
+    private final PassMapper mapper;
 
     private int hourForLogInScheduledCheck;
 
     @Override
-    public Pass addPass(Pass pass) {
-        log.info("Method {} [{}]", MethodLog.getMethodName(), pass);
-        if (userRepository.findById(pass.getUser().getId()).isEmpty()) {
-            throw new UserNotFoundException(String.format("User not found [id=%s]", pass.getUser().getId()));
-        }
-        UUID territoryId = pass.getTerritory().getId();
-        if (territoryRepository.findById(territoryId).isEmpty()) {
-            log.warn(TERRITORY_NOT_FOUND_LOG, territoryId);
-            throw new TerritoryNotFoundException(TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
-        }
+    public PassResponseDTO addPass(PassCreateDTO passCreateDTO) {
+        log.info("Method {} [{}]", MethodLog.getMethodName(), passCreateDTO);
 
-        checkPassTime(pass);
-        checkUserTerritoryRelation(pass);
+        UUID userId = passCreateDTO.getUserId();
+        UUID territoryId = passCreateDTO.getTerritoryId();
+        User user = userService.findUserById(userId);
+        Territory territory = territoryService.findById(territoryId);
+        checkUserTerritoryRelation(user, territory);
+
+        Pass pass = mapper.toPass(passCreateDTO);
         checkOverlapTime(pass);
 
         trimThemAll(pass);
@@ -87,11 +87,11 @@ public class PassServiceImpl implements PassService {
         Pass savedPass = passRepository.save(pass);
         log.info("Pass saved [{}]", savedPass);
 
-        return savedPass;
+        return mapper.toPassDTO(savedPass);
     }
 
     @Override
-    public Page<Pass> findPasses(PagingParams pagingParams) {
+    public Page<PassResponseDTO> findPasses(PagingParams pagingParams) {
         log.debug("Method {}", MethodLog.getMethodName());
 
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
@@ -103,12 +103,17 @@ public class PassServiceImpl implements PassService {
                     foundPasses.getTotalPages(), foundPasses.getTotalElements()));
         }
 
-        return foundPasses;
+        return foundPasses.map(mapper::toPassDTO);
     }
 
     @Override
-    public Pass findById(UUID id) {
-        log.debug("Method {} [UUID - {}]", MethodLog.getMethodName(), id);
+    public PassResponseDTO findById(UUID id) {
+        log.debug(METHOD_UUID, MethodLog.getMethodName(), id);
+        return mapper.toPassDTO(findPassById(id));
+    }
+
+    @Override
+    public Pass findPassById(UUID id) {
         return passRepository.findById(id).orElseThrow(
                 () -> {
                     log.warn(PASS_NOT_FOUND_LOG, id);
@@ -117,12 +122,10 @@ public class PassServiceImpl implements PassService {
     }
 
     @Override
-    public Page<Pass> findPassesByUser(UUID userId, PagingParams pagingParams) {
-        log.debug("Method {} [UUID - {}]", MethodLog.getMethodName(), userId);
+    public Page<PassResponseDTO> findPassesByUser(UUID userId, PagingParams pagingParams) {
+        log.debug(METHOD_UUID, MethodLog.getMethodName(), userId);
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
-        if (userRepository.findById(userId).isEmpty()) {
-            throw new UserNotFoundException(String.format("User not found [id=%s]", userId));
-        }
+        userService.findById(userId);
 
         Page<Pass> foundPasses = passRepository.findPassesByUserId(userId, pageable);
         if (!foundPasses.hasContent()) {
@@ -132,17 +135,14 @@ public class PassServiceImpl implements PassService {
                     foundPasses.getTotalPages(), foundPasses.getTotalElements(), userId));
         }
 
-        return foundPasses;
+        return foundPasses.map(mapper::toPassDTO);
     }
 
     @Override
-    public Page<Pass> findPassesByTerritory(UUID terId, PagingParams pagingParams) {
-        log.debug("Method {} [UUID - {}]", MethodLog.getMethodName(), terId);
+    public Page<PassResponseDTO> findPassesByTerritory(UUID terId, PagingParams pagingParams) {
+        log.debug(METHOD_UUID, MethodLog.getMethodName(), terId);
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
-        if (territoryRepository.findById(terId).isEmpty()) {
-            log.warn(TERRITORY_NOT_FOUND_LOG, terId);
-            throw new TerritoryNotFoundException(TERRITORY_NOT_FOUND_MSG.formatted(terId));
-        }
+        territoryService.findById(terId);
         Page<Pass> foundPasses = passRepository.findPassesByTerritoryId(terId, pageable);
         if (!foundPasses.hasContent()) {
             throw new PassNotFoundException(String.format(
@@ -150,18 +150,23 @@ public class PassServiceImpl implements PassService {
                     pageable.getPageNumber(), pageable.getPageSize(),
                     foundPasses.getTotalPages(), foundPasses.getTotalElements(), terId));
         }
-        return foundPasses;
+        return foundPasses.map(mapper::toPassDTO);
     }
 
     @Override
-    public Pass updatePass(Pass pass) {
-        log.info("Method {} [UUID - {}]", MethodLog.getMethodName(), pass.getId());
-        Pass foundPass = findById(pass.getId());
-        if (!foundPass.getStatus().equals(PassStatus.ACTIVE) && !foundPass.getStatus().equals(PassStatus.DELAYED)) {
+    public PassResponseDTO updatePass(PassUpdateDTO passUpdateDTO) {
+        log.debug(METHOD_UUID, MethodLog.getMethodName(), passUpdateDTO);
+
+        UUID passId = passUpdateDTO.getId();
+        User user = userService.findByPassId(passId);
+        Territory territory = territoryService.findByPassId(passId);
+        checkUserTerritoryRelation(user, territory);
+        Pass pass = mapper.toPass(passUpdateDTO, user, territory);
+
+        Pass foundPass = findPassById(passId);
+        if (foundPass.getStatus() != PassStatus.ACTIVE && foundPass.getStatus() != PassStatus.DELAYED) {
             throw new IllegalStateException("This pass is not active or delayed, it cannot be changed");
         }
-        checkPassTime(pass);
-        checkUserTerritoryRelation(pass);
         checkOverlapTime(pass);
         trimThemAll(pass);
 
@@ -174,15 +179,15 @@ public class PassServiceImpl implements PassService {
         Pass updatedPass = passRepository.save(foundPass);
         log.info("Pass updated, {}", updatedPass);
 
-        return updatedPass;
+        return mapper.toPassDTO(updatedPass);
     }
 
     @Override
     @Transactional
-    public Pass cancelPass(UUID id) {
-        log.info("Method {} [UUID - {}]", MethodLog.getMethodName(), id);
+    public PassResponseDTO cancelPass(UUID id) {
+        log.info(METHOD_UUID, MethodLog.getMethodName(), id);
 
-        Pass pass = findById(id);
+        Pass pass = findPassById(id);
         if (!pass.getStatus().equals(PassStatus.ACTIVE) && !pass.getStatus().equals(PassStatus.DELAYED)) {
             throw new IllegalStateException("You can only cancel an active or delayed pass");
         }
@@ -199,13 +204,13 @@ public class PassServiceImpl implements PassService {
         log.info("Pass [UUID - {}], exist {} crossings, changed status on {}",
                 pass.getId(), passCrossings.size(), pass.getStatus());
 
-        return cancelledPass;
+        return mapper.toPassDTO(cancelledPass);
     }
 
     @Override
-    public Pass activateCancelledPass(UUID id) {
-        log.info("Method {} [UUID - {}]", MethodLog.getMethodName(), id);
-        Pass pass = findById(id);
+    public PassResponseDTO activateCancelledPass(UUID id) {
+        log.info(METHOD_UUID, MethodLog.getMethodName(), id);
+        Pass pass = findPassById(id);
 
         if (!pass.getStatus().equals(PassStatus.CANCELLED)) {
             throw new IllegalStateException("You can only activate a previously cancelled pass");
@@ -222,31 +227,31 @@ public class PassServiceImpl implements PassService {
         }
 
         Pass activatedPass = passRepository.save(pass);
-        log.info("Pass [UUID - {}], changed status on {}", pass.getId(), pass.getStatus());
+        log.info(PASS_STATUS_CHANGED_LOG, pass.getId(), pass.getStatus());
 
-        return activatedPass;
+        return mapper.toPassDTO(activatedPass);
     }
 
     @Override
-    public Pass unWarningPass(UUID id) {
-        log.info("Method {} [UUID - {}]", MethodLog.getMethodName(), id);
+    public PassResponseDTO unWarningPass(UUID id) {
+        log.info(METHOD_UUID, MethodLog.getMethodName(), id);
 
-        Pass pass = findById(id);
+        Pass pass = findPassById(id);
         if (!pass.getStatus().equals(PassStatus.WARNING)) {
             throw new IllegalStateException("You can only to unwarnining a previously warninged pass");
         }
         pass.setStatus(PassStatus.COMPLETED);
 
         Pass completedPass = passRepository.save(pass);
-        log.info("Pass [UUID - {}], changed status on {}", pass.getId(), pass.getStatus());
+        log.info(PASS_STATUS_CHANGED_LOG, pass.getId(), pass.getStatus());
 
-        return completedPass;
+        return mapper.toPassDTO(completedPass);
     }
 
     @Override
     public void markFavorite(UUID id) {
-        log.info("Method {} [UUID - {}]", MethodLog.getMethodName(), id);
-        Pass pass = findById(id);
+        log.info(METHOD_UUID, MethodLog.getMethodName(), id);
+        Pass pass = findPassById(id);
         pass.setFavorite(true);
         passRepository.save(pass);
         log.info("Pass [UUID - {}] marked favorite", id);
@@ -254,8 +259,8 @@ public class PassServiceImpl implements PassService {
 
     @Override
     public void unmarkFavorite(UUID id) {
-        log.info("Method {} [UUID - {}]", MethodLog.getMethodName(), id);
-        Pass pass = findById(id);
+        log.info(METHOD_UUID, MethodLog.getMethodName(), id);
+        Pass pass = findPassById(id);
         pass.setFavorite(false);
         passRepository.save(pass);
         log.info("Pass [UUID - {}] unmarked favorite", id);
@@ -263,7 +268,7 @@ public class PassServiceImpl implements PassService {
 
     @Override
     public void deletePass(UUID id) {
-        log.info("Method {} [UUID - {}]", MethodLog.getMethodName(), id);
+        log.info(METHOD_UUID, MethodLog.getMethodName(), id);
         if (passRepository.findById(id).isEmpty()) {
             log.warn(PASS_NOT_FOUND_LOG, id);
             throw new PassNotFoundException(PASS_NOT_FOUND_MSG.formatted(id));
@@ -273,30 +278,15 @@ public class PassServiceImpl implements PassService {
     }
 
     /**
-     * Проверяет, что в добавляемом или изменяемом пропуске
-     * время окончания больше чем время начала
+     * Проверяет связь пользователя и территории,
+     * которая означает право пользователя создавать пропуска на указанную территорию
      *
-     * @param newPass добавляемый или изменяемый пропуск
-     * @throws IllegalArgumentException "The start time must be earlier than the end time"
+     * @param user пользователь
+     * @param territory территория
      */
-    private void checkPassTime(Pass newPass) {
-        if (!newPass.getStartTime().isBefore(newPass.getEndTime())) {
-
-            String message = String.format("The start time is after the end time [UUID - %s], start - %s, end - %s",
-                    newPass.getId(), newPass.getStartTime(), newPass.getEndTime());
-            log.info(message);
-            throw new IllegalArgumentException(message);
-        }
-    }
-
-    /**
-     * @param newPass добавляемый или изменяемый пропуск
-     * @throws TerritoryNotFoundException, если указанный юзер не имеет связи с указанной территорией,
-     *                                     т.е. не имеет права создавать пропуска для этой территории
-     */
-    private void checkUserTerritoryRelation(Pass newPass) {
-        UUID userId = newPass.getUser().getId();
-        UUID territoryId = newPass.getTerritory().getId();
+    private void checkUserTerritoryRelation(User user, Territory territory) {
+        UUID userId = user.getId();
+        UUID territoryId = territory.getId();
 
         if (!passRepository.checkUserTerritoryRelation(userId, territoryId)) {
             String message = String.format("Reject operation: user [%s] not have permission to create passes " +
@@ -366,7 +356,7 @@ public class PassServiceImpl implements PassService {
             pass.setStatus(PassStatus.ACTIVE);
             passRepository.save(pass);
 
-            log.debug("Pass [UUID - {}], changed status on {}",
+            log.debug(PASS_STATUS_CHANGED_LOG,
                     pass.getId(), pass.getStatus());
         }
     }

@@ -3,12 +3,16 @@ package ru.ac.checkpointmanager.validation;
 import jakarta.validation.ConstraintValidatorContext;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.VisitorDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
+import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.util.TestUtils;
+
+import java.util.stream.Stream;
 
 class CarOrVisitorFieldsCheckValidatorTest {
 
@@ -30,40 +34,89 @@ class CarOrVisitorFieldsCheckValidatorTest {
         carOrVisitorFieldsValidator = new CarOrVisitorFieldsValidator();
     }
 
-    @Test
-    void shouldValidateWithNotValidForBothFieldsPresent() {
-        PassCreateDTO passCreateDTO = TestUtils.getPassDtoCreate();
-        passCreateDTO.setCar(new CarDTO());
-        passCreateDTO.setVisitor(new VisitorDTO());
-        boolean valid = carOrVisitorFieldsValidator.isValid(passCreateDTO, context);
+    @ParameterizedTest
+    @MethodSource("getPassDtoWithBotCarAndVisitor")
+    void shouldValidateWithNotValidForBothFieldsPresent(Object passDto) {
+        boolean valid = carOrVisitorFieldsValidator.isValid(passDto, context);
+
         Assertions.assertThat(valid).isFalse();
     }
 
-    @Test
-    void shouldValidateWithNotValidForBothFieldsNull() {
-        PassCreateDTO passCreateDTO = TestUtils.getPassDtoCreate();
-        passCreateDTO.setCar(new CarDTO());
-        passCreateDTO.setVisitor(new VisitorDTO());
-        boolean valid = carOrVisitorFieldsValidator.isValid(passCreateDTO, context);
+    @ParameterizedTest
+    @MethodSource("getPassDtoWithCarAndVisitorNulls")
+    void shouldValidateWithNotValidForBothFieldsNull(Object passDto) {
+        boolean valid = carOrVisitorFieldsValidator.isValid(passDto, context);
+
         Assertions.assertThat(valid).isFalse();
     }
 
-    @Test
-    void shouldValidateWithValidIfOnlyCarPresent() {
+    @ParameterizedTest
+    @MethodSource("getPassDtoWithOnlyCar")
+    void shouldValidateWithValidIfOnlyCarPresent(Object passDto) {
+        boolean valid = carOrVisitorFieldsValidator.isValid(passDto, context);
+
+        Assertions.assertThat(valid).isTrue();
+    }
+
+    @ParameterizedTest
+    @MethodSource("getPassDtoWithOnlyVisitor")
+    void shouldValidateWithValidIfOnlyVisitorPresent(Object passDto) {
+        boolean valid = carOrVisitorFieldsValidator.isValid(passDto, context);
+
+        Assertions.assertThat(valid).isTrue();
+    }
+
+    private static Stream<Object> getPassDtoWithBotCarAndVisitor() {
+        PassCreateDTO passCreateDTO = TestUtils.getPassDtoCreate();
+        passCreateDTO.setCar(new CarDTO());
+        passCreateDTO.setVisitor(new VisitorDTO());
+        PassUpdateDTO passUpdateDTO = TestUtils.getPassDtoUpdate();
+        passUpdateDTO.setCar(new CarDTO());
+        passUpdateDTO.setVisitor(new VisitorDTO());
+        return Stream.of(
+                passCreateDTO,
+                passUpdateDTO
+        );
+    }
+
+    private static Stream<Object> getPassDtoWithCarAndVisitorNulls() {
+        PassCreateDTO passDtoCreate = TestUtils.getPassDtoCreate();
+        passDtoCreate.setCar(null);
+        passDtoCreate.setVisitor(null);
+
+        PassUpdateDTO passDtoUpdate = TestUtils.getPassDtoUpdate();
+        passDtoUpdate.setCar(null);
+        passDtoUpdate.setVisitor(null);
+        return Stream.of(
+                passDtoCreate,
+                passDtoUpdate
+        );
+    }
+
+    private static Stream<Object> getPassDtoWithOnlyCar() {
         PassCreateDTO passCreateDTO = TestUtils.getPassDtoCreate();
         passCreateDTO.setVisitor(null);
         passCreateDTO.setCar(new CarDTO());
-        boolean valid = carOrVisitorFieldsValidator.isValid(passCreateDTO, context);
-        Assertions.assertThat(valid).isTrue();
+        PassUpdateDTO passUpdateDTO = TestUtils.getPassDtoUpdate();
+        passUpdateDTO.setVisitor(null);
+        passUpdateDTO.setCar(new CarDTO());
+        return Stream.of(
+                passCreateDTO,
+                passUpdateDTO
+        );
     }
 
-    @Test
-    void shouldValidateWithValidIfOnlyVisitorPresent() {
+    private static Stream<Object> getPassDtoWithOnlyVisitor() {
         PassCreateDTO passCreateDTO = TestUtils.getPassDtoCreate();
-        passCreateDTO.setCar(null);
         passCreateDTO.setVisitor(new VisitorDTO());
-        boolean valid = carOrVisitorFieldsValidator.isValid(passCreateDTO, context);
-        Assertions.assertThat(valid).isTrue();
+        passCreateDTO.setCar(null);
+        PassUpdateDTO passUpdateDTO = TestUtils.getPassDtoUpdate();
+        passUpdateDTO.setVisitor(new VisitorDTO());
+        passUpdateDTO.setCar(null);
+        return Stream.of(
+                passCreateDTO,
+                passUpdateDTO
+        );
     }
 
 }

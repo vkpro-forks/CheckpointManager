@@ -62,19 +62,12 @@ public class UserServiceImpl implements UserService {
     private static final String USER_NOT_FOUND_MSG = "User with [id=%s] not found";
 
     private final UserMapper userMapper;
-
     private final TerritoryMapper territoryMapper;
-
     private final UserRepository userRepository;
-
     private final PhoneRepository phoneRepository;
-
     private final PasswordEncoder passwordEncoder;
-
     private final TemporaryUserService temporaryUserService;
-
     private final EmailService emailService;
-
     private final PhoneService phoneService;
 
     /**
@@ -92,9 +85,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDTO findById(UUID id) {
         log.debug(METHOD_UUID, MethodLog.getMethodName(), id);
+        User foundUser = findUserById(id);
+        return userMapper.toUserResponseDTO(foundUser);
+    }
+
+    @Override
+    public User findUserById(UUID id) {
         User foundUser = userRepository.findById(id).orElseThrow(
                 () -> new UserNotFoundException(String.format("User not found [id=%s]", id)));
-        return userMapper.toUserResponseDTO(foundUser);
+        return foundUser;
     }
 
     /**
