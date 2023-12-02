@@ -131,14 +131,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public Collection<UserResponseDTO> findByName(String name) {
         log.info("Method {} was invoked", MethodLog.getMethodName());
-        Collection<UserResponseDTO> userResponseDTOS = userMapper.toUserResponseDTOs(userRepository
+        return userMapper.toUserResponseDTOs(userRepository
                 .findUserByFullNameContainingIgnoreCase(name));
-
-        if (userResponseDTOS.isEmpty()) {
-            log.debug("here is no user with name containing {}", name);
-            throw new UserNotFoundException("There is no user with name containing " + name);
-        }
-        return userResponseDTOS;
     }
 
     /**
@@ -477,13 +471,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Collection<UserResponseDTO> getAll() {
         log.debug("Method {}", MethodLog.getMethodName());
-        Collection<UserResponseDTO> userResponseDTOS = userMapper.toUserResponseDTOs(userRepository.findAll());
-
-        if (userResponseDTOS.isEmpty()) {
-            log.warn("There is no user in DB");
-            throw new UserNotFoundException("There is no user in DB");
-        }
-        return userResponseDTOS;
+        return userMapper.toUserResponseDTOs(userRepository.findAll());
     }
 
     /**

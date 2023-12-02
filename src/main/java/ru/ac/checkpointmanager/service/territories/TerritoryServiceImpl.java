@@ -23,6 +23,9 @@ public class TerritoryServiceImpl implements TerritoryService {
 
     private static final String TERRITORY_NOT_FOUND_MSG = "Territory with id: %s not found";
     private static final String TERRITORY_NOT_FOUND_LOG = "Territory with id: {} not found";
+
+    private static final String USER_NOT_FOUND_LOG = "User with [id: {}] not found";
+    private static final String USER_NOT_FOUND_MSG = "User with id: %s not found";
     private static final String METHOD_CALLED_UUID_LOG = "Method {}, UUID - {}";
     public static final String METHOD_USER_TERR = "Method {}, user - {}, terr - {}";
 
@@ -53,11 +56,7 @@ public class TerritoryServiceImpl implements TerritoryService {
     public List<User> findUsersByTerritoryId(UUID territoryId) {
         log.debug(METHOD_CALLED_UUID_LOG, MethodLog.getMethodName(), territoryId);
         findById(territoryId);
-        List<User> users = territoryRepository.findUsersByTerritoryId(territoryId);
-        if (users.isEmpty()) {
-            throw new UserNotFoundException(String.format("Users for Territory not found [territory_id=%s]", territoryId));
-        }
-        return users;
+        return territoryRepository.findUsersByTerritoryId(territoryId);
     }
 
     @Override
@@ -99,7 +98,11 @@ public class TerritoryServiceImpl implements TerritoryService {
                     return new TerritoryNotFoundException(TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
                 });
         User user = userRepository.findById(userId).orElseThrow(
-                () -> new UserNotFoundException(String.format("User not found [Id=%s]", userId)));
+                () -> {
+                    log.warn(USER_NOT_FOUND_LOG, userId);
+                    return new UserNotFoundException(USER_NOT_FOUND_MSG.formatted(userId));
+                }
+        );
         if (territoryRepository.checkUserTerritoryRelation(userId, territoryId)) {
             String message = String.format("User [%s] and territory [%s] are already connected", userId, territoryId);
             log.warn(message);
@@ -132,8 +135,11 @@ public class TerritoryServiceImpl implements TerritoryService {
                     return new TerritoryNotFoundException(TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
                 });
         User user = userRepository.findById(userId).orElseThrow(
-                () -> new UserNotFoundException(String.format("User not found [Id=%s]", userId)));
-
+                () -> {
+                    log.warn(USER_NOT_FOUND_LOG, userId);
+                    return new UserNotFoundException(USER_NOT_FOUND_MSG.formatted(userId));
+                }
+        );
         if (!territoryRepository.checkUserTerritoryRelation(userId, territoryId)) {
             String message = String.format("User [%s] and territory [%s] have no connection", userId, territoryId);
             log.warn(message);

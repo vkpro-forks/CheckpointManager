@@ -453,6 +453,34 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
         checkNotFoundFields(resultActions);
     }
 
+    @Test
+    @SneakyThrows
+    void shouldHandleUserNotFoundExceptionForAttachUserToTerritory() {
+        Territory territory = new Territory();
+        territory.setName(TestUtils.TERR_NAME);
+        Territory savedTerritory = territoryRepository.save(territory);
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                        .patch(UrlConstants.TERR_ATTACH_DETACH_URL
+                                .formatted(savedTerritory.getId(), TestUtils.USER_ID)))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(Matchers.startsWith(USER)));
+        checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldHandleUserNotFoundExceptionForDetachUserToTerritory() {
+        Territory territory = new Territory();
+        territory.setName(TestUtils.TERR_NAME);
+        Territory savedTerritory = territoryRepository.save(territory);
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                        .delete(UrlConstants.TERR_ATTACH_DETACH_URL
+                                .formatted(savedTerritory.getId(), TestUtils.USER_ID)))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(Matchers.startsWith(USER)));
+        checkNotFoundFields(resultActions);
+    }
+
     private void checkNotFoundFields(ResultActions resultActions) throws Exception {
         resultActions.andExpect(MockMvcResultMatchers.status().isNotFound())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE))
