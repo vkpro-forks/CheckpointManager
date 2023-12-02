@@ -2,30 +2,34 @@ package ru.ac.checkpointmanager.service.passes;
 
 import org.springframework.data.domain.Page;
 import ru.ac.checkpointmanager.dto.passes.PagingParams;
+import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
+import ru.ac.checkpointmanager.dto.passes.PassResponseDTO;
+import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.model.passes.Pass;
 
-import java.util.Optional;
 import java.util.UUID;
 
 public interface PassService {
 
-    Pass addPass(Pass pass);
+    PassResponseDTO addPass(PassCreateDTO passCreateDTO);
 
-    Page<Pass> findPasses(PagingParams pagingParams);
+    Page<PassResponseDTO> findPasses(PagingParams pagingParams);
 
-    Pass findById(UUID id);
+    PassResponseDTO findById(UUID id);
 
-    Page<Pass> findPassesByUser(UUID userId, PagingParams pagingParams);
+    Pass findPassById(UUID id);
 
-    Page<Pass> findPassesByTerritory(UUID terId, PagingParams pagingParams);
+    Page<PassResponseDTO> findPassesByUser(UUID userId, PagingParams pagingParams);
 
-    Pass updatePass(Pass pass);
+    Page<PassResponseDTO> findPassesByTerritory(UUID terId, PagingParams pagingParams);
 
-    Pass cancelPass(UUID id);
+    PassResponseDTO updatePass(PassUpdateDTO passUpdateDTO);
 
-    Pass activateCancelledPass(UUID id);
+    PassResponseDTO cancelPass(UUID id);
 
-    Pass unWarningPass(UUID id);
+    PassResponseDTO activateCancelledPass(UUID id);
+
+    PassResponseDTO unWarningPass(UUID id);
 
     void markFavorite(UUID id);
 

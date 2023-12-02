@@ -3,8 +3,12 @@ package ru.ac.checkpointmanager.service.territories;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.ac.checkpointmanager.dto.TerritoryDTO;
+import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
+import ru.ac.checkpointmanager.mapper.TerritoryMapper;
+import ru.ac.checkpointmanager.mapper.UserMapper;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.repository.TerritoryRepository;
@@ -27,21 +31,34 @@ public class TerritoryServiceImpl implements TerritoryService {
     public static final String METHOD_USER_TERR = "Method {}, user - {}, terr - {}";
 
     private final TerritoryRepository territoryRepository;
-
     private final UserRepository userRepository;
+    private final TerritoryMapper territoryMapper;
+    private final UserMapper userMapper;
+
 
     @Override
-    public Territory addTerritory(Territory territory) {
-        log.debug(METHOD_CALLED_UUID_LOG, MethodLog.getMethodName(), territory.getId());
+    public TerritoryDTO addTerritory(TerritoryDTO territoryDTO) {
+        log.debug(METHOD_CALLED_UUID_LOG, MethodLog.getMethodName(), territoryDTO.getId());
+        Territory territory = territoryMapper.toTerritory(territoryDTO);
         trimThemAll(territory);
         Territory saved = territoryRepository.save(territory);
         log.info("Territory with [id: {}] was saved", territory.getId());
-        return saved;
+        return territoryMapper.toTerritoryDTO(saved);
     }
 
     @Override
-    public Territory findById(UUID id) {
+    public TerritoryDTO findById(UUID id) {
         log.debug(METHOD_CALLED_UUID_LOG, MethodLog.getMethodName(), id);
+        Territory territory = territoryRepository.findById(id).orElseThrow(
+                () -> {
+                    log.warn(TERRITORY_NOT_FOUND_LOG, id);
+                    return new TerritoryNotFoundException(TERRITORY_NOT_FOUND_MSG.formatted(id));
+                });
+        return territoryMapper.toTerritoryDTO(territory);
+    }
+
+    @Override
+    public Territory findTerritoryById(UUID id) {
         return territoryRepository.findById(id).orElseThrow(
                 () -> {
                     log.warn(TERRITORY_NOT_FOUND_LOG, id);
@@ -50,33 +67,35 @@ public class TerritoryServiceImpl implements TerritoryService {
     }
 
     @Override
-    public List<User> findUsersByTerritoryId(UUID territoryId) {
+    public List<UserResponseDTO> findUsersByTerritoryId(UUID territoryId) {
         log.debug(METHOD_CALLED_UUID_LOG, MethodLog.getMethodName(), territoryId);
         findById(territoryId);
         List<User> users = territoryRepository.findUsersByTerritoryId(territoryId);
         if (users.isEmpty()) {
             throw new UserNotFoundException(String.format("Users for Territory not found [territory_id=%s]", territoryId));
         }
-        return users;
+        return userMapper.toUserResponseDTOs(users);
     }
 
     @Override
-    public List<Territory> findTerritoriesByName(String name) {
+    public List<TerritoryDTO> findTerritoriesByName(String name) {
         log.debug("Method {}, name - {}", MethodLog.getMethodName(), name);
-        return territoryRepository.findTerritoriesByNameContainingIgnoreCase(name);
+        List<Territory> territories = territoryRepository.findTerritoriesByNameContainingIgnoreCase(name);
+        return territoryMapper.toTerritoriesDTO(territories);
     }
 
     @Override
-    public List<Territory> findAllTerritories() {
+    public List<TerritoryDTO> findAllTerritories() {
         log.debug("Method {}", MethodLog.getMethodName());
-        return territoryRepository.findAll();
+        List<Territory> territories = territoryRepository.findAll();
+        return territoryMapper.toTerritoriesDTO(territories);
     }
 
     @Override
-    public Territory updateTerritory(Territory territory) {
-        UUID territoryId = territory.getId();
+    public TerritoryDTO updateTerritory(TerritoryDTO territoryDTO) {
+        UUID territoryId = territoryDTO.getId();
         log.debug(METHOD_CALLED_UUID_LOG, MethodLog.getMethodName(), territoryId);
-        trimThemAll(territory);
+        trimThemAll(territoryDTO);
         Territory foundTerritory = territoryRepository.findById(territoryId)
                 .orElseThrow(() -> {
                             log.warn(TERRITORY_NOT_FOUND_LOG, territoryId);
@@ -84,10 +103,11 @@ public class TerritoryServiceImpl implements TerritoryService {
                         }
                 );
 
-        foundTerritory.setName(territory.getName());
-        foundTerritory.setNote(territory.getNote());
+        foundTerritory.setName(territoryDTO.getName());
+        foundTerritory.setNote(territoryDTO.getNote());
 
-        return territoryRepository.save(foundTerritory);
+        territoryRepository.save(foundTerritory);
+        return territoryMapper.toTerritoryDTO(foundTerritory);
     }
 
     @Override
