@@ -16,13 +16,20 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.service.phone.PhoneService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
 
 import java.util.Collection;
-import java.util.Optional;
 import java.util.UUID;
 
 
@@ -38,7 +45,6 @@ import java.util.UUID;
         @ApiResponse(responseCode = "500",
                 description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса")})
 public class PhoneController {
-
     private final PhoneService phoneService;
 
     @Operation(summary = "Создание нового номера телефона")
@@ -80,12 +86,10 @@ public class PhoneController {
                     description = "NOT_FOUND: номера с таким id не найдено"
             )
     })
-    @GetMapping("{id}")
-    public ResponseEntity<PhoneDTO> findById(@Parameter(description = "Уникальный идентификатор телефона")
-                                             @PathVariable UUID id
-    ) {
-        Optional<PhoneDTO> foundPhone = Optional.ofNullable(phoneService.findById(id));
-        return foundPhone.map(ResponseEntity::ok).orElse(ResponseEntity.noContent().build());
+    @GetMapping("/{id}")
+    public PhoneDTO findById(@Parameter(description = "Уникальный идентификатор телефона")
+                             @PathVariable UUID id) {
+        return phoneService.findById(id);
     }
 
     @Operation(summary = "Получить список всех номеров")
@@ -105,7 +109,7 @@ public class PhoneController {
     @GetMapping
     public ResponseEntity<Collection<PhoneDTO>> getAll() {
         Collection<PhoneDTO> phones = phoneService.getAll();
-        return phones.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(phones);
+        return ResponseEntity.ok(phones);
     }
 
     @Operation(summary = "Изменение параметров телефона")
@@ -140,23 +144,18 @@ public class PhoneController {
     @Operation(summary = "Удалить телефон по id")
     @ApiResponses(value = {
             @ApiResponse(
-                    responseCode = "200",
-                    description = "OK: телефон удален"
+                    responseCode = "204",
+                    description = "NO CONTENT: телефон удален"
             ),
             @ApiResponse(
                     responseCode = "404",
                     description = "NOT_FOUND: телефон не найден"
             )
     })
-    @DeleteMapping("{id}")
-    public ResponseEntity<Void> deleteNumber(@Parameter(description = "Уникальный идентификатор телефона")
-                                             @PathVariable UUID id
-    ) {
-        PhoneDTO foundPhone = phoneService.findById(id);
-        if (foundPhone == null) {
-            return ResponseEntity.noContent().build();
-        }
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteNumber(@Parameter(description = "Уникальный идентификатор телефона")
+                             @PathVariable UUID id) {
         phoneService.deletePhoneNumber(id);
-        return ResponseEntity.ok().build();
     }
 }

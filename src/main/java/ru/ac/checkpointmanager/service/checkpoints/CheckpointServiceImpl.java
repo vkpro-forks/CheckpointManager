@@ -3,7 +3,10 @@ package ru.ac.checkpointmanager.service.checkpoints;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.ac.checkpointmanager.dto.CheckpointDTO;
 import ru.ac.checkpointmanager.exception.CheckpointNotFoundException;
+import ru.ac.checkpointmanager.mapper.CheckpointMapper;
+import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
 import ru.ac.checkpointmanager.repository.CheckpointRepository;
 import ru.ac.checkpointmanager.service.territories.TerritoryService;
@@ -25,13 +28,28 @@ public class CheckpointServiceImpl implements CheckpointService {
 
     private final CheckpointRepository checkpointRepository;
     private final TerritoryService territoryService;
+    private final CheckpointMapper checkpointMapper;
 
     @Override
-    public Checkpoint addCheckpoint(Checkpoint checkpoint) {
-        log.info(METHOD_CALLED_LOG, MethodLog.getMethodName(), checkpoint.getId());
+    public CheckpointDTO addCheckpoint(CheckpointDTO checkpointDTO) {
+        log.info(METHOD_CALLED_LOG, MethodLog.getMethodName(), checkpointDTO.getId());
+        Checkpoint checkpoint = checkpointMapper.toCheckpoint(checkpointDTO);
+
         territoryService.findById(checkpoint.getTerritory().getId());
         trimThemAll(checkpoint);
-        return checkpointRepository.save(checkpoint);
+        checkpointRepository.save(checkpoint);
+        return checkpointMapper.toCheckpointDTO(checkpoint);
+    }
+
+    @Override
+    public CheckpointDTO findById(UUID id) {
+        log.debug(METHOD_CALLED_LOG, MethodLog.getMethodName(), id);
+        Checkpoint foundCheckpoint = checkpointRepository.findById(id).orElseThrow(
+                () -> {
+                    log.warn(CHECKPOINT_NOT_FOUND_LOG, id);
+                    return new CheckpointNotFoundException(CHECKPOINT_NOT_FOUND_MSG.formatted(id));
+                });
+        return checkpointMapper.toCheckpointDTO(foundCheckpoint);
     }
 
     @Override
@@ -45,28 +63,30 @@ public class CheckpointServiceImpl implements CheckpointService {
     }
 
     @Override
-    public List<Checkpoint> findCheckpointsByName(String name) {
+    public List<CheckpointDTO> findCheckpointsByName(String name) {
         log.debug("Method {}, name - {}", MethodLog.getMethodName(), name);
-        return checkpointRepository.findCheckpointsByNameContainingIgnoreCase(name);
+        List<Checkpoint> checkpoints = checkpointRepository.findCheckpointsByNameContainingIgnoreCase(name);
+        return checkpointMapper.toCheckpointsDTO(checkpoints);
     }
 
     @Override
-    public List<Checkpoint> findAllCheckpoints() {
+    public List<CheckpointDTO> findAllCheckpoints() {
         log.debug("Method {}", MethodLog.getMethodName());
-        return checkpointRepository.findAll();
+        List<Checkpoint> checkpoints = checkpointRepository.findAll();
+        return checkpointMapper.toCheckpointsDTO(checkpoints);
     }
 
     @Override
-    public List<Checkpoint> findCheckpointsByTerritoryId(UUID id) {
+    public List<CheckpointDTO> findCheckpointsByTerritoryId(UUID id) {
         log.debug(METHOD_CALLED_LOG, MethodLog.getMethodName(), id);
         List<Checkpoint> foundCheckpoints = checkpointRepository.findCheckpointsByTerritoryIdOrderByName(id);
         log.debug("Checkpoint for [territory with id: {}] retrieved from repo", id);
-        return foundCheckpoints;
+        return checkpointMapper.toCheckpointsDTO(foundCheckpoints);
     }
 
     @Override
-    public Checkpoint updateCheckpoint(Checkpoint checkpoint) {
-        UUID checkpointId = checkpoint.getId();
+    public CheckpointDTO updateCheckpoint(CheckpointDTO checkpointDTO) {
+        UUID checkpointId = checkpointDTO.getId();
         log.info(METHOD_CALLED_LOG, MethodLog.getMethodName(), checkpointId);
         Checkpoint foundCheckpoint = checkpointRepository.findById(checkpointId)
                 .orElseThrow(() -> {
@@ -75,17 +95,17 @@ public class CheckpointServiceImpl implements CheckpointService {
                 });
         //FIXME It would be better to find entity here and bind it to checkpoint
         //FIXME we don't need to go to DB if territory shouldn't change
-        territoryService.findById(checkpoint.getTerritory().getId());
-        trimThemAll(checkpoint);
+        Territory territory = territoryService.findTerritoryById(checkpointDTO.getTerritory().getId());
+        trimThemAll(checkpointDTO);
 
-        foundCheckpoint.setName(checkpoint.getName());
-        foundCheckpoint.setType(checkpoint.getType());
-        foundCheckpoint.setNote(checkpoint.getNote());
-        foundCheckpoint.setTerritory(checkpoint.getTerritory());
+        foundCheckpoint.setName(checkpointDTO.getName());
+        foundCheckpoint.setType(checkpointDTO.getType());
+        foundCheckpoint.setNote(checkpointDTO.getNote());
+        foundCheckpoint.setTerritory(territory);
 
         Checkpoint updated = checkpointRepository.save(foundCheckpoint);
         log.info("[Checkpoint with id: {}] was successfully updated", checkpointId);
-        return updated;
+        return checkpointMapper.toCheckpointDTO(updated);
     }
 
     @Override

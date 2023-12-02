@@ -1,24 +1,27 @@
 package ru.ac.checkpointmanager.service.territories;
 
+import ru.ac.checkpointmanager.dto.TerritoryDTO;
+import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.model.Territory;
-import ru.ac.checkpointmanager.model.User;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface TerritoryService {
 
-    Territory addTerritory(Territory territory);
+    TerritoryDTO addTerritory(TerritoryDTO territoryDTO);
 
-    Territory findById(UUID id);
+    TerritoryDTO findById(UUID id);
 
-    List<User> findUsersByTerritoryId(UUID territoryId);
+    Territory findTerritoryById(UUID id);
 
-    List<Territory> findTerritoriesByName(String name);
+    List<UserResponseDTO> findUsersByTerritoryId(UUID territoryId);
 
-    List<Territory> findAllTerritories();
+    List<TerritoryDTO> findTerritoriesByName(String name);
 
-    Territory updateTerritory(Territory territory);
+    List<TerritoryDTO> findAllTerritories();
+
+    TerritoryDTO updateTerritory(TerritoryDTO territoryDTO);
 
     void attachUserToTerritory(UUID territoryId, UUID userId);
 

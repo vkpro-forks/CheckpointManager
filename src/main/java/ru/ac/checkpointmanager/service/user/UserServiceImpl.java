@@ -64,7 +64,6 @@ public class UserServiceImpl implements UserService {
 
     private final UserMapper userMapper;
     private final TerritoryMapper territoryMapper;
-
     private final UserRepository userRepository;
     private final PhoneRepository phoneRepository;
     private final PasswordEncoder passwordEncoder;
@@ -88,9 +87,15 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public UserResponseDTO findById(UUID id) {
         log.debug(METHOD_UUID, MethodLog.getMethodName(), id);
+        User foundUser = findUserById(id);
+        return userMapper.toUserResponseDTO(foundUser);
+    }
+
+    @Override
+    public User findUserById(UUID id) {
         User foundUser = userRepository.findById(id).orElseThrow(
                 () -> new UserNotFoundException(String.format("User not found [id=%s]", id)));
-        return userMapper.toUserResponseDTO(foundUser);
+        return foundUser;
     }
 
     /**

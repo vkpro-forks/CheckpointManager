@@ -26,11 +26,11 @@ public class PassTimeValidator implements ConstraintValidator<PassTimeCheck, Obj
         if (value == null) {
             return true;//not responsibility of this annotation
         }
-        if (value instanceof PassUpdateDTO passDtoUpdate) {
-            return passDtoUpdate.getStartTime().isBefore(passDtoUpdate.getEndTime());
+        if (value instanceof PassUpdateDTO passUpdateDTO) {
+            return passUpdateDTO.getStartTime().isBefore(passUpdateDTO.getEndTime());
         }
-        if (value instanceof PassCreateDTO passDtoCreate) {
-            return passDtoCreate.getStartTime().isBefore(passDtoCreate.getEndTime());
+        if (value instanceof PassCreateDTO passCreateDTO) {
+            return passCreateDTO.getStartTime().isBefore(passCreateDTO.getEndTime());
         }
         return false;
     }

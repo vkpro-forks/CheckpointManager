@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -35,6 +36,7 @@ import java.time.LocalDateTime;
 @WebMvcTest(PassController.class)
 @Import({OpenAllEndpointsTestConfiguration.class, CorsTestConfiguration.class})
 @WithMockUser(roles = {"ADMIN"})
+@ActiveProfiles("test")
 class PassControllerValidationIntegrationTest {
 
     private static final String CAR = "car";
@@ -69,7 +71,7 @@ class PassControllerValidationIntegrationTest {
     @Test
     @SneakyThrows
     void shouldReturnValidationErrorForNullCarAndVisitorFieldsForAddPass() {
-        PassCreateDTO passCreateDTO = TestUtils.getPassDtoCreate();
+        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTO();
         passCreateDTO.setCar(null);
         passCreateDTO.setVisitor(null);
         String passDtoCreateString = TestUtils.jsonStringFromObject(passCreateDTO);
@@ -82,7 +84,7 @@ class PassControllerValidationIntegrationTest {
     @Test
     @SneakyThrows
     void shouldReturnValidationErrorForBothCarAndVisitorFieldsForAddPass() {
-        PassCreateDTO passCreateDTO = TestUtils.getPassDtoCreate();
+        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTO();
         passCreateDTO.setCar(new CarDTO());
         passCreateDTO.setVisitor(new VisitorDTO());
         String passDtoCreateString = TestUtils.jsonStringFromObject(passCreateDTO);
@@ -95,7 +97,7 @@ class PassControllerValidationIntegrationTest {
     @Test
     @SneakyThrows
     void shouldReturnValidationErrorForNullCarAndVisitorFieldsForUpdatePass() {
-        PassUpdateDTO passUpdateDTO = TestUtils.getPassDtoUpdate();
+        PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTO();
         passUpdateDTO.setCar(null);
         passUpdateDTO.setVisitor(null);
         String passDtoCreateString = TestUtils.jsonStringFromObject(passUpdateDTO);
@@ -108,7 +110,7 @@ class PassControllerValidationIntegrationTest {
     @Test
     @SneakyThrows
     void shouldReturnValidationErrorForBothCarAndVisitorFieldsForUpdatePass() {
-        PassUpdateDTO passUpdateDTO = TestUtils.getPassDtoUpdate();
+        PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTO();
         passUpdateDTO.setCar(new CarDTO());
         passUpdateDTO.setVisitor(new VisitorDTO());
         String passDtoCreateString = TestUtils.jsonStringFromObject(passUpdateDTO);
@@ -121,11 +123,11 @@ class PassControllerValidationIntegrationTest {
     @Test
     @SneakyThrows
     void shouldReturnValidationErrorIncorrectStartAndEndTimeFieldsForAddPass() {
-        PassDtoCreate passDtoCreate = TestUtils.getPassDtoCreate();
-        passDtoCreate.setCar(new CarDTO());
-        passDtoCreate.setEndTime(LocalDateTime.now().plusHours(1));
-        passDtoCreate.setStartTime(LocalDateTime.now().plusHours(3));
-        String passDtoCreateString = TestUtils.jsonStringFromObject(passDtoCreate);
+        PassCreateDTO passCreateDTO = TestUtils.getPassDtoCreate();
+        passCreateDTO.setCar(new CarDTO());
+        passCreateDTO.setEndTime(LocalDateTime.now().plusHours(1));
+        passCreateDTO.setStartTime(LocalDateTime.now().plusHours(3));
+        String passDtoCreateString = TestUtils.jsonStringFromObject(passCreateDTO);
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(passDtoCreateString));
@@ -135,11 +137,11 @@ class PassControllerValidationIntegrationTest {
     @Test
     @SneakyThrows
     void shouldReturnValidationErrorIncorrectStartAndEndTimeFieldsForUpdatePass() {
-        PassDtoUpdate passDtoUpdate = TestUtils.getPassDtoUpdate();
-        passDtoUpdate.setCar(new CarDTO());
-        passDtoUpdate.setEndTime(LocalDateTime.now().plusHours(1));
-        passDtoUpdate.setStartTime(LocalDateTime.now().plusHours(3));
-        String passDtoCreateString = TestUtils.jsonStringFromObject(passDtoUpdate);
+        PassUpdateDTO passUpdateDTO = TestUtils.getPassDtoUpdate();
+        passUpdateDTO.setCar(new CarDTO());
+        passUpdateDTO.setEndTime(LocalDateTime.now().plusHours(1));
+        passUpdateDTO.setStartTime(LocalDateTime.now().plusHours(3));
+        String passDtoCreateString = TestUtils.jsonStringFromObject(passUpdateDTO);
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.put(UrlConstants.PASS_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(passDtoCreateString));

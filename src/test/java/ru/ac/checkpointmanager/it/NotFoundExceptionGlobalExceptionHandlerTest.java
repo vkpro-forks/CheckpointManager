@@ -52,6 +52,7 @@ import java.util.stream.Stream;
 class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConfig {
 
     private static final String TERRITORY = "Territory";
+    public static final String PHONE = "Phone";
 
     @Autowired
     MockMvc mockMvc;
@@ -238,7 +239,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
     @Test
     @SneakyThrows
     void shouldHandlePassNotFoundExceptionForUpdatePass() {
-        String passUpdateDto = TestUtils.jsonStringFromObject(TestUtils.getPassDtoUpdate());
+        String passUpdateDto = TestUtils.jsonStringFromObject(TestUtils.getPassUpdateDTO());
         ResultActions resultActions = mockMvc
                 .perform(MockMvcRequestBuilders.put(UrlConstants.PASS_URL)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -269,7 +270,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
     @SneakyThrows
     void shouldHandleTerritoryNotFoundExceptionForAddPass() {
         Mockito.when(userRepository.findById(Mockito.any())).thenReturn(Optional.of(new User()));
-        String passDtoCreate = TestUtils.jsonStringFromObject(TestUtils.getPassDtoCreate());
+        String passDtoCreate = TestUtils.jsonStringFromObject(TestUtils.getPassCreateDTO());
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(passDtoCreate))
@@ -380,6 +381,41 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
                         .delete(UrlConstants.TERR_ATTACH_DETACH_URL.formatted(TestUtils.TERR_ID, TestUtils.USER_ID)))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith(TERRITORY)));
+        checkNotFoundFields(resultActions);
+    }
+
+    //PHONE NOT FOUND EXCEPTION HANDLING
+    @Test
+    @SneakyThrows
+    void shouldHandlePhoneNotFoundExceptionForGetNumber() {
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                        .get(UrlConstants.PHONE_URL + "/" + TestUtils.PHONE_ID))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(Matchers.startsWith(PHONE)));
+        checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldHandlePhoneNotFoundExceptionForDeleteNumber() {
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                        .delete(UrlConstants.PHONE_URL + "/" + TestUtils.PHONE_ID))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(Matchers.startsWith(PHONE)));
+        checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldHandlePhoneNotFoundExceptionForUpdateNumber() {
+        String phoneDto = TestUtils.jsonStringFromObject(TestUtils.getPhoneDto());
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                        .put(UrlConstants.PHONE_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(phoneDto)
+                )
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(Matchers.startsWith(PHONE)));
         checkNotFoundFields(resultActions);
     }
 
