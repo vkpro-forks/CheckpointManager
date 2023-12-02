@@ -133,15 +133,6 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
-    @ExceptionHandler(UserNotFoundException.class)
-    public ProblemDetail handleUserNotFoundException(UserNotFoundException e) {
-        ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
-        problemDetail.setTitle("User not found");
-        problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
-        log.debug(LOG_MSG, e.getClass());
-        return problemDetail;
-    }
-
     @ExceptionHandler(DateOfBirthFormatException.class)
     public ProblemDetail handleDateOfBirthFormatException(DateOfBirthFormatException e) {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);

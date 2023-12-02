@@ -61,7 +61,7 @@ public class PassController {
                     "создавать пропуск на эту территорию; у пользователя найден накладывающийся пропуск"),
             @ApiResponse(responseCode = "404", description = "Не найден пользователь или территория")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
-    @PostMapping
+    @PostMapping//FIXME TESTED
     public PassResponseDTO addPass(@RequestBody @Valid PassCreateDTO passCreateDTO) {
         Pass newPass = service.addPass(mapper.toPass(passCreateDTO));
         return mapper.toPassDTO(newPass);

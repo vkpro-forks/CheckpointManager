@@ -419,6 +419,21 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
         checkNotFoundFields(resultActions);
     }
 
+    // USER NOT FOUND EXCEPTION HANDLING
+
+    @Test
+    @SneakyThrows
+    void shouldHandleUserNotFoundExceptionForAddPass() {
+        Mockito.when(userRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+        String passDtoCreate = TestUtils.jsonStringFromObject(TestUtils.getPassCreateDTO());
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(passDtoCreate))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(Matchers.startsWith("User")));
+        checkNotFoundFields(resultActions);
+    }
+
 
     private void checkNotFoundFields(ResultActions resultActions) throws Exception {
         resultActions.andExpect(MockMvcResultMatchers.status().isNotFound())

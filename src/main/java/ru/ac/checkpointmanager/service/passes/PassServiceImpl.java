@@ -51,6 +51,9 @@ public class PassServiceImpl implements PassService {
     private static final String METHOD_UUID = "Method {} [UUID - {}]";
 
     private static final String PASS_STATUS_CHANGED_LOG = "Pass [UUID - {}], changed status on {}";
+    public static final String USER_NOT_FOUND_LOG = "User with [id: {}] not found";
+
+    public static final String USER_NOT_FOUND_MSG = "User with id: %s not found";
 
 
     private final PassRepository passRepository;
@@ -66,8 +69,10 @@ public class PassServiceImpl implements PassService {
     @Override
     public Pass addPass(Pass pass) {
         log.info("Method {} [{}]", MethodLog.getMethodName(), pass);
-        if (userRepository.findById(pass.getUser().getId()).isEmpty()) {
-            throw new UserNotFoundException(String.format("User not found [id=%s]", pass.getUser().getId()));
+        UUID userId = pass.getUser().getId();
+        if (userRepository.findById(userId).isEmpty()) {
+            log.warn(USER_NOT_FOUND_LOG, userId);
+            throw new UserNotFoundException(USER_NOT_FOUND_MSG.formatted(userId));
         }
         UUID territoryId = pass.getTerritory().getId();
         if (territoryRepository.findById(territoryId).isEmpty()) {
