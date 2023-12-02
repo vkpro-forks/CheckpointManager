@@ -31,8 +31,6 @@ import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassResponseDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
-import ru.ac.checkpointmanager.mapper.PassMapper;
-import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.service.passes.PassService;
 
 import java.util.UUID;
@@ -48,7 +46,6 @@ import java.util.UUID;
 public class PassController {
 
     private final PassService service;
-    private final PassMapper mapper;
 
     /* CREATE */
     @Operation(summary = "Добавить новый пропуск",
@@ -63,8 +60,8 @@ public class PassController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @PostMapping
     public PassResponseDTO addPass(@RequestBody @Valid PassCreateDTO passCreateDTO) {
-        Pass newPass = service.addPass(mapper.toPass(passCreateDTO));
-        return mapper.toPassDTO(newPass);
+        PassResponseDTO newPass = service.addPass(passCreateDTO);
+        return newPass;
     }
 
     /* READ */
@@ -84,8 +81,8 @@ public class PassController {
     public ResponseEntity<Page<PassResponseDTO>> getPasses(@Schema(hidden = true)
                                                            @Valid @PagingParam PagingParams pagingParams) {
 
-        Page<Pass> passPage = service.findPasses(pagingParams);
-        return ResponseEntity.ok(passPage.map(mapper::toPassDTO));
+        Page<PassResponseDTO> passPage = service.findPasses(pagingParams);
+        return ResponseEntity.ok(passPage);
     }
 
     @Operation(summary = "Найти пропуск по id",
@@ -98,8 +95,8 @@ public class PassController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @GetMapping("/{id}")
     public ResponseEntity<PassResponseDTO> getPass(@PathVariable("id") UUID id) {
-        Pass foundPass = service.findById(id);
-        return ResponseEntity.ok(mapper.toPassDTO(foundPass));
+        PassResponseDTO foundPass = service.findById(id);
+        return ResponseEntity.ok(foundPass);
     }
 
     @Operation(summary = "Получить список пропусков конкретного пользователя",
@@ -118,8 +115,8 @@ public class PassController {
     public ResponseEntity<Page<PassResponseDTO>> getPassesByUserId(@PathVariable UUID userId, @Schema(hidden = true)
                                                                    @Valid @PagingParam PagingParams pagingParams) {
 
-        Page<Pass> passPage = service.findPassesByUser(userId, pagingParams);
-        return ResponseEntity.ok(passPage.map(mapper::toPassDTO));
+        Page<PassResponseDTO> passPage = service.findPassesByUser(userId, pagingParams);
+        return ResponseEntity.ok(passPage);
     }
 
     @Operation(summary = "Получить список пропусков на конкретную территорию",
@@ -138,8 +135,8 @@ public class PassController {
     public ResponseEntity<Page<PassResponseDTO>> getPassesByTerritoryId(@PathVariable UUID territoryId, @Schema(hidden = true)
                                                                         @Valid @PagingParam PagingParams pagingParams) {
 
-        Page<Pass> passPage = service.findPassesByTerritory(territoryId, pagingParams);
-        return ResponseEntity.ok(passPage.map(mapper::toPassDTO));
+        Page<PassResponseDTO> passPage = service.findPassesByTerritory(territoryId, pagingParams);
+        return ResponseEntity.ok(passPage);
     }
 
     /* UPDATE */
@@ -155,8 +152,8 @@ public class PassController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @PutMapping
     public PassResponseDTO updatePass(@RequestBody @Valid PassUpdateDTO passUpdateDTO) {
-        Pass updatedPass = service.updatePass(mapper.toPass(passUpdateDTO));
-        return mapper.toPassDTO(updatedPass);
+        PassResponseDTO updatedPass = service.updatePass(passUpdateDTO);
+        return updatedPass;
     }
 
     @Operation(summary = "Отменить активный пропуск",
@@ -171,8 +168,8 @@ public class PassController {
     @PatchMapping("/{id}/cancel")
     public ResponseEntity<PassResponseDTO> cancelPass(@PathVariable UUID id) {
 
-        Pass cancelledPass = service.cancelPass(id);
-        return ResponseEntity.ok(mapper.toPassDTO(cancelledPass));
+        PassResponseDTO cancelledPass = service.cancelPass(id);
+        return ResponseEntity.ok(cancelledPass);
     }
 
     @Operation(summary = "Активировать отмененный пропуск",
@@ -187,8 +184,8 @@ public class PassController {
     @PatchMapping("/{id}/activate")
     public ResponseEntity<PassResponseDTO> activatePass(@PathVariable UUID id) {
 
-        Pass activatedPass = service.activateCancelledPass(id);
-        return ResponseEntity.ok(mapper.toPassDTO(activatedPass));
+        PassResponseDTO activatedPass = service.activateCancelledPass(id);
+        return ResponseEntity.ok(activatedPass);
     }
 
     @Operation(summary = "Отметить выполненным пропуск со статусом Warning (время истекло, последнее пересечение на выезд)",
@@ -203,8 +200,8 @@ public class PassController {
     @PatchMapping("/{id}/unwarning")
     public ResponseEntity<PassResponseDTO> unWarningPass(@PathVariable UUID id) {
 
-        Pass completedPass = service.unWarningPass(id);
-        return ResponseEntity.ok(mapper.toPassDTO(completedPass));
+        PassResponseDTO completedPass = service.unWarningPass(id);
+        return ResponseEntity.ok(completedPass);
     }
 
     @Operation(summary = "Отметить пропуск как избранный",

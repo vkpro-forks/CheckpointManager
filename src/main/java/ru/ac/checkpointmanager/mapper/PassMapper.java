@@ -8,40 +8,34 @@ import org.springframework.stereotype.Component;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassResponseDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
+import ru.ac.checkpointmanager.model.Territory;
+import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.model.passes.PassWalk;
-import ru.ac.checkpointmanager.service.territories.TerritoryService;
-import ru.ac.checkpointmanager.service.user.UserService;
-
-import java.util.UUID;
 
 @Component
 @Slf4j
-public class    PassMapper {
+public class PassMapper {
 
     private final ModelMapper modelMapper;
-    private final UserService userService;
-    private final TerritoryService territoryService;
 
     @Autowired
-    public PassMapper(UserService userService, TerritoryService territoryService) {
+    public PassMapper() {
         this.modelMapper = new ModelMapper();
-        this.userService = userService;
-        this.territoryService = territoryService;
         configureModelMapper();
     }
 
-    public Pass toPass(PassCreateDTO passDTOcreateDTO) {
+    public Pass toPass(PassCreateDTO passCreateDTO) {
 
-        if (passDTOcreateDTO.getCar() != null) {
-            return modelMapper.map(passDTOcreateDTO, PassAuto.class);
+        if (passCreateDTO.getCar() != null) {
+            return modelMapper.map(passCreateDTO, PassAuto.class);
         } else {
-            return modelMapper.map(passDTOcreateDTO, PassWalk.class);
+            return modelMapper.map(passCreateDTO, PassWalk.class);
         }
     }
 
-    public Pass toPass(PassUpdateDTO passUpdateDTO) {
+    public Pass toPass(PassUpdateDTO passUpdateDTO, User user, Territory territory) {
         Pass pass;
 
         if (passUpdateDTO.getCar() != null) {
@@ -49,6 +43,8 @@ public class    PassMapper {
         } else {
             pass = modelMapper.map(passUpdateDTO, PassWalk.class);
         }
+        pass.setUser(user);
+        pass.setTerritory(territory);
 
         return pass;
     }
@@ -73,37 +69,5 @@ public class    PassMapper {
             }
         };
         modelMapper.addMappings(passWalkMapCreate);
-
-        PropertyMap<PassUpdateDTO, PassAuto> passAutoMapUpdate = new PropertyMap<>() {
-            @Override
-            protected void configure() {
-                using(ctx -> {
-                    UUID passId = ((PassUpdateDTO) ctx.getSource()).getId();
-                    return userService.findByPassId(passId);
-                }).map(source, destination.getUser());
-
-                using(ctx -> {
-                    UUID passId = ((PassUpdateDTO) ctx.getSource()).getId();
-                    return territoryService.findByPassId(passId);
-                }).map(source, destination.getTerritory());
-            }
-        };
-        modelMapper.addMappings(passAutoMapUpdate);
-
-        PropertyMap<PassUpdateDTO, PassWalk> passWalkMapUpdate = new PropertyMap<>() {
-            @Override
-            protected void configure() {
-                using(ctx -> {
-                    UUID passId = ((PassUpdateDTO) ctx.getSource()).getId();
-                    return userService.findByPassId(passId);
-                }).map(source, destination.getUser());
-
-                using(ctx -> {
-                    UUID passId = ((PassUpdateDTO) ctx.getSource()).getId();
-                    return territoryService.findByPassId(passId);
-                }).map(source, destination.getTerritory());
-            }
-        };
-        modelMapper.addMappings(passWalkMapUpdate);
     }
 }
