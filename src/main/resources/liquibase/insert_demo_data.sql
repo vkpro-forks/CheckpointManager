@@ -70,15 +70,15 @@ DO $$
                (user3_id, ter1_id),
                (user4_id, ter1_id);
 
-        INSERT INTO car_brand (id, brand)
-        VALUES (1, 'Toyota'), (2, 'Ford'), (3, 'Honda'), (4, 'Nissan')
-             , (5, 'Chevrolet'), (6, 'Volkswagen') ,(7, 'Hyundai'), (8, 'BMW')
-             , (9, 'Mercedes-Benz'), (10, 'Audi'), (11, 'Kia')
-             , (12, 'Jeep'), (13, 'Subaru'), (14, 'Mazda');
+        INSERT INTO car_brand (brand)
+        VALUES ('Toyota'), ('Ford'), ('Honda'), ('Nissan')
+             , ('Chevrolet'), ('Volkswagen') ,('Hyundai'), ('BMW')
+             , ('Mercedes-Benz'), ('Audi'), ('Kia')
+             , ('Jeep'), ('Subaru'), ('Mazda');
 
         INSERT INTO cars (id, license_plate, brand_id)
-        VALUES (car1_id, 'А777АА77', 1),
-               (car2_id, 'В666ВВ66', 2);
+        VALUES (car1_id, 'А777АА77', (select id from car_brand where brand = 'Toyota')),
+               (car2_id, 'В666ВВ66', (select id from car_brand where brand = 'Ford'));
 
         INSERT INTO visitors (id, full_name, visitor_phone, note)
         VALUES (visitor1_id, 'Петрович', '+79991234567', 'электрик'),
