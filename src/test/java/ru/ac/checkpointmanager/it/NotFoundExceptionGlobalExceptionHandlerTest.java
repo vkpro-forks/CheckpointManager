@@ -12,7 +12,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -439,6 +441,17 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
         checkNotFoundFields(resultActions);
     }
 
+    @Test
+    @SneakyThrows
+    void shouldHandleUserNotFoundExceptionForUploadAvatar() {
+        MockMultipartFile file
+                = new MockMultipartFile("image", "avatar.png", MediaType.IMAGE_PNG_VALUE, new byte[]{1, 2, 3});
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.multipart(
+                        HttpMethod.POST, UrlConstants.AVATAR_URL + "/" + TestUtils.USER_ID).file(file))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(Matchers.startsWith(USER)));
+        checkNotFoundFields(resultActions);
+    }
 
     private void checkNotFoundFields(ResultActions resultActions) throws Exception {
         resultActions.andExpect(MockMvcResultMatchers.status().isNotFound())

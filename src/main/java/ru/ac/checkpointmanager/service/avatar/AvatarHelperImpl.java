@@ -159,7 +159,6 @@ class AvatarHelperImpl implements AvatarHelper {
      *
      * @param avatar     Объект Avatar для установки изображения.
      * @param avatarFile Мультипарт-файл, содержащий изображение аватара.
-     * @throws IOException              если происходит ошибка ввода-вывода.   FIXME we need to do smth to avoid this situation
      * @throws IllegalArgumentException если файл не является изображением.
      */
     @Override
@@ -234,7 +233,6 @@ class AvatarHelperImpl implements AvatarHelper {
         log.debug("Attempting to update avatar for user ID: {}", userId);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> {
-                    log.warn(USER_NOT_FOUND_LOG, userId);
                     return new UserNotFoundException("This check should be not here");//FIXME это должно перед обработкой картинки
                 });
         user.setAvatar(avatar);

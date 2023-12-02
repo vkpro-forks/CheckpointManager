@@ -10,7 +10,6 @@ import ru.ac.checkpointmanager.dto.avatar.AvatarImageDTO;
 import ru.ac.checkpointmanager.exception.AvatarNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.mapper.avatar.AvatarMapper;
-import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.avatar.Avatar;
 import ru.ac.checkpointmanager.repository.AvatarRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
@@ -47,10 +46,11 @@ public class AvatarServiceImpl implements AvatarService {
     @Override
     public AvatarDTO uploadAvatar(UUID userId, MultipartFile avatarFile) {
         log.info("Method uploadAvatar invoked for entityId: {}", userId);
-        User user = userRepository.findById(userId)
+        //FIXME временно здесь пока не реализуем логику по другому
+        userRepository.findById(userId)
                 .orElseThrow(() -> {
                     log.warn(USER_NOT_FOUND_LOG, userId);
-                    return new UserNotFoundException("This check should be not here");//FIXME это должно перед обработкой картинки
+                    return new UserNotFoundException(USER_NOT_FOUND_MSG.formatted(userId));
                 });
         //- достали юзера из бд
         //- сделали работу по подготовке аватарки к загрузке
@@ -60,15 +60,16 @@ public class AvatarServiceImpl implements AvatarService {
         //- удалили старую аватарку из репозитория
         //- в рамках одной транзакции
         //- в рамках данной таски я на входе в метод проверю есть ли юзер, и проверю что если его нет вылетит ошибка
-        //TODO Делаем кучу работы с объектом аватара, а потом вдруг выясняется что юзера нет в бд
+        //TODO Делаем кучу работы с объектом аватара, а потом вдруг выясняется что юзера нет в бд, валидирую до входа в контроллер
         avatarHelper.validateAvatar(avatarFile);
-        Avatar avatar = avatarHelper.getOrCreateAvatar(userId);//TODO вот тут две ситуации может быть
+        //TODO вот тут две ситуации может быть
         //TODO либо нет юзера, либо нет аватара, если нет аватара - ок, а если нет юзера объект все равно создастся
+        Avatar avatar = avatarHelper.getOrCreateAvatar(userId);
+
         avatarHelper.configureAvatar(avatar, avatarFile);
         avatarHelper.processAndSetAvatarImage(avatar, avatarFile);//TODO мы его с конфигурируем, сделали работу
         avatar = avatarHelper.saveAvatar(avatar);//TODO  сохраняем даже в бд.
         avatarHelper.updateUserAvatar(userId, avatar);//TODO проверяем есть ли юзер в базе только здесь
-        //
 
         log.info("Avatar ID updated for user {}", userId);
         return avatarMapper.toAvatarDTO(avatar);

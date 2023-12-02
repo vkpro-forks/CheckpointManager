@@ -61,7 +61,7 @@ public class PassController {
                     "создавать пропуск на эту территорию; у пользователя найден накладывающийся пропуск"),
             @ApiResponse(responseCode = "404", description = "Не найден пользователь или территория")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
-    @PostMapping//FIXME TESTED
+    @PostMapping
     public PassResponseDTO addPass(@RequestBody @Valid PassCreateDTO passCreateDTO) {
         Pass newPass = service.addPass(mapper.toPass(passCreateDTO));
         return mapper.toPassDTO(newPass);
@@ -114,7 +114,7 @@ public class PassController {
                             array = @ArraySchema(schema = @Schema(implementation = PassResponseDTO.class)))),
             @ApiResponse(responseCode = "404", description = "Пропуска не найдены; пользователь не найден")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
-    @GetMapping("/user/{userId}")//FIXME TESTED
+    @GetMapping("/user/{userId}")
     public ResponseEntity<Page<PassResponseDTO>> getPassesByUserId(@PathVariable UUID userId, @Schema(hidden = true)
                                                                    @Valid @PagingParam PagingParams pagingParams) {
         Page<Pass> passPage = service.findPassesByUser(userId, pagingParams);
