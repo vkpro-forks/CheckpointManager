@@ -67,10 +67,10 @@ public class PassController {
     /* READ */
     @Operation(summary = "Получить список всех пропусков",
             description = "Доступ: ADMIN.",
-    parameters = {
-            @Parameter(in = ParameterIn.QUERY, name = "page", example = "0"),
-            @Parameter(in = ParameterIn.QUERY, name = "size", example = "20")
-    })
+            parameters = {
+                    @Parameter(in = ParameterIn.QUERY, name = "page", example = "0"),
+                    @Parameter(in = ParameterIn.QUERY, name = "size", example = "20")
+            })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуска найдены",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -113,12 +113,9 @@ public class PassController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
     @GetMapping("/user/{userId}")
     public ResponseEntity<Page<PassResponseDTO>> getPassesByUserId(@PathVariable UUID userId, @Schema(hidden = true)
-                                                                   @Valid @PagingParam PagingParams pagingParams) {
-
+    @Valid @PagingParam PagingParams pagingParams) {
         Page<PassResponseDTO> passPage = service.findPassesByUser(userId, pagingParams);
         return ResponseEntity.ok(passPage);
-        Page<Pass> passPage = service.findPassesByUser(userId, pagingParams);
-        return ResponseEntity.ok(passPage.map(mapper::toPassDTO));
     }
 
     @Operation(summary = "Получить список пропусков на конкретную территорию",
@@ -135,7 +132,7 @@ public class PassController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/territory/{territoryId}")
     public ResponseEntity<Page<PassResponseDTO>> getPassesByTerritoryId(@PathVariable UUID territoryId, @Schema(hidden = true)
-                                                                        @Valid @PagingParam PagingParams pagingParams) {
+    @Valid @PagingParam PagingParams pagingParams) {
 
         Page<PassResponseDTO> passPage = service.findPassesByTerritory(territoryId, pagingParams);
         return ResponseEntity.ok(passPage);

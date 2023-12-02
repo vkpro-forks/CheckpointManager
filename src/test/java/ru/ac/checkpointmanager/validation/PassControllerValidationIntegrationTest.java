@@ -123,7 +123,7 @@ class PassControllerValidationIntegrationTest {
     @Test
     @SneakyThrows
     void shouldReturnValidationErrorIncorrectStartAndEndTimeFieldsForAddPass() {
-        PassCreateDTO passCreateDTO = TestUtils.getPassDtoCreate();
+        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTO();
         passCreateDTO.setCar(new CarDTO());
         passCreateDTO.setEndTime(LocalDateTime.now().plusHours(1));
         passCreateDTO.setStartTime(LocalDateTime.now().plusHours(3));
@@ -137,7 +137,7 @@ class PassControllerValidationIntegrationTest {
     @Test
     @SneakyThrows
     void shouldReturnValidationErrorIncorrectStartAndEndTimeFieldsForUpdatePass() {
-        PassUpdateDTO passUpdateDTO = TestUtils.getPassDtoUpdate();
+        PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTO();
         passUpdateDTO.setCar(new CarDTO());
         passUpdateDTO.setEndTime(LocalDateTime.now().plusHours(1));
         passUpdateDTO.setStartTime(LocalDateTime.now().plusHours(3));

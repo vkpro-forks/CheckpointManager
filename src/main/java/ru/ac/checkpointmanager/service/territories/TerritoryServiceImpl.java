@@ -73,7 +73,8 @@ public class TerritoryServiceImpl implements TerritoryService {
     public List<UserResponseDTO> findUsersByTerritoryId(UUID territoryId) {
         log.debug(METHOD_CALLED_UUID_LOG, MethodLog.getMethodName(), territoryId);
         findById(territoryId);
-        return territoryRepository.findUsersByTerritoryId(territoryId);
+        List<User> users = territoryRepository.findUsersByTerritoryId(territoryId);
+        return userMapper.toUserResponseDTOs(users);
     }
 
     @Override

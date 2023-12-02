@@ -63,19 +63,6 @@ public class PassServiceImpl implements PassService {
     @Override
     public PassResponseDTO addPass(PassCreateDTO passCreateDTO) {
         log.info("Method {} [{}]", MethodLog.getMethodName(), passCreateDTO);
-    public Pass addPass(Pass pass) {
-        log.info("Method {} [{}]", MethodLog.getMethodName(), pass);
-        UUID userId = pass.getUser().getId();
-        if (userRepository.findById(userId).isEmpty()) {
-            log.warn(USER_NOT_FOUND_LOG, userId);
-            throw new UserNotFoundException(USER_NOT_FOUND_MSG.formatted(userId));
-        }
-        UUID territoryId = pass.getTerritory().getId();
-        if (territoryRepository.findById(territoryId).isEmpty()) {
-            log.warn(TERRITORY_NOT_FOUND_LOG, territoryId);
-            throw new TerritoryNotFoundException(TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
-        }
-
         UUID userId = passCreateDTO.getUserId();
         UUID territoryId = passCreateDTO.getTerritoryId();
         User user = userService.findUserById(userId);
