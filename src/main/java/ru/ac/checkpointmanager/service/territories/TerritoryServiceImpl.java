@@ -57,7 +57,7 @@ public class TerritoryServiceImpl implements TerritoryService {
         return territoryMapper.toTerritoryDTO(territory);
     }
 
-    @Override // пришлось сделать доступным везде, тк используется в чекпоинтсервисе, там сущность именно нужна в методе update
+    @Override
     public Territory findTerritoryById(UUID id) {
         return territoryRepository.findById(id).orElseThrow(
                 () -> {
