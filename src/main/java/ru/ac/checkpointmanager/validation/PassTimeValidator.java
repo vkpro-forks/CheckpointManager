@@ -34,5 +34,4 @@ public class PassTimeValidator implements ConstraintValidator<PassTimeCheck, Obj
         }
         return false;
     }
-
 }
