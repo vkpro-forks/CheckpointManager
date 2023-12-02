@@ -26,8 +26,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.dto.CheckpointDTO;
-import ru.ac.checkpointmanager.mapper.CheckpointMapper;
-import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
 import ru.ac.checkpointmanager.service.checkpoints.CheckpointService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
 
@@ -44,7 +42,6 @@ import java.util.UUID;
 public class CheckpointController {
 
     private final CheckpointService checkpointService;
-    private final CheckpointMapper checkpointMapper;
 
     /* CREATE */
     @Operation(summary = "Добавить новый КПП",
@@ -62,8 +59,8 @@ public class CheckpointController {
             return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
         }
 
-        Checkpoint newCheckpoint = checkpointService.addCheckpoint(checkpointMapper.toCheckpoint(checkpointDTO));
-        return ResponseEntity.ok(checkpointMapper.toCheckpointDTO(newCheckpoint));
+        CheckpointDTO newCheckpoint = checkpointService.addCheckpoint(checkpointDTO);
+        return ResponseEntity.ok(newCheckpoint);
     }
 
     /* READ */
@@ -77,11 +74,11 @@ public class CheckpointController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @GetMapping("/{id}")
     public ResponseEntity<CheckpointDTO> getCheckpoint(@PathVariable("id") UUID id) {
-        Checkpoint foundCheckpoint = checkpointService.findCheckpointById(id);
+        CheckpointDTO foundCheckpoint = checkpointService.findById(id);
         if (foundCheckpoint == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(checkpointMapper.toCheckpointDTO(foundCheckpoint));
+        return ResponseEntity.ok(foundCheckpoint);
     }
 
     @Operation(summary = "Найти список КПП по названию",
@@ -95,11 +92,11 @@ public class CheckpointController {
     @GetMapping("/name")
     public ResponseEntity<List<CheckpointDTO>> getCheckpointsByName(@Parameter(description = "Часть названия")
                                                                     @RequestParam String name) {
-        List<Checkpoint> checkpoints = checkpointService.findCheckpointsByName(name);
+        List<CheckpointDTO> checkpoints = checkpointService.findCheckpointsByName(name);
         if (checkpoints.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(checkpointMapper.toCheckpointsDTO(checkpoints));
+        return ResponseEntity.ok(checkpoints);
     }
 
     @Operation(summary = "Получить список всех КПП",
@@ -112,11 +109,11 @@ public class CheckpointController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @GetMapping
     public ResponseEntity<List<CheckpointDTO>> getCheckpoints() {
-        List<Checkpoint> checkpoints = checkpointService.findAllCheckpoints();
+        List<CheckpointDTO> checkpoints = checkpointService.findAllCheckpoints();
         if (checkpoints.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(checkpointMapper.toCheckpointsDTO(checkpoints));
+        return ResponseEntity.ok(checkpoints);
     }
 
     @Operation(summary = "Получить список КПП, привязанных к указанной территории",
@@ -131,11 +128,11 @@ public class CheckpointController {
     @GetMapping("/territory/{territoryId}")
     public ResponseEntity<List<CheckpointDTO>> getCheckpointsByTerritoryId(@Parameter(description = "ID территории")
                                                                            @PathVariable UUID territoryId) {
-        List<Checkpoint> checkpoints = checkpointService.findCheckpointsByTerritoryId(territoryId);
+        List<CheckpointDTO> checkpoints = checkpointService.findCheckpointsByTerritoryId(territoryId);
         if (checkpoints.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(checkpointMapper.toCheckpointsDTO(checkpoints));
+        return ResponseEntity.ok(checkpoints);
     }
 
     /* UPDATE */
@@ -155,8 +152,8 @@ public class CheckpointController {
             return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
         }
 
-        Checkpoint updatedCheckpoint = checkpointService.updateCheckpoint(checkpointMapper.toCheckpoint(checkpointDTO));
-        return ResponseEntity.ok(checkpointMapper.toCheckpointDTO(updatedCheckpoint));
+        CheckpointDTO updatedCheckpoint = checkpointService.updateCheckpoint(checkpointDTO);
+        return ResponseEntity.ok(updatedCheckpoint);
     }
 
     /* DELETE */

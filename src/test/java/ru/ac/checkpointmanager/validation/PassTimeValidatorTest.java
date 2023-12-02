@@ -53,28 +53,28 @@ class PassTimeValidatorTest {
     }
 
     private static Stream<Object> getCorrectPassDtoArguments() {
-        PassUpdateDTO passDtoUpdate = TestUtils.getPassUpdateDTO();
-        passDtoUpdate.setStartTime(LocalDateTime.now().plusHours(1));
-        passDtoUpdate.setEndTime(LocalDateTime.now().plusHours(2));
-        PassCreateDTO passDtoCreate = TestUtils.getPassCreateDTO();
-        passDtoCreate.setStartTime(LocalDateTime.now().plusHours(1));
-        passDtoCreate.setEndTime(LocalDateTime.now().plusHours(2));
+        PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTO();
+        passUpdateDTO.setStartTime(LocalDateTime.now().plusHours(1));
+        passUpdateDTO.setEndTime(LocalDateTime.now().plusHours(2));
+        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTO();
+        passCreateDTO.setStartTime(LocalDateTime.now().plusHours(1));
+        passCreateDTO.setEndTime(LocalDateTime.now().plusHours(2));
         return Stream.of(
-                passDtoUpdate,
-                passDtoCreate
+                passUpdateDTO,
+                passCreateDTO
         );
     }
 
     private static Stream<Object> getIncorrectPassDtoArguments() {
-        PassCreateDTO passDtoCreate = TestUtils.getPassCreateDTO();
-        passDtoCreate.setEndTime(LocalDateTime.now().plusHours(1));
-        passDtoCreate.setStartTime(LocalDateTime.now().plusHours(2));
-        PassUpdateDTO passDtoUpdate = TestUtils.getPassUpdateDTO();
-        passDtoUpdate.setEndTime(LocalDateTime.now().plusHours(1));
-        passDtoUpdate.setStartTime(LocalDateTime.now().plusHours(2));
+        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTO();
+        passCreateDTO.setEndTime(LocalDateTime.now().plusHours(1));
+        passCreateDTO.setStartTime(LocalDateTime.now().plusHours(2));
+        PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTO();
+        passUpdateDTO.setEndTime(LocalDateTime.now().plusHours(1));
+        passUpdateDTO.setStartTime(LocalDateTime.now().plusHours(2));
         return Stream.of(
-                passDtoUpdate,
-                passDtoCreate
+                passUpdateDTO,
+                passCreateDTO
         );
     }
 

@@ -13,6 +13,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.configuration.JwtService;
 import ru.ac.checkpointmanager.dto.AuthenticationRequest;
@@ -80,7 +81,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
      * @see ru.ac.checkpointmanager.utils.FieldsValidation
      * @see EmailService
      */
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @Override
     public TemporaryUser preRegister(UserAuthDTO userAuthDTO) {
         log.debug("Method {} was invoked", MethodLog.getMethodName());
@@ -127,7 +128,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
      * @see User
      * @see JwtService
      */
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @Override
     public void confirmRegistration(String token) {
         log.debug("Method {} was invoked", MethodLog.getMethodName());
@@ -155,6 +156,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public IsAuthenticatedResponse isUserAuthenticated(String email) {
         log.debug("Method {}, email {}", MethodLog.getMethodName(), email);
         Optional<User> foundUser = userRepository.findByEmail(email);
@@ -178,6 +180,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
      * @see UsernamePasswordAuthenticationToken
      */
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public LoginResponse authenticate(AuthenticationRequest request) {
         log.debug("Method {}, Username {}", MethodLog.getMethodName(), request.getEmail());
         authenticationManager.authenticate(
@@ -206,6 +209,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
+    @Transactional
     public void saveUserToken(User user, String jwtToken) {
         log.info("Method {} was invoked", MethodLog.getMethodName());
         Token token = new Token();
@@ -227,6 +231,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
      * @param user пользователь, токены которого должны быть отозваны.
      */
     @Override
+    @Transactional
     public void revokeAllUserTokens(User user) {
         log.info("Method {} was invoked", MethodLog.getMethodName());
         List<Token> validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
@@ -256,6 +261,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
      * @see JwtService
      */
     @Override
+    @Transactional
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         log.debug("Method {} was invoked", MethodLog.getMethodName());
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
