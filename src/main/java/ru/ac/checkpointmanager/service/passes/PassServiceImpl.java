@@ -51,9 +51,8 @@ public class PassServiceImpl implements PassService {
     private static final String METHOD_UUID = "Method {} [UUID - {}]";
 
     private static final String PASS_STATUS_CHANGED_LOG = "Pass [UUID - {}], changed status on {}";
-    public static final String USER_NOT_FOUND_LOG = "User with [id: {}] not found";
-
-    public static final String USER_NOT_FOUND_MSG = "User with id: %s not found";
+    private static final String USER_NOT_FOUND_LOG = "User with [id: {}] not found";
+    private static final String USER_NOT_FOUND_MSG = "User with id: %s not found";
 
 
     private final PassRepository passRepository;

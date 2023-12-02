@@ -9,9 +9,9 @@ import ru.ac.checkpointmanager.dto.avatar.AvatarImageDTO;
 import ru.ac.checkpointmanager.exception.AvatarLoadingException;
 import ru.ac.checkpointmanager.exception.AvatarProcessingException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
+import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.avatar.Avatar;
 import ru.ac.checkpointmanager.model.avatar.AvatarProperties;
-import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.repository.AvatarRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 
@@ -27,7 +27,6 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 class AvatarHelperImpl implements AvatarHelper {
-
     private final AvatarRepository repository;
     private final AvatarProperties avatarProperties;
     private final UserRepository userRepository;
@@ -74,8 +73,8 @@ class AvatarHelperImpl implements AvatarHelper {
      * Размеры изменяются в соответствии с заданными целевыми шириной и высотой.
      *
      * @param originalImage Исходное изображение для изменения размера.
-     * @param targetWidth Целевая ширина изображения.
-     * @param targetHeight Целевая высота изображения.
+     * @param targetWidth   Целевая ширина изображения.
+     * @param targetHeight  Целевая высота изображения.
      * @return Изменённое изображение с новыми размерами.
      */
     @Override
@@ -109,7 +108,7 @@ class AvatarHelperImpl implements AvatarHelper {
      * @throws IllegalArgumentException если файл не проходит проверку.
      */
     @Override
-    public void validateAvatar(MultipartFile avatarFile) {
+    public void validateAvatar(MultipartFile avatarFile) {//TODO уйдет в валидацию
         log.debug("Validating avatar file...");
         if (avatarFile == null || avatarFile.isEmpty()) {
             log.warn("Validation failed: the avatar file is empty or null.");
@@ -145,7 +144,7 @@ class AvatarHelperImpl implements AvatarHelper {
     /**
      * Конфигурирует объект Avatar, устанавливая размер файла и тип медиа.
      *
-     * @param avatar Объект Avatar для конфигурации.
+     * @param avatar     Объект Avatar для конфигурации.
      * @param avatarFile Мультипарт-файл, содержащий данные аватара.
      */
     @Override
@@ -158,9 +157,9 @@ class AvatarHelperImpl implements AvatarHelper {
      * Обрабатывает изображение аватара, проверяя его размер и формат,
      * и устанавливает обработанное изображение в объект Avatar.
      *
-     * @param avatar Объект Avatar для установки изображения.
+     * @param avatar     Объект Avatar для установки изображения.
      * @param avatarFile Мультипарт-файл, содержащий изображение аватара.
-     * @throws IOException если происходит ошибка ввода-вывода.   FIXME we need to do smth to avoid this situation
+     * @throws IOException              если происходит ошибка ввода-вывода.   FIXME we need to do smth to avoid this situation
      * @throws IllegalArgumentException если файл не является изображением.
      */
     @Override
@@ -235,8 +234,8 @@ class AvatarHelperImpl implements AvatarHelper {
         log.debug("Attempting to update avatar for user ID: {}", userId);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> {
-                    log.error("User not found with ID: {}", userId);
-                    return new UserNotFoundException("User with ID " + userId + " not found.");
+                    log.warn(USER_NOT_FOUND_LOG, userId);
+                    return new UserNotFoundException("This check should be not here");//FIXME это должно перед обработкой картинки
                 });
         user.setAvatar(avatar);
         userRepository.save(user);

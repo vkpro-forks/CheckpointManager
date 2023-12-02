@@ -435,7 +435,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(passDtoCreate))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
-                        .value(Matchers.startsWith("User")));
+                        .value(Matchers.startsWith(USER)));
         checkNotFoundFields(resultActions);
     }
 

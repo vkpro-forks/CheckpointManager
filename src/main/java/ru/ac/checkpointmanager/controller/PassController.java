@@ -114,10 +114,9 @@ public class PassController {
                             array = @ArraySchema(schema = @Schema(implementation = PassResponseDTO.class)))),
             @ApiResponse(responseCode = "404", description = "Пропуска не найдены; пользователь не найден")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
-    @GetMapping("/user/{userId}")
+    @GetMapping("/user/{userId}")//FIXME TESTED
     public ResponseEntity<Page<PassResponseDTO>> getPassesByUserId(@PathVariable UUID userId, @Schema(hidden = true)
                                                                    @Valid @PagingParam PagingParams pagingParams) {
-
         Page<Pass> passPage = service.findPassesByUser(userId, pagingParams);
         return ResponseEntity.ok(passPage.map(mapper::toPassDTO));
     }

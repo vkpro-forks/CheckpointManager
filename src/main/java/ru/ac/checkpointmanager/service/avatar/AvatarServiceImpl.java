@@ -8,7 +8,9 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.ac.checkpointmanager.dto.avatar.AvatarDTO;
 import ru.ac.checkpointmanager.dto.avatar.AvatarImageDTO;
 import ru.ac.checkpointmanager.exception.AvatarNotFoundException;
+import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.mapper.avatar.AvatarMapper;
+import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.avatar.Avatar;
 import ru.ac.checkpointmanager.repository.AvatarRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
@@ -23,7 +25,12 @@ public class AvatarServiceImpl implements AvatarService {
 
     public static final String AVATAR_NOT_FOUND_LOG = "[Avatar with id: {}] not found";
     public static final String AVATAR_NOT_FOUND_MSG = "Avatar with id: %s not found";
+
+    private static final String USER_NOT_FOUND_LOG = "User with [id: {}] not found";
+    private static final String USER_NOT_FOUND_MSG = "User with id: %s not found";
+
     private final AvatarRepository repository;
+    private final UserRepository userRepository;
 
     private final AvatarMapper avatarMapper;
     private final AvatarHelper avatarHelper;
@@ -40,13 +47,28 @@ public class AvatarServiceImpl implements AvatarService {
     @Override
     public AvatarDTO uploadAvatar(UUID userId, MultipartFile avatarFile) {
         log.info("Method uploadAvatar invoked for entityId: {}", userId);
-
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> {
+                    log.warn(USER_NOT_FOUND_LOG, userId);
+                    return new UserNotFoundException("This check should be not here");//FIXME это должно перед обработкой картинки
+                });
+        //- достали юзера из бд
+        //- сделали работу по подготовке аватарки к загрузке
+        //- сохранили аватарку в репо
+        //- присоединили аватарку к текущему юзеру
+        //- апдейт юзера с новой аватаркой
+        //- удалили старую аватарку из репозитория
+        //- в рамках одной транзакции
+        //- в рамках данной таски я на входе в метод проверю есть ли юзер, и проверю что если его нет вылетит ошибка
+        //TODO Делаем кучу работы с объектом аватара, а потом вдруг выясняется что юзера нет в бд
         avatarHelper.validateAvatar(avatarFile);
-        Avatar avatar = avatarHelper.getOrCreateAvatar(userId);
+        Avatar avatar = avatarHelper.getOrCreateAvatar(userId);//TODO вот тут две ситуации может быть
+        //TODO либо нет юзера, либо нет аватара, если нет аватара - ок, а если нет юзера объект все равно создастся
         avatarHelper.configureAvatar(avatar, avatarFile);
-        avatarHelper.processAndSetAvatarImage(avatar, avatarFile);
-        avatar = avatarHelper.saveAvatar(avatar);
-        avatarHelper.updateUserAvatar(userId, avatar);
+        avatarHelper.processAndSetAvatarImage(avatar, avatarFile);//TODO мы его с конфигурируем, сделали работу
+        avatar = avatarHelper.saveAvatar(avatar);//TODO  сохраняем даже в бд.
+        avatarHelper.updateUserAvatar(userId, avatar);//TODO проверяем есть ли юзер в базе только здесь
+        //
 
         log.info("Avatar ID updated for user {}", userId);
         return avatarMapper.toAvatarDTO(avatar);
