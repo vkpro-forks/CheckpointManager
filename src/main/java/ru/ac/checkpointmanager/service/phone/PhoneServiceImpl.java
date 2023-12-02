@@ -49,6 +49,7 @@ public class PhoneServiceImpl implements PhoneService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PhoneDTO findById(UUID id) {
         log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), id);
         Phone foundPhone = phoneRepository.findById(id).orElseThrow(
@@ -79,6 +80,7 @@ public class PhoneServiceImpl implements PhoneService {
 
 
     @Override
+    @Transactional
     public void deletePhoneNumber(UUID id) {
         log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), id);
         if (phoneRepository.findById(id).isEmpty()) {
@@ -89,6 +91,7 @@ public class PhoneServiceImpl implements PhoneService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Collection<PhoneDTO> getAll() {
         log.debug("Method {}", MethodLog.getMethodName());
         Collection<PhoneDTO> numbers = phoneMapper.toPhonesDTO(phoneRepository.findAll());
@@ -101,6 +104,7 @@ public class PhoneServiceImpl implements PhoneService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Boolean existsByNumber(String number) {
         log.debug("Method {}", MethodLog.getMethodName());
         return phoneRepository.existsByNumber(number);

@@ -81,7 +81,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
      * @see ru.ac.checkpointmanager.utils.FieldsValidation
      * @see EmailService
      */
-    @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @Override
     public TemporaryUser preRegister(UserAuthDTO userAuthDTO) {
         log.debug("Method {} was invoked", MethodLog.getMethodName());
