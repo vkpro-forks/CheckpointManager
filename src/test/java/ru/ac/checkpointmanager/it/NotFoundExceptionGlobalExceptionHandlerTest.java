@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.ac.checkpointmanager.dto.CheckpointDTO;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
+import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.exception.handler.ErrorCode;
 import ru.ac.checkpointmanager.it.config.CorsTestConfiguration;
 import ru.ac.checkpointmanager.it.config.OpenAllEndpointsTestConfiguration;
@@ -40,7 +41,6 @@ import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -53,11 +53,12 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
 
     private static final String TERRITORY = "Territory";
     public static final String PHONE = "Phone";
+    public static final String USER = "User";
 
     @Autowired
     MockMvc mockMvc;
 
-    @MockBean
+    @Autowired
     UserRepository userRepository;
 
     @MockBean
@@ -114,19 +115,9 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
     @Test
     @SneakyThrows
     void shouldHandleAvatarNotFoundExceptionForGetAvatar() {
-        Mockito.when(userRepository.findAvatarIdByUserId(Mockito.any()))
-                .thenReturn(UUID.randomUUID());
         ResultActions resultActions = mockMvc
-                .perform(MockMvcRequestBuilders.get(UrlConstants.AVATAR_URL + "/" + TestUtils.USER_ID));
-        checkNotFoundFields(resultActions);
-    }
-
-    @Test
-    @SneakyThrows
-    void shouldHandleAvatarNotFoundExceptionIfUserDoesntHaveAvatar() {
-        Mockito.when(userRepository.findAvatarIdByUserId(Mockito.any())).thenReturn(null);
-        ResultActions resultActions = mockMvc
-                .perform(MockMvcRequestBuilders.get(UrlConstants.AVATAR_URL + "/" + TestUtils.USER_ID));
+                .perform(MockMvcRequestBuilders.get(UrlConstants.AVATAR_URL + "/" + TestUtils.USER_ID))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL).value(Matchers.startsWith("Avatar")));
         checkNotFoundFields(resultActions);
     }
 
@@ -269,14 +260,17 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
     @Test
     @SneakyThrows
     void shouldHandleTerritoryNotFoundExceptionForAddPass() {
-        Mockito.when(userRepository.findById(Mockito.any())).thenReturn(Optional.of(new User()));
-        String passDtoCreate = TestUtils.jsonStringFromObject(TestUtils.getPassCreateDTO());
+        User savedUser = userRepository.save(TestUtils.getUser());
+        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTO();
+        passCreateDTO.setUserId(savedUser.getId());
+        String passDtoCreate = TestUtils.jsonStringFromObject(passCreateDTO);
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(passDtoCreate))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith(TERRITORY)));
         checkNotFoundFields(resultActions);
+        userRepository.deleteAll();
     }
 
     @Test
@@ -424,7 +418,18 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
     @Test
     @SneakyThrows
     void shouldHandleUserNotFoundExceptionForAddPass() {
-        Mockito.when(userRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+        String passDtoCreate = TestUtils.jsonStringFromObject(TestUtils.getPassCreateDTO());
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(passDtoCreate))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(Matchers.startsWith(USER)));
+        checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldHandleUserNotFoundExceptionForGetPassesByUser() {
         String passDtoCreate = TestUtils.jsonStringFromObject(TestUtils.getPassCreateDTO());
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
                         .contentType(MediaType.APPLICATION_JSON)

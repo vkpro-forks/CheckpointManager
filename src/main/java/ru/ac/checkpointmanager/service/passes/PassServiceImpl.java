@@ -133,7 +133,8 @@ public class PassServiceImpl implements PassService {
         log.debug(METHOD_UUID, MethodLog.getMethodName(), userId);
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
         if (userRepository.findById(userId).isEmpty()) {
-            throw new UserNotFoundException(String.format("User not found [id=%s]", userId));
+            log.warn(USER_NOT_FOUND_LOG, userId);
+            throw new UserNotFoundException(USER_NOT_FOUND_MSG.formatted(userId));
         }
 
         Page<Pass> foundPasses = passRepository.findPassesByUserId(userId, pageable);
