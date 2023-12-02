@@ -67,10 +67,10 @@ class CarOrVisitorFieldsCheckValidatorTest {
     }
 
     private static Stream<Object> getPassDtoWithBotCarAndVisitor() {
-        PassCreateDTO passCreateDTO = TestUtils.getPassDtoCreate();
+        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTO();
         passCreateDTO.setCar(new CarDTO());
         passCreateDTO.setVisitor(new VisitorDTO());
-        PassUpdateDTO passUpdateDTO = TestUtils.getPassDtoUpdate();
+        PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTO();
         passUpdateDTO.setCar(new CarDTO());
         passUpdateDTO.setVisitor(new VisitorDTO());
         return Stream.of(
@@ -80,11 +80,11 @@ class CarOrVisitorFieldsCheckValidatorTest {
     }
 
     private static Stream<Object> getPassDtoWithCarAndVisitorNulls() {
-        PassCreateDTO passDtoCreate = TestUtils.getPassDtoCreate();
+        PassCreateDTO passDtoCreate = TestUtils.getPassCreateDTO();
         passDtoCreate.setCar(null);
         passDtoCreate.setVisitor(null);
 
-        PassUpdateDTO passDtoUpdate = TestUtils.getPassDtoUpdate();
+        PassUpdateDTO passDtoUpdate = TestUtils.getPassUpdateDTO();
         passDtoUpdate.setCar(null);
         passDtoUpdate.setVisitor(null);
         return Stream.of(
@@ -94,10 +94,10 @@ class CarOrVisitorFieldsCheckValidatorTest {
     }
 
     private static Stream<Object> getPassDtoWithOnlyCar() {
-        PassCreateDTO passCreateDTO = TestUtils.getPassDtoCreate();
+        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTO();
         passCreateDTO.setVisitor(null);
         passCreateDTO.setCar(new CarDTO());
-        PassUpdateDTO passUpdateDTO = TestUtils.getPassDtoUpdate();
+        PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTO();
         passUpdateDTO.setVisitor(null);
         passUpdateDTO.setCar(new CarDTO());
         return Stream.of(
@@ -107,10 +107,10 @@ class CarOrVisitorFieldsCheckValidatorTest {
     }
 
     private static Stream<Object> getPassDtoWithOnlyVisitor() {
-        PassCreateDTO passCreateDTO = TestUtils.getPassDtoCreate();
+        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTO();
         passCreateDTO.setVisitor(new VisitorDTO());
         passCreateDTO.setCar(null);
-        PassUpdateDTO passUpdateDTO = TestUtils.getPassDtoUpdate();
+        PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTO();
         passUpdateDTO.setVisitor(new VisitorDTO());
         passUpdateDTO.setCar(null);
         return Stream.of(

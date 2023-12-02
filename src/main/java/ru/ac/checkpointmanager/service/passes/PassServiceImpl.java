@@ -65,7 +65,7 @@ public class PassServiceImpl implements PassService {
         UUID userId = passCreateDTO.getUserId();
         UUID territoryId = passCreateDTO.getTerritoryId();
         User user = userService.findUserById(userId);
-        Territory territory = territoryService.findById(territoryId);
+        Territory territory = territoryService.findTerritoryById(territoryId);
         checkUserTerritoryRelation(user, territory);
 
         Pass pass = mapper.toPass(passCreateDTO);
