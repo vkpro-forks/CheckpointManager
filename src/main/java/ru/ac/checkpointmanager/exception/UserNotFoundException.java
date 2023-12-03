@@ -1,18 +1,11 @@
 package ru.ac.checkpointmanager.exception;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import jakarta.persistence.EntityNotFoundException;
 
-@ResponseStatus(HttpStatus.NOT_FOUND)
-public class UserNotFoundException extends RuntimeException{
-    public UserNotFoundException() {
-    }
+public class UserNotFoundException extends EntityNotFoundException {
 
     public UserNotFoundException(String message) {
         super(message);
     }
 
-    public UserNotFoundException(String message, Throwable cause) {
-        super(message, cause);
-    }
 }

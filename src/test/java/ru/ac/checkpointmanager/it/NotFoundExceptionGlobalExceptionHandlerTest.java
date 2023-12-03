@@ -12,7 +12,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -22,6 +24,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.ac.checkpointmanager.dto.CheckpointDTO;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
+import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
+import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.exception.handler.ErrorCode;
 import ru.ac.checkpointmanager.it.config.CorsTestConfiguration;
 import ru.ac.checkpointmanager.it.config.OpenAllEndpointsTestConfiguration;
@@ -40,7 +44,6 @@ import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -53,11 +56,12 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
 
     private static final String TERRITORY = "Territory";
     public static final String PHONE = "Phone";
+    public static final String USER = "User";
 
     @Autowired
     MockMvc mockMvc;
 
-    @MockBean
+    @Autowired
     UserRepository userRepository;
 
     @MockBean
@@ -114,19 +118,9 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
     @Test
     @SneakyThrows
     void shouldHandleAvatarNotFoundExceptionForGetAvatar() {
-        Mockito.when(userRepository.findAvatarIdByUserId(Mockito.any()))
-                .thenReturn(UUID.randomUUID());
         ResultActions resultActions = mockMvc
-                .perform(MockMvcRequestBuilders.get(UrlConstants.AVATAR_URL + "/" + TestUtils.USER_ID));
-        checkNotFoundFields(resultActions);
-    }
-
-    @Test
-    @SneakyThrows
-    void shouldHandleAvatarNotFoundExceptionIfUserDoesntHaveAvatar() {
-        Mockito.when(userRepository.findAvatarIdByUserId(Mockito.any())).thenReturn(null);
-        ResultActions resultActions = mockMvc
-                .perform(MockMvcRequestBuilders.get(UrlConstants.AVATAR_URL + "/" + TestUtils.USER_ID));
+                .perform(MockMvcRequestBuilders.get(UrlConstants.AVATAR_URL + "/" + TestUtils.USER_ID))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL).value(Matchers.startsWith("Avatar")));
         checkNotFoundFields(resultActions);
     }
 
@@ -208,7 +202,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
 
     @Test
     @SneakyThrows
-    void handlePassNotFoundExceptionForGetCrossing() {
+    void handlePassNotFoundExceptionForMarkCrossing() {
         Checkpoint checkpoint = new Checkpoint();
         checkpoint.setName(TestUtils.CHECKPOINT_NAME);
         checkpoint.setType(CheckpointType.AUTO);
@@ -269,14 +263,17 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
     @Test
     @SneakyThrows
     void shouldHandleTerritoryNotFoundExceptionForAddPass() {
-        Mockito.when(userRepository.findById(Mockito.any())).thenReturn(Optional.of(new User()));
-        String passDtoCreate = TestUtils.jsonStringFromObject(TestUtils.getPassCreateDTO());
+        User savedUser = userRepository.save(TestUtils.getUser());
+        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTO();
+        passCreateDTO.setUserId(savedUser.getId());
+        String passDtoCreate = TestUtils.jsonStringFromObject(passCreateDTO);
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(passDtoCreate))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith(TERRITORY)));
         checkNotFoundFields(resultActions);
+        userRepository.deleteAll();
     }
 
     @Test
@@ -419,6 +416,71 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
         checkNotFoundFields(resultActions);
     }
 
+    // USER NOT FOUND EXCEPTION HANDLING
+
+    @Test
+    @SneakyThrows
+    void shouldHandleUserNotFoundExceptionForAddPass() {
+        String passDtoCreate = TestUtils.jsonStringFromObject(TestUtils.getPassCreateDTO());
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(passDtoCreate))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(Matchers.startsWith(USER)));
+        checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldHandleUserNotFoundExceptionForGetPassesByUser() {
+        String passDtoCreate = TestUtils.jsonStringFromObject(TestUtils.getPassCreateDTO());
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(passDtoCreate))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(Matchers.startsWith(USER)));
+        checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldHandleUserNotFoundExceptionForUploadAvatar() {
+        MockMultipartFile file
+                = new MockMultipartFile("image", "avatar.png", MediaType.IMAGE_PNG_VALUE, new byte[]{1, 2, 3});
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.multipart(
+                        HttpMethod.POST, UrlConstants.AVATAR_URL + "/" + TestUtils.USER_ID).file(file))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(Matchers.startsWith(USER)));
+        checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldHandleUserNotFoundExceptionForAttachUserToTerritory() {
+        Territory territory = new Territory();
+        territory.setName(TestUtils.TERR_NAME);
+        Territory savedTerritory = territoryRepository.save(territory);
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                        .patch(UrlConstants.TERR_ATTACH_DETACH_URL
+                                .formatted(savedTerritory.getId(), TestUtils.USER_ID)))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(Matchers.startsWith(USER)));
+        checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldHandleUserNotFoundExceptionForDetachUserToTerritory() {
+        Territory territory = new Territory();
+        territory.setName(TestUtils.TERR_NAME);
+        Territory savedTerritory = territoryRepository.save(territory);
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                        .delete(UrlConstants.TERR_ATTACH_DETACH_URL
+                                .formatted(savedTerritory.getId(), TestUtils.USER_ID)))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(Matchers.startsWith(USER)));
+        checkNotFoundFields(resultActions);
+    }
 
     private void checkNotFoundFields(ResultActions resultActions) throws Exception {
         resultActions.andExpect(MockMvcResultMatchers.status().isNotFound())
