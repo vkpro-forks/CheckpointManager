@@ -88,14 +88,14 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
+/*    @ExceptionHandler(IllegalArgumentException.class)
     public ProblemDetail handleIllegalArgumentException(IllegalArgumentException e) {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
         problemDetail.setTitle("Illegal argument exception occurred");//FIXME replace for more suitable exception
         problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
         log.debug(LOG_MSG, e.getClass());
         return problemDetail;
-    }
+    }*/
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ProblemDetail handleAvatarIsTooBigException(MaxUploadSizeExceededException e) {
@@ -129,15 +129,6 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.FORBIDDEN, e);
         problemDetail.setTitle("Access denied");
         problemDetail.setProperty(ERROR_CODE, ErrorCode.FORBIDDEN.toString());
-        log.debug(LOG_MSG, e.getClass());
-        return problemDetail;
-    }
-
-    @ExceptionHandler(UserNotFoundException.class)
-    public ProblemDetail handleUserNotFoundException(UserNotFoundException e) {
-        ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
-        problemDetail.setTitle("User not found");
-        problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
         log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }

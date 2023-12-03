@@ -52,15 +52,21 @@ public class CrossingMapper {
             protected void configure() {
                 skip(destination.getId());
 
+
+                //crossingDTO у нас source, destination Crossing
+                //мы берез из сорса - айди, достаем чекпоинт - и сажаем его в в Crossing,
+                // туда нам надо посадить объект Checkpoint
                 using(ctx -> {
                     UUID checkpointId = ((CrossingDTO) ctx.getSource()).getCheckpointId();
-                    return checkpointService.findById(checkpointId); // тут вернется теперь ДТО чекпоинта, надо проверить как будет работать,
+                    //это временно
+                    return checkpointService.findCheckpointById(checkpointId); // тут вернется теперь ДТО чекпоинта, надо проверить как будет работать,
                     // если что метод который сущность возвращает сделать публичным и добавить в интерфейс
                 }).map(source, destination.getCheckpoint());
 
                 using(ctx -> {
+                    //тут та же история, мы должны цеплять не ДТО а сущность в destination, пока временный вариант
                     UUID passId = ((CrossingDTO) ctx.getSource()).getPassId();
-                    return passService.findById(passId);
+                    return passService.findPassById(passId);
                 }).map(source, destination.getPass());
             }
         };

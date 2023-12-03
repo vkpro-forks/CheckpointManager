@@ -4,6 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.instancio.Instancio;
+import org.instancio.Model;
+import org.instancio.Select;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.CheckpointDTO;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
@@ -11,6 +14,7 @@ import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
+import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.model.checkpoints.CheckpointType;
 import ru.ac.checkpointmanager.model.enums.Direction;
@@ -133,6 +137,20 @@ public class TestUtils {
                 USER_ID,
                 "note"
         );
+    }
+
+    public static User getUser() {
+        return Instancio.of(getInstancioUserModel()).create();
+    }
+
+    public static Model<User> getInstancioUserModel() {
+        return Instancio.of(User.class)
+                .ignore(Select.field("tokens"))
+                .ignore(Select.field("numbers"))
+                .ignore(Select.field("pass"))
+                .ignore(Select.field("avatar"))
+                .ignore(Select.field("territories"))
+                .generate(Select.field("email"), gen -> gen.text().pattern("#a#a#a#a#a@example.com")).toModel();
     }
 
     public static String jsonStringFromObject(Object object) throws JsonProcessingException {

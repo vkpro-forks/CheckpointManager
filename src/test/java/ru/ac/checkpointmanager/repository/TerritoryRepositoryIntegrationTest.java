@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.instancio.Instancio;
 import org.instancio.Model;
-import org.instancio.Select;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,14 +42,7 @@ class TerritoryRepositoryIntegrationTest extends PostgresContainersConfig {
     void shouldReturnUsersByTerritoryId() {
         Territory territory = new Territory();
         territory.setName(TestUtils.TERR_NAME);
-        Model<User> userModel = Instancio.of(User.class)
-                .ignore(Select.field("tokens"))
-                .ignore(Select.field("numbers"))
-                .ignore(Select.field("pass"))
-                .ignore(Select.field("avatar"))
-                .ignore(Select.field("territories"))
-                .generate(Select.field("email"), gen -> gen.text().pattern("#a#a#a#a#a@example.com"))
-                .toModel();
+        Model<User> userModel = TestUtils.getInstancioUserModel();
         List<User> users = Instancio.ofList(userModel).size(10).create();
         List<User> savedUsers = userRepository.saveAllAndFlush(users);
         territory.setUsers(savedUsers);
