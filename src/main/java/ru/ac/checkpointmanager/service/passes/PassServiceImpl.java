@@ -157,18 +157,23 @@ public class PassServiceImpl implements PassService {
     @Override
     public PassResponseDTO updatePass(PassUpdateDTO passUpdateDTO) {
         log.debug(METHOD_UUID, MethodLog.getMethodName(), passUpdateDTO);
-
+        //TODO так а что тут у нас происходит - сначала ищем привязанные сущности, потом маппим в pass
+        //сначала логично проверить что сам Pass который мы хотим отапдейдить есть в базе
         UUID passId = passUpdateDTO.getId();
-        User user = userService.findByPassId(passId);
-        Territory territory = territoryService.findByPassId(passId);
-        checkUserTerritoryRelation(user, territory);
-        Pass pass = mapper.toPass(passUpdateDTO, user, territory);
-
         Pass foundPass = findPassById(passId);
         if (foundPass.getStatus() != PassStatus.ACTIVE && foundPass.getStatus() != PassStatus.DELAYED) {
             throw new IllegalStateException("This pass is not active or delayed, it cannot be changed");
         }
-        checkOverlapTime(pass);
+        //- далее, ищем юзера и территорию, проверяем из отношение, если всё ОК
+        //проверяем
+        User user = userService.findByPassId(passId);
+        Territory territory = territoryService.findByPassId(passId);
+        checkUserTerritoryRelation(user, territory);
+        Pass pass = mapper.toPass(passUpdateDTO, user, territory);//есть тогда смысла в этом маппинге?
+
+
+        checkOverlapTime(pass);//TODO в этот есть смысл если мы из бд достали пропуск, который перед сохранением уже
+        //прошел такую проверку?
         trimThemAll(pass);
 
         foundPass.setComment(pass.getComment());
@@ -176,7 +181,7 @@ public class PassServiceImpl implements PassService {
         foundPass.setStartTime(pass.getStartTime());
         foundPass.setEndTime(pass.getEndTime());
         foundPass.setAttachedEntity(pass);
-
+        //TODO вот после того как мы обновили значения пропуска есть смысл проверить на оверлап
         Pass updatedPass = passRepository.save(foundPass);
         log.info("Pass updated, {}", updatedPass);
 
@@ -282,7 +287,7 @@ public class PassServiceImpl implements PassService {
      * Проверяет связь пользователя и территории,
      * которая означает право пользователя создавать пропуска на указанную территорию
      *
-     * @param user пользователь
+     * @param user      пользователь
      * @param territory территория
      */
     private void checkUserTerritoryRelation(User user, Territory territory) {

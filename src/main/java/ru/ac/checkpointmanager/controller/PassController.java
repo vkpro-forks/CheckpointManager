@@ -151,8 +151,7 @@ public class PassController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @PutMapping
     public PassResponseDTO updatePass(@RequestBody @Valid PassUpdateDTO passUpdateDTO) {
-        PassResponseDTO updatedPass = service.updatePass(passUpdateDTO);
-        return updatedPass;
+        return service.updatePass(passUpdateDTO);
     }
 
     @Operation(summary = "Отменить активный пропуск",
