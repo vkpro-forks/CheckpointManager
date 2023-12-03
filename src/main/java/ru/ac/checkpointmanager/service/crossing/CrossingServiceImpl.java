@@ -32,7 +32,7 @@ public class CrossingServiceImpl implements CrossingService {
     private final PassService passService;
     private final CheckpointService checkpointService;
     private final CrossingMapper mapper;
-    private final Map<String, PassProcessing> passServiceMap;
+    private final Map<String, PassProcessing> passProcessingMap;
 
     @Override
     public CrossingDTO addCrossing(CrossingDTO crossingDTO) {
@@ -70,7 +70,7 @@ public class CrossingServiceImpl implements CrossingService {
     }
 
     public void processPass(String passTimeType, Pass pass, Direction direction) {
-        PassProcessing passProcessing = passServiceMap.get(passTimeType);
+        PassProcessing passProcessing = passProcessingMap.get(passTimeType);
         if (passProcessing == null) {
             throw new RuntimeException("Unsupported pass time type");
         }
