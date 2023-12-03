@@ -201,7 +201,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
 
     @Test
     @SneakyThrows
-    void handlePassNotFoundExceptionForGetCrossing() {
+    void handlePassNotFoundExceptionForMarkCrossing() {
         Checkpoint checkpoint = new Checkpoint();
         checkpoint.setName(TestUtils.CHECKPOINT_NAME);
         checkpoint.setType(CheckpointType.AUTO);
