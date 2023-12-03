@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -57,7 +58,7 @@ public class AvatarController {
     })
     @PostMapping(value = "/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<AvatarDTO> uploadAvatar(@PathVariable UUID userId,
-                                                  @RequestPart @AvatarImageCheck MultipartFile avatarFile) {
+                                                  @Valid @RequestPart @AvatarImageCheck MultipartFile avatarFile) {
         AvatarDTO avatarDTO = service.uploadAvatar(userId, avatarFile);
         return ResponseEntity.ok(avatarDTO);
     }
