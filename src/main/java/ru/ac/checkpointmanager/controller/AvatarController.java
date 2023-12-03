@@ -13,17 +13,26 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import ru.ac.checkpointmanager.dto.avatar.AvatarDTO;
 import ru.ac.checkpointmanager.dto.avatar.AvatarImageDTO;
 import ru.ac.checkpointmanager.exception.AvatarNotFoundException;
 import ru.ac.checkpointmanager.service.avatar.AvatarService;
+import ru.ac.checkpointmanager.validation.annotation.AvatarImageCheck;
 
 import java.util.UUID;
 
 @Slf4j
 @RestController
+@Validated
 @RequiredArgsConstructor
 @RequestMapping("api/v1/avatars")
 @SecurityRequirement(name = "bearerAuth")
@@ -48,7 +57,7 @@ public class AvatarController {
     })
     @PostMapping(value = "/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<AvatarDTO> uploadAvatar(@PathVariable UUID userId,
-                                               @RequestBody MultipartFile avatarFile) {
+                                                  @RequestPart @AvatarImageCheck MultipartFile avatarFile) {
         AvatarDTO avatarDTO = service.uploadAvatar(userId, avatarFile);
         return ResponseEntity.ok(avatarDTO);
     }

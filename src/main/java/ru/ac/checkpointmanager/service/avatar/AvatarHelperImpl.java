@@ -32,7 +32,7 @@ class AvatarHelperImpl implements AvatarHelper {
     private final UserRepository userRepository;
 
     @Value("${avatars.extensions}")
-    private String extensions;
+    private String extensions;//FIXME зачем когда есть класс аватар пропертис?)
 
     @Value("${avatars.image.max-width}")
     private int maxWidth;
