@@ -71,10 +71,10 @@ decryptProperties {
 }
 
 checkstyle {
-    configDirectory = file("checkstyle")
-    configFile = file("checkstyle/checkstyle.xml")
     toolVersion = '10.12.5'
+    configFile file("config/checkstyle/checkstyle.xml")
 }
+
 
 tasks.named('test') {
     useJUnitPlatform()
@@ -85,6 +85,3 @@ processResources {
         expand(version: project.version)
     }
 }
-
-
-
