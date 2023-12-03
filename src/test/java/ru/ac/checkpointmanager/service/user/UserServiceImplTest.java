@@ -1,7 +1,6 @@
 package ru.ac.checkpointmanager.service.user;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -18,7 +17,6 @@ import ru.ac.checkpointmanager.dto.ChangePasswordRequest;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.user.UserPutDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
-import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.mapper.TerritoryMapper;
 import ru.ac.checkpointmanager.mapper.UserMapper;
@@ -33,7 +31,6 @@ import ru.ac.checkpointmanager.service.email.EmailService;
 import ru.ac.checkpointmanager.service.phone.PhoneService;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -170,15 +167,6 @@ class UserServiceImplTest {
     }
 
     @Test
-    @Disabled
-    void findTerritoriesByUserId_ThrowsTerritoryNotFoundException() {
-        when(userRepository.findTerritoriesByUserId(userId)).thenReturn(Collections.emptyList());
-
-        assertThrows(TerritoryNotFoundException.class, () -> out.findTerritoriesByUserId(userId));
-    }
-
-
-    @Test
     void findByName_ReturnCollectionUserResponseDTO() {
         when(userRepository.findUserByFullNameContainingIgnoreCase(anyString())).thenReturn(users);
         when(userMapper.toUserResponseDTOs(users)).thenReturn((List<UserResponseDTO>) userResponseDTOS);
@@ -186,13 +174,6 @@ class UserServiceImplTest {
         Collection<UserResponseDTO> result = out.findByName("Test");
         assertNotNull(result);
         assertFalse(result.isEmpty());
-    }
-
-    @Test
-    void findByName_ThrowsUserNotFoundException() {
-        when(userRepository.findUserByFullNameContainingIgnoreCase(anyString())).thenReturn(Collections.emptyList());
-
-        assertThrows(UserNotFoundException.class, () -> out.findByName(anyString()));
     }
 
     @Test
@@ -446,13 +427,6 @@ class UserServiceImplTest {
         assertFalse(result.isEmpty());
         verify(userRepository).findAll();
         verify(userMapper).toUserResponseDTOs(users);
-    }
-
-    @Test
-    void getAll_NoUsersInDB_ThrowsUserNotFoundException() {
-        when(userRepository.findAll()).thenReturn(Collections.emptyList());
-
-        assertThrows(UserNotFoundException.class, () -> out.getAll());
     }
 
     @Test

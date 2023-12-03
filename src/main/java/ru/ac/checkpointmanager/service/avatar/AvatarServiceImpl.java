@@ -5,9 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import ru.ac.checkpointmanager.dto.avatar.AvatarImageDTO;
 import ru.ac.checkpointmanager.dto.avatar.AvatarDTO;
+import ru.ac.checkpointmanager.dto.avatar.AvatarImageDTO;
 import ru.ac.checkpointmanager.exception.AvatarNotFoundException;
+import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.mapper.avatar.AvatarMapper;
 import ru.ac.checkpointmanager.model.avatar.Avatar;
 import ru.ac.checkpointmanager.repository.AvatarRepository;
@@ -23,6 +24,10 @@ public class AvatarServiceImpl implements AvatarService {
 
     public static final String AVATAR_NOT_FOUND_LOG = "[Avatar with id: {}] not found";
     public static final String AVATAR_NOT_FOUND_MSG = "Avatar with id: %s not found";
+
+    private static final String USER_NOT_FOUND_LOG = "User with [id: {}] not found";
+    private static final String USER_NOT_FOUND_MSG = "User with id: %s not found";
+
     private final AvatarRepository repository;
     private final UserRepository userRepository;
 
@@ -30,26 +35,41 @@ public class AvatarServiceImpl implements AvatarService {
     private final AvatarHelper avatarHelper;
 
 
-
     /**
      * Загружает и сохраняет аватар пользователя. Если аватар для пользователя уже существует,
      * обновляет его новым изображением, иначе создает новый.
      *
-     * @param userId      идентификатор пользователя, для которого загружается аватар.
-     * @param avatarFile  файл аватара, который нужно загрузить.
+     * @param userId     идентификатор пользователя, для которого загружается аватар.
+     * @param avatarFile файл аватара, который нужно загрузить.
      * @return объект AvatarDTO, представляющий загруженный или обновленный аватар.
-     * @throws IOException если происходит ошибка ввода-вывода при обработке файла аватара. FIXME we need to do smth to avoid this situation
      */
     @Override
     public AvatarDTO uploadAvatar(UUID userId, MultipartFile avatarFile) {
         log.info("Method uploadAvatar invoked for entityId: {}", userId);
-
+        //FIXME временно здесь пока не реализуем логику по другому
+        userRepository.findById(userId)
+                .orElseThrow(() -> {
+                    log.warn(USER_NOT_FOUND_LOG, userId);
+                    return new UserNotFoundException(USER_NOT_FOUND_MSG.formatted(userId));
+                });
+        //- достали юзера из бд
+        //- сделали работу по подготовке аватарки к загрузке
+        //- сохранили аватарку в репо
+        //- присоединили аватарку к текущему юзеру
+        //- апдейт юзера с новой аватаркой
+        //- удалили старую аватарку из репозитория
+        //- в рамках одной транзакции
+        //- в рамках данной таски я на входе в метод проверю есть ли юзер, и проверю что если его нет вылетит ошибка
+        //TODO Делаем кучу работы с объектом аватара, а потом вдруг выясняется что юзера нет в бд, валидирую до входа в контроллер
         avatarHelper.validateAvatar(avatarFile);
+        //TODO вот тут две ситуации может быть
+        //TODO либо нет юзера, либо нет аватара, если нет аватара - ок, а если нет юзера объект все равно создастся
         Avatar avatar = avatarHelper.getOrCreateAvatar(userId);
+
         avatarHelper.configureAvatar(avatar, avatarFile);
-        avatarHelper.processAndSetAvatarImage(avatar, avatarFile);
-        avatar = avatarHelper.saveAvatar(avatar);
-        avatarHelper.updateUserAvatar(userId, avatar);
+        avatarHelper.processAndSetAvatarImage(avatar, avatarFile);//TODO мы его с конфигурируем, сделали работу
+        avatar = avatarHelper.saveAvatar(avatar);//TODO  сохраняем даже в бд.
+        avatarHelper.updateUserAvatar(userId, avatar);//TODO проверяем есть ли юзер в базе только здесь
 
         log.info("Avatar ID updated for user {}", userId);
         return avatarMapper.toAvatarDTO(avatar);
@@ -64,15 +84,12 @@ public class AvatarServiceImpl implements AvatarService {
      */
     @Override
     public AvatarImageDTO getAvatarByUserId(UUID userId) {
-        log.debug("Fetching avatar for user ID: {}", userId);
-        UUID avatarId = userRepository.findAvatarIdByUserId(userId);
-        if (avatarId == null) {
-            log.warn("[User with id: {}] doesn't have avatar", userId);
-            throw new AvatarNotFoundException("User with id: %s doesn't have avatar".formatted(userId));
-        }
-        log.debug("Searching [avatar with id: {}]", avatarId);
-        Avatar avatar = repository.findById(avatarId)
-                .orElseThrow(() -> new AvatarNotFoundException(AVATAR_NOT_FOUND_MSG.formatted(avatarId)));
+        //TODO начал переписывать тесты на реальные репозитории вместо моков и выяснил, что эту ситуацию очень сложно
+        //смоделировать, зачем сначала лазить в юзер репо за аваАйди, а потом лезть в ава репо за самой авой
+        //можно за один заход сходить в аватар репозиторий и достать по юзер айди, там даже метод такой есть
+        log.debug("Searching [avatar with for user id: {}]", userId);
+        Avatar avatar = repository.findByUserId(userId)
+                .orElseThrow(() -> new AvatarNotFoundException("Avatar for user [id: {}] not found"));
         return avatarHelper.createAvatarImageDTO(avatar);
     }
 
@@ -84,7 +101,7 @@ public class AvatarServiceImpl implements AvatarService {
      */
     public void deleteAvatarIfExists(UUID avatarId) {
         log.debug("Attempting to delete avatar for avatarId ID: {}", avatarId);
-        Avatar avatar =  findAvatarById(avatarId);
+        Avatar avatar = findAvatarById(avatarId);
         repository.delete(avatar);
         log.info("Avatar with ID: {} deleted successfully", avatarId);
     }
