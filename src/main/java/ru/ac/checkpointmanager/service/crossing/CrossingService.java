@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public interface CrossingService {
 
-    Crossing markCrossing(Crossing crossing);
+    CrossingDTO addCrossing(CrossingDTO crossingDTO);
 
     Crossing getCrossing(UUID uuid);
 }

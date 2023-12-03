@@ -27,7 +27,6 @@ import ru.ac.checkpointmanager.service.user.UserService;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -192,7 +191,7 @@ public class PassServiceImpl implements PassService {
             throw new IllegalStateException("You can only cancel an active or delayed pass");
         }
 
-        List<Crossing> passCrossings = crossingRepository.findCrossingsByPassId(pass.getId());
+        List<Crossing> passCrossings = crossingRepository.findCrossingsByPassIdOrderByLocalDateTimeDesc(pass.getId());
         if (passCrossings.isEmpty()) {
             pass.setStatus(PassStatus.CANCELLED);
         } else {
@@ -379,7 +378,7 @@ public class PassServiceImpl implements PassService {
         log.info("Method {}, endTime reached on {} active pass(es)", MethodLog.getMethodName(), passes.size());
 
         for (Pass pass : passes) {
-            List<Crossing> passCrossings = crossingRepository.findCrossingsByPassId(pass.getId());
+            List<Crossing> passCrossings = crossingRepository.findCrossingsByPassIdOrderByLocalDateTimeDesc(pass.getId());
             if (passCrossings.isEmpty()) {
                 pass.setStatus(PassStatus.OUTDATED);
             } else {
@@ -403,10 +402,8 @@ public class PassServiceImpl implements PassService {
      * @see PassStatus
      */
     private PassStatus changeStatusForPassWithCrossings(List<Crossing> crossings) {
-        Crossing lastCrossing = crossings.stream()
-                .max(Comparator.comparing(Crossing::getLocalDateTime))
-                .get();
 
+        Crossing lastCrossing = crossings.get(0);
         if (lastCrossing.getDirection().equals(Direction.OUT)) {
             return PassStatus.COMPLETED;
         } else {
