@@ -3,6 +3,7 @@ package ru.ac.checkpointmanager.mapper;
 
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.ac.checkpointmanager.dto.VisitorDTO;
 import ru.ac.checkpointmanager.model.Visitor;
@@ -16,6 +17,7 @@ public class VisitorMapper {
 
     private final ModelMapper modelMapper;
 
+    @Autowired
     public VisitorMapper(ModelMapper modelMapper) {
         this.modelMapper = modelMapper;
     }

@@ -1,9 +1,9 @@
 package ru.ac.checkpointmanager.mapper;
 
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.MappingException;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.ac.checkpointmanager.dto.user.LoginResponse;
 import ru.ac.checkpointmanager.dto.user.UserAuthDTO;
@@ -19,8 +19,10 @@ import java.util.List;
 public class UserMapper {
     private final ModelMapper modelMapper;
 
-    public UserMapper() {
-        this.modelMapper = new ModelMapper();
+    @Autowired
+    public UserMapper(ModelMapper modelMapper) {
+        this.modelMapper = modelMapper;
+        configureModelMapper();
     }
 
     public User toUser(UserResponseDTO userResponseDTO) {
@@ -45,49 +47,12 @@ public class UserMapper {
         return modelMapper.map(user, UserAuthDTO.class);
     }
 
-    /**
-     * Метод для конвертации временного пользователя в основного.
-     * При маппинге игнорируется поле id, так как идентификатор основного пользователя назначается при сохранении в базу данных.
-     *
-     * @param temporaryUser временный пользователь, который будет конвертирован в основного пользователя.
-     * @return User - основной пользователь.
-     * @see TemporaryUser
-     * @see User
-     */
     public User toUser(TemporaryUser temporaryUser) {
-        PropertyMap<TemporaryUser, User> propertyMap = new PropertyMap<>() {
-            protected void configure() {
-                skip(destination.getId());
-                skip(destination.getAddedAt());
-            }
-        };
-        modelMapper.addMappings(propertyMap);
-        try {
-            User user = modelMapper.map(temporaryUser, User.class);
-            log.info("Конвертация в основного пользователя прошла успешно");
-            return user;
-        } catch (MappingException e) {
-            log.error("Ошибка при конвертации TemporaryUser в User", e);
-            throw new RuntimeException("Ошибка при конвертации TemporaryUser в User", e);
-        }
+        return modelMapper.map(temporaryUser, User.class);
     }
 
     public TemporaryUser toTemporaryUser(User user) {
-        PropertyMap<TemporaryUser, User> propertyMap = new PropertyMap<>() {
-            protected void configure() {
-                skip(destination.getId());
-                skip(destination.getAddedAt());
-            }
-        };
-        modelMapper.addMappings(propertyMap);
-        try {
-            TemporaryUser temp = modelMapper.map(user, TemporaryUser.class);
-            log.info("Конвертация во временного пользователя прошла успешно");
-            return temp;
-        } catch (MappingException e) {
-            log.error("Ошибка при конвертации User в TemporaryUser", e);
-            throw new RuntimeException("Ошибка при конвертации User в TemporaryUser", e);
-        }
+        return modelMapper.map(user, TemporaryUser.class);
     }
 
     public TemporaryUser toTemporaryUser(UserAuthDTO userAuthDTO) {
@@ -96,5 +61,15 @@ public class UserMapper {
 
     public LoginResponse toLoginResponse(User user) {
         return modelMapper.map(user, LoginResponse.class);
+    }
+
+    private void configureModelMapper() {
+        PropertyMap<TemporaryUser, User> propertyMap = new PropertyMap<>() {
+            protected void configure() {
+                skip(destination.getId());
+                skip(destination.getAddedAt());
+            }
+        };
+        modelMapper.addMappings(propertyMap);
     }
 }
