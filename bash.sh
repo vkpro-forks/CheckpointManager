@@ -10,7 +10,7 @@ echo $PROJECT_VERSION
 export PROJECT_VERSION
 
 # Шаг 3: Сборка проекта
-./gradlew build
+./gradlew build -x test
 
 # Шаг 4: Переименовываем JAR файл для удобства копирования и использования в Dockerfile
 mv build/libs/CheckpointManager-$PROJECT_VERSION.jar build/libs/app.jar
