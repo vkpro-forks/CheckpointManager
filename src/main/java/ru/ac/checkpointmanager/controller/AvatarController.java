@@ -9,21 +9,32 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import ru.ac.checkpointmanager.dto.avatar.AvatarDTO;
 import ru.ac.checkpointmanager.dto.avatar.AvatarImageDTO;
 import ru.ac.checkpointmanager.exception.AvatarNotFoundException;
 import ru.ac.checkpointmanager.service.avatar.AvatarService;
+import ru.ac.checkpointmanager.validation.annotation.AvatarImageCheck;
 
 import java.util.UUID;
 
 @Slf4j
 @RestController
+@Validated
 @RequiredArgsConstructor
 @RequestMapping("api/v1/avatars")
 @SecurityRequirement(name = "bearerAuth")
@@ -40,17 +51,18 @@ public class AvatarController {
 
     @Operation(summary = "Загрузить аватар пользователю(выбрать id пользователя и картинку).")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Аватар успешно добавлен",
+            @ApiResponse(responseCode = "201", description = "Аватар успешно добавлен",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = AvatarDTO.class))),
             @ApiResponse(responseCode = "400", description = "BAD_REQUEST: Неверные данные запроса",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
     })
     @PostMapping(value = "/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<AvatarDTO> uploadAvatar(@PathVariable UUID userId,
-                                               @RequestBody MultipartFile avatarFile) {
-        AvatarDTO avatarDTO = service.uploadAvatar(userId, avatarFile);
-        return ResponseEntity.ok(avatarDTO);
+    @ResponseStatus(HttpStatus.CREATED)
+    public AvatarDTO uploadAvatar(@PathVariable UUID userId,
+                                  @RequestPart @AvatarImageCheck MultipartFile avatarFile) {
+        return service.uploadAvatar(userId, avatarFile);
+
     }
 
     @Operation(summary = "Получить аватар по Id пользователя")

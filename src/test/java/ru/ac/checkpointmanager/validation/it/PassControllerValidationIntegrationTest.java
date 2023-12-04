@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.validation;
+package ru.ac.checkpointmanager.validation.it;
 
 import lombok.SneakyThrows;
 import org.hamcrest.Matchers;
@@ -8,25 +8,22 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import ru.ac.checkpointmanager.configuration.JwtAuthenticationFilter;
-import ru.ac.checkpointmanager.configuration.JwtService;
+import ru.ac.checkpointmanager.config.ValidationTestConfiguration;
 import ru.ac.checkpointmanager.controller.PassController;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.VisitorDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.exception.handler.ErrorCode;
-import ru.ac.checkpointmanager.it.config.CorsTestConfiguration;
-import ru.ac.checkpointmanager.it.config.OpenAllEndpointsTestConfiguration;
+import ru.ac.checkpointmanager.config.CorsTestConfiguration;
+import ru.ac.checkpointmanager.config.OpenAllEndpointsTestConfiguration;
 import ru.ac.checkpointmanager.mapper.PassMapper;
-import ru.ac.checkpointmanager.repository.TokenRepository;
 import ru.ac.checkpointmanager.service.passes.PassService;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
@@ -34,7 +31,7 @@ import ru.ac.checkpointmanager.util.UrlConstants;
 import java.time.LocalDateTime;
 
 @WebMvcTest(PassController.class)
-@Import({OpenAllEndpointsTestConfiguration.class, CorsTestConfiguration.class})
+@Import({OpenAllEndpointsTestConfiguration.class, CorsTestConfiguration.class, ValidationTestConfiguration.class})
 @WithMockUser(roles = {"ADMIN"})
 @ActiveProfiles("test")
 class PassControllerValidationIntegrationTest {
@@ -55,18 +52,6 @@ class PassControllerValidationIntegrationTest {
 
     @MockBean
     PassMapper passMapper;
-
-    @Autowired
-    JwtAuthenticationFilter jwtAuthenticationFilter;
-
-    @MockBean
-    JwtService jwtService;
-
-    @MockBean
-    TokenRepository tokenRepository;
-
-    @MockBean
-    UserDetailsService userDetailsService;
 
     @Test
     @SneakyThrows

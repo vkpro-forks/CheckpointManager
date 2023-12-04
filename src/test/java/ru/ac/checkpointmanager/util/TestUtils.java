@@ -7,6 +7,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.instancio.Instancio;
 import org.instancio.Model;
 import org.instancio.Select;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.CheckpointDTO;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
@@ -14,6 +16,7 @@ import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
+import ru.ac.checkpointmanager.exception.handler.ErrorCode;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.model.checkpoints.CheckpointType;
@@ -56,7 +59,7 @@ public class TestUtils {
 
     public static final String JSON_TIMESTAMP = "$.timestamp";
 
-    public static final String JSON_VIOLATIONS_FIELD = "$.violations[%s].fieldName";
+    public static final String JSON_VIOLATIONS_FIELD = "$.violations[%s].name";
 
     public static final String JSON_TITLE = "$.title";
 
@@ -156,6 +159,12 @@ public class TestUtils {
     public static String jsonStringFromObject(Object object) throws JsonProcessingException {
         ObjectMapper objectMapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
         return objectMapper.writeValueAsString(object);
+    }
+
+    public static void checkCommonValidationFields(ResultActions resultActions) throws Exception {
+        resultActions.andExpect(MockMvcResultMatchers.status().is4xxClientError())
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_ERROR_CODE)
+                        .value(ErrorCode.VALIDATION.toString()));
     }
 
     private TestUtils() {

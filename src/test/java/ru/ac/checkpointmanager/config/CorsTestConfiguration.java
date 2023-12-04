@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.it.config;
+package ru.ac.checkpointmanager.config;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;

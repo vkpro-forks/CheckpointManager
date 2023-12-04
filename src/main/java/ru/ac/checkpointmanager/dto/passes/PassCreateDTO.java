@@ -29,7 +29,7 @@ public class PassCreateDTO {
     @NotNull
     private UUID territoryId;
 
-    @NotNull
+    @NotNull//FIXME не работает здесь
     @FutureOrPresent
     private LocalDateTime startTime;
 

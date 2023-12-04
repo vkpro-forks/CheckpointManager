@@ -9,11 +9,7 @@ import java.util.UUID;
 
 interface AvatarHelper {
 
-    String getExtension(String fileName);
-
     BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight);
-
-    void validateAvatar(MultipartFile avatarFile);
 
     Avatar getOrCreateAvatar(UUID userId);
 

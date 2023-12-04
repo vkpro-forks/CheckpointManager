@@ -2,42 +2,34 @@ package ru.ac.checkpointmanager.validation;
 
 import jakarta.validation.ConstraintValidatorContext;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.VisitorDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
+import ru.ac.checkpointmanager.ext.ValidationContextTestResolver;
 import ru.ac.checkpointmanager.util.TestUtils;
 
 import java.util.stream.Stream;
 
+@ExtendWith({MockitoExtension.class, ValidationContextTestResolver.class})
 class CarOrVisitorFieldsCheckValidatorTest {
 
-    CarOrVisitorFieldsValidator carOrVisitorFieldsValidator;
+    CarOrVisitorFieldsValidator carOrVisitorFieldsValidator = new CarOrVisitorFieldsValidator();
 
-    ConstraintValidatorContext context;
+    ConstraintValidatorContext constraintContext;
 
-    @BeforeEach
-    void init() {
-        context = Mockito.mock(ConstraintValidatorContext.class);
-        ConstraintValidatorContext.ConstraintViolationBuilder cvBuilder = Mockito
-                .mock(ConstraintValidatorContext.ConstraintViolationBuilder.class);
-        Mockito.when(context.buildConstraintViolationWithTemplate(Mockito.any())).thenReturn(cvBuilder);
-        ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext
-                nodeBuilderCustomizableContext = Mockito
-                .mock(ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext.class);
-        Mockito.when(nodeBuilderCustomizableContext.addConstraintViolation()).thenReturn(context);
-        Mockito.when(cvBuilder.addPropertyNode(Mockito.any())).thenReturn(nodeBuilderCustomizableContext);
-        carOrVisitorFieldsValidator = new CarOrVisitorFieldsValidator();
+    public CarOrVisitorFieldsCheckValidatorTest(ConstraintValidatorContext constraintContext) {
+        this.constraintContext = constraintContext;
     }
 
     @ParameterizedTest
     @MethodSource("getPassDtoWithBotCarAndVisitor")
     void shouldValidateWithNotValidForBothFieldsPresent(Object passDto) {
-        boolean valid = carOrVisitorFieldsValidator.isValid(passDto, context);
+        boolean valid = carOrVisitorFieldsValidator.isValid(passDto, constraintContext);
 
         Assertions.assertThat(valid).isFalse();
     }
@@ -45,7 +37,7 @@ class CarOrVisitorFieldsCheckValidatorTest {
     @ParameterizedTest
     @MethodSource("getPassDtoWithCarAndVisitorNulls")
     void shouldValidateWithNotValidForBothFieldsNull(Object passDto) {
-        boolean valid = carOrVisitorFieldsValidator.isValid(passDto, context);
+        boolean valid = carOrVisitorFieldsValidator.isValid(passDto, constraintContext);
 
         Assertions.assertThat(valid).isFalse();
     }
@@ -53,7 +45,7 @@ class CarOrVisitorFieldsCheckValidatorTest {
     @ParameterizedTest
     @MethodSource("getPassDtoWithOnlyCar")
     void shouldValidateWithValidIfOnlyCarPresent(Object passDto) {
-        boolean valid = carOrVisitorFieldsValidator.isValid(passDto, context);
+        boolean valid = carOrVisitorFieldsValidator.isValid(passDto, constraintContext);
 
         Assertions.assertThat(valid).isTrue();
     }
@@ -61,7 +53,7 @@ class CarOrVisitorFieldsCheckValidatorTest {
     @ParameterizedTest
     @MethodSource("getPassDtoWithOnlyVisitor")
     void shouldValidateWithValidIfOnlyVisitorPresent(Object passDto) {
-        boolean valid = carOrVisitorFieldsValidator.isValid(passDto, context);
+        boolean valid = carOrVisitorFieldsValidator.isValid(passDto, constraintContext);
 
         Assertions.assertThat(valid).isTrue();
     }

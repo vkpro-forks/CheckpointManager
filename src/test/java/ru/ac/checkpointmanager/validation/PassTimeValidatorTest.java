@@ -2,44 +2,33 @@ package ru.ac.checkpointmanager.validation;
 
 import jakarta.validation.ConstraintValidatorContext;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
+import ru.ac.checkpointmanager.ext.ValidationContextTestResolver;
 import ru.ac.checkpointmanager.util.TestUtils;
 
 import java.time.LocalDateTime;
 import java.util.stream.Stream;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({MockitoExtension.class, ValidationContextTestResolver.class})
 class PassTimeValidatorTest {
 
-    PassTimeValidator passTimeValidator;
+    PassTimeValidator passTimeValidator = new PassTimeValidator();
 
-    ConstraintValidatorContext context;
+    ConstraintValidatorContext constraintContext;
 
-    @BeforeEach
-    void init() {
-        context = Mockito.mock(ConstraintValidatorContext.class);
-        ConstraintValidatorContext.ConstraintViolationBuilder cvBuilder = Mockito
-                .mock(ConstraintValidatorContext.ConstraintViolationBuilder.class);
-        Mockito.when(context.buildConstraintViolationWithTemplate(Mockito.any())).thenReturn(cvBuilder);
-        ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext
-                nodeBuilderCustomizableContext = Mockito
-                .mock(ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext.class);
-        Mockito.when(nodeBuilderCustomizableContext.addConstraintViolation()).thenReturn(context);
-        Mockito.when(cvBuilder.addPropertyNode(Mockito.any())).thenReturn(nodeBuilderCustomizableContext);
-        passTimeValidator = new PassTimeValidator();
+    public PassTimeValidatorTest(ConstraintValidatorContext constraintContext) {
+        this.constraintContext = constraintContext;
     }
 
     @ParameterizedTest
     @MethodSource("getCorrectPassDtoArguments")
     void shouldValidateForCorrectPathDto(Object passDto) {
-        boolean valid = passTimeValidator.isValid(passDto, context);
+        boolean valid = passTimeValidator.isValid(passDto, constraintContext);
 
         Assertions.assertThat(valid).isTrue();
     }
@@ -47,7 +36,7 @@ class PassTimeValidatorTest {
     @ParameterizedTest
     @MethodSource("getIncorrectPassDtoArguments")
     void shouldNotValidateForIncorrectPassDto(Object passDto) {
-        boolean valid = passTimeValidator.isValid(passDto, context);
+        boolean valid = passTimeValidator.isValid(passDto, constraintContext);
 
         Assertions.assertThat(valid).isFalse();
     }
