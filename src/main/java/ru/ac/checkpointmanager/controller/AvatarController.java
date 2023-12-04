@@ -111,4 +111,18 @@ public class AvatarController {
         headers.setContentLength(avatarImageDTO.getImageData().length);
         return ResponseEntity.ok().headers(headers).body(avatarImageDTO.getImageData());
     }
+
+    @Operation(summary = "Получить аватар по Id пользователя")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Аватар получен. Контент содержит изображение в формате JPEG.",
+                    content = @Content(mediaType = MediaType.IMAGE_JPEG_VALUE,
+                            schema = @Schema(implementation = AvatarImageDTO.class))),
+            @ApiResponse(responseCode = "404", description = "NOT_FOUND: Аватар не найден",
+                    content = @Content(schema = @Schema(implementation = AvatarNotFoundException.class))),
+    })
+    @GetMapping("/fromSofa/{userId}")
+    public ResponseEntity<AvatarImageDTO> getAvatarByUserId(@PathVariable UUID userId) {
+        AvatarImageDTO avatarImageDTO = service.getAvatarByUserId(userId);
+        return ResponseEntity.ok(avatarImageDTO);
+    }
 }
