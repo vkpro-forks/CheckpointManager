@@ -97,10 +97,11 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
         config.setAllowedOrigins(Arrays.asList(
-                "http://localhost:3000", //Сонин локал (удалить потом)
+                "http://localhost:3000", //React локал (удалить потом)
                 "http://192.168.1.37:3000", //Сонин Ip (удалить потом)
                 "http://192.168.31.74:3000", //Сони Ip (удалить потом)
                 "http://192.168.1.55:3000", //Жени Ip(удалить потом)
+                "https://checkpoint-manager.vercel.app", //Приложение для фронта(для тестирования).
                 "https://checkpoint-manager.ru",
                 "https://www.checkpoint-manager.ru"
         ));
