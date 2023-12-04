@@ -2,7 +2,6 @@ package ru.ac.checkpointmanager.service.avatar;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.ac.checkpointmanager.dto.avatar.AvatarImageDTO;
@@ -16,11 +15,11 @@ import ru.ac.checkpointmanager.repository.AvatarRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
+import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -30,43 +29,6 @@ class AvatarHelperImpl implements AvatarHelper {
     private final AvatarRepository repository;
     private final AvatarProperties avatarProperties;
     private final UserRepository userRepository;
-
-    @Value("${avatars.extensions}")
-    private String extensions;//FIXME зачем когда есть класс аватар пропертис?)
-
-    @Value("${avatars.image.max-width}")
-    private int maxWidth;
-
-    @Value("${avatars.image.max-height}")
-    private int maxHeight;
-
-    @Value("${avatars.max-size}")
-    private String maxFileSize;
-
-
-    /**
-     * Извлекает расширение файла из его полного имени.
-     * Расширение определяется как подстрока после последней точки в имени файла.
-     *
-     * @param fileName Имя файла, для которого необходимо извлечь расширение.
-     * @return Расширение файла в нижнем регистре.
-     * @throws IllegalArgumentException если имя файла не содержит точку или расширение.
-     */
-    @Override
-    public String getExtension(String fileName) {//TODO этот метод тоже не нужен, он теперь в валидации
-        log.debug("Attempting to extract file extension from: {}", fileName);
-        try {
-            String extension = Optional.ofNullable(fileName)
-                    .filter(f -> f.contains("."))
-                    .map(f -> f.substring(fileName.lastIndexOf(".") + 1).toLowerCase())
-                    .orElseThrow(() -> new IllegalArgumentException("The file does not contain an extension."));
-            log.info("File extension '{}' extracted successfully.", extension);
-            return extension;
-        } catch (Exception e) {
-            log.warn("Error determining file extension for file: {}", fileName, e);
-            throw new IllegalArgumentException("There was an error determining the file extension.", e);
-        }
-    }
 
     /**
      * Изменяет размер переданного изображения с сохранением пропорций.
@@ -99,36 +61,6 @@ class AvatarHelperImpl implements AvatarHelper {
         return outputImage;
     }
 
-    /**
-     * Проверяет файл аватара на соответствие определенным требованиям:
-     * файл не должен быть пустым или null, должен иметь допустимое расширение
-     * и тип содержимого, начинающийся с "image/".
-     *
-     * @param avatarFile Мультипарт-файл, представляющий аватар.
-     * @throws IllegalArgumentException если файл не проходит проверку.
-     */
-    @Override//TODO ВОТ ЭТО ВСЁ ТЕПЕРЬ В ВАЛИДАЦИИ + МОЖНО ЕЩЕ ЧЕГО НИБУДЬ ДОБАВИТЬ, УДАЛЯЕМ?:)))
-    public void validateAvatar(MultipartFile avatarFile) {//TODO уйдет в валидацию
-        log.debug("Validating avatar file...");
-        if (avatarFile == null || avatarFile.isEmpty()) {
-            log.warn("Validation failed: the avatar file is empty or null.");
-            throw new IllegalArgumentException("Avatar file cannot be empty.");
-        }
-
-        log.debug("Checking file extension...");
-        String fileExtension = getExtension(avatarFile.getOriginalFilename());
-        if (!extensions.contains(fileExtension)) {
-            log.warn("Validation failed: file extension '{}' is not one of the allowed: {}", fileExtension, extensions);
-            throw new IllegalArgumentException("The file extension must be one of the valid ones: " + extensions);
-        }
-
-        log.debug("Checking file content type...");
-        if (!avatarFile.getContentType().startsWith("image/")) {
-            log.warn("Validation failed: file content type '{}' is not an image.", avatarFile.getContentType());
-            throw new IllegalArgumentException("The file must be an image.");
-        }
-        log.info("Avatar file validation successful.");
-    }
 
     /**
      * Получает существующий аватар пользователя или создает новый, если он не существует.
@@ -154,7 +86,7 @@ class AvatarHelperImpl implements AvatarHelper {
     }
 
     /**
-     * Обрабатывает изображение аватара, проверяя его размер и формат,
+     * Обрабатывает изображение аватара, проверяя его формат,
      * и устанавливает обработанное изображение в объект Avatar.
      *
      * @param avatar     Объект Avatar для установки изображения.
@@ -165,18 +97,13 @@ class AvatarHelperImpl implements AvatarHelper {
     public void processAndSetAvatarImage(Avatar avatar, MultipartFile avatarFile) {
         // Проверяем размер файла
         try {
-            if (avatarFile.getSize() > avatarProperties.getMaxSizeInBytes()) {//FIXME можно переместить в валидацию ПОДУМОТЬ
-                log.warn("File size {} exceeds the maximum allowed size of {}", avatarFile.getSize(), maxFileSize);
-                throw new IOException("File too big");
-            }
-
             // Читаем изображение из файла
             BufferedImage image = ImageIO.read(avatarFile.getInputStream());
+            //FIXME если файл существует оно может быть null? оставить до тестирования
             if (image == null) {
                 log.warn("The file uploaded for entityID: {} is not an image.", avatar.getId());
                 throw new IllegalArgumentException("The file is not an image.");
             }
-
             // Проверяем и обрабатываем разрешение изображения
             BufferedImage processedImage = processImage(image);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -199,7 +126,10 @@ class AvatarHelperImpl implements AvatarHelper {
     public BufferedImage processImage(BufferedImage originalImage) {
         log.debug("Processing image with original size: width = {}, height = {}", originalImage.getWidth(), originalImage.getHeight());
         // Проверяем разрешение изображения
-        if (originalImage.getWidth() > maxWidth || originalImage.getHeight() > maxHeight) {
+        int maxWidth = avatarProperties.getMaxWidth();
+        int maxHeight = avatarProperties.getMaxHeight();
+        if (originalImage.getWidth() > maxWidth
+                || originalImage.getHeight() > maxHeight) {
             log.info("Image size exceeds max dimensions ({}x{}), resizing required.", maxWidth, maxHeight);
             BufferedImage resizedImage = resizeImage(originalImage, maxWidth, maxHeight);
             log.debug("Image resized to: width = {}, height = {}", resizedImage.getWidth(), resizedImage.getHeight());

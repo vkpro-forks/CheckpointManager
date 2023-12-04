@@ -61,7 +61,6 @@ public class AvatarServiceImpl implements AvatarService {
         //- в рамках одной транзакции
         //- в рамках данной таски я на входе в метод проверю есть ли юзер, и проверю что если его нет вылетит ошибка
         //TODO Делаем кучу работы с объектом аватара, а потом вдруг выясняется что юзера нет в бд, валидирую до входа в контроллер
-        avatarHelper.validateAvatar(avatarFile);
         //TODO вот тут две ситуации может быть
         //TODO либо нет юзера, либо нет аватара, если нет аватара - ок, а если нет юзера объект все равно создастся
         Avatar avatar = avatarHelper.getOrCreateAvatar(userId);
@@ -97,7 +96,6 @@ public class AvatarServiceImpl implements AvatarService {
      * Удаляет аватар пользователя, если он существует.
      *
      * @param avatarId Уникальный идентификатор сущности, аватар которой нужно удалить.
-     * @return Удаленный объект Avatar, если он существует, иначе возвращает null.
      */
     public void deleteAvatarIfExists(UUID avatarId) {
         log.debug("Attempting to delete avatar for avatarId ID: {}", avatarId);

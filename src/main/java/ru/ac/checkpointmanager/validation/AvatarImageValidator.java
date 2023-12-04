@@ -62,9 +62,16 @@ public class AvatarImageValidator implements ConstraintValidator<AvatarImageChec
         }
         log.debug("Checking file content type...");
         String contentType = value.getContentType();
-        if (contentType == null ||
-                !contentType.startsWith(avatarProperties.getContentType())) {
+        if (contentType == null || !contentType.startsWith(avatarProperties.getContentType())) {
             detailedMessage = NOT_SUPPORTED_OF_AVATAR_FILE.formatted("contentType");
+            log.warn(validationMessage + detailedMessage);
+            configureErrorMessage(context, detailedMessage);
+            return false;
+        }
+        log.debug("Checking file size...");
+        if (value.getSize() > avatarProperties.getMaxSizeInBytes()) {
+            detailedMessage = ": file size %s exceeds the maximum allowed size of %s".formatted(value.getSize(),
+                    avatarProperties.getMaxSizeInBytes());
             log.warn(validationMessage + detailedMessage);
             configureErrorMessage(context, detailedMessage);
             return false;

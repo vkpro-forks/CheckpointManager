@@ -10,6 +10,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.util.unit.DataSize;
 import org.springframework.web.multipart.MultipartFile;
 import ru.ac.checkpointmanager.ext.ValidationContextTestResolver;
 import ru.ac.checkpointmanager.model.avatar.AvatarProperties;
@@ -33,6 +34,7 @@ class AvatarImageValidatorTest {
         AvatarProperties avatarProperties = new AvatarProperties();
         avatarProperties.setContentType("image/");
         avatarProperties.setExtensions(List.of("jpg", "jpeg", "png", "ico", "gif"));
+        avatarProperties.setMaxSize(DataSize.ofBytes(5));
         avatarImageValidator = new AvatarImageValidator(avatarProperties);
     }
 
@@ -54,7 +56,6 @@ class AvatarImageValidatorTest {
         Assertions.assertThat(isValid).isTrue();
     }
 
-
     private static Stream<MockMultipartFile> getIncorrectMultipartFiles() {
         MockMultipartFile empty
                 = new MockMultipartFile("avatarFile", "avatar.png", MediaType.IMAGE_PNG_VALUE, new byte[]{});
@@ -62,8 +63,11 @@ class AvatarImageValidatorTest {
                 = new MockMultipartFile("avatarFile", "avatar.buba", MediaType.IMAGE_PNG_VALUE, new byte[]{1, 2});
         MockMultipartFile wrongContentType
                 = new MockMultipartFile("avatarFile", "avatar.png", MediaType.APPLICATION_JSON_VALUE, new byte[]{1, 2});
+        MockMultipartFile tooBig
+                = new MockMultipartFile("avatarFile", "avatar.png", MediaType.IMAGE_PNG_VALUE,
+                new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
         return Stream.of(
-                empty, badExtension, wrongContentType
+                empty, badExtension, wrongContentType, tooBig
         );
     }
 
