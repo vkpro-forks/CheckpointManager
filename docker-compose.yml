@@ -24,6 +24,7 @@ services:
       - SPRING_DATASOURCE_PASSWORD=chpmanPass%
       - AVATAR_STORAGE_PATH=/avatars
       - TZ=UTC
+      - JASYPT_ENCRYPTOR_PASSWORD=${JASYPT_ENCRYPTOR_PASSWORD}
 
   # Сервис для базы данных PostgreSQL
   postgres-db:
