@@ -20,8 +20,8 @@ public class CrossingMapper {
     private final ModelMapper modelMapper;
 
     @Autowired
-    public CrossingMapper() {
-        this.modelMapper = new ModelMapper();
+    public CrossingMapper(ModelMapper modelMapper) {
+        this.modelMapper = modelMapper;
         configureModelMapper();
     }
 

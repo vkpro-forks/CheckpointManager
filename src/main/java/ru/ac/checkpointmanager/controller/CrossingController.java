@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
-import ru.ac.checkpointmanager.mapper.CrossingMapper;
 import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.service.crossing.CrossingService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
@@ -46,7 +45,6 @@ import java.util.UUID;
 public class CrossingController {
 
     private final CrossingService crossingService;
-    private final CrossingMapper mapper;
 
     @Operation(summary = "Создание пересечения, имитирует проезд или проход объекта через КПП",
             description = "Доступ: ADMIN, SECURITY.")
@@ -80,7 +78,7 @@ public class CrossingController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SECURITY')")
     @GetMapping("/{id}")
     public ResponseEntity<?> getCrossing(@PathVariable UUID id) {
-        Crossing existCrossing = crossingService.getCrossing(id);
-        return new ResponseEntity<>(mapper.toCrossingDTO(existCrossing), HttpStatus.OK);
+        CrossingDTO crossing = crossingService.getCrossing(id);
+        return new ResponseEntity<>(crossing, HttpStatus.OK);
     }
 }

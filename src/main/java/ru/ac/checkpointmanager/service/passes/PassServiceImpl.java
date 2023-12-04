@@ -43,13 +43,9 @@ import static ru.ac.checkpointmanager.utils.StringTrimmer.trimThemAll;
 @RequiredArgsConstructor
 public class PassServiceImpl implements PassService {
 
-    private static final String PASS_NOT_FOUND_LOG = "[Pass with id: {}] not found";
-    private static final String PASS_NOT_FOUND_MSG = "Pass with id: %s not found";
+    private static final String PASS_NOT_FOUND = "Pass [%s] not found";
     private static final String METHOD_UUID = "Method {} [{}]";
-    private static final String PASS_STATUS_CHANGED_LOG = "Pass [UUID - {}], changed status on {}";
-    private static final String USER_NOT_FOUND_LOG = "User with [id: {}] not found";
-    private static final String USER_NOT_FOUND_MSG = "User with id: %s not found";
-
+    private static final String PASS_STATUS_CHANGED_LOG = "Pass [{}], changed status on {}";
 
     private final PassRepository passRepository;
     private final CrossingRepository crossingRepository;
@@ -116,8 +112,8 @@ public class PassServiceImpl implements PassService {
     public Pass findPassById(UUID id) {
         return passRepository.findById(id).orElseThrow(
                 () -> {
-                    log.warn(PASS_NOT_FOUND_LOG, id);
-                    return new PassNotFoundException(PASS_NOT_FOUND_MSG.formatted(id));
+                    log.warn(PASS_NOT_FOUND.formatted(id));
+                    return new PassNotFoundException(PASS_NOT_FOUND.formatted(id));
                 });
     }
 
@@ -275,8 +271,8 @@ public class PassServiceImpl implements PassService {
     public void deletePass(UUID id) {
         log.info(METHOD_UUID, MethodLog.getMethodName(), id);
         if (passRepository.findById(id).isEmpty()) {
-            log.warn(PASS_NOT_FOUND_LOG, id);
-            throw new PassNotFoundException(PASS_NOT_FOUND_MSG.formatted(id));
+            log.warn(PASS_NOT_FOUND.formatted(id));
+            throw new PassNotFoundException(PASS_NOT_FOUND.formatted(id));
         }
         passRepository.deleteById(id);
         log.info("[Pass with id: {}] successfully deleted", id);

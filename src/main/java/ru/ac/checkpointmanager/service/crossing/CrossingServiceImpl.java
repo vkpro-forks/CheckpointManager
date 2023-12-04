@@ -18,6 +18,7 @@ import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.repository.CrossingRepository;
 import ru.ac.checkpointmanager.service.checkpoints.CheckpointService;
 import ru.ac.checkpointmanager.service.passes.PassService;
+import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.util.Map;
 import java.util.UUID;
@@ -28,6 +29,8 @@ import java.util.UUID;
 @Slf4j
 public class CrossingServiceImpl implements CrossingService {
 
+    private static final String METHOD_UUID = "Method {} [{}]";
+
     private final CrossingRepository crossingRepository;
     private final PassService passService;
     private final CheckpointService checkpointService;
@@ -36,9 +39,11 @@ public class CrossingServiceImpl implements CrossingService {
 
     @Override
     public CrossingDTO addCrossing(CrossingDTO crossingDTO) {
+        log.debug(METHOD_UUID, MethodLog.getMethodName(), crossingDTO);
         UUID passId = crossingDTO.getPassId();
         Pass pass = passService.findPassById(passId);
         if (pass.getStatus() != PassStatus.ACTIVE) {
+            log.warn("The pass is not active now %s".formatted(passId));
             throw new InactivePassException("The pass is not active now %s".formatted(passId));
         }
 
@@ -50,29 +55,33 @@ public class CrossingServiceImpl implements CrossingService {
                 .formatted(pass.getId(), pass.getDtype(), checkpoint.getId(), checkpoint.getType()));
         }
         if (!checkpoint.getTerritory().equals(pass.getTerritory())) {
-            throw new MismatchedTerritoryException("The checkpoint does not belong to the territory of the pass");
+            log.warn("Pass [%s] is issued to another territory [%s]".formatted(passId, pass.getTerritory()));
+            throw new MismatchedTerritoryException("Pass [%s] is issued to another territory [%s]"
+                .formatted(passId, pass.getTerritory()));
         }
 
         processPass(pass.getTypeTime().toString(), pass, crossingDTO.getDirection());
         Crossing crossing = mapper.toCrossing(crossingDTO, pass, checkpoint);
         crossing = crossingRepository.save(crossing);
+        log.info("Crossing added [{}]", crossing);
         return mapper.toCrossingDTO(crossing);
     }
 
     @Override
-    public Crossing getCrossing(UUID crossingId) {
+    public CrossingDTO getCrossing(UUID crossingId) {
         Crossing crossing = crossingRepository.findById(crossingId).orElseThrow(() -> {
             log.warn("[Crossing with id: {}] not found", crossingId);
             return new CrossingNotFoundException("Crossing with id %s not found".formatted(crossingId));
         });
         log.debug("Retrieved crossing with id {}", crossingId);
-        return crossing;
+        return mapper.toCrossingDTO(crossing);
     }
 
     public void processPass(String passTimeType, Pass pass, Direction direction) {
         PassProcessing passProcessing = passProcessingMap.get(passTimeType);
         if (passProcessing == null) {
-            throw new RuntimeException("Unsupported pass time type");
+            log.error("Unsupported pass time type - %s".formatted(passTimeType));
+            throw new RuntimeException("Unsupported pass time type - %s".formatted(passTimeType));
         }
         passProcessing.process(pass, direction);
     }
