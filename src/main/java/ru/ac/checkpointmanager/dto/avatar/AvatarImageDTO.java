@@ -25,5 +25,4 @@ public class AvatarImageDTO {
     private byte[] previewData;
 
     private Long fileSize;
-
 }
