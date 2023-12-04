@@ -19,9 +19,8 @@ public class CarDTO {
     private UUID id;
 
     @NotNull
-    @Column(name = "license_plate")
     @Size(min = 6, max = 10, message = "The number must be at least 6 characters and no more than 10")
-    @Pattern(regexp = "^[АВЕКМНОРСТУХA-Z0-9]+$", message = "Invalid characters in license plate")
+    @Pattern(regexp = "^[АВЕКМНОРСТУХавекмнорстухA-Za-z0-9]+$", message = "Invalid characters in license plate")
     private String licensePlate;
 
     private CarBrand brand;
