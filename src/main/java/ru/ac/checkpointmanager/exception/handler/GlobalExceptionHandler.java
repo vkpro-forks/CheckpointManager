@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import ru.ac.checkpointmanager.exception.AvatarIsEmptyException;
-import ru.ac.checkpointmanager.exception.BadAvatarExtensionException;
 import ru.ac.checkpointmanager.exception.DateOfBirthFormatException;
 import ru.ac.checkpointmanager.exception.EntranceWasAlreadyException;
 import ru.ac.checkpointmanager.exception.InactivePassException;

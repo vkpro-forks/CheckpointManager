@@ -26,8 +26,6 @@ import ru.ac.checkpointmanager.dto.CheckpointDTO;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.exception.handler.ErrorCode;
-import ru.ac.checkpointmanager.it.config.CorsTestConfiguration;
-import ru.ac.checkpointmanager.it.config.OpenAllEndpointsTestConfiguration;
 import ru.ac.checkpointmanager.model.TemporaryUser;
 import ru.ac.checkpointmanager.config.CorsTestConfiguration;
 import ru.ac.checkpointmanager.config.OpenAllEndpointsTestConfiguration;
