@@ -1,9 +1,8 @@
 package ru.ac.checkpointmanager.mapper;
 
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.model.car.Car;
@@ -17,7 +16,7 @@ public class CarMapper {
 
     private final ModelMapper modelMapper;
 
-
+    @Autowired
     public CarMapper(ModelMapper modelMapper) {
         this.modelMapper = modelMapper;
     }

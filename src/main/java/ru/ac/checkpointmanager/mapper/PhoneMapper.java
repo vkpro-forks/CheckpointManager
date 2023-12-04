@@ -2,6 +2,7 @@ package ru.ac.checkpointmanager.mapper;
 
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.model.Phone;
@@ -14,9 +15,11 @@ import java.util.List;
 public class PhoneMapper {
     private final ModelMapper modelMapper;
 
+    @Autowired
     public PhoneMapper(ModelMapper modelMapper) {
         this.modelMapper = modelMapper;
     }
+
     public Phone toPhone(PhoneDTO phoneDTO) {
         return modelMapper.map(phoneDTO, Phone.class);
     }

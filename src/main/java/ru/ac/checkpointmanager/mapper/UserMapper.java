@@ -3,6 +3,7 @@ package ru.ac.checkpointmanager.mapper;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.ac.checkpointmanager.dto.user.LoginResponse;
 import ru.ac.checkpointmanager.dto.user.UserAuthDTO;
@@ -18,8 +19,9 @@ import java.util.List;
 public class UserMapper {
     private final ModelMapper modelMapper;
 
-    public UserMapper() {
-        this.modelMapper = new ModelMapper();
+    @Autowired
+    public UserMapper(ModelMapper modelMapper) {
+        this.modelMapper = modelMapper;
         configureModelMapper();
     }
 

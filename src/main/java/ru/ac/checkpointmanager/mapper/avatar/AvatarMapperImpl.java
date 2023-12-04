@@ -1,6 +1,7 @@
 package ru.ac.checkpointmanager.mapper.avatar;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.ac.checkpointmanager.dto.avatar.AvatarDTO;
 import ru.ac.checkpointmanager.model.avatar.Avatar;
@@ -12,6 +13,7 @@ public class AvatarMapperImpl implements AvatarMapper {
 
     private final ModelMapper mapper;
 
+    @Autowired
     public AvatarMapperImpl(ModelMapper mapper) {
         this.mapper = mapper;
     }
