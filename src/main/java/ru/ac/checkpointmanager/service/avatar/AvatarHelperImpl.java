@@ -53,7 +53,7 @@ class AvatarHelperImpl implements AvatarHelper {
      * @throws IllegalArgumentException если имя файла не содержит точку или расширение.
      */
     @Override
-    public String getExtension(String fileName) {
+    public String getExtension(String fileName) {//TODO этот метод тоже не нужен, он теперь в валидации
         log.debug("Attempting to extract file extension from: {}", fileName);
         try {
             String extension = Optional.ofNullable(fileName)
@@ -107,7 +107,7 @@ class AvatarHelperImpl implements AvatarHelper {
      * @param avatarFile Мультипарт-файл, представляющий аватар.
      * @throws IllegalArgumentException если файл не проходит проверку.
      */
-    @Override
+    @Override//TODO ВОТ ЭТО ВСЁ ТЕПЕРЬ В ВАЛИДАЦИИ + МОЖНО ЕЩЕ ЧЕГО НИБУДЬ ДОБАВИТЬ, УДАЛЯЕМ?:)))
     public void validateAvatar(MultipartFile avatarFile) {//TODO уйдет в валидацию
         log.debug("Validating avatar file...");
         if (avatarFile == null || avatarFile.isEmpty()) {
@@ -165,7 +165,7 @@ class AvatarHelperImpl implements AvatarHelper {
     public void processAndSetAvatarImage(Avatar avatar, MultipartFile avatarFile) {
         // Проверяем размер файла
         try {
-            if (avatarFile.getSize() > avatarProperties.getMaxSizeInBytes()) {
+            if (avatarFile.getSize() > avatarProperties.getMaxSizeInBytes()) {//FIXME можно переместить в валидацию ПОДУМОТЬ
                 log.warn("File size {} exceeds the maximum allowed size of {}", avatarFile.getSize(), maxFileSize);
                 throw new IOException("File too big");
             }

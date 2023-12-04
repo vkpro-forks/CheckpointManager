@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import ru.ac.checkpointmanager.dto.avatar.AvatarDTO;
@@ -49,17 +51,18 @@ public class AvatarController {
 
     @Operation(summary = "Загрузить аватар пользователю(выбрать id пользователя и картинку).")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Аватар успешно добавлен",
+            @ApiResponse(responseCode = "201", description = "Аватар успешно добавлен",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = AvatarDTO.class))),
             @ApiResponse(responseCode = "400", description = "BAD_REQUEST: Неверные данные запроса",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
     })
     @PostMapping(value = "/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<AvatarDTO> uploadAvatar(@PathVariable UUID userId,
-                                                  @RequestPart @AvatarImageCheck MultipartFile avatarFile) {
-        AvatarDTO avatarDTO = service.uploadAvatar(userId, avatarFile);
-        return ResponseEntity.ok(avatarDTO);
+    @ResponseStatus(HttpStatus.CREATED)
+    public AvatarDTO uploadAvatar(@PathVariable UUID userId,
+                                  @RequestPart @AvatarImageCheck MultipartFile avatarFile) {
+        return service.uploadAvatar(userId, avatarFile);
+
     }
 
     @Operation(summary = "Получить аватар по Id пользователя")

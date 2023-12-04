@@ -56,7 +56,7 @@ public class GlobalExceptionHandler {
                 .map(v -> new ViolationError(
                         fieldNameFromPath(v.getPropertyPath().toString()),
                         v.getMessage(),
-                        v.getInvalidValue() != null ? v.getInvalidValue().toString() : "null"))
+                        formatValidationCurrentValue(v.getInvalidValue())))
                 .toList();
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation failed");
         ProblemDetail configuredProblemDetails = setUpValidationDetails(problemDetail, violationErrors);
@@ -69,7 +69,7 @@ public class GlobalExceptionHandler {
         final List<ViolationError> violationErrors = e.getBindingResult().getFieldErrors().stream()
                 .map(error -> new ViolationError(
                         error.getField(), error.getDefaultMessage(),
-                        error.getRejectedValue() != null ? error.getRejectedValue().toString() : "null"))
+                        formatValidationCurrentValue(error.getRejectedValue())))
                 .toList();
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation failed");
         problemDetail.setProperty(TIMESTAMP, Instant.now());
@@ -233,6 +233,16 @@ public class GlobalExceptionHandler {
             return split[split.length - 1];
         }
         return path;
+    }
+
+    private String formatValidationCurrentValue(Object object) {
+        if (object == null) {
+            return "null";
+        }
+        if (object.toString().contains(object.getClass().getName())) {
+            return object.getClass().getSimpleName();
+        }
+        return object.toString();
     }
 
 }
