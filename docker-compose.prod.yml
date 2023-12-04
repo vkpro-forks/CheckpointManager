@@ -28,6 +28,8 @@ services:
     image: postgres:latest
     ports:
       - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=chpmanDB
       - POSTGRES_USER=chpman
@@ -49,3 +51,4 @@ services:
 volumes:
   avatars: # Определение именованного тома для аватаров
   logs: # Определение именованного тома для логов
+  db-data: # Определение именованного тома для базы данных
