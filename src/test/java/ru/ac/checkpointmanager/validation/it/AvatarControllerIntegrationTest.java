@@ -14,10 +14,11 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import ru.ac.checkpointmanager.config.ValidationTestConfiguration;
-import ru.ac.checkpointmanager.controller.AvatarController;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.ac.checkpointmanager.config.CorsTestConfiguration;
 import ru.ac.checkpointmanager.config.OpenAllEndpointsTestConfiguration;
+import ru.ac.checkpointmanager.config.ValidationTestConfiguration;
+import ru.ac.checkpointmanager.controller.AvatarController;
 import ru.ac.checkpointmanager.model.avatar.AvatarProperties;
 import ru.ac.checkpointmanager.service.avatar.AvatarService;
 import ru.ac.checkpointmanager.util.TestUtils;
@@ -44,6 +45,8 @@ class AvatarControllerIntegrationTest {
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.multipart(
                 HttpMethod.POST, UrlConstants.AVATAR_URL + "/" + TestUtils.USER_ID).file(file));
         TestUtils.checkCommonValidationFields(resultActions);
+        resultActions.andExpect(MockMvcResultMatchers
+                .jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0)).value("avatarFile"));
     }
 
 }
