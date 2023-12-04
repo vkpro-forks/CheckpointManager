@@ -74,7 +74,7 @@ public class UserController {
             )
     })
     @PreAuthorize(value = "hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
-    @GetMapping("{id}") //FIXME TESTED
+    @GetMapping("/{id}")
     public UserResponseDTO findUserById(@Parameter(description = "Уникальный идентификатор пользователя", required = true)
                                         @PathVariable UUID id) {
         return userService.findById(id);
@@ -206,7 +206,7 @@ public class UserController {
             )
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER')")
-    @PutMapping// FIXME TESTED
+    @PutMapping
     public UserResponseDTO updateUser(@Valid @RequestBody UserPutDTO userPutDTO) {
         return userService.updateUser(userPutDTO);
     }
@@ -289,7 +289,7 @@ public class UserController {
             )
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
-    @PatchMapping("/role/{id}")//FIXME TESTED
+    @PatchMapping("/role/{id}")
     public void changeRole(@Parameter(description = "Уникальный идентификатор пользователя", required = true)
                            @PathVariable UUID id,
                            @Parameter(description = "Новая роль пользователя", required = true)
@@ -319,7 +319,7 @@ public class UserController {
             )
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
-    @PatchMapping("/{id}")//FIXME TESTED
+    @PatchMapping("/{id}")
     public UserResponseDTO updateBlockStatus(@Parameter(description = "Уникальный идентификатор пользователя", required = true)
                                              @PathVariable UUID id,
                                              @Parameter(description = "Статус блокировки: true для блокировки пользователя, false для разблокировки", required = true)
@@ -406,7 +406,7 @@ public class UserController {
             )
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER')")
-    @DeleteMapping("{id}") //FIXME TESTED
+    @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@Parameter(description = "Уникальный идентификатор пользователя", required = true)
                            @PathVariable UUID id) {

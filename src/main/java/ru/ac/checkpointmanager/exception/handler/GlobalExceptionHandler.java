@@ -115,15 +115,6 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
-    @ExceptionHandler(BadAvatarExtensionException.class)
-    public ProblemDetail handleBadAvatarExtensionException(BadAvatarExtensionException e) {
-        ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
-        problemDetail.setTitle("Not suitable extension for avatar");//FIXME No usages for this exception
-        problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
-        log.debug(LOG_MSG, e.getClass());
-        return problemDetail;
-    }
-
     @ExceptionHandler(AccessDeniedException.class)
     public ProblemDetail handleAccessDeniedException(AccessDeniedException e) {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.FORBIDDEN, e);
