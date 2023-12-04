@@ -23,13 +23,13 @@
         </encoder>
     </appender>
 
-    <root level="DEBUG">
+    <root level="INFO">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="FILE" />
     </root>e
 
     <logger name="ru.ac.checkpointmanager" level="debug">
-        <appender-ref ref="DB" />
+        <appender-ref ref="STDOUT"/>
     </logger>
 
 </configuration>

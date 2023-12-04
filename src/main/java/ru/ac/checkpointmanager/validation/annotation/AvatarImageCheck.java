@@ -16,7 +16,7 @@ import java.lang.annotation.Target;
 @Documented
 public @interface AvatarImageCheck {
 
-    String message() default "Avatar image doesn't meet requirements";
+    String message() default "Avatar image validation failed";
 
     Class<?>[] groups() default {};
 

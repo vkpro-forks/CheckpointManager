@@ -7,26 +7,29 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
+import ru.ac.checkpointmanager.ext.ValidationContextTestResolver;
 import ru.ac.checkpointmanager.model.avatar.AvatarProperties;
 
 import java.util.List;
 import java.util.stream.Stream;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({MockitoExtension.class, ValidationContextTestResolver.class})
 class AvatarImageValidatorTest {
-
-    ConstraintValidatorContext context;
 
     AvatarImageValidator avatarImageValidator;
 
+    ConstraintValidatorContext constraintContext;
+
+    public AvatarImageValidatorTest(ConstraintValidatorContext constraintContext) {
+        this.constraintContext = constraintContext;
+    }
+
     @BeforeEach
     void init() {
-        context = Mockito.mock(ConstraintValidatorContext.class);
         AvatarProperties avatarProperties = new AvatarProperties();
         avatarProperties.setContentType("image/");
         avatarProperties.setExtensions(List.of("jpg", "jpeg", "png", "ico", "gif"));
@@ -36,7 +39,7 @@ class AvatarImageValidatorTest {
     @ParameterizedTest
     @MethodSource("getIncorrectMultipartFiles")
     void shouldNotValidateNotCorrectMultipartFiles(MultipartFile multipartFile) {
-        boolean isValid = avatarImageValidator.isValid(multipartFile, context);
+        boolean isValid = avatarImageValidator.isValid(multipartFile, constraintContext);
 
         Assertions.assertThat(isValid).isFalse();
     }
@@ -46,7 +49,7 @@ class AvatarImageValidatorTest {
         MockMultipartFile goodFile
                 = new MockMultipartFile("avatarFile", "avatar.png", MediaType.IMAGE_PNG_VALUE, new byte[]{1, 2, 3});
 
-        boolean isValid = avatarImageValidator.isValid(goodFile, context);
+        boolean isValid = avatarImageValidator.isValid(goodFile, constraintContext);
 
         Assertions.assertThat(isValid).isTrue();
     }
