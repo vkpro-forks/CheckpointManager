@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ViolationError {
 
-    private String fieldName;
+    private String name;
 
     private String message;
 

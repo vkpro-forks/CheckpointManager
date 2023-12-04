@@ -29,6 +29,8 @@ import ru.ac.checkpointmanager.exception.handler.ErrorCode;
 import ru.ac.checkpointmanager.it.config.CorsTestConfiguration;
 import ru.ac.checkpointmanager.it.config.OpenAllEndpointsTestConfiguration;
 import ru.ac.checkpointmanager.model.TemporaryUser;
+import ru.ac.checkpointmanager.config.CorsTestConfiguration;
+import ru.ac.checkpointmanager.config.OpenAllEndpointsTestConfiguration;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.car.CarBrand;
@@ -450,7 +452,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
     @SneakyThrows
     void shouldHandleUserNotFoundExceptionForUploadAvatar() {
         MockMultipartFile file
-                = new MockMultipartFile("image", "avatar.png", MediaType.IMAGE_PNG_VALUE, new byte[]{1, 2, 3});
+                = new MockMultipartFile("avatarFile", "avatar.png", MediaType.IMAGE_PNG_VALUE, new byte[]{1, 2, 3});
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.multipart(
                         HttpMethod.POST, UrlConstants.AVATAR_URL + "/" + TestUtils.USER_ID).file(file))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
