@@ -14,7 +14,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AvatarImageValidator implements ConstraintValidator<AvatarImageCheck, MultipartFile> {
 
-    private static final String NOT_SUPPORTED_OF_AVATAR_FILE = "Not supported {} of avatar file";
+    private static final String NOT_SUPPORTED_OF_AVATAR_FILE = "Not supported %s of avatar file";
 
     private static final String VALIDATION_FAILED = "Validation failed: ";
 
@@ -28,12 +28,12 @@ public class AvatarImageValidator implements ConstraintValidator<AvatarImageChec
     @Override
     public boolean isValid(MultipartFile value, ConstraintValidatorContext context) {
         context.disableDefaultConstraintViolation();
-        context.buildConstraintViolationWithTemplate(VALIDATION_FAILED + "avatar file doesn't meet requirements")
-                .addPropertyNode("avatar")
-                .addConstraintViolation();
+        String validationMessage;
         log.debug("Validating avatar file...");
         if (value == null || value.isEmpty()) {
-            log.warn(VALIDATION_FAILED + "The avatar file is empty or null");
+            validationMessage = "The avatar file is empty or null";
+            log.warn(VALIDATION_FAILED + validationMessage);
+            configureErrorMessage(context, validationMessage);
             return false;
         }
         log.debug("Checking file extension...");
@@ -42,22 +42,33 @@ public class AvatarImageValidator implements ConstraintValidator<AvatarImageChec
                 .filter(f -> f.contains("."))
                 .map(f -> f.substring(filename.lastIndexOf(".") + 1).toLowerCase());
         if (optionalExtension.isEmpty()) {
-            log.warn(VALIDATION_FAILED + "No extension in avatar file");
+            validationMessage = "No extension in avatar file";
+            log.warn(VALIDATION_FAILED + validationMessage);
+            configureErrorMessage(context, validationMessage);
             return false;
         }
         if (!avatarProperties.getExtensions().contains(optionalExtension.get())) {
-            log.warn(VALIDATION_FAILED + NOT_SUPPORTED_OF_AVATAR_FILE, "extension");
+            validationMessage = NOT_SUPPORTED_OF_AVATAR_FILE.formatted("extension");
+            log.warn(VALIDATION_FAILED + validationMessage);
+            configureErrorMessage(context, validationMessage);
             return false;
         }
         log.debug("Checking file content type...");
         String contentType = value.getContentType();
         if (contentType == null ||
                 !contentType.startsWith(avatarProperties.getContentType())) {
-            log.warn(VALIDATION_FAILED + NOT_SUPPORTED_OF_AVATAR_FILE, "contentType");
+            validationMessage = NOT_SUPPORTED_OF_AVATAR_FILE.formatted("contentType");
+            log.warn(VALIDATION_FAILED + validationMessage);
+            configureErrorMessage(context, validationMessage);
             return false;
         }
-        log.info("Avatar file validation successful");
+        log.debug("Avatar file validation successful");
         return true;
+    }
+
+    private void configureErrorMessage(ConstraintValidatorContext context, String message) {
+        context.buildConstraintViolationWithTemplate(message)
+                .addConstraintViolation();
     }
 
 }

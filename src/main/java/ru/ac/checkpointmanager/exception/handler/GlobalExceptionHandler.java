@@ -13,7 +13,14 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
-import ru.ac.checkpointmanager.exception.*;
+import ru.ac.checkpointmanager.exception.AvatarIsEmptyException;
+import ru.ac.checkpointmanager.exception.BadAvatarExtensionException;
+import ru.ac.checkpointmanager.exception.DateOfBirthFormatException;
+import ru.ac.checkpointmanager.exception.EntranceWasAlreadyException;
+import ru.ac.checkpointmanager.exception.InactivePassException;
+import ru.ac.checkpointmanager.exception.InvalidPhoneNumberException;
+import ru.ac.checkpointmanager.exception.PhoneAlreadyExistException;
+import ru.ac.checkpointmanager.exception.VisitorNotFoundException;
 
 import java.time.Instant;
 import java.util.List;
@@ -51,7 +58,7 @@ public class GlobalExceptionHandler {
                         v.getMessage(),
                         v.getInvalidValue() != null ? v.getInvalidValue().toString() : "null"))
                 .toList();
-        ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation failed");
         ProblemDetail configuredProblemDetails = setUpValidationDetails(problemDetail, violationErrors);
         log.debug(LOG_MSG_DETAILS, e.getClass(), e.getMessage());
         return configuredProblemDetails;
@@ -60,7 +67,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ProblemDetail handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         final List<ViolationError> violationErrors = e.getBindingResult().getFieldErrors().stream()
-                .map(error -> new ViolationError(error.getField(), error.getDefaultMessage(),
+                .map(error -> new ViolationError(
+                        error.getField(), error.getDefaultMessage(),
                         error.getRejectedValue() != null ? error.getRejectedValue().toString() : "null"))
                 .toList();
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation failed");
