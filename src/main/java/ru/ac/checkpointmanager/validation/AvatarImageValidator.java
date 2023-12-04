@@ -10,6 +10,12 @@ import ru.ac.checkpointmanager.validation.annotation.AvatarImageCheck;
 
 import java.util.Optional;
 
+/**
+ * Класс проверяет, что в переданный файл для аватара:
+ * - не пустой;
+ * - имеет правильное расширение (которые мы указали в applucation.yaml)
+ * - имеет правильный тип контента
+ */
 @Slf4j
 @RequiredArgsConstructor
 public class AvatarImageValidator implements ConstraintValidator<AvatarImageCheck, MultipartFile> {

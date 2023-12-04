@@ -46,5 +46,4 @@ class AvatarControllerIntegrationTest {
         TestUtils.checkCommonValidationFields(resultActions);
     }
 
-
 }

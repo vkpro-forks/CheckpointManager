@@ -2,6 +2,7 @@ package ru.ac.checkpointmanager.validation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import lombok.extern.slf4j.Slf4j;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.validation.annotation.CarOrVisitorFieldsCheck;
@@ -12,6 +13,7 @@ import ru.ac.checkpointmanager.validation.annotation.CarOrVisitorFieldsCheck;
  * Если передаются оба поля - ошибка валидации
  * Если оба поля null - ошибка валидации
  */
+@Slf4j
 public class CarOrVisitorFieldsValidator implements ConstraintValidator<CarOrVisitorFieldsCheck, Object> {
 
     public static final String VALIDATION_MSG = "%s field is null, or present with %s;" +
@@ -26,6 +28,7 @@ public class CarOrVisitorFieldsValidator implements ConstraintValidator<CarOrVis
 
     @Override
     public boolean isValid(Object value, ConstraintValidatorContext context) {
+        log.debug("Validating Car or Visitor in Pass...");
         context.buildConstraintViolationWithTemplate(VALIDATION_MSG.formatted(CAR, VISITOR))
                 .addPropertyNode(CAR)
                 .addConstraintViolation()
@@ -42,6 +45,7 @@ public class CarOrVisitorFieldsValidator implements ConstraintValidator<CarOrVis
         if (value instanceof PassCreateDTO passCreateDTO) {
             return passCreateDTO.getVisitor() != null ^ passCreateDTO.getCar() != null;
         }
+        log.debug("Pass has only car, or only visitor: validation successful");
         return false;
     }
 
