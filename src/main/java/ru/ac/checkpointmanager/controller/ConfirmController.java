@@ -68,12 +68,9 @@ public class ConfirmController {
                     description = "NOT_FOUND: Ссылка подтверждения недействительна или истек срок действия"
             )
     })
-    @GetMapping("/email")
-    public ResponseEntity<String> confirmEmail(
-            @Parameter(description = "Токен из письма для подтверждения")
-            @RequestParam("token") String token
-    ) {
+    @GetMapping("/email") //FIXME TESTED
+    public void confirmEmail(@Parameter(description = "Токен из письма для подтверждения")
+                             @RequestParam("token") String token) {
         userService.confirmEmail(token);
-        return ResponseEntity.ok("Адрес электронной почты успешно изменён");
     }
 }

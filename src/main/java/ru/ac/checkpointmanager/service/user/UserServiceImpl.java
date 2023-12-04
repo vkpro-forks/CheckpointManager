@@ -15,6 +15,7 @@ import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.user.UserPutDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
+import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.mapper.TerritoryMapper;
@@ -93,9 +94,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findUserById(UUID id) {
-        User foundUser = userRepository.findById(id).orElseThrow(
-                () -> new UserNotFoundException(String.format("User not found [id=%s]", id)));
-        return foundUser;
+        return userRepository.findById(id).orElseThrow(
+                () -> {
+                    log.warn(USER_NOT_FOUND_MSG.formatted(id));
+                    return new UserNotFoundException(String.format(USER_NOT_FOUND_MSG.formatted(id)));
+                });
     }
 
     /**
@@ -156,10 +159,13 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public UserResponseDTO updateUser(UserPutDTO userPutDTO) {
-        log.debug("Updating user with [UUID - {}]", userPutDTO.getId());
-        User foundUser = userRepository.findById(userPutDTO.getId())
-                .orElseThrow(() -> new UserNotFoundException(
-                        String.format(USER_NOT_FOUND_MSG, userPutDTO.getId())));
+        UUID updateUserId = userPutDTO.getId();
+        log.debug("Updating user with [UUID - {}]", updateUserId);
+        User foundUser = userRepository.findById(updateUserId)
+                .orElseThrow(() -> {
+                    log.warn(USER_NOT_FOUND_MSG.formatted(updateUserId));
+                    return new UserNotFoundException(USER_NOT_FOUND_MSG.formatted(updateUserId));
+                });
 
         foundUser.setFullName(userPutDTO.getFullName());
 
@@ -300,19 +306,22 @@ public class UserServiceImpl implements UserService {
     public void confirmEmail(String token) {
         log.debug("[Method {}], [Temporary token {}]", MethodLog.getMethodName(), token);
         TemporaryUser tempUser = temporaryUserService.findByVerifiedToken(token);
-
         if (tempUser != null) {
-            User user = userRepository.findByEmail(tempUser.getPreviousEmail()).orElseThrow(()
-                    -> new UserNotFoundException(String.format("User email %s not found", tempUser.getPreviousEmail())));
-
+            String previousEmail = tempUser.getPreviousEmail();
+            User user = userRepository.findByEmail(previousEmail).orElseThrow(
+                    () -> {
+                        log.warn("User with [email %s] not found".formatted(previousEmail));
+                        return new UserNotFoundException("User with [email %s] not found".formatted(previousEmail));
+                    });
             user.setEmail(tempUser.getEmail());
             userRepository.save(user);
-            log.info("User email updated from {} to {}, [UUID {}]", tempUser.getPreviousEmail(), user.getEmail(), user.getId());
+            log.info("User email updated from {} to {}, [UUID {}]", previousEmail, user.getEmail(), user.getId());
 
             temporaryUserService.delete(tempUser);
             log.info("[Temporary user {}] deleted", tempUser.getId());
         } else {
             log.warn("Invalid or expired token");
+            throw new EmailVerificationTokenException("Invalid or expired token");//TODO handle
         }
     }
 
@@ -336,10 +345,11 @@ public class UserServiceImpl implements UserService {
     public void changeRole(UUID id, Role role) {
         log.debug(METHOD_UUID, MethodLog.getMethodName(), id);
         User existingUser = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(String.format("User not found [Id=%s]", id)));
-
+                .orElseThrow(() -> {
+                    log.warn(USER_NOT_FOUND_MSG.formatted(id));
+                    return new UserNotFoundException(USER_NOT_FOUND_MSG.formatted(id));
+                });
         User user = SecurityUtils.getCurrentUser();
-
         if (role == Role.ADMIN && !user.getRole().equals(Role.ADMIN)) {
             log.error("Users with role {} do not have permission to change the role to ADMIN", user.getRole());
             throw new AccessDeniedException("You do not have permission to change the role to ADMIN");
@@ -460,11 +470,11 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(UUID id) {
         log.debug(METHOD_UUID, MethodLog.getMethodName(), id);
         if (userRepository.findById(id).isEmpty()) {
-            log.warn("Error deleting user {}", id);
-            throw new UserNotFoundException("Error deleting user with ID" + id);
+            log.warn(USER_NOT_FOUND_MSG.formatted(id));
+            throw new UserNotFoundException(USER_NOT_FOUND_MSG.formatted(id));
         }
         userRepository.deleteById(id);
-        log.debug("User {} successfully deleted", id);
+        log.info("User {} successfully deleted", id);
     }
 
     /**

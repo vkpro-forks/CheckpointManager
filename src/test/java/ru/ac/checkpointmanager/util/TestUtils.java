@@ -14,6 +14,8 @@ import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
+import ru.ac.checkpointmanager.dto.user.UserPutDTO;
+import ru.ac.checkpointmanager.model.TemporaryUser;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.model.checkpoints.CheckpointType;
@@ -61,6 +63,8 @@ public class TestUtils {
     public static final String JSON_TITLE = "$.title";
 
     public static final String JSON_DETAIL = "$.detail";
+
+    public static final UUID EMAIL_TOKEN = UUID.randomUUID();
 
 
     public static CarBrand getCarBrand() {
@@ -151,6 +155,23 @@ public class TestUtils {
                 .ignore(Select.field("avatar"))
                 .ignore(Select.field("territories"))
                 .generate(Select.field("email"), gen -> gen.text().pattern("#a#a#a#a#a@example.com")).toModel();
+    }
+
+    public static TemporaryUser getTemporaryUser() {
+        return Instancio.of(getInstancioTemporaryUserModel()).create();
+    }
+
+    public static Model<TemporaryUser> getInstancioTemporaryUserModel() {
+        return Instancio.of(TemporaryUser.class)
+                .generate(Select.field("email"), gen -> gen.text().pattern("#a#a#a#a#a@example.com")).toModel();
+    }
+
+    public static UserPutDTO getUserPutDTO() {
+        return new UserPutDTO(
+                USER_ID,
+                "Vasin Vasya Petya",
+                "+79167868345"
+        );
     }
 
     public static String jsonStringFromObject(Object object) throws JsonProcessingException {
