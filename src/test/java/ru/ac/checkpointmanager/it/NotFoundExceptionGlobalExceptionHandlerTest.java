@@ -544,6 +544,17 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
         checkNotFoundFields(resultActions);
     }
 
+    @Test
+    @SneakyThrows
+    void shouldHandleUserNotFoundExceptionForUpdateBlockStatus() {
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                        .patch(UrlConstants.USER_URL + "/" + TestUtils.USER_ID)
+                        .param("isBlocked", "true"))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(Matchers.startsWith(USER)));
+        checkNotFoundFields(resultActions);
+    }
+
     private void checkNotFoundFields(ResultActions resultActions) throws Exception {
         resultActions.andExpect(MockMvcResultMatchers.status().isNotFound())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE))

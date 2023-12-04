@@ -319,14 +319,12 @@ public class UserController {
             )
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
-    @PatchMapping("{id}")
-    public ResponseEntity<?> updateBlockStatus(@Parameter(description = "Уникальный идентификатор пользователя", required = true)
-                                               @PathVariable UUID id,
-                                               @Parameter(description = "Статус блокировки: true для блокировки пользователя, false для разблокировки", required = true)
-                                               @RequestParam Boolean isBlocked
-    ) {
-        UserResponseDTO changedUser = userService.updateBlockStatus(id, isBlocked);
-        return ResponseEntity.ok(changedUser);
+    @PatchMapping("/{id}")//FIXME TESTED
+    public UserResponseDTO updateBlockStatus(@Parameter(description = "Уникальный идентификатор пользователя", required = true)
+                                             @PathVariable UUID id,
+                                             @Parameter(description = "Статус блокировки: true для блокировки пользователя, false для разблокировки", required = true)
+                                             @RequestParam Boolean isBlocked) {
+        return userService.updateBlockStatus(id, isBlocked);
     }
 
     @Operation(summary = "Заблокировать пользователя по id",

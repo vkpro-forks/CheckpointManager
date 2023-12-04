@@ -58,6 +58,8 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional(readOnly = true)// обычно ставят транзакцию ридонли прям над классом, она будет действовать на все методы
+//но там где надо поставить не ридонли - ставим снова аннотацию
 public class UserServiceImpl implements UserService {
 
     private static final String METHOD_UUID = "Method {}, UUID - {}";
@@ -85,7 +87,6 @@ public class UserServiceImpl implements UserService {
      * @see UserNotFoundException
      */
     @Override
-    @Transactional(readOnly = true)
     public UserResponseDTO findById(UUID id) {
         log.debug(METHOD_UUID, MethodLog.getMethodName(), id);
         User foundUser = findUserById(id);
@@ -114,7 +115,6 @@ public class UserServiceImpl implements UserService {
      * @see TerritoryNotFoundException
      */
     @Override
-    @Transactional(readOnly = true)
     public List<TerritoryDTO> findTerritoriesByUserId(UUID userId) {
         log.debug(METHOD_UUID, MethodLog.getMethodName(), userId);
         List<Territory> territories = userRepository.findTerritoriesByUserId(userId);
@@ -134,7 +134,6 @@ public class UserServiceImpl implements UserService {
      * @throws UserNotFoundException если пользователи с именем, содержащим указанную строку, не найдены.
      */
     @Override
-    @Transactional(readOnly = true)
     public Collection<UserResponseDTO> findByName(String name) {
         log.info("Method {} was invoked", MethodLog.getMethodName());
         return userMapper.toUserResponseDTOs(userRepository
@@ -254,8 +253,8 @@ public class UserServiceImpl implements UserService {
      * @throws IllegalStateException если текущая электронная почта пользователя не соответствует указанной в запросе.
      * @throws MailSendException     если происходит ошибка при отправке электронного письма.
      */
-    @Transactional
     @Override
+    @Transactional
     public String changeEmail(ChangeEmailRequest request) {
         User user = SecurityUtils.getCurrentUser();
         log.debug("[Method {}], [Username - {}]", MethodLog.getMethodName(), user.getUsername());
@@ -301,8 +300,8 @@ public class UserServiceImpl implements UserService {
      * @param token уникальный токен подтверждения, используемый для идентификации временного пользователя.
      * @throws UserNotFoundException если пользователь с указанной предыдущей электронной почтой не найден.
      */
-    @Transactional(isolation = Isolation.READ_COMMITTED)
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void confirmEmail(String token) {
         log.debug("[Method {}], [Temporary token {}]", MethodLog.getMethodName(), token);
         TemporaryUser tempUser = temporaryUserService.findByVerifiedToken(token);
@@ -386,17 +385,23 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponseDTO updateBlockStatus(UUID id, Boolean isBlocked) {
+        //TODO мы хотим изменить статус блокировки юзера
+        //если его статус не равен тому на который мы хотим поменять - меняет
+        //если равен - то эксепшн, а нужно ли?
+        //если статус такой же, то можно ничего не делать, я бы даже лог не писал
         log.debug(METHOD_UUID, MethodLog.getMethodName(), id);
         User existingUser = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(String.format("User not found [Id=%s]", id)));
-
+                .orElseThrow(() -> {
+                    log.warn(USER_NOT_FOUND_MSG.formatted(id));
+                    return new UserNotFoundException(USER_NOT_FOUND_MSG.formatted(id));
+                });
         if (existingUser.getIsBlocked() != isBlocked) {
             existingUser.setIsBlocked(isBlocked);
             userRepository.save(existingUser);
             log.debug("Block status {} for {} successfully changed", isBlocked, id);
         } else {
             log.warn("User {} already has block status {}", id, isBlocked);
-            throw new IllegalStateException(String.format("User already %s [id=%s]", isBlocked ? "blocked" : "unblocked", id));
+            //throw new UserBlockedException("User already %s [id=%s]", isBlocked ? "blocked" : "unblocked", id);
         }
         return userMapper.toUserResponseDTO(existingUser);
     }
@@ -488,7 +493,6 @@ public class UserServiceImpl implements UserService {
      * @throws UserNotFoundException если в базе данных нет пользователей.
      */
     @Override
-    @Transactional(readOnly = true)
     public Collection<UserResponseDTO> getAll() {
         log.debug("Method {}", MethodLog.getMethodName());
         return userMapper.toUserResponseDTOs(userRepository.findAll());
@@ -506,13 +510,8 @@ public class UserServiceImpl implements UserService {
      * @throws UserNotFoundException если пользователь с указанным идентификатором не найден.
      */
     @Override
-    @Transactional(readOnly = true)
     public Collection<String> findUsersPhoneNumbers(UUID userId) {
         log.debug("Method {}, UUID {}", MethodLog.getMethodName(), userId);
-        if (userRepository.findById(userId).isEmpty()) {
-            log.warn("Error getting users {} phones with", userId);
-            throw new UserNotFoundException(String.format("Error getting users %s phones", userId));
-        }
         return phoneRepository.getNumbersByUserId(userId);
     }
 
@@ -535,4 +534,5 @@ public class UserServiceImpl implements UserService {
     public User findByPassId(UUID passId) {
         return userRepository.findByPassId(passId);
     }
+
 }
