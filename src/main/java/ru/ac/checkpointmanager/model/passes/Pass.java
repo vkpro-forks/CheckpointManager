@@ -1,13 +1,16 @@
 package ru.ac.checkpointmanager.model.passes;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SourceType;
+import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -50,6 +53,10 @@ public abstract class Pass {
 
     @Column(insertable=false, updatable=false)
     private String dtype;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "pass")
+    private List<Crossing> crossings;
 
     Boolean favorite = false;
 

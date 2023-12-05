@@ -4,23 +4,23 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.ac.checkpointmanager.dto.CrossingDTO;
 import ru.ac.checkpointmanager.exception.CrossingNotFoundException;
-import ru.ac.checkpointmanager.exception.EntranceWasAlreadyException;
 import ru.ac.checkpointmanager.exception.InactivePassException;
 import ru.ac.checkpointmanager.exception.MismatchedTerritoryException;
+import ru.ac.checkpointmanager.mapper.CrossingMapper;
 import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
 import ru.ac.checkpointmanager.model.checkpoints.CheckpointType;
 import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
-import ru.ac.checkpointmanager.model.passes.PassTypeTime;
-import ru.ac.checkpointmanager.repository.CheckpointRepository;
 import ru.ac.checkpointmanager.repository.CrossingRepository;
-import ru.ac.checkpointmanager.repository.PassRepository;
+import ru.ac.checkpointmanager.service.checkpoints.CheckpointService;
+import ru.ac.checkpointmanager.service.passes.PassService;
+import ru.ac.checkpointmanager.utils.MethodLog;
 
-import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.Map;
 import java.util.UUID;
 
 @Transactional
@@ -29,114 +29,61 @@ import java.util.UUID;
 @Slf4j
 public class CrossingServiceImpl implements CrossingService {
 
-    private final PassRepository passRepository;
+    private static final String METHOD_UUID = "Method {} [{}]";
+
     private final CrossingRepository crossingRepository;
-    private final CheckpointRepository checkpointRepository;
+    private final PassService passService;
+    private final CheckpointService checkpointService;
+    private final CrossingMapper mapper;
+    private final Map<String, PassProcessing> passProcessingMap;
 
     @Override
-    public Crossing markCrossing(Crossing crossing) {
-        log.info("Attempting to mark crossing for pass ID: {}", crossing.getPass().getId());
-
-        Pass pass = validatePass(crossing.getPass().getId());
-        Checkpoint checkpoint = validateCheckpoint(crossing.getCheckpoint().getId(), pass.getTerritory().getId());
-
-        if (checkpoint.getType() != CheckpointType.UNIVERSAL &&
-                !pass.getDtype().equals(checkpoint.getType().toString())) {
-            log.warn(String.format("Conflict between the types of pass and checkpoint " +
-                            "[crossing - %s], [pass - %s, %s], [checkpoint - %s, %s]",
-                    crossing.getId(), pass.getId(), pass.getDtype(), checkpoint.getId(), checkpoint.getType()));
+    public CrossingDTO addCrossing(CrossingDTO crossingDTO) {
+        log.debug(METHOD_UUID, MethodLog.getMethodName(), crossingDTO);
+        UUID passId = crossingDTO.getPassId();
+        Pass pass = passService.findPassById(passId);
+        if (pass.getStatus() != PassStatus.ACTIVE) {
+            log.warn("The pass is not active now %s".formatted(passId));
+            throw new InactivePassException("The pass is not active now %s".formatted(passId));
         }
 
-        Optional<Crossing> lastCrossingOpt = crossingRepository.findTopByPassOrderByIdDesc(pass);
-        validateCrossing(crossing.getDirection(), lastCrossingOpt, crossing.getPass().getId());
+        UUID checkpointId = crossingDTO.getCheckpointId();
+        Checkpoint checkpoint = checkpointService.findCheckpointById(checkpointId);
+        if (checkpoint.getType() != CheckpointType.UNIVERSAL &&
+            !pass.getDtype().equals(checkpoint.getType().toString())) {
+            log.warn("Conflict between the types of pass and checkpoint [pass - %s, %s], [checkpoint - %s, %s]"
+                .formatted(pass.getId(), pass.getDtype(), checkpoint.getId(), checkpoint.getType()));
+        }
+        if (!checkpoint.getTerritory().equals(pass.getTerritory())) {
+            log.warn("Pass [%s] is issued to another territory [%s]".formatted(passId, pass.getTerritory()));
+            throw new MismatchedTerritoryException("Pass [%s] is issued to another territory [%s]"
+                .formatted(passId, pass.getTerritory()));
+        }
 
-        manageOneTimePass(crossing.getDirection(), lastCrossingOpt, pass);
-
-        crossing.setPass(pass);
-        crossing.setCheckpoint(checkpoint);
-
-        log.info("Local DateTime before setting: {}", crossing.getLocalDateTime());
-        crossing.setLocalDateTime(LocalDateTime.now());
-        log.info("Local DateTime after setting: {}", crossing.getLocalDateTime());
-
-        log.info("Successfully marked crossing for pass ID: {}", crossing.getPass().getId());
-        return crossingRepository.save(crossing);
+        processPass(pass.getTypeTime().toString(), pass, crossingDTO.getDirection());
+        Crossing crossing = mapper.toCrossing(crossingDTO, pass, checkpoint);
+        crossing = crossingRepository.save(crossing);
+        log.info("Crossing added [{}]", crossing);
+        return mapper.toCrossingDTO(crossing);
     }
 
     @Override
-    public Crossing getCrossing(UUID crossingId) {
+    public CrossingDTO getCrossing(UUID crossingId) {
         Crossing crossing = crossingRepository.findById(crossingId).orElseThrow(() -> {
             log.warn("[Crossing with id: {}] not found", crossingId);
             return new CrossingNotFoundException("Crossing with id %s not found".formatted(crossingId));
         });
         log.debug("Retrieved crossing with id {}", crossingId);
-        return crossing;
+        return mapper.toCrossingDTO(crossing);
     }
 
-
-    // проверяет, существует ли пропуск с данным ID и активен ли он
-    private Pass validatePass(UUID passId) {
-        log.debug("Validating pass with ID: {}", passId);
-
-        return passRepository.findById(passId)
-                .filter(p -> p.getStatus() == PassStatus.ACTIVE)
-                .orElseThrow(() -> new InactivePassException("The pass is not active now, passId - " + passId));
-    }
-
-
-    //проверяет, существует ли КПП с данным ID и принадлежит ли он территории пропуска
-    private Checkpoint validateCheckpoint(UUID checkpointId, UUID territoryIdFromPass) {
-        log.debug("Validating checkpoint with ID: {}", checkpointId);
-
-        return checkpointRepository.findById(checkpointId)
-                .filter(cp -> cp.getTerritory().getId().equals(territoryIdFromPass))
-                .orElseThrow(() -> new MismatchedTerritoryException("The checkpoint does not belong to the territory of the pass"));
-    }
-
-    //проверяет последнее пересечение для данного пропуска, если оно существует
-    //т.е. проверяет, не пытается ли пользователь проехать/пройти два раза в одном и том же направлении
-    private void validateCrossing(Direction direction, Optional<Crossing> lastCrossingOpt, UUID passId) {
-        log.debug("Validating crossing for pass ID: {} with direction: {}", passId, direction);
-
-        if (lastCrossingOpt.isPresent()) {
-            Crossing lastCrossing = lastCrossingOpt.get();
-
-            if (lastCrossing.getDirection().equals(direction)) {
-                throw new IllegalStateException(String.format("This passId %s needs to check in/check out", passId));
-            }
+    public void processPass(String passTimeType, Pass pass, Direction direction) {
+        PassProcessing passProcessing = passProcessingMap.get(passTimeType);
+        if (passProcessing == null) {
+            log.error("Unsupported pass time type - %s".formatted(passTimeType));
+            throw new RuntimeException("Unsupported pass time type - %s".formatted(passTimeType));
         }
-    }
-
-    //логико для одноразовых пропусков(не был ли уже использован пропуск для въезда, активирован ли пропуск(для случая выезда без предварительного въезда))
-    //если направление — выезд, меняет статус пропуска на "завершенный"
-    private void manageOneTimePass(Direction currentDirection, Optional<Crossing> lastCrossingOpt, Pass pass) {
-        log.debug("Managing one-time pass for pass ID: {}", pass.getId());
-
-        if (pass.getTypeTime() == PassTypeTime.ONETIME) {
-            if (isDoubleEntry(currentDirection, lastCrossingOpt)) {
-                throw new EntranceWasAlreadyException(String.format("The %s has already been used for entry.", pass.getId()));
-            }
-
-            if (isInvalidOutEntry(currentDirection, lastCrossingOpt)) {
-                throw new InactivePassException(String.format("This %s has not been activated (login to activate)", pass.getId()));
-            }
-
-            if (currentDirection.equals(Direction.OUT)) {
-                pass.setStatus(PassStatus.COMPLETED);
-            }
-        }
-    }
-
-    //проверяет, не пытается ли пользователь въехать дважды на территорию с одноразовым пропуском
-    private boolean isDoubleEntry(Direction currentDirection, Optional<Crossing> lastCrossingOpt) {
-        return lastCrossingOpt
-                .filter(lastCrossing -> currentDirection.equals(Direction.IN) && lastCrossing.getDirection().equals(Direction.IN))
-                .isPresent();
-    }
-
-    //проверяет, не пытается ли пользователь выехать без активации пропуска (т.е. без въезда)
-    private boolean isInvalidOutEntry(Direction currentDirection, Optional<Crossing> lastCrossingOpt) {
-        return currentDirection == Direction.OUT && lastCrossingOpt.isEmpty();
+        passProcessing.process(pass, direction);
     }
 }
 

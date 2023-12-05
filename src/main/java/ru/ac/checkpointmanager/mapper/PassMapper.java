@@ -21,8 +21,8 @@ public class PassMapper {
     private final ModelMapper modelMapper;
 
     @Autowired
-    public PassMapper() {
-        this.modelMapper = new ModelMapper();
+    public PassMapper(ModelMapper modelMapper) {
+        this.modelMapper = modelMapper;
         configureModelMapper();
     }
 
