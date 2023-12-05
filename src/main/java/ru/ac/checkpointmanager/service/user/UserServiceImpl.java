@@ -385,10 +385,6 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponseDTO updateBlockStatus(UUID id, Boolean isBlocked) {
-        //TODO мы хотим изменить статус блокировки юзера
-        //если его статус не равен тому на который мы хотим поменять - меняет
-        //если равен - то эксепшн, а нужно ли?
-        //если статус такой же, то можно ничего не делать, я бы даже лог не писал
         log.debug(METHOD_UUID, MethodLog.getMethodName(), id);
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> {
