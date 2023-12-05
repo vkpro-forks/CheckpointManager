@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import ru.ac.checkpointmanager.exception.AvatarIsEmptyException;
-import ru.ac.checkpointmanager.exception.BadAvatarExtensionException;
 import ru.ac.checkpointmanager.exception.DateOfBirthFormatException;
 import ru.ac.checkpointmanager.exception.EntranceWasAlreadyException;
 import ru.ac.checkpointmanager.exception.InactivePassException;
@@ -118,15 +117,6 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleAvatarIsEmptyException(AvatarIsEmptyException e) {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
         problemDetail.setTitle("Avatar is empty");// FIXME No usages for this exception
-        problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
-        log.debug(LOG_MSG, e.getClass());
-        return problemDetail;
-    }
-
-    @ExceptionHandler(BadAvatarExtensionException.class)
-    public ProblemDetail handleBadAvatarExtensionException(BadAvatarExtensionException e) {
-        ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
-        problemDetail.setTitle("Not suitable extension for avatar");//FIXME No usages for this exception
         problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
         log.debug(LOG_MSG, e.getClass());
         return problemDetail;

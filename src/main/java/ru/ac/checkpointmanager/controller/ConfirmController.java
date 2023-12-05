@@ -69,11 +69,8 @@ public class ConfirmController {
             )
     })
     @GetMapping("/email")
-    public ResponseEntity<String> confirmEmail(
-            @Parameter(description = "Токен из письма для подтверждения")
-            @RequestParam("token") String token
-    ) {
+    public void confirmEmail(@Parameter(description = "Токен из письма для подтверждения")
+                             @RequestParam("token") String token) {
         userService.confirmEmail(token);
-        return ResponseEntity.ok("Адрес электронной почты успешно изменён");
     }
 }

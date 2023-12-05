@@ -26,6 +26,7 @@ import ru.ac.checkpointmanager.dto.CheckpointDTO;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.exception.handler.ErrorCode;
+import ru.ac.checkpointmanager.model.TemporaryUser;
 import ru.ac.checkpointmanager.config.CorsTestConfiguration;
 import ru.ac.checkpointmanager.config.OpenAllEndpointsTestConfiguration;
 import ru.ac.checkpointmanager.model.Territory;
@@ -36,6 +37,7 @@ import ru.ac.checkpointmanager.model.checkpoints.CheckpointType;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.repository.CheckpointRepository;
 import ru.ac.checkpointmanager.repository.PassRepository;
+import ru.ac.checkpointmanager.repository.TemporaryUserRepository;
 import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.testcontainers.PostgresContainersConfig;
@@ -71,6 +73,9 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
 
     @Autowired
     TerritoryRepository territoryRepository;
+
+    @Autowired
+    TemporaryUserRepository temporaryUserRepository;
 
     @AfterEach
     void clear() {
@@ -476,6 +481,75 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends PostgresContainersConf
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                         .delete(UrlConstants.TERR_ATTACH_DETACH_URL
                                 .formatted(savedTerritory.getId(), TestUtils.USER_ID)))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(Matchers.startsWith(USER)));
+        checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldHandleUserNotFoundExceptionForGetUser() {
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                        .get(UrlConstants.USER_URL + "/" + TestUtils.USER_ID))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(Matchers.startsWith(USER)));
+        checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldHandleUserNotFoundExceptionForDeleteUser() {
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                        .delete(UrlConstants.USER_URL + "/" + TestUtils.USER_ID))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(Matchers.startsWith(USER)));
+        checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldHandleUserNotFoundExceptionForConfirmEmail() {
+        TemporaryUser temporaryUser = TestUtils.getTemporaryUser();
+        TemporaryUser saved = temporaryUserRepository.save(temporaryUser);
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                        .get(UrlConstants.CONFIRM_EMAIL_URL)
+                        .param("token", saved.getVerifiedToken()))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(Matchers.startsWith(USER)));
+        checkNotFoundFields(resultActions);
+        temporaryUserRepository.deleteAll();
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldHandleUserNotFoundExceptionForChangeRole() {
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                        .patch(UrlConstants.USER_ROLE_URL + "/" + TestUtils.USER_ID)
+                        .param("role", "ADMIN"))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(Matchers.startsWith(USER)));
+        checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldHandleUserNotFoundExceptionForUpdateUser() {
+        String userPutDTO = TestUtils.jsonStringFromObject(TestUtils.getUserPutDTO());
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                        .put(UrlConstants.USER_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(userPutDTO))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(Matchers.startsWith(USER)));
+        checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldHandleUserNotFoundExceptionForUpdateBlockStatus() {
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                        .patch(UrlConstants.USER_URL + "/" + TestUtils.USER_ID)
+                        .param("isBlocked", "true"))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith(USER)));
         checkNotFoundFields(resultActions);
