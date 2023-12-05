@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
-import ru.ac.checkpointmanager.mapper.CrossingMapper;
 import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.service.crossing.CrossingService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
@@ -43,11 +42,9 @@ import java.util.UUID;
         @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса",
                 content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
 })
-//я предполагаю, что этот эндпоинт будет вызываться когда будет открываться шлагбаум(например) и тем самым фиксироваться пересечение
 public class CrossingController {
 
     private final CrossingService crossingService;
-    private final CrossingMapper mapper;
 
     @Operation(summary = "Создание пересечения, имитирует проезд или проход объекта через КПП",
             description = "Доступ: ADMIN, SECURITY.")
@@ -59,15 +56,14 @@ public class CrossingController {
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SECURITY')")
-    @PostMapping("/mark")
-    public ResponseEntity<?> markCrossing(@Valid @RequestBody CrossingDTO crossingDTO, BindingResult bindingResult) {
+    @PostMapping
+    public ResponseEntity<?> addCrossing(@Valid @RequestBody CrossingDTO crossingDTO, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             log.warn("Failed to mark crossing due to validation errors");
             return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
         }
-        Crossing crossing = crossingService.markCrossing(mapper.toCrossing(crossingDTO));
-        log.info("Crossing marked: {}", crossing);
-        return new ResponseEntity<>(mapper.toCrossingDTO(crossing), HttpStatus.OK);
+        CrossingDTO crossing = crossingService.addCrossing(crossingDTO);
+        return new ResponseEntity<>(crossing, HttpStatus.OK);
     }
 
     @Operation(summary = "Получить пересечение по Id",
@@ -82,7 +78,7 @@ public class CrossingController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SECURITY')")
     @GetMapping("/{id}")
     public ResponseEntity<?> getCrossing(@PathVariable UUID id) {
-        Crossing existCrossing = crossingService.getCrossing(id);
-        return new ResponseEntity<>(mapper.toCrossingDTO(existCrossing), HttpStatus.OK);
+        CrossingDTO crossing = crossingService.getCrossing(id);
+        return new ResponseEntity<>(crossing, HttpStatus.OK);
     }
 }
