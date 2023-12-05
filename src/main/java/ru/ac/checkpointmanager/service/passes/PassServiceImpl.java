@@ -152,33 +152,29 @@ public class PassServiceImpl implements PassService {
     @Override
     public PassResponseDTO updatePass(PassUpdateDTO passUpdateDTO) {
         log.debug(METHOD_UUID, MethodLog.getMethodName(), passUpdateDTO);
-        //TODO так а что тут у нас происходит - сначала ищем привязанные сущности, потом маппим в pass
-        //сначала логично проверить что сам Pass который мы хотим отапдейдить есть в базе
+
         UUID passId = passUpdateDTO.getId();
-        Pass foundPass = findPassById(passId);
-        if (foundPass.getStatus() != PassStatus.ACTIVE && foundPass.getStatus() != PassStatus.DELAYED) {
+        Pass existPass = findPassById(passId);
+        if (existPass.getStatus() != PassStatus.ACTIVE && existPass.getStatus() != PassStatus.DELAYED) {
             throw new IllegalStateException("This pass is not active or delayed, it cannot be changed");
         }
-        //- далее, ищем юзера и территорию, проверяем из отношение, если всё ОК
-        //проверяем
+
         User user = userService.findByPassId(passId);
         Territory territory = territoryService.findByPassId(passId);
         checkUserTerritoryRelation(user, territory);
-        Pass pass = mapper.toPass(passUpdateDTO, user, territory);//есть тогда смысла в этом маппинге?
+        Pass newStatePass = mapper.toPass(passUpdateDTO, user, territory);
 
+        checkOverlapTime(newStatePass);
+        trimThemAll(newStatePass);
 
-        checkOverlapTime(pass);//TODO в этот есть смысл если мы из бд достали пропуск, который перед сохранением уже
-        //прошел такую проверку?
-        trimThemAll(pass);
+        existPass.setComment(newStatePass.getComment());
+        existPass.setTypeTime(newStatePass.getTypeTime());
+        existPass.setStartTime(newStatePass.getStartTime());
+        existPass.setEndTime(newStatePass.getEndTime());
+        existPass.setAttachedEntity(newStatePass);
 
-        foundPass.setComment(pass.getComment());
-        foundPass.setTypeTime(pass.getTypeTime());
-        foundPass.setStartTime(pass.getStartTime());
-        foundPass.setEndTime(pass.getEndTime());
-        foundPass.setAttachedEntity(pass);
-        //TODO вот после того как мы обновили значения пропуска есть смысл проверить на оверлап
-        Pass updatedPass = passRepository.save(foundPass);
-        log.info("Pass updated, {}", updatedPass);
+        Pass updatedPass = passRepository.save(existPass);
+        log.info("Pass updated: {}", updatedPass);
 
         return mapper.toPassDTO(updatedPass);
     }
