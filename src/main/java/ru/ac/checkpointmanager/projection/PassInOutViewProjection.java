@@ -1,6 +1,7 @@
 package ru.ac.checkpointmanager.projection;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public interface PassInOutViewProjection {
 
@@ -13,4 +14,5 @@ public interface PassInOutViewProjection {
     String getVisitor();
     LocalDateTime getIn_time();
     LocalDateTime getOut_time();
+    UUID getPass_id();
 }

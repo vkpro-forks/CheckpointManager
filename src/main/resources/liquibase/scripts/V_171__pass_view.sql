@@ -20,8 +20,8 @@ FROM InRanked i
 
 SELECT p.dtype, p.comment, t.name, p.type_time, p.status,
        c.license_plate as car, v.full_name as visitor,
-       cpr.in_time, cpr.out_time
-        , p.territory_id, p.user_id
+       cpr.in_time, cpr.out_time, p.id as pass_id,
+       p.territory_id, p.user_id
 FROM passes p
          JOIN territories t on p.territory_id = t.id
          LEFT JOIN cars c on p.car_id = c.id
