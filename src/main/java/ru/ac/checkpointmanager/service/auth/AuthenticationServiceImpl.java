@@ -181,16 +181,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                         request.getEmail(),
                         request.getPassword()
                 ));
-        //Если хочется поработать с токенами по ID - вот так можно взять айди без повторного вызова
-        //из репозитория
         User user = (User) authentication.getPrincipal();
-        //UUID id = principal.getId();
 
         String jwtToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
         log.debug("Access and refresh tokens for {} created", user.getEmail());
 
-        revokeAllUserTokens(user);//TODO см комментарии в этом методе
+        revokeAllUserTokens(user);
         log.debug("Previous user {} tokens was revoked", user.getEmail());
 
         saveUserToken(user, jwtToken);
@@ -228,9 +225,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Transactional
     public void revokeAllUserTokens(User user) {
         log.info(METHOD_WAS_INVOKED, MethodLog.getMethodName());
-        //TODO сюда можно передавать не целого юзера а только айди, или имейл
-        //эти методы напрашиваются в отдельный сервис типа ТокенСервис
-        //транзакция тут не сработает, т.к. вложенная
         List<Token> validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
         if (validUserTokens.isEmpty())
             return;
