@@ -147,10 +147,10 @@ public class PassController {
                     @Parameter(in = ParameterIn.QUERY, name = "size", example = "20")
             })
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Пропуска найдены",
+            @ApiResponse(responseCode = "200", description = "События найдены",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = PassInOutViewProjection.class)))),
-            @ApiResponse(responseCode = "404", description = "Пропуска не найдены; территория не найдена")})
+            @ApiResponse(responseCode = "404", description = "Пользователь не найден")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
     @GetMapping("/user/{userId}/events")
     public ResponseEntity<Page<PassInOutViewProjection>> getEventsByUserId(@PathVariable UUID userId,
@@ -167,10 +167,10 @@ public class PassController {
                     @Parameter(in = ParameterIn.QUERY, name = "size", example = "20")
             })
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Пропуска найдены",
+            @ApiResponse(responseCode = "200", description = "События найдены",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = PassInOutViewProjection.class)))),
-            @ApiResponse(responseCode = "404", description = "Пропуска не найдены; территория не найдена")})
+            @ApiResponse(responseCode = "404", description = "Территория не найдена")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/territory/{territoryId}/events")
     public ResponseEntity<Page<PassInOutViewProjection>> getEventsByTerritoryId(@PathVariable UUID territoryId,
