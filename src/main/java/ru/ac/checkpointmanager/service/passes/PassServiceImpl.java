@@ -159,9 +159,10 @@ public class PassServiceImpl implements PassService {
 
         UUID passId = passUpdateDTO.getId();
         Pass existPass = findPassById(passId);
-        if (existPass.getStatus() != PassStatus.ACTIVE && existPass.getStatus() != PassStatus.DELAYED) {
-            log.warn(PASS_NOT_UPDATE.formatted(passId, existPass.getStatus()));
-            throw new ModifyPassException(PASS_NOT_UPDATE.formatted(passId, existPass.getStatus()));
+        PassStatus passStatus = existPass.getStatus();
+        if (passStatus != PassStatus.ACTIVE && passStatus != PassStatus.DELAYED) {
+            log.warn(PASS_NOT_UPDATE.formatted(passId, passStatus));
+            throw new ModifyPassException(PASS_NOT_UPDATE.formatted(passId, passStatus));
         }
 
         User user = userService.findByPassId(passId);
@@ -190,9 +191,10 @@ public class PassServiceImpl implements PassService {
         log.info(METHOD_INVOKE, MethodLog.getMethodName(), id);
 
         Pass pass = findPassById(id);
-        if (!pass.getStatus().equals(PassStatus.ACTIVE) && !pass.getStatus().equals(PassStatus.DELAYED)) {
-            log.warn(PASS_NOT_CANCEL.formatted(id, pass.getStatus()));
-            throw new ModifyPassException(PASS_NOT_CANCEL.formatted(id, pass.getStatus()));
+        PassStatus passStatus = pass.getStatus();
+        if (passStatus != PassStatus.ACTIVE && passStatus != PassStatus.DELAYED) {
+            log.warn(PASS_NOT_CANCEL.formatted(id, passStatus));
+            throw new ModifyPassException(PASS_NOT_CANCEL.formatted(id, passStatus));
         }
 
         List<Crossing> passCrossings = crossingRepository.findCrossingsByPassIdOrderByLocalDateTimeDesc(pass.getId());
@@ -212,11 +214,12 @@ public class PassServiceImpl implements PassService {
     @Override
     public PassResponseDTO activateCancelledPass(UUID id) {
         log.info(METHOD_INVOKE, MethodLog.getMethodName(), id);
-        Pass pass = findPassById(id);
 
-        if (!pass.getStatus().equals(PassStatus.CANCELLED)) {
-            log.warn(PASS_NOT_ACTIVATED.formatted(id, pass.getStatus()));
-            throw new ModifyPassException(PASS_NOT_ACTIVATED.formatted(id, pass.getStatus()));
+        Pass pass = findPassById(id);
+        PassStatus passStatus = pass.getStatus();
+        if (passStatus  != PassStatus.CANCELLED) {
+            log.warn(PASS_NOT_ACTIVATED.formatted(id, passStatus));
+            throw new ModifyPassException(PASS_NOT_ACTIVATED.formatted(id, passStatus));
         }
 
         if (pass.getEndTime().isBefore(LocalDateTime.now())) {
@@ -240,7 +243,7 @@ public class PassServiceImpl implements PassService {
         log.info(METHOD_INVOKE, MethodLog.getMethodName(), id);
 
         Pass pass = findPassById(id);
-        if (!pass.getStatus().equals(PassStatus.WARNING)) {
+        if (pass.getStatus() != PassStatus.WARNING) {
             throw new ModifyPassException("You can only to unwarnining a previously warninged pass");
         }
 
