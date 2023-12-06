@@ -13,7 +13,7 @@ import java.util.Objects;
 @DiscriminatorValue("WALK")
 public class PassWalk extends Pass {
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "visitor_id")
     private Visitor visitor;
 
