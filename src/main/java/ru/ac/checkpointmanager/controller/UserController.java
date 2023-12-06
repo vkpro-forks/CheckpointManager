@@ -97,11 +97,10 @@ public class UserController {
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/{userId}/territories")
-    public ResponseEntity<List<TerritoryDTO>> getTerritoriesByUser(@Parameter(description = "Уникальный идентификатор пользователя", required = true)
-                                                                   @PathVariable UUID userId
-    ) {
-        List<TerritoryDTO> territories = userService.findTerritoriesByUserId(userId);
-        return territories.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(territories);
+    public List<TerritoryDTO> getTerritoriesByUser(
+            @Parameter(description = "Уникальный идентификатор пользователя", required = true)
+            @PathVariable UUID userId) {
+        return userService.findTerritoriesByUserId(userId);
     }
 
     @Operation(summary = "Поиск пользователя по имени",
@@ -121,11 +120,10 @@ public class UserController {
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/name")
-    public ResponseEntity<Collection<UserResponseDTO>> findUserByName(@Parameter(description = "имя/часть имени", required = true)
-                                                                      @RequestParam String name
-    ) {
-        Collection<UserResponseDTO> foundUsers = userService.findByName(name);
-        return foundUsers.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(foundUsers);
+    public Collection<UserResponseDTO> findUserByName(
+            @Parameter(description = "имя/часть имени", required = true)
+            @RequestParam String name) {
+        return userService.findByName(name);
     }
 
     @Operation(summary = "Получить список всех пользователей",
@@ -149,9 +147,8 @@ public class UserController {
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping()
-    public ResponseEntity<Collection<UserResponseDTO>> getAll() {
-        Collection<UserResponseDTO> foundUsers = userService.getAll();
-        return foundUsers.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(foundUsers);
+    public Collection<UserResponseDTO> getAll() {
+        return userService.getAll();
     }
 
     @Operation(summary = "Получения списка номеров телефона, привязанных к пользователю",
@@ -171,11 +168,10 @@ public class UserController {
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/numbers/{id}")
-    public ResponseEntity<Collection<String>> findUsersPhoneNumbers(@Parameter(description = "Уникальный идентификатор пользователя", required = true)
-                                                                    @PathVariable UUID id
-    ) {
-        Collection<String> numbers = userService.findUsersPhoneNumbers(id);
-        return numbers.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(numbers);
+    public Collection<String> findUsersPhoneNumbers(
+            @Parameter(description = "Уникальный идентификатор пользователя", required = true)
+            @PathVariable UUID id) {
+        return userService.findUsersPhoneNumbers(id);
     }
 
     @Operation(summary = "Изменение данных пользователя",

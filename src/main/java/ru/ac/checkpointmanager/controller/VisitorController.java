@@ -132,7 +132,7 @@ public class VisitorController {
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/phone")
-    public List<VisitorDTO> searchByPhone(@RequestParam String phone) {
+    public List<VisitorDTO> searchByPhone(@RequestParam String phone) { //TODO validate
         List<Visitor> visitors = visitorService.findByPhonePart(phone);
         log.debug("Visitors found with phone part: {}", phone);
         return mapper.toVisitorDTOS(visitors);

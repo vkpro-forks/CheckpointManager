@@ -58,8 +58,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@Transactional(readOnly = true)// обычно ставят транзакцию ридонли прям над классом, она будет действовать на все методы
-//но там где надо поставить не ридонли - ставим снова аннотацию
+@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
 
     private static final String METHOD_UUID = "Method {}, UUID - {}";
@@ -397,7 +396,6 @@ public class UserServiceImpl implements UserService {
             log.debug("Block status {} for {} successfully changed", isBlocked, id);
         } else {
             log.warn("User {} already has block status {}", id, isBlocked);
-            //throw new UserBlockedException("User already %s [id=%s]", isBlocked ? "blocked" : "unblocked", id);
         }
         return userMapper.toUserResponseDTO(existingUser);
     }

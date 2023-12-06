@@ -90,13 +90,9 @@ public class CheckpointController {
             @ApiResponse(responseCode = "404", description = "КПП не найдены")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @GetMapping("/name")
-    public ResponseEntity<List<CheckpointDTO>> getCheckpointsByName(@Parameter(description = "Часть названия")
-                                                                    @RequestParam String name) {
-        List<CheckpointDTO> checkpoints = checkpointService.findCheckpointsByName(name);
-        if (checkpoints.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(checkpoints);
+    public List<CheckpointDTO> getCheckpointsByName(@Parameter(description = "Часть названия")
+                                                    @RequestParam String name) {
+        return checkpointService.findCheckpointsByName(name);
     }
 
     @Operation(summary = "Получить список всех КПП",
@@ -108,12 +104,8 @@ public class CheckpointController {
             @ApiResponse(responseCode = "404", description = "КПП не найдены")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @GetMapping
-    public ResponseEntity<List<CheckpointDTO>> getCheckpoints() {
-        List<CheckpointDTO> checkpoints = checkpointService.findAllCheckpoints();
-        if (checkpoints.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(checkpoints);
+    public List<CheckpointDTO> getCheckpoints() {
+        return checkpointService.findAllCheckpoints();
     }
 
     @Operation(summary = "Получить список КПП, привязанных к указанной территории",
@@ -126,13 +118,9 @@ public class CheckpointController {
             @ApiResponse(responseCode = "404", description = "КПП не найдены")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @GetMapping("/territory/{territoryId}")
-    public ResponseEntity<List<CheckpointDTO>> getCheckpointsByTerritoryId(@Parameter(description = "ID территории")
-                                                                           @PathVariable UUID territoryId) {
-        List<CheckpointDTO> checkpoints = checkpointService.findCheckpointsByTerritoryId(territoryId);
-        if (checkpoints.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(checkpoints);
+    public List<CheckpointDTO> getCheckpointsByTerritoryId(@Parameter(description = "ID территории")
+                                                           @PathVariable UUID territoryId) {
+        return checkpointService.findCheckpointsByTerritoryId(territoryId);
     }
 
     /* UPDATE */
