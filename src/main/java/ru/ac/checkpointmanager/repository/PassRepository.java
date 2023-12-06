@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import ru.ac.checkpointmanager.model.passes.Pass;
+import ru.ac.checkpointmanager.projection.PassInOutViewProjection;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -90,4 +91,10 @@ public interface PassRepository extends JpaRepository<Pass, UUID> {
     @Query(value = "SELECT EXISTS (SELECT FROM user_territory WHERE user_id = :uId AND territory_id = :tId)"
             , nativeQuery = true)
     boolean checkUserTerritoryRelation(@Param("uId") UUID userId, @Param("tId") UUID territoryId);
+
+    @Query(value = "SELECT * FROM pass_in_out_view p WHERE p.user_id = :userId ", nativeQuery = true)
+    Page<PassInOutViewProjection> findEventsByUser(UUID userId, Pageable pageable);
+
+    @Query(value = "SELECT * FROM pass_in_out_view p WHERE p.territory_id = :terId ", nativeQuery = true)
+    Page<PassInOutViewProjection> findEventsByTerritory(UUID terId, Pageable pageable);
 }
