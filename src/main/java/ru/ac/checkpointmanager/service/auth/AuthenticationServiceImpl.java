@@ -243,7 +243,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
      * После успешной валидации производится проверка, существует ли пользователь в базе данных, если да то продолжаем работу,
      * если нет то:
      *
-     * @throws UsernameNotFoundException который обработается в {@link GlobalExceptionHandler}
+     * @throws UsernameNotFoundException если юзер из jwt не существует в бд
      * @see JwtService#validateRefreshToken(String)
      * @see JwtService#extractUsername(String)
      */
