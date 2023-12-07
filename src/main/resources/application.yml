@@ -46,9 +46,8 @@ spring:
             enable: true
   data:
     redis:
-      host: redis-13179.c274.us-east-1-3.ec2.cloud.redislabs.com
-      port: 13179
-      password: 4gK1A6s5thjWC7WuYIZa00d7H7MoPGSN
+      host: localhost
+      port: 6379
       jedis:
         pool:
           enabled: true
