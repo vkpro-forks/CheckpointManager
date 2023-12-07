@@ -228,6 +228,13 @@ public class JwtService {
 
     /**
      * Проверяет валидность рефрешь токена, перед тем как делать с ним какие либо действия
+     *
+     * @param token строка с токеном JWT
+     * @throws UnsupportedJwtException  не соответствует формату JWT
+     * @throws MalformedJwtException    поврежденный JWT
+     * @throws SignatureException       неверная подпись
+     * @throws ExpiredJwtException      время действия JWT вышло
+     * @throws IllegalArgumentException передан null/пустая строка/строка из пробелов
      */
     public void validateRefreshToken(String token) {
         try {
