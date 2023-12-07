@@ -1,8 +1,6 @@
 package ru.ac.checkpointmanager.service.auth;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -22,6 +20,7 @@ import ru.ac.checkpointmanager.dto.AuthenticationResponse;
 import ru.ac.checkpointmanager.dto.IsAuthenticatedResponse;
 import ru.ac.checkpointmanager.dto.user.LoginResponse;
 import ru.ac.checkpointmanager.dto.user.UserAuthDTO;
+import ru.ac.checkpointmanager.exception.InvalidTokenException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.mapper.UserMapper;
 import ru.ac.checkpointmanager.model.TemporaryUser;
@@ -50,6 +49,7 @@ import java.util.UUID;
 @Slf4j
 public class AuthenticationServiceImpl implements AuthenticationService {
     public static final String METHOD_WAS_INVOKED = "Method {} was invoked";
+    public static final String AUTH_HEADER_MISSING = "Authorization header is missing or does not start with Bearer String";
     private final UserRepository userRepository;
     private final TokenRepository tokenRepository;
     private final JwtService jwtService;
@@ -246,45 +246,44 @@ public class AuthenticationServiceImpl implements AuthenticationService {
      * Если заголовок авторизации отсутствует или не начинается с "Bearer ", или если пользователь с указанным адресом электронной почты не найден,
      * метод просто возвращает управление.
      *
-     * @param request  HTTP-запрос, содержащий заголовок авторизации с токеном обновления.
-     * @param response HTTP-ответ, в который будет записан новый токен доступа.
+     * @param request HTTP-запрос, содержащий заголовок авторизации с токеном обновления.
      * @throws IOException если произошла ошибка при записи ответа.
      * @see JwtService
      */
     @Override
     @Transactional
-    public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public AuthenticationResponse refreshToken(HttpServletRequest request) {
         log.debug(METHOD_WAS_INVOKED, MethodLog.getMethodName());
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         final String refreshToken;
         final String userEmail;
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            log.warn("Authorization header is missing or does not start with Bearer String");
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Token is missing or invalid");
-            return;
+            log.warn(AUTH_HEADER_MISSING);
+            throw new InvalidTokenException(AUTH_HEADER_MISSING);
         }
-
         refreshToken = authHeader.substring(7);
+
         userEmail = jwtService.extractUsername(refreshToken);
-
+        //TODO взяли из jwt email, потом достаем по этому имейлу юзера из БД (логично что у него будет такой же email)
+        //потом передаем в isTokenValid где сравниваем email.equals(email) и время жизни токена. можно было бы просто время проверить
+        //кстати если мы ломаем токен то всегда вылетает 500, хотя должна быть 401
         if (userEmail != null) {
-            User user = this.userRepository.findByEmail(userEmail).orElseThrow(() ->
-                    new UsernameNotFoundException(String.format("User with email - '%s', not found  ", userEmail)));
-
+            User user = this.userRepository.findByEmail(userEmail).orElseThrow(() -> {
+                log.warn("User with email - '%s', not found ".formatted(userEmail));
+                return new UsernameNotFoundException("User with email - '%s', not found ".formatted(userEmail));
+            });
             if (jwtService.isTokenValid(refreshToken, user)) {
                 String accessToken = jwtService.generateToken(user);
                 revokeAllUserTokens(user);
                 saveUserToken(user, accessToken);
-
-                AuthenticationResponse authResponse = new AuthenticationResponse(accessToken, refreshToken);
-                new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
+                return new AuthenticationResponse(accessToken, refreshToken);
             } else {
                 log.warn("Refresh token is not valid for user {}", userEmail);
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid Refresh Token");
+                throw new InvalidTokenException(AUTH_HEADER_MISSING);
             }
         } else {
             log.warn("User email could not be extracted from refresh token");
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid Refresh Token");
+            throw new InvalidTokenException(AUTH_HEADER_MISSING);
         }
     }
 }
