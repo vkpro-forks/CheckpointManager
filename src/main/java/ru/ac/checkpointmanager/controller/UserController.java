@@ -17,7 +17,16 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.dto.ChangeEmailRequest;
 import ru.ac.checkpointmanager.dto.ChangePasswordRequest;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
@@ -29,7 +38,6 @@ import ru.ac.checkpointmanager.utils.ErrorUtils;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -37,7 +45,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Пользовательский интерфейс", description = "Комплекс операций по управлению жизненным циклом " +
-                                                        "пользовательских учетных записей, включая создание, модификацию, просмотр и удаление аккаунтов")
+        "пользовательских учетных записей, включая создание, модификацию, просмотр и удаление аккаунтов")
 @ApiResponses(value = {
         @ApiResponse(responseCode = "401",
                 description = "UNAUTHORIZED: пользователь не авторизован"),
@@ -66,12 +74,10 @@ public class UserController {
             )
     })
     @PreAuthorize(value = "hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
-    @GetMapping("{id}")
-    public ResponseEntity<UserResponseDTO> findUserById(@Parameter(description = "Уникальный идентификатор пользователя", required = true)
-                                                        @PathVariable UUID id
-    ) {
-        Optional<UserResponseDTO> user = Optional.ofNullable(userService.findById(id));
-        return user.map(ResponseEntity::ok).orElse(ResponseEntity.noContent().build());
+    @GetMapping("/{id}")
+    public UserResponseDTO findUserById(@Parameter(description = "Уникальный идентификатор пользователя", required = true)
+                                        @PathVariable UUID id) {
+        return userService.findById(id);
     }
 
     @Operation(summary = "Поиск территории по id пользователя",
@@ -91,11 +97,10 @@ public class UserController {
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/{userId}/territories")
-    public ResponseEntity<List<TerritoryDTO>> getTerritoriesByUser(@Parameter(description = "Уникальный идентификатор пользователя", required = true)
-                                                                   @PathVariable UUID userId
-    ) {
-        List<TerritoryDTO> territories = userService.findTerritoriesByUserId(userId);
-        return territories.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(territories);
+    public List<TerritoryDTO> getTerritoriesByUser(
+            @Parameter(description = "Уникальный идентификатор пользователя", required = true)
+            @PathVariable UUID userId) {
+        return userService.findTerritoriesByUserId(userId);
     }
 
     @Operation(summary = "Поиск пользователя по имени",
@@ -115,11 +120,10 @@ public class UserController {
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/name")
-    public ResponseEntity<Collection<UserResponseDTO>> findUserByName(@Parameter(description = "имя/часть имени", required = true)
-                                                                      @RequestParam String name
-    ) {
-        Collection<UserResponseDTO> foundUsers = userService.findByName(name);
-        return foundUsers.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(foundUsers);
+    public Collection<UserResponseDTO> findUserByName(
+            @Parameter(description = "имя/часть имени", required = true)
+            @RequestParam String name) {
+        return userService.findByName(name);
     }
 
     @Operation(summary = "Получить список всех пользователей",
@@ -143,9 +147,8 @@ public class UserController {
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping()
-    public ResponseEntity<Collection<UserResponseDTO>> getAll() {
-        Collection<UserResponseDTO> foundUsers = userService.getAll();
-        return foundUsers.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(foundUsers);
+    public Collection<UserResponseDTO> getAll() {
+        return userService.getAll();
     }
 
     @Operation(summary = "Получения списка номеров телефона, привязанных к пользователю",
@@ -165,11 +168,10 @@ public class UserController {
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/numbers/{id}")
-    public ResponseEntity<Collection<String>> findUsersPhoneNumbers(@Parameter(description = "Уникальный идентификатор пользователя", required = true)
-                                                                    @PathVariable UUID id
-    ) {
-        Collection<String> numbers = userService.findUsersPhoneNumbers(id);
-        return numbers.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(numbers);
+    public Collection<String> findUsersPhoneNumbers(
+            @Parameter(description = "Уникальный идентификатор пользователя", required = true)
+            @PathVariable UUID id) {
+        return userService.findUsersPhoneNumbers(id);
     }
 
     @Operation(summary = "Изменение данных пользователя",
@@ -201,13 +203,8 @@ public class UserController {
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER')")
     @PutMapping
-    public ResponseEntity<?> updateUser(@Valid @RequestBody UserPutDTO userPutDTO, BindingResult result
-    ) {
-        if (result.hasErrors()) {
-            return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
-        }
-        UserResponseDTO changedUser = userService.updateUser(userPutDTO);
-        return new ResponseEntity<>(changedUser, HttpStatus.OK);
+    public UserResponseDTO updateUser(@Valid @RequestBody UserPutDTO userPutDTO) {
+        return userService.updateUser(userPutDTO);
     }
 
     @Operation(summary = "Изменение пароля пользователя",
@@ -289,13 +286,11 @@ public class UserController {
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @PatchMapping("/role/{id}")
-    public ResponseEntity<?> changeRole(@Parameter(description = "Уникальный идентификатор пользователя", required = true)
-                                        @PathVariable UUID id,
-                                        @Parameter(description = "Новая роль пользователя", required = true)
-                                        @RequestParam Role role
-    ) {
+    public void changeRole(@Parameter(description = "Уникальный идентификатор пользователя", required = true)
+                           @PathVariable UUID id,
+                           @Parameter(description = "Новая роль пользователя", required = true)
+                           @RequestParam Role role) {
         userService.changeRole(id, role);
-        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "Изменение статуса блокировки пользователя по id",
@@ -320,14 +315,12 @@ public class UserController {
             )
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
-    @PatchMapping("{id}")
-    public ResponseEntity<?> updateBlockStatus(@Parameter(description = "Уникальный идентификатор пользователя", required = true)
-                                               @PathVariable UUID id,
-                                               @Parameter(description = "Статус блокировки: true для блокировки пользователя, false для разблокировки", required = true)
-                                               @RequestParam Boolean isBlocked
-    ) {
-        UserResponseDTO changedUser = userService.updateBlockStatus(id, isBlocked);
-        return ResponseEntity.ok(changedUser);
+    @PatchMapping("/{id}")
+    public UserResponseDTO updateBlockStatus(@Parameter(description = "Уникальный идентификатор пользователя", required = true)
+                                             @PathVariable UUID id,
+                                             @Parameter(description = "Статус блокировки: true для блокировки пользователя, false для разблокировки", required = true)
+                                             @RequestParam Boolean isBlocked) {
+        return userService.updateBlockStatus(id, isBlocked);
     }
 
     @Operation(summary = "Заблокировать пользователя по id",
@@ -396,8 +389,8 @@ public class UserController {
     )
     @ApiResponses(value = {
             @ApiResponse(
-                    responseCode = "200",
-                    description = "OK: пользователь удален"
+                    responseCode = "204",
+                    description = "NO CONTENT: пользователь удален"
             ),
             @ApiResponse(
                     responseCode = "403",
@@ -409,15 +402,10 @@ public class UserController {
             )
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER')")
-    @DeleteMapping("{id}")
-    public ResponseEntity<Void> deleteUser(@Parameter(description = "Уникальный идентификатор пользователя", required = true)
-                                           @PathVariable UUID id
-    ) {
-        UserResponseDTO foundUser = userService.findById(id);
-        if (foundUser == null) {
-            return ResponseEntity.noContent().build();
-        }
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteUser(@Parameter(description = "Уникальный идентификатор пользователя", required = true)
+                           @PathVariable UUID id) {
         userService.deleteUser(id);
-        return ResponseEntity.ok().build();
     }
 }

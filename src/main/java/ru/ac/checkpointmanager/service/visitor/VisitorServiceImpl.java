@@ -84,7 +84,7 @@ public class VisitorServiceImpl implements VisitorService {
 
     @Override
     public List<Visitor> findByPhonePart(String phone) {
-        if (phone == null || phone.isEmpty()) {
+        if (phone == null || phone.isEmpty()) { //TODO after validation we can remove this check
             log.warn("Attempt to find Visitor by null or empty phone");
             throw new IllegalArgumentException("Phone part cannot be null or empty");
         }

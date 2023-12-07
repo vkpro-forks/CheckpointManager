@@ -12,7 +12,10 @@ import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassResponseDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
-import ru.ac.checkpointmanager.exception.PassNotFoundException;
+import ru.ac.checkpointmanager.exception.pass.ModifyPassException;
+import ru.ac.checkpointmanager.exception.pass.OverlapPassException;
+import ru.ac.checkpointmanager.exception.pass.PassNotFoundException;
+import ru.ac.checkpointmanager.exception.pass.UserTerritoryRelationException;
 import ru.ac.checkpointmanager.mapper.PassMapper;
 import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.model.Territory;
@@ -27,7 +30,6 @@ import ru.ac.checkpointmanager.service.user.UserService;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -44,13 +46,16 @@ import static ru.ac.checkpointmanager.utils.StringTrimmer.trimThemAll;
 @RequiredArgsConstructor
 public class PassServiceImpl implements PassService {
 
-    private static final String PASS_NOT_FOUND_LOG = "[Pass with id: {}] not found";
-    private static final String PASS_NOT_FOUND_MSG = "Pass with id: %s not found";
-    private static final String METHOD_UUID = "Method {} [{}]";
-    private static final String PASS_STATUS_CHANGED_LOG = "Pass [UUID - {}], changed status on {}";
-    private static final String USER_NOT_FOUND_LOG = "User with [id: {}] not found";
-    private static final String USER_NOT_FOUND_MSG = "User with id: %s not found";
-
+    private static final String PASS_NOT_FOUND = "Pass [%s] not found";
+    private static final String PAGE_NO_CONTENT = "Page %d, size - %d, has no content (total pages - %d, total elements - %d)";
+    private static final String PASS_NOT_UPDATE = "Pass [%s] cannot be updated (%s)";
+    private static final String PASS_NOT_CANCEL = "Pass [%s] cannot be canceled (%s)";
+    private static final String PASS_NOT_ACTIVATED = "Pass [%s] cannot be activated (%s)";
+    private static final String METHOD_INVOKE = "Method {} [{}]";
+    private static final String PASS_STATUS = "Pass [{}], changed status on {}";
+    private static final String PASS_STATUS_CROSS = "Pass [{}], exist {} crossings, changed status on {}";
+    private static final String USER_TER_REL = "Reject: user [%s] not have permission to create passes for territory [%s]";
+    private static final String OVERLAP_PASS = "Reject: user [%s] has an overlapping pass [%s]";
 
     private final PassRepository passRepository;
     private final CrossingRepository crossingRepository;
@@ -62,7 +67,7 @@ public class PassServiceImpl implements PassService {
 
     @Override
     public PassResponseDTO addPass(PassCreateDTO passCreateDTO) {
-        log.info("Method {} [{}]", MethodLog.getMethodName(), passCreateDTO);
+        log.info(METHOD_INVOKE, MethodLog.getMethodName(), passCreateDTO);
         UUID userId = passCreateDTO.getUserId();
         UUID territoryId = passCreateDTO.getTerritoryId();
         User user = userService.findUserById(userId);
@@ -93,14 +98,12 @@ public class PassServiceImpl implements PassService {
 
     @Override
     public Page<PassResponseDTO> findPasses(PagingParams pagingParams) {
-        log.debug("Method {}", MethodLog.getMethodName());
+        log.debug(METHOD_INVOKE, MethodLog.getMethodName(), "all");
 
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
         Page<Pass> foundPasses = passRepository.findAll(pageable);
         if (!foundPasses.hasContent()) {
-            throw new PassNotFoundException(String.format(
-                    "Page %d (size - %d) does not contain passes, total pages - %d, total elements - %d",
-                    pageable.getPageNumber(), pageable.getPageSize(),
+            log.warn(PAGE_NO_CONTENT.formatted(pageable.getPageNumber(), pageable.getPageSize(),
                     foundPasses.getTotalPages(), foundPasses.getTotalElements()));
         }
 
@@ -109,7 +112,7 @@ public class PassServiceImpl implements PassService {
 
     @Override
     public PassResponseDTO findById(UUID id) {
-        log.debug(METHOD_UUID, MethodLog.getMethodName(), id);
+        log.debug(METHOD_INVOKE, MethodLog.getMethodName(), id);
         return mapper.toPassDTO(findPassById(id));
     }
 
@@ -117,23 +120,21 @@ public class PassServiceImpl implements PassService {
     public Pass findPassById(UUID id) {
         return passRepository.findById(id).orElseThrow(
                 () -> {
-                    log.warn(PASS_NOT_FOUND_LOG, id);
-                    return new PassNotFoundException(PASS_NOT_FOUND_MSG.formatted(id));
+                    log.warn(PASS_NOT_FOUND.formatted(id));
+                    return new PassNotFoundException(PASS_NOT_FOUND.formatted(id));
                 });
     }
 
     @Override
     public Page<PassResponseDTO> findPassesByUser(UUID userId, PagingParams pagingParams) {
-        log.debug(METHOD_UUID, MethodLog.getMethodName(), userId);
+        log.debug(METHOD_INVOKE, MethodLog.getMethodName(), userId);
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
         userService.findById(userId);
 
         Page<Pass> foundPasses = passRepository.findPassesByUserId(userId, pageable);
         if (!foundPasses.hasContent()) {
-            throw new PassNotFoundException(String.format(
-                    "Page %d (size - %d) does not contain passes, total pages - %d, total elements - %d  [user id %s]",
-                    pageable.getPageNumber(), pageable.getPageSize(),
-                    foundPasses.getTotalPages(), foundPasses.getTotalElements(), userId));
+            log.warn(PAGE_NO_CONTENT.formatted(pageable.getPageNumber(), pageable.getPageSize(),
+                    foundPasses.getTotalPages(), foundPasses.getTotalElements()));
         }
 
         return foundPasses.map(mapper::toPassDTO);
@@ -141,49 +142,45 @@ public class PassServiceImpl implements PassService {
 
     @Override
     public Page<PassResponseDTO> findPassesByTerritory(UUID terId, PagingParams pagingParams) {
-        log.debug(METHOD_UUID, MethodLog.getMethodName(), terId);
+        log.debug(METHOD_INVOKE, MethodLog.getMethodName(), terId);
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
         territoryService.findById(terId);
         Page<Pass> foundPasses = passRepository.findPassesByTerritoryId(terId, pageable);
         if (!foundPasses.hasContent()) {
-            throw new PassNotFoundException(String.format(
-                    "Page %d (size - %d) does not contain passes, total pages - %d, total elements - %d  [territory id %s]",
-                    pageable.getPageNumber(), pageable.getPageSize(),
-                    foundPasses.getTotalPages(), foundPasses.getTotalElements(), terId));
+            log.warn(PAGE_NO_CONTENT.formatted(pageable.getPageNumber(), pageable.getPageSize(),
+                    foundPasses.getTotalPages(), foundPasses.getTotalElements()));
         }
         return foundPasses.map(mapper::toPassDTO);
     }
 
     @Override
     public PassResponseDTO updatePass(PassUpdateDTO passUpdateDTO) {
-        log.debug(METHOD_UUID, MethodLog.getMethodName(), passUpdateDTO);
-        //TODO так а что тут у нас происходит - сначала ищем привязанные сущности, потом маппим в pass
-        //сначала логично проверить что сам Pass который мы хотим отапдейдить есть в базе
+        log.debug(METHOD_INVOKE, MethodLog.getMethodName(), passUpdateDTO);
+
         UUID passId = passUpdateDTO.getId();
-        Pass foundPass = findPassById(passId);
-        if (foundPass.getStatus() != PassStatus.ACTIVE && foundPass.getStatus() != PassStatus.DELAYED) {
-            throw new IllegalStateException("This pass is not active or delayed, it cannot be changed");
+        Pass existPass = findPassById(passId);
+        PassStatus passStatus = existPass.getStatus();
+        if (passStatus != PassStatus.ACTIVE && passStatus != PassStatus.DELAYED) {
+            log.warn(PASS_NOT_UPDATE.formatted(passId, passStatus));
+            throw new ModifyPassException(PASS_NOT_UPDATE.formatted(passId, passStatus));
         }
-        //- далее, ищем юзера и территорию, проверяем из отношение, если всё ОК
-        //проверяем
+
         User user = userService.findByPassId(passId);
         Territory territory = territoryService.findByPassId(passId);
         checkUserTerritoryRelation(user, territory);
-        Pass pass = mapper.toPass(passUpdateDTO, user, territory);//есть тогда смысла в этом маппинге?
+        Pass newStatePass = mapper.toPass(passUpdateDTO, user, territory);
 
+        checkOverlapTime(newStatePass);
+        trimThemAll(newStatePass);
 
-        checkOverlapTime(pass);//TODO в этот есть смысл если мы из бд достали пропуск, который перед сохранением уже
-        //прошел такую проверку?
-        trimThemAll(pass);
+        existPass.setComment(newStatePass.getComment());
+        existPass.setTypeTime(newStatePass.getTypeTime());
+        existPass.setStartTime(newStatePass.getStartTime());
+        existPass.setEndTime(newStatePass.getEndTime());
+        existPass.setAttachedEntity(newStatePass);
 
-        foundPass.setComment(pass.getComment());
-        foundPass.setTypeTime(pass.getTypeTime());
-        foundPass.setStartTime(pass.getStartTime());
-        foundPass.setEndTime(pass.getEndTime());
-        foundPass.setAttachedEntity(pass);
-        //TODO вот после того как мы обновили значения пропуска есть смысл проверить на оверлап
-        Pass updatedPass = passRepository.save(foundPass);
-        log.info("Pass updated, {}", updatedPass);
+        Pass updatedPass = passRepository.save(existPass);
+        log.info("Pass updated: {}", updatedPass);
 
         return mapper.toPassDTO(updatedPass);
     }
@@ -191,14 +188,16 @@ public class PassServiceImpl implements PassService {
     @Override
     @Transactional
     public PassResponseDTO cancelPass(UUID id) {
-        log.info(METHOD_UUID, MethodLog.getMethodName(), id);
+        log.info(METHOD_INVOKE, MethodLog.getMethodName(), id);
 
         Pass pass = findPassById(id);
-        if (!pass.getStatus().equals(PassStatus.ACTIVE) && !pass.getStatus().equals(PassStatus.DELAYED)) {
-            throw new IllegalStateException("You can only cancel an active or delayed pass");
+        PassStatus passStatus = pass.getStatus();
+        if (passStatus != PassStatus.ACTIVE && passStatus != PassStatus.DELAYED) {
+            log.warn(PASS_NOT_CANCEL.formatted(id, passStatus));
+            throw new ModifyPassException(PASS_NOT_CANCEL.formatted(id, passStatus));
         }
 
-        List<Crossing> passCrossings = crossingRepository.findCrossingsByPassId(pass.getId());
+        List<Crossing> passCrossings = crossingRepository.findCrossingsByPassIdOrderByLocalDateTimeDesc(pass.getId());
         if (passCrossings.isEmpty()) {
             pass.setStatus(PassStatus.CANCELLED);
         } else {
@@ -207,23 +206,25 @@ public class PassServiceImpl implements PassService {
         }
 
         Pass cancelledPass = passRepository.save(pass);
-        log.info("Pass [UUID - {}], exist {} crossings, changed status on {}",
-                pass.getId(), passCrossings.size(), pass.getStatus());
+        log.info(PASS_STATUS_CROSS, id, passCrossings.size(), pass.getStatus());
 
         return mapper.toPassDTO(cancelledPass);
     }
 
     @Override
     public PassResponseDTO activateCancelledPass(UUID id) {
-        log.info(METHOD_UUID, MethodLog.getMethodName(), id);
-        Pass pass = findPassById(id);
+        log.info(METHOD_INVOKE, MethodLog.getMethodName(), id);
 
-        if (!pass.getStatus().equals(PassStatus.CANCELLED)) {
-            throw new IllegalStateException("You can only activate a previously cancelled pass");
+        Pass pass = findPassById(id);
+        PassStatus passStatus = pass.getStatus();
+        if (passStatus  != PassStatus.CANCELLED) {
+            log.warn(PASS_NOT_ACTIVATED.formatted(id, passStatus));
+            throw new ModifyPassException(PASS_NOT_ACTIVATED.formatted(id, passStatus));
         }
 
         if (pass.getEndTime().isBefore(LocalDateTime.now())) {
-            throw new IllegalStateException("This pass has already expired");
+            log.warn(PASS_NOT_ACTIVATED.formatted(id, "it's expired"));
+            throw new ModifyPassException(PASS_NOT_ACTIVATED.formatted(id, "it's expired"));
         }
 
         if (pass.getStartTime().isBefore(LocalDateTime.now())) {
@@ -231,32 +232,31 @@ public class PassServiceImpl implements PassService {
         } else {
             pass.setStatus(PassStatus.DELAYED);
         }
-
         Pass activatedPass = passRepository.save(pass);
-        log.info(PASS_STATUS_CHANGED_LOG, pass.getId(), pass.getStatus());
+        log.info(PASS_STATUS, pass.getId(), pass.getStatus());
 
         return mapper.toPassDTO(activatedPass);
     }
 
     @Override
     public PassResponseDTO unWarningPass(UUID id) {
-        log.info(METHOD_UUID, MethodLog.getMethodName(), id);
+        log.info(METHOD_INVOKE, MethodLog.getMethodName(), id);
 
         Pass pass = findPassById(id);
-        if (!pass.getStatus().equals(PassStatus.WARNING)) {
-            throw new IllegalStateException("You can only to unwarnining a previously warninged pass");
+        if (pass.getStatus() != PassStatus.WARNING) {
+            throw new ModifyPassException("You can only to unwarnining a previously warninged pass");
         }
-        pass.setStatus(PassStatus.COMPLETED);
 
+        pass.setStatus(PassStatus.COMPLETED);
         Pass completedPass = passRepository.save(pass);
-        log.info(PASS_STATUS_CHANGED_LOG, pass.getId(), pass.getStatus());
+        log.info(PASS_STATUS, pass.getId(), pass.getStatus());
 
         return mapper.toPassDTO(completedPass);
     }
 
     @Override
     public void markFavorite(UUID id) {
-        log.info(METHOD_UUID, MethodLog.getMethodName(), id);
+        log.info(METHOD_INVOKE, MethodLog.getMethodName(), id);
         Pass pass = findPassById(id);
         pass.setFavorite(true);
         passRepository.save(pass);
@@ -265,7 +265,7 @@ public class PassServiceImpl implements PassService {
 
     @Override
     public void unmarkFavorite(UUID id) {
-        log.info(METHOD_UUID, MethodLog.getMethodName(), id);
+        log.info(METHOD_INVOKE, MethodLog.getMethodName(), id);
         Pass pass = findPassById(id);
         pass.setFavorite(false);
         passRepository.save(pass);
@@ -274,11 +274,8 @@ public class PassServiceImpl implements PassService {
 
     @Override
     public void deletePass(UUID id) {
-        log.info(METHOD_UUID, MethodLog.getMethodName(), id);
-        if (passRepository.findById(id).isEmpty()) {
-            log.warn(PASS_NOT_FOUND_LOG, id);
-            throw new PassNotFoundException(PASS_NOT_FOUND_MSG.formatted(id));
-        }
+        log.info(METHOD_INVOKE, MethodLog.getMethodName(), id);
+        findPassById(id);
         passRepository.deleteById(id);
         log.info("[Pass with id: {}] successfully deleted", id);
     }
@@ -295,10 +292,8 @@ public class PassServiceImpl implements PassService {
         UUID territoryId = territory.getId();
 
         if (!passRepository.checkUserTerritoryRelation(userId, territoryId)) {
-            String message = String.format("Reject operation: user [%s] not have permission to create passes " +
-                    "for this territory [%s]", userId, territoryId);
-            log.warn(message);
-            throw new IllegalArgumentException(message);
+            log.warn(USER_TER_REL.formatted(userId, territoryId));
+            throw new UserTerritoryRelationException(USER_TER_REL.formatted(userId, territoryId));
         }
     }
 
@@ -319,10 +314,8 @@ public class PassServiceImpl implements PassService {
                 .findFirst();
 
         if (overlapPass.isPresent()) {
-            String message = String.format("Reject operation: user [UUID - %s] already has such a pass with " +
-                    "overlapping time [UUID - %s]", newPass.getUser().getId(), overlapPass.get().getId());
-            log.info(message);
-            throw new IllegalArgumentException(message);
+            log.info(OVERLAP_PASS.formatted(newPass.getUser().getId(), overlapPass.get().getId()));
+            throw new OverlapPassException(OVERLAP_PASS.formatted(newPass.getUser().getId(), overlapPass.get().getId()));
         }
     }
 
@@ -361,9 +354,7 @@ public class PassServiceImpl implements PassService {
         for (Pass pass : passes) {
             pass.setStatus(PassStatus.ACTIVE);
             passRepository.save(pass);
-
-            log.debug(PASS_STATUS_CHANGED_LOG,
-                    pass.getId(), pass.getStatus());
+            log.debug(PASS_STATUS, pass.getId(), pass.getStatus());
         }
     }
 
@@ -385,7 +376,7 @@ public class PassServiceImpl implements PassService {
         log.info("Method {}, endTime reached on {} active pass(es)", MethodLog.getMethodName(), passes.size());
 
         for (Pass pass : passes) {
-            List<Crossing> passCrossings = crossingRepository.findCrossingsByPassId(pass.getId());
+            List<Crossing> passCrossings = crossingRepository.findCrossingsByPassIdOrderByLocalDateTimeDesc(pass.getId());
             if (passCrossings.isEmpty()) {
                 pass.setStatus(PassStatus.OUTDATED);
             } else {
@@ -394,8 +385,7 @@ public class PassServiceImpl implements PassService {
             }
             passRepository.save(pass);
 
-            log.info("Pass [UUID - {}], exist {} crossings, changed status on {}",
-                    pass.getId(), passCrossings.size(), pass.getStatus());
+            log.info(PASS_STATUS_CROSS, pass.getId(), passCrossings.size(), pass.getStatus());
         }
     }
 
@@ -409,10 +399,8 @@ public class PassServiceImpl implements PassService {
      * @see PassStatus
      */
     private PassStatus changeStatusForPassWithCrossings(List<Crossing> crossings) {
-        Crossing lastCrossing = crossings.stream()
-                .max(Comparator.comparing(Crossing::getLocalDateTime))
-                .get();
 
+        Crossing lastCrossing = crossings.get(0);
         if (lastCrossing.getDirection().equals(Direction.OUT)) {
             return PassStatus.COMPLETED;
         } else {

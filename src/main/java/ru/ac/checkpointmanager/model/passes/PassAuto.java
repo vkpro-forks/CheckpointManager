@@ -13,7 +13,7 @@ import java.util.Objects;
 @DiscriminatorValue("AUTO")
 public class PassAuto extends Pass {
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "car_id")
     private Car car;
 

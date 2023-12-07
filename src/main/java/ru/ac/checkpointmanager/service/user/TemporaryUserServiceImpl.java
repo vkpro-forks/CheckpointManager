@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
 import ru.ac.checkpointmanager.model.TemporaryUser;
 import ru.ac.checkpointmanager.repository.TemporaryUserRepository;
 
@@ -21,13 +22,19 @@ import java.time.LocalDateTime;
 @Slf4j
 public class TemporaryUserServiceImpl implements TemporaryUserService {
 
+    public static final String TOKEN_NOT_FOUND_OR_EXPIRED = "Token not found or expired";
     private final TemporaryUserRepository repository;
 
     private int hourForLogInScheduledCheck;
 
     @Override
     public TemporaryUser findByVerifiedToken(String verifiedToken) {
-        return repository.findByVerifiedToken(verifiedToken);
+        return repository.findByVerifiedToken(verifiedToken)
+                .orElseThrow(() -> {
+                            log.warn(TOKEN_NOT_FOUND_OR_EXPIRED);
+                            return new EmailVerificationTokenException(TOKEN_NOT_FOUND_OR_EXPIRED);
+                        }
+                );
     }
 
     @Override

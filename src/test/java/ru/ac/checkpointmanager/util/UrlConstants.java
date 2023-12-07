@@ -8,11 +8,7 @@ public class UrlConstants {
 
     public static final String AVATAR_URL = "/api/v1/avatars";
 
-    public static final String AVATAR_URL_PREVIEW = AVATAR_URL + "/preview";
-
     public static final String CROSSING_URL = "/api/v1/crossing";
-
-    public static final String CROSSING_MARK_URL = CROSSING_URL + "/mark";
 
     public static final String CHECKPOINT_URL = "/api/v1/checkpoint";
 
@@ -37,6 +33,18 @@ public class UrlConstants {
     public static final String TERR_ATTACH_DETACH_URL = TERR_URL + "/%s/user/%s";
 
     public static final String PHONE_URL = "/api/v1/phone";
+
+    public static final String USER_URL = "/api/v1/user";
+
+    public static final String USER_ROLE_URL = USER_URL + "/role";
+
+    public static final String CONFIRM_URL = "/api/v1/confirm";
+
+    public static final String CONFIRM_EMAIL_URL = CONFIRM_URL + "/email";
+
+    public static final String AUTH_URL = "/api/v1/authentication";
+
+    public static final String AUTH_LOGIN_URL = AUTH_URL + "/login";
 
 
     private UrlConstants() {
