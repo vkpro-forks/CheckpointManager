@@ -2,6 +2,7 @@ package ru.ac.checkpointmanager.service.user;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSendException;
 import org.springframework.security.access.AccessDeniedException;
@@ -85,6 +86,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "user", key = "#id") //на этом эндпоинте проверяла работу кэширования, остальное кэширование - отдельная таска
     public UserResponseDTO findById(UUID id) {
         log.debug(METHOD_UUID, MethodLog.getMethodName(), id);
         User foundUser = findUserById(id);
