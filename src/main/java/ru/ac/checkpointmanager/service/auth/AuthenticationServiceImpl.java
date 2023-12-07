@@ -10,6 +10,7 @@ import org.springframework.mail.MailException;
 import org.springframework.mail.MailSendException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -48,6 +49,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class AuthenticationServiceImpl implements AuthenticationService {
+    public static final String METHOD_WAS_INVOKED = "Method {} was invoked";
     private final UserRepository userRepository;
     private final TokenRepository tokenRepository;
     private final JwtService jwtService;
@@ -84,18 +86,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Override
     public TemporaryUser preRegister(UserAuthDTO userAuthDTO) {
-        log.debug("Method {} was invoked", MethodLog.getMethodName());
+        log.debug(METHOD_WAS_INVOKED, MethodLog.getMethodName());
         boolean userExist = userRepository.findByEmail(userAuthDTO.getEmail()).isPresent();
         if (userExist) {
             log.warn("Email {} already taken", userAuthDTO.getEmail());
             throw new IllegalStateException(String.format("Email %s already taken", userAuthDTO.getEmail()));
         }
-
         TemporaryUser temporaryUser = userMapper.toTemporaryUser(userAuthDTO);
-
         String encodedPassword = passwordEncoder.encode(temporaryUser.getPassword());
         temporaryUser.setPassword(encodedPassword);
-
         String token = UUID.randomUUID().toString();
         temporaryUser.setVerifiedToken(token);
 
@@ -131,28 +130,22 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Override
     public void confirmRegistration(String token) {
-        log.debug("Method {} was invoked", MethodLog.getMethodName());
+        log.debug(METHOD_WAS_INVOKED, MethodLog.getMethodName());
         TemporaryUser tempUser = temporaryUserService.findByVerifiedToken(token);
 
-        if (tempUser != null) {
-            User user = userMapper.toUser(tempUser);
-            user.setRole(Role.USER);
-            user.setIsBlocked(false);
+        User user = userMapper.toUser(tempUser);
+        user.setRole(Role.USER);
+        user.setIsBlocked(false);
 
-            userRepository.save(user);
-            log.debug("User registration completed successfully for {}", user.getEmail());
+        userRepository.save(user);
+        log.debug("User registration completed successfully for {}", user.getEmail());
 
-            temporaryUserService.delete(tempUser);
-            log.debug("Temporary user {} was deleted", tempUser.getEmail());
+        temporaryUserService.delete(tempUser);
+        log.debug("Temporary user {} was deleted", tempUser.getEmail());
 
-            String jwtToken = jwtService.generateToken(user);
-            saveUserToken(user, jwtToken);
-            log.debug("Access token for {} created and saved", user.getEmail());
-
-        } else {
-            log.error("Email not confirmed. Error: temporary user with token {} not found", token);
-            throw new UserNotFoundException(String.format("User with token - '%s', not found  ", token));
-        }
+        String jwtToken = jwtService.generateToken(user);
+        saveUserToken(user, jwtToken);
+        log.debug("Access token for {} created and saved", user.getEmail());
     }
 
     @Override
@@ -183,14 +176,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public LoginResponse authenticate(AuthenticationRequest request) {
         log.debug("Method {}, Username {}", MethodLog.getMethodName(), request.getEmail());
-        authenticationManager.authenticate(
+        Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
                         request.getPassword()
                 ));
-
-        User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() ->
-                new UserNotFoundException(String.format("User with email - '%s', not found  ", request.getEmail())));
+        User user = (User) authentication.getPrincipal();
 
         String jwtToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
@@ -211,7 +202,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     @Transactional
     public void saveUserToken(User user, String jwtToken) {
-        log.info("Method {} was invoked", MethodLog.getMethodName());
+        log.info(METHOD_WAS_INVOKED, MethodLog.getMethodName());
         Token token = new Token();
         token.setUser(user);
         token.setToken(jwtToken);
@@ -233,7 +224,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     @Transactional
     public void revokeAllUserTokens(User user) {
-        log.info("Method {} was invoked", MethodLog.getMethodName());
+        log.info(METHOD_WAS_INVOKED, MethodLog.getMethodName());
         List<Token> validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
         if (validUserTokens.isEmpty())
             return;
@@ -263,7 +254,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     @Transactional
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        log.debug("Method {} was invoked", MethodLog.getMethodName());
+        log.debug(METHOD_WAS_INVOKED, MethodLog.getMethodName());
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         final String refreshToken;
         final String userEmail;

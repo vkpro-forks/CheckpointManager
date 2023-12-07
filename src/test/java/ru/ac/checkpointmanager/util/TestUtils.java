@@ -7,8 +7,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.instancio.Instancio;
 import org.instancio.Model;
 import org.instancio.Select;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import ru.ac.checkpointmanager.dto.AuthenticationRequest;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.CheckpointDTO;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
@@ -17,8 +19,8 @@ import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.dto.user.UserPutDTO;
-import ru.ac.checkpointmanager.model.TemporaryUser;
 import ru.ac.checkpointmanager.exception.handler.ErrorCode;
+import ru.ac.checkpointmanager.model.TemporaryUser;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.model.checkpoints.CheckpointType;
@@ -68,6 +70,9 @@ public class TestUtils {
     public static final String JSON_DETAIL = "$.detail";
 
     public static final UUID EMAIL_TOKEN = UUID.randomUUID();
+    public static final String PASSWORD = "password";
+
+    public static final String EMAIL = "123@123.com";
 
 
     public static CarBrand getCarBrand() {
@@ -177,6 +182,10 @@ public class TestUtils {
         );
     }
 
+    public static AuthenticationRequest getAuthenticationRequest() {
+        return new AuthenticationRequest(EMAIL, PASSWORD);
+    }
+
     public static String jsonStringFromObject(Object object) throws JsonProcessingException {
         ObjectMapper objectMapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
         return objectMapper.writeValueAsString(object);
@@ -186,6 +195,15 @@ public class TestUtils {
         resultActions.andExpect(MockMvcResultMatchers.status().is4xxClientError())
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_ERROR_CODE)
                         .value(ErrorCode.VALIDATION.toString()));
+    }
+
+    public static void checkNotFoundFields(ResultActions resultActions) throws Exception {
+        resultActions.andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_ERROR_CODE)
+                        .value(ErrorCode.NOT_FOUND.toString()))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_TIMESTAMP).isNotEmpty())
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_TITLE).isNotEmpty());
     }
 
     private TestUtils() {
