@@ -16,10 +16,10 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import ru.ac.checkpointmanager.exception.AvatarIsEmptyException;
 import ru.ac.checkpointmanager.exception.DateOfBirthFormatException;
 import ru.ac.checkpointmanager.exception.EntranceWasAlreadyException;
-import ru.ac.checkpointmanager.exception.pass.InactivePassException;
 import ru.ac.checkpointmanager.exception.InvalidPhoneNumberException;
 import ru.ac.checkpointmanager.exception.PhoneAlreadyExistException;
 import ru.ac.checkpointmanager.exception.VisitorNotFoundException;
+import ru.ac.checkpointmanager.exception.pass.InactivePassException;
 
 import java.time.Instant;
 import java.util.List;
@@ -190,7 +190,7 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleBadCredentialsException(BadCredentialsException e) {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.UNAUTHORIZED, e);
         problemDetail.setTitle("Bad credentials");
-        problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
+        problemDetail.setProperty(ERROR_CODE, ErrorCode.UNAUTHORIZED.toString());
         log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }

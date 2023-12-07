@@ -19,7 +19,7 @@ import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 
-class UserTestNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestConfig {
+class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestConfig {
 
     public static final String USER = "User";
 
