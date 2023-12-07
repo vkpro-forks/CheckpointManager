@@ -13,7 +13,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
-import ru.ac.checkpointmanager.exception.AvatarIsEmptyException;
 import ru.ac.checkpointmanager.exception.DateOfBirthFormatException;
 import ru.ac.checkpointmanager.exception.EntranceWasAlreadyException;
 import ru.ac.checkpointmanager.exception.InvalidPhoneNumberException;
@@ -95,28 +94,10 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
-/*    @ExceptionHandler(IllegalArgumentException.class)
-    public ProblemDetail handleIllegalArgumentException(IllegalArgumentException e) {
-        ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
-        problemDetail.setTitle("Illegal argument exception occurred");//FIXME replace for more suitable exception
-        problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
-        log.debug(LOG_MSG, e.getClass());
-        return problemDetail;
-    }*/
-
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ProblemDetail handleAvatarIsTooBigException(MaxUploadSizeExceededException e) {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
         problemDetail.setTitle("Size of uploading file exceeds maximum");
-        problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
-        log.debug(LOG_MSG, e.getClass());
-        return problemDetail;
-    }
-
-    @ExceptionHandler(AvatarIsEmptyException.class)
-    public ProblemDetail handleAvatarIsEmptyException(AvatarIsEmptyException e) {
-        ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
-        problemDetail.setTitle("Avatar is empty");// FIXME No usages for this exception
         problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
         log.debug(LOG_MSG, e.getClass());
         return problemDetail;
