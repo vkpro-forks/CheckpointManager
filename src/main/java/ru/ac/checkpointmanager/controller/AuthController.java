@@ -10,13 +10,13 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.security.SecuritySchemes;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,6 +27,7 @@ import ru.ac.checkpointmanager.dto.AuthenticationRequest;
 import ru.ac.checkpointmanager.dto.AuthenticationResponse;
 import ru.ac.checkpointmanager.dto.IsAuthenticatedResponse;
 import ru.ac.checkpointmanager.dto.user.LoginResponse;
+import ru.ac.checkpointmanager.dto.user.RefreshTokenDTO;
 import ru.ac.checkpointmanager.dto.user.UserAuthDTO;
 import ru.ac.checkpointmanager.service.auth.AuthenticationService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
@@ -35,6 +36,7 @@ import static ru.ac.checkpointmanager.utils.ErrorUtils.errorsList;
 
 @RestController
 @RequiredArgsConstructor
+@Validated
 @RequestMapping("api/v1/authentication")
 @Tag(name = "Регистрация и аутентификация", description = "Точка входа в приложение")
 @SecuritySchemes({
@@ -123,21 +125,18 @@ public class AuthController {
                             responseCode = "200",
                             description = "OK: Токен успешно обновлен",
                             content = @Content(
-                                    schema = @Schema(implementation = AuthenticationResponse.class)
+                                    schema = @Schema(implementation = AuthenticationResponse.class),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE
                             )
                     ),
                     @ApiResponse(
                             responseCode = "401",
                             description = "UNAUTHORIZED: Недействительный токен обновления или проблемы с аутентификацией пользователя"
-                    ),
-                    @ApiResponse(
-                            responseCode = "500",
-                            description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса на обновление токена"
                     )
             }
     )
-    public AuthenticationResponse refreshToken(HttpServletRequest request) {
-        return authenticationService.refreshToken(request);
+    public AuthenticationResponse refreshToken(@Valid @RequestBody RefreshTokenDTO refreshTokenDTO) {
+        return authenticationService.refreshToken(refreshTokenDTO);
     }
 
     @Operation(summary = "Проверка регистрации при входе в сервис")
