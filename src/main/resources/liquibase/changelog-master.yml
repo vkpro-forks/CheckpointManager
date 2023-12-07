@@ -57,6 +57,8 @@ databaseChangeLog:
       file: liquibase/scripts/V_102__add_favorite_pass_flag.sql
   - include:
       file: liquibase/scripts/V_127__change_pass_fields.sql
+  - include:
+      file: liquibase/scripts/V_174__change_column_brand_id.sql
 
 ## ВНЕСЕНИЕ ДЕМО-ДАННЫХ, ОСТАВЛЯЙТЕ ВСЕГДА В КОНЦЕ ФАЙЛА
   - include:
