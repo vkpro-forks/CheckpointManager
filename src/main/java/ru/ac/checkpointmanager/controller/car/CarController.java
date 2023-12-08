@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -69,7 +70,7 @@ public class CarController {
     @PostMapping
     public ResponseEntity<?> addCar(@Valid @RequestBody CarDTO carDTO, BindingResult result) {
         if (result.hasErrors()) {
-            log.warn("Failed to add visitor due to validation errors");
+            log.warn("Failed to add car due to validation errors");
             return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
         }
 
@@ -159,7 +160,7 @@ public class CarController {
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/phone")
-    public List<CarDTO> searchByPhone(@RequestParam String phone) { //TODO validate
+    public List<CarDTO> searchByPhone(@RequestParam @NotBlank String phone) { //TODO validate
         List<Car> cars = carService.findByPhonePart(phone);
         log.debug("Cars found with phone part: {}", phone);
         return mapper.toCarDTOs(cars);
