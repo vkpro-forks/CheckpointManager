@@ -59,6 +59,8 @@ databaseChangeLog:
       file: liquibase/scripts/V_127__change_pass_fields.sql
   - include:
       file: liquibase/scripts/V_174__change_column_brand_id.sql
+  - include:
+      file: liquibase/scripts/V_112__add_column_forCar_phoneNumber.sql
 
 ## ВНЕСЕНИЕ ДЕМО-ДАННЫХ, ОСТАВЛЯЙТЕ ВСЕГДА В КОНЦЕ ФАЙЛА
   - include:
