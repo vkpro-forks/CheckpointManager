@@ -24,4 +24,6 @@ public class CarDTO {
     private String licensePlate;
 
     private CarBrand brand;
+
+    private String phone;
 }

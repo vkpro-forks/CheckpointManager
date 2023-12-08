@@ -25,8 +25,14 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public Car addCar(Car car) {
+        if (car == null) {
+            log.warn("Attempt to add null Car");
+            throw new IllegalArgumentException("Car cannot be null");
+        }
+        log.info("Adding new Visitor: {}", car);
         return repository.save(car);
     }
+
 
     @Override
     public Car getCarById(UUID carId) {
@@ -66,6 +72,16 @@ public class CarServiceImpl implements CarService {
     @Override
     public List<Car> getAllCars() {
         return repository.findAll();
+    }
+
+    @Override
+    public List<Car> findByPhonePart(String phone) {
+        if (phone == null || phone.isEmpty()) { //TODO after validation we can remove this check
+            log.warn("Attempt to find Car by null or empty phone");
+            throw new IllegalArgumentException("Phone part cannot be null or empty");
+        }
+        log.info("Searching for Cars with phone containing: {}", phone);
+        return repository.findByPhoneContaining(phone);
     }
 
     @Override
