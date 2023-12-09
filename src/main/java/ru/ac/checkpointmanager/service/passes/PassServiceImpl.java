@@ -78,8 +78,10 @@ public class PassServiceImpl implements PassService {
         checkOverlapTime(pass);
 
         trimThemAll(pass);
-
-        if (pass.getStartTime().isBefore(LocalDateTime.now())) {
+        if (pass.getStartTime().isBefore(LocalDateTime.now())) {//а как сюда попадет значение ранее NOW()?
+            //мы же отбраковываем значения с плохим start time? еще на входе в контроллер
+            //получается что все пропуски по умолчанию создаются DELAYED
+            //вот такие вопросы возникают во время написания тестов
             pass.setStatus(PassStatus.ACTIVE);
         } else {
             pass.setStatus(PassStatus.DELAYED);
@@ -217,7 +219,7 @@ public class PassServiceImpl implements PassService {
 
         Pass pass = findPassById(id);
         PassStatus passStatus = pass.getStatus();
-        if (passStatus  != PassStatus.CANCELLED) {
+        if (passStatus != PassStatus.CANCELLED) {
             log.warn(PASS_NOT_ACTIVATED.formatted(id, passStatus));
             throw new ModifyPassException(PASS_NOT_ACTIVATED.formatted(id, passStatus));
         }
