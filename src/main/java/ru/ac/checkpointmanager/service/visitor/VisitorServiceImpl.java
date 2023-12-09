@@ -18,6 +18,7 @@ import java.util.UUID;
 @Slf4j
 public class VisitorServiceImpl implements VisitorService {
 
+    public static final String VISITOR_NOT_FOUND = "Visitor with [id: %s] not found";
     private final VisitorRepository repository;
     private final UserService userService;
 
@@ -33,23 +34,15 @@ public class VisitorServiceImpl implements VisitorService {
 
     @Override
     public Visitor getVisitor(UUID uuid) {
-        if (uuid == null) {
-            log.warn("Attempt to get Visitor with null UUID");
-            throw new IllegalArgumentException("UUID cannot be null");
-        }
         Optional<Visitor> visitorOptional = repository.findById(uuid);
         return visitorOptional.orElseThrow(() -> {
-            log.warn("Visitor not found for UUID: {}", uuid);
-            return new VisitorNotFoundException("Visitor not found");
+            log.warn(VISITOR_NOT_FOUND.formatted(uuid));
+            return new VisitorNotFoundException(VISITOR_NOT_FOUND.formatted(uuid));
         });
     }
 
     @Override
     public Visitor updateVisitor(UUID uuid, Visitor visitor) {
-        if (uuid == null || visitor == null) {
-            log.warn("Attempt to update Visitor with null UUID or null Visitor");
-            throw new IllegalArgumentException("UUID or Visitor cannot be null");
-        }
         Visitor existVisitor = getVisitor(uuid);
         log.info("Updating Visitor with UUID: {}, new data: {}", uuid, visitor);
         existVisitor.setName(visitor.getName());

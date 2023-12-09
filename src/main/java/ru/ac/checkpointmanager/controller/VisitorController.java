@@ -75,10 +75,10 @@ public class VisitorController {
             @ApiResponse(responseCode = "404", description = "Посетитель не существует.")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<?> getVisitor(@PathVariable UUID id) {
+    public VisitorDTO getVisitor(@PathVariable UUID id) {
         Visitor existVisitor = visitorService.getVisitor(id);
         log.debug("Retrieved visitor with ID {}", id);
-        return new ResponseEntity<>(mapper.toVisitorDTO(existVisitor), HttpStatus.OK);
+        return mapper.toVisitorDTO(existVisitor);
     }
 
 
