@@ -12,6 +12,8 @@ public enum ErrorCode {
 
     BAD_REQUEST,
 
-    FORBIDDEN
+    FORBIDDEN,
+
+    UNAUTHORIZED
 
 }

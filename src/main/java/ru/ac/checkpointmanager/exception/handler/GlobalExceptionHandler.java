@@ -13,13 +13,13 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
-import ru.ac.checkpointmanager.exception.AvatarIsEmptyException;
 import ru.ac.checkpointmanager.exception.DateOfBirthFormatException;
 import ru.ac.checkpointmanager.exception.EntranceWasAlreadyException;
-import ru.ac.checkpointmanager.exception.pass.InactivePassException;
 import ru.ac.checkpointmanager.exception.InvalidPhoneNumberException;
+import ru.ac.checkpointmanager.exception.InvalidTokenException;
 import ru.ac.checkpointmanager.exception.PhoneAlreadyExistException;
 import ru.ac.checkpointmanager.exception.VisitorNotFoundException;
+import ru.ac.checkpointmanager.exception.pass.InactivePassException;
 
 import java.time.Instant;
 import java.util.List;
@@ -95,28 +95,10 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
-/*    @ExceptionHandler(IllegalArgumentException.class)
-    public ProblemDetail handleIllegalArgumentException(IllegalArgumentException e) {
-        ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
-        problemDetail.setTitle("Illegal argument exception occurred");//FIXME replace for more suitable exception
-        problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
-        log.debug(LOG_MSG, e.getClass());
-        return problemDetail;
-    }*/
-
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ProblemDetail handleAvatarIsTooBigException(MaxUploadSizeExceededException e) {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
         problemDetail.setTitle("Size of uploading file exceeds maximum");
-        problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
-        log.debug(LOG_MSG, e.getClass());
-        return problemDetail;
-    }
-
-    @ExceptionHandler(AvatarIsEmptyException.class)
-    public ProblemDetail handleAvatarIsEmptyException(AvatarIsEmptyException e) {
-        ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
-        problemDetail.setTitle("Avatar is empty");// FIXME No usages for this exception
         problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
         log.debug(LOG_MSG, e.getClass());
         return problemDetail;
@@ -188,9 +170,18 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BadCredentialsException.class)
     public ProblemDetail handleBadCredentialsException(BadCredentialsException e) {
-        ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
+        ProblemDetail problemDetail = createProblemDetail(HttpStatus.UNAUTHORIZED, e);
         problemDetail.setTitle("Bad credentials");
-        problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
+        problemDetail.setProperty(ERROR_CODE, ErrorCode.UNAUTHORIZED.toString());
+        log.debug(LOG_MSG, e.getClass());
+        return problemDetail;
+    }
+
+    @ExceptionHandler(InvalidTokenException.class)
+    public ProblemDetail handleInvalidTokenException(InvalidTokenException e) {
+        ProblemDetail problemDetail = createProblemDetail(HttpStatus.UNAUTHORIZED, e);
+        problemDetail.setTitle("Jwt is invalid");
+        problemDetail.setProperty(ERROR_CODE, ErrorCode.UNAUTHORIZED.toString());
         log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }
