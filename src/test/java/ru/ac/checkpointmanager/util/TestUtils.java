@@ -4,11 +4,17 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import org.instancio.Instancio;
 import org.instancio.Model;
 import org.instancio.Select;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import ru.ac.checkpointmanager.dto.AuthenticationRequest;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.CheckpointDTO;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
@@ -16,9 +22,10 @@ import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
+import ru.ac.checkpointmanager.dto.user.RefreshTokenDTO;
 import ru.ac.checkpointmanager.dto.user.UserPutDTO;
-import ru.ac.checkpointmanager.model.TemporaryUser;
 import ru.ac.checkpointmanager.exception.handler.ErrorCode;
+import ru.ac.checkpointmanager.model.TemporaryUser;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.model.checkpoints.CheckpointType;
@@ -26,7 +33,12 @@ import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.enums.PhoneNumberType;
 import ru.ac.checkpointmanager.model.passes.PassTypeTime;
 
+import java.security.Key;
 import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class TestUtils {
@@ -68,6 +80,10 @@ public class TestUtils {
     public static final String JSON_DETAIL = "$.detail";
 
     public static final UUID EMAIL_TOKEN = UUID.randomUUID();
+    public static final String PASSWORD = "password";
+
+    public static final String EMAIL = "123@123.com";
+    private static final String USERNAME = "Username";
 
 
     public static CarBrand getCarBrand() {
@@ -177,6 +193,27 @@ public class TestUtils {
         );
     }
 
+    public static AuthenticationRequest getAuthenticationRequest() {
+        return new AuthenticationRequest(EMAIL, PASSWORD);
+    }
+
+    public static RefreshTokenDTO getRefreshTokenDTO() {
+        return new RefreshTokenDTO(getJwt(86400000, USERNAME, List.of("ROLE_ADMIN")));
+    }
+
+    public static String getJwt(Integer expired, String username, List<String> roles) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("role", roles);
+        return Jwts
+                .builder()
+                .setClaims(claims)
+                .setSubject(username)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + expired))
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
     public static String jsonStringFromObject(Object object) throws JsonProcessingException {
         ObjectMapper objectMapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
         return objectMapper.writeValueAsString(object);
@@ -186,6 +223,20 @@ public class TestUtils {
         resultActions.andExpect(MockMvcResultMatchers.status().is4xxClientError())
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_ERROR_CODE)
                         .value(ErrorCode.VALIDATION.toString()));
+    }
+
+    public static void checkNotFoundFields(ResultActions resultActions) throws Exception {
+        resultActions.andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_ERROR_CODE)
+                        .value(ErrorCode.NOT_FOUND.toString()))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_TIMESTAMP).isNotEmpty())
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_TITLE).isNotEmpty());
+    }
+
+    private static Key getSignInKey() {
+        byte[] keyBytes = Decoders.BASE64.decode("8790D58F7205C4C250CD67DD6D9B6F8B20D2E928FFAA6D4A2BEB2AD2189B01D1");
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 
     private TestUtils() {

@@ -55,9 +55,8 @@ avatars:
   dir:
   extensions: jpg, jpeg, png, ico, gif, eps, svg, bmp
   max-size: 5MB # Максимальный размер файла
-  image:
-    max-width: 400 # максимальная ширина изображения
-    max-height: 400 # максимальная высота изображения
+  max-width: 400 # максимальная ширина изображения
+  max-height: 400 # максимальная высота изображения
   content-type: "image/"
 logging:
   config: classpath:logback-local.xml

@@ -65,13 +65,7 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public List<Car> getAllCars() {
-        List<Car> cars = repository.findAll();
-
-        if (cars.isEmpty()) {
-            System.out.println("No cars found in the database.");
-        }
-
-        return cars;
+        return repository.findAll();
     }
 
     @Override

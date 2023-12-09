@@ -104,12 +104,8 @@ public class TerritoryController {
             @ApiResponse(responseCode = "404", description = "Территории не найдены")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @GetMapping("/name")
-    public ResponseEntity<List<TerritoryDTO>> getTerritoriesByName(@RequestParam String name) {
-        List<TerritoryDTO> territories = territoryService.findTerritoriesByName(name);
-        if (territories.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(territories);
+    public List<TerritoryDTO> getTerritoriesByName(@RequestParam String name) {
+        return territoryService.findTerritoriesByName(name);
     }
 
     @Operation(summary = "Получить список всех территорий",
@@ -121,12 +117,8 @@ public class TerritoryController {
             @ApiResponse(responseCode = "404", description = "Территории не найдены")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @GetMapping
-    public ResponseEntity<List<TerritoryDTO>> getTerritories() {
-        List<TerritoryDTO> territories = territoryService.findAllTerritories();
-        if (territories.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(territories);
+    public List<TerritoryDTO> getTerritories() {
+        return territoryService.findAllTerritories();
     }
 
     /* UPDATE */

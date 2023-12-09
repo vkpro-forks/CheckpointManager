@@ -115,7 +115,7 @@ public class AvatarController {
     @Operation(summary = "Получить аватар по Id пользователя")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Аватар получен. Контент содержит изображение в формате JPEG.",
-                    content = @Content(mediaType = MediaType.IMAGE_JPEG_VALUE,
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = AvatarImageDTO.class))),
             @ApiResponse(responseCode = "404", description = "NOT_FOUND: Аватар не найден",
                     content = @Content(schema = @Schema(implementation = AvatarNotFoundException.class))),
