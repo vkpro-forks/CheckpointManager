@@ -3,7 +3,6 @@ package ru.ac.checkpointmanager.repository.car;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import ru.ac.checkpointmanager.model.Visitor;
 import ru.ac.checkpointmanager.model.car.Car;
 
 import java.util.List;

@@ -25,7 +25,7 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public Car addCar(Car car) {
-        log.info("Adding new Visitor: {}", car);
+        log.info("Adding new Car: {}", car);
         return repository.save(car);
     }
 
