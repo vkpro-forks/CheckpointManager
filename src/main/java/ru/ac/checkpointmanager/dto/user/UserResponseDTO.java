@@ -32,10 +32,8 @@ public class UserResponseDTO {
     @NotEmpty(message = "Email should not be empty")
     private String email;
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Boolean isBlocked;
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Role role;
 
     @JsonProperty("avatar")
