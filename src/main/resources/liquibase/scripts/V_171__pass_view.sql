@@ -46,7 +46,8 @@ FROM InRanked i
 -- всё, итоговый CTE сформирован - у нас есть пары въезд-выезд,
 -- в которых всего три колонки - pass_id, in_time, out_time;
 -- так что можем по pass_id сджойнить нужные данные из других таблиц
-SELECT p.dtype, p.comment, t.name, p.type_time, p.status,
+SELECT p.dtype, p.comment as pass_comment, t.name as terr_name,
+       p.type_time as pass_time_type, p.status as pass_status,
        c.license_plate as car, v.full_name as visitor,
        cpr.in_time, cpr.out_time, p.id as pass_id,
        p.territory_id, p.user_id
