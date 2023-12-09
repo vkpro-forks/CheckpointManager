@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import ru.ac.checkpointmanager.exception.DateOfBirthFormatException;
 import ru.ac.checkpointmanager.exception.EntranceWasAlreadyException;
 import ru.ac.checkpointmanager.exception.InvalidPhoneNumberException;
+import ru.ac.checkpointmanager.exception.InvalidTokenException;
 import ru.ac.checkpointmanager.exception.PhoneAlreadyExistException;
 import ru.ac.checkpointmanager.exception.VisitorNotFoundException;
 import ru.ac.checkpointmanager.exception.pass.InactivePassException;
@@ -171,6 +172,15 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleBadCredentialsException(BadCredentialsException e) {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.UNAUTHORIZED, e);
         problemDetail.setTitle("Bad credentials");
+        problemDetail.setProperty(ERROR_CODE, ErrorCode.UNAUTHORIZED.toString());
+        log.debug(LOG_MSG, e.getClass());
+        return problemDetail;
+    }
+
+    @ExceptionHandler(InvalidTokenException.class)
+    public ProblemDetail handleInvalidTokenException(InvalidTokenException e) {
+        ProblemDetail problemDetail = createProblemDetail(HttpStatus.UNAUTHORIZED, e);
+        problemDetail.setTitle("Jwt is invalid");
         problemDetail.setProperty(ERROR_CODE, ErrorCode.UNAUTHORIZED.toString());
         log.debug(LOG_MSG, e.getClass());
         return problemDetail;

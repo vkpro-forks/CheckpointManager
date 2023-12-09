@@ -1,20 +1,29 @@
 package ru.ac.checkpointmanager.configuration;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import ru.ac.checkpointmanager.exception.InvalidTokenException;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.security.Key;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -63,7 +72,11 @@ public class JwtService {
      */
     public String extractUsername(String token) {
         log.info("Method {} [Token {}]", MethodLog.getMethodName(), token);
-        return extractClaim(token, Claims::getSubject);
+        String username = extractClaim(token, Claims::getSubject);
+        if (username == null || username.isBlank()) {
+            throw new InvalidTokenException("Username/email in JWT is null or empty");
+        }
+        return username;
     }
 
     /**
@@ -211,6 +224,33 @@ public class JwtService {
         log.debug("Method {}, User {}", MethodLog.getMethodName(), userDetails.getUsername());
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+    }
+
+    /**
+     * Проверяет валидность рефрешь токена, перед тем как делать с ним какие либо действия
+     *
+     * @param token строка с токеном JWT
+     * @throws InvalidTokenException который собирает в себе:
+     *                               <p>
+     *                               {@link UnsupportedJwtException}  не соответствует формату JWT;
+     *                               <p>
+     *                               {@link MalformedJwtException}    поврежденный JWT
+     *                               <p>
+     *                               {@link  SignatureException}       неверная подпись
+     *                               <p>
+     *                               {@link ExpiredJwtException}      время действия JWT вышло
+     *                               <p>
+     *                               {@link IllegalArgumentException} передан null/пустая строка/строка из пробелов
+     */
+    public void validateRefreshToken(String token) {
+        try {
+            extractAllClaims(token);
+            //из метода parseClaimsJws вот это всё вылетает, это всё Runtime
+        } catch (UnsupportedJwtException | MalformedJwtException | SignatureException |
+                 ExpiredJwtException | IllegalArgumentException ex) {
+            log.warn("Refresh token is invalid: {}", ex.getMessage());
+            throw new InvalidTokenException(ex.getMessage());
+        }
     }
 
     /**

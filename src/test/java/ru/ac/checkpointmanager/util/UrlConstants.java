@@ -46,6 +46,8 @@ public class UrlConstants {
 
     public static final String AUTH_LOGIN_URL = AUTH_URL + "/login";
 
+    public static final String AUTH_REFRESH_TOKEN_URL = AUTH_URL + "/refresh-token";
+
 
     private UrlConstants() {
 

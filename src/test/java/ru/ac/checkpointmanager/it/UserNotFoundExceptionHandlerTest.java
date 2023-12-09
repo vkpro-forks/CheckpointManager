@@ -172,4 +172,17 @@ class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestCo
         TestUtils.checkNotFoundFields(resultActions);
     }
 
+    @Test
+    @SneakyThrows
+    void shouldHandleUserNotFoundExceptionForGettingRefreshToken() {
+        String refreshTokenString = TestUtils.jsonStringFromObject(TestUtils.getRefreshTokenDTO());
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                        .post(UrlConstants.AUTH_REFRESH_TOKEN_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(refreshTokenString))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(Matchers.startsWith(USER)));
+        TestUtils.checkNotFoundFields(resultActions);
+    }
+
 }

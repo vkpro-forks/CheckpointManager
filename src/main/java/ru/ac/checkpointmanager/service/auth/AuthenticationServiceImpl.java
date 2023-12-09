@@ -1,11 +1,7 @@
 package ru.ac.checkpointmanager.service.auth;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSendException;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,8 +17,10 @@ import ru.ac.checkpointmanager.dto.AuthenticationRequest;
 import ru.ac.checkpointmanager.dto.AuthenticationResponse;
 import ru.ac.checkpointmanager.dto.IsAuthenticatedResponse;
 import ru.ac.checkpointmanager.dto.user.LoginResponse;
+import ru.ac.checkpointmanager.dto.user.RefreshTokenDTO;
 import ru.ac.checkpointmanager.dto.user.UserAuthDTO;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
+import ru.ac.checkpointmanager.exception.handler.GlobalExceptionHandler;
 import ru.ac.checkpointmanager.mapper.UserMapper;
 import ru.ac.checkpointmanager.model.TemporaryUser;
 import ru.ac.checkpointmanager.model.Token;
@@ -35,7 +33,6 @@ import ru.ac.checkpointmanager.service.email.EmailService;
 import ru.ac.checkpointmanager.service.user.TemporaryUserService;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -238,53 +235,34 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     /**
      * Обновляет токен доступа пользователя.
      * <p>
-     * Этот метод извлекает токен обновления из заголовка авторизации HTTP-запроса, проверяет его действительность и,
+     * Этот метод получает токен обновления из тела запроса, проверяет его валидность, и
      * если токен действителен, генерирует новый токен доступа, отзывает все предыдущие токены пользователя и сохраняет новый токен.
      * Затем метод создает новый объект {@code AuthenticationResponse} с новым токеном доступа и токеном обновления,
-     * преобразует его в JSON и записывает в поток ответа.
+     * преобразует его в JSON и возвращает для представления пользователю
      * <p>
-     * Если заголовок авторизации отсутствует или не начинается с "Bearer ", или если пользователь с указанным адресом электронной почты не найден,
-     * метод просто возвращает управление.
+     * После успешной валидации производится проверка, существует ли пользователь в базе данных, если да то продолжаем работу,
+     * если нет то:
      *
-     * @param request  HTTP-запрос, содержащий заголовок авторизации с токеном обновления.
-     * @param response HTTP-ответ, в который будет записан новый токен доступа.
-     * @throws IOException если произошла ошибка при записи ответа.
-     * @see JwtService
+     * @throws UsernameNotFoundException если юзер из jwt не существует в бд
+     * @see JwtService#validateRefreshToken(String)
+     * @see JwtService#extractUsername(String)
      */
     @Override
     @Transactional
-    public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public AuthenticationResponse refreshToken(RefreshTokenDTO refreshTokenDTO) {
         log.debug(METHOD_WAS_INVOKED, MethodLog.getMethodName());
-        final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-        final String refreshToken;
-        final String userEmail;
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            log.warn("Authorization header is missing or does not start with Bearer String");
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Token is missing or invalid");
-            return;
-        }
-
-        refreshToken = authHeader.substring(7);
-        userEmail = jwtService.extractUsername(refreshToken);
-
-        if (userEmail != null) {
-            User user = this.userRepository.findByEmail(userEmail).orElseThrow(() ->
-                    new UsernameNotFoundException(String.format("User with email - '%s', not found  ", userEmail)));
-
-            if (jwtService.isTokenValid(refreshToken, user)) {
-                String accessToken = jwtService.generateToken(user);
-                revokeAllUserTokens(user);
-                saveUserToken(user, accessToken);
-
-                AuthenticationResponse authResponse = new AuthenticationResponse(accessToken, refreshToken);
-                new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
-            } else {
-                log.warn("Refresh token is not valid for user {}", userEmail);
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid Refresh Token");
-            }
-        } else {
-            log.warn("User email could not be extracted from refresh token");
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid Refresh Token");
-        }
+        final String refreshToken = refreshTokenDTO.getRefreshToken();
+        jwtService.validateRefreshToken(refreshToken);//здесь проверится, парсится ли jwt, совпадают ли подписи, валидно ли время жизни
+        String userEmail = jwtService.extractUsername(refreshToken);
+        User user = this.userRepository.findByEmail(userEmail).orElseThrow(() -> {
+            log.warn("User with email - '%s', not found ".formatted(userEmail));
+            return new UsernameNotFoundException("User with email - '%s', not found ".formatted(userEmail));
+        });
+        String accessToken = jwtService.generateToken(user);
+        //можно сразу 2 токена возвращать если например refresh скоро устареет
+        revokeAllUserTokens(user);
+        saveUserToken(user, accessToken);
+        return new AuthenticationResponse(accessToken, refreshToken);
     }
+
 }
