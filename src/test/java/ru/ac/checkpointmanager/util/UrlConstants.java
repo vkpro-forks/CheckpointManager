@@ -50,6 +50,8 @@ public class UrlConstants {
 
     public static final String VISITOR_URL = "/api/v1/visitor";
 
+    public static final String VISITOR_PHONE_URL = "/api/v1/visitor/phone";
+
 
     private UrlConstants() {
 
