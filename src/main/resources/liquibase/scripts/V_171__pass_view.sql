@@ -18,13 +18,13 @@ WITH cross_pairs AS
         -- а окно - это все строки из crossings с одинаковым pass_id, отсортированные по времени пересечения;
         -- этот номер строки потом нужен будет для сопоставления
         ROW_NUMBER() OVER (PARTITION BY pass_id ORDER BY local_date_time) as rn
-        FROM Crossings
+        FROM crossings
         WHERE direction = 'IN'), -- несколько CTE можно создавать через запятую, WITH повторять не надо
     -- так что вот второй вложенный CTE, такой же как первый, но для выездов
     OutRanked AS (
         SELECT pass_id, local_date_time as time,
         ROW_NUMBER() OVER (PARTITION BY pass_id ORDER BY local_date_time) as rn
-        FROM Crossings
+        FROM crossings
         WHERE direction = 'OUT')
 
 -- здесь мы еще находимся внутри большого CTE (cross_pairs), но уже можем использовать CTE InRanked и OutRanked:
