@@ -1,6 +1,5 @@
 package ru.ac.checkpointmanager.dto;
 
-import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -23,7 +22,8 @@ public class CarDTO {
     @Pattern(regexp = "^[АВЕКМНОРСТУХавекмнорстухA-Za-z0-9]+$", message = "Invalid characters in license plate")
     private String licensePlate;
 
-    private CarBrand brand;
+    private CarBrand brand;//можно передать авто без бренда?
 
-    private String phone;
+    private String phone;//можно передать авто без телефона?
+
 }

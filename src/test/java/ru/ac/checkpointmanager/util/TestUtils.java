@@ -112,7 +112,8 @@ public class TestUtils {
         return new CarDTO(
                 CAR_ID,
                 LICENSE_PLATE,
-                getCarBrand()
+                getCarBrand(),
+                PHONE_NUM
         );
     }
 

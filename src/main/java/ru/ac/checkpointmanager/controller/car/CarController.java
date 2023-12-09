@@ -25,14 +25,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.dto.CarDTO;
-import ru.ac.checkpointmanager.dto.VisitorDTO;
 import ru.ac.checkpointmanager.mapper.CarMapper;
-import ru.ac.checkpointmanager.model.Visitor;
 import ru.ac.checkpointmanager.model.car.Car;
-import ru.ac.checkpointmanager.model.car.CarBrand;
-import ru.ac.checkpointmanager.service.car.CarBrandService;
 import ru.ac.checkpointmanager.service.car.CarService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
 
@@ -55,7 +52,6 @@ public class CarController {
 
     private final CarMapper mapper;
     private final CarService carService;
-    private final CarBrandService carBrandService;
 
     @Operation(summary = "Добавить новую машину",
             description = "Доступ: ADMIN.")
@@ -68,15 +64,11 @@ public class CarController {
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @PostMapping
-    public ResponseEntity<?> addCar(@Valid @RequestBody CarDTO carDTO, BindingResult result) {
-        if (result.hasErrors()) {
-            log.warn("Failed to add car due to validation errors");
-            return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
-        }
-
+    @ResponseStatus(HttpStatus.CREATED)
+    public CarDTO addCar(@Valid @RequestBody CarDTO carDTO) {
         Car newCar = carService.addCar(mapper.toCar(carDTO));
         log.info("New car added: {}", newCar);
-        return new ResponseEntity<>(mapper.toCarDTO(newCar), HttpStatus.CREATED);
+        return mapper.toCarDTO(newCar);
     }
 
     @Operation(summary = "Обновить новую машину",
@@ -160,7 +152,7 @@ public class CarController {
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/phone")
-    public List<CarDTO> searchByPhone(@RequestParam @NotBlank String phone) { //TODO validate
+    public List<CarDTO> searchByPhone(@RequestParam @NotBlank String phone) {
         List<Car> cars = carService.findByPhonePart(phone);
         log.debug("Cars found with phone part: {}", phone);
         return mapper.toCarDTOs(cars);
