@@ -118,11 +118,13 @@ class PassControllerIntegrationTest extends PostgresContainersConfig {
         car.setLicensePlate(TestUtils.getCarDto().getLicensePlate());
         car.setBrand(savedCarBrand);
         car.setId(TestUtils.getCarDto().getId());
-        carRepository.saveAndFlush(car);
+        Car savedCar = carRepository.saveAndFlush(car);//save car and repo change its id
         PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTO();
         passCreateDTO.setUserId(savedUser.getId());
         passCreateDTO.setTerritoryId(savedTerritory.getId());
         passCreateDTO.getCar().setBrand(savedCarBrand);//set saved car brand, if no car brand in DB, 404 will be thrown
+        passCreateDTO.getCar().setId(savedCar.getId());
+        passCreateDTO.getCar().setLicensePlate(savedCar.getLicensePlate());
         String passCreateDtoString = TestUtils.jsonStringFromObject(passCreateDTO);
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
@@ -131,9 +133,13 @@ class PassControllerIntegrationTest extends PostgresContainersConfig {
                 .andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.user.id").value(savedUser.getId().toString()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.territory.id").value(savedTerritory.getId().toString()));
-        resultActions.andExpect(MockMvcResultMatchers.jsonPath("$.car.id").value(car.getId().toString()));
+        resultActions.andExpect(MockMvcResultMatchers.jsonPath("$.car.id").value(savedCar.getId().toString()));
+
+        List<Car> allCars = carRepository.findAll();
+        Assertions.assertThat(allCars).hasSize(1);//check if no added cars
+
         List<Pass> allPasses = passRepository.findAll();
-        Assertions.assertThat(allPasses).hasSize(1);
+        Assertions.assertThat(allPasses).hasSize(1);//check if only one pass here
     }
 
 }
