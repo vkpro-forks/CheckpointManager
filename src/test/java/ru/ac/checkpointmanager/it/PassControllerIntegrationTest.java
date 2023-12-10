@@ -3,7 +3,6 @@ package ru.ac.checkpointmanager.it;
 import lombok.SneakyThrows;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -74,7 +73,7 @@ class PassControllerIntegrationTest extends PostgresContainersConfig {
 
     @Test
     @SneakyThrows
-    void shouldAddPassWithNewCar() {
+    void shouldAddPassWithNewCarIfCarNotExists() {
         Territory territory = new Territory();
         territory.setName(TestUtils.TERR_NAME);
         User user = TestUtils.getUser();
@@ -106,7 +105,7 @@ class PassControllerIntegrationTest extends PostgresContainersConfig {
 
     @Test
     @SneakyThrows
-    void shouldAddPassWithExistingCar() {
+    void shouldAddPassWithExistingCarsId() {
         Territory territory = new Territory();
         territory.setName(TestUtils.TERR_NAME);
         User user = TestUtils.getUser();
@@ -145,8 +144,7 @@ class PassControllerIntegrationTest extends PostgresContainersConfig {
 
     @Test
     @SneakyThrows
-    @Disabled("switch on when logic on saving will be fixe")
-    void shouldAddPassWithExistingCarButCarInDtoWillBeWithoutId() {
+    void shouldAddPassWithExistingCarInRepoButCarInDtoWillBeWithoutId() {
         Territory territory = new Territory();
         territory.setName(TestUtils.TERR_NAME);
         User user = TestUtils.getUser();
@@ -176,11 +174,16 @@ class PassControllerIntegrationTest extends PostgresContainersConfig {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.territory.id").value(savedTerritory.getId().toString()));
 
         org.junit.jupiter.api.Assertions.assertAll(
-                () -> resultActions.andExpect(MockMvcResultMatchers.jsonPath("$.car.id")
-                        .value(savedCar.getId().toString())),
+                () -> {
+                    List<Car> carsByUserId = carRepository.findCarsByUserId(savedUser.getId());
+                    Assertions.assertThat(carsByUserId).hasSize(1);
+                    Car carInPass = carsByUserId.get(0);
+                    resultActions.andExpect(MockMvcResultMatchers.jsonPath("$.car.id")
+                            .value(carInPass.getId().toString()));
+                },
                 () -> {
                     List<Car> allCars = carRepository.findAll();
-                    Assertions.assertThat(allCars).hasSize(1);//check if no added cars
+                    Assertions.assertThat(allCars).hasSize(2);//check if no added cars
                 },
                 () -> {
                     List<Pass> allPasses = passRepository.findAll();
