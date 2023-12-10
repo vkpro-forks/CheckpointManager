@@ -90,7 +90,8 @@ public class PassServiceImpl implements PassService {
         if (pass.getComment() == null || pass.getComment().isBlank()) {
             pass.setComment("Пропуск-" + pass.getId().toString().substring(32));
         }
-
+        //here it would be better to check, if car exists or not, then check if car brand exists or not
+        //and then save
         Pass savedPass = passRepository.save(pass);//на PERSIST
         // не сохранял автомобиль, который уже БЫЛ в бд
         log.info("Pass saved [{}]", savedPass);
