@@ -66,6 +66,7 @@ public class PassServiceImpl implements PassService {
     private int hourForLogInScheduledCheck;
 
     @Override
+    @Transactional
     public PassResponseDTO addPass(PassCreateDTO passCreateDTO) {
         log.info(METHOD_INVOKE, MethodLog.getMethodName(), passCreateDTO);
         UUID userId = passCreateDTO.getUserId();
@@ -90,7 +91,8 @@ public class PassServiceImpl implements PassService {
             pass.setComment("Пропуск-" + pass.getId().toString().substring(32));
         }
 
-        Pass savedPass = passRepository.save(pass);
+        Pass savedPass = passRepository.save(pass);//на PERSIST
+        // не сохранял автомобиль, который уже БЫЛ в бд
         log.info("Pass saved [{}]", savedPass);
 
         return mapper.toPassDTO(savedPass);
@@ -217,7 +219,7 @@ public class PassServiceImpl implements PassService {
 
         Pass pass = findPassById(id);
         PassStatus passStatus = pass.getStatus();
-        if (passStatus  != PassStatus.CANCELLED) {
+        if (passStatus != PassStatus.CANCELLED) {
             log.warn(PASS_NOT_ACTIVATED.formatted(id, passStatus));
             throw new ModifyPassException(PASS_NOT_ACTIVATED.formatted(id, passStatus));
         }

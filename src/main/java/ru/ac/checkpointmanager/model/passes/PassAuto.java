@@ -13,7 +13,7 @@ import java.util.Objects;
 @DiscriminatorValue("AUTO")
 public class PassAuto extends Pass {
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})//Теперь работает
     @JoinColumn(name = "car_id")
     private Car car;
 
