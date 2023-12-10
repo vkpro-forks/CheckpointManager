@@ -103,5 +103,37 @@ class PassControllerIntegrationTest extends PostgresContainersConfig {
         Assertions.assertThat(allPasses).hasSize(1);
     }
 
+    @Test
+    @SneakyThrows
+    void shouldAddPassWithExistingCar() {
+        Territory territory = new Territory();
+        territory.setName(TestUtils.TERR_NAME);
+        User user = TestUtils.getUser();
+        User savedUser = userRepository.saveAndFlush(user);
+        territory.setUsers(List.of(savedUser));
+        Territory savedTerritory = territoryRepository.saveAndFlush(territory);
+        CarBrand carBrand = TestUtils.getCarBrand();
+        CarBrand savedCarBrand = carBrandRepository.saveAndFlush(carBrand);
+        Car car = new Car();
+        car.setLicensePlate(TestUtils.getCarDto().getLicensePlate());
+        car.setBrand(savedCarBrand);
+        car.setId(TestUtils.getCarDto().getId());
+        carRepository.saveAndFlush(car);
+        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTO();
+        passCreateDTO.setUserId(savedUser.getId());
+        passCreateDTO.setTerritoryId(savedTerritory.getId());
+        passCreateDTO.getCar().setBrand(savedCarBrand);//set saved car brand, if no car brand in DB, 404 will be thrown
+        String passCreateDtoString = TestUtils.jsonStringFromObject(passCreateDTO);
+
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(passCreateDtoString))
+                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.user.id").value(savedUser.getId().toString()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.territory.id").value(savedTerritory.getId().toString()));
+        resultActions.andExpect(MockMvcResultMatchers.jsonPath("$.car.id").value(car.getId().toString()));
+        List<Pass> allPasses = passRepository.findAll();
+        Assertions.assertThat(allPasses).hasSize(1);
+    }
 
 }
