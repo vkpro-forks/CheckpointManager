@@ -25,6 +25,7 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public Car addCar(Car car) {
+        car.setId(UUID.randomUUID());
         return repository.save(car);
     }
 

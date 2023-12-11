@@ -3,6 +3,7 @@ package ru.ac.checkpointmanager.it;
 import lombok.SneakyThrows;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -73,7 +74,7 @@ class PassControllerIntegrationTest extends PostgresContainersConfig {
 
     @Test
     @SneakyThrows
-    void shouldAddPassWithNewCarIfCarNotExists() {
+    void shouldAddPassWithNewCarWithoutIdWhenCarInRepoDoesntExists() {
         Territory territory = new Territory();
         territory.setName(TestUtils.TERR_NAME);
         User user = TestUtils.getUser();
@@ -86,6 +87,7 @@ class PassControllerIntegrationTest extends PostgresContainersConfig {
         PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTO();
         passCreateDTO.setUserId(savedUser.getId());
         passCreateDTO.setTerritoryId(savedTerritory.getId());
+        passCreateDTO.getCar().setId(null);
         passCreateDTO.getCar().setBrand(savedCarBrand);//set saved car brand, if no car brand in DB, 404 will be thrown
         String passCreateDtoString = TestUtils.jsonStringFromObject(passCreateDTO);
 
@@ -105,7 +107,7 @@ class PassControllerIntegrationTest extends PostgresContainersConfig {
 
     @Test
     @SneakyThrows
-    void shouldAddPassWithExistingCarsId() {
+    void shouldAddPassWithExistingCarsIdWhenCarInRepoExists() {
         Territory territory = new Territory();
         territory.setName(TestUtils.TERR_NAME);
         User user = TestUtils.getUser();
@@ -184,6 +186,46 @@ class PassControllerIntegrationTest extends PostgresContainersConfig {
                 () -> {
                     List<Car> allCars = carRepository.findAll();
                     Assertions.assertThat(allCars).hasSize(2);//check if no added cars
+                },
+                () -> {
+                    List<Pass> allPasses = passRepository.findAll();
+                    Assertions.assertThat(allPasses).hasSize(1);//check if only one pass here
+                }
+        );
+    }
+
+    @Test
+    @SneakyThrows
+    //@Disabled
+    void shouldAddPassWithNoCarInRepoButCarInDtoWillBeWithId() {
+        Territory territory = new Territory();
+        territory.setName(TestUtils.TERR_NAME);
+        User user = TestUtils.getUser();
+        User savedUser = userRepository.saveAndFlush(user);
+        territory.setUsers(List.of(savedUser));
+        Territory savedTerritory = territoryRepository.saveAndFlush(territory);
+        CarBrand carBrand = TestUtils.getCarBrand();
+        CarBrand savedCarBrand = carBrandRepository.saveAndFlush(carBrand);
+        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTO();
+        passCreateDTO.setUserId(savedUser.getId());
+        passCreateDTO.setTerritoryId(savedTerritory.getId());
+        passCreateDTO.getCar().setBrand(savedCarBrand);//set saved car brand, if no car brand in DB, 404 will be thrown
+        passCreateDTO.getCar().setId(TestUtils.CAR_ID);
+        passCreateDTO.getCar().setLicensePlate(TestUtils.LICENSE_PLATE);
+        String passCreateDtoString = TestUtils.jsonStringFromObject(passCreateDTO);
+
+        mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(passCreateDtoString))
+                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.user.id").value(savedUser.getId().toString()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.territory.id").value(savedTerritory.getId().toString()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.car.id").value(passCreateDTO.getCar().getId().toString()));
+
+        org.junit.jupiter.api.Assertions.assertAll(
+                () -> {
+                    List<Car> allCars = carRepository.findAll();
+                    Assertions.assertThat(allCars).hasSize(1);//check if no added cars
                 },
                 () -> {
                     List<Pass> allPasses = passRepository.findAll();
