@@ -90,11 +90,7 @@ public class PassServiceImpl implements PassService {
         if (pass.getComment() == null || pass.getComment().isBlank()) {
             pass.setComment("Пропуск-" + pass.getId().toString().substring(32));
         }
-        //перед сохраненим по хорошему бы проверить, есть ли авто в бд или нет, также как и есть ли карбренд или нет
-        //сейчас если попробовать сохранить машинку с брендом которого нет в бд - будет 404 ошибка, но бросится EntityNotFound,
-        //базовая гиберовская, не наша.
-        Pass savedPass = passRepository.save(pass);//на PERSIST
-        // не сохранял автомобиль, который уже БЫЛ в бд
+        Pass savedPass = passRepository.save(pass);
         log.info("Pass saved [{}]", savedPass);
 
         return mapper.toPassDTO(savedPass);

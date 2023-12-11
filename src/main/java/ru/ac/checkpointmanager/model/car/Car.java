@@ -28,7 +28,7 @@ import java.util.UUID;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = {"brand", "passes"})//caught lazy initialization exception because by default these fiels don't load
+@ToString(exclude = {"brand", "passes"})//caught lazy initialization exception because by default these fields don't load
 public class Car {
 
     @Id
