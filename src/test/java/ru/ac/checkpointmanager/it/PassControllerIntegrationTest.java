@@ -232,6 +232,9 @@ class PassControllerIntegrationTest extends PostgresContainersConfig {
 
         mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.PASS_URL + "/" + TestUtils.PASS_ID))
                 .andExpect(MockMvcResultMatchers.status().isOk());
+
+        List<Pass> passesAfterDelete = passRepository.findAll();
+        Assertions.assertThat(passesAfterDelete).isEmpty();
     }
 
 }
