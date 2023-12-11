@@ -4,6 +4,8 @@ import lombok.SneakyThrows;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,6 +26,9 @@ import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.car.Car;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.model.passes.Pass;
+import ru.ac.checkpointmanager.model.passes.PassAuto;
+import ru.ac.checkpointmanager.model.passes.PassStatus;
+import ru.ac.checkpointmanager.model.passes.PassTypeTime;
 import ru.ac.checkpointmanager.repository.PassRepository;
 import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
@@ -33,6 +38,7 @@ import ru.ac.checkpointmanager.testcontainers.PostgresContainersConfig;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -190,6 +196,42 @@ class PassControllerIntegrationTest extends PostgresContainersConfig {
                     Assertions.assertThat(allPasses).hasSize(1);//check if only one pass here
                 }
         );
+    }
+
+    @ParameterizedTest
+    @EnumSource(PassStatus.class)
+    @SneakyThrows
+    void shouldDeletePassWithAuto(PassStatus passStatus) {
+        //creating a pass for territory
+        Territory territory = new Territory();
+        territory.setName(TestUtils.TERR_NAME);
+        User user = TestUtils.getUser();
+        User savedUser = userRepository.saveAndFlush(user);
+        territory.setUsers(List.of(savedUser));
+        Territory savedTerritory = territoryRepository.saveAndFlush(territory);
+        CarBrand carBrand = TestUtils.getCarBrand();
+        CarBrand savedCarBrand = carBrandRepository.saveAndFlush(carBrand);
+        Car car = new Car();
+        car.setLicensePlate(TestUtils.getCarDto().getLicensePlate());
+        car.setBrand(savedCarBrand);
+        car.setId(TestUtils.getCarDto().getId());
+        Car savedCar = carRepository.saveAndFlush(car);
+
+        PassAuto pass = new PassAuto();
+        pass.setId(TestUtils.PASS_ID);
+        pass.setTypeTime(PassTypeTime.ONETIME);
+        pass.setStartTime(LocalDateTime.now());
+        pass.setEndTime(LocalDateTime.now().plusHours(5));
+        pass.setStatus(passStatus);
+        pass.setTerritory(savedTerritory);
+        pass.setUser(savedUser);
+        pass.setCar(savedCar);
+        passRepository.saveAndFlush(pass);
+        List<Pass> allPasses = passRepository.findAll();
+        Assertions.assertThat(allPasses).hasSize(1);//check if only one pass here
+
+        mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.PASS_URL + "/" + TestUtils.PASS_ID))
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
 }
