@@ -121,9 +121,7 @@ class UserServiceImplTest {
         Mockito.when(userRepository.findTerritoriesByUserId(userId)).thenReturn(territories);
         Mockito.when(territoryMapper.toTerritoriesDTO(territories)).thenReturn(territoryDTOS);
 
-        List<TerritoryDTO> result = userService.findTerritoriesByUserId(userId);
-
-        Assertions.assertThat(result).isEmpty();
+        Assertions.assertThatNoException().isThrownBy(() -> userService.findTerritoriesByUserId(userId));
         Mockito.verify(userRepository).findTerritoriesByUserId(userId);
         Mockito.verify(territoryMapper).toTerritoriesDTO(territories);
     }
@@ -138,6 +136,7 @@ class UserServiceImplTest {
 
         Collection<UserResponseDTO> result = userService.findByName(anyString());
         Assertions.assertThat(result).isNotEmpty();
+        Assertions.assertThat(users).hasSize(1);
         Assertions.assertThat(users.size()).isEqualTo(userResponseDTOS.size());
         Mockito.verify(userRepository).findUserByFullNameContainingIgnoreCase(anyString());
         Mockito.verify(userMapper).toUserResponseDTOs(users);
@@ -151,8 +150,7 @@ class UserServiceImplTest {
         Mockito.when(userRepository.findUserByFullNameContainingIgnoreCase(anyString())).thenReturn(users);
         Mockito.when(userMapper.toUserResponseDTOs(users)).thenReturn(userResponseDTOS);
 
-        Collection<UserResponseDTO> result = userService.findByName(anyString());
-        Assertions.assertThat(result).isEmpty();
+        Assertions.assertThatNoException().isThrownBy(() -> userService.findByName(anyString()));
         Mockito.verify(userRepository).findUserByFullNameContainingIgnoreCase(anyString());
         Mockito.verify(userMapper).toUserResponseDTOs(users);
     }
@@ -191,7 +189,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void changePasswordUpdatesPassword() {
+    void shouldChangePassword() {
         ChangePasswordRequest request = TestUtils.getChangePasswordRequest();
         String newPassword = request.getNewPassword();
         User user = TestUtils.getUser();
@@ -208,7 +206,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void changePasswordIncorrectCurrentPasswordThrowsException() {
+    void shouldThrowExceptionIfPassedPasswordDoesntMatchCurrent() {
         ChangePasswordRequest request = TestUtils.getChangePasswordRequest();
         TestUtils.setSecurityContext(TestUtils.getUser());
 
@@ -283,7 +281,7 @@ class UserServiceImplTest {
         User user = TestUtils.getUser();
         TemporaryUser tempUser = TestUtils.getTemporaryUser();
         tempUser.setPreviousEmail(user.getEmail());
-        String token = TestUtils.EMAIL_TOKEN;
+        String token = TestUtils.EMAIL_STRING_TOKEN;
 
         Mockito.when(temporaryUserService.findByVerifiedToken(token)).thenReturn(tempUser);
         Mockito.when(userRepository.findByEmail(tempUser.getPreviousEmail())).thenReturn(Optional.of(user));

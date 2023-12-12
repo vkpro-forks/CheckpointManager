@@ -87,7 +87,8 @@ public class TestUtils {
 
     public static final String JSON_DETAIL = "$.detail";
 
-    public static final String EMAIL_TOKEN = UUID.randomUUID().toString();
+    public static final String EMAIL_STRING_TOKEN = UUID.randomUUID().toString();
+    public static final UUID EMAIL_TOKEN = UUID.randomUUID();
     public static final String PASSWORD = "password";
 
     public static final String EMAIL = "123@123.com";
