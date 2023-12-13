@@ -1,7 +1,21 @@
 package ru.ac.checkpointmanager.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -16,7 +30,11 @@ import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.model.passes.Pass;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -50,9 +68,6 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @OneToMany(mappedBy = "user")
-    private List<Token> tokens;
-
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Phone> numbers;
 
@@ -72,7 +87,7 @@ public class User implements UserDetails {
     private List<Pass> pass;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "avatar_id", referencedColumnName = "id", nullable = true)
+    @JoinColumn(name = "avatar_id", referencedColumnName = "id")
     private Avatar avatar;
 
     @Override
@@ -113,12 +128,12 @@ public class User implements UserDetails {
     @Override
     public String toString() {
         return "User{" +
-                "id=" + id +
-                ", fullName='" + fullName + '\'' +
-                ", mainNumber='" + mainNumber + '\'' +
-                ", email='" + email + '\'' +
-                ", isBlocked=" + isBlocked +
-                ", role=" + role +
-                '}';
+               "id=" + id +
+               ", fullName='" + fullName + '\'' +
+               ", mainNumber='" + mainNumber + '\'' +
+               ", email='" + email + '\'' +
+               ", isBlocked=" + isBlocked +
+               ", role=" + role +
+               '}';
     }
 }

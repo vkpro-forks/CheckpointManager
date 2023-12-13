@@ -61,6 +61,8 @@ databaseChangeLog:
       file: liquibase/scripts/V_171__pass_view.sql
   - include:
       file: liquibase/scripts/V_174__change_column_brand_id.sql
+  - include:
+      file: liquibase/scripts/V_178__drop_tokens.sql
 
 ## ВНЕСЕНИЕ ДЕМО-ДАННЫХ, ОСТАВЛЯЙТЕ ВСЕГДА В КОНЦЕ ФАЙЛА
   - include:

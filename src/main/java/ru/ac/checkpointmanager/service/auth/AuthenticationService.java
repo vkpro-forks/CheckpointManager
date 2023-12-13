@@ -7,7 +7,6 @@ import ru.ac.checkpointmanager.dto.user.LoginResponse;
 import ru.ac.checkpointmanager.dto.user.RefreshTokenDTO;
 import ru.ac.checkpointmanager.dto.user.UserAuthDTO;
 import ru.ac.checkpointmanager.model.TemporaryUser;
-import ru.ac.checkpointmanager.model.User;
 
 public interface AuthenticationService {
 
@@ -18,10 +17,6 @@ public interface AuthenticationService {
     IsAuthenticatedResponse isUserAuthenticated(String email);
 
     LoginResponse authenticate(AuthenticationRequest request);
-
-    void saveUserToken(User user, String jwtToken);
-
-    void revokeAllUserTokens(User user);
 
     AuthenticationResponse refreshToken(RefreshTokenDTO refreshTokenDTO);
 }

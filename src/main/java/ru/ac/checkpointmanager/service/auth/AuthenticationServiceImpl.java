@@ -12,7 +12,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import ru.ac.checkpointmanager.configuration.JwtService;
 import ru.ac.checkpointmanager.dto.AuthenticationRequest;
 import ru.ac.checkpointmanager.dto.AuthenticationResponse;
 import ru.ac.checkpointmanager.dto.IsAuthenticatedResponse;
@@ -20,20 +19,17 @@ import ru.ac.checkpointmanager.dto.user.LoginResponse;
 import ru.ac.checkpointmanager.dto.user.RefreshTokenDTO;
 import ru.ac.checkpointmanager.dto.user.UserAuthDTO;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
-import ru.ac.checkpointmanager.exception.handler.GlobalExceptionHandler;
+import ru.ac.checkpointmanager.security.jwt.JwtService;
+import ru.ac.checkpointmanager.security.jwt.JwtValidator;
 import ru.ac.checkpointmanager.mapper.UserMapper;
 import ru.ac.checkpointmanager.model.TemporaryUser;
-import ru.ac.checkpointmanager.model.Token;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.enums.Role;
-import ru.ac.checkpointmanager.model.enums.TokenType;
-import ru.ac.checkpointmanager.repository.TokenRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.service.email.EmailService;
 import ru.ac.checkpointmanager.service.user.TemporaryUserService;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -48,14 +44,12 @@ import java.util.UUID;
 public class AuthenticationServiceImpl implements AuthenticationService {
     public static final String METHOD_WAS_INVOKED = "Method {} was invoked";
     private final UserRepository userRepository;
-    private final TokenRepository tokenRepository;
     private final JwtService jwtService;
+    private final JwtValidator jwtValidator;
     private final EmailService emailService;
     private final TemporaryUserService temporaryUserService;
-
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
-
     private final UserMapper userMapper;
 
     /**
@@ -140,9 +134,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         temporaryUserService.delete(tempUser);
         log.debug("Temporary user {} was deleted", tempUser.getEmail());
 
-        String jwtToken = jwtService.generateToken(user);
-        saveUserToken(user, jwtToken);
-        log.debug("Access token for {} created and saved", user.getEmail());
+        jwtService.generateToken(user);
+        log.debug("Access token for {} created", user.getEmail());
     }
 
     @Override
@@ -184,52 +177,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         String refreshToken = jwtService.generateRefreshToken(user);
         log.debug("Access and refresh tokens for {} created", user.getEmail());
 
-        revokeAllUserTokens(user);
-        log.debug("Previous user {} tokens was revoked", user.getEmail());
-
-        saveUserToken(user, jwtToken);
-        log.debug("Access token for {} saved", user.getEmail());
-
         LoginResponse response = userMapper.toLoginResponse(user);
         response.setAccessToken(jwtToken);
         response.setRefreshToken(refreshToken);
         return response;
-    }
-
-    @Override
-    @Transactional
-    public void saveUserToken(User user, String jwtToken) {
-        log.info(METHOD_WAS_INVOKED, MethodLog.getMethodName());
-        Token token = new Token();
-        token.setUser(user);
-        token.setToken(jwtToken);
-        token.setTokenType(TokenType.BEARER);
-        token.setExpired(false);
-        token.setRevoked(false);
-
-        tokenRepository.save(token);
-    }
-
-    /**
-     * Отменяет все действительные токены для данного пользователя.
-     * <p>
-     * Метод находит все действительные токены пользователя в репозитории. Если такие есть,
-     * они помечаются как просроченные и отозванные, а затем сохраняются обратно в репозиторий.
-     *
-     * @param user пользователь, токены которого должны быть отозваны.
-     */
-    @Override
-    @Transactional
-    public void revokeAllUserTokens(User user) {
-        log.info(METHOD_WAS_INVOKED, MethodLog.getMethodName());
-        List<Token> validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
-        if (validUserTokens.isEmpty())
-            return;
-        validUserTokens.forEach(token -> {
-            token.setExpired(true);
-            token.setRevoked(true);
-        });
-        tokenRepository.saveAll(validUserTokens);
     }
 
     /**
@@ -244,7 +195,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
      * если нет то:
      *
      * @throws UsernameNotFoundException если юзер из jwt не существует в бд
-     * @see JwtService#validateRefreshToken(String)
      * @see JwtService#extractUsername(String)
      */
     @Override
@@ -252,17 +202,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public AuthenticationResponse refreshToken(RefreshTokenDTO refreshTokenDTO) {
         log.debug(METHOD_WAS_INVOKED, MethodLog.getMethodName());
         final String refreshToken = refreshTokenDTO.getRefreshToken();
-        jwtService.validateRefreshToken(refreshToken);//здесь проверится, парсится ли jwt, совпадают ли подписи, валидно ли время жизни
+        jwtValidator.validateRefreshToken(refreshToken);
         String userEmail = jwtService.extractUsername(refreshToken);
         User user = this.userRepository.findByEmail(userEmail).orElseThrow(() -> {
             log.warn("User with email - '%s', not found ".formatted(userEmail));
             return new UsernameNotFoundException("User with email - '%s', not found ".formatted(userEmail));
         });
         String accessToken = jwtService.generateToken(user);
-        //можно сразу 2 токена возвращать если например refresh скоро устареет
-        revokeAllUserTokens(user);
-        saveUserToken(user, accessToken);
         return new AuthenticationResponse(accessToken, refreshToken);
     }
-
 }

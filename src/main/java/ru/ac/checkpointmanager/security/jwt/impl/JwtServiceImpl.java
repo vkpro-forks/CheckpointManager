@@ -1,14 +1,10 @@
-package ru.ac.checkpointmanager.configuration;
+package ru.ac.checkpointmanager.security.jwt.impl;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
@@ -16,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import ru.ac.checkpointmanager.exception.InvalidTokenException;
 import ru.ac.checkpointmanager.model.User;
+import ru.ac.checkpointmanager.security.jwt.JwtService;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.security.Key;
@@ -49,7 +46,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
-public class JwtService {
+public class JwtServiceImpl implements JwtService {
 
     @Value("${application.security.jwt.secret-key}")
     private String secretKey;
@@ -70,6 +67,7 @@ public class JwtService {
      * @param token JWT токен, из которого необходимо извлечь имя пользователя.
      * @return Имя пользователя, закодированное в токене.
      */
+    @Override
     public String extractUsername(String token) {
         log.info("Method {} [Token {}]", MethodLog.getMethodName(), token);
         String username = extractClaim(token, Claims::getSubject);
@@ -89,6 +87,7 @@ public class JwtService {
      * @param token JWT токен, из которого необходимо извлечь роли пользователя.
      * @return Список ролей пользователя, закодированных в токене.
      */
+    @Override
     public List<String> extractRole(String token) {
         log.info("Method {} [Token {}]", MethodLog.getMethodName(), token);
         return extractAllClaims(token).get("role", List.class);
@@ -104,6 +103,7 @@ public class JwtService {
      * @param token JWT токен, из которого необходимо извлечь идентификатор пользователя.
      * @return UUID пользователя, закодированный в токене.
      */
+    @Override
     public UUID extractId(String token) {
         log.info("Method {} [Token {}]", MethodLog.getMethodName(), token);
         return extractAllClaims(token).get("id", UUID.class);
@@ -121,6 +121,7 @@ public class JwtService {
      * @param claimsResolver Функция, преобразующая {@link Claims} в тип T.
      * @return Утверждение из токена, преобразованное в тип T.
      */
+    @Override
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         log.info("Method {} was invoked", MethodLog.getMethodName());
         final Claims claims = extractAllClaims(token);
@@ -137,6 +138,7 @@ public class JwtService {
      * @param userDetails Объект {@link UserDetails}, содержащий информацию о пользователе.
      * @return Строка с сгенерированным JWT токеном.
      */
+    @Override
     public String generateToken(UserDetails userDetails) {
         log.debug("Method {}, User {}", MethodLog.getMethodName(), userDetails.getUsername());
         return generateToken(new HashMap<>(), userDetails);
@@ -152,6 +154,7 @@ public class JwtService {
      * @param userDetails Объект {@link UserDetails}, содержащий информацию о пользователе.
      * @return Строка с сгенерированным JWT токеном.
      */
+    @Override
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         log.info("Method {} was invoked", MethodLog.getMethodName());
         return buildToken(extraClaims, userDetails, jwtExpiration);
@@ -167,6 +170,7 @@ public class JwtService {
      * @param userDetails Объект {@link UserDetails}, содержащий информацию о пользователе.
      * @return Строка с сгенерированным токеном обновления.
      */
+    @Override
     public String generateRefreshToken(UserDetails userDetails) {
         log.debug("Method {}, User {}", MethodLog.getMethodName(), userDetails.getUsername());
         return buildToken(new HashMap<>(), userDetails, refreshExpiration);
@@ -192,7 +196,7 @@ public class JwtService {
         List<String> rolesList = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
-        extraClaims.put("role", rolesList); // добавляем в клеймы токена роль юзера
+        extraClaims.put("role", rolesList);
 
         if (userDetails instanceof User user) {
             extraClaims.put("id", user.getId());
@@ -200,85 +204,12 @@ public class JwtService {
 
         return Jwts
                 .builder()
-                .setClaims(extraClaims) // устанавливает доп клеймы, которые мы хотим вшить в токен
-                .setSubject(userDetails.getUsername()) // sub == username
-                .setIssuedAt(new Date(System.currentTimeMillis())) // время создания токена (клейм)
-                .setExpiration(new Date(System.currentTimeMillis() + expiration)) // дата истечения срока действия (клейм)
-                .signWith(getSignInKey(), SignatureAlgorithm.HS256) // подписываем токен
+                .setClaims(extraClaims)
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
-    }
-
-    /**
-     * Проверяет валидность токена.
-     * <p>
-     * Этот метод проверяет, соответствует ли имя пользователя, закодированное в токене,
-     * имени пользователя из предоставленных пользовательских данных, и не истек ли срок
-     * действия токена.
-     * <p>
-     *
-     * @param token       Строка токена для проверки.
-     * @param userDetails Объект {@link UserDetails}, содержащий информацию о пользователе.
-     * @return true, если токен действителен, иначе false.
-     */
-    public boolean isTokenValid(String token, UserDetails userDetails) {
-        log.debug("Method {}, User {}", MethodLog.getMethodName(), userDetails.getUsername());
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
-    }
-
-    /**
-     * Проверяет валидность рефрешь токена, перед тем как делать с ним какие либо действия
-     *
-     * @param token строка с токеном JWT
-     * @throws InvalidTokenException который собирает в себе:
-     *                               <p>
-     *                               {@link UnsupportedJwtException}  не соответствует формату JWT;
-     *                               <p>
-     *                               {@link MalformedJwtException}    поврежденный JWT
-     *                               <p>
-     *                               {@link  SignatureException}       неверная подпись
-     *                               <p>
-     *                               {@link ExpiredJwtException}      время действия JWT вышло
-     *                               <p>
-     *                               {@link IllegalArgumentException} передан null/пустая строка/строка из пробелов
-     */
-    public void validateRefreshToken(String token) {
-        try {
-            extractAllClaims(token);
-            //из метода parseClaimsJws вот это всё вылетает, это всё Runtime
-        } catch (UnsupportedJwtException | MalformedJwtException | SignatureException |
-                 ExpiredJwtException | IllegalArgumentException ex) {
-            log.warn("Refresh token is invalid: {}", ex.getMessage());
-            throw new InvalidTokenException(ex.getMessage());
-        }
-    }
-
-    /**
-     * Проверяет, истек ли срок действия токена.
-     * <p>
-     * Метод сравнивает дату истечения токена с текущей датой.
-     * <p>
-     *
-     * @param token Строка JWT токена для проверки.
-     * @return true, если срок действия токена истек, иначе false.
-     */
-    private boolean isTokenExpired(String token) {
-        log.info("Method {} was invoked", MethodLog.getMethodName());
-        return extractExpiration(token).before(new Date());
-    }
-
-    /**
-     * Извлекает дату истечения срока действия токена.
-     * <p>
-     * Метод возвращает дату истечения срока действия JWT токена.
-     * <p>
-     *
-     * @param token Строка JWT токена.
-     * @return Дата истечения срока действия токена.
-     */
-    private Date extractExpiration(String token) {
-        log.info("Method {} was invoked", MethodLog.getMethodName());
-        return extractClaim(token, Claims::getExpiration);
     }
 
     /**
@@ -291,11 +222,12 @@ public class JwtService {
      * @param token Строка JWT токена.
      * @return Объект {@link Claims}, содержащий все утверждения токена.
      */
-    private Claims extractAllClaims(String token) { // извлекает все клэймы у токена (поля)
+    @Override
+    public Claims extractAllClaims(String token) {
         log.info("Method {} was invoked", MethodLog.getMethodName());
         return Jwts
                 .parserBuilder()
-                .setSigningKey(getSignInKey()) // устанавливаем ключ подписи
+                .setSigningKey(getSignInKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
@@ -315,7 +247,7 @@ public class JwtService {
      *
      * @return Объект {@link Key}, используемый для подписи JWT токенов.
      */
-    private Key getSignInKey() { // декодирует секретный ключ из Base64 и возвращает объект Key для использования при подписи токена
+    private Key getSignInKey() {
         log.info("Method {} was invoked", MethodLog.getMethodName());
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
