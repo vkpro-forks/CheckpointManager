@@ -80,10 +80,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     }
                 }
             } else {
-                log.error("Invalid JWT token [{}]", jwt);
+                log.warn("Invalid JWT token [{}]", jwt);
             }
         } catch (ExpiredJwtException exception) {
-            log.error("Jwt is expired");
+            log.warn("Jwt is expired");
             return;
         }
 
