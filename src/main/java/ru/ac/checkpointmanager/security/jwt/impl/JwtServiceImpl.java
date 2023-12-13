@@ -174,7 +174,7 @@ public class JwtServiceImpl implements JwtService {
     public String generateRefreshToken(UserDetails userDetails) {
         log.debug("Method {}, User {}", MethodLog.getMethodName(), userDetails.getUsername());
         Map<String, Object> extraClaims = new HashMap<>();
-        extraClaims.put("REFRESH", true);
+        extraClaims.put("refresh", true);
         return buildToken(extraClaims, userDetails, refreshExpiration);
     }
 
