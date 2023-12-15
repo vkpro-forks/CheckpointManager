@@ -40,6 +40,8 @@ import ru.ac.checkpointmanager.model.checkpoints.CheckpointType;
 import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.enums.PhoneNumberType;
 import ru.ac.checkpointmanager.model.enums.Role;
+import ru.ac.checkpointmanager.model.passes.PassAuto;
+import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.model.passes.PassTypeTime;
 
 import java.security.Key;
@@ -270,6 +272,17 @@ public class TestUtils {
                 PHONE_NUM,
                 "note"
         );
+    }
+
+    public static PassAuto getSimpleActiveOneTimePassAutoFor3Hours() {
+        PassAuto passAuto = new PassAuto();
+        passAuto.setStartTime(LocalDateTime.now());
+        passAuto.setEndTime(LocalDateTime.now().plusHours(3));
+        passAuto.setId(UUID.randomUUID());
+        passAuto.setTypeTime(PassTypeTime.ONETIME);
+        passAuto.setDtype("AUTO");
+        passAuto.setStatus(PassStatus.ACTIVE);
+        return passAuto;
     }
 
     public static String jsonStringFromObject(Object object) throws JsonProcessingException {
