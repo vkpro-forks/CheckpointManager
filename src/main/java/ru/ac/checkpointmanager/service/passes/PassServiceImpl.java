@@ -67,12 +67,14 @@ public class PassServiceImpl implements PassService {
     private int hourForLogInScheduledCheck;
 
     @Override
+    @Transactional
     public PassResponseDTO addPass(PassCreateDTO passCreateDTO) {
         log.info(METHOD_INVOKE, MethodLog.getMethodName(), passCreateDTO);
         UUID userId = passCreateDTO.getUserId();
         UUID territoryId = passCreateDTO.getTerritoryId();
         User user = userService.findUserById(userId);
         Territory territory = territoryService.findTerritoryById(territoryId);
+
         checkUserTerritoryRelation(user, territory);
 
         Pass pass = mapper.toPass(passCreateDTO);
@@ -92,7 +94,6 @@ public class PassServiceImpl implements PassService {
         if (pass.getComment() == null || pass.getComment().isBlank()) {
             pass.setComment("Пропуск-" + pass.getId().toString().substring(32));
         }
-
         Pass savedPass = passRepository.save(pass);
         log.info("Pass saved [{}]", savedPass);
 

@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.annotation.PagingParam;
 import ru.ac.checkpointmanager.dto.passes.PagingParams;
@@ -52,7 +54,7 @@ public class PassController {
     @Operation(summary = "Добавить новый пропуск",
             description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Пропуск успешно добавлен",
+            @ApiResponse(responseCode = "201", description = "Пропуск успешно добавлен",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = PassResponseDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей; пользователь не имеет права " +
@@ -60,9 +62,9 @@ public class PassController {
             @ApiResponse(responseCode = "404", description = "Не найден пользователь или территория")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public PassResponseDTO addPass(@RequestBody @Valid PassCreateDTO passCreateDTO) {
-        PassResponseDTO newPass = service.addPass(passCreateDTO);
-        return newPass;
+        return service.addPass(passCreateDTO);
     }
 
     /* READ */

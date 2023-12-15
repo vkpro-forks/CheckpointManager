@@ -20,6 +20,7 @@ import ru.ac.checkpointmanager.exception.InvalidTokenException;
 import ru.ac.checkpointmanager.exception.PhoneAlreadyExistException;
 import ru.ac.checkpointmanager.exception.VisitorNotFoundException;
 import ru.ac.checkpointmanager.exception.pass.InactivePassException;
+import ru.ac.checkpointmanager.exception.pass.PassException;
 
 import java.time.Instant;
 import java.util.List;
@@ -90,6 +91,15 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleNoActivePassException(InactivePassException e) {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
         problemDetail.setTitle("Inactive pass");
+        problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
+        log.debug(LOG_MSG, e.getClass());
+        return problemDetail;
+    }
+
+    @ExceptionHandler(PassException.class)
+    public ProblemDetail handlePassException(PassException e) {
+        ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
+        problemDetail.setTitle("Pass creating error");
         problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
         log.debug(LOG_MSG, e.getClass());
         return problemDetail;
