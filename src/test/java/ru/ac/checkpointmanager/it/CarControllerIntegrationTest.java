@@ -77,7 +77,6 @@ class CarControllerIntegrationTest extends PostgresContainersConfig {
     @SneakyThrows
     void shouldAddCar() {
         CarBrand savedCarBrand = saveCarBrandInRepo();
-
         CarDTO carDTO = new CarDTO();
         carDTO.setLicensePlate(TestUtils.LICENSE_PLATE);
         carDTO.setBrand(savedCarBrand);
@@ -99,25 +98,16 @@ class CarControllerIntegrationTest extends PostgresContainersConfig {
     @Test
     @SneakyThrows
     void shouldDeleteCarIfItPresentInPass() {
+        //save car brand, user, territory, car, bind it to pass, save pass, delete car, check
         CarBrand carBrand = saveCarBrandInRepo();
-        Territory territory = new Territory();
-        territory.setName(TestUtils.TERR_NAME);
+        Territory territory = TestUtils.getTerritory();
         User user = TestUtils.getUser();
         User savedUser = userRepository.saveAndFlush(user);
         territory.setUsers(List.of(savedUser));
         Territory savedTerritory = territoryRepository.saveAndFlush(territory);
-
-        Car car = new Car();
-        car.setLicensePlate(TestUtils.getCarDto().getLicensePlate());
-        car.setBrand(carBrand);
-        car.setId(TestUtils.getCarDto().getId());
-        Car savedCar = carRepository.saveAndFlush(car);//save car and repo change its id
-
-        PassAuto passAuto = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours();
-        passAuto.setCar(savedCar);
-        passAuto.setUser(savedUser);
-        passAuto.setTerritory(savedTerritory);
-
+        Car car = TestUtils.getCar(carBrand);
+        Car savedCar = carRepository.saveAndFlush(car);
+        PassAuto passAuto = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
         passRepository.saveAndFlush(passAuto);
 
         mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.CAR_URL + "/" + savedCar.getId()))
@@ -131,23 +121,14 @@ class CarControllerIntegrationTest extends PostgresContainersConfig {
     @SneakyThrows
     void shouldFindCarsByUserId() {
         CarBrand carBrand = saveCarBrandInRepo();
-        Territory territory = new Territory();
-        territory.setName(TestUtils.TERR_NAME);
+        Territory territory = TestUtils.getTerritory();
         User user = TestUtils.getUser();
         User savedUser = userRepository.saveAndFlush(user);
         territory.setUsers(List.of(savedUser));
         Territory savedTerritory = territoryRepository.saveAndFlush(territory);
-
-        Car car = new Car();
-        car.setLicensePlate(TestUtils.getCarDto().getLicensePlate());
-        car.setBrand(carBrand);
-        car.setId(TestUtils.getCarDto().getId());
-        Car savedCar = carRepository.saveAndFlush(car);//save car and repo change its id
-
-        PassAuto passAuto = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours();
-        passAuto.setCar(savedCar);
-        passAuto.setUser(savedUser);
-        passAuto.setTerritory(savedTerritory);
+        Car car = TestUtils.getCar(carBrand);
+        Car savedCar = carRepository.saveAndFlush(car);
+        PassAuto passAuto = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
 
         passRepository.saveAndFlush(passAuto);
 
