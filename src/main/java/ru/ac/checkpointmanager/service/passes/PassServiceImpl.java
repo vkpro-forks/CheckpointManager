@@ -23,6 +23,7 @@ import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
+import ru.ac.checkpointmanager.projection.PassInOutViewProjection;
 import ru.ac.checkpointmanager.repository.CrossingRepository;
 import ru.ac.checkpointmanager.repository.PassRepository;
 import ru.ac.checkpointmanager.service.territories.TerritoryService;
@@ -153,6 +154,24 @@ public class PassServiceImpl implements PassService {
                     foundPasses.getTotalPages(), foundPasses.getTotalElements()));
         }
         return foundPasses.map(mapper::toPassDTO);
+    }
+
+    @Override
+    public Page<PassInOutViewProjection> findEventsByUser(UUID userId, PagingParams pagingParams) {
+        log.debug(METHOD_INVOKE, MethodLog.getMethodName(), userId);
+        userService.findById(userId);
+        Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
+
+        return passRepository.findEventsByUser(userId, pageable);
+    }
+
+    @Override
+    public Page<PassInOutViewProjection> findEventsByTerritory(UUID terId, PagingParams pagingParams) {
+        log.debug(METHOD_INVOKE, MethodLog.getMethodName(), terId);
+        territoryService.findById(terId);
+        Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
+
+        return passRepository.findEventsByTerritory(terId, pageable);
     }
 
     @Override
