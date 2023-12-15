@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import ru.ac.checkpointmanager.exception.InvalidTokenException;
 import ru.ac.checkpointmanager.security.jwt.JwtService;
 import ru.ac.checkpointmanager.security.jwt.JwtValidator;
 import ru.ac.checkpointmanager.utils.MethodLog;
@@ -44,18 +45,17 @@ public class JwtValidatorImpl implements JwtValidator {
 
 
     @Override
-    public boolean validateRefreshToken(String token) {
+    public void validateRefreshToken(String token) {
         try {
             Claims claims = jwtService.extractAllClaims(token);
-            if (claims.getExpiration().before(new Date())) {
-                return false;
+            if (ObjectUtils.isEmpty(claims.get(REFRESH))) {
+                throw new InvalidTokenException("Jwt is not a refresh token");
             }
             log.info("Refresh token validated");
-            return !ObjectUtils.isEmpty(claims.get(REFRESH));
         } catch (UnsupportedJwtException | MalformedJwtException | SignatureException |
                  ExpiredJwtException | IllegalArgumentException exception) {
-            log.error(ERROR_MESSAGE, exception.getMessage());
-            return false;
+            log.warn(ERROR_MESSAGE, exception.getMessage());
+            throw new InvalidTokenException(exception.getMessage());
         }
     }
 
