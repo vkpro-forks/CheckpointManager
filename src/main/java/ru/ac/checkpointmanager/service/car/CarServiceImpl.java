@@ -30,7 +30,6 @@ public class CarServiceImpl implements CarService {
         return repository.save(car);
     }
 
-
     @Override
     public Car getCarById(UUID carId) {
         Car car = repository.findById(carId)
