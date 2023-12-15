@@ -12,10 +12,15 @@ import org.instancio.Instancio;
 import org.instancio.Model;
 import org.instancio.Select;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import ru.ac.checkpointmanager.configuration.CustomAuthenticationToken;
 import ru.ac.checkpointmanager.dto.AuthenticationRequest;
 import ru.ac.checkpointmanager.dto.CarDTO;
+import ru.ac.checkpointmanager.dto.ChangeEmailRequest;
+import ru.ac.checkpointmanager.dto.ChangePasswordRequest;
 import ru.ac.checkpointmanager.dto.CheckpointDTO;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
 import ru.ac.checkpointmanager.dto.PhoneDTO;
@@ -25,13 +30,16 @@ import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.dto.user.RefreshTokenDTO;
 import ru.ac.checkpointmanager.dto.user.UserPutDTO;
+import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.exception.handler.ErrorCode;
 import ru.ac.checkpointmanager.model.TemporaryUser;
+import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.model.checkpoints.CheckpointType;
 import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.enums.PhoneNumberType;
+import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.model.passes.PassTypeTime;
 
 import java.security.Key;
@@ -80,6 +88,7 @@ public class TestUtils {
 
     public static final String JSON_DETAIL = "$.detail";
 
+    public static final String EMAIL_STRING_TOKEN = UUID.randomUUID().toString();
     public static final UUID EMAIL_TOKEN = UUID.randomUUID();
 
     public static final UUID VISITOR_ID = UUID.randomUUID();
@@ -87,6 +96,7 @@ public class TestUtils {
 
     public static final String EMAIL = "123@123.com";
     private static final String USERNAME = "Username";
+    private static final String NEW_PASSWORD = "new_password";
 
 
     public static CarBrand getCarBrand() {
@@ -103,6 +113,10 @@ public class TestUtils {
                 LocalDateTime.now(),
                 Direction.IN
         );
+    }
+
+    public static Territory getTerritory() {
+        return Instancio.of(Territory.class).create();
     }
 
     public static TerritoryDTO getTerritoryDTO() {
@@ -160,9 +174,9 @@ public class TestUtils {
         return new PhoneDTO(
                 PHONE_ID,
                 PHONE_NUM,
-                PhoneNumberType.HOME,
+                PhoneNumberType.MOBILE,
                 USER_ID,
-                "note"
+                null
         );
     }
 
@@ -195,6 +209,35 @@ public class TestUtils {
                 "Vasin Vasya Petya",
                 "+79167868345"
         );
+    }
+
+    public static UserResponseDTO getUserResponseDTO() {
+        return new UserResponseDTO(
+                USER_ID,
+                "Sashulka",
+                PHONE_NUM,
+                EMAIL,
+                false,
+                Role.ADMIN,
+                null
+        );
+    }
+
+    public static ChangePasswordRequest getChangePasswordRequest() {
+        return new ChangePasswordRequest(
+                PASSWORD,
+                NEW_PASSWORD,
+                NEW_PASSWORD
+        );
+    }
+
+    public static ChangeEmailRequest getChangeEmailRequest() {
+        return new ChangeEmailRequest("new_email@gmail.com");
+    }
+
+    public static void setSecurityContext(User user) {
+        Authentication authentication = new CustomAuthenticationToken(user, null, user.getId(), user.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
     public static AuthenticationRequest getAuthenticationRequest() {

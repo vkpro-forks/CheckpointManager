@@ -1,26 +1,26 @@
 package ru.ac.checkpointmanager.service.user;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mail.MailSendException;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import ru.ac.checkpointmanager.configuration.CustomAuthenticationToken;
 import ru.ac.checkpointmanager.dto.ChangeEmailRequest;
 import ru.ac.checkpointmanager.dto.ChangePasswordRequest;
+import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.user.UserPutDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
-import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.mapper.TerritoryMapper;
 import ru.ac.checkpointmanager.mapper.UserMapper;
 import ru.ac.checkpointmanager.model.TemporaryUser;
@@ -32,22 +32,15 @@ import ru.ac.checkpointmanager.repository.PhoneRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.service.email.EmailService;
 import ru.ac.checkpointmanager.service.phone.PhoneService;
+import ru.ac.checkpointmanager.util.TestUtils;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -70,400 +63,503 @@ class UserServiceImplTest {
     @Mock
     private PhoneService phoneService;
 
-    private UserService out;
+    @InjectMocks
+    UserServiceImpl userService;
 
-    private UUID userId;
-    private User user;
-    private UserResponseDTO userResponseDTO;
+    @Captor
+    ArgumentCaptor<PhoneDTO> phoneDTOArgumentCaptor;
 
-    private Collection<UserResponseDTO> userResponseDTOS;
-    private Collection<User> users;
+    @Test
+    void shouldFindById() {
+        User user = TestUtils.getUser();
+        UUID userId = user.getId();
 
-    private ChangePasswordRequest passwordRequest;
-    private ChangeEmailRequest emailRequest;
-    private TemporaryUser tempUser;
+        Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        Mockito.when(userMapper.toUserResponseDTO(user)).thenReturn(TestUtils.getUserResponseDTO());
 
+        UserResponseDTO result = userService.findById(userId);
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-
-        out = new UserServiceImpl(userMapper, territoryMapper, userRepository, phoneRepository, passwordEncoder,
-                temporaryUserService, emailService, phoneService);
-
-        setUserArea();
-        setSecurityContext();
-        setChangePasswordRequest();
-        setChangeEmailRequest();
-        setTemporaryUser();
-    }
-
-    void setUserArea() {
-        userId = UUID.randomUUID();
-        user = new User();
-        user.setId(userId);
-        user.setPassword("1");
-        user.setEmail("test@example.com");
-        user.setRole(Role.ADMIN);
-
-        userResponseDTO = new UserResponseDTO();
-
-        users = List.of(user);
-        userResponseDTOS = List.of(userResponseDTO);
-    }
-
-    void setSecurityContext() {
-        Authentication authentication = new CustomAuthenticationToken(user, null, userId, user.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-    }
-
-    void setChangePasswordRequest() {
-        passwordRequest = new ChangePasswordRequest();
-        passwordRequest.setCurrentPassword("1");
-        passwordRequest.setNewPassword("newPassword");
-        passwordRequest.setConfirmationPassword("newPassword");
-    }
-
-    void setChangeEmailRequest() {
-        emailRequest = new ChangeEmailRequest();
-        emailRequest.setNewEmail("newEmail@example.com");
-    }
-
-    void setTemporaryUser() {
-        tempUser = new TemporaryUser();
-        tempUser.setPreviousEmail("test@example.com");
-        tempUser.setEmail("newEmail@example.com");
+        Assertions.assertThat(result).isNotNull();
+        Mockito.verify(userRepository).findById(userId);
+        Mockito.verify(userMapper).toUserResponseDTO(user);
     }
 
     @Test
-    void findById_UserExists_ReturnsUserResponseDTO() {
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(userMapper.toUserResponseDTO(user)).thenReturn(userResponseDTO);
-
-        UserResponseDTO result = out.findById(userId);
-
-        assertNotNull(result);
-        assertEquals(userResponseDTO, result);
-    }
-
-    @Test
-    void findById_UserDoesNotExist_ThrowsUserNotFoundException() {
+    void shouldThrowsUserNotFoundException() {
+        UUID userId = TestUtils.USER_ID;
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        assertThrows(UserNotFoundException.class, () -> out.findById(userId),
-                "Should throw UserNotFoundException when user does not exist");
+        Assertions.assertThatThrownBy(
+                        () -> userService.findById(userId))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("not found");
+        Mockito.verify(userRepository).findById(userId);
     }
 
     @Test
-    void findTerritoriesByUserId_ReturnsListOfTerritoriesDTO() {
-        List<Territory> territories = List.of(new Territory());
-        when(userRepository.findTerritoriesByUserId(userId)).thenReturn(territories);
+    void shouldFindTerritoriesByUserId() {
+        UUID userId = TestUtils.USER_ID;
+        List<Territory> territories = List.of(TestUtils.getTerritory());
+        List<TerritoryDTO> territoryDTOs = List.of(TestUtils.getTerritoryDTO());
 
-        List<TerritoryDTO> territoryDTOs = List.of(new TerritoryDTO());
-        when(territoryMapper.toTerritoriesDTO(territories)).thenReturn(territoryDTOs);
+        Mockito.when(userRepository.findTerritoriesByUserId(userId)).thenReturn(territories);
+        Mockito.when(territoryMapper.toTerritoriesDTO(territories)).thenReturn(territoryDTOs);
 
-        List<TerritoryDTO> result = out.findTerritoriesByUserId(userId);
+        List<TerritoryDTO> result = userService.findTerritoriesByUserId(userId);
 
-        assertNotNull(result);
-        assertFalse(result.isEmpty());
-        assertEquals(territoryDTOs.size(), territories.size());
+        Assertions.assertThat(result).isNotEmpty();
+        Assertions.assertThat(territories.size()).isEqualTo(territoryDTOs.size());
+        Mockito.verify(userRepository).findTerritoriesByUserId(userId);
+        Mockito.verify(territoryMapper).toTerritoriesDTO(territories);
     }
 
     @Test
-    void findByName_ReturnCollectionUserResponseDTO() {
-        when(userRepository.findUserByFullNameContainingIgnoreCase(anyString())).thenReturn(users);
-        when(userMapper.toUserResponseDTOs(users)).thenReturn((List<UserResponseDTO>) userResponseDTOS);
+    void shouldFindTerritoriesByUserIdAndReturnEmptyList() {
+        UUID userId = TestUtils.USER_ID;
+        List<Territory> territories = Collections.emptyList();
+        List<TerritoryDTO> territoryDTOS = Collections.emptyList();
+        Mockito.when(userRepository.findTerritoriesByUserId(userId)).thenReturn(territories);
+        Mockito.when(territoryMapper.toTerritoriesDTO(territories)).thenReturn(territoryDTOS);
 
-        Collection<UserResponseDTO> result = out.findByName("Test");
-        assertNotNull(result);
-        assertFalse(result.isEmpty());
+        Assertions.assertThatNoException().isThrownBy(() -> userService.findTerritoriesByUserId(userId));
+        Mockito.verify(userRepository).findTerritoriesByUserId(userId);
+        Mockito.verify(territoryMapper).toTerritoriesDTO(territories);
     }
 
     @Test
-    void updateUser_SuccessfulUpdate_ReturnsUpdatedUser() {
-        UserPutDTO userPutDTO = new UserPutDTO();
+    void shouldFindByName() {
+        List<User> users = List.of(TestUtils.getUser());
+        List<UserResponseDTO> userResponseDTOS = List.of(TestUtils.getUserResponseDTO());
+
+        Mockito.when(userRepository.findUserByFullNameContainingIgnoreCase(anyString())).thenReturn(users);
+        Mockito.when(userMapper.toUserResponseDTOs(users)).thenReturn(userResponseDTOS);
+
+        Collection<UserResponseDTO> result = userService.findByName(anyString());
+        Assertions.assertThat(result).isNotEmpty();
+        Assertions.assertThat(users).hasSize(1);
+        Assertions.assertThat(users.size()).isEqualTo(userResponseDTOS.size());
+        Mockito.verify(userRepository).findUserByFullNameContainingIgnoreCase(anyString());
+        Mockito.verify(userMapper).toUserResponseDTOs(users);
+    }
+
+    @Test
+    void shouldFindByNameAndReturnEmptyList() {
+        List<User> users = Collections.emptyList();
+        List<UserResponseDTO> userResponseDTOS = Collections.emptyList();
+
+        Mockito.when(userRepository.findUserByFullNameContainingIgnoreCase(anyString())).thenReturn(users);
+        Mockito.when(userMapper.toUserResponseDTOs(users)).thenReturn(userResponseDTOS);
+
+        Assertions.assertThatNoException().isThrownBy(() -> userService.findByName(anyString()));
+        Mockito.verify(userRepository).findUserByFullNameContainingIgnoreCase(anyString());
+        Mockito.verify(userMapper).toUserResponseDTOs(users);
+    }
+
+    @Test
+    void shouldUpdateUser() {
+        User user = TestUtils.getUser();
+        UUID userId = user.getId();
+        UserResponseDTO userResponseDTO = TestUtils.getUserResponseDTO();
+        userResponseDTO.setId(userId);
+        UserPutDTO userPutDTO = TestUtils.getUserPutDTO();
         userPutDTO.setId(userId);
-        userPutDTO.setFullName("New Name");
-        userPutDTO.setMainNumber("123456789");
 
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(userMapper.toUserResponseDTO(any(User.class))).thenReturn(new UserResponseDTO());
+        Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        Mockito.when(userMapper.toUserResponseDTO(user)).thenReturn(userResponseDTO);
 
-        UserResponseDTO result = out.updateUser(userPutDTO);
+        UserResponseDTO result = userService.updateUser(userPutDTO);
 
-        assertNotNull(result);
-        verify(userRepository).save(user);
-        verify(userMapper).toUserResponseDTO(user);
+        Assertions.assertThat(result).isNotNull().isEqualTo(userResponseDTO);
+        Mockito.verify(userRepository).save(user);
+        Mockito.verify(userMapper).toUserResponseDTO(user);
+        Mockito.verify(phoneService).createPhoneNumber(phoneDTOArgumentCaptor.capture());
     }
 
     @Test
-    void updateUser_UserNotFound_ThrowsUserNotFoundException() {
-        UserPutDTO userPutDTO = new UserPutDTO();
-        userPutDTO.setId(userId);
+    void updateUserShouldThrowsUserNotFoundException() {
+        UserPutDTO userPutDTO = TestUtils.getUserPutDTO();
+        UUID userId = TestUtils.USER_ID;
 
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
-
-        assertThrows(UserNotFoundException.class, () -> out.updateUser(userPutDTO));
+        Mockito.when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        Assertions.assertThatThrownBy(
+                        () -> userService.updateUser(userPutDTO))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("not found");
+        Mockito.verify(userRepository).findById(userId);
     }
 
     @Test
-    void changePassword_SuccessfulChange_UpdatesPassword() {
-        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
-        when(passwordEncoder.encode(anyString())).thenReturn("encodedNewPassword");
+    void shouldChangePassword() {
+        ChangePasswordRequest request = TestUtils.getChangePasswordRequest();
+        String newPassword = request.getNewPassword();
+        User user = TestUtils.getUser();
+        user.setPassword(TestUtils.PASSWORD);
+        TestUtils.setSecurityContext(user);
 
-        out.changePassword(passwordRequest);
-        verify(passwordEncoder).encode("newPassword");
-        verify(userRepository).save(user);
-        assertEquals(user.getPassword(), passwordEncoder.encode(passwordRequest.getNewPassword()));
+        Mockito.when(passwordEncoder.matches(user.getPassword(), request.getCurrentPassword())).thenReturn(true);
+        Mockito.when(passwordEncoder.encode(newPassword)).thenReturn(newPassword);
+
+        userService.changePassword(request);
+        Mockito.verify(passwordEncoder).encode(newPassword);
+        Mockito.verify(userRepository).save(user);
+        Assertions.assertThat(user.getPassword()).isEqualTo(newPassword);
     }
 
     @Test
-    void changePassword_IncorrectCurrentPassword_ThrowsException() {
-        passwordRequest.setCurrentPassword("wrongPassword");
-        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
+    void shouldThrowExceptionIfPassedPasswordDoesntMatchCurrent() {
+        ChangePasswordRequest request = TestUtils.getChangePasswordRequest();
+        TestUtils.setSecurityContext(TestUtils.getUser());
 
-        assertThrows(IllegalStateException.class, () -> out.changePassword(passwordRequest),
-                "Should throw IllegalStateException for incorrect current password");
+        Mockito.when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
+
+        Assertions.assertThatExceptionOfType(IllegalStateException.class)
+                .isThrownBy(() -> userService.changePassword(request))
+                .withMessageContaining("Current password not matched");
+        Mockito.verify(passwordEncoder).matches(anyString(), anyString());
     }
 
     @Test
-    void changePassword_PasswordAndConfirmationDoNotMatch_ThrowsException() {
-        passwordRequest.setConfirmationPassword("differentNewPassword");
+    void changePasswordWhenConfirmationDoNotMatchThrowsException() {
+        ChangePasswordRequest request = TestUtils.getChangePasswordRequest();
+        request.setConfirmationPassword("1");
+        TestUtils.setSecurityContext(TestUtils.getUser());
 
-        assertThrows(IllegalStateException.class, () -> out.changePassword(passwordRequest),
-                "Should throw IllegalStateException when new password and confirmation do not match");
-    }
-
-/*    @Test
-    void changeEmail_SuccessfulChange_ReturnsRequest() {
-        when(mapper.toTemporaryUser(user)).thenReturn(new TemporaryUser());
-
-        ChangeEmailRequest result = out.changeEmail(emailRequest);
-
-        assertEquals(emailRequest, result);
-        verify(emailService).sendEmailConfirm(anyString(), anyString());
-        verify(temporaryUserService).create(any(TemporaryUser.class));
-    }*/
-
-
-    @Test
-    void changeEmail_EmailSendFailure_ThrowsMailSendException() {
-        when(userMapper.toTemporaryUser(user)).thenReturn(new TemporaryUser());
-        doThrow(new MailSendException("failed")).when(emailService).sendEmailConfirm(anyString(), anyString());
-
-        assertThrows(MailSendException.class, () -> out.changeEmail(emailRequest),
-                "Should throw MailSendException on email send failure");
+        Mockito.when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
+        Assertions.assertThatExceptionOfType(IllegalStateException.class)
+                .isThrownBy(() -> userService.changePassword(request))
+                .withMessageContaining("Passwords are not the same");
     }
 
     @Test
-    void confirmEmail_SuccessfulConfirmation_UpdatesUserEmail() {
-        String token = "validToken";
-        when(temporaryUserService.findByVerifiedToken(token)).thenReturn(tempUser);
-        when(userRepository.findByEmail(tempUser.getPreviousEmail())).thenReturn(Optional.of(user));
+    void successfulChangeEmailRequest() {
+        ChangeEmailRequest request = TestUtils.getChangeEmailRequest();
+        User user = TestUtils.getUser();
+        TestUtils.setSecurityContext(user);
+        TemporaryUser temporaryUser = TestUtils.getTemporaryUser();
 
-        out.confirmEmail(token);
+        Mockito.when(userRepository.findByEmail(request.getNewEmail())).thenReturn(Optional.empty());
+        Mockito.when(userMapper.toTemporaryUser(user)).thenReturn(temporaryUser);
 
-        assertEquals("newEmail@example.com", user.getEmail());
-        verify(userRepository).save(user);
-        verify(temporaryUserService).delete(tempUser);
+        userService.changeEmail(request);
+        Mockito.verify(userRepository).findByEmail(anyString());
+        Mockito.verify(userMapper).toTemporaryUser(user);
+        Mockito.verify(emailService).sendEmailConfirm(anyString(), anyString());
     }
 
     @Test
-    void confirmEmail_InvalidOrExpiredToken_NoActionTaken() {
+    void changeEmailShouldThrowExceptionWhenEmailTaken() {
+        ChangeEmailRequest request = TestUtils.getChangeEmailRequest();
+        User user = TestUtils.getUser();
+        TestUtils.setSecurityContext(user);
+
+        Mockito.when(userRepository.findByEmail(request.getNewEmail())).thenReturn(Optional.ofNullable(user));
+
+        Assertions.assertThatExceptionOfType(IllegalStateException.class)
+                .isThrownBy(() -> userService.changeEmail(request))
+                .withMessageContaining("already taken");
+
+        Mockito.verify(userRepository).findByEmail(anyString());
+    }
+
+    @Test
+    void changeEmailThrowsMailSendException() {
+        User user = TestUtils.getUser();
+        TestUtils.setSecurityContext(user);
+        TemporaryUser temporaryUser = TestUtils.getTemporaryUser();
+        ChangeEmailRequest request = TestUtils.getChangeEmailRequest();
+
+        Mockito.when(userMapper.toTemporaryUser(user)).thenReturn(temporaryUser);
+        Mockito.doThrow(new MailSendException("failed")).when(emailService).sendEmailConfirm(anyString(), anyString());
+
+        Assertions.assertThatExceptionOfType(MailSendException.class)
+                .isThrownBy(() -> userService.changeEmail(request))
+                .withMessageContaining("Email sending failed");
+    }
+
+    @Test
+    void confirmEmailSuccessfulConfirmationUpdatesUserEmail() {
+        User user = TestUtils.getUser();
+        TemporaryUser tempUser = TestUtils.getTemporaryUser();
+        tempUser.setPreviousEmail(user.getEmail());
+        String token = TestUtils.EMAIL_STRING_TOKEN;
+
+        Mockito.when(temporaryUserService.findByVerifiedToken(token)).thenReturn(tempUser);
+        Mockito.when(userRepository.findByEmail(tempUser.getPreviousEmail())).thenReturn(Optional.of(user));
+
+        userService.confirmEmail(token);
+
+        Assertions.assertThat(user.getEmail()).isEqualTo(tempUser.getEmail());
+        Mockito.verify(temporaryUserService).findByVerifiedToken(token);
+        Mockito.verify(userRepository).save(user);
+        Mockito.verify(temporaryUserService).delete(tempUser);
+    }
+
+    @Test
+    void confirmEmailInvalidOrExpiredTokenNoActionTaken() {
         String token = "invalidToken";
         when(temporaryUserService.findByVerifiedToken(token)).thenReturn(null);
 
         Assertions.assertThatThrownBy(
-                () -> out.confirmEmail(token)
-        ).isInstanceOf(EmailVerificationTokenException.class);
+                        () -> userService.confirmEmail(token))
+                .isInstanceOf(EmailVerificationTokenException.class)
+                .hasMessageContaining("Invalid or expired token");
 
-        verify(userRepository, never()).save(any(User.class));
-        verify(temporaryUserService, never()).delete(any(TemporaryUser.class));
+        Mockito.verify(userRepository, Mockito.never()).save(ArgumentMatchers.any(User.class));
+        Mockito.verify(temporaryUserService, Mockito.never()).delete(ArgumentMatchers.any(TemporaryUser.class));
     }
 
     @Test
-    void confirmEmail_UserNotFound_ThrowsUserNotFoundException() {
+    void confirmEmailUserNotFoundThrowsUserNotFoundException() {
         String token = "validToken";
+        TemporaryUser tempUser = TestUtils.getTemporaryUser();
         when(temporaryUserService.findByVerifiedToken(token)).thenReturn(tempUser);
         when(userRepository.findByEmail(tempUser.getPreviousEmail())).thenReturn(Optional.empty());
 
-        assertThrows(UserNotFoundException.class, () -> out.confirmEmail(token));
+        Assertions.assertThatThrownBy(
+                        () -> userService.confirmEmail(token))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("User with [email %s] not found", tempUser.getPreviousEmail());
+
     }
 
     @Test
-    void changeRole_SuccessfulChange_ChangesUserRole() {
-        User existingUser = new User();
-        existingUser.setId(userId);
-        existingUser.setRole(Role.USER);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
-
-        out.changeRole(userId, Role.MANAGER);
-
-        assertEquals(Role.MANAGER, existingUser.getRole());
-        verify(userRepository).save(existingUser);
-    }
-
-    @Test
-    void changeRole_NoPermissionToChangeToAdmin_ThrowsAccessDeniedException() {
-        User existingUser = new User();
-        existingUser.setRole(Role.ADMIN);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
-
+    void changeRoleSuccessfulChange() {
+        User userInContext = TestUtils.getUser();
+        User user = TestUtils.getUser();
         user.setRole(Role.USER);
+        UUID userId = user.getId();
+        TestUtils.setSecurityContext(userInContext);
 
-        assertThrows(AccessDeniedException.class, () -> out.changeRole(userId, Role.ADMIN));
+        Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        userService.changeRole(userId, Role.MANAGER);
+
+        Assertions.assertThat(Role.MANAGER).isEqualTo(user.getRole());
+        Mockito.verify(userRepository).save(user);
     }
 
     @Test
-    void changeRole_UserAlreadyHasRole_ThrowsIllegalStateException() {
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+    void changeRoleNoPermissionToChangeToAdminThrowsAccessDeniedException() {
+        User userInContext = TestUtils.getUser();
+        userInContext.setRole(Role.MANAGER);
+        User user = TestUtils.getUser();
+        user.setRole(Role.USER);
+        UUID userId = user.getId();
+        TestUtils.setSecurityContext(userInContext);
 
-        assertThrows(IllegalStateException.class, () -> out.changeRole(userId, Role.ADMIN));
+        Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        Assertions.assertThatExceptionOfType(AccessDeniedException.class)
+                .isThrownBy(() -> userService.changeRole(userId, Role.ADMIN))
+                .withMessageContaining("You do not have permission to change the role to ADMIN");
     }
 
     @Test
-    void changeRole_UserNotFound_ThrowsUserNotFoundException() {
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+    void changeRoleNoPermissionToChangeAdminToAnotherThrowsAccessDeniedException() {
+        User userInContext = TestUtils.getUser();
+        userInContext.setRole(Role.MANAGER);
+        User user = TestUtils.getUser();
+        user.setRole(Role.ADMIN);
+        UUID userId = user.getId();
+        TestUtils.setSecurityContext(userInContext);
 
-        assertThrows(UserNotFoundException.class, () -> out.changeRole(userId, Role.ADMIN));
+        Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        Assertions.assertThatExceptionOfType(AccessDeniedException.class)
+                .isThrownBy(() -> userService.changeRole(userId, Role.USER))
+                .withMessageContaining("You do not have permission to change the role ADMIN to another role");
+    }
+
+
+    @Test
+    void changeRoleUserAlreadyHasRoleThrowsIllegalStateException() {
+        User userInContext = TestUtils.getUser();
+        User user = TestUtils.getUser();
+        user.setRole(Role.USER);
+        UUID userId = user.getId();
+        TestUtils.setSecurityContext(userInContext);
+
+        Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        Assertions.assertThatExceptionOfType(IllegalStateException.class)
+                .isThrownBy(() -> userService.changeRole(userId, Role.USER))
+                .withMessageContaining("This user already has role %s", user.getRole());
     }
 
     @Test
-    void updateBlockStatus_SuccessfulUpdate_ReturnsUpdatedUser() {
+    void changeRoleUserNotFoundThrowsUserNotFoundException() {
+        UUID userId = TestUtils.USER_ID;
+        Mockito.when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        Assertions.assertThatThrownBy(
+                        () -> userService.changeRole(userId, Role.ADMIN))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("User with [id=%s] not found", userId);
+    }
+
+    @Test
+    void updateBlockStatusSuccessfulUpdate() {
+        User user = TestUtils.getUser();
+        UUID userId = TestUtils.USER_ID;
         user.setIsBlocked(false);
+        UserResponseDTO userResponseDTO = TestUtils.getUserResponseDTO();
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(userMapper.toUserResponseDTO(user)).thenReturn(userResponseDTO);
 
-        UserResponseDTO result = out.updateBlockStatus(userId, true);
+        UserResponseDTO result = userService.updateBlockStatus(userId, true);
 
-        assertTrue(user.getIsBlocked());
-        assertNotNull(result);
-        verify(userRepository).save(user);
+        Assertions.assertThat(user.getIsBlocked()).isTrue();
+        Assertions.assertThat(result).isNotNull();
+        Mockito.verify(userRepository).save(user);
     }
 
     @Test
-    @Disabled //TODO под вопросом
-    void updateBlockStatus_UserAlreadyHasStatus_ThrowsIllegalStateException() {
+    void updateBlockStatusUserNotFoundThrowsUserNotFoundException() {
+        UUID userId = TestUtils.USER_ID;
+        Mockito.when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        Assertions.assertThatThrownBy(
+                        () -> userService.updateBlockStatus(userId, true))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("User with [id=%s] not found", userId);
+    }
+
+    @Test
+    void blockByIdSuccessful() {
+        User user = TestUtils.getUser();
+        UUID userId = TestUtils.USER_ID;
+        user.setIsBlocked(false);
+        Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        userService.blockById(userId);
+
+        Mockito.verify(userRepository).blockById(userId);
+    }
+
+    @Test
+    void blockByIdUserAlreadyBlockedThrowsIllegalStateException() {
+        User user = TestUtils.getUser();
+        UUID userId = TestUtils.USER_ID;
         user.setIsBlocked(true);
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        assertThrows(IllegalStateException.class, () -> out.updateBlockStatus(userId, true));
+        Assertions.assertThatExceptionOfType(IllegalStateException.class)
+                .isThrownBy(() -> userService.blockById(userId))
+                .withMessageContaining("User already blocked [id=%s]", userId);
     }
 
     @Test
-    void updateBlockStatus_UserNotFound_ThrowsUserNotFoundException() {
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+    void blockByIdUserNotFoundThrowsUserNotFoundException() {
+        UUID userId = TestUtils.USER_ID;
+        Mockito.when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        assertThrows(UserNotFoundException.class, () -> out.updateBlockStatus(userId, true));
+        Assertions.assertThatThrownBy(
+                        () -> userService.blockById(userId))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("User with [id=%s] not found", userId);
     }
 
     @Test
-    void blockById_SuccessfulBlock_UpdatesUser() {
+    void unblockByIdSuccessfulUnblock() {
+        User user = TestUtils.getUser();
+        UUID userId = TestUtils.USER_ID;
+        user.setIsBlocked(true);
+        Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        userService.unblockById(userId);
+        Mockito.verify(userRepository).unblockById(userId);
+    }
+
+    @Test
+    void unblockByIdUserAlreadyUnblockedThrowsIllegalStateException() {
+        User user = TestUtils.getUser();
+        UUID userId = TestUtils.USER_ID;
         user.setIsBlocked(false);
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        out.blockById(userId);
-
-        verify(userRepository).blockById(userId);
+        Assertions.assertThatExceptionOfType(IllegalStateException.class)
+                .isThrownBy(() -> userService.unblockById(userId))
+                .withMessageContaining("User already unblocked [id=%s]", userId);
     }
 
     @Test
-    void blockById_UserAlreadyBlocked_ThrowsIllegalStateException() {
-        user.setIsBlocked(true);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+    void unblockByIdUserNotFoundThrowsUserNotFoundException() {
+        UUID userId = TestUtils.USER_ID;
+        Mockito.when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalStateException.class, () -> out.blockById(userId));
+        Assertions.assertThatThrownBy(
+                        () -> userService.unblockById(userId))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("User with [id=%s] not found", userId);
     }
 
     @Test
-    void blockById_UserNotFound_ThrowsUserNotFoundException() {
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+    void deleteUserSuccessfulDeletion() {
+        User user = TestUtils.getUser();
+        UUID userId = TestUtils.USER_ID;
+        Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        assertThrows(UserNotFoundException.class, () -> out.blockById(userId));
+        userService.deleteUser(userId);
+        Mockito.verify(userRepository).deleteById(userId);
     }
 
     @Test
-    void unblockById_SuccessfulUnblock_UpdatesUser() {
-        user.setIsBlocked(true);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+    void deleteUserUserNotFoundThrowsUserNotFoundException() {
+        UUID userId = TestUtils.USER_ID;
+        Mockito.when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        out.unblockById(userId);
-
-        verify(userRepository).unblockById(userId);
+        Assertions.assertThatThrownBy(
+                        () -> userService.deleteUser(userId))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("User with [id=%s] not found", userId);
     }
 
     @Test
-    void unblockById_UserAlreadyUnblocked_ThrowsIllegalStateException() {
-        user.setIsBlocked(false);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+    void getAllUsersExistReturnsUserList() {
+        List<User> users = List.of(TestUtils.getUser());
+        UserResponseDTO userResponseDTO = TestUtils.getUserResponseDTO();
+        List<UserResponseDTO> userResponseDTOS = List.of(userResponseDTO);
 
-        assertThrows(IllegalStateException.class, () -> out.unblockById(userId));
+        Mockito.when(userRepository.findAll()).thenReturn(users);
+        Mockito.when(userMapper.toUserResponseDTOs(users)).thenReturn(userResponseDTOS);
+
+        Collection<UserResponseDTO> result = userService.getAll();
+
+        Assertions.assertThat(result).isNotEmpty().contains(userResponseDTO);
+        Mockito.verify(userRepository).findAll();
+        Mockito.verify(userMapper).toUserResponseDTOs(users);
     }
 
     @Test
-    void unblockById_UserNotFound_ThrowsUserNotFoundException() {
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
-
-        assertThrows(UserNotFoundException.class, () -> out.unblockById(userId));
-    }
-
-    @Test
-    void deleteUser_SuccessfulDeletion_DeletesUser() {
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-
-        out.deleteUser(userId);
-
-        verify(userRepository).deleteById(userId);
-    }
-
-    @Test
-    void deleteUser_UserNotFound_ThrowsUserNotFoundException() {
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
-
-        assertThrows(UserNotFoundException.class, () -> out.deleteUser(userId));
-    }
-
-    @Test
-    void getAll_UsersExist_ReturnsUserList() {
-        when(userRepository.findAll()).thenReturn((List<User>) users);
-        when(userMapper.toUserResponseDTOs(users)).thenReturn((List<UserResponseDTO>) userResponseDTOS);
-
-        Collection<UserResponseDTO> result = out.getAll();
-
-        assertFalse(result.isEmpty());
-        verify(userRepository).findAll();
-        verify(userMapper).toUserResponseDTOs(users);
-    }
-
-    @Test
-    void findUsersPhoneNumbers_UserExists_ReturnsPhoneNumbers() {
-        List<String> phoneNumbers = List.of("1234567890");
+    void findUsersPhoneNumbersUserExistsReturnsPhoneNumbers() {
+        UUID userId = TestUtils.USER_ID;
+        String phone = "1234567890";
+        List<String> phoneNumbers = List.of(phone);
         when(phoneRepository.getNumbersByUserId(userId)).thenReturn(phoneNumbers);
 
-        Collection<String> result = out.findUsersPhoneNumbers(userId);
+        Collection<String> result = userService.findUsersPhoneNumbers(userId);
 
-        assertFalse(result.isEmpty());
-        assertEquals(phoneNumbers, result);
-        verify(phoneRepository).getNumbersByUserId(userId);
+        Assertions.assertThat(result).isNotEmpty().contains(phone);
+        Assertions.assertThat(phoneNumbers.size()).isEqualTo(result.size());
+        Mockito.verify(phoneRepository).getNumbersByUserId(userId);
     }
 
     @Test
-    void assignAvatarToUser_ValidInputs_AssignsAvatar() {
-        Avatar avatar = new Avatar();
+    void assignAvatarToUserValidInputsAssignsAvatar() {
+        User user = TestUtils.getUser();
+        Avatar avatar = user.getAvatar();
+        UUID userId = user.getId();
 
-        out.assignAvatarToUser(userId, avatar);
-
-        verify(userRepository).setAvatarForUser(avatar, userId);
+        userService.assignAvatarToUser(userId, avatar);
+        Mockito.verify(userRepository).setAvatarForUser(avatar, userId);
     }
 
     @Test
-    void findByPassId_ValidId_ReturnsUser() {
-        UUID passId = UUID.randomUUID();
+    void findByPassIdReturnsUser() {
+        User user = TestUtils.getUser();
+        UUID passId = TestUtils.PASS_ID;
+
         when(userRepository.findByPassId(passId)).thenReturn(user);
+        User result = userService.findByPassId(passId);
 
-        User result = out.findByPassId(passId);
-
-        assertEquals(user, result);
-        verify(userRepository).findByPassId(passId);
+        Assertions.assertThat(user).isEqualTo(result);
+        Mockito.verify(userRepository).findByPassId(passId);
     }
 }
