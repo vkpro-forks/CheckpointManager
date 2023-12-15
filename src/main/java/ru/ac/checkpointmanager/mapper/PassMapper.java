@@ -14,6 +14,8 @@ import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.model.passes.PassWalk;
 
+import java.util.UUID;
+
 @Component
 @Slf4j
 public class PassMapper {
@@ -29,6 +31,9 @@ public class PassMapper {
     public Pass toPass(PassCreateDTO passCreateDTO) {
 
         if (passCreateDTO.getCar() != null) {
+            if (passCreateDTO.getCar().getId() == null) {
+                passCreateDTO.getCar().setId(UUID.randomUUID());
+            }
             return modelMapper.map(passCreateDTO, PassAuto.class);
         } else {
             return modelMapper.map(passCreateDTO, PassWalk.class);

@@ -23,6 +23,7 @@ import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
+import ru.ac.checkpointmanager.projection.PassInOutViewProjection;
 import ru.ac.checkpointmanager.repository.CrossingRepository;
 import ru.ac.checkpointmanager.repository.PassRepository;
 import ru.ac.checkpointmanager.service.territories.TerritoryService;
@@ -73,14 +74,17 @@ public class PassServiceImpl implements PassService {
         UUID territoryId = passCreateDTO.getTerritoryId();
         User user = userService.findUserById(userId);
         Territory territory = territoryService.findTerritoryById(territoryId);
+
         checkUserTerritoryRelation(user, territory);
 
         Pass pass = mapper.toPass(passCreateDTO);
         checkOverlapTime(pass);
 
         trimThemAll(pass);
-
-        if (pass.getStartTime().isBefore(LocalDateTime.now())) {
+        if (pass.getStartTime().isBefore(LocalDateTime.now())) {//а как сюда попадет значение ранее NOW()?
+            //мы же отбраковываем значения с плохим start time? еще на входе в контроллер
+            //получается что все пропуски по умолчанию создаются DELAYED
+            //вот такие вопросы возникают во время написания тестов
             pass.setStatus(PassStatus.ACTIVE);
         } else {
             pass.setStatus(PassStatus.DELAYED);
@@ -151,6 +155,24 @@ public class PassServiceImpl implements PassService {
                     foundPasses.getTotalPages(), foundPasses.getTotalElements()));
         }
         return foundPasses.map(mapper::toPassDTO);
+    }
+
+    @Override
+    public Page<PassInOutViewProjection> findEventsByUser(UUID userId, PagingParams pagingParams) {
+        log.debug(METHOD_INVOKE, MethodLog.getMethodName(), userId);
+        userService.findById(userId);
+        Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
+
+        return passRepository.findEventsByUser(userId, pageable);
+    }
+
+    @Override
+    public Page<PassInOutViewProjection> findEventsByTerritory(UUID terId, PagingParams pagingParams) {
+        log.debug(METHOD_INVOKE, MethodLog.getMethodName(), terId);
+        territoryService.findById(terId);
+        Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
+
+        return passRepository.findEventsByTerritory(terId, pageable);
     }
 
     @Override
