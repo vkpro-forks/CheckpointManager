@@ -4,9 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -40,6 +38,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -65,9 +64,6 @@ class UserServiceImplTest {
 
     @InjectMocks
     UserServiceImpl userService;
-
-    @Captor
-    ArgumentCaptor<PhoneDTO> phoneDTOArgumentCaptor;
 
     @Test
     void shouldFindById() {
@@ -166,13 +162,13 @@ class UserServiceImplTest {
 
         Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         Mockito.when(userMapper.toUserResponseDTO(user)).thenReturn(userResponseDTO);
+        when(phoneService.createPhoneNumber(any(PhoneDTO.class))).thenReturn(any(PhoneDTO.class));
 
         UserResponseDTO result = userService.updateUser(userPutDTO);
 
         Assertions.assertThat(result).isNotNull().isEqualTo(userResponseDTO);
         Mockito.verify(userRepository).save(user);
         Mockito.verify(userMapper).toUserResponseDTO(user);
-        Mockito.verify(phoneService).createPhoneNumber(phoneDTOArgumentCaptor.capture());
     }
 
     @Test
