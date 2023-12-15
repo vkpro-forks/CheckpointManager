@@ -20,6 +20,7 @@ import ru.ac.checkpointmanager.dto.CheckpointDTO;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
 import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
+import ru.ac.checkpointmanager.dto.VisitorDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.dto.user.RefreshTokenDTO;
@@ -80,6 +81,8 @@ public class TestUtils {
     public static final String JSON_DETAIL = "$.detail";
 
     public static final UUID EMAIL_TOKEN = UUID.randomUUID();
+
+    public static final UUID VISITOR_ID = UUID.randomUUID();
     public static final String PASSWORD = "password";
 
     public static final String EMAIL = "123@123.com";
@@ -123,7 +126,8 @@ public class TestUtils {
         return new CarDTO(
                 CAR_ID,
                 LICENSE_PLATE,
-                getCarBrand()
+                getCarBrand(),
+                PHONE_NUM
         );
     }
 
@@ -212,6 +216,15 @@ public class TestUtils {
                 .setExpiration(new Date(System.currentTimeMillis() + expired))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    public static VisitorDTO getVisitorDTO() {
+        return new VisitorDTO(
+                VISITOR_ID,
+                USERNAME,
+                PHONE_NUM,
+                "note"
+        );
     }
 
     public static String jsonStringFromObject(Object object) throws JsonProcessingException {

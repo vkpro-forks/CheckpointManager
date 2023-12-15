@@ -8,12 +8,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,12 +23,12 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.dto.VisitorDTO;
 import ru.ac.checkpointmanager.mapper.VisitorMapper;
 import ru.ac.checkpointmanager.model.Visitor;
 import ru.ac.checkpointmanager.service.visitor.VisitorService;
-import ru.ac.checkpointmanager.utils.ErrorUtils;
 
 import java.util.List;
 import java.util.UUID;
@@ -36,6 +37,7 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("api/v1/visitor")
+@Validated
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Visitor (Посетитель)", description = "Работа со списком посетителей.")
 @ApiResponses(value = {@ApiResponse(responseCode = "401", description = "Не авторизован."),
@@ -55,15 +57,11 @@ public class VisitorController {
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @PostMapping
-    public ResponseEntity<?> addVisitor(@Valid @RequestBody VisitorDTO visitorDTO, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            log.warn("Failed to add visitor due to validation errors");
-            return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
-        }
-
+    @ResponseStatus(HttpStatus.CREATED)
+    public VisitorDTO addVisitor(@Valid @RequestBody VisitorDTO visitorDTO) {
         Visitor newVisitor = visitorService.addVisitor(mapper.toVisitor(visitorDTO));
         log.info("New visitor added: {}", newVisitor);
-        return new ResponseEntity<>(mapper.toVisitorDTO(newVisitor), HttpStatus.CREATED);
+        return mapper.toVisitorDTO(newVisitor);
     }
 
     @Operation(summary = "Получение посетителя по id.",
@@ -75,10 +73,10 @@ public class VisitorController {
             @ApiResponse(responseCode = "404", description = "Посетитель не существует.")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<?> getVisitor(@PathVariable UUID id) {
+    public VisitorDTO getVisitor(@PathVariable UUID id) {
         Visitor existVisitor = visitorService.getVisitor(id);
         log.debug("Retrieved visitor with ID {}", id);
-        return new ResponseEntity<>(mapper.toVisitorDTO(existVisitor), HttpStatus.OK);
+        return mapper.toVisitorDTO(existVisitor);
     }
 
 
@@ -93,17 +91,11 @@ public class VisitorController {
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateVisitor(@PathVariable UUID id, @RequestBody VisitorDTO visitorDTO,
-                                           BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            log.warn("Failed to update visitor due to validation errors");
-            return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
-        }
-
+    public VisitorDTO updateVisitor(@PathVariable UUID id, @RequestBody @Valid VisitorDTO visitorDTO) {
         Visitor visitor = mapper.toVisitor(visitorDTO);
         Visitor updatedVisitor = visitorService.updateVisitor(id, visitor);
         log.info("Visitor updated with ID {}", id);
-        return new ResponseEntity<>(mapper.toVisitorDTO(updatedVisitor), HttpStatus.OK);
+        return mapper.toVisitorDTO(updatedVisitor);
     }
 
 
@@ -132,7 +124,7 @@ public class VisitorController {
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/phone")
-    public List<VisitorDTO> searchByPhone(@RequestParam String phone) { //TODO validate
+    public List<VisitorDTO> searchByPhone(@RequestParam @NotBlank String phone) {
         List<Visitor> visitors = visitorService.findByPhonePart(phone);
         log.debug("Visitors found with phone part: {}", phone);
         return mapper.toVisitorDTOS(visitors);
