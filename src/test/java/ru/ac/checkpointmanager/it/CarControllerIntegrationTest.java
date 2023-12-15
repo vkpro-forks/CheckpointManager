@@ -1,20 +1,14 @@
 package ru.ac.checkpointmanager.it;
 
-import jakarta.persistence.EntityManager;
 import lombok.SneakyThrows;
 import org.assertj.core.api.Assertions;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.cache.Cache;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
@@ -23,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import ru.ac.checkpointmanager.config.CacheTestConfiguration;
 import ru.ac.checkpointmanager.config.CorsTestConfiguration;
 import ru.ac.checkpointmanager.config.OpenAllEndpointsTestConfiguration;
 import ru.ac.checkpointmanager.dto.CarDTO;
@@ -46,7 +41,7 @@ import java.util.Optional;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
 @AutoConfigureMockMvc
-@Import({OpenAllEndpointsTestConfiguration.class, CorsTestConfiguration.class})
+@Import({OpenAllEndpointsTestConfiguration.class, CorsTestConfiguration.class, CacheTestConfiguration.class})
 @ActiveProfiles("test")
 @WithMockUser(roles = {"ADMIN"})
 class CarControllerIntegrationTest extends PostgresContainersConfig {
@@ -68,18 +63,6 @@ class CarControllerIntegrationTest extends PostgresContainersConfig {
 
     @Autowired
     UserRepository userRepository;
-
-    @Autowired
-    EntityManager entityManager;
-
-    @MockBean
-    RedisCacheManager redisCacheManager;
-
-    @BeforeEach
-    void init() {
-        Cache mockCache = Mockito.mock(Cache.class);
-        Mockito.when(redisCacheManager.getCache(Mockito.anyString())).thenReturn(mockCache);
-    }
 
     @AfterEach
     void clear() {

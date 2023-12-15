@@ -3,19 +3,16 @@ package ru.ac.checkpointmanager.it;
 import lombok.SneakyThrows;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.cache.Cache;
-import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import ru.ac.checkpointmanager.config.CacheTestConfiguration;
 import ru.ac.checkpointmanager.model.TemporaryUser;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.repository.TemporaryUserRepository;
@@ -24,6 +21,7 @@ import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 
+@Import({CacheTestConfiguration.class})
 class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestConfig {
 
     public static final String USER = "User";
@@ -36,15 +34,6 @@ class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestCo
 
     @Autowired
     TemporaryUserRepository temporaryUserRepository;
-
-    @MockBean
-    RedisCacheManager redisCacheManager;
-
-    @BeforeEach
-    void init() {
-        Cache mockCache = Mockito.mock(Cache.class);
-        Mockito.when(redisCacheManager.getCache(Mockito.anyString())).thenReturn(mockCache);
-    }
 
     @AfterEach
     void clear() {
