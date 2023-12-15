@@ -16,8 +16,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
 
 import java.util.List;
@@ -30,17 +28,10 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString(exclude = {"brand", "passes"})
-@SQLDelete(sql = """
-        UPDATE cars
-        SET deleted = true
-        WHERE id = ?
-        """)
-@Where(clause = "deleted = false")
 public class Car {
 
     @Id
     @EqualsAndHashCode.Include
-    // @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @NotNull
@@ -59,9 +50,6 @@ public class Car {
 
     @Column(name = "car_phone")
     private String phone;
-
-    @Column(name = "deleted")
-    private Boolean deleted = Boolean.FALSE;
 
     public void setLicensePlate(String licensePlate) {
         this.licensePlate = licensePlate.toUpperCase();

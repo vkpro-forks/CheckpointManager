@@ -65,8 +65,9 @@ databaseChangeLog:
       file: liquibase/scripts/V_174__change_column_brand_id.sql
   - include:
       file: liquibase/scripts/V_178__drop_tokens.sql
+
   - include:
-      file: liquibase/scripts/V_187__add_column_forCar_deleted.yaml
+      file: liquibase/scripts/V_187__alter_table_passes_set_null_on_delete_car.yaml
 
   ## ВНЕСЕНИЕ ДЕМО-ДАННЫХ, ОСТАВЛЯЙТЕ ВСЕГДА В КОНЦЕ ФАЙЛА
   - include:

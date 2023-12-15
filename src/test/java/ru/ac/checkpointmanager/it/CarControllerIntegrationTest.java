@@ -1,7 +1,6 @@
 package ru.ac.checkpointmanager.it;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.Query;
 import lombok.SneakyThrows;
 import org.assertj.core.api.Assertions;
 import org.hamcrest.Matchers;
@@ -96,7 +95,7 @@ class CarControllerIntegrationTest extends PostgresContainersConfig {
     void shouldAddCar() {
         CarBrand savedCarBrand = saveCarBrandInRepo();
 
-        CarDTO carDTO = new CarDTO();//save without id
+        CarDTO carDTO = new CarDTO();
         carDTO.setLicensePlate(TestUtils.LICENSE_PLATE);
         carDTO.setBrand(savedCarBrand);
 
@@ -141,12 +140,8 @@ class CarControllerIntegrationTest extends PostgresContainersConfig {
         mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.CAR_URL + "/" + savedCar.getId()))
                 .andExpect(MockMvcResultMatchers.status().isNoContent());
 
-        Query nativeQuery = entityManager.createNativeQuery("SELECT * FROM cars WHERE cars.id= ?", Car.class);
-        nativeQuery.setParameter(1, savedCar.getId());
-        Optional<Car> optCar = Optional.ofNullable((Car) nativeQuery.getSingleResult());
-        Assertions.assertThat(optCar).isPresent();
-        Car deletedCar = optCar.get();
-        Assertions.assertThat(deletedCar.getDeleted()).isTrue();
+        Optional<Car> optionalCar = carRepository.findById(savedCar.getId());
+        Assertions.assertThat(optionalCar).isEmpty();
     }
 
     @Test
@@ -176,36 +171,6 @@ class CarControllerIntegrationTest extends PostgresContainersConfig {
         mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.CAR_USER_URL + "/" + savedUser.getId()))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.[0].id").value(savedCar.getId().toString()));
-    }
-
-    @Test
-    @SneakyThrows
-    void shouldReturnEmptyListIfCarByUserDeleted() {
-        CarBrand carBrand = saveCarBrandInRepo();
-        Territory territory = new Territory();
-        territory.setName(TestUtils.TERR_NAME);
-        User user = TestUtils.getUser();
-        User savedUser = userRepository.saveAndFlush(user);
-        territory.setUsers(List.of(savedUser));
-        Territory savedTerritory = territoryRepository.saveAndFlush(territory);
-
-        Car car = new Car();
-        car.setLicensePlate(TestUtils.getCarDto().getLicensePlate());
-        car.setBrand(carBrand);
-        car.setId(TestUtils.getCarDto().getId());
-        car.setDeleted(true);
-        Car savedCar = carRepository.saveAndFlush(car);//save car and repo change its id
-
-        PassAuto passAuto = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours();
-        passAuto.setCar(savedCar);
-        passAuto.setUser(savedUser);
-        passAuto.setTerritory(savedTerritory);
-
-        passRepository.saveAndFlush(passAuto);
-
-        mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.CAR_USER_URL + "/" + savedUser.getId()))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.size").value(0));
     }
 
     private CarBrand saveCarBrandInRepo() {
