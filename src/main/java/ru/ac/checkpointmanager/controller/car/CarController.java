@@ -8,9 +8,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
@@ -22,12 +24,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.mapper.CarMapper;
 import ru.ac.checkpointmanager.model.car.Car;
-import ru.ac.checkpointmanager.model.car.CarBrand;
-import ru.ac.checkpointmanager.service.car.CarBrandService;
 import ru.ac.checkpointmanager.service.car.CarService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
 
@@ -41,45 +43,32 @@ import java.util.UUID;
 @Validated
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Car (Машина)", description = "Для обработки списка машин")
-@ApiResponses(value = {@ApiResponse(responseCode = "401", description = "UNAUTHORIZED: пользователь не авторизован"),
-        @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса")})
+@ApiResponses(value = {@ApiResponse(responseCode = "401", description = "UNAUTHORIZED: пользователь не авторизован",
+        content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса",
+                content = @Content(schema = @Schema(implementation = ProblemDetail.class)))})
 
 public class CarController {
 
     private final CarMapper mapper;
     private final CarService carService;
-    private final CarBrandService carBrandService;
 
     @Operation(summary = "Добавить новую машину",
             description = "Доступ: ADMIN.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Машина успешно добавлен",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Car.class))}),
-            @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей.")
+                            schema = @Schema(implementation = CarDTO.class))}),
+            @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей.",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @PostMapping
-    public ResponseEntity<?> addCar(@Valid @RequestBody CarDTO carDTO, BindingResult result) {
-        if (result.hasErrors()) {
-            log.warn("Car creation failed due to validation errors");
-            return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
-        }
-
-        Car car = mapper.toCar(carDTO);
-
-        try {
-            CarBrand existingBrand = carBrandService.getBrandById(carDTO.getBrand().getId());
-            car.setBrand(existingBrand);
-            Car newCar = carService.addCar(car);
-            CarDTO newCarDTO = mapper.toCarDTO(newCar);
-            log.info("New car created: {}", newCar);
-            return new ResponseEntity<>(newCarDTO, HttpStatus.CREATED);
-        } catch (IllegalArgumentException e) {
-            log.warn("Car creation failed: {}", e.getMessage());
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-
-        }
+    @ResponseStatus(HttpStatus.CREATED)
+    public CarDTO addCar(@Valid @RequestBody CarDTO carDTO) {
+        Car newCar = carService.addCar(mapper.toCar(carDTO));
+        log.info("New car added: {}", newCar);
+        return mapper.toCarDTO(newCar);
     }
 
     @Operation(summary = "Обновить новую машину",
@@ -87,8 +76,9 @@ public class CarController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Машина успешно обновлена",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Car.class))}),
-            @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей.")
+                            schema = @Schema(implementation = CarDTO.class))}),
+            @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей.",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @PutMapping("/{carId}")
@@ -110,8 +100,9 @@ public class CarController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Машина успешно удален",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Car.class))}),
-            @ApiResponse(responseCode = "404", description = "Такой машины не существует.")
+                            schema = @Schema(implementation = CarDTO.class))}),
+            @ApiResponse(responseCode = "404", description = "Такой машины не существует.",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @DeleteMapping("/{carId}")
@@ -125,7 +116,7 @@ public class CarController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Список машин получен",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Car.class))}),
+                            schema = @Schema(implementation = CarDTO.class))}),
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping
@@ -140,7 +131,7 @@ public class CarController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Список машин получен",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Car.class))}),
+                            schema = @Schema(implementation = CarDTO.class))}),
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/user/{userId}")
@@ -150,4 +141,21 @@ public class CarController {
         log.debug("Retrieved cars for user ID {}", userId);
         return new ResponseEntity<>(carDTOs, HttpStatus.OK);
     }
+
+    @Operation(summary = "Найти машину по номеру телефона.",
+            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Машина успешно найдена. " +
+                    "Может вернуть пустой список если машины не найдены.",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = CarDTO.class))}),
+    })
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
+    @GetMapping("/phone")
+    public List<CarDTO> searchByPhone(@RequestParam @NotBlank String phone) {
+        List<Car> cars = carService.findByPhonePart(phone);
+        log.debug("Cars found with phone part: {}", phone);
+        return mapper.toCarDTOs(cars);
+    }
+
 }

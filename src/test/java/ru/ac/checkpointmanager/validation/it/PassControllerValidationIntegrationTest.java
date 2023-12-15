@@ -14,15 +14,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import ru.ac.checkpointmanager.config.CorsTestConfiguration;
+import ru.ac.checkpointmanager.config.OpenAllEndpointsTestConfiguration;
 import ru.ac.checkpointmanager.config.ValidationTestConfiguration;
 import ru.ac.checkpointmanager.controller.PassController;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.VisitorDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
-import ru.ac.checkpointmanager.exception.handler.ErrorCode;
-import ru.ac.checkpointmanager.config.CorsTestConfiguration;
-import ru.ac.checkpointmanager.config.OpenAllEndpointsTestConfiguration;
 import ru.ac.checkpointmanager.mapper.PassMapper;
 import ru.ac.checkpointmanager.service.passes.PassService;
 import ru.ac.checkpointmanager.util.TestUtils;
@@ -133,14 +132,8 @@ class PassControllerValidationIntegrationTest {
         checkStartEndTimeFields(resultActions);
     }
 
-    private static void checkCommonValidationFields(ResultActions resultActions) throws Exception {
-        resultActions.andExpect(MockMvcResultMatchers.status().is4xxClientError())
-                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_ERROR_CODE)
-                        .value(ErrorCode.VALIDATION.toString()));
-    }
-
     private static void checkCarOrVisitorFields(ResultActions resultActions) throws Exception {
-        checkCommonValidationFields(resultActions);
+        TestUtils.checkCommonValidationFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0))
                         .value(Matchers.anyOf(Matchers.is(CAR), Matchers.is(VISITOR))))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(1))
@@ -148,7 +141,7 @@ class PassControllerValidationIntegrationTest {
     }
 
     private static void checkStartEndTimeFields(ResultActions resultActions) throws Exception {
-        checkCommonValidationFields(resultActions);
+        TestUtils.checkCommonValidationFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0))
                         .value(Matchers.anyOf(Matchers.is(START_TIME), Matchers.is(END_TIME))))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(1))
