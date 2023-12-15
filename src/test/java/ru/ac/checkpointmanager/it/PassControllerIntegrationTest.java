@@ -40,7 +40,9 @@ import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
@@ -317,6 +319,49 @@ class PassControllerIntegrationTest extends PostgresContainersConfig {
 
         List<Pass> passesAfterDelete = passRepository.findAll();
         Assertions.assertThat(passesAfterDelete).isEmpty();
+    }
+
+    @ParameterizedTest
+    @EnumSource(PassStatus.class)
+    @SneakyThrows
+    void shouldDeleteManyPassesWithOneAuto(PassStatus passStatus) {
+        //creating a passes for territory with one car
+        Territory territory = new Territory();
+        territory.setName(TestUtils.TERR_NAME);
+        User user = TestUtils.getUser();
+        User savedUser = userRepository.saveAndFlush(user);
+        territory.setUsers(List.of(savedUser));
+        Territory savedTerritory = territoryRepository.saveAndFlush(territory);
+        CarBrand carBrand = TestUtils.getCarBrand();
+        CarBrand savedCarBrand = carBrandRepository.saveAndFlush(carBrand);
+        Car car = new Car();
+        car.setLicensePlate(TestUtils.getCarDto().getLicensePlate());
+        car.setBrand(savedCarBrand);
+        car.setId(TestUtils.getCarDto().getId());
+        Car savedCar = carRepository.saveAndFlush(car);
+        List<Pass> passes = new ArrayList<>();
+        //created 5 passes for one car
+        for (int i = 0; i < 5; i++) {
+            PassAuto pass = new PassAuto();
+            pass.setId(UUID.randomUUID());
+            pass.setTypeTime(PassTypeTime.ONETIME);
+            pass.setStartTime(LocalDateTime.now().plusHours(i));
+            pass.setEndTime(LocalDateTime.now().plusHours(5 + i));
+            pass.setStatus(passStatus);
+            pass.setTerritory(savedTerritory);
+            pass.setUser(savedUser);
+            pass.setCar(savedCar);
+            passes.add(pass);
+        }
+        passRepository.saveAllAndFlush(passes);
+        List<Pass> allPasses = passRepository.findAll();
+        Assertions.assertThat(allPasses).hasSize(5);
+
+        mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.PASS_URL + "/" + passes.get(0).getId()))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+
+        List<Pass> passesAfterDelete = passRepository.findAll();
+        Assertions.assertThat(passesAfterDelete).hasSize(4);
     }
 
 }

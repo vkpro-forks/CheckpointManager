@@ -186,7 +186,6 @@ public class TestUtils {
 
     public static Model<User> getInstancioUserModel() {
         return Instancio.of(User.class)
-                .ignore(Select.field("tokens"))
                 .ignore(Select.field("numbers"))
                 .ignore(Select.field("pass"))
                 .ignore(Select.field("avatar"))
@@ -245,12 +244,15 @@ public class TestUtils {
     }
 
     public static RefreshTokenDTO getRefreshTokenDTO() {
-        return new RefreshTokenDTO(getJwt(86400000, USERNAME, List.of("ROLE_ADMIN")));
+        return new RefreshTokenDTO(getJwt(86400000, USERNAME, List.of("ROLE_ADMIN"), true));
     }
 
-    public static String getJwt(Integer expired, String username, List<String> roles) {
+    public static String getJwt(Integer expired, String username, List<String> roles, boolean isRefresh) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", roles);
+        if (isRefresh) {
+            claims.put("refresh", true);
+        }
         return Jwts
                 .builder()
                 .setClaims(claims)
