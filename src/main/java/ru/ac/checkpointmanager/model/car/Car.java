@@ -52,6 +52,9 @@ public class Car {
     @OneToMany(mappedBy = "car")
     private List<PassAuto> passes;
 
+    @Column(name = "car_phone")
+    private String phone;
+
     public void setLicensePlate(String licensePlate) {
         this.licensePlate = licensePlate.toUpperCase();
     }

@@ -26,8 +26,10 @@ public class CarServiceImpl implements CarService {
     @Override
     public Car addCar(Car car) {
         car.setId(UUID.randomUUID());
+        log.info("Adding new Car: {}", car);
         return repository.save(car);
     }
+
 
     @Override
     public Car getCarById(UUID carId) {
@@ -67,6 +69,12 @@ public class CarServiceImpl implements CarService {
     @Override
     public List<Car> getAllCars() {
         return repository.findAll();
+    }
+
+    @Override
+    public List<Car> findByPhonePart(String phone) {
+        log.info("Searching for Cars with phone containing: {}", phone);
+        return repository.findByPhoneContaining(phone);
     }
 
     @Override

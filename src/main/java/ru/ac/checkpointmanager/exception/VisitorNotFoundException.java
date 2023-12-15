@@ -1,14 +1,11 @@
 package ru.ac.checkpointmanager.exception;
 
-public class VisitorNotFoundException extends RuntimeException {
-    public VisitorNotFoundException() {
-    }
+import jakarta.persistence.EntityNotFoundException;
+
+public class VisitorNotFoundException extends EntityNotFoundException {
 
     public VisitorNotFoundException(String message) {
         super(message);
     }
 
-    public VisitorNotFoundException(String message, Throwable cause) {
-        super(message, cause);
-    }
 }
