@@ -4,9 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import ru.ac.checkpointmanager.configuration.JwtAuthenticationFilter;
-import ru.ac.checkpointmanager.configuration.JwtService;
-import ru.ac.checkpointmanager.repository.TokenRepository;
+import ru.ac.checkpointmanager.security.filter.JwtAuthenticationFilter;
+import ru.ac.checkpointmanager.security.jwt.JwtService;
 
 @TestConfiguration
 public class ValidationTestConfiguration {
@@ -16,9 +15,6 @@ public class ValidationTestConfiguration {
 
     @MockBean
     JwtService jwtService;
-
-    @MockBean
-    TokenRepository tokenRepository;
 
     @MockBean
     UserDetailsService userDetailsService;
