@@ -35,11 +35,14 @@ import ru.ac.checkpointmanager.exception.handler.ErrorCode;
 import ru.ac.checkpointmanager.model.TemporaryUser;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
+import ru.ac.checkpointmanager.model.car.Car;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.model.checkpoints.CheckpointType;
 import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.enums.PhoneNumberType;
 import ru.ac.checkpointmanager.model.enums.Role;
+import ru.ac.checkpointmanager.model.passes.PassAuto;
+import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.model.passes.PassTypeTime;
 
 import java.security.Key;
@@ -116,7 +119,13 @@ public class TestUtils {
     }
 
     public static Territory getTerritory() {
-        return Instancio.of(Territory.class).create();
+        return Instancio.of(Territory.class)
+                .ignore(Select.field("users"))
+                .ignore(Select.field(Territory::getPass))
+                .ignore(Select.field(Territory::getCheckpoints))
+                .set(Select.field(Territory::getName), TERR_NAME)
+                .set(Select.field(Territory::getId), TERR_ID)
+                .create();
     }
 
     public static TerritoryDTO getTerritoryDTO() {
@@ -270,6 +279,28 @@ public class TestUtils {
                 PHONE_NUM,
                 "note"
         );
+    }
+
+    public static PassAuto getSimpleActiveOneTimePassAutoFor3Hours(User user, Territory territory, Car car) {
+        PassAuto passAuto = new PassAuto();
+        passAuto.setStartTime(LocalDateTime.now());
+        passAuto.setEndTime(LocalDateTime.now().plusHours(3));
+        passAuto.setId(UUID.randomUUID());
+        passAuto.setTypeTime(PassTypeTime.ONETIME);
+        passAuto.setDtype("AUTO");
+        passAuto.setStatus(PassStatus.ACTIVE);
+        passAuto.setCar(car);
+        passAuto.setUser(user);
+        passAuto.setTerritory(territory);
+        return passAuto;
+    }
+
+    public static Car getCar(CarBrand carBrand) {
+        Car car = new Car();
+        car.setLicensePlate(TestUtils.LICENSE_PLATE);
+        car.setBrand(carBrand);
+        car.setId(TestUtils.CAR_ID);
+        return car;
     }
 
     public static String jsonStringFromObject(Object object) throws JsonProcessingException {
