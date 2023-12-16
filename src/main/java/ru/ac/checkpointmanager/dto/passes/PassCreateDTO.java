@@ -21,6 +21,7 @@ public class PassCreateDTO {
     @NotNull
     private UUID userId;
 
+    @Size(max = 30)
     private String comment;
 
     @NotNull
