@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,6 +34,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("api/v1/car")
+@Validated
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "CarBrand (Бренд Машины)", description = "Для обработки Брендов Авто")
@@ -52,12 +54,7 @@ public class CarBrandController {
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @PostMapping("/brands")
-    public ResponseEntity<?> createBrand(@Valid @RequestBody CarBrand brand, BindingResult result) {
-        if (result.hasErrors()) {
-            log.warn("Creation failed: Invalid CarBrand data");
-            return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
-        }
-
+    public ResponseEntity<?> createBrand(@Valid @RequestBody CarBrand brand) {
         CarBrand carBrand = carBrandService.addBrand(brand);
         log.info("CarBrand created: {}", carBrand);
         return new ResponseEntity<>(carBrand, HttpStatus.CREATED);
