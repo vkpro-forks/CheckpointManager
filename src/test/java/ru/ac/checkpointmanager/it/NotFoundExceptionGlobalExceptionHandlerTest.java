@@ -13,12 +13,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.CheckpointDTO;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.exception.handler.ErrorCode;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
+import ru.ac.checkpointmanager.model.car.Car;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
 import ru.ac.checkpointmanager.model.checkpoints.CheckpointType;
@@ -28,6 +30,8 @@ import ru.ac.checkpointmanager.repository.CheckpointRepository;
 import ru.ac.checkpointmanager.repository.PassRepository;
 import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
+import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
+import ru.ac.checkpointmanager.repository.car.CarRepository;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 
@@ -51,11 +55,19 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
     @Autowired
     TerritoryRepository territoryRepository;
 
+    @Autowired
+    CarBrandRepository carBrandRepository;
+
+    @Autowired
+    CarRepository carRepository;
+
     @AfterEach
     void clear() {
         checkpointRepository.deleteAll();
         territoryRepository.deleteAll();
         userRepository.deleteAll();
+        carRepository.deleteAll();
+        carBrandRepository.deleteAll();
     }
 
     //CAR BRAND NOT FOUND EXCEPTION HANDLING
@@ -81,6 +93,45 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
                 .perform(MockMvcRequestBuilders.put(UrlConstants.CAR_BRANDS_URL + "/" + TestUtils.CAR_BRAND_ID_STR)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(contentString));
+        TestUtils.checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    void handleCarBrandNotFoundExceptionForAddCar() {
+        CarDTO carDTO = TestUtils.getCarDto();
+        String carDtoString = TestUtils.jsonStringFromObject(carDTO);
+
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CAR_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(carDtoString))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(Matchers.startsWith("CarBrand")));
+        TestUtils.checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    void handleCarBrandNotFoundExceptionForUpdateCar() {
+        String newLicensePlate = "А666ВХ666";
+        CarBrand carBrand = TestUtils.getCarBrand();
+        CarBrand savedBrand = carBrandRepository.saveAndFlush(carBrand);
+        CarBrand anotherCarBrand = new CarBrand();
+        String evilCarBrand = "EvilCar";
+        anotherCarBrand.setBrand(evilCarBrand);
+        Car car = TestUtils.getCar(savedBrand);
+        Car savedCar = carRepository.saveAndFlush(car);
+        CarDTO carDto = TestUtils.getCarDto();
+        carDto.setLicensePlate(newLicensePlate);
+        carDto.setBrand(anotherCarBrand);
+        String carDtoString = TestUtils.jsonStringFromObject(carDto);
+
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                        .put(UrlConstants.CAR_URL + "/" + savedCar.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(carDtoString))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(Matchers.startsWith("CarBrand")));
         TestUtils.checkNotFoundFields(resultActions);
     }
 
