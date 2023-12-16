@@ -3,6 +3,7 @@ package ru.ac.checkpointmanager.service.car;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.ac.checkpointmanager.exception.CarBrandAlreadyExistsException;
 import ru.ac.checkpointmanager.exception.CarBrandNotFoundException;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
@@ -16,6 +17,7 @@ import java.util.Optional;
 public class CarBrandServiceImpl implements CarBrandService {
 
     public static final String CAR_BRAND_NOT_FOUND_WITH_ID_MSG = "Car brand not found with ID:";
+    public static final String CAR_BRAND_EXISTS = "CarBrand with [name: %s] already exists";
 
     private final CarBrandRepository carBrandRepository;
 
@@ -33,6 +35,8 @@ public class CarBrandServiceImpl implements CarBrandService {
 
     @Override
     public CarBrand addBrand(CarBrand brand) {
+            log.warn(CAR_BRAND_EXISTS.formatted(brand.getBrand()));
+            throw new CarBrandAlreadyExistsException(CAR_BRAND_EXISTS.formatted(brand.getBrand()));
         Optional<CarBrand> carBrandOptional = carBrandRepository.findByBrand(brand.getBrand());
         if (carBrandOptional.isPresent()) {
             throw new IllegalArgumentException("A brand with the same name already exists!");
@@ -44,7 +48,7 @@ public class CarBrandServiceImpl implements CarBrandService {
     //удалить бренд можно только в том случае, если у этого бренда в бд нет ни одной модели
     @Override
     public void deleteBrand(Long brandId) {
-        CarBrand carBrand = carBrandRepository.findById(brandId)
+        carBrandRepository.findById(brandId)
                 .orElseThrow(() -> {
                     log.warn(CAR_BRAND_NOT_FOUND_WITH_ID_MSG + " {}", brandId);
                     return new CarBrandNotFoundException(CAR_BRAND_NOT_FOUND_WITH_ID_MSG + " " + brandId);
