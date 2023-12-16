@@ -13,19 +13,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.service.car.CarBrandService;
-import ru.ac.checkpointmanager.utils.ErrorUtils;
 
 import java.util.List;
 
@@ -33,10 +33,11 @@ import java.util.List;
 @RestController
 @RequestMapping("api/v1/car")
 @RequiredArgsConstructor
+@Validated
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "CarBrand (Бренд Машины)", description = "Для обработки Брендов Авто")
 @ApiResponses(value = {@ApiResponse(responseCode = "401", description = "Произошла ошибка, Нужно авторизоваться"),
-@ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса")})
+        @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса")})
 public class CarBrandController {
 
     private final CarBrandService carBrandService;
@@ -51,15 +52,9 @@ public class CarBrandController {
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @PostMapping("/brands")
-    public ResponseEntity<?> createBrand(@Valid @RequestBody CarBrand brand, BindingResult result) {
-        if (result.hasErrors()) {
-            log.warn("Creation failed: Invalid CarBrand data");
-            return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
-        }
-
-        CarBrand carBrand = carBrandService.addBrand(brand);
-        log.info("CarBrand created: {}", carBrand);
-        return new ResponseEntity<>(carBrand, HttpStatus.CREATED);
+    @ResponseStatus(HttpStatus.CREATED)
+    public CarBrand createBrand(@Valid @RequestBody CarBrand brand) {
+        return carBrandService.addBrand(brand);
     }
 
     @Operation(summary = "Получение Бренд Машины по id",
