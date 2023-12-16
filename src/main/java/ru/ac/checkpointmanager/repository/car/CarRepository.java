@@ -15,4 +15,5 @@ public interface CarRepository extends JpaRepository<Car, UUID> {
     List<Car> findCarsByUserId(@Param("userId") UUID userId);
 
     List<Car> findByPhoneContaining(String phone);
+
 }

@@ -4,6 +4,8 @@ public class UrlConstants {
 
     public static final String CAR_URL = "/api/v1/car";
 
+    public static final String CAR_USER_URL = "/api/v1/car/user";
+
     public static final String CAR_BRANDS_URL = CAR_URL + "/brands";
 
     public static final String CAR_PHONE_URL = CAR_URL + "/phone";
