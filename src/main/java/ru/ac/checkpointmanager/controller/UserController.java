@@ -14,9 +14,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -34,7 +33,6 @@ import ru.ac.checkpointmanager.dto.user.UserPutDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.service.user.UserService;
-import ru.ac.checkpointmanager.utils.ErrorUtils;
 
 import java.util.Collection;
 import java.util.List;
@@ -42,6 +40,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("api/v1/user")
+@Validated
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Пользовательский интерфейс", description = "Комплекс операций по управлению жизненным циклом " +
@@ -212,8 +211,8 @@ public class UserController {
     )
     @ApiResponses(value = {
             @ApiResponse(
-                    responseCode = "200",
-                    description = "OK: пароль пользователя успешно изменен"
+                    responseCode = "201",
+                    description = "NO_CONTENT: пароль пользователя успешно изменен"
             ),
             @ApiResponse(
                     responseCode = "409",
@@ -225,15 +224,9 @@ public class UserController {
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @PatchMapping("/password")
-    public ResponseEntity<?> changePassword(@RequestBody @Valid ChangePasswordRequest request,
-                                            BindingResult result
-    ) {
-        if (result.hasErrors()) {
-            return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
-        }
-
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void changePassword(@RequestBody @Valid ChangePasswordRequest request) {
         userService.changePassword(request);
-        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "Изменение почты пользователя",
@@ -253,14 +246,8 @@ public class UserController {
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @PatchMapping("/email")
-    public ResponseEntity<?> changeEmail(@RequestBody @Valid ChangeEmailRequest request,
-                                         BindingResult result
-    ) {
-        if (result.hasErrors()) {
-            return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
-        }
-
-        return ResponseEntity.ok(userService.changeEmail(request));
+    public String changeEmail(@RequestBody @Valid ChangeEmailRequest request) {
+        return userService.changeEmail(request);
     }
 
     @Operation(summary = "Изменение роли пользователя",
@@ -268,8 +255,8 @@ public class UserController {
     )
     @ApiResponses(value = {
             @ApiResponse(
-                    responseCode = "200",
-                    description = "OK: роль пользователя успешно изменена"
+                    responseCode = "204",
+                    description = "NO_CONTENT: роль пользователя успешно изменена"
             ),
             @ApiResponse(
                     responseCode = "403",
@@ -286,6 +273,7 @@ public class UserController {
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @PatchMapping("/role/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void changeRole(@Parameter(description = "Уникальный идентификатор пользователя", required = true)
                            @PathVariable UUID id,
                            @Parameter(description = "Новая роль пользователя", required = true)
@@ -328,8 +316,8 @@ public class UserController {
     )
     @ApiResponses(value = {
             @ApiResponse(
-                    responseCode = "200",
-                    description = "OK: пользователь заблокирован"
+                    responseCode = "204",
+                    description = "NO_CONTENT: пользователь заблокирован"
             ),
             @ApiResponse(
                     responseCode = "403",
@@ -346,11 +334,10 @@ public class UserController {
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @PatchMapping("/block/{id}")
-    public ResponseEntity<?> blockById(@Parameter(description = "Уникальный идентификатор пользователя", required = true)
-                                       @PathVariable UUID id
-    ) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void blockById(@Parameter(description = "Уникальный идентификатор пользователя", required = true)
+                          @PathVariable UUID id) {
         userService.blockById(id);
-        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "Разблокировать пользователя по id",
@@ -358,8 +345,8 @@ public class UserController {
     )
     @ApiResponses(value = {
             @ApiResponse(
-                    responseCode = "200",
-                    description = "OK: пользователь разблокирован"
+                    responseCode = "204",
+                    description = "NO_CONTENT: пользователь разблокирован"
             ),
             @ApiResponse(
                     responseCode = "403",
@@ -376,11 +363,10 @@ public class UserController {
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @PatchMapping("/unblock/{id}")
-    public ResponseEntity<?> unblockById(@Parameter(description = "Уникальный идентификатор пользователя", required = true)
-                                         @PathVariable UUID id
-    ) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void unblockById(@Parameter(description = "Уникальный идентификатор пользователя", required = true)
+                            @PathVariable UUID id) {
         userService.unblockById(id);
-        return ResponseEntity.ok().build();
     }
 
 

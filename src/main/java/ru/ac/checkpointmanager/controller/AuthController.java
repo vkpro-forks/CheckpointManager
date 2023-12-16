@@ -54,8 +54,8 @@ public class AuthController {
 
     @Operation(summary = "Регистрация нового пользователя", responses = {
             @ApiResponse(
-                    responseCode = "200",
-                    description = "OK: Данные валидны, письмо для подтверждения отправлено",
+                    responseCode = "201",
+                    description = "CREATED: Данные валидны, письмо для подтверждения отправлено",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = UserAuthDTO.class))}
             ),
@@ -85,7 +85,7 @@ public class AuthController {
         if (result.hasErrors()) {
             return new ResponseEntity<>(errorsList(result), HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(authenticationService.preRegister(user), HttpStatus.OK);
+        return new ResponseEntity<>(authenticationService.preRegister(user), HttpStatus.CREATED);
     }
 
     @PostMapping("/login")

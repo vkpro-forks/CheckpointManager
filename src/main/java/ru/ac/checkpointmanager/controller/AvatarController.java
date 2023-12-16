@@ -81,11 +81,12 @@ public class AvatarController {
 
     @Operation(summary = "Удалить аватара по Id")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Аватар получен. Контент содержит изображение в формате JPEG."),
+            @ApiResponse(responseCode = "204", description = "Аватар удален."),
             @ApiResponse(responseCode = "404", description = "NOT_FOUND: Аватар не найден",
                     content = @Content(schema = @Schema(implementation = AvatarNotFoundException.class))),
     })
     @DeleteMapping("/{avatarId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteAvatar(@PathVariable UUID avatarId) {
         service.deleteAvatarIfExists(avatarId);
     }

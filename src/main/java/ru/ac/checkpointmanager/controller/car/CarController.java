@@ -74,7 +74,7 @@ public class CarController {
     @Operation(summary = "Обновить новую машину",
             description = "Доступ: ADMIN.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Машина успешно обновлена",
+            @ApiResponse(responseCode = "200", description = "Машина успешно обновлена",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = CarDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей.",
@@ -98,7 +98,7 @@ public class CarController {
     @Operation(summary = "Удалить машину",
             description = "Доступ: ADMIN.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Машина успешно удален",
+            @ApiResponse(responseCode = "204", description = "Машина успешно удален",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = CarDTO.class))}),
             @ApiResponse(responseCode = "404", description = "Такой машины не существует.",
@@ -106,9 +106,9 @@ public class CarController {
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @DeleteMapping("/{carId}")
-    public ResponseEntity<Void> deletedCar(@PathVariable UUID carId) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deletedCar(@PathVariable UUID carId) {
         carService.deleteCar(carId);
-        return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Получение всех машин.",

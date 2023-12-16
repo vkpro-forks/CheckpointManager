@@ -15,7 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,7 +27,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.service.phone.PhoneService;
-import ru.ac.checkpointmanager.utils.ErrorUtils;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -35,6 +34,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("api/v1/phone")
+@Validated
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
@@ -50,7 +50,7 @@ public class PhoneController {
     @Operation(summary = "Создание нового номера телефона")
     @ApiResponses(value = {
             @ApiResponse(
-                    responseCode = "200",
+                    responseCode = "201",
                     description = "OK: номер сохранен",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = PhoneDTO.class))
@@ -62,15 +62,9 @@ public class PhoneController {
             )
     })
     @PostMapping
-    public ResponseEntity<?> createPhoneNumber(@Valid @RequestBody PhoneDTO phoneDTO,
-                                               BindingResult result
-    ) {
-        if (result.hasErrors()) {
-            return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
-        }
-
-        PhoneDTO createdPhone = phoneService.createPhoneNumber(phoneDTO);
-        return new ResponseEntity<>(createdPhone, HttpStatus.CREATED);
+    @ResponseStatus(HttpStatus.CREATED)
+    public PhoneDTO createPhoneNumber(@Valid @RequestBody PhoneDTO phoneDTO) {
+        return phoneService.createPhoneNumber(phoneDTO);
     }
 
     @Operation(summary = "Поиск номера по id")
@@ -130,15 +124,8 @@ public class PhoneController {
             )
     })
     @PutMapping
-    public ResponseEntity<?> updateNumber(@Valid @RequestBody PhoneDTO phoneDTO,
-                                          BindingResult result
-    ) {
-        if (result.hasErrors()) {
-            return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
-        }
-
-        PhoneDTO changedNumber = phoneService.updatePhoneNumber(phoneDTO);
-        return ResponseEntity.ok(changedNumber);
+    public PhoneDTO updateNumber(@Valid @RequestBody PhoneDTO phoneDTO) {
+        return phoneService.updatePhoneNumber(phoneDTO);
     }
 
     @Operation(summary = "Удалить телефон по id")

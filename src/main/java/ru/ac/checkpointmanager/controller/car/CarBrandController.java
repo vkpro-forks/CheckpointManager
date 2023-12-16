@@ -14,15 +14,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.service.car.CarBrandService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
@@ -36,7 +37,7 @@ import java.util.List;
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "CarBrand (Бренд Машины)", description = "Для обработки Брендов Авто")
 @ApiResponses(value = {@ApiResponse(responseCode = "401", description = "Произошла ошибка, Нужно авторизоваться"),
-@ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса")})
+        @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса")})
 public class CarBrandController {
 
     private final CarBrandService carBrandService;
@@ -82,22 +83,22 @@ public class CarBrandController {
     @Operation(summary = "Удалить Бренд Машины",
             description = "Доступ: ADMIN.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Бренд Машины успешно удален",
+            @ApiResponse(responseCode = "204", description = "Бренд Машины успешно удален",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = CarBrand.class))}),
             @ApiResponse(responseCode = "404", description = "Такого Бренд Машины не существует.")
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @DeleteMapping("/brands/{id}")
-    public ResponseEntity<String> deleteCarBrandById(@PathVariable Long id) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteCarBrandById(@PathVariable Long id) {
         carBrandService.deleteBrand(id);
-        return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Обновить новый Бренд Машины",
             description = "Доступ: ADMIN.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Бренд Машины успешно обновлен",
+            @ApiResponse(responseCode = "200", description = "Бренд Машины успешно обновлен",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = CarBrand.class))}),
             @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей.")

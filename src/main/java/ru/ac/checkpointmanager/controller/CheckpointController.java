@@ -15,7 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,16 +24,17 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.dto.CheckpointDTO;
 import ru.ac.checkpointmanager.service.checkpoints.CheckpointService;
-import ru.ac.checkpointmanager.utils.ErrorUtils;
 
 import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("api/v1/checkpoint")
+@Validated
 @RequiredArgsConstructor
 @Tag(name = "Checkpoint (КПП)", description = "Администрирование списка КПП для обслуживаемых территорий")
 @ApiResponses(value = {@ApiResponse(responseCode = "401", description = "UNAUTHORIZED: пользователь не авторизован"),
@@ -47,20 +48,15 @@ public class CheckpointController {
     @Operation(summary = "Добавить новый КПП",
             description = "Доступ: ADMIN.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "КПП успешно добавлен",
+            @ApiResponse(responseCode = "201", description = "КПП успешно добавлен",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CheckpointDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей; не найдена указанная территория")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @PostMapping
-    public ResponseEntity<?> addCheckpoint(@RequestBody @Valid CheckpointDTO checkpointDTO,
-                                           BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
-        }
-
-        CheckpointDTO newCheckpoint = checkpointService.addCheckpoint(checkpointDTO);
-        return ResponseEntity.ok(newCheckpoint);
+    @ResponseStatus(HttpStatus.CREATED)
+    public CheckpointDTO addCheckpoint(@RequestBody @Valid CheckpointDTO checkpointDTO) {
+        return checkpointService.addCheckpoint(checkpointDTO);
     }
 
     /* READ */
@@ -75,9 +71,6 @@ public class CheckpointController {
     @GetMapping("/{id}")
     public ResponseEntity<CheckpointDTO> getCheckpoint(@PathVariable("id") UUID id) {
         CheckpointDTO foundCheckpoint = checkpointService.findById(id);
-        if (foundCheckpoint == null) {
-            return ResponseEntity.notFound().build();
-        }
         return ResponseEntity.ok(foundCheckpoint);
     }
 
@@ -134,12 +127,7 @@ public class CheckpointController {
             @ApiResponse(responseCode = "404", description = "КПП не найден")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @PutMapping
-    public ResponseEntity<?> updateCheckpoint(@RequestBody @Valid CheckpointDTO checkpointDTO,
-                                              BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
-        }
-
+    public ResponseEntity<?> updateCheckpoint(@RequestBody @Valid CheckpointDTO checkpointDTO) {
         CheckpointDTO updatedCheckpoint = checkpointService.updateCheckpoint(checkpointDTO);
         return ResponseEntity.ok(updatedCheckpoint);
     }
@@ -148,13 +136,13 @@ public class CheckpointController {
     @Operation(summary = "Удалить КПП",
             description = "Доступ: ADMIN.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "КПП успешно удален"),
+            @ApiResponse(responseCode = "204", description = "КПП успешно удален"),
             @ApiResponse(responseCode = "404", description = "КПП не найден")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @DeleteMapping("{id}")
-    public ResponseEntity<Void> deleteCheckpoint(@PathVariable UUID id) {
-
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteCheckpoint(@PathVariable UUID id) {
         checkpointService.deleteCheckpointById(id);
-        return ResponseEntity.ok().build();
     }
+
 }
