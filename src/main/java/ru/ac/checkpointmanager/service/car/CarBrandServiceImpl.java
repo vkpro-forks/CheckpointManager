@@ -35,11 +35,10 @@ public class CarBrandServiceImpl implements CarBrandService {
 
     @Override
     public CarBrand addBrand(CarBrand brand) {
-            log.warn(CAR_BRAND_EXISTS.formatted(brand.getBrand()));
-            throw new CarBrandAlreadyExistsException(CAR_BRAND_EXISTS.formatted(brand.getBrand()));
         Optional<CarBrand> carBrandOptional = carBrandRepository.findByBrand(brand.getBrand());
         if (carBrandOptional.isPresent()) {
-            throw new IllegalArgumentException("A brand with the same name already exists!");
+            log.warn(CAR_BRAND_EXISTS.formatted(brand.getBrand()));
+            throw new CarBrandAlreadyExistsException(CAR_BRAND_EXISTS.formatted(brand.getBrand()));
         }
         return carBrandRepository.save(brand);
     }
@@ -48,7 +47,7 @@ public class CarBrandServiceImpl implements CarBrandService {
     //удалить бренд можно только в том случае, если у этого бренда в бд нет ни одной модели
     @Override
     public void deleteBrand(Long brandId) {
-        carBrandRepository.findById(brandId)
+        CarBrand carBrand = carBrandRepository.findById(brandId)
                 .orElseThrow(() -> {
                     log.warn(CAR_BRAND_NOT_FOUND_WITH_ID_MSG + " {}", brandId);
                     return new CarBrandNotFoundException(CAR_BRAND_NOT_FOUND_WITH_ID_MSG + " " + brandId);
