@@ -23,7 +23,7 @@ public class PassProcessingOnetime implements PassProcessing {
         if (direction == Direction.OUT) {
             pass.setStatus(PassStatus.COMPLETED);
             log.info(PASS_STATUS_CHANGED_LOG, pass.getId(), pass.getStatus());
-        } else if (pass.getCrossings().size() > 0) {
+        } else if (!pass.getCrossings().isEmpty()) {
             log.warn(PASS_ALREADY_USED.formatted(pass.getId()));
             throw new EntranceWasAlreadyException(PASS_ALREADY_USED.formatted(pass.getId()));
         }

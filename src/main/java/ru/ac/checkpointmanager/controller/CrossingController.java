@@ -46,6 +46,44 @@ public class CrossingController {
 
     private final CrossingService crossingService;
 
+    @Operation(summary = "Создание пересечения, имитирует проезд или проход объекта через КПП, НА (IN) территорию",
+            description = "Доступ: ADMIN, SECURITY.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Пересечение успешно добавлено.",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = CrossingDTO.class))}),
+            @ApiResponse(responseCode = "400", description = "BAD_REQUEST: Неверные данные запроса",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+    })
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SECURITY')")
+    @PostMapping("/in")
+    public CrossingDTO addCrossingIn(@Valid @RequestBody CrossingDTO crossingDTO) {
+        return crossingService.addCrossing(crossingDTO);
+    }
+
+    @Operation(summary = "Создание пересечения, имитирует проезд или проход объекта через КПП," +
+            " С (OUT) территории",
+            description = "Доступ: ADMIN, SECURITY.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Пересечение успешно добавлено.",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = CrossingDTO.class))}),
+            @ApiResponse(responseCode = "400", description = "BAD_REQUEST: Неверные данные запроса",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+    })
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SECURITY')")
+    @PostMapping("/out")
+    public CrossingDTO addCrossingOut(@Valid @RequestBody CrossingDTO crossingDTO) {
+        return crossingService.addCrossing(crossingDTO);
+
+    }
+
+
+    /**
+     * Will be replaced for in/out endpoints
+     *
+     * @deprecated
+     */
     @Operation(summary = "Создание пересечения, имитирует проезд или проход объекта через КПП",
             description = "Доступ: ADMIN, SECURITY.")
     @ApiResponses(value = {
@@ -55,6 +93,7 @@ public class CrossingController {
             @ApiResponse(responseCode = "400", description = "BAD_REQUEST: Неверные данные запроса",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
     })
+    @Deprecated(forRemoval = true, since = "17.12.2023")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SECURITY')")
     @PostMapping
     public ResponseEntity<?> addCrossing(@Valid @RequestBody CrossingDTO crossingDTO, BindingResult bindingResult) {
