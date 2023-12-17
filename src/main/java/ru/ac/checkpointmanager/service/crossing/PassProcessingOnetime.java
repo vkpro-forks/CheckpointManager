@@ -13,16 +13,19 @@ import ru.ac.checkpointmanager.model.passes.PassStatus;
 @RequiredArgsConstructor
 public class PassProcessingOnetime implements PassProcessing {
 
-    private static final String PASS_STATUS_CHANGED_LOG = "Pass [{}], changed status on {}";
+    private static final String PASS_STATUS_CHANGED_LOG = "Pass [{}], changed status to {}";
     private static final String PASS_ALREADY_USED = "OnetimePass [%s] has already been used, it is not possible to enter";
 
     @Override
-    public void process(Pass pass, Direction direction) {
+    public void process(Pass pass, Direction currentDirection) {
         log.debug("Processing onetime pass [{}]", pass.getId());
 
-        if (direction == Direction.OUT) {
+        if (currentDirection == Direction.OUT) {
             pass.setStatus(PassStatus.COMPLETED);
             log.info(PASS_STATUS_CHANGED_LOG, pass.getId(), pass.getStatus());
+        } else if (pass.getCrossings().size() > 0) {
+            //по-хорошему сделать в crossingRepository метод поиска пересечений по id пропуска, использовать его здесь
+            //вместо pass.getCrossings(), соответственно из энтити Pass убрать поле crossings, ибо больше нигде не нужно
         } else if (!pass.getCrossings().isEmpty()) {
             log.warn(PASS_ALREADY_USED.formatted(pass.getId()));
             throw new EntranceWasAlreadyException(PASS_ALREADY_USED.formatted(pass.getId()));

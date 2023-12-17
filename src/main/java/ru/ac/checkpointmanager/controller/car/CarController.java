@@ -15,7 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,7 +30,6 @@ import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.mapper.CarMapper;
 import ru.ac.checkpointmanager.model.car.Car;
 import ru.ac.checkpointmanager.service.car.CarService;
-import ru.ac.checkpointmanager.utils.ErrorUtils;
 
 import java.util.List;
 import java.util.UUID;
@@ -74,7 +72,7 @@ public class CarController {
     @Operation(summary = "Обновить новую машину",
             description = "Доступ: ADMIN.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Машина успешно обновлена",
+            @ApiResponse(responseCode = "200", description = "Машина успешно обновлена",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = CarDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей.",
@@ -82,23 +80,16 @@ public class CarController {
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @PutMapping("/{carId}")
-    public ResponseEntity<?> updateCar(@org.hibernate.validator.constraints.UUID
+    public Car updateCar(@org.hibernate.validator.constraints.UUID
                                        @PathVariable String carId,
-                                       @Valid @RequestBody CarDTO updateCarDto,
-                                       BindingResult result) {
-        if (result.hasErrors()) {
-            log.warn("Car update failed for ID {} due to validation errors", carId);
-            return new ResponseEntity<>(ErrorUtils.errorsList(result), HttpStatus.BAD_REQUEST);
-        }
-        Car updated = carService.updateCar(carId, updateCarDto);
-        log.info("[Car with id {}] updated", carId);
-        return ResponseEntity.ok(updated);
+                                       @Valid @RequestBody CarDTO updateCarDto) {
+        return  carService.updateCar(carId, updateCarDto);
     }
 
     @Operation(summary = "Удалить машину",
             description = "Доступ: ADMIN.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Машина успешно удален",
+            @ApiResponse(responseCode = "204", description = "Машина успешно удален",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = CarDTO.class))}),
             @ApiResponse(responseCode = "404", description = "Такой машины не существует.",
@@ -106,9 +97,9 @@ public class CarController {
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @DeleteMapping("/{carId}")
-    public ResponseEntity<Void> deletedCar(@PathVariable UUID carId) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deletedCar(@PathVariable UUID carId) {
         carService.deleteCar(carId);
-        return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Получение всех машин.",

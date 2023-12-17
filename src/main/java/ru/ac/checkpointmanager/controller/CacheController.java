@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.service.cache.CacheService;
 
@@ -32,8 +33,8 @@ public class CacheController {
     )
     @ApiResponses(value = {
             @ApiResponse(
-                    responseCode = "200",
-                    description = "OK: кэш очищен"
+                    responseCode = "204",
+                    description = "NO_CONTENT: кэш очищен"
             ),
             @ApiResponse(
                     responseCode = "403",
@@ -42,9 +43,9 @@ public class CacheController {
     })
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping
-    public ResponseEntity<?> clearCache() {
+    public ResponseEntity<Void> clearCache() {
         cacheService.clearAllCaches();
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
 //TODO: функционал для очистки кэша, принадлежащего юзеру

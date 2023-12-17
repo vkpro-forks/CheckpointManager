@@ -1,6 +1,8 @@
 package ru.ac.checkpointmanager.dto.passes;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import ru.ac.checkpointmanager.dto.CarDTO;
@@ -21,6 +23,7 @@ public class PassCreateDTO {
     @NotNull
     private UUID userId;
 
+    @Size(max = 30)
     private String comment;
 
     @NotNull
@@ -29,8 +32,9 @@ public class PassCreateDTO {
     @NotNull
     private UUID territoryId;
 
-    @NotNull//FIXME не работает здесь
-    @FutureOrPresent
+    //FIXME кажется, @PassTimeCheck работает раньше, чем аннотации над полями,
+    // и падает NPE при отсутсвии полей startTime или endTime
+    @NotNull
     private LocalDateTime startTime;
 
     @NotNull

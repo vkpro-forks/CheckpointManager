@@ -1,9 +1,19 @@
 package ru.ac.checkpointmanager.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SourceType;
 import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
@@ -11,19 +21,20 @@ import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.passes.Pass;
 
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
-import java.util.Objects;
 import java.util.UUID;
 
 @Entity
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Table(name = "crossings")
 public class Crossing {
 
     @Id
     @GeneratedValue
+    @EqualsAndHashCode.Include
     private UUID id;
 
     @ManyToOne
@@ -42,15 +53,12 @@ public class Crossing {
     private Direction direction;
 
     @Override
-    public boolean equals(Object o) {
-        if(this == o) return true;
-        if(o == null || getClass() != o.getClass()) return false;
-        Crossing crossing = (Crossing) o;
-        return Objects.equals(id, crossing.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
+    public String toString() {
+        return "Crossing{" + id +
+                ", pass=" + pass.getId() +
+                ", checkpoint=" + checkpoint.getId() +
+                ", time=" + localDateTime +
+                ", dir=" + direction +
+                '}';
     }
 }

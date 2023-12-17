@@ -9,6 +9,7 @@ import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -34,8 +35,8 @@ public class CarBrandServiceImpl implements CarBrandService {
 
     @Override
     public CarBrand addBrand(CarBrand brand) {
-        CarBrand existingBrand = carBrandRepository.findByBrand(brand.getBrand());
-        if (existingBrand != null) {
+        Optional<CarBrand> carBrandOptional = carBrandRepository.findByBrand(brand.getBrand());
+        if (carBrandOptional.isPresent()) {
             log.warn(CAR_BRAND_EXISTS.formatted(brand.getBrand()));
             throw new CarBrandAlreadyExistsException(CAR_BRAND_EXISTS.formatted(brand.getBrand()));
         }
@@ -46,12 +47,12 @@ public class CarBrandServiceImpl implements CarBrandService {
     //удалить бренд можно только в том случае, если у этого бренда в бд нет ни одной модели
     @Override
     public void deleteBrand(Long brandId) {
-        carBrandRepository.findById(brandId)
+        CarBrand carBrand = carBrandRepository.findById(brandId)
                 .orElseThrow(() -> {
                     log.warn(CAR_BRAND_NOT_FOUND_WITH_ID_MSG + " {}", brandId);
                     return new CarBrandNotFoundException(CAR_BRAND_NOT_FOUND_WITH_ID_MSG + " " + brandId);
                 });
-        carBrandRepository.deleteById(brandId);
+        carBrandRepository.delete(carBrand);
         log.info("Car brand with [id: {}] successfully deleted", brandId);
     }
 

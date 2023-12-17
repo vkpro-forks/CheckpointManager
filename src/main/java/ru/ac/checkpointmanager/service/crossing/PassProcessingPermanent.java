@@ -9,11 +9,11 @@ import ru.ac.checkpointmanager.model.passes.Pass;
 @Slf4j
 public class PassProcessingPermanent implements PassProcessing {
     @Override
-    public void process(Pass pass, Direction direction) {
+    public void process(Pass pass, Direction currentDirection) {
         log.debug("Processing permanent pass [{}]", pass.getId());
 
-        if (pass.getCrossings().get(0).getDirection() == direction) {
-            log.warn("Two crossings in a row in the same direction - {}, pass {}", direction, pass.getId());
+        if (pass.getExpectedDirection() != currentDirection) {
+            log.warn("Two crossings in a row in the same direction - {}, pass {}", currentDirection, pass.getId());
         }
     }
 }

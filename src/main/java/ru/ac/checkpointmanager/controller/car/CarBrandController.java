@@ -77,22 +77,22 @@ public class CarBrandController {
     @Operation(summary = "Удалить Бренд Машины",
             description = "Доступ: ADMIN.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Бренд Машины успешно удален",
+            @ApiResponse(responseCode = "204", description = "Бренд Машины успешно удален",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = CarBrand.class))}),
             @ApiResponse(responseCode = "404", description = "Такого Бренд Машины не существует.")
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @DeleteMapping("/brands/{id}")
-    public ResponseEntity<String> deleteCarBrandById(@PathVariable Long id) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteCarBrandById(@PathVariable Long id) {
         carBrandService.deleteBrand(id);
-        return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Обновить новый Бренд Машины",
             description = "Доступ: ADMIN.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Бренд Машины успешно обновлен",
+            @ApiResponse(responseCode = "200", description = "Бренд Машины успешно обновлен",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = CarBrand.class))}),
             @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей.")
