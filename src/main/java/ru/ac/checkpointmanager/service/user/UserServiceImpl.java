@@ -29,11 +29,12 @@ import ru.ac.checkpointmanager.model.enums.PhoneNumberType;
 import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
+import ru.ac.checkpointmanager.security.AuthenticationFacadeImpl;
+import ru.ac.checkpointmanager.security.AuthenticationFacade;
 import ru.ac.checkpointmanager.service.email.EmailService;
 import ru.ac.checkpointmanager.service.phone.PhoneService;
 import ru.ac.checkpointmanager.utils.FieldsValidation;
 import ru.ac.checkpointmanager.utils.MethodLog;
-import ru.ac.checkpointmanager.utils.SecurityUtils;
 
 import java.util.Collection;
 import java.util.List;
@@ -54,7 +55,7 @@ import java.util.UUID;
  * @see User
  * @see UserRepository
  * @see EmailService
- * @see SecurityUtils
+ * @see AuthenticationFacadeImpl
  */
 @Service
 @RequiredArgsConstructor
@@ -73,6 +74,7 @@ public class UserServiceImpl implements UserService {
     private final TemporaryUserService temporaryUserService;
     private final EmailService emailService;
     private final PhoneService phoneService;
+    private final AuthenticationFacade authentication;
 
     /**
      * Находит пользователя по его уникальному идентификатору (UUID).
@@ -88,7 +90,8 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(value = "user", key = "#id") //на этом эндпоинте проверяла работу кэширования, остальное кэширование - отдельная таска
+    @Cacheable(value = "user", key = "#id")
+    //на этом эндпоинте проверяла работу кэширования, остальное кэширование - отдельная таска
     public UserResponseDTO findById(UUID id) {
         log.debug(METHOD_UUID, MethodLog.getMethodName(), id);
         User foundUser = findUserById(id);
@@ -212,12 +215,12 @@ public class UserServiceImpl implements UserService {
      *
      * @param request Объект {@link ChangePasswordRequest}, содержащий текущий и новый пароли.
      * @throws IllegalStateException если текущий пароль не соответствует или новый пароль и его подтверждение не совпадают.
-     * @see SecurityUtils
+     * @see AuthenticationFacadeImpl
      */
     @Override
     @Transactional
     public void changePassword(ChangePasswordRequest request) {
-        User user = SecurityUtils.getCurrentUser();
+        User user = authentication.getCurrentUser();
         log.debug("Method {}, Username - {}", MethodLog.getMethodName(), user.getUsername());
 
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
@@ -258,7 +261,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public String changeEmail(ChangeEmailRequest request) {
-        User user = SecurityUtils.getCurrentUser();
+        User user = authentication.getCurrentUser();
         log.debug("[Method {}], [Username - {}]", MethodLog.getMethodName(), user.getUsername());
 
         if (userRepository.findByEmail(request.getNewEmail()).isPresent()) {
@@ -350,7 +353,7 @@ public class UserServiceImpl implements UserService {
                     log.warn(USER_NOT_FOUND_MSG.formatted(id));
                     return new UserNotFoundException(USER_NOT_FOUND_MSG.formatted(id));
                 });
-        User user = SecurityUtils.getCurrentUser();
+        User user = authentication.getCurrentUser();
         if (role == Role.ADMIN && !user.getRole().equals(Role.ADMIN)) {
             log.error("Users with role {} do not have permission to change the role to ADMIN", user.getRole());
             throw new AccessDeniedException("You do not have permission to change the role to ADMIN");
@@ -531,5 +534,4 @@ public class UserServiceImpl implements UserService {
     public User findByPassId(UUID passId) {
         return userRepository.findByPassId(passId);
     }
-
 }

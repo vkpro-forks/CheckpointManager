@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.configuration;
+package ru.ac.checkpointmanager.security;
 
 import lombok.Getter;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
