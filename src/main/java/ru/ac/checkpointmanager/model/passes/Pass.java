@@ -1,13 +1,30 @@
 package ru.ac.checkpointmanager.model.passes;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorColumn;
+import jakarta.persistence.DiscriminatorType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SourceType;
 import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
+import ru.ac.checkpointmanager.model.enums.Direction;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,6 +42,7 @@ import java.util.UUID;
 public abstract class Pass {
 
     @Id
+    @GeneratedValue
     @EqualsAndHashCode.Include
     private UUID id;
 
@@ -58,7 +76,10 @@ public abstract class Pass {
     @OneToMany(mappedBy = "pass")
     private List<Crossing> crossings;
 
-    Boolean favorite = false;
+    private Boolean favorite = false;
+
+    @Enumerated(EnumType.STRING)
+    private Direction expectedDirection = Direction.IN;
 
     public boolean compareByFields(Pass other) {
         return  (Objects.equals(this.getUser(), other.getUser()) &&
@@ -72,13 +93,17 @@ public abstract class Pass {
 
     @Override
     public String toString() {
-        return  "id=" + id +
-                ", u=" + user.getId() +
-                ", " + status +
-                ", " + typeTime +
-                ", s=" + startTime +
-                ", e=" + endTime +
-                ", t=" + territory.getId() +
-                ", dtype=" + dtype;
+        return "Pass{" + id +
+                ", user=" + user.getId() +
+                ", comment=" + comment +
+                ", status=" + status +
+                ", typeTime=" + typeTime +
+                ", territory=" + territory.getId() +
+                ", startTime=" + startTime +
+                ", endTime=" + endTime +
+                ", dtype=" + dtype +
+                ", favorite=" + favorite +
+                ", expDir=" + expectedDirection +
+                '}';
     }
 }

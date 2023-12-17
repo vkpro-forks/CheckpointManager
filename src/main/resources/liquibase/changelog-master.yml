@@ -65,8 +65,12 @@ databaseChangeLog:
       file: liquibase/scripts/V_174__change_column_brand_id.sql
   - include:
       file: liquibase/scripts/V_178__drop_tokens.sql
+  - include:
+      file: liquibase/scripts/V_187__alter_table_passes_set_null_on_delete_car.yaml
+  - include:
+      file: liquibase/scripts/V_168__expected_direction.sql
 
-## ВНЕСЕНИЕ ДЕМО-ДАННЫХ, ОСТАВЛЯЙТЕ ВСЕГДА В КОНЦЕ ФАЙЛА
+  ## ВНЕСЕНИЕ ДЕМО-ДАННЫХ, ОСТАВЛЯЙТЕ ВСЕГДА В КОНЦЕ ФАЙЛА
   - include:
       file: liquibase/insert_demo_data.sql
       labels: demo-data

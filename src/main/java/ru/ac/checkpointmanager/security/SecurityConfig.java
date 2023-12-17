@@ -108,7 +108,8 @@ public class SecurityConfig {
                 "http://192.168.1.55:3000", //Жени Ip(удалить потом)
                 "https://checkpoint-manager.vercel.app", //Приложение для фронта(для тестирования).
                 "https://checkpoint-manager.ru",
-                "https://www.checkpoint-manager.ru"
+                "https://www.checkpoint-manager.ru",
+                "https://55ef-95-82-241-230.ngrok-free.app" //Наставник Сони
         ));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH"));
         config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));

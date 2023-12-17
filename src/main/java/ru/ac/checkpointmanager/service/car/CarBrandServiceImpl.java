@@ -1,14 +1,15 @@
 package ru.ac.checkpointmanager.service.car;
 
-import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.ac.checkpointmanager.exception.CarBrandAlreadyExistsException;
 import ru.ac.checkpointmanager.exception.CarBrandNotFoundException;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -16,6 +17,7 @@ import java.util.List;
 public class CarBrandServiceImpl implements CarBrandService {
 
     public static final String CAR_BRAND_NOT_FOUND_WITH_ID_MSG = "Car brand not found with ID:";
+    public static final String CAR_BRAND_EXISTS = "CarBrand with [name: %s] already exists";
 
     private final CarBrandRepository carBrandRepository;
 
@@ -33,9 +35,10 @@ public class CarBrandServiceImpl implements CarBrandService {
 
     @Override
     public CarBrand addBrand(CarBrand brand) {
-        CarBrand existingBrand = carBrandRepository.findByBrand(brand.getBrand());
-        if (existingBrand != null) {
-            throw new IllegalArgumentException("A brand with the same name already exists!");
+        Optional<CarBrand> carBrandOptional = carBrandRepository.findByBrand(brand.getBrand());
+        if (carBrandOptional.isPresent()) {
+            log.warn(CAR_BRAND_EXISTS.formatted(brand.getBrand()));
+            throw new CarBrandAlreadyExistsException(CAR_BRAND_EXISTS.formatted(brand.getBrand()));
         }
         return carBrandRepository.save(brand);
     }
@@ -49,7 +52,7 @@ public class CarBrandServiceImpl implements CarBrandService {
                     log.warn(CAR_BRAND_NOT_FOUND_WITH_ID_MSG + " {}", brandId);
                     return new CarBrandNotFoundException(CAR_BRAND_NOT_FOUND_WITH_ID_MSG + " " + brandId);
                 });
-        carBrandRepository.deleteById(brandId);
+        carBrandRepository.delete(carBrand);
         log.info("Car brand with [id: {}] successfully deleted", brandId);
     }
 

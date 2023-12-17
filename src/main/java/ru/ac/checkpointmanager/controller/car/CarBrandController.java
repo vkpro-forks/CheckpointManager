@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,15 +28,14 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.service.car.CarBrandService;
-import ru.ac.checkpointmanager.utils.ErrorUtils;
 
 import java.util.List;
 
 @Slf4j
 @RestController
 @RequestMapping("api/v1/car")
-@Validated
 @RequiredArgsConstructor
+@Validated
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "CarBrand (Бренд Машины)", description = "Для обработки Брендов Авто")
 @ApiResponses(value = {@ApiResponse(responseCode = "401", description = "Произошла ошибка, Нужно авторизоваться"),
@@ -58,6 +58,9 @@ public class CarBrandController {
         CarBrand carBrand = carBrandService.addBrand(brand);
         log.info("CarBrand created: {}", carBrand);
         return new ResponseEntity<>(carBrand, HttpStatus.CREATED);
+    @ResponseStatus(HttpStatus.CREATED)
+    public CarBrand createBrand(@Valid @RequestBody CarBrand brand) {
+        return carBrandService.addBrand(brand);
     }
 
     @Operation(summary = "Получение Бренд Машины по id",

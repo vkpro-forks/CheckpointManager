@@ -5,5 +5,5 @@ import ru.ac.checkpointmanager.model.passes.Pass;
 
 public interface PassProcessing {
 
-    void process(Pass pass, Direction direction);
+    void process(Pass pass, Direction currentDirection);
 }

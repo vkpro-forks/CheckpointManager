@@ -17,6 +17,7 @@ import ru.ac.checkpointmanager.exception.DateOfBirthFormatException;
 import ru.ac.checkpointmanager.exception.EntranceWasAlreadyException;
 import ru.ac.checkpointmanager.exception.InvalidPhoneNumberException;
 import ru.ac.checkpointmanager.exception.InvalidTokenException;
+import ru.ac.checkpointmanager.exception.ObjectAlreadyExistsException;
 import ru.ac.checkpointmanager.exception.PhoneAlreadyExistException;
 import ru.ac.checkpointmanager.exception.VisitorNotFoundException;
 import ru.ac.checkpointmanager.exception.pass.InactivePassException;
@@ -101,6 +102,15 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
         problemDetail.setTitle("Pass creating error");
         problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
+        log.debug(LOG_MSG, e.getClass());
+        return problemDetail;
+    }
+
+    @ExceptionHandler(ObjectAlreadyExistsException.class)
+    public ProblemDetail handleAlreadyExistsException(ObjectAlreadyExistsException e) {
+        ProblemDetail problemDetail = createProblemDetail(HttpStatus.CONFLICT, e);
+        problemDetail.setTitle("Object already exists");
+        problemDetail.setProperty(ERROR_CODE, ErrorCode.CONFLICT.toString());
         log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }
