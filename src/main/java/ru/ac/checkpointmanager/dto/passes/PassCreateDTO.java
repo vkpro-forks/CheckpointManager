@@ -30,6 +30,8 @@ public class PassCreateDTO {
     @NotNull
     private UUID territoryId;
 
+    //FIXME кажется, @PassTimeCheck работает раньше, чем аннотации над полями,
+    // и падает NPE при отсутсвии полей startTime или endTime
     @NotNull
     private LocalDateTime startTime;
 
