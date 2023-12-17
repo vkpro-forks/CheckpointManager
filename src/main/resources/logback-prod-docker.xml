@@ -34,11 +34,11 @@
 
     <root level="info">
         <appender-ref ref="STDOUT"/>
-        <appender-ref ref="FILE"/>
+        <appender-ref ref="DB"/>
     </root>
 
     <logger name="ru.ac.checkpointmanager" level="debug">
-        <appender-ref ref="DB"/>
+        <appender-ref ref="FILE"/>
     </logger>
 
 </configuration>
