@@ -16,10 +16,12 @@ import ru.ac.checkpointmanager.security.jwt.JwtService;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.security.Key;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -90,7 +92,15 @@ public class JwtServiceImpl implements JwtService {
     @Override
     public List<String> extractRole(String token) {
         log.info("Method {} [Token {}]", MethodLog.getMethodName(), token);
-        return extractAllClaims(token).get("role", List.class);
+        List<?> roles = extractAllClaims(token).get("role", List.class);
+        if (roles == null) {
+            return Collections.emptyList();
+        }
+
+        return roles.stream()
+                .filter(Objects::nonNull)
+                .map(Object::toString)
+                .collect(Collectors.toList());
     }
 
     /**
