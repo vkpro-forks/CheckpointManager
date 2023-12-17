@@ -1,9 +1,9 @@
 package ru.ac.checkpointmanager.service.crossing;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
 import ru.ac.checkpointmanager.exception.CrossingNotFoundException;
 import ru.ac.checkpointmanager.exception.pass.InactivePassException;
@@ -16,6 +16,7 @@ import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.repository.CrossingRepository;
+import ru.ac.checkpointmanager.repository.PassRepository;
 import ru.ac.checkpointmanager.service.checkpoints.CheckpointService;
 import ru.ac.checkpointmanager.service.passes.PassService;
 import ru.ac.checkpointmanager.utils.MethodLog;
@@ -33,6 +34,7 @@ public class CrossingServiceImpl implements CrossingService {
 
     private final CrossingRepository crossingRepository;
     private final PassService passService;
+    private final PassRepository passRepository;
     private final CheckpointService checkpointService;
     private final CrossingMapper mapper;
     private final Map<String, PassProcessing> passProcessingMap;
@@ -60,7 +62,8 @@ public class CrossingServiceImpl implements CrossingService {
                 .formatted(passId, pass.getTerritory()));
         }
 
-        processPass(pass.getTypeTime().toString(), pass, crossingDTO.getDirection());
+        processPass(pass, crossingDTO.getDirection());
+
         Crossing crossing = mapper.toCrossing(crossingDTO, pass, checkpoint);
         crossing = crossingRepository.save(crossing);
         log.info("Crossing added [{}]", crossing);
@@ -77,13 +80,31 @@ public class CrossingServiceImpl implements CrossingService {
         return mapper.toCrossingDTO(crossing);
     }
 
-    public void processPass(String passTimeType, Pass pass, Direction direction) {
+    /**
+     * Обрабатывает использованный при пересечении пропуск в зависимости от его временного типа,
+     * затем устанавливает ожидаемое направление следующего пересечения
+     * на противоположное направлению текущего пересечения
+     *
+     * @param pass пропуск, использованные при пересечении
+     * @param currentDirection направление текущего (добавляемого) пересечения
+     */
+    public void processPass(Pass pass, Direction currentDirection) {
+        String passTimeType = pass.getTypeTime().toString();
         PassProcessing passProcessing = passProcessingMap.get(passTimeType);
         if (passProcessing == null) {
             log.error("Unsupported pass time type - %s".formatted(passTimeType));
             throw new RuntimeException("Unsupported pass time type - %s".formatted(passTimeType));
         }
-        passProcessing.process(pass, direction);
+        passProcessing.process(pass, currentDirection);
+
+        Direction nextDirectionForUsedPass = switch (currentDirection) {
+            case IN -> Direction.OUT;
+            case OUT -> Direction.IN;
+        };
+        pass.setExpectedDirection(nextDirectionForUsedPass);
+        log.debug("Pass [{}], changed expected direction to {}", pass.getId(), nextDirectionForUsedPass);
+
+        passRepository.save(pass);
     }
 }
 

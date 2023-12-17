@@ -1,7 +1,6 @@
 package ru.ac.checkpointmanager.dto.passes;
 
 import jakarta.validation.constraints.Future;
-import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -29,7 +28,6 @@ public class PassUpdateDTO {
     private PassTypeTime typeTime;
 
     @NotNull
-    @FutureOrPresent
     private LocalDateTime startTime;
 
     @NotNull

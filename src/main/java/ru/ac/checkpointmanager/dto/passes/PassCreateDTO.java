@@ -1,6 +1,7 @@
 package ru.ac.checkpointmanager.dto.passes;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import ru.ac.checkpointmanager.dto.CarDTO;
@@ -29,8 +30,7 @@ public class PassCreateDTO {
     @NotNull
     private UUID territoryId;
 
-    @NotNull//FIXME не работает здесь
-    @FutureOrPresent
+    @NotNull
     private LocalDateTime startTime;
 
     @NotNull

@@ -85,46 +85,55 @@ DO $$
                (visitor2_id, 'Дон Румата Эсторский', '+79991234568', null);
 
         INSERT INTO passes ( id, user_id, status, type_time, territory_id, added_at
-                           , start_time, end_time, comment, car_id, visitor_id, dtype, favorite)
+                           , start_time, end_time, comment, car_id, visitor_id, dtype, favorite, expected_direction)
 
                -- АКТИВНЫЕ ПРОПУСКА НА НЕДЕЛЮ, без пересечений, с ними можно проверять пересечения
                -- автомобильный разовый
         VALUES (pass1_id, user1_id, 'ACTIVE', 'ONETIME', ter1_id, nowDT
-               , nowDT, nowDT + interval '7 day', 'ACTIVE FOR WEEK', car1_id, null, 'AUTO', true),
+               , nowDT, nowDT + interval '7 day', 'ACTIVE FOR WEEK 1', car1_id, null, 'AUTO', true, 'OUT'),
 
                -- автомобильный постоянный
-               (pass2_id, user1_id, 'ACTIVE', 'PERMANENT', ter2_id, nowDT
-               , nowDT, nowDT + interval '7 day', 'ACTIVE FOR WEEK', car2_id, null, 'AUTO', false),
+               (pass2_id, user1_id, 'ACTIVE', 'PERMANENT', ter1_id, nowDT
+               , nowDT, nowDT + interval '7 day', 'ACTIVE FOR WEEK 2', car2_id, null, 'AUTO', false, 'IN'),
 
                -- пешеходный разовый
-               (pass3_id, user1_id, 'ACTIVE', 'ONETIME', ter1_id, nowDT
-               , nowDT, nowDT + interval '7 day', 'ACTIVE FOR WEEK', null, visitor1_id, 'WALK', true),
+               (pass3_id, user1_id, 'ACTIVE', 'ONETIME', ter2_id, nowDT
+               , nowDT, nowDT + interval '7 day', 'ACTIVE FOR WEEK 3', null, visitor1_id, 'WALK', true, 'IN'),
 
                -- пешеходный постоянный
                (pass4_id, user1_id, 'ACTIVE', 'PERMANENT', ter2_id, nowDT
-               , nowDT, nowDT + interval '7 day', 'ACTIVE FOR WEEK', null, visitor2_id, 'WALK', false),
+               , nowDT, nowDT + interval '7 day', 'ACTIVE FOR WEEK 4', null, visitor2_id, 'WALK', false, 'IN'),
 
 
                -- ПРОПУСКА НА МИНУТУ, они должны поменять статус при проверке
                -- активный автомобильный разовый, нет пересечений - должен УСТАРЕТЬ
                (pass5_id, user2_id, 'ACTIVE', 'ONETIME', ter1_id, nowDT
-               , nowDT - interval '1 hour', nowDT, 'should be OUTDATED', car1_id, null, 'AUTO', true),
+               , nowDT - interval '1 hour', nowDT, 'should be OUTDATED', car1_id, null, 'AUTO', true, 'IN'),
 
                -- активный автомобильный разовый, одно пересечение на въезд - должен стать ВАРНИНГ
                (pass6_id, user2_id, 'ACTIVE', 'ONETIME', ter1_id, nowDT
-               , nowDT - interval '1 hour', nowDT, 'should be WARNING', car2_id, null, 'AUTO', false),
+               , nowDT - interval '1 hour', nowDT, 'should be WARNING', car2_id, null, 'AUTO', false, 'OUT'),
 
                -- активный пешеходный постоянный, пересечения на въезд и на выезд - должен стать ВЫПОЛНЕН
                (pass7_id, user2_id, 'ACTIVE', 'ONETIME', ter1_id, nowDT
-               , nowDT - interval '1 hour', nowDT, 'should be COMPLETED', null, visitor1_id, 'WALK', true),
+               , nowDT - interval '1 hour', nowDT, 'should be COMPLETED', null, visitor1_id, 'WALK', true, 'IN'),
 
                -- отложенный пешеходный разовый, должен стать АКТИВНЫМ на сутки
-               (pass8_id, user2_id, 'DELAYED', 'ONETIME', ter1_id, nowDT
-               , nowDT + interval '1 minute', nowDT + interval '1 day', 'should be ACTIVE', null, visitor2_id, 'WALK', false);
+               (pass8_id, user2_id, 'DELAYED', 'ONETIME', ter1_id, nowDT, nowDT + interval '1 minute'
+               , nowDT + interval '1 day', 'should be ACTIVE', null, visitor2_id, 'WALK', false, 'IN');
 
         INSERT INTO crossings (pass_id, checkpoint_id, local_date_time, direction)
-        VALUES (pass6_id, chp1_id, nowDT, 'IN'),
-               (pass7_id, chp1_id, nowDT - interval '1 minute', 'IN'),
-               (pass7_id, chp1_id, nowDT, 'OUT');
+        VALUES (pass1_id, chp1_id, nowDT, 'IN'),
+
+               (pass2_id, chp2_id, nowDT + interval '1 second', 'IN'),
+               (pass2_id, chp2_id, nowDT + interval '2 second', 'OUT'),
+               (pass2_id, chp2_id, nowDT + interval '3 second', 'IN'),
+               (pass2_id, chp2_id, nowDT + interval '4 second', 'OUT'),
+               (pass2_id, chp2_id, nowDT + interval '5 second', 'IN'),
+
+               (pass6_id, chp1_id, nowDT, 'IN'),
+
+               (pass7_id, chp1_id, nowDT, 'IN'),
+               (pass7_id, chp1_id, nowDT + interval '1 second', 'OUT');
     END $$;
 
