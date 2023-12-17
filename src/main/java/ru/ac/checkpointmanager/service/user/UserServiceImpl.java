@@ -74,7 +74,7 @@ public class UserServiceImpl implements UserService {
     private final TemporaryUserService temporaryUserService;
     private final EmailService emailService;
     private final PhoneService phoneService;
-    private final AuthenticationFacade authentication;
+    private final AuthenticationFacade authFacade;
 
     /**
      * Находит пользователя по его уникальному идентификатору (UUID).
@@ -220,7 +220,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void changePassword(ChangePasswordRequest request) {
-        User user = authentication.getCurrentUser();
+        User user = authFacade.getCurrentUser();
         log.debug("Method {}, Username - {}", MethodLog.getMethodName(), user.getUsername());
 
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
@@ -261,7 +261,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public String changeEmail(ChangeEmailRequest request) {
-        User user = authentication.getCurrentUser();
+        User user = authFacade.getCurrentUser();
         log.debug("[Method {}], [Username - {}]", MethodLog.getMethodName(), user.getUsername());
 
         if (userRepository.findByEmail(request.getNewEmail()).isPresent()) {
@@ -353,7 +353,7 @@ public class UserServiceImpl implements UserService {
                     log.warn(USER_NOT_FOUND_MSG.formatted(id));
                     return new UserNotFoundException(USER_NOT_FOUND_MSG.formatted(id));
                 });
-        User user = authentication.getCurrentUser();
+        User user = authFacade.getCurrentUser();
         if (role == Role.ADMIN && !user.getRole().equals(Role.ADMIN)) {
             log.error("Users with role {} do not have permission to change the role to ADMIN", user.getRole());
             throw new AccessDeniedException("You do not have permission to change the role to ADMIN");
