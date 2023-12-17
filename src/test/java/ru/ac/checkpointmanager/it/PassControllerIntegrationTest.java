@@ -274,7 +274,7 @@ class PassControllerIntegrationTest extends PostgresContainersConfig {
         Assertions.assertThat(allPasses).hasSize(1);//check if only one pass here
 
         mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.PASS_URL + "/" + TestUtils.PASS_ID))
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
 
         List<Pass> passesAfterDelete = passRepository.findAll();
         Assertions.assertThat(passesAfterDelete).isEmpty();
@@ -317,7 +317,7 @@ class PassControllerIntegrationTest extends PostgresContainersConfig {
         Assertions.assertThat(allPasses).hasSize(5);
 
         mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.PASS_URL + "/" + passes.get(0).getId()))
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
 
         List<Pass> passesAfterDelete = passRepository.findAll();
         Assertions.assertThat(passesAfterDelete).hasSize(4);

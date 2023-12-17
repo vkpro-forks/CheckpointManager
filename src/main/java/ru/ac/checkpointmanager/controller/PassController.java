@@ -83,7 +83,6 @@ public class PassController {
     @GetMapping
     public ResponseEntity<Page<PassResponseDTO>> getPasses(@Schema(hidden = true)
                                                            @Valid @PagingParam PagingParams pagingParams) {
-
         Page<PassResponseDTO> passPage = service.findPasses(pagingParams);
         return ResponseEntity.ok(passPage);
     }
@@ -116,8 +115,7 @@ public class PassController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
     @GetMapping("/user/{userId}")
     public ResponseEntity<Page<PassResponseDTO>> getPassesByUserId(@PathVariable UUID userId,
-        @Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams) {
-
+                                                                   @Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams) {
         Page<PassResponseDTO> passPage = service.findPassesByUser(userId, pagingParams);
         return ResponseEntity.ok(passPage);
     }
@@ -136,7 +134,7 @@ public class PassController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/territory/{territoryId}")
     public ResponseEntity<Page<PassResponseDTO>> getPassesByTerritoryId(@PathVariable UUID territoryId,
-        @Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams) {
+                                                                        @Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams) {
 
         Page<PassResponseDTO> passPage = service.findPassesByTerritory(territoryId, pagingParams);
         return ResponseEntity.ok(passPage);
@@ -156,7 +154,7 @@ public class PassController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
     @GetMapping("/user/{userId}/events")
     public ResponseEntity<Page<PassInOutViewProjection>> getEventsByUserId(@PathVariable UUID userId,
-        @Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams) {
+                                                                           @Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams) {
 
         Page<PassInOutViewProjection> events = service.findEventsByUser(userId, pagingParams);
         return ResponseEntity.ok(events);
@@ -176,7 +174,7 @@ public class PassController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/territory/{territoryId}/events")
     public ResponseEntity<Page<PassInOutViewProjection>> getEventsByTerritoryId(@PathVariable UUID territoryId,
-        @Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams) {
+                                                                                @Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams) {
 
         Page<PassInOutViewProjection> events = service.findEventsByTerritory(territoryId, pagingParams);
         return ResponseEntity.ok(events);
@@ -274,12 +272,12 @@ public class PassController {
     @Operation(summary = "Удалить пропуск",
             description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Пропуск успешно удален"),
+            @ApiResponse(responseCode = "204", description = "Пропуск успешно удален"),
             @ApiResponse(responseCode = "404", description = "Пропуск не найден")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @DeleteMapping("{id}")
-    public ResponseEntity<Void> deletePass(@PathVariable UUID id) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deletePass(@PathVariable UUID id) {
         service.deletePass(id);
-        return ResponseEntity.ok().build();
     }
 }
