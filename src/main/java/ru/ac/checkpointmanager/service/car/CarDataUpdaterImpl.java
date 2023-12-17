@@ -12,7 +12,10 @@ import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.model.car.CarData;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -57,7 +60,7 @@ public class CarDataUpdaterImpl implements CarDataUpdater {
             String modelName = carJsonObject.get("model").getAsString();
             carDataSet.add(new CarData(brandName, modelName));
 
-            System.out.println("Parsed car data: Brand=" + brandName + ", Model=" + modelName);
+            log.debug("Parsed car data: Brand=" + brandName + ", Model=" + modelName);
         }
 
         return carDataSet;
@@ -66,11 +69,10 @@ public class CarDataUpdaterImpl implements CarDataUpdater {
     private void updateDatabase(List<CarData> carDataList) {
         log.info("Updating database");
         for (CarData carData : carDataList) {
-            System.out.println(carData.toString());
-            CarBrand carBrand = carBrandRepository.findByBrand(carData.getBrandName());
+            Optional<CarBrand> carBrandOptional = carBrandRepository.findByBrand(carData.getBrandName());
 
-            if (carBrand == null) {
-                carBrand = new CarBrand();
+            if (carBrandOptional.isEmpty()) {
+                CarBrand carBrand = new CarBrand();
                 carBrand.setBrand(carData.getBrandName());
                 carBrandRepository.save(carBrand);
             }

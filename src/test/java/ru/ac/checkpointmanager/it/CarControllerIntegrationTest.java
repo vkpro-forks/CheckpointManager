@@ -80,8 +80,8 @@ class CarControllerIntegrationTest extends PostgresContainersConfig {
         CarDTO carDTO = new CarDTO();
         carDTO.setLicensePlate(TestUtils.LICENSE_PLATE);
         carDTO.setBrand(savedCarBrand);
-
         String carDtoString = TestUtils.jsonStringFromObject(carDTO);
+
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CAR_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(carDtoString))
@@ -135,6 +135,51 @@ class CarControllerIntegrationTest extends PostgresContainersConfig {
         mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.CAR_USER_URL + "/" + savedUser.getId()))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.[0].id").value(savedCar.getId().toString()));
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldUpdateCarWithSameCarBrand() {
+        String newLicensePlate = "А666ВХ666";
+        CarBrand carBrand = saveCarBrandInRepo();
+        Car car = TestUtils.getCar(carBrand);
+        Car savedCar = carRepository.saveAndFlush(car);
+        CarDTO carDto = TestUtils.getCarDto();
+        carDto.setLicensePlate(newLicensePlate);
+        carDto.setBrand(carBrand);
+        String carDtoString = TestUtils.jsonStringFromObject(carDto);
+
+        mockMvc.perform(MockMvcRequestBuilders.put(UrlConstants.CAR_URL + "/" + savedCar.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(carDtoString))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(savedCar.getId().toString()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.licensePlate").value(newLicensePlate));
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldUpdateCarWithNewCarBrand() {
+        String newLicensePlate = "А666ВХ666";
+        CarBrand carBrand = saveCarBrandInRepo();
+        CarBrand anotherCarBrand = new CarBrand();
+        String evilCarBrand = "EvilCar";
+        anotherCarBrand.setBrand(evilCarBrand);
+        CarBrand savedAnotherCarBrand = carBrandRepository.save(anotherCarBrand);
+        Car car = TestUtils.getCar(carBrand);
+        Car savedCar = carRepository.saveAndFlush(car);
+        CarDTO carDto = TestUtils.getCarDto();
+        carDto.setLicensePlate(newLicensePlate);
+        carDto.setBrand(savedAnotherCarBrand);
+        String carDtoString = TestUtils.jsonStringFromObject(carDto);
+
+        mockMvc.perform(MockMvcRequestBuilders.put(UrlConstants.CAR_URL + "/" + savedCar.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(carDtoString))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(savedCar.getId().toString()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.licensePlate").value(newLicensePlate))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.brand.brand").value(evilCarBrand));
     }
 
     private CarBrand saveCarBrandInRepo() {
