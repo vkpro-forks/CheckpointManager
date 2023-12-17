@@ -15,7 +15,7 @@ public enum PassStatus {
     COMPLETED("Выполнен"),
     CANCELLED("Отменен"),
     OUTDATED("Устарел"),
-    WARNING("Внимание! Нет выезда");
+    WARNING("Нет выезда");
 
     private final String description;
 

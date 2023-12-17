@@ -6,6 +6,7 @@ import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.VisitorDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
+import ru.ac.checkpointmanager.model.enums.Direction;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -33,6 +34,8 @@ public class PassResponseDTO {
     private String dtype;
 
     private Boolean favorite;
+
+    private Direction expectedDirection;
 
     private VisitorDTO visitor;
 
