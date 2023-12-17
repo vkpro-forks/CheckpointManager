@@ -102,17 +102,17 @@ public class VisitorController {
     @Operation(summary = "Удалить посетителя.",
             description = "Доступ: ADMIN.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Посетитель успешно удален",
+            @ApiResponse(responseCode = "204", description = "Посетитель успешно удален",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = Visitor.class))}),
             @ApiResponse(responseCode = "404", description = "Посетитель не существует.")
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteVisitor(@PathVariable UUID id) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteVisitor(@PathVariable UUID id) {
         visitorService.deleteVisitor(id);
         log.info("Visitor with ID {} deleted", id);
-        return new ResponseEntity<>("Visitor deleted " + id, HttpStatus.OK);
     }
 
     @Operation(summary = "Найти посетителя по номеру телефона.",

@@ -16,23 +16,24 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
 import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.service.crossing.CrossingService;
-import ru.ac.checkpointmanager.utils.ErrorUtils;
 
 import java.util.UUID;
 
 @Slf4j
 @RestController
 @RequestMapping("api/v1/crossing")
+@Validated
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Crossing (Пересечение)", description = "Управление пересечениями")
@@ -57,13 +58,9 @@ public class CrossingController {
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SECURITY')")
     @PostMapping
-    public ResponseEntity<?> addCrossing(@Valid @RequestBody CrossingDTO crossingDTO, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            log.warn("Failed to mark crossing due to validation errors");
-            return new ResponseEntity<>(ErrorUtils.errorsList(bindingResult), HttpStatus.BAD_REQUEST);
-        }
-        CrossingDTO crossing = crossingService.addCrossing(crossingDTO);
-        return new ResponseEntity<>(crossing, HttpStatus.OK);
+    @ResponseStatus(HttpStatus.CREATED)
+    public CrossingDTO addCrossing(@Valid @RequestBody CrossingDTO crossingDTO) {
+        return crossingService.addCrossing(crossingDTO);
     }
 
     @Operation(summary = "Получить пересечение по Id",
