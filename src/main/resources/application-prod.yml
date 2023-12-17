@@ -13,8 +13,18 @@ spring:
           auth: true
           starttls:
             enable: true
+  data:
+    redis:
+      host: redis-cache
+      port: 6379
+      jedis:
+        pool:
+        # Здесь указать параметры пула соединений, если необходимо
+      password: admin
+
 app:
   confirmation-link: https://checkpoint-manager.ru/api/v1/confirm/registration?token=
   confirmation-email-link: https://checkpoint-manager.ru/api/v1/confirm/email?token=
+
 logging:
   config: classpath:logback-prod.xml
