@@ -20,7 +20,6 @@ import ru.ac.checkpointmanager.mapper.PassMapper;
 import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
-import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.projection.PassInOutViewProjection;
@@ -282,7 +281,7 @@ public class PassServiceImpl implements PassService {
         Pass pass = findPassById(id);
         pass.setFavorite(true);
         passRepository.save(pass);
-        log.info("Pass [UUID - {}] marked favorite", id);
+        log.info("Pass [{}] marked favorite", id);
     }
 
     @Override
@@ -291,7 +290,7 @@ public class PassServiceImpl implements PassService {
         Pass pass = findPassById(id);
         pass.setFavorite(false);
         passRepository.save(pass);
-        log.info("Pass [UUID - {}] unmarked favorite", id);
+        log.info("Pass [{}] unmarked favorite", id);
     }
 
     @Override
@@ -299,7 +298,7 @@ public class PassServiceImpl implements PassService {
         log.info(METHOD_INVOKE, MethodLog.getMethodName(), id);
         findPassById(id);
         passRepository.deleteById(id);
-        log.info("[Pass with id: {}] successfully deleted", id);
+        log.info("Pass [{}] successfully deleted", id);
     }
 
     /**
@@ -421,26 +420,6 @@ public class PassServiceImpl implements PassService {
 
             passRepository.save(pass);
             log.info(PASS_STATUS_CROSS, pass.getId(), passCrossings.size(), targetStatus);
-        }
-    }
-
-    /**
-     * Возвращает статус для отменяемого или истекшего пропуска, по которому были зафиксированы пересечения:
-     * если последнее было на выезд - статус COMPLETED.
-     * если последнее было на въезд - статус WARNING.
-     *
-     * @deprecated после введения в Pass поля expected_direction
-     * @param sortedCrossings список пересечений по проверяемому пропуску, отсортированные по времени в порядке убывания
-     * @return {@code PassStatus}
-     * @see PassStatus
-     */
-    private PassStatus changeStatusForPassWithCrossings(List<Crossing> sortedCrossings) {
-
-        Crossing lastCrossing = sortedCrossings.get(0);
-        if (lastCrossing.getDirection().equals(Direction.OUT)) {
-            return PassStatus.COMPLETED;
-        } else {
-            return PassStatus.WARNING;
         }
     }
 }

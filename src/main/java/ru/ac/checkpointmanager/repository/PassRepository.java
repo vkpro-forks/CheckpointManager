@@ -92,9 +92,11 @@ public interface PassRepository extends JpaRepository<Pass, UUID> {
             , nativeQuery = true)
     boolean checkUserTerritoryRelation(@Param("uId") UUID userId, @Param("tId") UUID territoryId);
 
-    @Query(value = "SELECT * FROM pass_in_out_view p WHERE p.user_id = :userId ", nativeQuery = true)
+    @Query(value = "SELECT * FROM pass_in_out_view p WHERE p.user_id = :userId ORDER BY in_time DESC"
+            , nativeQuery = true)
     Page<PassInOutViewProjection> findEventsByUser(UUID userId, Pageable pageable);
 
-    @Query(value = "SELECT * FROM pass_in_out_view p WHERE p.territory_id = :terId ", nativeQuery = true)
+    @Query(value = "SELECT * FROM pass_in_out_view p WHERE p.territory_id = :terId ORDER BY in_time DESC"
+            , nativeQuery = true)
     Page<PassInOutViewProjection> findEventsByTerritory(UUID terId, Pageable pageable);
 }

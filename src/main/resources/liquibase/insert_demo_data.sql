@@ -94,7 +94,7 @@ DO $$
 
                -- автомобильный постоянный
                (pass2_id, user1_id, 'ACTIVE', 'PERMANENT', ter1_id, nowDT
-               , nowDT, nowDT + interval '7 day', 'ACTIVE FOR WEEK 2', car2_id, null, 'AUTO', false, 'IN'),
+               , nowDT, nowDT + interval '7 day', 'ACTIVE FOR WEEK 2', car2_id, null, 'AUTO', false, 'OUT'),
 
                -- пешеходный разовый
                (pass3_id, user1_id, 'ACTIVE', 'ONETIME', ter2_id, nowDT
