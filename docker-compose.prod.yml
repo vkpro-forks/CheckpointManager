@@ -19,6 +19,9 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/chpmanDB
       - SPRING_DATASOURCE_USERNAME=chpman
       - SPRING_DATASOURCE_PASSWORD=chpmanPass%
+      - SPRING_DATA_REDIS_HOST=redis-cache #check
+      - SPRING_DATA_REDIS_PORT=6379 #check
+      - SPRING_DATA_REDIS_PASSWORD=admin #check
       - AVATAR_STORAGE_PATH=/avatars
       - TZ=UTC
       - JASYPT_ENCRYPTOR_PASSWORD=${JASYPT_ENCRYPTOR_PASSWORD}
@@ -36,6 +39,19 @@ services:
       - POSTGRES_PASSWORD=chpmanPass%
       - TZ=UTC
 
+  #Сервис для кеширования в Redis
+  redis-cache:
+    container_name: redis-cache
+    hostname: redis-cache
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    restart: on-failure
+    volumes:
+      - redis-cache-data:/data #check
+    command: redis-server --requirepass admin
+
+
   # Сервис для хранения аватаров
   avatars-storage:
     image: nginx:latest
@@ -48,7 +64,9 @@ services:
     environment:
       - TZ=UTC
 
+
 volumes:
   avatars: # Определение именованного тома для аватаров
   logs: # Определение именованного тома для логов
   db-data: # Определение именованного тома для базы данных
+  redis-cache-data: # Вольюм для редиса, откуда он сюда подставится?

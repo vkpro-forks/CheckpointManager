@@ -55,6 +55,8 @@ spring:
           max-idle: 5
           max-wait: -1ms
           min-idle: 1
+      password: admin
+
 application:
   security:
     jwt:
