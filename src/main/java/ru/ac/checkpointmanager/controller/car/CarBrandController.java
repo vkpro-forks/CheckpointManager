@@ -13,8 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -54,10 +52,6 @@ public class CarBrandController {
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @PostMapping("/brands")
-    public ResponseEntity<?> createBrand(@Valid @RequestBody CarBrand brand) {
-        CarBrand carBrand = carBrandService.addBrand(brand);
-        log.info("CarBrand created: {}", carBrand);
-        return new ResponseEntity<>(carBrand, HttpStatus.CREATED);
     @ResponseStatus(HttpStatus.CREATED)
     public CarBrand createBrand(@Valid @RequestBody CarBrand brand) {
         return carBrandService.addBrand(brand);
