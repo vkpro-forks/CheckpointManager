@@ -106,7 +106,8 @@ public class JwtServiceImpl implements JwtService {
     @Override
     public UUID extractId(String token) {
         log.info("Method {} [Token {}]", MethodLog.getMethodName(), token);
-        return extractAllClaims(token).get("id", UUID.class);
+        String id = extractAllClaims(token).get("id", String.class); // Получаем id как строку
+        return UUID.fromString(id);
     }
 
     /**
