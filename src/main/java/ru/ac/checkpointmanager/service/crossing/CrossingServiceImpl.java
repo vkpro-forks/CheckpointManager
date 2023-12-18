@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
+import ru.ac.checkpointmanager.dto.CrossingRequestDTO;
 import ru.ac.checkpointmanager.exception.CrossingNotFoundException;
 import ru.ac.checkpointmanager.exception.MismatchedTerritoryException;
 import ru.ac.checkpointmanager.exception.pass.InactivePassException;
@@ -22,6 +23,7 @@ import ru.ac.checkpointmanager.service.checkpoints.CheckpointService;
 import ru.ac.checkpointmanager.service.passes.PassService;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
+import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.UUID;
 
@@ -41,7 +43,7 @@ public class CrossingServiceImpl implements CrossingService {
     private final Map<String, PassProcessing> passProcessingMap;
 
     @Override
-    public CrossingDTO addCrossing(CrossingDTO crossingDTO, Direction direction) {
+    public CrossingDTO addCrossing(CrossingRequestDTO crossingDTO, Direction direction) {
         log.debug(METHOD_UUID, MethodLog.getMethodName(), crossingDTO);
         UUID passId = crossingDTO.getPassId();
         Pass pass = passService.findPassById(passId);
@@ -64,7 +66,8 @@ public class CrossingServiceImpl implements CrossingService {
         }
 
         processPass(pass, direction);
-        Crossing crossing = toCrossing(direction, pass, checkpoint);//тут логика совсем простая, и используется один раз
+        Crossing crossing = toCrossing(direction, pass, checkpoint, crossingDTO.getPerformedAt());
+        //тут логика совсем простая, и используется один раз
         //можно обойтись без маппера, а вот обратно пусть пусть маппер работает
         crossing = crossingRepository.save(crossing);
         log.info("Crossing added [{}]", crossing);
@@ -108,11 +111,12 @@ public class CrossingServiceImpl implements CrossingService {
         passRepository.save(pass);
     }
 
-    private Crossing toCrossing(Direction direction, Pass pass, Checkpoint checkpoint) {
+    private Crossing toCrossing(Direction direction, Pass pass, Checkpoint checkpoint, ZonedDateTime performedAt) {
         Crossing crossing = new Crossing();
         crossing.setPass(pass);
         crossing.setCheckpoint(checkpoint);
         crossing.setDirection(direction);
+        crossing.setPerformedAt(performedAt);
         return crossing;
     }
 

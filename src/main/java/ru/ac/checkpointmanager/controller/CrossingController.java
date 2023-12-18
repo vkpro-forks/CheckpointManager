@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
+import ru.ac.checkpointmanager.dto.CrossingRequestDTO;
 import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.service.crossing.CrossingService;
@@ -59,7 +60,7 @@ public class CrossingController {
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SECURITY')")
     @PostMapping("/in")
-    public CrossingDTO addCrossingIn(@Valid @RequestBody CrossingDTO crossingDTO) {
+    public CrossingDTO addCrossingIn(@Valid @RequestBody CrossingRequestDTO crossingDTO) {
         return crossingService.addCrossing(crossingDTO, Direction.IN);
     }
 
@@ -75,11 +76,10 @@ public class CrossingController {
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SECURITY')")
     @PostMapping("/out")
-    public CrossingDTO addCrossingOut(@Valid @RequestBody CrossingDTO crossingDTO) {
+    public CrossingDTO addCrossingOut(@Valid @RequestBody CrossingRequestDTO crossingDTO) {
         return crossingService.addCrossing(crossingDTO, Direction.OUT);
 
     }
-
 
     /**
      * Will be replaced for in/out endpoints
@@ -99,7 +99,7 @@ public class CrossingController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SECURITY')")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CrossingDTO addCrossing(@Valid @RequestBody CrossingDTO crossingDTO) {
+    public CrossingDTO addCrossing(@Valid @RequestBody CrossingRequestDTO crossingDTO) {
         return crossingService.addCrossing(crossingDTO, null);
     }
 

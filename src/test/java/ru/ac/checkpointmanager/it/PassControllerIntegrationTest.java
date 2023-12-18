@@ -260,15 +260,8 @@ class PassControllerIntegrationTest extends PostgresContainersConfig {
         car.setId(TestUtils.getCarDto().getId());
         Car savedCar = carRepository.saveAndFlush(car);
 
-        PassAuto pass = new PassAuto();
-        pass.setId(TestUtils.PASS_ID);
-        pass.setTypeTime(PassTypeTime.ONETIME);
-        pass.setStartTime(LocalDateTime.now());
-        pass.setEndTime(LocalDateTime.now().plusHours(5));
+        PassAuto pass = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
         pass.setStatus(passStatus);
-        pass.setTerritory(savedTerritory);
-        pass.setUser(savedUser);
-        pass.setCar(savedCar);
         PassAuto savedPass = passRepository.saveAndFlush(pass);
         List<Pass> allPasses = passRepository.findAll();
         Assertions.assertThat(allPasses).hasSize(1);//check if only one pass here
