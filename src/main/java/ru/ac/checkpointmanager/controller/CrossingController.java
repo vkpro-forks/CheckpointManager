@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
 import ru.ac.checkpointmanager.model.Crossing;
+import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.service.crossing.CrossingService;
 
 import java.util.UUID;
@@ -59,7 +60,7 @@ public class CrossingController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SECURITY')")
     @PostMapping("/in")
     public CrossingDTO addCrossingIn(@Valid @RequestBody CrossingDTO crossingDTO) {
-        return crossingService.addCrossing(crossingDTO);
+        return crossingService.addCrossing(crossingDTO, Direction.IN);
     }
 
     @Operation(summary = "Создание пересечения, имитирует проезд или проход объекта через КПП," +
@@ -75,7 +76,7 @@ public class CrossingController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SECURITY')")
     @PostMapping("/out")
     public CrossingDTO addCrossingOut(@Valid @RequestBody CrossingDTO crossingDTO) {
-        return crossingService.addCrossing(crossingDTO);
+        return crossingService.addCrossing(crossingDTO, Direction.OUT);
 
     }
 
@@ -99,7 +100,7 @@ public class CrossingController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public CrossingDTO addCrossing(@Valid @RequestBody CrossingDTO crossingDTO) {
-        return crossingService.addCrossing(crossingDTO);
+        return crossingService.addCrossing(crossingDTO, null);
     }
 
     @Operation(summary = "Получить пересечение по Id",

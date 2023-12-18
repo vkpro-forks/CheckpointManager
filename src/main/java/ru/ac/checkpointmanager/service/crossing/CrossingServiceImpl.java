@@ -6,8 +6,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
 import ru.ac.checkpointmanager.exception.CrossingNotFoundException;
-import ru.ac.checkpointmanager.exception.pass.InactivePassException;
 import ru.ac.checkpointmanager.exception.MismatchedTerritoryException;
+import ru.ac.checkpointmanager.exception.pass.InactivePassException;
+import ru.ac.checkpointmanager.exception.pass.PassException;
 import ru.ac.checkpointmanager.mapper.CrossingMapper;
 import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
@@ -40,7 +41,7 @@ public class CrossingServiceImpl implements CrossingService {
     private final Map<String, PassProcessing> passProcessingMap;
 
     @Override
-    public CrossingDTO addCrossing(CrossingDTO crossingDTO) {
+    public CrossingDTO addCrossing(CrossingDTO crossingDTO, Direction direction) {
         log.debug(METHOD_UUID, MethodLog.getMethodName(), crossingDTO);
         UUID passId = crossingDTO.getPassId();
         Pass pass = passService.findPassById(passId);
@@ -52,19 +53,19 @@ public class CrossingServiceImpl implements CrossingService {
         UUID checkpointId = crossingDTO.getCheckpointId();
         Checkpoint checkpoint = checkpointService.findCheckpointById(checkpointId);
         if (checkpoint.getType() != CheckpointType.UNIVERSAL &&
-            !pass.getDtype().equals(checkpoint.getType().toString())) {
+                !pass.getDtype().equals(checkpoint.getType().toString())) {
             log.warn("Conflict between the types of pass and checkpoint [pass - %s, %s], [checkpoint - %s, %s]"
-                .formatted(pass.getId(), pass.getDtype(), checkpoint.getId(), checkpoint.getType()));
+                    .formatted(pass.getId(), pass.getDtype(), checkpoint.getId(), checkpoint.getType()));
         }
         if (!checkpoint.getTerritory().equals(pass.getTerritory())) {
             log.warn("Pass [%s] is issued to another territory [%s]".formatted(passId, pass.getTerritory()));
             throw new MismatchedTerritoryException("Pass [%s] is issued to another territory [%s]"
-                .formatted(passId, pass.getTerritory()));
+                    .formatted(passId, pass.getTerritory()));
         }
 
-        processPass(pass, crossingDTO.getDirection());
-
-        Crossing crossing = mapper.toCrossing(crossingDTO, pass, checkpoint);
+        processPass(pass, direction);
+        Crossing crossing = toCrossing(direction, pass, checkpoint);//тут логика совсем простая, и используется один раз
+        //можно обойтись без маппера, а вот обратно пусть пусть маппер работает
         crossing = crossingRepository.save(crossing);
         log.info("Crossing added [{}]", crossing);
         return mapper.toCrossingDTO(crossing);
@@ -85,15 +86,15 @@ public class CrossingServiceImpl implements CrossingService {
      * затем устанавливает ожидаемое направление следующего пересечения
      * на противоположное направлению текущего пересечения
      *
-     * @param pass пропуск, использованные при пересечении
+     * @param pass             пропуск, использованные при пересечении
      * @param currentDirection направление текущего (добавляемого) пересечения
      */
-    public void processPass(Pass pass, Direction currentDirection) {
+    public void processPass(Pass pass, Direction currentDirection) { //я бы вынес этот метод в пасс сервис
         String passTimeType = pass.getTypeTime().toString();
         PassProcessing passProcessing = passProcessingMap.get(passTimeType);
         if (passProcessing == null) {
             log.error("Unsupported pass time type - %s".formatted(passTimeType));
-            throw new RuntimeException("Unsupported pass time type - %s".formatted(passTimeType));
+            throw new PassException("Unsupported pass time type - %s".formatted(passTimeType));
         }
         passProcessing.process(pass, currentDirection);
 
@@ -106,5 +107,14 @@ public class CrossingServiceImpl implements CrossingService {
 
         passRepository.save(pass);
     }
+
+    private Crossing toCrossing(Direction direction, Pass pass, Checkpoint checkpoint) {
+        Crossing crossing = new Crossing();
+        crossing.setPass(pass);
+        crossing.setCheckpoint(checkpoint);
+        crossing.setDirection(direction);
+        return crossing;
+    }
+
 }
 
