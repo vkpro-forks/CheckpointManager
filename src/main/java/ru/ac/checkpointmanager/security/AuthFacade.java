@@ -5,10 +5,12 @@ import ru.ac.checkpointmanager.model.User;
 
 import java.util.UUID;
 
-public interface AuthenticationFacade {
+public interface AuthFacade {
     Authentication getAuthentication();
 
     User getCurrentUser();
 
     UUID getUserUUID();
+
+    boolean isUserIdMatch(UUID userId);
 }
