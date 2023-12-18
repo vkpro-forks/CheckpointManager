@@ -65,6 +65,8 @@ public class TestUtils {
 
     public static final UUID CHECKPOINT_ID = UUID.randomUUID();
 
+    public static final UUID CROSSING_ID = UUID.randomUUID();
+
     public static final String CHECKPOINT_NAME = "ch_name";
 
     public static final UUID TERR_ID = UUID.randomUUID();
@@ -74,8 +76,6 @@ public class TestUtils {
     public static final UUID CAR_ID = UUID.randomUUID();
 
     public static final String LICENSE_PLATE = "А420ВХ799";
-
-    public static final UUID CROSSING_ID = UUID.randomUUID();
 
     public static final UUID PHONE_ID = UUID.randomUUID();
 
@@ -111,6 +111,7 @@ public class TestUtils {
 
     public static CrossingDTO getCrossingDTO() {
         return new CrossingDTO(
+                CROSSING_ID,
                 PASS_ID,
                 CHECKPOINT_ID,
                 LocalDateTime.now(),

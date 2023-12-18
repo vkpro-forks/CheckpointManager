@@ -14,6 +14,9 @@ import java.util.UUID;
 @NoArgsConstructor
 public class CrossingDTO {
 
+    //А вот в результат-ответ я бы еще добавил идентификатор пересечения (пусть будет)
+    private UUID id;
+
     @NotNull
     private UUID passId;
 
