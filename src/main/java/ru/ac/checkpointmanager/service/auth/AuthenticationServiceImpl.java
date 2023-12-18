@@ -43,6 +43,7 @@ import java.util.UUID;
 @Slf4j
 public class AuthenticationServiceImpl implements AuthenticationService {
     public static final String METHOD_WAS_INVOKED = "Method {} was invoked";
+    private static final String USER_NOT_FOUND_MSG = "User with [id=%s] not found";
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final JwtValidator jwtValidator;
@@ -134,7 +135,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         temporaryUserService.delete(tempUser);
         log.debug("Temporary user {} was deleted", tempUser.getEmail());
 
-        jwtService.generateToken(user);
+        jwtService.generateAccessToken(user);
         log.debug("Access token for {} created", user.getEmail());
     }
 
@@ -173,7 +174,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 ));
         User user = (User) authentication.getPrincipal();
 
-        String jwtToken = jwtService.generateToken(user);
+        String jwtToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
         log.debug("Access and refresh tokens for {} created", user.getEmail());
 
@@ -184,31 +185,28 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     /**
-     * Обновляет токен доступа пользователя.
+     * Обновляет токен доступа пользователя на основе предоставленного токена обновления.
      * <p>
-     * Этот метод получает токен обновления из тела запроса, проверяет его валидность, и
-     * если токен действителен, генерирует новый токен доступа, отзывает все предыдущие токены пользователя и сохраняет новый токен.
-     * Затем метод создает новый объект {@code AuthenticationResponse} с новым токеном доступа и токеном обновления,
-     * преобразует его в JSON и возвращает для представления пользователю
+     * Метод выполняет проверку токена обновления и, при успешной валидации,
+     * извлекает идентификатор пользователя из токена. Затем осуществляется поиск пользователя в репозитории.
+     * Если пользователь найден, генерируется новый токен доступа.
      * <p>
-     * После успешной валидации производится проверка, существует ли пользователь в базе данных, если да то продолжаем работу,
-     * если нет то:
-     *
-     * @throws UsernameNotFoundException если юзер из jwt не существует в бд
-     * @see JwtService#extractUsername(String)
+     * @param refreshTokenDTO Объект {@link RefreshTokenDTO}, содержащий токен обновления.
+     * @return {@link AuthenticationResponse}, содержащий новый токен доступа и токен обновления.
+     * @throws UserNotFoundException если пользователь не найден.
      */
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public AuthenticationResponse refreshToken(RefreshTokenDTO refreshTokenDTO) {
         log.debug(METHOD_WAS_INVOKED, MethodLog.getMethodName());
         final String refreshToken = refreshTokenDTO.getRefreshToken();
         jwtValidator.validateRefreshToken(refreshToken);
-        String userEmail = jwtService.extractUsername(refreshToken);
-        User user = this.userRepository.findByEmail(userEmail).orElseThrow(() -> {
-            log.warn("User with email - '%s', not found ".formatted(userEmail));
-            return new UsernameNotFoundException("User with email - '%s', not found ".formatted(userEmail));
+        UUID userId = jwtService.extractId(refreshToken);
+        User user = userRepository.findById(userId).orElseThrow(() -> {
+            log.warn(USER_NOT_FOUND_MSG.formatted(userId));
+            return new UserNotFoundException(String.format(USER_NOT_FOUND_MSG.formatted(userId)));
         });
-        String accessToken = jwtService.generateToken(user);
+        String accessToken = jwtService.generateAccessToken(user);
         return new AuthenticationResponse(accessToken, refreshToken);
     }
 }
