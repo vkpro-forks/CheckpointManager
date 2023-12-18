@@ -50,7 +50,6 @@ import java.util.Optional;
 @WithMockUser(roles = {"ADMIN"})
 class CrossingControllerIntegrationTest extends PostgresContainersConfig {
 
-
     @Autowired
     MockMvc mockMvc;
 

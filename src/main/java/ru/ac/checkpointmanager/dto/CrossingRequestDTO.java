@@ -1,6 +1,7 @@
 package ru.ac.checkpointmanager.dto;
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,7 +20,8 @@ public class CrossingRequestDTO {
     @NotNull
     private UUID checkpointId;
 
-    @NotNull// FIXME check me
+    @NotNull
+    @PastOrPresent
     private ZonedDateTime performedAt;
 
 }
