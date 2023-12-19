@@ -43,6 +43,7 @@ import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -328,6 +329,8 @@ public class UserServiceImpl implements UserService {
             user.setEmail(newEmail);
             userRepository.save(user);
             log.info("User email updated from {} to {}, [UUID {}]", previousEmail, newEmail, user.getId());
+            Objects.requireNonNull(cacheManager.getCache("user")).evict(user.getId());
+
             String accessToken = jwtService.generateAccessToken(user);
             String refreshToken = jwtService.generateRefreshToken(user);
             return new AuthenticationResponse(accessToken, refreshToken);
