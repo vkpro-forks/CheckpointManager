@@ -23,7 +23,7 @@ import ru.ac.checkpointmanager.dto.user.IsAuthenticatedResponse;
 import ru.ac.checkpointmanager.dto.user.LoginResponse;
 import ru.ac.checkpointmanager.dto.user.RefreshTokenDTO;
 import ru.ac.checkpointmanager.dto.user.UserAuthDTO;
-import ru.ac.checkpointmanager.exception.RegistrationVerificationTokenException;
+import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.mapper.UserMapper;
 import ru.ac.checkpointmanager.model.User;
@@ -131,7 +131,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                         cacheManager.getCache("registration"))
                 .map(cache -> cache.get(token, ConfirmRegistration.class));
         if (confirmUser.isEmpty()) {
-            throw new RegistrationVerificationTokenException(String.format("Invalid or expired token %s", token));//TODO handle
+            throw new EmailVerificationTokenException(String.format("Invalid or expired token %s", token));//TODO handle
         }
         User user = userMapper.toUser(confirmUser);
         user.setRole(Role.USER);
