@@ -38,7 +38,7 @@ import java.util.UUID;
 @Validated
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
-@Tag(name = "Crossing (Пересечение)", description = "Управление пересечениями")
+@Tag(name = "Crossing (Пересечение)", description = "Работа с пересечениями машин и посетителей через КПП")
 @ApiResponses(value = {
         @ApiResponse(responseCode = "401", description = "UNAUTHORIZED: пользователь не авторизован",
                 content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
@@ -49,6 +49,7 @@ public class CrossingController {
 
     private final CrossingService crossingService;
 
+    @Operation(summary = "Добавление пересечения",
     @Operation(summary = "Создание пересечения, имитирует проезд или проход объекта через КПП, НА (IN) территорию",
             description = "Доступ: ADMIN, SECURITY.")
     @ApiResponses(value = {
@@ -89,7 +90,7 @@ public class CrossingController {
     @Operation(summary = "Создание пересечения, имитирует проезд или проход объекта через КПП",
             description = "Доступ: ADMIN, SECURITY.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Пересечение успешно добавлено.",
+            @ApiResponse(responseCode = "200", description = "Пересечение успешно добавлено",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CrossingDTO.class))}),
             @ApiResponse(responseCode = "400", description = "BAD_REQUEST: Неверные данные запроса",
@@ -106,7 +107,7 @@ public class CrossingController {
     @Operation(summary = "Получить пересечение по Id",
             description = "Доступ: ADMIN, SECURITY.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Пересечение успешно получено.",
+            @ApiResponse(responseCode = "200", description = "Пересечение успешно получено",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = Crossing.class))}),
             @ApiResponse(responseCode = "400", description = "BAD_REQUEST: Неверные данные запроса",

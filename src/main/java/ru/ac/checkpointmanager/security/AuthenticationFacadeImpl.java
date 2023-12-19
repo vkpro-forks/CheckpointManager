@@ -1,15 +1,15 @@
-package ru.ac.checkpointmanager.utils;
+package ru.ac.checkpointmanager.security;
 
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import ru.ac.checkpointmanager.configuration.CustomAuthenticationToken;
+import org.springframework.stereotype.Component;
 import ru.ac.checkpointmanager.model.User;
 
 import java.util.UUID;
 
 /**
- * Утилитный класс, предоставляющий методы для работы с контекстом безопасности Spring Security.
+ * Класс, предоставляющий методы для работы с контекстом безопасности Spring Security.
  * <p>
  * Класс содержит статические методы для получения информации о текущем аутентифицированном
  * пользователе, такие как получение самого пользователя или его уникального идентификатора (UUID).
@@ -18,7 +18,13 @@ import java.util.UUID;
  * @see CustomAuthenticationToken
  * @see User
  */
-public class SecurityUtils {
+@Component
+public class AuthenticationFacadeImpl implements AuthenticationFacade {
+
+    @Override
+    public Authentication getAuthentication() {
+        return SecurityContextHolder.getContext().getAuthentication();
+    }
 
     /**
      * Получает текущего аутентифицированного пользователя из контекста безопасности.
@@ -27,8 +33,9 @@ public class SecurityUtils {
      * @throws AccessDeniedException если пользователь не аутентифицирован.
      * @see CustomAuthenticationToken
      */
-    public static User getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    @Override
+    public User getCurrentUser() {
+        Authentication authentication = getAuthentication();
         if (!(authentication instanceof CustomAuthenticationToken)) {
             throw new AccessDeniedException("User is not authenticated");
         }
@@ -43,12 +50,12 @@ public class SecurityUtils {
      * @throws AccessDeniedException если пользователь не аутентифицирован.
      * @see CustomAuthenticationToken
      */
-    public static UUID getUserUUID() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    @Override
+    public UUID getUserUUID() {
+        Authentication authentication = getAuthentication();
         if (!(authentication instanceof CustomAuthenticationToken)) {
             throw new AccessDeniedException("User is not authenticated");
         }
-        UUID userId = ((CustomAuthenticationToken) authentication).getUserId();
-        return userId;
+        return ((CustomAuthenticationToken) authentication).getUserId();
     }
 }

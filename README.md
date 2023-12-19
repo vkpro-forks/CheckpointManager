@@ -26,5 +26,5 @@ _указывайте контакты и ссылки какие хотите_
 |  Frontend   |   Софья    |            [Telegram]()            |       [GitHub](https://github.com/)       |   |
 |     QA      |  Алексей   |            [Telegram]()            |       [что-то](https://github.com/)       |   |
 |     QA      | Александр  |            [Telegram]()            |       [что-то](https://github.com/)       |   |
-|   Design    |   Сергей   |            [Telegram]()            |       [что-то](https://github.com/)       |   |
+| PM, Design  |   Сергей   |            [Telegram]()            |       [что-то](https://github.com/)       |   |
 

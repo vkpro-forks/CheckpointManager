@@ -17,7 +17,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import ru.ac.checkpointmanager.configuration.CustomAuthenticationToken;
+import ru.ac.checkpointmanager.security.CustomAuthenticationToken;
 import ru.ac.checkpointmanager.security.jwt.JwtService;
 import ru.ac.checkpointmanager.security.jwt.JwtValidator;
 import ru.ac.checkpointmanager.model.User;

@@ -22,6 +22,9 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/chpmanDB
       - SPRING_DATASOURCE_USERNAME=chpman
       - SPRING_DATASOURCE_PASSWORD=chpmanPass%
+      - SPRING_DATA_REDIS_HOST=redis-cache #check
+      - SPRING_DATA_REDIS_PORT=6379 #check
+      - SPRING_DATA_REDIS_PASSWORD=admin #check
       - AVATAR_STORAGE_PATH=/avatars
       - TZ=UTC
       - JASYPT_ENCRYPTOR_PASSWORD=${JASYPT_ENCRYPTOR_PASSWORD}
