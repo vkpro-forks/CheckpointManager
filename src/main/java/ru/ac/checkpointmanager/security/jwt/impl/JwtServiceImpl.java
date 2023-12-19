@@ -121,7 +121,6 @@ public class JwtServiceImpl implements JwtService {
             throw new InvalidTokenException("Jwt hasn't ID claim");
         }
         return UUID.fromString(id);
-        //TODO !!!тут NPE падает если этого клейма нет, я же спрашивал(((((
     }
 
     /**

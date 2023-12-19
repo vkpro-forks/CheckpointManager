@@ -202,9 +202,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         log.debug(METHOD_WAS_INVOKED, MethodLog.getMethodName());
         final String refreshToken = refreshTokenDTO.getRefreshToken();
         jwtValidator.validateRefreshToken(refreshToken);
-        String username = jwtService.extractUsername(refreshToken);//здесь не надо доставать по айди, когда есть subject
-        //тогда можно из рефреша убрать id вообще, или тогда давайте в subject не юзернейм класть а id
-        //вроде хотели облегчить refresh а в итоге всадили сюда еще одно поле, и тесты сломались))))
+        String username = jwtService.extractUsername(refreshToken);
         User user = userRepository.findByEmail(username).orElseThrow(() -> {
             log.warn(USER_NOT_FOUND_MSG.formatted(username));
             return new UserNotFoundException(String.format(USER_NOT_FOUND_MSG.formatted(username)));
