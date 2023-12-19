@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
+import ru.ac.checkpointmanager.dto.user.AuthenticationResponse;
 import ru.ac.checkpointmanager.dto.user.ChangeEmailRequest;
 import ru.ac.checkpointmanager.dto.user.ChangePasswordRequest;
 import ru.ac.checkpointmanager.dto.user.ConfirmChangeEmail;
@@ -25,7 +26,6 @@ import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.mapper.TerritoryMapper;
 import ru.ac.checkpointmanager.mapper.UserMapper;
-import ru.ac.checkpointmanager.model.TemporaryUser;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.avatar.Avatar;
@@ -35,6 +35,7 @@ import ru.ac.checkpointmanager.repository.PhoneRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.security.AuthenticationFacade;
 import ru.ac.checkpointmanager.security.AuthenticationFacadeImpl;
+import ru.ac.checkpointmanager.security.jwt.JwtService;
 import ru.ac.checkpointmanager.service.email.EmailService;
 import ru.ac.checkpointmanager.service.phone.PhoneService;
 import ru.ac.checkpointmanager.utils.FieldsValidation;
@@ -79,6 +80,7 @@ public class UserServiceImpl implements UserService {
     private final PhoneService phoneService;
     private final AuthenticationFacade authFacade;
     private final RedisCacheManager cacheManager;
+    private final JwtService jwtService;
 
     /**
      * Находит пользователя по его уникальному идентификатору (UUID).
@@ -248,10 +250,9 @@ public class UserServiceImpl implements UserService {
      * Метод выполняет следующие действия:
      * <ol>
      * <li>Проверяет, соответствует ли текущая электронная почта пользователя электронной почте, указанной в запросе.</li>
-     * <li>Создает временного пользователя {@link TemporaryUser} на основе данных основного пользователя.</li>
      * <li>Генерирует уникальный токен подтверждения и связывает его с временным пользователем.</li>
      * <li>Отправляет электронное письмо с подтверждением на новую электронную почту пользователя.</li>
-     * <li>Сохраняет временного пользователя в базе данных.</li>
+     * <li>Сохраняет временного пользователя в кэше.</li>
      * </ol>
      * <p>
      * В случае ошибки при отправке электронного письма генерируется исключение {@link MailSendException}.
@@ -296,10 +297,10 @@ public class UserServiceImpl implements UserService {
      * <p>
      * Метод выполняет следующие действия:
      * <ol>
-     * <li>Ищет временного пользователя {@link TemporaryUser} по предоставленному токену.</li>
+     * <li>Ищет временного пользователя по предоставленному токену.</li>
      * <li>Если временный пользователь найден, находит основного пользователя по предыдущей электронной почте.</li>
      * <li>Обновляет электронную почту основного пользователя на новую, указанную во временном пользователе.</li>
-     * <li>Удаляет временного пользователя из базы данных после успешного обновления.</li>
+     * <li>Удаляет временного пользователя из кэшах после успешного обновления.</li>
      * </ol>
      * <p>
      * В случае ошибки, когда токен недействителен или истек, выводится сообщение об ошибке.
@@ -311,7 +312,7 @@ public class UserServiceImpl implements UserService {
     @CacheEvict(value = "email", key = "#token")
     @Override
     @Transactional
-    public void confirmEmail(String token) {
+    public AuthenticationResponse confirmEmail(String token) {
         log.debug("[Method {}], [Temporary token {}]", MethodLog.getMethodName(), token);
         Optional<ConfirmChangeEmail> confirmEmail = Optional.ofNullable(
                         cacheManager.getCache("email"))
@@ -327,6 +328,9 @@ public class UserServiceImpl implements UserService {
             user.setEmail(newEmail);
             userRepository.save(user);
             log.info("User email updated from {} to {}, [UUID {}]", previousEmail, newEmail, user.getId());
+            String accessToken = jwtService.generateAccessToken(user);
+            String refreshToken = jwtService.generateRefreshToken(user);
+            return new AuthenticationResponse(accessToken, refreshToken);
         } else {
             log.warn("Invalid or expired token");
             throw new EmailVerificationTokenException("Invalid or expired token");//TODO handle

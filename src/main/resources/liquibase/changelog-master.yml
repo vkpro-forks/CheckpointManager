@@ -69,6 +69,8 @@ databaseChangeLog:
       file: liquibase/scripts/V_187__alter_table_passes_set_null_on_delete_car.yaml
   - include:
       file: liquibase/scripts/V_168__expected_direction.sql
+  - include:
+      file: liquibase/scripts/V_208__drop_temporary_users_table.sql
 
   ## ВНЕСЕНИЕ ДЕМО-ДАННЫХ, ОСТАВЛЯЙТЕ ВСЕГДА В КОНЦЕ ФАЙЛА
   - include:

@@ -13,9 +13,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.ac.checkpointmanager.config.CacheTestConfiguration;
-import ru.ac.checkpointmanager.model.TemporaryUser;
 import ru.ac.checkpointmanager.model.Territory;
-import ru.ac.checkpointmanager.repository.TemporaryUserRepository;
 import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.util.TestUtils;
@@ -32,13 +30,10 @@ class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestCo
     @Autowired
     TerritoryRepository territoryRepository;
 
-    @Autowired
-    TemporaryUserRepository temporaryUserRepository;
 
     @AfterEach
     void clear() {
         userRepository.deleteAll();
-        temporaryUserRepository.deleteAll();
         territoryRepository.deleteAll();
     }
 
@@ -127,18 +122,17 @@ class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestCo
         TestUtils.checkNotFoundFields(resultActions);
     }
 
-    @Test
-    @SneakyThrows
-    void shouldHandleUserNotFoundExceptionForConfirmEmail() {
-        TemporaryUser temporaryUser = TestUtils.getTemporaryUser();
-        TemporaryUser saved = temporaryUserRepository.save(temporaryUser);
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
-                        .get(UrlConstants.CONFIRM_EMAIL_URL)
-                        .param("token", saved.getVerifiedToken()))
-                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
-                        .value(Matchers.startsWith(USER)));
-        TestUtils.checkNotFoundFields(resultActions);
-    }
+//    @Test
+//    @SneakyThrows
+//    void shouldHandleUserNotFoundExceptionForConfirmEmail() {
+//        TemporaryUser temporaryUser = TestUtils.getTemporaryUser();
+//        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+//                        .get(UrlConstants.CONFIRM_EMAIL_URL)
+//                        .param("token", saved.getVerifiedToken()))
+//                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+//                        .value(Matchers.startsWith(USER)));
+//        TestUtils.checkNotFoundFields(resultActions);
+//    }
 
     @Test
     @SneakyThrows

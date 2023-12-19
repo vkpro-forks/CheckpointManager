@@ -3,8 +3,6 @@ package ru.ac.checkpointmanager.dto.user;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
-
 @Data
 @NoArgsConstructor
 public class ConfirmRegistration {

@@ -2,13 +2,11 @@ package ru.ac.checkpointmanager.service.auth;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.Cache;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSendException;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -20,16 +18,14 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.user.AuthenticationRequest;
 import ru.ac.checkpointmanager.dto.user.AuthenticationResponse;
-import ru.ac.checkpointmanager.dto.user.IsAuthenticatedResponse;
 import ru.ac.checkpointmanager.dto.user.ConfirmRegistration;
+import ru.ac.checkpointmanager.dto.user.IsAuthenticatedResponse;
 import ru.ac.checkpointmanager.dto.user.LoginResponse;
 import ru.ac.checkpointmanager.dto.user.RefreshTokenDTO;
 import ru.ac.checkpointmanager.dto.user.UserAuthDTO;
-import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
 import ru.ac.checkpointmanager.exception.RegistrationVerificationTokenException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.mapper.UserMapper;
-import ru.ac.checkpointmanager.model.TemporaryUser;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.repository.UserRepository;
@@ -39,7 +35,6 @@ import ru.ac.checkpointmanager.service.email.EmailService;
 import ru.ac.checkpointmanager.utils.FieldsValidation;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -63,7 +58,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserMapper userMapper;
     private final RedisCacheManager cacheManager;
 
-    private int hourForLogInScheduledCheck;
 
     /**
      * Предварительная регистрация нового пользователя в системе.
@@ -82,7 +76,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
      * @return TemporaryUser, представляющий предварительно зарегистрированного пользователя.
      * @throws IllegalStateException если пользователь с указанным email уже существует.
      * @throws MailSendException     если отправка письма с токеном подтверждения не удалась.
-     * @see TemporaryUser
      * @see UserAuthDTO
      * @see FieldsValidation
      * @see EmailService
@@ -126,7 +119,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
      *
      * @param token токен подтверждения регистрации.
      * @throws UserNotFoundException если пользователь с указанным токеном не найден.
-     * @see TemporaryUser
      * @see User
      * @see JwtService
      */
@@ -218,18 +210,5 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         });
         String accessToken = jwtService.generateAccessToken(user);
         return new AuthenticationResponse(accessToken, refreshToken);
-    }
-
-    @Scheduled(cron = "0 * * * * ?")
-    public void clearRegistrationCache() {
-        LocalDateTime now = LocalDateTime.now();
-        if (now.getHour() != hourForLogInScheduledCheck) {
-            hourForLogInScheduledCheck = now.getHour();
-            log.debug("Scheduled {} continues to work", MethodLog.getMethodName());
-        }
-        Cache tempUserCache = cacheManager.getCache("registration");
-        if (tempUserCache != null) {
-            tempUserCache.clear();
-        }
     }
 }

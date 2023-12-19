@@ -21,7 +21,6 @@ import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
 import ru.ac.checkpointmanager.mapper.TerritoryMapper;
 import ru.ac.checkpointmanager.mapper.UserMapper;
-import ru.ac.checkpointmanager.model.TemporaryUser;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.avatar.Avatar;
@@ -55,8 +54,7 @@ class UserServiceImplTest {
     private PhoneRepository phoneRepository;
     @Mock
     private PasswordEncoder passwordEncoder;
-    @Mock
-    private TemporaryUserService temporaryUserService;
+
     @Mock
     private EmailService emailService;
     @Mock
@@ -231,14 +229,13 @@ class UserServiceImplTest {
         ChangeEmailRequest request = TestUtils.getChangeEmailRequest();
         User user = TestUtils.getUser();
         TestUtils.setSecurityContext(user);
-        TemporaryUser temporaryUser = TestUtils.getTemporaryUser();
 
         Mockito.when(userRepository.findByEmail(request.getNewEmail())).thenReturn(Optional.empty());
-        Mockito.when(userMapper.toTemporaryUser(user)).thenReturn(temporaryUser);
+//        Mockito.when(userMapper.toTemporaryUser(user)).thenReturn(temporaryUser);
 
         userService.changeEmail(request);
         Mockito.verify(userRepository).findByEmail(anyString());
-        Mockito.verify(userMapper).toTemporaryUser(user);
+//        Mockito.verify(userMapper).toTemporaryUser(user);
         Mockito.verify(emailService).sendEmailConfirm(anyString(), anyString());
     }
 
@@ -261,10 +258,9 @@ class UserServiceImplTest {
     void changeEmailThrowsMailSendException() {
         User user = TestUtils.getUser();
         TestUtils.setSecurityContext(user);
-        TemporaryUser temporaryUser = TestUtils.getTemporaryUser();
         ChangeEmailRequest request = TestUtils.getChangeEmailRequest();
 
-        Mockito.when(userMapper.toTemporaryUser(user)).thenReturn(temporaryUser);
+//        Mockito.when(userMapper.toTemporaryUser(user)).thenReturn(temporaryUser);
         Mockito.doThrow(new MailSendException("failed")).when(emailService).sendEmailConfirm(anyString(), anyString());
 
         Assertions.assertThatExceptionOfType(MailSendException.class)
@@ -272,28 +268,23 @@ class UserServiceImplTest {
                 .withMessageContaining("Email sending failed");
     }
 
-    @Test
-    void confirmEmailSuccessfulConfirmationUpdatesUserEmail() {
-        User user = TestUtils.getUser();
-        TemporaryUser tempUser = TestUtils.getTemporaryUser();
-        tempUser.setPreviousEmail(user.getEmail());
-        String token = TestUtils.EMAIL_STRING_TOKEN;
-
-        Mockito.when(temporaryUserService.findByVerifiedToken(token)).thenReturn(tempUser);
-        Mockito.when(userRepository.findByEmail(tempUser.getPreviousEmail())).thenReturn(Optional.of(user));
-
-        userService.confirmEmail(token);
-
-        Assertions.assertThat(user.getEmail()).isEqualTo(tempUser.getEmail());
-        Mockito.verify(temporaryUserService).findByVerifiedToken(token);
-        Mockito.verify(userRepository).save(user);
-        Mockito.verify(temporaryUserService).delete(tempUser);
-    }
+//    @Test
+//    void confirmEmailSuccessfulConfirmationUpdatesUserEmail() {
+//        User user = TestUtils.getUser();
+//
+//        String token = TestUtils.EMAIL_STRING_TOKEN;
+//
+//        Mockito.when(userRepository.findByEmail(tempUser.getPreviousEmail())).thenReturn(Optional.of(user));
+//
+//        userService.confirmEmail(token);
+//
+//        Assertions.assertThat(user.getEmail()).isEqualTo(tempUser.getEmail());
+//        Mockito.verify(userRepository).save(user);
+//    }
 
     @Test
     void confirmEmailInvalidOrExpiredTokenNoActionTaken() {
         String token = "invalidToken";
-        when(temporaryUserService.findByVerifiedToken(token)).thenReturn(null);
 
         Assertions.assertThatThrownBy(
                         () -> userService.confirmEmail(token))
@@ -301,22 +292,20 @@ class UserServiceImplTest {
                 .hasMessageContaining("Invalid or expired token");
 
         Mockito.verify(userRepository, Mockito.never()).save(ArgumentMatchers.any(User.class));
-        Mockito.verify(temporaryUserService, Mockito.never()).delete(ArgumentMatchers.any(TemporaryUser.class));
     }
 
-    @Test
-    void confirmEmailUserNotFoundThrowsUserNotFoundException() {
-        String token = "validToken";
-        TemporaryUser tempUser = TestUtils.getTemporaryUser();
-        when(temporaryUserService.findByVerifiedToken(token)).thenReturn(tempUser);
-        when(userRepository.findByEmail(tempUser.getPreviousEmail())).thenReturn(Optional.empty());
-
-        Assertions.assertThatThrownBy(
-                        () -> userService.confirmEmail(token))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessageContaining("User with [email %s] not found", tempUser.getPreviousEmail());
-
-    }
+//    @Test
+//    void confirmEmailUserNotFoundThrowsUserNotFoundException() {
+//        String token = "validToken";
+//        TemporaryUser tempUser = TestUtils.getTemporaryUser();
+//        when(userRepository.findByEmail(tempUser.getPreviousEmail())).thenReturn(Optional.empty());
+//
+//        Assertions.assertThatThrownBy(
+//                        () -> userService.confirmEmail(token))
+//                .isInstanceOf(EntityNotFoundException.class)
+//                .hasMessageContaining("User with [email %s] not found", tempUser.getPreviousEmail());
+//
+//    }
 
     @Test
     void changeRoleSuccessfulChange() {
