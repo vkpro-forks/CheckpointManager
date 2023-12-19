@@ -47,11 +47,10 @@ import java.util.UUID;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
 @AutoConfigureMockMvc
-@Import({OpenAllEndpointsTestConfiguration.class, CorsTestConfiguration.class, CacheTestConfiguration.class,
-        PostgresTestContainersConfiguration.class})
+@Import({OpenAllEndpointsTestConfiguration.class, CorsTestConfiguration.class, CacheTestConfiguration.class})
 @ActiveProfiles("test")
 @WithMockUser(roles = {"ADMIN"})
-class PassControllerIntegrationTest {
+class PassControllerIntegrationTest extends PostgresTestContainersConfiguration {
 
     @Autowired
     MockMvc mockMvc;
@@ -270,11 +269,11 @@ class PassControllerIntegrationTest {
         pass.setTerritory(savedTerritory);
         pass.setUser(savedUser);
         pass.setCar(savedCar);
-        passRepository.saveAndFlush(pass);
+        PassAuto savedPass = passRepository.saveAndFlush(pass);
         List<Pass> allPasses = passRepository.findAll();
         Assertions.assertThat(allPasses).hasSize(1);//check if only one pass here
 
-        mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.PASS_URL + "/" + TestUtils.PASS_ID))
+        mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.PASS_URL + "/" + savedPass.getId()))
                 .andExpect(MockMvcResultMatchers.status().isNoContent());
 
         List<Pass> passesAfterDelete = passRepository.findAll();
@@ -317,7 +316,7 @@ class PassControllerIntegrationTest {
         List<Pass> allPasses = passRepository.findAll();
         Assertions.assertThat(allPasses).hasSize(5);
 
-        mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.PASS_URL + "/" + passes.get(0).getId()))
+        mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.PASS_URL + "/" + allPasses.get(0).getId()))
                 .andExpect(MockMvcResultMatchers.status().isNoContent());
 
         List<Pass> passesAfterDelete = passRepository.findAll();

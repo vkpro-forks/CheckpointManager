@@ -30,11 +30,10 @@ import java.util.List;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
 @AutoConfigureMockMvc
-@Import({OpenAllEndpointsTestConfiguration.class, CorsTestConfiguration.class,
-        PostgresTestContainersConfiguration.class})
+@Import({OpenAllEndpointsTestConfiguration.class, CorsTestConfiguration.class})
 @ActiveProfiles("test")
 @WithMockUser(roles = {"ADMIN"})
-class CarBrandControllerIntegrationTest {
+class CarBrandControllerIntegrationTest extends PostgresTestContainersConfiguration {
 
     @Autowired
     MockMvc mockMvc;

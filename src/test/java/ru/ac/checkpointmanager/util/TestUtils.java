@@ -16,7 +16,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import ru.ac.checkpointmanager.security.CustomAuthenticationToken;
 import ru.ac.checkpointmanager.dto.AuthenticationRequest;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.ChangeEmailRequest;
@@ -44,6 +43,7 @@ import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.model.passes.PassTypeTime;
+import ru.ac.checkpointmanager.security.CustomAuthenticationToken;
 
 import java.security.Key;
 import java.time.LocalDateTime;
@@ -253,14 +253,19 @@ public class TestUtils {
     }
 
     public static RefreshTokenDTO getRefreshTokenDTO() {
-        return new RefreshTokenDTO(getJwt(86400000, USERNAME, List.of("ROLE_ADMIN"), true));
+        return new RefreshTokenDTO(getJwt(86400000, USERNAME, List.of("ROLE_ADMIN"), true, true));
     }
 
-    public static String getJwt(Integer expired, String username, List<String> roles, boolean isRefresh) {
+    public static String getJwt(Integer expired, String username, List<String> roles, boolean isRefresh,
+                                boolean withIdClaim) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", roles);
+
         if (isRefresh) {
             claims.put("refresh", true);
+        }
+        if (withIdClaim) {
+            claims.put("id", USER_ID);
         }
         return Jwts
                 .builder()

@@ -15,11 +15,10 @@ import ru.ac.checkpointmanager.config.PostgresTestContainersConfiguration;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
 @AutoConfigureMockMvc
-@Import({OpenAllEndpointsTestConfiguration.class, CorsTestConfiguration.class,
-        PostgresTestContainersConfiguration.class})
+@Import({OpenAllEndpointsTestConfiguration.class, CorsTestConfiguration.class})
 @ActiveProfiles("test")
 @WithMockUser(roles = {"ADMIN"})
-public class GlobalExceptionHandlerBasicTestConfig {
+public class GlobalExceptionHandlerBasicTestConfig extends PostgresTestContainersConfiguration {
 
     @Autowired
     MockMvc mockMvc;

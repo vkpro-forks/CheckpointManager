@@ -19,12 +19,12 @@ import ru.ac.checkpointmanager.util.TestUtils;
 
 import java.util.List;
 
-@Import({CorsTestConfiguration.class, PostgresTestContainersConfiguration.class})
+@Import({CorsTestConfiguration.class})
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")
 @Slf4j
-class TerritoryRepositoryIntegrationTest {
+class TerritoryRepositoryIntegrationTest extends PostgresTestContainersConfiguration {
 
     @Autowired
     UserRepository userRepository;
