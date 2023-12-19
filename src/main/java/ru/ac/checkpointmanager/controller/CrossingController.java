@@ -49,7 +49,6 @@ public class CrossingController {
 
     private final CrossingService crossingService;
 
-    @Operation(summary = "Добавление пересечения",
     @Operation(summary = "Создание пересечения, имитирует проезд или проход объекта через КПП, НА (IN) территорию",
             description = "Доступ: ADMIN, SECURITY.")
     @ApiResponses(value = {
@@ -119,4 +118,5 @@ public class CrossingController {
         CrossingDTO crossing = crossingService.getCrossing(id);
         return new ResponseEntity<>(crossing, HttpStatus.OK);
     }
+
 }
