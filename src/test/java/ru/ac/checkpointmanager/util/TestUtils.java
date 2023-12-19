@@ -27,6 +27,7 @@ import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.dto.user.AuthenticationRequest;
 import ru.ac.checkpointmanager.dto.user.ChangeEmailRequest;
 import ru.ac.checkpointmanager.dto.user.ChangePasswordRequest;
+import ru.ac.checkpointmanager.dto.user.ConfirmChangeEmail;
 import ru.ac.checkpointmanager.dto.user.RefreshTokenDTO;
 import ru.ac.checkpointmanager.dto.user.UserPutDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
@@ -97,6 +98,7 @@ public class TestUtils {
     public static final String PASSWORD = "password";
 
     public static final String EMAIL = "123@123.com";
+    public static final String NEW_EMAIL = "new.com";
     private static final String USERNAME = "Username";
     private static final String NEW_PASSWORD = "new_password";
 
@@ -229,8 +231,16 @@ public class TestUtils {
         );
     }
 
+    public static ConfirmChangeEmail getConfirmChangeEmail() {
+        return new ConfirmChangeEmail(
+                EMAIL,
+                NEW_EMAIL,
+                EMAIL_STRING_TOKEN
+        );
+    }
+
     public static ChangeEmailRequest getChangeEmailRequest() {
-        return new ChangeEmailRequest("new_email@gmail.com");
+        return new ChangeEmailRequest(NEW_EMAIL);
     }
 
     public static void setSecurityContext(User user) {
