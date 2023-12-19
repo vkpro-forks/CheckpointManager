@@ -30,8 +30,8 @@ import ru.ac.checkpointmanager.model.enums.PhoneNumberType;
 import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
-import ru.ac.checkpointmanager.security.AuthenticationFacadeImpl;
 import ru.ac.checkpointmanager.security.AuthenticationFacade;
+import ru.ac.checkpointmanager.security.AuthenticationFacadeImpl;
 import ru.ac.checkpointmanager.service.email.EmailService;
 import ru.ac.checkpointmanager.service.phone.PhoneService;
 import ru.ac.checkpointmanager.utils.FieldsValidation;
@@ -119,7 +119,7 @@ public class UserServiceImpl implements UserService {
      * @throws TerritoryNotFoundException если территории для указанного пользователя не найдены.
      * @see TerritoryNotFoundException
      */
-    @Cacheable(value = "user", key = "#userId")
+    @Cacheable(value = "user-territory", key = "#userId")
     @Override
     public List<TerritoryDTO> findTerritoriesByUserId(UUID userId) {
         log.debug(METHOD_UUID, MethodLog.getMethodName(), userId);
@@ -517,7 +517,6 @@ public class UserServiceImpl implements UserService {
      * @return Коллекция строк, представляющих номера телефонов пользователя.
      * @throws UserNotFoundException если пользователь с указанным идентификатором не найден.
      */
-    @Cacheable(value = "user", key = "#userId")
     @Override
     public Collection<String> findUsersPhoneNumbers(UUID userId) {
         log.debug("Method {}, UUID {}", MethodLog.getMethodName(), userId);
