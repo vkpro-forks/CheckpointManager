@@ -3,7 +3,9 @@ package ru.ac.checkpointmanager.service.user;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSendException;
 import org.springframework.security.access.AccessDeniedException;
@@ -11,10 +13,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import ru.ac.checkpointmanager.dto.ChangeEmailRequest;
-import ru.ac.checkpointmanager.dto.ChangePasswordRequest;
 import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
+import ru.ac.checkpointmanager.dto.user.AuthenticationResponse;
+import ru.ac.checkpointmanager.dto.user.ChangeEmailRequest;
+import ru.ac.checkpointmanager.dto.user.ChangePasswordRequest;
+import ru.ac.checkpointmanager.dto.user.ConfirmChangeEmail;
 import ru.ac.checkpointmanager.dto.user.UserPutDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
@@ -22,7 +26,6 @@ import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.mapper.TerritoryMapper;
 import ru.ac.checkpointmanager.mapper.UserMapper;
-import ru.ac.checkpointmanager.model.TemporaryUser;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.avatar.Avatar;
@@ -32,6 +35,7 @@ import ru.ac.checkpointmanager.repository.PhoneRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.security.AuthenticationFacade;
 import ru.ac.checkpointmanager.security.AuthenticationFacadeImpl;
+import ru.ac.checkpointmanager.security.jwt.JwtService;
 import ru.ac.checkpointmanager.service.email.EmailService;
 import ru.ac.checkpointmanager.service.phone.PhoneService;
 import ru.ac.checkpointmanager.utils.FieldsValidation;
@@ -39,6 +43,7 @@ import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -72,10 +77,11 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PhoneRepository phoneRepository;
     private final PasswordEncoder passwordEncoder;
-    private final TemporaryUserService temporaryUserService;
     private final EmailService emailService;
     private final PhoneService phoneService;
     private final AuthenticationFacade authFacade;
+    private final RedisCacheManager cacheManager;
+    private final JwtService jwtService;
 
     /**
      * Находит пользователя по его уникальному идентификатору (UUID).
@@ -247,10 +253,9 @@ public class UserServiceImpl implements UserService {
      * Метод выполняет следующие действия:
      * <ol>
      * <li>Проверяет, соответствует ли текущая электронная почта пользователя электронной почте, указанной в запросе.</li>
-     * <li>Создает временного пользователя {@link TemporaryUser} на основе данных основного пользователя.</li>
      * <li>Генерирует уникальный токен подтверждения и связывает его с временным пользователем.</li>
      * <li>Отправляет электронное письмо с подтверждением на новую электронную почту пользователя.</li>
-     * <li>Сохраняет временного пользователя в базе данных.</li>
+     * <li>Сохраняет временного пользователя в кэше.</li>
      * </ol>
      * <p>
      * В случае ошибки при отправке электронного письма генерируется исключение {@link MailSendException}.
@@ -261,9 +266,10 @@ public class UserServiceImpl implements UserService {
      * @throws IllegalStateException если текущая электронная почта пользователя не соответствует указанной в запросе.
      * @throws MailSendException     если происходит ошибка при отправке электронного письма.
      */
+    @CachePut(value = "email", key = "#result.verifiedToken")
     @Override
     @Transactional
-    public String changeEmail(ChangeEmailRequest request) {
+    public ConfirmChangeEmail changeEmail(ChangeEmailRequest request) {
         User user = authFacade.getCurrentUser();
         log.debug("[Method {}], [Username - {}]", MethodLog.getMethodName(), user.getUsername());
 
@@ -272,23 +278,21 @@ public class UserServiceImpl implements UserService {
             throw new IllegalStateException(String.format("Email %s already taken", request.getNewEmail()));
         }
 
-        TemporaryUser tempUser = userMapper.toTemporaryUser(user);
-        tempUser.setPreviousEmail(user.getEmail());
-        tempUser.setEmail(request.getNewEmail());
+        ConfirmChangeEmail confirmEmail = userMapper.toConfirmChangeEmail(request);
+        confirmEmail.setPreviousEmail(user.getEmail());
 
         String token = UUID.randomUUID().toString();
-        tempUser.setVerifiedToken(token);
+        confirmEmail.setVerifiedToken(token);
 
         try {
-            emailService.sendEmailConfirm(tempUser.getEmail(), token);
+            emailService.sendEmailConfirm(confirmEmail.getNewEmail(), token);
             log.info("Email confirmation message was sent");
         } catch (MailException e) {
             log.error("Email sending failed");
             throw new MailSendException("Email sending failed", e);
         }
 
-        temporaryUserService.create(tempUser);
-        return token;
+        return confirmEmail;
     }
 
     /**
@@ -296,10 +300,10 @@ public class UserServiceImpl implements UserService {
      * <p>
      * Метод выполняет следующие действия:
      * <ol>
-     * <li>Ищет временного пользователя {@link TemporaryUser} по предоставленному токену.</li>
+     * <li>Ищет временного пользователя по предоставленному токену.</li>
      * <li>Если временный пользователь найден, находит основного пользователя по предыдущей электронной почте.</li>
      * <li>Обновляет электронную почту основного пользователя на новую, указанную во временном пользователе.</li>
-     * <li>Удаляет временного пользователя из базы данных после успешного обновления.</li>
+     * <li>Удаляет временного пользователя из кэшах после успешного обновления.</li>
      * </ol>
      * <p>
      * В случае ошибки, когда токен недействителен или истек, выводится сообщение об ошибке.
@@ -308,24 +312,30 @@ public class UserServiceImpl implements UserService {
      * @param token уникальный токен подтверждения, используемый для идентификации временного пользователя.
      * @throws UserNotFoundException если пользователь с указанной предыдущей электронной почтой не найден.
      */
+    @CacheEvict(value = "email", key = "#token")
     @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    public void confirmEmail(String token) {
+    @Transactional
+    public AuthenticationResponse confirmEmail(String token) {
         log.debug("[Method {}], [Temporary token {}]", MethodLog.getMethodName(), token);
-        TemporaryUser tempUser = temporaryUserService.findByVerifiedToken(token);
-        if (tempUser != null) {
-            String previousEmail = tempUser.getPreviousEmail();
+        Optional<ConfirmChangeEmail> confirmEmail = Optional.ofNullable(
+                        cacheManager.getCache("email"))
+                .map(cache -> cache.get(token, ConfirmChangeEmail.class));
+        if (confirmEmail.isPresent()) {
+            String previousEmail = confirmEmail.get().getPreviousEmail();
+            String newEmail = confirmEmail.get().getNewEmail();
             User user = userRepository.findByEmail(previousEmail).orElseThrow(
                     () -> {
                         log.warn("User with [email %s] not found".formatted(previousEmail));
                         return new UserNotFoundException("User with [email %s] not found".formatted(previousEmail));
                     });
-            user.setEmail(tempUser.getEmail());
+            user.setEmail(newEmail);
             userRepository.save(user);
-            log.info("User email updated from {} to {}, [UUID {}]", previousEmail, user.getEmail(), user.getId());
+            log.info("User email updated from {} to {}, [UUID {}]", previousEmail, newEmail, user.getId());
+            Objects.requireNonNull(cacheManager.getCache("user")).evict(user.getId());
 
-            temporaryUserService.delete(tempUser);
-            log.info("[Temporary user {}] deleted", tempUser.getId());
+            String accessToken = jwtService.generateAccessToken(user);
+            String refreshToken = jwtService.generateRefreshToken(user);
+            return new AuthenticationResponse(accessToken, refreshToken);
         } else {
             log.warn("Invalid or expired token");
             throw new EmailVerificationTokenException("Invalid or expired token");//TODO handle
