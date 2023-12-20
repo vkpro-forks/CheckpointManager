@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.ac.checkpointmanager.model.enums.Direction;
 
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
@@ -14,7 +13,6 @@ import java.util.UUID;
 @NoArgsConstructor
 public class CrossingDTO {
 
-    //А вот в результат-ответ я бы еще добавил идентификатор пересечения (пусть будет)
     private UUID id;
 
     private UUID passId;

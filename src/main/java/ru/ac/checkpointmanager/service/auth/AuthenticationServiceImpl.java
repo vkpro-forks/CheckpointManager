@@ -48,7 +48,7 @@ import java.util.UUID;
 @Slf4j
 public class AuthenticationServiceImpl implements AuthenticationService {
     public static final String METHOD_WAS_INVOKED = "Method {} was invoked";
-    private static final String USER_NOT_FOUND_MSG = "User with [id=%s] not found";
+    private static final String USER_NOT_FOUND_MSG = "User with [email=%s] not found";
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final JwtValidator jwtValidator;
@@ -203,10 +203,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         log.debug(METHOD_WAS_INVOKED, MethodLog.getMethodName());
         final String refreshToken = refreshTokenDTO.getRefreshToken();
         jwtValidator.validateRefreshToken(refreshToken);
-        UUID userId = jwtService.extractId(refreshToken);
-        User user = userRepository.findById(userId).orElseThrow(() -> {
-            log.warn(USER_NOT_FOUND_MSG.formatted(userId));
-            return new UserNotFoundException(String.format(USER_NOT_FOUND_MSG.formatted(userId)));
+        String username = jwtService.extractUsername(refreshToken);
+        User user = userRepository.findByEmail(username).orElseThrow(() -> {
+            log.warn(USER_NOT_FOUND_MSG.formatted(username));
+            return new UserNotFoundException(String.format(USER_NOT_FOUND_MSG.formatted(username)));
         });
         String accessToken = jwtService.generateAccessToken(user);
         return new AuthenticationResponse(accessToken, refreshToken);

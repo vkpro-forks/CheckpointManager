@@ -1,5 +1,7 @@
-package ru.ac.checkpointmanager.testcontainers;
+package ru.ac.checkpointmanager.config;
 
+import org.springframework.boot.autoconfigure.jdbc.JdbcConnectionDetails;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -7,18 +9,14 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers
-public class PostgresContainersConfig {
+public class PostgresTestContainersConfiguration {
 
     @Container
-    private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(
-            "postgres:latest"
-    ).withDatabaseName("chpmanDB");
+    @ServiceConnection(type = JdbcConnectionDetails.class)
+    private static PostgreSQLContainer<?> postgresContainer = new PostgreSQLContainer<>("postgres:latest").withDatabaseName("chpmanDB");
 
     @DynamicPropertySource
     private static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgres::getJdbcUrl);
-        registry.add("spring.datasource.username", postgres::getUsername);
-        registry.add("spring.datasource.password", postgres::getPassword);
         registry.add("spring.liquibase.enabled", () -> true);
         registry.add("spring.liquibase.label-filter", () -> "!demo-data");
     }
