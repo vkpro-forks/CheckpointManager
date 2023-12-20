@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.dto;
+package ru.ac.checkpointmanager.dto.user;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

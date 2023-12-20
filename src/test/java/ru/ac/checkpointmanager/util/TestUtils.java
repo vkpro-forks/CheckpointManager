@@ -16,11 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import ru.ac.checkpointmanager.security.CustomAuthenticationToken;
-import ru.ac.checkpointmanager.dto.AuthenticationRequest;
 import ru.ac.checkpointmanager.dto.CarDTO;
-import ru.ac.checkpointmanager.dto.ChangeEmailRequest;
-import ru.ac.checkpointmanager.dto.ChangePasswordRequest;
 import ru.ac.checkpointmanager.dto.CheckpointDTO;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
 import ru.ac.checkpointmanager.dto.PhoneDTO;
@@ -28,11 +24,14 @@ import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.VisitorDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
+import ru.ac.checkpointmanager.dto.user.AuthenticationRequest;
+import ru.ac.checkpointmanager.dto.user.ChangeEmailRequest;
+import ru.ac.checkpointmanager.dto.user.ChangePasswordRequest;
+import ru.ac.checkpointmanager.dto.user.ConfirmChangeEmail;
 import ru.ac.checkpointmanager.dto.user.RefreshTokenDTO;
 import ru.ac.checkpointmanager.dto.user.UserPutDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.exception.handler.ErrorCode;
-import ru.ac.checkpointmanager.model.TemporaryUser;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.car.Car;
@@ -45,6 +44,7 @@ import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.model.passes.PassTypeTime;
+import ru.ac.checkpointmanager.security.CustomAuthenticationToken;
 
 import java.security.Key;
 import java.time.LocalDateTime;
@@ -100,6 +100,7 @@ public class TestUtils {
     public static final String PASSWORD = "password";
 
     public static final String EMAIL = "123@123.com";
+    public static final String NEW_EMAIL = "new.com";
     private static final String USERNAME = "Username";
     private static final String NEW_PASSWORD = "new_password";
 
@@ -205,15 +206,6 @@ public class TestUtils {
                 .generate(Select.field("email"), gen -> gen.text().pattern("#a#a#a#a#a@example.com")).toModel();
     }
 
-    public static TemporaryUser getTemporaryUser() {
-        return Instancio.of(getInstancioTemporaryUserModel()).create();
-    }
-
-    public static Model<TemporaryUser> getInstancioTemporaryUserModel() {
-        return Instancio.of(TemporaryUser.class)
-                .generate(Select.field("email"), gen -> gen.text().pattern("#a#a#a#a#a@example.com")).toModel();
-    }
-
     public static UserPutDTO getUserPutDTO() {
         return new UserPutDTO(
                 USER_ID,
@@ -242,8 +234,16 @@ public class TestUtils {
         );
     }
 
+    public static ConfirmChangeEmail getConfirmChangeEmail() {
+        return new ConfirmChangeEmail(
+                EMAIL,
+                NEW_EMAIL,
+                EMAIL_STRING_TOKEN
+        );
+    }
+
     public static ChangeEmailRequest getChangeEmailRequest() {
-        return new ChangeEmailRequest("new_email@gmail.com");
+        return new ChangeEmailRequest(NEW_EMAIL);
     }
 
     public static void setSecurityContext(User user) {
