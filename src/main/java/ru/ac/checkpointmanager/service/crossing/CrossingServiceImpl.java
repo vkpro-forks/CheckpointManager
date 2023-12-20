@@ -67,8 +67,6 @@ public class CrossingServiceImpl implements CrossingService {
 
         processPass(pass, direction);
         Crossing crossing = toCrossing(direction, pass, checkpoint, crossingDTO.getPerformedAt());
-        //тут логика совсем простая, и используется один раз
-        //можно обойтись без маппера, а вот обратно пусть пусть маппер работает
         crossing = crossingRepository.save(crossing);
         log.info("Crossing added [{}]", crossing);
         return mapper.toCrossingDTO(crossing);
@@ -89,10 +87,10 @@ public class CrossingServiceImpl implements CrossingService {
      * затем устанавливает ожидаемое направление следующего пересечения
      * на противоположное направлению текущего пересечения
      *
-     * @param pass             пропуск, использованные при пересечении
+     * @param pass             пропуск, использованный при пересечении
      * @param currentDirection направление текущего (добавляемого) пересечения
      */
-    public void processPass(Pass pass, Direction currentDirection) { //я бы вынес этот метод в пасс сервис
+    public void processPass(Pass pass, Direction currentDirection) {
         String passTimeType = pass.getTypeTime().toString();
         PassProcessing passProcessing = passProcessingMap.get(passTimeType);
         if (passProcessing == null) {
