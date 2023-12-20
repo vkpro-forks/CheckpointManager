@@ -37,6 +37,7 @@ import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.car.Car;
 import ru.ac.checkpointmanager.model.car.CarBrand;
+import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
 import ru.ac.checkpointmanager.model.checkpoints.CheckpointType;
 import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.enums.PhoneNumberType;
@@ -47,6 +48,7 @@ import ru.ac.checkpointmanager.model.passes.PassTypeTime;
 
 import java.security.Key;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -65,6 +67,8 @@ public class TestUtils {
 
     public static final UUID CHECKPOINT_ID = UUID.randomUUID();
 
+    public static final UUID CROSSING_ID = UUID.randomUUID();
+
     public static final String CHECKPOINT_NAME = "ch_name";
 
     public static final UUID TERR_ID = UUID.randomUUID();
@@ -74,8 +78,6 @@ public class TestUtils {
     public static final UUID CAR_ID = UUID.randomUUID();
 
     public static final String LICENSE_PLATE = "А420ВХ799";
-
-    public static final UUID CROSSING_ID = UUID.randomUUID();
 
     public static final UUID PHONE_ID = UUID.randomUUID();
 
@@ -111,9 +113,10 @@ public class TestUtils {
 
     public static CrossingDTO getCrossingDTO() {
         return new CrossingDTO(
+                CROSSING_ID,
                 PASS_ID,
                 CHECKPOINT_ID,
-                LocalDateTime.now(),
+                ZonedDateTime.now(),
                 Direction.IN
         );
     }
@@ -293,6 +296,14 @@ public class TestUtils {
         passAuto.setUser(user);
         passAuto.setTerritory(territory);
         return passAuto;
+    }
+
+    public static Checkpoint getCheckpoint(CheckpointType type, Territory territory) {
+        Checkpoint checkpoint = new Checkpoint();
+        checkpoint.setName(CHECKPOINT_NAME);
+        checkpoint.setType(type);
+        checkpoint.setTerritory(territory);
+        return checkpoint;
     }
 
     public static Car getCar(CarBrand carBrand) {

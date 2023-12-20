@@ -260,20 +260,13 @@ class PassControllerIntegrationTest extends PostgresContainersConfig {
         car.setId(TestUtils.getCarDto().getId());
         Car savedCar = carRepository.saveAndFlush(car);
 
-        PassAuto pass = new PassAuto();
-        pass.setId(TestUtils.PASS_ID);
-        pass.setTypeTime(PassTypeTime.ONETIME);
-        pass.setStartTime(LocalDateTime.now());
-        pass.setEndTime(LocalDateTime.now().plusHours(5));
+        PassAuto pass = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
         pass.setStatus(passStatus);
-        pass.setTerritory(savedTerritory);
-        pass.setUser(savedUser);
-        pass.setCar(savedCar);
-        passRepository.saveAndFlush(pass);
+        PassAuto savedPass = passRepository.saveAndFlush(pass);
         List<Pass> allPasses = passRepository.findAll();
         Assertions.assertThat(allPasses).hasSize(1);//check if only one pass here
 
-        mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.PASS_URL + "/" + TestUtils.PASS_ID))
+        mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.PASS_URL + "/" + savedPass.getId()))
                 .andExpect(MockMvcResultMatchers.status().isNoContent());
 
         List<Pass> passesAfterDelete = passRepository.findAll();
@@ -316,7 +309,7 @@ class PassControllerIntegrationTest extends PostgresContainersConfig {
         List<Pass> allPasses = passRepository.findAll();
         Assertions.assertThat(allPasses).hasSize(5);
 
-        mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.PASS_URL + "/" + passes.get(0).getId()))
+        mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.PASS_URL + "/" + allPasses.get(0).getId()))
                 .andExpect(MockMvcResultMatchers.status().isNoContent());
 
         List<Pass> passesAfterDelete = passRepository.findAll();

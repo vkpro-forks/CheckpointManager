@@ -11,8 +11,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SourceType;
@@ -21,6 +21,7 @@ import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.passes.Pass;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 @Entity
@@ -44,6 +45,9 @@ public class Crossing {
     @ManyToOne
     @JoinColumn(name = "checkpoint_id", referencedColumnName = "id")
     private Checkpoint checkpoint;
+
+    @Column(name = "performed_at")
+    private ZonedDateTime performedAt;
 
     @Column(name = "local_date_time")
     @CreationTimestamp(source = SourceType.VM)
