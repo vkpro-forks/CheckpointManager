@@ -7,8 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
 import ru.ac.checkpointmanager.model.Crossing;
-import ru.ac.checkpointmanager.model.passes.Pass;
-import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
 
 import java.util.Collection;
 import java.util.List;
@@ -23,13 +21,6 @@ public class CrossingMapper {
     public CrossingMapper(ModelMapper modelMapper) {
         this.modelMapper = modelMapper;
         configureModelMapper();
-    }
-
-    public Crossing toCrossing(CrossingDTO crossingDTO, Pass pass, Checkpoint checkpoint) {
-       Crossing crossing = modelMapper.map(crossingDTO, Crossing.class);
-       crossing.setPass(pass);
-       crossing.setCheckpoint(checkpoint);
-       return crossing;
     }
 
     public CrossingDTO toCrossingDTO(Crossing crossing) {
