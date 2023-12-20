@@ -2,6 +2,8 @@ package ru.ac.checkpointmanager.service.phone;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.PhoneDTO;
@@ -50,6 +52,7 @@ public class PhoneServiceImpl implements PhoneService {
         return phoneMapper.toPhoneDTO(phone);
     }
 
+    @Cacheable(value = "phone", key = "#id")
     @Override
     @Transactional(readOnly = true)
     public PhoneDTO findById(UUID id) {
@@ -62,6 +65,7 @@ public class PhoneServiceImpl implements PhoneService {
         return phoneMapper.toPhoneDTO(foundPhone);
     }
 
+    @CacheEvict(value = "phone", key = "#phoneDTO.id")
     @Override
     @Transactional
     public PhoneDTO updatePhoneNumber(PhoneDTO phoneDTO) {
@@ -86,7 +90,7 @@ public class PhoneServiceImpl implements PhoneService {
         return phoneMapper.toPhoneDTO(foundPhone);
     }
 
-
+    @CacheEvict(value = "phone", key = "#id")
     @Override
     @Transactional
     public void deletePhoneNumber(UUID id) {

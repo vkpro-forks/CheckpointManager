@@ -2,6 +2,7 @@ package ru.ac.checkpointmanager.service.user;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSendException;
@@ -29,8 +30,8 @@ import ru.ac.checkpointmanager.model.enums.PhoneNumberType;
 import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
-import ru.ac.checkpointmanager.security.AuthenticationFacadeImpl;
 import ru.ac.checkpointmanager.security.AuthenticationFacade;
+import ru.ac.checkpointmanager.security.AuthenticationFacadeImpl;
 import ru.ac.checkpointmanager.service.email.EmailService;
 import ru.ac.checkpointmanager.service.phone.PhoneService;
 import ru.ac.checkpointmanager.utils.FieldsValidation;
@@ -91,7 +92,6 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     @Cacheable(value = "user", key = "#id")
-    //на этом эндпоинте проверяла работу кэширования, остальное кэширование - отдельная таска
     public UserResponseDTO findById(UUID id) {
         log.debug(METHOD_UUID, MethodLog.getMethodName(), id);
         User foundUser = findUserById(id);
@@ -119,6 +119,7 @@ public class UserServiceImpl implements UserService {
      * @throws TerritoryNotFoundException если территории для указанного пользователя не найдены.
      * @see TerritoryNotFoundException
      */
+    @Cacheable(value = "user-territory", key = "#userId")
     @Override
     public List<TerritoryDTO> findTerritoriesByUserId(UUID userId) {
         log.debug(METHOD_UUID, MethodLog.getMethodName(), userId);
@@ -138,6 +139,7 @@ public class UserServiceImpl implements UserService {
      * @return Коллекция {@link UserResponseDTO}, представляющая найденных пользователей.
      * @throws UserNotFoundException если пользователи с именем, содержащим указанную строку, не найдены.
      */
+    @Cacheable(value = "user", key = "#name")
     @Override
     public Collection<UserResponseDTO> findByName(String name) {
         log.info("Method {} was invoked", MethodLog.getMethodName());
@@ -160,6 +162,7 @@ public class UserServiceImpl implements UserService {
      * @see UserPutDTO
      * @see UserResponseDTO
      */
+    @CacheEvict(value = "user", key = "#userPutDTO.id")
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public UserResponseDTO updateUser(UserPutDTO userPutDTO) {
@@ -344,6 +347,7 @@ public class UserServiceImpl implements UserService {
      * @throws AccessDeniedException если у пользователя, выполняющего операцию, нет прав на изменение роли.
      * @throws IllegalStateException если пользователь уже имеет указанную роль.
      */
+    @CacheEvict(value = "user", key = "#id")
     @Override
     @Transactional
     public void changeRole(UUID id, Role role) {
@@ -387,6 +391,7 @@ public class UserServiceImpl implements UserService {
      * @throws UserNotFoundException если пользователь с заданным идентификатором не найден.
      * @throws IllegalStateException если статус блокировки пользователя уже соответствует указанному значению.
      */
+    @CacheEvict(value = "user", key = "#id")
     @Override
     @Transactional
     public UserResponseDTO updateBlockStatus(UUID id, Boolean isBlocked) {
@@ -418,6 +423,7 @@ public class UserServiceImpl implements UserService {
      * @throws UserNotFoundException если пользователь с указанным идентификатором не найден.
      * @throws IllegalStateException если пользователь уже заблокирован.
      */
+    @CacheEvict(value = "user", key = "#id")
     @Override
     @Transactional
     public void blockById(UUID id) {
@@ -445,6 +451,7 @@ public class UserServiceImpl implements UserService {
      * @throws UserNotFoundException если пользователь с указанным идентификатором не найден.
      * @throws IllegalStateException если пользователь уже разблокирован.
      */
+    @CacheEvict(value = "user", key = "#id")
     @Override
     @Transactional
     public void unblockById(UUID id) {
@@ -470,6 +477,7 @@ public class UserServiceImpl implements UserService {
      * @param id Идентификатор пользователя, которого необходимо удалить.
      * @throws UserNotFoundException если пользователь с указанным идентификатором не найден.
      */
+    @CacheEvict(value = "user", key = "#id")
     @Override
     @Transactional
     public void deleteUser(UUID id) {
