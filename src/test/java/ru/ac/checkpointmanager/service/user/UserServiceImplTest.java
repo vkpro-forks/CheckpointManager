@@ -15,10 +15,10 @@ import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.mail.MailSendException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import ru.ac.checkpointmanager.dto.user.ChangeEmailRequest;
-import ru.ac.checkpointmanager.dto.user.ChangePasswordRequest;
 import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
+import ru.ac.checkpointmanager.dto.user.ChangeEmailRequest;
+import ru.ac.checkpointmanager.dto.user.ChangePasswordRequest;
 import ru.ac.checkpointmanager.dto.user.ConfirmChangeEmail;
 import ru.ac.checkpointmanager.dto.user.UserPutDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
@@ -239,6 +239,7 @@ class UserServiceImplTest {
                 .isThrownBy(() -> userService.changePassword(request))
                 .withMessageContaining("Passwords are not the same");
     }
+
     @Test
     @Disabled("broken, need to fix")
     void successfulChangeEmailRequest() {
@@ -295,7 +296,8 @@ class UserServiceImplTest {
         String token = TestUtils.EMAIL_STRING_TOKEN;
 
         Mockito.when(cacheManager.getCache("email")).thenReturn(cache);
-        Mockito.when(cache.get(Mockito.eq(token), Mockito.eq(ConfirmChangeEmail.class))).thenReturn(changeEmail);
+        Mockito.when(cacheManager.getCache("user")).thenReturn(cache);
+        Mockito.when(cache.get(token, Mockito.eq(ConfirmChangeEmail.class))).thenReturn(changeEmail);
         Mockito.when(userRepository.findByEmail(changeEmail.getPreviousEmail())).thenReturn(Optional.of(user));
         Mockito.when(jwtService.generateAccessToken(user)).thenReturn("mockAccessToken");
         Mockito.when(jwtService.generateRefreshToken(user)).thenReturn("mockRefreshToken");

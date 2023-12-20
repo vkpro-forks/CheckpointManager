@@ -4,7 +4,10 @@ import lombok.SneakyThrows;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -20,6 +23,8 @@ import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 
+import java.util.Optional;
+
 @Import({CacheTestConfiguration.class})
 class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestConfig {
 
@@ -30,6 +35,9 @@ class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestCo
 
     @Autowired
     TerritoryRepository territoryRepository;
+
+    @Autowired
+    CacheManager cacheManager;
 
 
     @AfterEach
@@ -126,7 +134,14 @@ class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestCo
     @Test
     @SneakyThrows
     void shouldHandleUserNotFoundExceptionForConfirmEmail() {
+        Cache emailCache = cacheManager.getCache("email");
         ConfirmChangeEmail changeEmail = TestUtils.getConfirmChangeEmail();
+        Cache.ValueWrapper wrapperMock = Mockito.mock(Cache.ValueWrapper.class);
+
+        assert emailCache != null;
+        Mockito.when(emailCache.get(Mockito.anyString())).thenReturn(wrapperMock);
+
+        //Mockito.when(wrapperMock.get(Mockito.anyString(), ConfirmChangeEmail.class)).thenReturn(Optional.of(changeEmail));
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                         .get(UrlConstants.CONFIRM_EMAIL_URL)
                         .param("token", changeEmail.getVerifiedToken()))
