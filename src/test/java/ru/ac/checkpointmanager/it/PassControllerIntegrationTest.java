@@ -260,12 +260,9 @@ class PassControllerIntegrationTest extends PostgresTestContainersConfiguration 
         car.setId(TestUtils.getCarDto().getId());
         Car savedCar = carRepository.saveAndFlush(car);
 
-        PassAuto pass = new PassAuto();
-        pass.setId(TestUtils.PASS_ID);
-        pass.setTypeTime(PassTypeTime.ONETIME);
-        pass.setStartTime(LocalDateTime.now());
-        pass.setEndTime(LocalDateTime.now().plusHours(5));
+        PassAuto pass = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
         pass.setStatus(passStatus);
+        PassAuto savedPass = passRepository.saveAndFlush(pass);
         pass.setTerritory(savedTerritory);
         pass.setUser(savedUser);
         pass.setCar(savedCar);
