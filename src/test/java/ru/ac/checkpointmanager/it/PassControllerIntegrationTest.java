@@ -263,11 +263,7 @@ class PassControllerIntegrationTest extends PostgresTestContainersConfiguration 
         PassAuto pass = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
         pass.setStatus(passStatus);
         PassAuto savedPass = passRepository.saveAndFlush(pass);
-        pass.setTerritory(savedTerritory);
-        pass.setUser(savedUser);
-        pass.setCar(savedCar);
-        PassAuto savedPass = passRepository.saveAndFlush(pass);
-        List<Pass> allPasses = passRepository.findAll();
+                List<Pass> allPasses = passRepository.findAll();
         Assertions.assertThat(allPasses).hasSize(1);//check if only one pass here
 
         mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.PASS_URL + "/" + savedPass.getId()))
