@@ -297,7 +297,7 @@ class UserServiceImplTest {
 
         Mockito.when(cacheManager.getCache("email")).thenReturn(cache);
         Mockito.when(cacheManager.getCache("user")).thenReturn(cache);
-        Mockito.when(cache.get(token, Mockito.eq(ConfirmChangeEmail.class))).thenReturn(changeEmail);
+        Mockito.when(cache.get(Mockito.eq(token), Mockito.eq(ConfirmChangeEmail.class))).thenReturn(changeEmail);
         Mockito.when(userRepository.findByEmail(changeEmail.getPreviousEmail())).thenReturn(Optional.of(user));
         Mockito.when(jwtService.generateAccessToken(user)).thenReturn("mockAccessToken");
         Mockito.when(jwtService.generateRefreshToken(user)).thenReturn("mockRefreshToken");
