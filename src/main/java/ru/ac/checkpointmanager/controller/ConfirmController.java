@@ -3,6 +3,8 @@ package ru.ac.checkpointmanager.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -10,11 +12,13 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.security.SecuritySchemes;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.ac.checkpointmanager.dto.user.AuthenticationResponse;
 import ru.ac.checkpointmanager.service.auth.AuthenticationService;
 import ru.ac.checkpointmanager.service.user.UserService;
 
@@ -61,7 +65,9 @@ public class ConfirmController {
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "OK: Почта подтверждена"
+                    description = "OK: Почта подтверждена",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = AuthenticationResponse.class))
             ),
             @ApiResponse(
                     responseCode = "404",
@@ -69,8 +75,8 @@ public class ConfirmController {
             )
     })
     @GetMapping("/email")
-    public void confirmEmail(@Parameter(description = "Токен из письма для подтверждения")
-                             @RequestParam("token") String token) {
-        userService.confirmEmail(token);
+    public AuthenticationResponse confirmEmail(@Parameter(description = "Токен из письма для подтверждения")
+                                               @RequestParam("token") String token) {
+        return userService.confirmEmail(token);
     }
 }

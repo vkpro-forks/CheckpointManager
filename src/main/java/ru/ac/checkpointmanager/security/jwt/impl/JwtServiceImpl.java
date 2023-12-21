@@ -117,6 +117,9 @@ public class JwtServiceImpl implements JwtService {
     public UUID extractId(String token) {
         log.info("Method {} [Token {}]", MethodLog.getMethodName(), token);
         String id = extractAllClaims(token).get("id", String.class);
+        if (id == null) {
+            throw new InvalidTokenException("Jwt hasn't ID claim");
+        }
         return UUID.fromString(id);
     }
 

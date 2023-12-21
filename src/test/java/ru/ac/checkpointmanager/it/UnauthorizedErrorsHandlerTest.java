@@ -54,13 +54,14 @@ class UnauthorizedErrorsHandlerTest extends GlobalExceptionHandlerBasicTestConfi
 
     private static Stream<RefreshTokenDTO> getBadRefreshTokens() {
         List<String> roles = List.of("ROLE_ADMIN");
-        RefreshTokenDTO expired = new RefreshTokenDTO(TestUtils.getJwt(-1, "name", roles, true));
-        RefreshTokenDTO nullName = new RefreshTokenDTO(TestUtils.getJwt(1000000, null, roles, true));
-        RefreshTokenDTO emptyName = new RefreshTokenDTO(TestUtils.getJwt(1000000, "", roles, true));
+        RefreshTokenDTO expired = new RefreshTokenDTO(TestUtils.getJwt(-1, "name", roles, true, true));
+        RefreshTokenDTO nullName = new RefreshTokenDTO(TestUtils.getJwt(1000000, null, roles, true, true));
+        RefreshTokenDTO emptyName = new RefreshTokenDTO(TestUtils.getJwt(1000000, "", roles, true, true));
         String goodToken = TestUtils.getRefreshTokenDTO().getRefreshToken();
         RefreshTokenDTO badJwt = new RefreshTokenDTO(goodToken + 1);
-        RefreshTokenDTO notRefresh = new RefreshTokenDTO(TestUtils.getJwt(1000000, "", roles, false));
-        return Stream.of(expired, nullName, emptyName, badJwt, notRefresh);
+        RefreshTokenDTO notRefresh = new RefreshTokenDTO(TestUtils.getJwt(1000000, "", roles, false, true));
+        RefreshTokenDTO withoutIdClaim = new RefreshTokenDTO(TestUtils.getJwt(1000000, "", roles, true, false));
+        return Stream.of(expired, nullName, emptyName, badJwt, notRefresh, withoutIdClaim);
     }
 
 

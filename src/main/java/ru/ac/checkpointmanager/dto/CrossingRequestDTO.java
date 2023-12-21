@@ -1,9 +1,10 @@
 package ru.ac.checkpointmanager.dto;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.ac.checkpointmanager.model.enums.Direction;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -11,16 +12,16 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CrossingDTO {
+public class CrossingRequestDTO {
 
-    private UUID id;
-
+    @NotNull
     private UUID passId;
 
+    @NotNull
     private UUID checkpointId;
 
+    @NotNull
+    @PastOrPresent
     private ZonedDateTime performedAt;
-
-    private Direction direction;
 
 }
