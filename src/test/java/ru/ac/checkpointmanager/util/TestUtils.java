@@ -104,6 +104,10 @@ public class TestUtils {
     public static final String USERNAME = "Username";
     public static final String NEW_PASSWORD = "new_password";
 
+    public static final String AUTH_HEADER = "Authorization";
+
+    public static final String BEARER = "Bearer ";
+
 
     public static CarBrand getCarBrand() {
         CarBrand carBrand = new CarBrand();
@@ -344,8 +348,12 @@ public class TestUtils {
     }
 
     private static Key getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode("8790D58F7205C4C250CD67DD6D9B6F8B20D2E928FFAA6D4A2BEB2AD2189B01D1");
+        byte[] keyBytes = Decoders.BASE64.decode(getKey());
         return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    public static String getKey() {
+        return "8790D58F7205C4C250CD67DD6D9B6F8B20D2E928FFAA6D4A2BEB2AD2189B01D1";
     }
 
     private TestUtils() {

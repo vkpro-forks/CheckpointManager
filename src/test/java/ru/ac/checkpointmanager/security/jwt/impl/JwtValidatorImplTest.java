@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -37,6 +38,17 @@ class JwtValidatorImplTest {
         Mockito.when(jwtService.extractAllClaims(token)).thenReturn(claims);
         boolean isValid = jwtValidator.validateAccessToken(token);
         Assertions.assertThat(isValid).isTrue();
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    void shouldNotValidateAccessTokenWithoutSubject(String subject) {
+        String token = TestUtils.getSimpleValidAccessToken();
+        DefaultClaims claims = new DefaultClaims();
+        claims.setSubject(subject);
+        Mockito.when(jwtService.extractAllClaims(token)).thenReturn(claims);
+        boolean isValid = jwtValidator.validateAccessToken(token);
+        Assertions.assertThat(isValid).isFalse();
     }
 
     @Test
@@ -82,6 +94,17 @@ class JwtValidatorImplTest {
         String token = TestUtils.getSimpleValidAccessToken();
         DefaultClaims claims = new DefaultClaims();
         claims.setSubject(TestUtils.USERNAME);
+        Mockito.when(jwtService.extractAllClaims(token)).thenReturn(claims);
+        Assertions.assertThatThrownBy(() -> jwtValidator.validateRefreshToken(token))
+                .isInstanceOf(InvalidTokenException.class);
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    void shouldNotValidateRefreshTokenWithoutSubjectClaim(String subject) {
+        String token = TestUtils.getSimpleValidAccessToken();
+        DefaultClaims claims = new DefaultClaims();
+        claims.setSubject(subject);
         Mockito.when(jwtService.extractAllClaims(token)).thenReturn(claims);
         Assertions.assertThatThrownBy(() -> jwtValidator.validateRefreshToken(token))
                 .isInstanceOf(InvalidTokenException.class);

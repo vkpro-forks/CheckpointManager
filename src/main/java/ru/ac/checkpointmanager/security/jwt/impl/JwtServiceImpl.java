@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * Сервис для работы с JSON Web Token (JWT).
@@ -50,6 +49,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class JwtServiceImpl implements JwtService {
 
+    public static final String METHOD_TOKEN = "Method {} [Token {}]";
     @Value("${application.security.jwt.secret-key}")
     private String secretKey;
 
@@ -68,15 +68,12 @@ public class JwtServiceImpl implements JwtService {
      *
      * @param token JWT токен, из которого необходимо извлечь имя пользователя.
      * @return Имя пользователя, закодированное в токене.
+     * @throws InvalidTokenException if token doesn't contain username as subject
      */
     @Override
     public String extractUsername(String token) {
-        log.info("Method {} [Token {}]", MethodLog.getMethodName(), token);
-        String username = extractClaim(token, Claims::getSubject);
-        if (username == null || username.isBlank()) {
-            throw new InvalidTokenException("Username/email in JWT is null or empty");
-        }
-        return username;
+        log.debug(METHOD_TOKEN, MethodLog.getMethodName(), token);
+        return extractClaim(token, Claims::getSubject);
     }
 
     /**
@@ -91,7 +88,7 @@ public class JwtServiceImpl implements JwtService {
      */
     @Override
     public List<String> extractRole(String token) {
-        log.info("Method {} [Token {}]", MethodLog.getMethodName(), token);
+        log.info(METHOD_TOKEN, MethodLog.getMethodName(), token);
         List<?> roles = extractAllClaims(token).get("role", List.class);
         if (roles == null) {
             return Collections.emptyList();
@@ -100,7 +97,7 @@ public class JwtServiceImpl implements JwtService {
         return roles.stream()
                 .filter(Objects::nonNull)
                 .map(Object::toString)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -115,7 +112,7 @@ public class JwtServiceImpl implements JwtService {
      */
     @Override
     public UUID extractId(String token) {
-        log.info("Method {} [Token {}]", MethodLog.getMethodName(), token);
+        log.info(METHOD_TOKEN, MethodLog.getMethodName(), token);
         String id = extractAllClaims(token).get("id", String.class);
         if (id == null) {
             throw new InvalidTokenException("Jwt hasn't ID claim");
@@ -161,7 +158,7 @@ public class JwtServiceImpl implements JwtService {
         Map<String, Object> extraClaims = new HashMap<>();
         List<String> rolesList = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
+                .toList();
         extraClaims.put("role", rolesList);
 
         if (userDetails instanceof User user) {

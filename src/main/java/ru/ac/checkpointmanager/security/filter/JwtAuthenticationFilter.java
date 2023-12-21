@@ -79,11 +79,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             if (StringUtils.isNotBlank(jwt) && jwtValidator.validateAccessToken(jwt)) {
                 String userEmail = jwtService.extractUsername(jwt);
-                if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                if (SecurityContextHolder.getContext().getAuthentication() == null) {
                     UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
                     if (jwtValidator.isUsernameValid(jwt, userDetails)) {
                         setAuthenticationContext(request, jwt, userDetails);
                     }
+                } else {
+                    log.debug("User email doesn't exists or ");
                 }
             } else {
                 log.debug("Invalid JWT token [{}]", jwt);

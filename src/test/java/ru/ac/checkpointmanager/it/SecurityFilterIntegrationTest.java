@@ -42,7 +42,7 @@ class SecurityFilterIntegrationTest extends PostgresTestContainersConfiguration 
     @SneakyThrows
     void shouldReturn403ErrorIfNotJwtInBearerFound() {
         mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL)
-                        .header("Authorization", ""))
+                        .header(TestUtils.AUTH_HEADER, ""))
                 .andExpect(MockMvcResultMatchers.status().isForbidden())
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_ERROR_CODE)
                         .value(ErrorCode.FORBIDDEN.toString()))
@@ -54,7 +54,7 @@ class SecurityFilterIntegrationTest extends PostgresTestContainersConfiguration 
     @SneakyThrows
     void shouldReturn403ErrorIfJwtIsBad() {
         mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL)
-                        .header("Authorization", "Bearer Bearer"))
+                        .header(TestUtils.AUTH_HEADER, TestUtils.BEARER + "Bearer"))
                 .andExpect(MockMvcResultMatchers.status().isForbidden())
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_ERROR_CODE)
                         .value(ErrorCode.FORBIDDEN.toString()))
@@ -67,7 +67,7 @@ class SecurityFilterIntegrationTest extends PostgresTestContainersConfiguration 
     void shouldReturnJwtExpiredErrorWithExpiredAccessToken() {
         String jwt = TestUtils.getJwt(-1, TestUtils.USERNAME, List.of("ADMIN"), false, true);
         mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL)
-                        .header("Authorization", "Bearer " + jwt))
+                        .header(TestUtils.AUTH_HEADER, TestUtils.BEARER + jwt))
                 .andExpect(MockMvcResultMatchers.status().isForbidden())
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_ERROR_CODE)
                         .value(ErrorCode.TOKEN_EXPIRED.toString()))
