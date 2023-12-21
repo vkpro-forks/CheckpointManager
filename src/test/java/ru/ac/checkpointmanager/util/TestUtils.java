@@ -12,8 +12,6 @@ import org.instancio.Instancio;
 import org.instancio.Model;
 import org.instancio.Select;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.ac.checkpointmanager.dto.CarDTO;
@@ -44,7 +42,6 @@ import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.model.passes.PassTypeTime;
-import ru.ac.checkpointmanager.security.CustomAuthenticationToken;
 
 import java.security.Key;
 import java.time.LocalDateTime;
@@ -244,11 +241,6 @@ public class TestUtils {
 
     public static ChangeEmailRequest getChangeEmailRequest() {
         return new ChangeEmailRequest(NEW_EMAIL);
-    }
-
-    public static void setSecurityContext(User user) {
-        Authentication authentication = new CustomAuthenticationToken(user, null, user.getId(), user.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
     public static AuthenticationRequest getAuthenticationRequest() {

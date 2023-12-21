@@ -159,14 +159,12 @@ public class JwtServiceImpl implements JwtService {
     public String generateAccessToken(UserDetails userDetails) {
         log.debug("Method {}, User {}", MethodLog.getMethodName(), userDetails.getUsername());
         Map<String, Object> extraClaims = new HashMap<>();
+        User user = (User) userDetails;
         List<String> rolesList = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
         extraClaims.put("role", rolesList);
-
-        if (userDetails instanceof User user) {
-            extraClaims.put("id", user.getId());
-        }
+        extraClaims.put("id", user.getId());
 
         return Jwts
                 .builder()
@@ -197,9 +195,6 @@ public class JwtServiceImpl implements JwtService {
     public String generateRefreshToken(UserDetails userDetails) {
         log.debug("Method {}, User {}", MethodLog.getMethodName(), userDetails.getUsername());
         Map<String, Object> extraClaims = new HashMap<>();
-        User user = (User) userDetails;
-
-        extraClaims.put("id", user.getId());
         extraClaims.put("refresh", true);
 
         return Jwts

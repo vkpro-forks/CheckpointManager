@@ -53,9 +53,9 @@ public class JwtValidatorImpl implements JwtValidator {
             }
             log.info("Refresh token validated");
         } catch (UnsupportedJwtException | MalformedJwtException | SignatureException |
-                 ExpiredJwtException | IllegalArgumentException exception) {
-            log.warn(ERROR_MESSAGE, exception.getMessage());
-            throw new InvalidTokenException(exception.getMessage());
+                 ExpiredJwtException | IllegalArgumentException e) {
+            log.warn(ERROR_MESSAGE, e.getMessage());
+            throw new InvalidTokenException(e.getMessage());
         }
     }
 
