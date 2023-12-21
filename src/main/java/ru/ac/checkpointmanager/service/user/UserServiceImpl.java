@@ -33,8 +33,8 @@ import ru.ac.checkpointmanager.model.enums.PhoneNumberType;
 import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
-import ru.ac.checkpointmanager.security.AuthenticationFacade;
-import ru.ac.checkpointmanager.security.AuthenticationFacadeImpl;
+import ru.ac.checkpointmanager.security.AuthFacadeImpl;
+import ru.ac.checkpointmanager.security.AuthFacade;
 import ru.ac.checkpointmanager.security.jwt.JwtService;
 import ru.ac.checkpointmanager.service.email.EmailService;
 import ru.ac.checkpointmanager.service.phone.PhoneService;
@@ -61,7 +61,7 @@ import java.util.UUID;
  * @see User
  * @see UserRepository
  * @see EmailService
- * @see AuthenticationFacadeImpl
+ * @see AuthFacadeImpl
  */
 @Service
 @RequiredArgsConstructor
@@ -79,9 +79,10 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final PhoneService phoneService;
-    private final AuthenticationFacade authFacade;
+    private final AuthFacade authFacade;
     private final RedisCacheManager cacheManager;
     private final JwtService jwtService;
+
 
     /**
      * Находит пользователя по его уникальному идентификатору (UUID).
@@ -224,7 +225,7 @@ public class UserServiceImpl implements UserService {
      *
      * @param request Объект {@link ChangePasswordRequest}, содержащий текущий и новый пароли.
      * @throws IllegalStateException если текущий пароль не соответствует или новый пароль и его подтверждение не совпадают.
-     * @see AuthenticationFacadeImpl
+     * @see AuthFacadeImpl
      */
     @Override
     @Transactional
