@@ -69,7 +69,7 @@ public class SecurityConfig {
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
                 ) //  код обрабатывает ошибки аутентификации
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests((authorize) ->
+                .authorizeHttpRequests(authorize ->
                         authorize
                                 .requestMatchers("/api/v1/authentication/**", "/api/v1/confirm/**",
                                         "/swagger-ui/**", "/v3/api-docs/**",

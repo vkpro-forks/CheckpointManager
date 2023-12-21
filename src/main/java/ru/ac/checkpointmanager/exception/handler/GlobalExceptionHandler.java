@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.mail.MailSendException;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -195,15 +194,6 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.INTERNAL_SERVER_ERROR, e);
         problemDetail.setTitle("Error during send mail");
         problemDetail.setProperty(ERROR_CODE, ErrorCode.INTERNAL_SERVER_ERROR.toString());
-        log.debug(LOG_MSG, e.getClass());
-        return problemDetail;
-    }
-
-    @ExceptionHandler(BadCredentialsException.class)
-    public ProblemDetail handleBadCredentialsException(BadCredentialsException e) {
-        ProblemDetail problemDetail = createProblemDetail(HttpStatus.UNAUTHORIZED, e);
-        problemDetail.setTitle("Bad credentials");
-        problemDetail.setProperty(ERROR_CODE, ErrorCode.UNAUTHORIZED.toString());
         log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }

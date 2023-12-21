@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -22,6 +23,7 @@ import ru.ac.checkpointmanager.config.PostgresTestContainersConfiguration;
 import ru.ac.checkpointmanager.exception.handler.ErrorCode;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
+import ru.ac.checkpointmanager.security.filter.JwtAuthenticationFilter;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 
@@ -37,6 +39,9 @@ class CarBrandControllerIntegrationTest extends PostgresTestContainersConfigurat
 
     @Autowired
     MockMvc mockMvc;
+
+    @MockBean
+    JwtAuthenticationFilter authenticationFilter;
 
     @Autowired
     CarBrandRepository carBrandRepository;

@@ -52,7 +52,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final JwtValidator jwtValidator;
     private final UserDetailsService userDetailsService;
-
     private final HandlerExceptionResolver handlerExceptionResolver;
 
     @Override
@@ -82,7 +81,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String userEmail = jwtService.extractUsername(jwt);
                 if (SecurityContextHolder.getContext().getAuthentication() == null) {
                     UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail); //will throw exception
-                    //TODO rework, auth manager can handle it
+                    //TODO rework, auth manager must handle it
                     setAuthenticationContext(request, jwt, userDetails);
                 }
             } else {
@@ -115,9 +114,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         Collection<? extends GrantedAuthority> authorities = jwtService.extractRole(jwt).stream()
                 .map(SimpleGrantedAuthority::new).toList();
 
-        UUID userId = null;
-        if (userDetails instanceof User) {
-            userId = ((User) userDetails).getId();
+        UUID userId = null;// TODO REWORK
+        if (userDetails instanceof User user) {
+            userId = user.getId();
         }
 
         CustomAuthenticationToken authToken = new CustomAuthenticationToken(

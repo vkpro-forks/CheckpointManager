@@ -33,7 +33,6 @@ class SecurityFilterIntegrationTest extends PostgresTestContainersConfiguration 
     @Autowired
     MockMvc mockMvc;
 
-
     @Test
     @SneakyThrows
     void shouldReturn403ErrorIfNotJwtInBearerFound() {
@@ -60,7 +59,7 @@ class SecurityFilterIntegrationTest extends PostgresTestContainersConfiguration 
 
     @Test
     @SneakyThrows
-    void shouldReturnJwtExpiredErrorWithExpiredAccessToken() {
+    void shouldReturnJwtExpiredErrorIfAccessTokenExpired() {
         String jwt = TestUtils.getJwt(-1, TestUtils.USERNAME, List.of("ADMIN"), false, true);
         mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL)
                         .header(TestUtils.AUTH_HEADER, TestUtils.BEARER + jwt))
