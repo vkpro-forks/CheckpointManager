@@ -14,6 +14,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
@@ -38,11 +39,12 @@ public class SecurityConfig {
     @Autowired
     public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter,
                           AuthenticationProvider authenticationProvider,
-                          @Lazy CorsFilter corsFilter, AccessDeniedHandler customAccessDeniedHandler) {
+                          @Lazy CorsFilter corsFilter, AccessDeniedHandler customAccessDeniedHandler, AuthenticationEntryPoint authenticationEntryPoint) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.authenticationProvider = authenticationProvider;
         this.corsFilter = corsFilter;
         this.customAccessDeniedHandler = customAccessDeniedHandler;
+        this.authenticationEntryPoint = authenticationEntryPoint;
     }
 
     private final JwtAuthenticationFilter jwtAuthFilter;
@@ -51,10 +53,12 @@ public class SecurityConfig {
 
     private final AccessDeniedHandler customAccessDeniedHandler;
 
+    private final AuthenticationEntryPoint authenticationEntryPoint;
+
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        log.info("filter chain started");
+        log.debug("filter chain started");
         CharacterEncodingFilter filter = new CharacterEncodingFilter();
         filter.setEncoding("UTF-8");
         filter.setForceEncoding(true);
@@ -80,7 +84,10 @@ public class SecurityConfig {
                         logout.logoutUrl("/logout")
                                 .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext())
                 )
-                .exceptionHandling(ex -> ex.accessDeniedHandler(customAccessDeniedHandler));
+                .exceptionHandling(ex -> {
+                    ex.accessDeniedHandler(customAccessDeniedHandler);
+                    ex.authenticationEntryPoint(authenticationEntryPoint);
+                });
         return http.build();
     }
 

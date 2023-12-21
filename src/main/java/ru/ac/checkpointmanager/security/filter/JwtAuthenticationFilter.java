@@ -15,6 +15,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -80,12 +81,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (StringUtils.isNotBlank(jwt) && jwtValidator.validateAccessToken(jwt)) {
                 String userEmail = jwtService.extractUsername(jwt);
                 if (SecurityContextHolder.getContext().getAuthentication() == null) {
-                    UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
-                    if (jwtValidator.isUsernameValid(jwt, userDetails)) {
-                        setAuthenticationContext(request, jwt, userDetails);
-                    }
-                } else {
-                    log.debug("User email doesn't exists or ");
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail); //will throw exception
+                    //TODO rework, auth manager can handle it
+                    setAuthenticationContext(request, jwt, userDetails);
                 }
             } else {
                 log.debug("Invalid JWT token [{}]", jwt);
@@ -94,7 +92,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
         } catch (ExpiredJwtException exception) {
-            log.warn("Jwt is expired");
+            log.debug("Jwt is expired");
+            handlerExceptionResolver.resolveException(request, response, null, exception);
+            return;
+        } catch (UsernameNotFoundException exception) {
+            log.debug("User with email specified in JWT not found");
             handlerExceptionResolver.resolveException(request, response, null, exception);
             return;
         }

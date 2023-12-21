@@ -114,23 +114,4 @@ class JwtAuthenticationFilterTest {
         Assertions.assertThat(captured).isInstanceOf(ExpiredJwtException.class);
     }
 
-    @Test
-    @SneakyThrows
-    void shouldSendExceptionToResolverIfNoEmailInJwt() {
-        String stubJwt = "stubJwt";
-        Mockito.when(jwtValidator.validateAccessToken(Mockito.any())).thenReturn(true);
-        Mockito.when(jwtService.extractUsername(stubJwt)).thenReturn(null);
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        request.addHeader(TestUtils.AUTH_HEADER, TestUtils.BEARER + stubJwt);
-        FilterChain mockFilterChain = Mockito.mock(FilterChain.class);
-        MockHttpServletResponse response = new MockHttpServletResponse();
-        jwtAuthenticationFilter.doFilterInternal(request, response, mockFilterChain);
-        Mockito.verifyNoInteractions(mockFilterChain);
-        Mockito.verify(resolver).resolveException(Mockito.any(), Mockito.any(), Mockito.any(),
-                exceptionCaptor.capture());
-        RuntimeException captured = exceptionCaptor.getValue();
-        Assertions.assertThat(captured).isInstanceOf(InvalidTokenException.class);
-    }
-
-
 }

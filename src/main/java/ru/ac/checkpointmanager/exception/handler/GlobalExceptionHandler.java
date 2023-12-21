@@ -9,7 +9,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.mail.MailSendException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -134,6 +134,16 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ProblemDetail handleAuthenticationException(AuthenticationException e) {
+        ProblemDetail problemDetail = createProblemDetail(HttpStatus.UNAUTHORIZED, e);
+        problemDetail.setTitle("Authentication error");
+        problemDetail.setProperty(ERROR_CODE, ErrorCode.UNAUTHORIZED.toString());
+        log.debug(LOG_MSG, e.getClass());
+        return problemDetail;
+    }
+
     @ExceptionHandler(ExpiredJwtException.class)
     public ProblemDetail handleExpiredJwtException(ExpiredJwtException e) {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.FORBIDDEN, e);
@@ -166,15 +176,6 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.CONFLICT, e);
         problemDetail.setTitle("Phone number already exists");
         problemDetail.setProperty(ERROR_CODE, ErrorCode.CONFLICT.toString());
-        log.debug(LOG_MSG, e.getClass());
-        return problemDetail;
-    }
-
-    @ExceptionHandler(UsernameNotFoundException.class)
-    public ProblemDetail handleUsernameNotFoundException(UsernameNotFoundException e) {
-        ProblemDetail problemDetail = createProblemDetail(HttpStatus.NOT_FOUND, e);
-        problemDetail.setTitle("Username not found");
-        problemDetail.setProperty(ERROR_CODE, ErrorCode.NOT_FOUND.toString());
         log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }

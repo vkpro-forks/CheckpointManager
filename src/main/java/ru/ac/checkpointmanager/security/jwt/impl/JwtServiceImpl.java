@@ -115,7 +115,7 @@ public class JwtServiceImpl implements JwtService {
         log.info(METHOD_TOKEN, MethodLog.getMethodName(), token);
         String id = extractAllClaims(token).get("id", String.class);
         if (id == null) {
-            throw new InvalidTokenException("Jwt hasn't ID claim");
+            throw new InvalidTokenException("Jwt hasn't ID claim");//TODO move to validator too
         }
         return UUID.fromString(id);
     }

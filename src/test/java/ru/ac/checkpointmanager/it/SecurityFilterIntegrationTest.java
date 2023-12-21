@@ -8,7 +8,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -30,9 +29,6 @@ class SecurityFilterIntegrationTest extends PostgresTestContainersConfiguration 
 
     @MockBean
     UserService userService;
-
-    @MockBean
-    UserDetailsService userDetailsService;
 
     @Autowired
     MockMvc mockMvc;
@@ -73,6 +69,19 @@ class SecurityFilterIntegrationTest extends PostgresTestContainersConfiguration 
                         .value(ErrorCode.TOKEN_EXPIRED.toString()))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWithIgnoringCase("JWT expired")));
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldReturn401IfUserFromJwtNotExists() {
+        String jwt = TestUtils.getJwt(600000, TestUtils.USERNAME, List.of("ADMIN"), false, true);
+        mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL)
+                        .header(TestUtils.AUTH_HEADER, TestUtils.BEARER + jwt))
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_ERROR_CODE)
+                        .value(ErrorCode.UNAUTHORIZED.toString()))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(Matchers.startsWithIgnoringCase("User")));
     }
 
 }
