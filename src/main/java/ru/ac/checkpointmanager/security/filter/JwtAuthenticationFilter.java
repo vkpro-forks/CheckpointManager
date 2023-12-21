@@ -17,17 +17,16 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.security.CustomAuthenticationToken;
 import ru.ac.checkpointmanager.security.jwt.JwtService;
 import ru.ac.checkpointmanager.security.jwt.JwtValidator;
-import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * Фильтр для аутентификации JWT.
@@ -100,7 +99,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private void setAuthenticationContext(HttpServletRequest request, String jwt, UserDetails userDetails) {
         Collection<? extends GrantedAuthority> authorities = jwtService.extractRole(jwt).stream()
-                .map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+                .map(SimpleGrantedAuthority::new).toList();
 
         UUID userId = null;
         if (userDetails instanceof User) {

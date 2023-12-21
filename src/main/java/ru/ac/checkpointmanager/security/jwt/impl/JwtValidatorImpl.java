@@ -15,8 +15,6 @@ import ru.ac.checkpointmanager.security.jwt.JwtService;
 import ru.ac.checkpointmanager.security.jwt.JwtValidator;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
-import java.util.Date;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -27,22 +25,25 @@ public class JwtValidatorImpl implements JwtValidator {
 
     public static final String REFRESH = "refresh";
 
+    /**
+     * Метод проверяет токен доступа, если при парсинге всех клеймов не вылетает исключений, и токен не содержит поля
+     * refresh
+     *
+     * @param token JWT access token
+     * @return boolean true: если токен валидный, false если возникли исключения, и токен не валидный
+     * @throws ExpiredJwtException если истекло время действия (бросается из {@link JwtService})
+     */
     @Override
     public boolean validateAccessToken(String token) {
         try {
             Claims claims = jwtService.extractAllClaims(token);
-            if (claims.getExpiration().before(new Date())) {
-                return false;
-            }
-            log.info("Access token validated");
-            return ObjectUtils.isEmpty(claims.get(REFRESH));
-        } catch (UnsupportedJwtException | MalformedJwtException | SignatureException |
-                 ExpiredJwtException | IllegalArgumentException e) {
+            log.debug("Access token validated");
+            return ObjectUtils.isEmpty(claims.get(REFRESH));//check if it contains label for refresh token
+        } catch (UnsupportedJwtException | MalformedJwtException | SignatureException | IllegalArgumentException e) {
             log.warn(ERROR_MESSAGE, e.getMessage());
             return false;
         }
     }
-
 
     @Override
     public void validateRefreshToken(String token) {

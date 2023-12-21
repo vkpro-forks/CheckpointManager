@@ -101,8 +101,8 @@ public class TestUtils {
 
     public static final String EMAIL = "123@123.com";
     public static final String NEW_EMAIL = "new.com";
-    private static final String USERNAME = "Username";
-    private static final String NEW_PASSWORD = "new_password";
+    public static final String USERNAME = "Username";
+    public static final String NEW_PASSWORD = "new_password";
 
 
     public static CarBrand getCarBrand() {
@@ -257,6 +257,10 @@ public class TestUtils {
 
     public static RefreshTokenDTO getRefreshTokenDTO() {
         return new RefreshTokenDTO(getJwt(86400000, USERNAME, List.of("ROLE_ADMIN"), true, true));
+    }
+
+    public static String getSimpleValidAccessToken() {
+        return getJwt(60000, USERNAME, List.of("ADMIN"), false, true);
     }
 
     public static String getJwt(Integer expired, String username, List<String> roles, boolean isRefresh,
