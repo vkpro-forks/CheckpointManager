@@ -15,6 +15,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.session.SessionManagementFilter;
@@ -37,15 +38,18 @@ public class SecurityConfig {
     @Autowired
     public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter,
                           AuthenticationProvider authenticationProvider,
-                          @Lazy CorsFilter corsFilter) {
+                          @Lazy CorsFilter corsFilter, AccessDeniedHandler customAccessDeniedHandler) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.authenticationProvider = authenticationProvider;
         this.corsFilter = corsFilter;
+        this.customAccessDeniedHandler = customAccessDeniedHandler;
     }
 
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
     private final CorsFilter corsFilter;
+
+    private final AccessDeniedHandler customAccessDeniedHandler;
 
 
     @Bean
@@ -75,7 +79,8 @@ public class SecurityConfig {
                 .logout(logout ->
                         logout.logoutUrl("/logout")
                                 .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext())
-                );
+                )
+                .exceptionHandling(ex -> ex.accessDeniedHandler(customAccessDeniedHandler));
         return http.build();
     }
 

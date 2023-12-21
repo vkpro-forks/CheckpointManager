@@ -27,8 +27,8 @@ spring:
     contexts: default
     default-schema: public
     drop-first: false
-   # enabled: true
-    #label-filter: "!demo-data"
+    enabled: true
+    label-filter: "!demo-data"
 
   mail:
     host: smtp.yandex.ru

@@ -1,5 +1,6 @@
 package ru.ac.checkpointmanager.exception.handler;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
@@ -133,6 +134,15 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ProblemDetail handleExpiredJwtException(ExpiredJwtException e) {
+        ProblemDetail problemDetail = createProblemDetail(HttpStatus.FORBIDDEN, e);
+        problemDetail.setTitle("Jwt expired, send refresh token");
+        problemDetail.setProperty(ERROR_CODE, ErrorCode.TOKEN_EXPIRED.toString());
+        log.debug(LOG_MSG, e.getClass());
+        return problemDetail;
+    }
+
     @ExceptionHandler(DateOfBirthFormatException.class)
     public ProblemDetail handleDateOfBirthFormatException(DateOfBirthFormatException e) {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
@@ -199,9 +209,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(InvalidTokenException.class)
     public ProblemDetail handleInvalidTokenException(InvalidTokenException e) {
-        ProblemDetail problemDetail = createProblemDetail(HttpStatus.UNAUTHORIZED, e);
+        ProblemDetail problemDetail = createProblemDetail(HttpStatus.FORBIDDEN, e);
         problemDetail.setTitle("Jwt is invalid");
-        problemDetail.setProperty(ERROR_CODE, ErrorCode.UNAUTHORIZED.toString());
+        problemDetail.setProperty(ERROR_CODE, ErrorCode.FORBIDDEN.toString());
         log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }

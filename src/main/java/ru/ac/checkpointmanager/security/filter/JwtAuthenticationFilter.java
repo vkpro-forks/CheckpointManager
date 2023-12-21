@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.NonNull;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,6 +18,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.servlet.HandlerExceptionResolver;
+import ru.ac.checkpointmanager.exception.InvalidTokenException;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.security.CustomAuthenticationToken;
 import ru.ac.checkpointmanager.security.jwt.JwtService;
@@ -49,6 +52,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtValidator jwtValidator;
     private final UserDetailsService userDetailsService;
 
+    private final HandlerExceptionResolver handlerExceptionResolver;
+
     @Override
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,
@@ -64,10 +69,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         Optional<String> jwtOpt = getJwtFromRequest(request);
         if (jwtOpt.isEmpty()) {
-            filterChain.doFilter(request, response);
+            log.debug("Authorization header doesn't contain bearer token");
+            handlerExceptionResolver
+                    .resolveException(request, response, null,
+                            new AccessDeniedException("Jwt is not present in header, access forbidden for this path"));
             return;
         }
-
         String jwt = jwtOpt.get();
         try {
             if (StringUtils.isNotBlank(jwt) && jwtValidator.validateAccessToken(jwt)) {
@@ -79,13 +86,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     }
                 }
             } else {
-                log.warn("Invalid JWT token [{}]", jwt);
+                log.debug("Invalid JWT token [{}]", jwt);
+                handlerExceptionResolver
+                        .resolveException(request, response, null, new InvalidTokenException("Jwt is invalid"));
+                return;
             }
         } catch (ExpiredJwtException exception) {
             log.warn("Jwt is expired");
+            handlerExceptionResolver.resolveException(request, response, null, exception);
             return;
         }
-
         filterChain.doFilter(request, response);
     }
 
