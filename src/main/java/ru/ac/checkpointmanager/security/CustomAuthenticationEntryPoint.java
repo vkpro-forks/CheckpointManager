@@ -23,4 +23,5 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         log.debug("AuthenticationException handled by CustomAuthenticationEntryPoint");
         handlerExceptionResolver.resolveException(request, response, null, authException);
     }
+
 }

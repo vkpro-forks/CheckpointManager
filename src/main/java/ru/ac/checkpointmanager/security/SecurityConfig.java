@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,7 +16,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.session.SessionManagementFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -65,9 +63,10 @@ public class SecurityConfig {
 
         http
                 .addFilterBefore(corsFilter, SessionManagementFilter.class) // Добавляем CorsFilter перед SessionManagementFilter
-                .exceptionHandling(exceptionHandling -> exceptionHandling
-                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
-                ) //  код обрабатывает ошибки аутентификации
+                .exceptionHandling(ex -> {
+                    ex.accessDeniedHandler(customAccessDeniedHandler);
+                    ex.authenticationEntryPoint(authenticationEntryPoint);
+                }) //пока эти друзья не отрабатывают т.к. исключения бросаются не из фильтра, но чуть позже заставлю их работать
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize ->
                         authorize
@@ -83,11 +82,8 @@ public class SecurityConfig {
                 .logout(logout ->
                         logout.logoutUrl("/logout")
                                 .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext())
-                )
-                .exceptionHandling(ex -> {
-                    ex.accessDeniedHandler(customAccessDeniedHandler);
-                    ex.authenticationEntryPoint(authenticationEntryPoint);
-                });
+                );
+
         return http.build();
     }
 
