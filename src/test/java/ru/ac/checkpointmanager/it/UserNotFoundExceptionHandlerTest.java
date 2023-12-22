@@ -47,7 +47,7 @@ class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestCo
     @Test
     @SneakyThrows
     void shouldHandleUserNotFoundExceptionForAddPass() {
-        String passDtoCreate = TestUtils.jsonStringFromObject(TestUtils.getPassCreateDTO());
+        String passDtoCreate = TestUtils.jsonStringFromObject(TestUtils.getPassCreateDTOWithCar());
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(passDtoCreate))
@@ -59,7 +59,7 @@ class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestCo
     @Test
     @SneakyThrows
     void shouldHandleUserNotFoundExceptionForGetPassesByUser() {
-        String passDtoCreate = TestUtils.jsonStringFromObject(TestUtils.getPassCreateDTO());
+        String passDtoCreate = TestUtils.jsonStringFromObject(TestUtils.getPassCreateDTOWithCar());
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(passDtoCreate))

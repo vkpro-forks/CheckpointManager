@@ -52,7 +52,7 @@ class PassServiceImplTest {
 
     @Test
     void shouldAddPass() {
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTO();
+        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
         UUID userId = passCreateDTO.getUserId();
         UUID territoryId = passCreateDTO.getTerritoryId();
         User mockUser = Mockito.mock(User.class);

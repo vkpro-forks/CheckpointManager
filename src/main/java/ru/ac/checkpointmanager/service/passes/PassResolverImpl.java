@@ -65,8 +65,7 @@ public class PassResolverImpl implements PassResolver {
         Pass pass;
         if (passCreateDTO.getCar() != null) {
             CarBrandDTO brand = passCreateDTO.getCar().getBrand();
-            CarBrand carBrand = carBrandRepository.findByBrand(brand.getBrand())
-                    .orElse(new CarBrand(brand.getBrand()));
+            CarBrand carBrand = carBrandRepository.findByBrand(brand.getBrand()).orElse(new CarBrand(brand.getBrand()));
             PassAuto passAuto = passMapper.toPassAuto(passCreateDTO);
             Car car = passAuto.getCar();
             car.setBrand(carBrand);

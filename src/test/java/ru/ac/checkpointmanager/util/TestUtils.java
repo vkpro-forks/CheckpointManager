@@ -175,9 +175,9 @@ public class TestUtils {
         );
     }
 
-    public static PassCreateDTO getPassCreateDTO() {
+    public static PassCreateDTO getPassCreateDTOWithCar() {
         return new PassCreateDTO(
-                PASS_ID,
+                USER_ID,
                 "comment",
                 PassTypeTime.ONETIME,
                 TERR_ID,
@@ -185,6 +185,19 @@ public class TestUtils {
                 LocalDateTime.now().plusHours(7),
                 null,
                 getCarDto()
+        );
+    }
+
+    public static PassCreateDTO getPassCreateDTOWithVisitor() {
+        return new PassCreateDTO(
+                USER_ID,
+                "comment",
+                PassTypeTime.ONETIME,
+                TERR_ID,
+                LocalDateTime.now().plusHours(1),
+                LocalDateTime.now().plusHours(7),
+                getVisitorDTO(),
+                null
         );
     }
 
