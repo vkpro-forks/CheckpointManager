@@ -95,7 +95,8 @@ public class UserController {
                     description = "NOT_FOUND: территории у переданного пользователя не найдены"
             )
     })
-    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
+    @PreAuthorize("@authFacade.isUserIdMatch(#userId) or " +
+                  "hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/{userId}/territories")
     public List<TerritoryDTO> getTerritoriesByUser(
             @Parameter(description = "Уникальный идентификатор пользователя", required = true)
@@ -166,7 +167,8 @@ public class UserController {
                     description = "NOT_FOUND: пользователь не найден"
             )
     })
-    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
+    @PreAuthorize("@authFacade.isUserIdMatch(#id) or " +
+                  "hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/numbers/{id}")
     public Collection<String> findUsersPhoneNumbers(
             @Parameter(description = "Уникальный идентификатор пользователя", required = true)
@@ -201,7 +203,7 @@ public class UserController {
                     description = "NOT_FOUND: пользователь не найден"
             )
     })
-    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER')")
+    @PreAuthorize("@authFacade.isUserIdMatch(#userPutDTO.id) or hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @PutMapping
     public UserResponseDTO updateUser(@Valid @RequestBody UserPutDTO userPutDTO) {
         return userService.updateUser(userPutDTO);
@@ -388,7 +390,7 @@ public class UserController {
                     description = "NOT_FOUND: пользователь не найден"
             )
     })
-    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER')")
+    @PreAuthorize("@authFacade.isUserIdMatch(#id) or hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@Parameter(description = "Уникальный идентификатор пользователя", required = true)

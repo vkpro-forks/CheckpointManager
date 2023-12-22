@@ -15,11 +15,12 @@ import java.util.UUID;
  * пользователе, такие как получение самого пользователя или его уникального идентификатора (UUID).
  * Методы класса могут выбрасывать {@link AccessDeniedException}, если пользователь не аутентифицирован.
  * <p>
+ *
  * @see CustomAuthenticationToken
  * @see User
  */
-@Component
-public class AuthenticationFacadeImpl implements AuthenticationFacade {
+@Component("authFacade")
+public class AuthFacadeImpl implements AuthFacade {
 
     @Override
     public Authentication getAuthentication() {
@@ -57,5 +58,15 @@ public class AuthenticationFacadeImpl implements AuthenticationFacade {
             throw new AccessDeniedException("User is not authenticated");
         }
         return ((CustomAuthenticationToken) authentication).getUserId();
+    }
+
+    @Override
+    public boolean isUserIdMatch(UUID userId) {
+        Authentication authentication = getAuthentication();
+        if (!(authentication instanceof CustomAuthenticationToken customToken)) {
+            throw new AccessDeniedException("User is not authenticated");
+        }
+        UUID currentUserUUID = customToken.getUserId();
+        return currentUserUUID.equals(userId);
     }
 }
