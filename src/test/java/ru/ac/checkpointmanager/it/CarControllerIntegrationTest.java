@@ -21,6 +21,7 @@ import ru.ac.checkpointmanager.config.CacheTestConfiguration;
 import ru.ac.checkpointmanager.config.CorsTestConfiguration;
 import ru.ac.checkpointmanager.config.OpenAllEndpointsTestConfiguration;
 import ru.ac.checkpointmanager.config.PostgresTestContainersConfiguration;
+import ru.ac.checkpointmanager.dto.CarBrandDTO;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
@@ -79,7 +80,7 @@ class CarControllerIntegrationTest extends PostgresTestContainersConfiguration {
         CarBrand savedCarBrand = saveCarBrandInRepo();
         CarDTO carDTO = new CarDTO();
         carDTO.setLicensePlate(TestUtils.LICENSE_PLATE);
-        carDTO.setBrand(savedCarBrand);
+        carDTO.setBrand(TestUtils.getCarBrandDTO());
         String carDtoString = TestUtils.jsonStringFromObject(carDTO);
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CAR_URL)
@@ -146,7 +147,7 @@ class CarControllerIntegrationTest extends PostgresTestContainersConfiguration {
         Car savedCar = carRepository.saveAndFlush(car);
         CarDTO carDto = TestUtils.getCarDto();
         carDto.setLicensePlate(newLicensePlate);
-        carDto.setBrand(carBrand);
+        carDto.setBrand(TestUtils.getCarBrandDTO());
         String carDtoString = TestUtils.jsonStringFromObject(carDto);
 
         mockMvc.perform(MockMvcRequestBuilders.put(UrlConstants.CAR_URL + "/" + savedCar.getId())
@@ -170,7 +171,7 @@ class CarControllerIntegrationTest extends PostgresTestContainersConfiguration {
         Car savedCar = carRepository.saveAndFlush(car);
         CarDTO carDto = TestUtils.getCarDto();
         carDto.setLicensePlate(newLicensePlate);
-        carDto.setBrand(savedAnotherCarBrand);
+        carDto.setBrand(new CarBrandDTO(evilCarBrand));
         String carDtoString = TestUtils.jsonStringFromObject(carDto);
 
         mockMvc.perform(MockMvcRequestBuilders.put(UrlConstants.CAR_URL + "/" + savedCar.getId())

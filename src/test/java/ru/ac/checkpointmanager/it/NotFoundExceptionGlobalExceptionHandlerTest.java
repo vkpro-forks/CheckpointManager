@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import ru.ac.checkpointmanager.dto.CarBrandDTO;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.CheckpointDTO;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
@@ -123,7 +124,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
         Car savedCar = carRepository.saveAndFlush(car);
         CarDTO carDto = TestUtils.getCarDto();
         carDto.setLicensePlate(newLicensePlate);
-        carDto.setBrand(anotherCarBrand);
+        carDto.setBrand(new CarBrandDTO(evilCarBrand));
         String carDtoString = TestUtils.jsonStringFromObject(carDto);
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders

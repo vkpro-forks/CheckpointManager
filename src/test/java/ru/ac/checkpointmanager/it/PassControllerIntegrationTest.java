@@ -90,13 +90,13 @@ class PassControllerIntegrationTest extends PostgresTestContainersConfiguration 
         territory.setUsers(List.of(savedUser));
         Territory savedTerritory = territoryRepository.saveAndFlush(territory);
         CarBrand carBrand = TestUtils.getCarBrand();
-        CarBrand savedCarBrand = carBrandRepository.saveAndFlush(carBrand);
+        carBrandRepository.saveAndFlush(carBrand);
 
         PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTO();
         passCreateDTO.setUserId(savedUser.getId());
         passCreateDTO.setTerritoryId(savedTerritory.getId());
         passCreateDTO.getCar().setId(null);
-        passCreateDTO.getCar().setBrand(savedCarBrand);//set saved car brand, if no car brand in DB, 404 will be thrown
+        passCreateDTO.getCar().setBrand(TestUtils.getCarBrandDTO());//set saved car brand, if no car brand in DB, 404 will be thrown
         String passCreateDtoString = TestUtils.jsonStringFromObject(passCreateDTO);
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
@@ -132,7 +132,7 @@ class PassControllerIntegrationTest extends PostgresTestContainersConfiguration 
         PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTO();
         passCreateDTO.setUserId(savedUser.getId());
         passCreateDTO.setTerritoryId(savedTerritory.getId());
-        passCreateDTO.getCar().setBrand(savedCarBrand);//set saved car brand, if no car brand in DB, 404 will be thrown
+        passCreateDTO.getCar().setBrand(TestUtils.getCarBrandDTO());//set saved car brand, if no car brand in DB, 404 will be thrown
         passCreateDTO.getCar().setId(savedCar.getId());
         passCreateDTO.getCar().setLicensePlate(savedCar.getLicensePlate());
         String passCreateDtoString = TestUtils.jsonStringFromObject(passCreateDTO);
@@ -171,7 +171,7 @@ class PassControllerIntegrationTest extends PostgresTestContainersConfiguration 
         PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTO();
         passCreateDTO.setUserId(savedUser.getId());
         passCreateDTO.setTerritoryId(savedTerritory.getId());
-        passCreateDTO.getCar().setBrand(savedCarBrand);//set saved car brand, if no car brand in DB, 404 will be thrown
+        passCreateDTO.getCar().setBrand(TestUtils.getCarBrandDTO());//set saved car brand, if no car brand in DB, 404 will be thrown
         passCreateDTO.getCar().setId(null);//don't pass ID of car, pass only license plate
         passCreateDTO.getCar().setLicensePlate(savedCar.getLicensePlate());
         String passCreateDtoString = TestUtils.jsonStringFromObject(passCreateDTO);
@@ -216,7 +216,7 @@ class PassControllerIntegrationTest extends PostgresTestContainersConfiguration 
         PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTO();
         passCreateDTO.setUserId(savedUser.getId());
         passCreateDTO.setTerritoryId(savedTerritory.getId());
-        passCreateDTO.getCar().setBrand(savedCarBrand);//set saved car brand, if no car brand in DB, 404 will be thrown
+        passCreateDTO.getCar().setBrand(TestUtils.getCarBrandDTO());//set saved car brand, if no car brand in DB, 404 will be thrown
         passCreateDTO.getCar().setId(TestUtils.CAR_ID);
         passCreateDTO.getCar().setLicensePlate(TestUtils.LICENSE_PLATE);
         String passCreateDtoString = TestUtils.jsonStringFromObject(passCreateDTO);

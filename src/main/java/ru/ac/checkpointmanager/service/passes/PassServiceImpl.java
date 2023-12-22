@@ -25,6 +25,7 @@ import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.projection.PassInOutViewProjection;
 import ru.ac.checkpointmanager.repository.CrossingRepository;
 import ru.ac.checkpointmanager.repository.PassRepository;
+import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
 import ru.ac.checkpointmanager.service.territories.TerritoryService;
 import ru.ac.checkpointmanager.service.user.UserService;
 import ru.ac.checkpointmanager.utils.MethodLog;
@@ -61,6 +62,7 @@ public class PassServiceImpl implements PassService {
     private final CrossingRepository crossingRepository;
     private final UserService userService;
     private final TerritoryService territoryService;
+    private final CarBrandRepository carBrandRepository;
     private final PassMapper mapper;
 
     private int hourForLogInScheduledCheck;

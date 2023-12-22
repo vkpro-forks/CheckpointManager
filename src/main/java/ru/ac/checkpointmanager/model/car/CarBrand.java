@@ -1,10 +1,14 @@
 package ru.ac.checkpointmanager.model.car;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,9 +30,6 @@ public class CarBrand {
 
 
     @Column(name = "brand")
-    @NotNull
-    @Pattern(regexp = "^[a-zA-Zа-яА-Я0-9\\s-]+$", message = "Brand name should contain only letters, spaces, numbers, and hyphens.")
-    @Size(min = 2, max = 25, message = "Brand name must be less than 25 characters!")
     private String brand;
 
     @JsonIgnore

@@ -16,6 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import ru.ac.checkpointmanager.dto.CarBrandDTO;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.CheckpointDTO;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
@@ -112,6 +113,10 @@ public class TestUtils {
         return carBrand;
     }
 
+    public static CarBrandDTO getCarBrandDTO() {
+        return new CarBrandDTO("Buhanka");
+    }
+
     public static CrossingDTO getCrossingDTO() {
         return new CrossingDTO(
                 CROSSING_ID,
@@ -153,7 +158,7 @@ public class TestUtils {
         return new CarDTO(
                 CAR_ID,
                 LICENSE_PLATE,
-                getCarBrand(),
+                getCarBrandDTO(),
                 PHONE_NUM
         );
     }
