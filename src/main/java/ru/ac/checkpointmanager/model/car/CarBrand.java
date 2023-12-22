@@ -37,4 +37,7 @@ public class CarBrand {
     @OneToMany(mappedBy = "brand", fetch = FetchType.LAZY)
     private List<Car> cars = new ArrayList<>();
 
+    public CarBrand(String brand) {
+        this.brand = brand;
+    }
 }

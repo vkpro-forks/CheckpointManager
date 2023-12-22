@@ -25,7 +25,6 @@ import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.projection.PassInOutViewProjection;
 import ru.ac.checkpointmanager.repository.CrossingRepository;
 import ru.ac.checkpointmanager.repository.PassRepository;
-import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
 import ru.ac.checkpointmanager.service.territories.TerritoryService;
 import ru.ac.checkpointmanager.service.user.UserService;
 import ru.ac.checkpointmanager.utils.MethodLog;
@@ -62,8 +61,9 @@ public class PassServiceImpl implements PassService {
     private final CrossingRepository crossingRepository;
     private final UserService userService;
     private final TerritoryService territoryService;
-    private final CarBrandRepository carBrandRepository;
     private final PassMapper mapper;
+    private final PassResolver passResolver;
+    private final PassChecker passChecker;
 
     private int hourForLogInScheduledCheck;
 
@@ -73,13 +73,10 @@ public class PassServiceImpl implements PassService {
         log.info(METHOD_INVOKE, MethodLog.getMethodName(), passCreateDTO);
         UUID userId = passCreateDTO.getUserId();
         UUID territoryId = passCreateDTO.getTerritoryId();
-        User user = userService.findUserById(userId);
-        Territory territory = territoryService.findTerritoryById(territoryId);
+        passChecker.checkUserTerritoryRelation(userId, territoryId);
 
-        checkUserTerritoryRelation(user, territory);
-
-        Pass pass = mapper.toPass(passCreateDTO);
-        checkOverlapTime(pass);
+        Pass pass = passResolver.createPass(passCreateDTO);
+        checkOverlapTime(pass);// pass checker
 
         trimThemAll(pass);
         if (pass.getStartTime().isBefore(LocalDateTime.now())) {
@@ -176,7 +173,6 @@ public class PassServiceImpl implements PassService {
     @Override
     public PassResponseDTO updatePass(PassUpdateDTO passUpdateDTO) {
         log.debug(METHOD_INVOKE, MethodLog.getMethodName(), passUpdateDTO);
-
         UUID passId = passUpdateDTO.getId();
         Pass existPass = findPassById(passId);
         PassStatus passStatus = existPass.getStatus();
@@ -184,10 +180,9 @@ public class PassServiceImpl implements PassService {
             log.warn(PASS_NOT_UPDATE.formatted(passId, passStatus));
             throw new ModifyPassException(PASS_NOT_UPDATE.formatted(passId, passStatus));
         }
-
         User user = userService.findByPassId(passId);
         Territory territory = territoryService.findByPassId(passId);
-        checkUserTerritoryRelation(user, territory);
+        passChecker.checkUserTerritoryRelation(user.getId(), territory.getId());
         Pass newStatePass = mapper.toPass(passUpdateDTO, user, territory);
 
         checkOverlapTime(newStatePass);
