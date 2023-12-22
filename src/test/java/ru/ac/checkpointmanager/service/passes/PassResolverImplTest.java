@@ -66,6 +66,9 @@ class PassResolverImplTest {
         Car car = casted.getCar();
         Assertions.assertThat(car.getId()).isEqualTo(TestUtils.CAR_ID);
         Assertions.assertThat(car.getBrand().getBrand()).isEqualTo(TestUtils.getCarBrand().getBrand());
+        Mockito.verify(userRepository).findById(TestUtils.USER_ID);
+        Mockito.verify(territoryRepository).findById(TestUtils.TERR_ID);
+        Mockito.verify(carBrandRepository).findByBrand(car.getBrand().getBrand());
     }
 
     @Test
@@ -88,6 +91,9 @@ class PassResolverImplTest {
         Car car = casted.getCar();
         Assertions.assertThat(car.getId()).isEqualTo(TestUtils.CAR_ID);
         Assertions.assertThat(car.getBrand().getBrand()).isEqualTo(notExistedCarBrand);
+        Mockito.verify(userRepository).findById(TestUtils.USER_ID);
+        Mockito.verify(territoryRepository).findById(TestUtils.TERR_ID);
+        Mockito.verify(carBrandRepository).findByBrand(car.getBrand().getBrand());
     }
 
     @Test
@@ -106,6 +112,9 @@ class PassResolverImplTest {
         PassWalk casted = (PassWalk) pass;
 
         Assertions.assertThat(casted.getVisitor().getName()).isEqualTo(TestUtils.getVisitorDTO().getName());
+        Mockito.verify(userRepository).findById(TestUtils.USER_ID);
+        Mockito.verify(territoryRepository).findById(TestUtils.TERR_ID);
+        Mockito.verifyNoInteractions(carBrandRepository);
     }
 
     @Test

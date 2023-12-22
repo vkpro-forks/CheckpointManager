@@ -73,9 +73,9 @@ public class PassServiceImpl implements PassService {
         log.info(METHOD_INVOKE, MethodLog.getMethodName(), passCreateDTO);
         UUID userId = passCreateDTO.getUserId();
         UUID territoryId = passCreateDTO.getTerritoryId();
-        passChecker.checkUserTerritoryRelation(userId, territoryId);
 
         Pass pass = passResolver.createPass(passCreateDTO);
+        passChecker.checkUserTerritoryRelation(userId, territoryId);
         checkOverlapTime(pass);// pass checker
 
         trimThemAll(pass);

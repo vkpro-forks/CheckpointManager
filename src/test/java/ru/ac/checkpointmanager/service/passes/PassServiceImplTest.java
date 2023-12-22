@@ -11,7 +11,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.mapper.PassMapper;
-import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
@@ -41,6 +40,12 @@ class PassServiceImplTest {
     TerritoryService territoryService;
 
     @Mock
+    PassResolver passResolver;
+
+    @Mock
+    PassChecker passChecker;
+
+    @Mock
     PassMapper passMapper;
 
     @InjectMocks
@@ -54,33 +59,21 @@ class PassServiceImplTest {
     void shouldAddPass() {
         PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
         UUID userId = passCreateDTO.getUserId();
-        UUID territoryId = passCreateDTO.getTerritoryId();
-        User mockUser = Mockito.mock(User.class);
-        Mockito.when(mockUser.getId()).thenReturn(userId);
-        Mockito.when(userService.findUserById(userId)).thenReturn(mockUser);
-        Territory mockTerritory = Mockito.mock(Territory.class);
-        Mockito.when(mockTerritory.getId()).thenReturn(territoryId);
-        Mockito.when(territoryService.findTerritoryById(territoryId)).thenReturn(mockTerritory);
-        Mockito.when(passRepository.checkUserTerritoryRelation(userId, territoryId)).thenReturn(true);
+        User user = TestUtils.getUser();
+        user.setId(TestUtils.USER_ID);
         Mockito.when(passRepository.findAllPassesByUserId(userId)).thenReturn(Collections.emptyList());
         Pass pass = new PassAuto();
-        pass.setTerritory(mockTerritory);
-        pass.setUser(mockUser);
+        pass.setTerritory(TestUtils.getTerritory());
+        pass.setUser(user);
         pass.setStartTime(passCreateDTO.getStartTime());
         pass.setEndTime(passCreateDTO.getEndTime());
         pass.setComment(passCreateDTO.getComment());
-        Mockito.when(passMapper.toPass(passCreateDTO)).thenReturn(pass);//все таки у маппера есть логика,
-        //в зависимости от визитора или кара он создает либо пеший либо авто пропуск
-        // поэтому пока он не оттестирован, лучше замокать
+        Mockito.when(passResolver.createPass(passCreateDTO)).thenReturn(pass);
 
         passService.addPass(passCreateDTO);
 
-        Mockito.verify(userService).findUserById(userId);
-        Mockito.verify(territoryService).findTerritoryById(territoryId);
-        Mockito.verify(passRepository).checkUserTerritoryRelation(userId, territoryId);
         Mockito.verify(passRepository).findAllPassesByUserId(userId);
         Mockito.verify(passRepository).save(passArgumentCaptor.capture());
-
         Pass captured = passArgumentCaptor.getValue();
         //просто проверяем что не трогали поля
         Assertions.assertThat(captured.getStartTime()).isEqualTo(pass.getStartTime());
