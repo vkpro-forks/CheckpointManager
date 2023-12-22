@@ -59,7 +59,9 @@ class JwtAuthenticationFilterTest {
         request.setServletPath("/api/v1/authentication");
         FilterChain mockFilterChain = Mockito.mock(FilterChain.class);
         MockHttpServletResponse response = new MockHttpServletResponse();
+
         jwtAuthenticationFilter.doFilterInternal(request, response, mockFilterChain);
+
         Mockito.verify(mockFilterChain).doFilter(request, response);
     }
 

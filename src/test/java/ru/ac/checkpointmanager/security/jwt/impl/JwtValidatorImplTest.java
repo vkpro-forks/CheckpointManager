@@ -24,6 +24,7 @@ import java.util.stream.Stream;
 @ExtendWith(MockitoExtension.class)
 class JwtValidatorImplTest {
 
+    public static final String REFRESH = "refresh";
     @Mock
     JwtService jwtService;
 
@@ -36,7 +37,9 @@ class JwtValidatorImplTest {
         DefaultClaims claims = new DefaultClaims();
         claims.setSubject(TestUtils.USERNAME);
         Mockito.when(jwtService.extractAllClaims(token)).thenReturn(claims);
+
         boolean isValid = jwtValidator.validateAccessToken(token);
+
         Assertions.assertThat(isValid).isTrue();
     }
 
@@ -46,8 +49,10 @@ class JwtValidatorImplTest {
         String token = TestUtils.getSimpleValidAccessToken();
         DefaultClaims claims = new DefaultClaims();
         claims.setSubject(subject);
+
         Mockito.when(jwtService.extractAllClaims(token)).thenReturn(claims);
         boolean isValid = jwtValidator.validateAccessToken(token);
+
         Assertions.assertThat(isValid).isFalse();
     }
 
@@ -56,9 +61,11 @@ class JwtValidatorImplTest {
         String token = TestUtils.getSimpleValidAccessToken();
         DefaultClaims claims = new DefaultClaims();
         claims.setSubject(TestUtils.USERNAME);
-        claims.put("refresh", true);
+        claims.put(REFRESH, true);
         Mockito.when(jwtService.extractAllClaims(token)).thenReturn(claims);
+
         boolean isValid = jwtValidator.validateAccessToken(token);
+
         Assertions.assertThat(isValid).isFalse();
     }
 
@@ -67,7 +74,9 @@ class JwtValidatorImplTest {
     void shouldNotValidateIfExceptionWasThrown(Exception exception) {
         String token = TestUtils.getSimpleValidAccessToken();
         Mockito.when(jwtService.extractAllClaims(token)).thenThrow(exception);
+
         boolean isValid = jwtValidator.validateAccessToken(token);
+
         Assertions.assertThat(isValid).isFalse();
     }
 
@@ -84,8 +93,9 @@ class JwtValidatorImplTest {
         String token = TestUtils.getSimpleValidAccessToken();
         DefaultClaims claims = new DefaultClaims();
         claims.setSubject(TestUtils.USERNAME);
-        claims.put("refresh", true);
+        claims.put(REFRESH, true);
         Mockito.when(jwtService.extractAllClaims(token)).thenReturn(claims);
+
         Assertions.assertThatNoException().isThrownBy(() -> jwtValidator.validateRefreshToken(token));
     }
 
@@ -95,6 +105,7 @@ class JwtValidatorImplTest {
         DefaultClaims claims = new DefaultClaims();
         claims.setSubject(TestUtils.USERNAME);
         Mockito.when(jwtService.extractAllClaims(token)).thenReturn(claims);
+
         Assertions.assertThatThrownBy(() -> jwtValidator.validateRefreshToken(token))
                 .isInstanceOf(InvalidTokenException.class);
     }
@@ -106,6 +117,7 @@ class JwtValidatorImplTest {
         DefaultClaims claims = new DefaultClaims();
         claims.setSubject(subject);
         Mockito.when(jwtService.extractAllClaims(token)).thenReturn(claims);
+
         Assertions.assertThatThrownBy(() -> jwtValidator.validateRefreshToken(token))
                 .isInstanceOf(InvalidTokenException.class);
     }
@@ -115,6 +127,7 @@ class JwtValidatorImplTest {
     void shouldNotValidateRefreshTokenAndThrowInvalidTokenException(Exception exception) {
         String token = TestUtils.getSimpleValidAccessToken();
         Mockito.when(jwtService.extractAllClaims(token)).thenThrow(exception);
+
         Assertions.assertThatThrownBy(() -> jwtValidator.validateRefreshToken(token))
                 .isInstanceOf(InvalidTokenException.class);
     }

@@ -26,8 +26,7 @@ public class WithMockCustomUserSecurityContextFactory implements WithSecurityCon
         user.setId(UUID.fromString(customUser.id()));
         user.setRole(Role.valueOf(customUser.role()));
         Collection<? extends GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(customUser.role()));
-        CustomAuthenticationToken authToken = new CustomAuthenticationToken(
-                user, null, user.getId(), authorities);
+        CustomAuthenticationToken authToken = new CustomAuthenticationToken(user, null, user.getId(), authorities);
         context.setAuthentication(authToken);
         return context;
     }
