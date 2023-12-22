@@ -113,15 +113,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private void setAuthenticationContext(HttpServletRequest request, String jwt, UserDetails userDetails) {
         Collection<? extends GrantedAuthority> authorities = jwtService.extractRole(jwt).stream()
                 .map(SimpleGrantedAuthority::new).toList();
-
-        UUID userId = null;// TODO REWORK
-        if (userDetails instanceof User user) {
-            userId = user.getId();
-        }
-
+        User castedUser = (User) userDetails; //у нас других объектов реализующих юзер дитейлс нет, поэтому кастим сразу
+        UUID userId = castedUser.getId();
         CustomAuthenticationToken authToken = new CustomAuthenticationToken(
                 userDetails, null, userId, authorities);
-
         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authToken);
         log.info("Authentication set for user '{}'", userDetails.getUsername());
