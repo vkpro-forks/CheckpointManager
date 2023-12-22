@@ -31,7 +31,7 @@ import ru.ac.checkpointmanager.model.avatar.Avatar;
 import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
-import ru.ac.checkpointmanager.security.AuthenticationFacade;
+import ru.ac.checkpointmanager.security.AuthFacade;
 import ru.ac.checkpointmanager.security.jwt.JwtService;
 import ru.ac.checkpointmanager.service.email.EmailService;
 import ru.ac.checkpointmanager.service.phone.PhoneService;
@@ -61,7 +61,7 @@ class UserServiceImplTest {
     @Mock
     private PasswordEncoder passwordEncoder;
     @Mock
-    AuthenticationFacade authenticationFacade;
+    AuthFacade authenticationFacade;
     @Mock
     private EmailService emailService;
     @Mock
@@ -115,7 +115,8 @@ class UserServiceImplTest {
         List<TerritoryDTO> result = userService.findTerritoriesByUserId(userId);
 
         Assertions.assertThat(result).isNotEmpty();
-        Assertions.assertThat(territories.size()).isEqualTo(territoryDTOs.size());
+
+        Assertions.assertThat(territories).hasSameSizeAs(territoryDTOs);
         Mockito.verify(userRepository).findTerritoriesByUserId(userId);
         Mockito.verify(territoryMapper).toTerritoriesDTO(territories);
     }
@@ -143,8 +144,7 @@ class UserServiceImplTest {
 
         Collection<UserResponseDTO> result = userService.findByName(anyString());
         Assertions.assertThat(result).isNotEmpty();
-        Assertions.assertThat(users).hasSize(1);
-        Assertions.assertThat(users.size()).isEqualTo(userResponseDTOS.size());
+        Assertions.assertThat(users).hasSameSizeAs(userResponseDTOS).hasSize(1);
         Mockito.verify(userRepository).findUserByFullNameContainingIgnoreCase(anyString());
         Mockito.verify(userMapper).toUserResponseDTOs(users);
     }
@@ -349,7 +349,7 @@ class UserServiceImplTest {
 
         userService.changeRole(userId, Role.MANAGER);
 
-        Assertions.assertThat(Role.MANAGER).isEqualTo(user.getRole());
+        Assertions.assertThat(user.getRole()).isEqualTo(Role.MANAGER);
         Mockito.verify(userRepository).save(user);
     }
 
@@ -555,7 +555,7 @@ class UserServiceImplTest {
         Collection<String> result = userService.findUsersPhoneNumbers(userId);
 
         Assertions.assertThat(result).isNotEmpty().contains(phone);
-        Assertions.assertThat(phoneNumbers.size()).isEqualTo(result.size());
+        Assertions.assertThat(phoneNumbers).hasSameSizeAs(result);
         Mockito.verify(phoneRepository).getNumbersByUserId(userId);
     }
 
