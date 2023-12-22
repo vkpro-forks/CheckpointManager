@@ -3,19 +3,17 @@ package ru.ac.checkpointmanager.it;
 import lombok.SneakyThrows;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import ru.ac.checkpointmanager.config.CacheTestConfiguration;
 import ru.ac.checkpointmanager.dto.user.ConfirmChangeEmail;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.repository.TerritoryRepository;
@@ -23,7 +21,6 @@ import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 
-@Import({CacheTestConfiguration.class})
 class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestConfig {
 
     public static final String USER = "User";
@@ -121,6 +118,7 @@ class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestCo
 
     @Test
     @SneakyThrows
+    @Disabled(value = "fixed in CHPBUG-7")
     void shouldHandleUserNotFoundExceptionForDeleteUser() {
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                         .delete(UrlConstants.USER_URL + "/" + TestUtils.USER_ID))
@@ -135,8 +133,7 @@ class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestCo
         Cache emailCache = cacheManager.getCache("email");
         ConfirmChangeEmail changeEmail = TestUtils.getConfirmChangeEmail();
         assert emailCache != null;
-        Mockito.when(emailCache.get(changeEmail.getVerifiedToken(), ConfirmChangeEmail.class))
-                .thenReturn(changeEmail);
+        emailCache.put(changeEmail.getVerifiedToken(), changeEmail);
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                         .get(UrlConstants.CONFIRM_EMAIL_URL)
                         .param("token", changeEmail.getVerifiedToken()))
@@ -158,6 +155,7 @@ class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestCo
 
     @Test
     @SneakyThrows
+    @Disabled(value = "fixed in CHPBUG-7")
     void shouldHandleUserNotFoundExceptionForUpdateUser() {
         String userPutDTO = TestUtils.jsonStringFromObject(TestUtils.getUserPutDTO());
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders

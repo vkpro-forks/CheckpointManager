@@ -31,7 +31,7 @@ import ru.ac.checkpointmanager.model.avatar.Avatar;
 import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
-import ru.ac.checkpointmanager.security.AuthenticationFacade;
+import ru.ac.checkpointmanager.security.AuthFacade;
 import ru.ac.checkpointmanager.security.jwt.JwtService;
 import ru.ac.checkpointmanager.service.email.EmailService;
 import ru.ac.checkpointmanager.service.phone.PhoneService;
@@ -61,7 +61,7 @@ class UserServiceImplTest {
     @Mock
     private PasswordEncoder passwordEncoder;
     @Mock
-    AuthenticationFacade authenticationFacade;
+    AuthFacade authenticationFacade;
     @Mock
     private EmailService emailService;
     @Mock
