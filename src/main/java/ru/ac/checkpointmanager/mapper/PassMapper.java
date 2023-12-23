@@ -43,7 +43,7 @@ public class PassMapper {
         return modelMapper.map(passCreateDTO, PassAuto.class);
     }
 
-    public Pass toPassWalk(PassCreateDTO passCreateDTO) {
+    public PassWalk toPassWalk(PassCreateDTO passCreateDTO) {
         return modelMapper.map(passCreateDTO, PassWalk.class);
     }
 

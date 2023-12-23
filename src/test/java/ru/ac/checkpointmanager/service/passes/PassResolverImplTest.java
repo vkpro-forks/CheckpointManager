@@ -24,6 +24,7 @@ import ru.ac.checkpointmanager.model.passes.PassWalk;
 import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
+import ru.ac.checkpointmanager.service.passes.impl.PassResolverImpl;
 import ru.ac.checkpointmanager.util.TestUtils;
 
 import java.util.Optional;

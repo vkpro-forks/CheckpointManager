@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ru.ac.checkpointmanager.exception.pass.PassException;
 import ru.ac.checkpointmanager.exception.pass.UserTerritoryRelationException;
 import ru.ac.checkpointmanager.repository.PassRepository;
+import ru.ac.checkpointmanager.service.passes.impl.PassCheckerImpl;
 import ru.ac.checkpointmanager.util.TestUtils;
 
 import java.util.UUID;

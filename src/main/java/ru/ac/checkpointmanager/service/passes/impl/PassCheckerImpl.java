@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.service.passes;
+package ru.ac.checkpointmanager.service.passes.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import ru.ac.checkpointmanager.exception.ExceptionMessage;
 import ru.ac.checkpointmanager.exception.pass.UserTerritoryRelationException;
 import ru.ac.checkpointmanager.repository.PassRepository;
+import ru.ac.checkpointmanager.service.passes.PassChecker;
 
 import java.util.UUID;
 

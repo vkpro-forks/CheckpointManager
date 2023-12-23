@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.service.passes;
+package ru.ac.checkpointmanager.service.passes.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +19,7 @@ import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
+import ru.ac.checkpointmanager.service.passes.PassResolver;
 
 import java.util.UUID;
 
