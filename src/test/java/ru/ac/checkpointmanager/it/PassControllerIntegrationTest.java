@@ -89,13 +89,13 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         territory.setUsers(List.of(savedUser));
         Territory savedTerritory = territoryRepository.saveAndFlush(territory);
         CarBrand carBrand = TestUtils.getCarBrand();
-        CarBrand savedCarBrand = carBrandRepository.saveAndFlush(carBrand);
+        carBrandRepository.saveAndFlush(carBrand);
 
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTO();
+        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
         passCreateDTO.setUserId(savedUser.getId());
         passCreateDTO.setTerritoryId(savedTerritory.getId());
         passCreateDTO.getCar().setId(null);
-        passCreateDTO.getCar().setBrand(savedCarBrand);//set saved car brand, if no car brand in DB, 404 will be thrown
+        passCreateDTO.getCar().setBrand(TestUtils.getCarBrandDTO());//set saved car brand, if no car brand in DB, 404 will be thrown
         String passCreateDtoString = TestUtils.jsonStringFromObject(passCreateDTO);
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
@@ -128,10 +128,10 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         car.setBrand(savedCarBrand);
         car.setId(TestUtils.getCarDto().getId());
         Car savedCar = carRepository.saveAndFlush(car);//save car and repo change its id
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTO();
+        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
         passCreateDTO.setUserId(savedUser.getId());
         passCreateDTO.setTerritoryId(savedTerritory.getId());
-        passCreateDTO.getCar().setBrand(savedCarBrand);//set saved car brand, if no car brand in DB, 404 will be thrown
+        passCreateDTO.getCar().setBrand(TestUtils.getCarBrandDTO());//set saved car brand, if no car brand in DB, 404 will be thrown
         passCreateDTO.getCar().setId(savedCar.getId());
         passCreateDTO.getCar().setLicensePlate(savedCar.getLicensePlate());
         String passCreateDtoString = TestUtils.jsonStringFromObject(passCreateDTO);
@@ -167,10 +167,10 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         car.setBrand(savedCarBrand);
         car.setId(TestUtils.getCarDto().getId());
         Car savedCar = carRepository.saveAndFlush(car);//save car and repo change its id
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTO();
+        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
         passCreateDTO.setUserId(savedUser.getId());
         passCreateDTO.setTerritoryId(savedTerritory.getId());
-        passCreateDTO.getCar().setBrand(savedCarBrand);//set saved car brand, if no car brand in DB, 404 will be thrown
+        passCreateDTO.getCar().setBrand(TestUtils.getCarBrandDTO());//set saved car brand, if no car brand in DB, 404 will be thrown
         passCreateDTO.getCar().setId(null);//don't pass ID of car, pass only license plate
         passCreateDTO.getCar().setLicensePlate(savedCar.getLicensePlate());
         String passCreateDtoString = TestUtils.jsonStringFromObject(passCreateDTO);
@@ -211,11 +211,11 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         territory.setUsers(List.of(savedUser));
         Territory savedTerritory = territoryRepository.saveAndFlush(territory);
         CarBrand carBrand = TestUtils.getCarBrand();
-        CarBrand savedCarBrand = carBrandRepository.saveAndFlush(carBrand);
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTO();
+        carBrandRepository.saveAndFlush(carBrand);
+        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
         passCreateDTO.setUserId(savedUser.getId());
         passCreateDTO.setTerritoryId(savedTerritory.getId());
-        passCreateDTO.getCar().setBrand(savedCarBrand);//set saved car brand, if no car brand in DB, 404 will be thrown
+        passCreateDTO.getCar().setBrand(TestUtils.getCarBrandDTO());//set saved car brand, if no car brand in DB, 404 will be thrown
         passCreateDTO.getCar().setId(TestUtils.CAR_ID);
         passCreateDTO.getCar().setLicensePlate(TestUtils.LICENSE_PLATE);
         String passCreateDtoString = TestUtils.jsonStringFromObject(passCreateDTO);
@@ -262,7 +262,7 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         PassAuto pass = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
         pass.setStatus(passStatus);
         PassAuto savedPass = passRepository.saveAndFlush(pass);
-                List<Pass> allPasses = passRepository.findAll();
+        List<Pass> allPasses = passRepository.findAll();
         Assertions.assertThat(allPasses).hasSize(1);//check if only one pass here
 
         mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.PASS_URL + "/" + savedPass.getId()))

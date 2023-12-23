@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.ac.checkpointmanager.config.CorsTestConfiguration;
 import ru.ac.checkpointmanager.config.OpenAllEndpointsTestConfiguration;
 import ru.ac.checkpointmanager.config.PostgresTestContainersConfiguration;
+import ru.ac.checkpointmanager.dto.CarBrandDTO;
 import ru.ac.checkpointmanager.exception.handler.ErrorCode;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
@@ -54,7 +55,7 @@ class CarBrandControllerIntegrationTest extends PostgresTestContainersConfigurat
     @Test
     @SneakyThrows
     void shouldSaveCarBrand() {
-        String carBrandString = TestUtils.jsonStringFromObject(TestUtils.getCarBrand());
+        String carBrandString = TestUtils.jsonStringFromObject(TestUtils.getCarBrandDTO());
         mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CAR_BRANDS_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(carBrandString))
@@ -72,7 +73,7 @@ class CarBrandControllerIntegrationTest extends PostgresTestContainersConfigurat
     void shouldReturnConflictErrorIfCarBrandAlreadyExists() {
         CarBrand carBrand = TestUtils.getCarBrand();
         CarBrand savedBrand = carBrandRepository.saveAndFlush(carBrand);
-        String carBrandString = TestUtils.jsonStringFromObject(savedBrand);
+        String carBrandString = TestUtils.jsonStringFromObject(new CarBrandDTO(savedBrand.getBrand()));
         mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CAR_BRANDS_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(carBrandString))
