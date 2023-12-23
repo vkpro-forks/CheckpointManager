@@ -4,18 +4,15 @@ import lombok.SneakyThrows;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import ru.ac.checkpointmanager.config.CacheTestConfiguration;
 import ru.ac.checkpointmanager.config.security.WithMockCustomUser;
 import ru.ac.checkpointmanager.dto.user.ConfirmChangeEmail;
 import ru.ac.checkpointmanager.dto.user.UserPutDTO;
@@ -27,7 +24,6 @@ import ru.ac.checkpointmanager.util.UrlConstants;
 
 import java.util.UUID;
 
-@Import({CacheTestConfiguration.class})
 class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestConfig {
 
     public static final String USER = "User";
@@ -140,8 +136,7 @@ class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestCo
         Cache emailCache = cacheManager.getCache("email");
         ConfirmChangeEmail changeEmail = TestUtils.getConfirmChangeEmail();
         assert emailCache != null;
-        Mockito.when(emailCache.get(changeEmail.getVerifiedToken(), ConfirmChangeEmail.class))
-                .thenReturn(changeEmail);
+        emailCache.put(changeEmail.getVerifiedToken(), changeEmail);
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                         .get(UrlConstants.CONFIRM_EMAIL_URL)
                         .param("token", changeEmail.getVerifiedToken()))

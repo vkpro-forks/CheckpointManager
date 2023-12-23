@@ -41,7 +41,7 @@ import java.util.stream.Stream;
 class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandlerBasicTestConfig {
 
     private static final String TERRITORY = "Territory";
-    public static final String PHONE = "Phone";
+    private static final String PHONE = "Phone";
 
     @Autowired
     UserRepository userRepository;

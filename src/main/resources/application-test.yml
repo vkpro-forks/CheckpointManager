@@ -20,6 +20,18 @@ spring:
         use_sql_comments: true
       jdbc:
         time-zone: UTC
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      jedis:
+        pool:
+          enabled: true
+          max-active: 10
+          max-idle: 5
+          max-wait: -1ms
+          min-idle: 1
+
   jackson:
     time-zone: UTC
   liquibase:
@@ -27,7 +39,7 @@ spring:
     contexts: default
     default-schema: public
     drop-first: false
-    enabled: true
+    # enabled: true
     #label-filter: "!demo-data"
 
   mail:
