@@ -27,7 +27,7 @@ spring:
     contexts: default
     default-schema: public
     drop-first: false
-   # enabled: true
+    enabled: true
     #label-filter: "!demo-data"
 
   mail:

@@ -14,6 +14,8 @@ public enum ErrorCode {
 
     FORBIDDEN,
 
-    UNAUTHORIZED
+    UNAUTHORIZED,
+
+    TOKEN_EXPIRED
 
 }
