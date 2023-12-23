@@ -3,7 +3,6 @@ package ru.ac.checkpointmanager.it;
 import lombok.SneakyThrows;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
@@ -118,10 +117,10 @@ class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestCo
 
     @Test
     @SneakyThrows
-    @Disabled(value = "fixed in CHPBUG-7")
+    @WithMockCustomUser(id = "bf03cd3b-8b20-4cac-8be9-e1cdf825c165")
     void shouldHandleUserNotFoundExceptionForDeleteUser() {
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
-                        .delete(UrlConstants.USER_URL + "/" + TestUtils.USER_ID))
+                        .delete(UrlConstants.USER_URL + "/" + "bf03cd3b-8b20-4cac-8be9-e1cdf825c165"))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith(USER)));
         TestUtils.checkNotFoundFields(resultActions);
@@ -155,13 +154,15 @@ class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestCo
 
     @Test
     @SneakyThrows
-    @Disabled(value = "fixed in CHPBUG-7")
+    @WithMockCustomUser(id = "bf03cd3b-8b20-4cac-8be9-e1cdf825c165")
     void shouldHandleUserNotFoundExceptionForUpdateUser() {
-        String userPutDTO = TestUtils.jsonStringFromObject(TestUtils.getUserPutDTO());
+        UserPutDTO userPutDto = TestUtils.getUserPutDTO();
+        userPutDto.setId(UUID.fromString("bf03cd3b-8b20-4cac-8be9-e1cdf825c165"));
+        String userPutDtoStr = TestUtils.jsonStringFromObject(userPutDto);
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                         .put(UrlConstants.USER_URL)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(userPutDTO))
+                        .content(userPutDtoStr))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith(USER)));
         TestUtils.checkNotFoundFields(resultActions);
