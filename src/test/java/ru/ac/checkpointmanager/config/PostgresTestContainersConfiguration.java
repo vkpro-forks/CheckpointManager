@@ -13,7 +13,8 @@ public class PostgresTestContainersConfiguration {
 
     @Container
     @ServiceConnection(type = JdbcConnectionDetails.class)
-    private static PostgreSQLContainer<?> postgresContainer = new PostgreSQLContainer<>("postgres:latest").withDatabaseName("chpmanDB");
+    private static PostgreSQLContainer<?> postgresContainer = new PostgreSQLContainer<>("postgres:latest")
+            .withDatabaseName("chpmanDB");
 
     @DynamicPropertySource
     private static void configureProperties(DynamicPropertyRegistry registry) {

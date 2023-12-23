@@ -22,6 +22,7 @@ import ru.ac.checkpointmanager.dto.user.ConfirmChangeEmail;
 import ru.ac.checkpointmanager.dto.user.UserPutDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
+import ru.ac.checkpointmanager.exception.ObjectAlreadyExistsException;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.mapper.TerritoryMapper;
@@ -276,7 +277,7 @@ public class UserServiceImpl implements UserService {
 
         if (userRepository.findByEmail(request.getNewEmail()).isPresent()) {
             log.warn("[Email {}] already taken", request.getNewEmail());
-            throw new IllegalStateException(String.format("Email %s already taken", request.getNewEmail()));
+            throw new ObjectAlreadyExistsException(String.format("Email %s already taken", request.getNewEmail()));
         }
 
         ConfirmChangeEmail confirmEmail = userMapper.toConfirmChangeEmail(request);

@@ -15,10 +15,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import ru.ac.checkpointmanager.config.CacheTestConfiguration;
 import ru.ac.checkpointmanager.config.CorsTestConfiguration;
 import ru.ac.checkpointmanager.config.OpenAllEndpointsTestConfiguration;
-import ru.ac.checkpointmanager.config.PostgresTestContainersConfiguration;
+import ru.ac.checkpointmanager.config.RedisAndPostgresTestContainersConfiguration;
 import ru.ac.checkpointmanager.dto.CrossingRequestDTO;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
@@ -45,10 +44,10 @@ import java.util.Optional;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
 @AutoConfigureMockMvc
-@Import({OpenAllEndpointsTestConfiguration.class, CorsTestConfiguration.class, CacheTestConfiguration.class})
+@Import({OpenAllEndpointsTestConfiguration.class, CorsTestConfiguration.class})
 @ActiveProfiles("test")
 @WithMockUser(roles = {"ADMIN"})
-class CrossingControllerIntegrationTest extends PostgresTestContainersConfiguration {
+class CrossingControllerIntegrationTest extends RedisAndPostgresTestContainersConfiguration {
 
     @Autowired
     MockMvc mockMvc;
