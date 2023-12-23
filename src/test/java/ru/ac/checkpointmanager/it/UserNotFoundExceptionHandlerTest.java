@@ -13,12 +13,16 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import ru.ac.checkpointmanager.config.security.WithMockCustomUser;
 import ru.ac.checkpointmanager.dto.user.ConfirmChangeEmail;
+import ru.ac.checkpointmanager.dto.user.UserPutDTO;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
+
+import java.util.UUID;
 
 class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestConfig {
 
