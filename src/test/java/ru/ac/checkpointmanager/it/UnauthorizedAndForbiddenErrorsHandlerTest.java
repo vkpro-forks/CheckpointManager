@@ -17,19 +17,21 @@ import ru.ac.checkpointmanager.util.UrlConstants;
 import java.util.List;
 import java.util.stream.Stream;
 
-class UnauthorizedErrorsHandlerTest extends GlobalExceptionHandlerBasicTestConfig {
+class UnauthorizedAndForbiddenErrorsHandlerTest extends GlobalExceptionHandlerBasicTestConfig {
 
     @Test
     @SneakyThrows
     void shouldHandleBadCredentialsExceptionForLogin() {
         String loginDto = TestUtils.jsonStringFromObject(TestUtils.getAuthenticationRequest());
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+        mockMvc.perform(MockMvcRequestBuilders
                         .post(UrlConstants.AUTH_LOGIN_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(loginDto))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
-                        .value(Matchers.startsWith("Bad")));
-        checkUnauthorized(resultActions);
+                        .value(Matchers.startsWith("Bad")))
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_ERROR_CODE)
+                        .value(ErrorCode.UNAUTHORIZED.toString()));
     }
 
     @ParameterizedTest
@@ -47,9 +49,9 @@ class UnauthorizedErrorsHandlerTest extends GlobalExceptionHandlerBasicTestConfi
     }
 
     private void checkUnauthorized(ResultActions resultActions) throws Exception {
-        resultActions.andExpect(MockMvcResultMatchers.status().isUnauthorized())
+        resultActions.andExpect(MockMvcResultMatchers.status().isForbidden())
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_ERROR_CODE)
-                        .value(ErrorCode.UNAUTHORIZED.toString()));
+                        .value(ErrorCode.FORBIDDEN.toString()));
     }
 
     private static Stream<RefreshTokenDTO> getBadRefreshTokens() {
@@ -63,6 +65,5 @@ class UnauthorizedErrorsHandlerTest extends GlobalExceptionHandlerBasicTestConfi
         RefreshTokenDTO withoutIdClaim = new RefreshTokenDTO(TestUtils.getJwt(1000000, "", roles, true, false));
         return Stream.of(expired, nullName, emptyName, badJwt, notRefresh, withoutIdClaim);
     }
-
 
 }

@@ -102,8 +102,12 @@ public class TestUtils {
 
     public static final String EMAIL = "123@123.com";
     public static final String NEW_EMAIL = "new.com";
-    private static final String USERNAME = "Username";
-    private static final String NEW_PASSWORD = "new_password";
+    public static final String USERNAME = "Username";
+    public static final String NEW_PASSWORD = "new_password";
+
+    public static final String AUTH_HEADER = "Authorization";
+
+    public static final String BEARER = "Bearer ";
 
 
     public static CarBrand getCarBrand() {
@@ -277,6 +281,10 @@ public class TestUtils {
         return new RefreshTokenDTO(getJwt(86400000, USERNAME, List.of("ROLE_ADMIN"), true, true));
     }
 
+    public static String getSimpleValidAccessToken() {
+        return getJwt(60000, USERNAME, List.of("ADMIN"), false, true);
+    }
+
     public static String getJwt(Integer expired, String username, List<String> roles, boolean isRefresh,
                                 boolean withIdClaim) {
         Map<String, Object> claims = new HashMap<>();
@@ -358,8 +366,12 @@ public class TestUtils {
     }
 
     private static Key getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode("8790D58F7205C4C250CD67DD6D9B6F8B20D2E928FFAA6D4A2BEB2AD2189B01D1");
+        byte[] keyBytes = Decoders.BASE64.decode(getKey());
         return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    public static String getKey() {
+        return "8790D58F7205C4C250CD67DD6D9B6F8B20D2E928FFAA6D4A2BEB2AD2189B01D1";
     }
 
     private TestUtils() {

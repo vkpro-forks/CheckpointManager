@@ -3,6 +3,7 @@ package ru.ac.checkpointmanager;
 import org.springframework.boot.SpringApplication;
 import ru.ac.checkpointmanager.config.CorsTestConfiguration;
 import ru.ac.checkpointmanager.config.LocalDevPostgresTestContainersConfiguration;
+import ru.ac.checkpointmanager.config.LocalDevRedisTestContainersConfiguration;
 
 public class CheckPointManagerLocalDevApplication {
 
@@ -15,7 +16,8 @@ public class CheckPointManagerLocalDevApplication {
      */
     public static void main(String[] args) {
         SpringApplication.from(CheckpointManagerApplication::main)
-                .with(LocalDevPostgresTestContainersConfiguration.class, CorsTestConfiguration.class)
+                .with(LocalDevPostgresTestContainersConfiguration.class, CorsTestConfiguration.class,
+                        LocalDevRedisTestContainersConfiguration.class)
                 .run(args);
     }
 
