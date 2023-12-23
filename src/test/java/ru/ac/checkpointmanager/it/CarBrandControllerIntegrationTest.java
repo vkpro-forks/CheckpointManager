@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -21,12 +20,11 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.ac.checkpointmanager.config.CorsTestConfiguration;
 import ru.ac.checkpointmanager.config.OpenAllEndpointsTestConfiguration;
-import ru.ac.checkpointmanager.config.PostgresTestContainersConfiguration;
+import ru.ac.checkpointmanager.config.RedisAndPostgresTestContainersConfiguration;
 import ru.ac.checkpointmanager.exception.handler.ErrorCode;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
 import ru.ac.checkpointmanager.util.TestMessage;
-import ru.ac.checkpointmanager.security.filter.JwtAuthenticationFilter;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 
@@ -39,7 +37,7 @@ import java.util.List;
 @ActiveProfiles("test")
 @WithMockUser(roles = {"ADMIN"})
 @Slf4j
-class CarBrandControllerIntegrationTest extends PostgresTestContainersConfiguration {
+class CarBrandControllerIntegrationTest extends RedisAndPostgresTestContainersConfiguration {
 
     @Autowired
     MockMvc mockMvc;
