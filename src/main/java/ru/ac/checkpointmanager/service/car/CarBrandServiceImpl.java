@@ -67,6 +67,11 @@ public class CarBrandServiceImpl implements CarBrandService {
                     log.warn(CAR_BRAND_NOT_FOUND_WITH_ID_MSG + " {}", brandId);
                     return new CarBrandNotFoundException(CAR_BRAND_NOT_FOUND_WITH_ID_MSG + " " + brandId);
                 });
+        Optional<CarBrand> carBrandOptional = carBrandRepository.findByBrand(carBrand.getBrand());
+        if (carBrandOptional.isPresent()) {
+            log.warn(CAR_BRAND_EXISTS.formatted(carBrand.getBrand()));
+            throw new CarBrandAlreadyExistsException(CAR_BRAND_EXISTS.formatted(carBrand.getBrand()));
+        }
         updateCarBrand.setBrand(carBrand.getBrand());
         CarBrand saved = carBrandRepository.save(updateCarBrand);
         log.info("Car brand with [id: {}] successfully updated", brandId);
