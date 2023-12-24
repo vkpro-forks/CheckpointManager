@@ -55,7 +55,7 @@ class PassControllerValidationIntegrationTest {
     @Test
     @SneakyThrows
     void shouldReturnValidationErrorForNullCarAndVisitorFieldsForAddPass() {
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTO();
+        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
         passCreateDTO.setCar(null);
         passCreateDTO.setVisitor(null);
         String passDtoCreateString = TestUtils.jsonStringFromObject(passCreateDTO);
@@ -68,7 +68,7 @@ class PassControllerValidationIntegrationTest {
     @Test
     @SneakyThrows
     void shouldReturnValidationErrorForBothCarAndVisitorFieldsForAddPass() {
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTO();
+        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
         passCreateDTO.setCar(new CarDTO());
         passCreateDTO.setVisitor(new VisitorDTO());
         String passDtoCreateString = TestUtils.jsonStringFromObject(passCreateDTO);
@@ -107,7 +107,7 @@ class PassControllerValidationIntegrationTest {
     @Test
     @SneakyThrows
     void shouldReturnValidationErrorIncorrectStartAndEndTimeFieldsForAddPass() {
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTO();
+        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
         passCreateDTO.setCar(new CarDTO());
         passCreateDTO.setEndTime(LocalDateTime.now().plusHours(1));
         passCreateDTO.setStartTime(LocalDateTime.now().plusHours(3));

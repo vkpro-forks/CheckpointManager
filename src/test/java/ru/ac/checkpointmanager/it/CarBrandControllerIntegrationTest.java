@@ -20,6 +20,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.ac.checkpointmanager.config.CorsTestConfiguration;
 import ru.ac.checkpointmanager.config.OpenAllEndpointsTestConfiguration;
+import ru.ac.checkpointmanager.config.PostgresTestContainersConfiguration;
+import ru.ac.checkpointmanager.dto.CarBrandDTO;
 import ru.ac.checkpointmanager.config.RedisAndPostgresTestContainersConfiguration;
 import ru.ac.checkpointmanager.exception.handler.ErrorCode;
 import ru.ac.checkpointmanager.model.car.CarBrand;
@@ -55,6 +57,7 @@ class CarBrandControllerIntegrationTest extends RedisAndPostgresTestContainersCo
     void shouldSaveCarBrand() {
         String carBrandString = TestUtils.jsonStringFromObject(TestUtils.getCarBrand());
         log.info(TestMessage.PERFORM_HTTP, HttpMethod.POST.name(), UrlConstants.CAR_BRANDS_URL);
+        String carBrandString = TestUtils.jsonStringFromObject(TestUtils.getCarBrandDTO());
         mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CAR_BRANDS_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(carBrandString))
@@ -74,6 +77,7 @@ class CarBrandControllerIntegrationTest extends RedisAndPostgresTestContainersCo
         CarBrand savedBrand = carBrandRepository.saveAndFlush(carBrand);
         String carBrandString = TestUtils.jsonStringFromObject(savedBrand);
         log.info(TestMessage.PERFORM_HTTP, HttpMethod.POST.name(), UrlConstants.CAR_BRANDS_URL);
+        String carBrandString = TestUtils.jsonStringFromObject(new CarBrandDTO(savedBrand.getBrand()));
         mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CAR_BRANDS_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(carBrandString))

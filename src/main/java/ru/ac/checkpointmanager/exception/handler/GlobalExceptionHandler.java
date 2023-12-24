@@ -161,15 +161,6 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
-    @ExceptionHandler(IllegalStateException.class)
-    public ProblemDetail handleIllegalStateException(IllegalStateException e) {
-        ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
-        problemDetail.setTitle("Illegal state exception occurred");//FIXME need new more suitable exception
-        problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
-        log.debug(LOG_MSG, e.getClass());
-        return problemDetail;
-    }
-
     @ExceptionHandler(PhoneAlreadyExistException.class)
     public ProblemDetail handlePhoneAlreadyExistException(PhoneAlreadyExistException e) {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.CONFLICT, e);

@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.service.passes;
+package ru.ac.checkpointmanager.service.passes.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +15,6 @@ import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.exception.pass.ModifyPassException;
 import ru.ac.checkpointmanager.exception.pass.OverlapPassException;
 import ru.ac.checkpointmanager.exception.pass.PassNotFoundException;
-import ru.ac.checkpointmanager.exception.pass.UserTerritoryRelationException;
 import ru.ac.checkpointmanager.mapper.PassMapper;
 import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.model.Territory;
@@ -25,6 +24,9 @@ import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.projection.PassInOutViewProjection;
 import ru.ac.checkpointmanager.repository.CrossingRepository;
 import ru.ac.checkpointmanager.repository.PassRepository;
+import ru.ac.checkpointmanager.service.passes.PassChecker;
+import ru.ac.checkpointmanager.service.passes.PassResolver;
+import ru.ac.checkpointmanager.service.passes.PassService;
 import ru.ac.checkpointmanager.service.territories.TerritoryService;
 import ru.ac.checkpointmanager.service.user.UserService;
 import ru.ac.checkpointmanager.utils.MethodLog;
@@ -54,7 +56,6 @@ public class PassServiceImpl implements PassService {
     private static final String METHOD_INVOKE = "Method {} [{}]";
     private static final String PASS_STATUS = "Pass [{}], changed status on {}";
     private static final String PASS_STATUS_CROSS = "Pass [{}], exist {} crossings, changed status on {}";
-    private static final String USER_TER_REL = "Reject: user [%s] not have permission to create passes for territory [%s]";
     private static final String OVERLAP_PASS = "Reject: user [%s] has an overlapping pass [%s]";
 
     private final PassRepository passRepository;
@@ -62,6 +63,8 @@ public class PassServiceImpl implements PassService {
     private final UserService userService;
     private final TerritoryService territoryService;
     private final PassMapper mapper;
+    private final PassResolver passResolver;
+    private final PassChecker passChecker;
 
     private int hourForLogInScheduledCheck;
 
@@ -69,17 +72,13 @@ public class PassServiceImpl implements PassService {
     @Transactional
     public PassResponseDTO addPass(PassCreateDTO passCreateDTO) {
         log.info(METHOD_INVOKE, MethodLog.getMethodName(), passCreateDTO);
-        UUID userId = passCreateDTO.getUserId();
-        UUID territoryId = passCreateDTO.getTerritoryId();
-        User user = userService.findUserById(userId);
-        Territory territory = territoryService.findTerritoryById(territoryId);
 
-        checkUserTerritoryRelation(user, territory);
-
-        Pass pass = mapper.toPass(passCreateDTO);
-        checkOverlapTime(pass);
+        Pass pass = passResolver.createPass(passCreateDTO);
+        passChecker.checkUserTerritoryRelation(pass.getUser().getId(), pass.getTerritory().getId());
+        checkOverlapTime(pass);// to pass checker
 
         trimThemAll(pass);
+
         if (pass.getStartTime().isBefore(LocalDateTime.now())) {
             pass.setStatus(PassStatus.ACTIVE);
         } else {
@@ -178,6 +177,7 @@ public class PassServiceImpl implements PassService {
         UUID passId = passUpdateDTO.getId();
         Pass existPass = findPassById(passId);
         PassStatus passStatus = existPass.getStatus();
+
         if (passStatus != PassStatus.ACTIVE && passStatus != PassStatus.DELAYED) {
             log.warn(PASS_NOT_UPDATE.formatted(passId, passStatus));
             throw new ModifyPassException(PASS_NOT_UPDATE.formatted(passId, passStatus));
@@ -185,7 +185,7 @@ public class PassServiceImpl implements PassService {
 
         User user = userService.findByPassId(passId);
         Territory territory = territoryService.findByPassId(passId);
-        checkUserTerritoryRelation(user, territory);
+        passChecker.checkUserTerritoryRelation(user.getId(), territory.getId());
         Pass newStatePass = mapper.toPass(passUpdateDTO, user, territory);
 
         checkOverlapTime(newStatePass);
@@ -302,23 +302,6 @@ public class PassServiceImpl implements PassService {
     }
 
     /**
-     * Проверяет связь пользователя и территории,
-     * которая означает право пользователя создавать пропуска на указанную территорию
-     *
-     * @param user      пользователь
-     * @param territory территория
-     */
-    private void checkUserTerritoryRelation(User user, Territory territory) {
-        UUID userId = user.getId();
-        UUID territoryId = territory.getId();
-
-        if (!passRepository.checkUserTerritoryRelation(userId, territoryId)) {
-            log.warn(USER_TER_REL.formatted(userId, territoryId));
-            throw new UserTerritoryRelationException(USER_TER_REL.formatted(userId, territoryId));
-        }
-    }
-
-    /**
      * @param newPass добавляемый или изменяемый пропуск
      * @throws IllegalArgumentException, если в системе существует другой активный пропуск,
      *                                   созданный тем же юзером, в котором совпадает территория, данные машины/человека
@@ -390,7 +373,7 @@ public class PassServiceImpl implements PassService {
      * Обновляет статусы активных пропусков с истекшим временем действия:
      * по каждому активному пропуску ищет зафиксированные пересечения:
      * если пересечений не было, присваивает пропуску статус OUTDATED,
-     * если помледнее пересечение было на выезд - COMPLETED,
+     * если последнее пересечение было на выезд - COMPLETED,
      * если на въезд - WARNING
      *
      * @see PassStatus

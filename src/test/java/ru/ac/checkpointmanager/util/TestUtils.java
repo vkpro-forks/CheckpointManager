@@ -16,6 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import ru.ac.checkpointmanager.dto.CarBrandDTO;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.CheckpointDTO;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
@@ -116,6 +117,10 @@ public class TestUtils {
         return carBrand;
     }
 
+    public static CarBrandDTO getCarBrandDTO() {
+        return new CarBrandDTO("Buhanka");
+    }
+
     public static CrossingDTO getCrossingDTO() {
         return new CrossingDTO(
                 CROSSING_ID,
@@ -157,7 +162,7 @@ public class TestUtils {
         return new CarDTO(
                 CAR_ID,
                 LICENSE_PLATE,
-                getCarBrand(),
+                getCarBrandDTO(),
                 PHONE_NUM
         );
     }
@@ -174,9 +179,9 @@ public class TestUtils {
         );
     }
 
-    public static PassCreateDTO getPassCreateDTO() {
+    public static PassCreateDTO getPassCreateDTOWithCar() {
         return new PassCreateDTO(
-                PASS_ID,
+                USER_ID,
                 "comment",
                 PassTypeTime.ONETIME,
                 TERR_ID,
@@ -184,6 +189,19 @@ public class TestUtils {
                 LocalDateTime.now().plusHours(7),
                 null,
                 getCarDto()
+        );
+    }
+
+    public static PassCreateDTO getPassCreateDTOWithVisitor() {
+        return new PassCreateDTO(
+                USER_ID,
+                "comment",
+                PassTypeTime.ONETIME,
+                TERR_ID,
+                LocalDateTime.now().plusHours(1),
+                LocalDateTime.now().plusHours(7),
+                getVisitorDTO(),
+                null
         );
     }
 

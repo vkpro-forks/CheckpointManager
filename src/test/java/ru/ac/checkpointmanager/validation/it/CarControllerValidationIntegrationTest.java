@@ -77,8 +77,8 @@ class CarControllerValidationIntegrationTest {
 
     private static Stream<CarDTO> getBadCarDto() {
         CarDTO badLicensePLate = new CarDTO(UUID.randomUUID(), "NOT A LICENSE PLATE",
-                TestUtils.getCarBrand(), TestUtils.PHONE_NUM);
-        CarDTO nullLicensePlate = new CarDTO(UUID.randomUUID(), null, TestUtils.getCarBrand(), TestUtils.PHONE_NUM);
+                TestUtils.getCarBrandDTO(), TestUtils.PHONE_NUM);
+        CarDTO nullLicensePlate = new CarDTO(UUID.randomUUID(), null, TestUtils.getCarBrandDTO(), TestUtils.PHONE_NUM);
         return Stream.of(badLicensePLate, nullLicensePlate);
     }
 

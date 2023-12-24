@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import ru.ac.checkpointmanager.dto.CarBrandDTO;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.service.car.CarBrandService;
 
@@ -53,7 +54,7 @@ public class CarBrandController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @PostMapping("/brands")
     @ResponseStatus(HttpStatus.CREATED)
-    public CarBrand createBrand(@Valid @RequestBody CarBrand brand) {
+    public CarBrand createBrand(@Valid @RequestBody CarBrandDTO brand) {
         return carBrandService.addBrand(brand);
     }
 
@@ -100,7 +101,7 @@ public class CarBrandController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @PutMapping("/brands/{id}")
     public CarBrand updateCarBrand(@Valid @PathVariable Long id,
-                                   @Valid @RequestBody CarBrand carBrandDetails) {
+                                   @Valid @RequestBody CarBrandDTO carBrandDetails) {
         return carBrandService.updateBrand(id, carBrandDetails);
     }
 
