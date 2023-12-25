@@ -14,7 +14,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -67,18 +66,14 @@ class JwtAuthenticationFilterTest {
 
     @Test
     @SneakyThrows
-    void shouldSendExceptionToResolverIfNoJwtInHeader() {
+    void shouldPassRequestToFilterIfNoJwtInHeader() {
         MockHttpServletRequest request = new MockHttpServletRequest();
         FilterChain mockFilterChain = Mockito.mock(FilterChain.class);
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         jwtAuthenticationFilter.doFilterInternal(request, response, mockFilterChain);
 
-        Mockito.verifyNoInteractions(mockFilterChain);
-        Mockito.verify(resolver).resolveException(Mockito.any(), Mockito.any(), Mockito.any(),
-                exceptionCaptor.capture());
-        RuntimeException captured = exceptionCaptor.getValue();
-        Assertions.assertThat(captured).isInstanceOf(AccessDeniedException.class);
+        Mockito.verify(mockFilterChain).doFilter(request, response);
     }
 
     @Test
