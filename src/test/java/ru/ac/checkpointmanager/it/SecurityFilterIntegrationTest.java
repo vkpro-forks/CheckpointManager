@@ -38,11 +38,11 @@ class SecurityFilterIntegrationTest extends PostgresTestContainersConfiguration 
     void shouldReturn403ErrorIfNotJwtInBearerFound() {
         mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL)
                         .header(TestUtils.AUTH_HEADER, ""))
-                .andExpect(MockMvcResultMatchers.status().isForbidden())
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized())
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_ERROR_CODE)
-                        .value(ErrorCode.FORBIDDEN.toString()))
+                        .value(ErrorCode.UNAUTHORIZED.toString()))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
-                        .value(Matchers.startsWithIgnoringCase("Jwt is not present")));
+                        .value(Matchers.startsWithIgnoringCase("Full")));
     }
 
     @Test

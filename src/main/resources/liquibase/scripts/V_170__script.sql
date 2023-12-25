@@ -1,4 +1,11 @@
 ALTER TABLE CROSSINGS
     ADD COLUMN
-        performed_at TIMESTAMP WITH TIME ZONE NOT NULL;
+        performed_at TIMESTAMP WITH TIME ZONE;
+GO
+UPDATE CROSSINGS
+SET performed_at=local_date_time
+WHERE performed_at IS NULL;
+GO
+ALTER TABLE CROSSINGS
+    ALTER COLUMN performed_at SET NOT NULL;
 GO
