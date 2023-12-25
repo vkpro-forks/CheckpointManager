@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.NonNull;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -61,18 +60,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain) throws ServletException, IOException {
         log.debug("Method {} was invoked", MethodLog.getMethodName());
 
-        if (request.getServletPath().contains("/api/v1/authentication")) {
-            log.debug("Authentication path '{}' requested, passing through the filter chain.", request.getRequestURI());
-            filterChain.doFilter(request, response);
-            return;
-        }
-
         Optional<String> jwtOpt = getJwtFromRequest(request);
-        if (jwtOpt.isEmpty()) {
+        if (jwtOpt.isEmpty()) { //если хедер пустой, то пускаем запрос дальше, будет работать наш фильтр (роль такого юзера Anonymous)
             log.debug("Authorization header doesn't contain bearer token");
-            handlerExceptionResolver
-                    .resolveException(request, response, null,
-                            new AccessDeniedException("Jwt is not present in header, access forbidden for this path"));
+            filterChain.doFilter(request, response);
             return;
         }
         String jwt = jwtOpt.get();
