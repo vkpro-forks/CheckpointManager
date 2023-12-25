@@ -50,8 +50,8 @@ services:
       - "6379:6379"
     restart: on-failure
     volumes:
-      - ./config/redis/redis.conf:/usr/local/etc/redis/redis.conf
-      - ./config:/data
+      - ./config/redis/redis.conf:/usr/local/etc/redis/redis.conf #copy config to redis
+      - redis-cache-data:/data
     command: redis-server /usr/local/etc/redis/redis.conf --requirepass admin
 
   # Сервис для хранения аватаров
@@ -63,3 +63,6 @@ services:
       - "8081:80"
     environment:
       - TZ=UTC
+
+volumes:
+  redis-cache-data:
