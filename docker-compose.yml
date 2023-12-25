@@ -12,6 +12,7 @@ services:
     depends_on:
       - postgres-db
       - avatars-storage
+      - redis-cache
     volumes:
       - ./logs:/logs # Монтирование локальной директории для логов
     environment:
