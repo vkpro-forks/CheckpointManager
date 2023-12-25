@@ -1,8 +1,18 @@
 package ru.ac.checkpointmanager.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.CreationTimestamp;
 import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
 import ru.ac.checkpointmanager.model.passes.Pass;
