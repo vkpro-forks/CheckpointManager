@@ -165,7 +165,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
      * @see UsernamePasswordAuthenticationToken
      */
     @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
     public LoginResponse authenticate(AuthenticationRequest request) {
         log.debug("Method {}, Username {}", MethodLog.getMethodName(), request.getEmail());
         Authentication authentication = authenticationManager.authenticate(
