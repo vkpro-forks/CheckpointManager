@@ -1,0 +1,28 @@
+databaseChangeLog:
+  - changeSet:
+      id: '216'
+      author: 'veselov.nikolay'
+      comment: 'tag before changing passes table for set null on delete territory, CHPBUG-10'
+      changes:
+        - tagDatabase:
+            tag: '216-tag-before'
+
+  - changeSet:
+      id: '216.1'
+      author: 'veselov.nikolay'
+      labels: 'passes, territory, CHPBUG, CHPBUG-10'
+      comment: 'changing passes table for set null on delete territory'
+      created: '2023-12-25'
+      changes:
+        - sqlFile:
+            dbms: postgresql
+            encoding: utf8
+            endDelimiter: GO
+            path: V_216__script.sql
+            relativeToChangelogFile: true
+            splitStatements: true
+            stripComments: true
+      rollback:
+        changesetId: '216'
+        changesetPath: liquibase/scripts/V_216__alter_table_passes_set_null_on_delete_territory.yaml
+        changesetAuthor: 'veselov.nikolay'

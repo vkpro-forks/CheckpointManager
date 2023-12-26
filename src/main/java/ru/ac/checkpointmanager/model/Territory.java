@@ -42,7 +42,7 @@ public class Territory {
     private LocalDate addedAt;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "territory")
+    @OneToMany(mappedBy = "territory", orphanRemoval = true)
     private Set<Checkpoint> checkpoints;
 
     @ManyToMany(fetch = FetchType.LAZY)
