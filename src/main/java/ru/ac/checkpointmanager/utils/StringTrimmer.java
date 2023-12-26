@@ -8,21 +8,22 @@ public final class StringTrimmer {
     /**
      * во всех полях типа String принятого объекта удаляет двойные пробелы,
      * а также пробелы в начале и конце строки
-     * @param object экземпляр любой из сушностей
+     * @param object экземпляр любой из сущностей
      */
     public static void trimThemAll(Object object) {
         List<Field> fields = Arrays.stream(object.getClass().getDeclaredFields()).toList();
         fields.forEach(field -> {
-            field.setAccessible(true); // Установите флаг доступности для приватных полей
-            if (field.getType() == String.class) { // Проверка типа поля
+            // Сделать приватные поля доступными
+            field.setAccessible(true);
+            if (field.getType() == String.class) {
                 try {
-                    String value = (String) field.get(object); // Получение значения поля из экземпляра объекта
-                    // Если значение не равно null, преобразуйте его к верхнему регистру и обновите поле
+                    // Получить значение поля из экземпляра объекта
+                    String value = (String) field.get(object);
                     if (value != null) {
                         field.set(object, value
-                                //удаляет двойные пробелы
+                                //удалить двойные пробелы
                                 .replaceAll("\\s+", " ")
-                                //удаляет пробелы в начале и в конце строки
+                                //удалить пробелы в начале и в конце строки
                                 .trim());
                     }
                 } catch (IllegalAccessException e) {
