@@ -19,11 +19,10 @@ public final class StringTrimmer {
                 try {
                     // Получить значение поля из экземпляра объекта
                     String value = (String) field.get(object);
+                    // Удалить лишние пробелы и обновить поле
                     if (value != null) {
                         field.set(object, value
-                                //удалить двойные пробелы
                                 .replaceAll("\\s+", " ")
-                                //удалить пробелы в начале и в конце строки
                                 .trim());
                     }
                 } catch (IllegalAccessException e) {
