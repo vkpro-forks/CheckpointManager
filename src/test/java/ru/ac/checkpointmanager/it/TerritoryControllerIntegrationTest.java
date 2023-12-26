@@ -104,7 +104,7 @@ class TerritoryControllerIntegrationTest extends RedisAndPostgresTestContainersC
         Optional<Territory> optionalTerritory = territoryRepository.findById(savedTerritory.getId());
         Assertions.assertThat(optionalTerritory).isEmpty();
         List<Pass> allPasses = passRepository.findAll();
-        Assertions.assertThat(allPasses).isNotEmpty();
+        Assertions.assertThat(allPasses).isEmpty();
     }
 
     @Test
@@ -133,7 +133,7 @@ class TerritoryControllerIntegrationTest extends RedisAndPostgresTestContainersC
         Optional<Territory> optionalTerritory = territoryRepository.findById(savedTerritory.getId());
         Assertions.assertThat(optionalTerritory).isEmpty();
         List<Pass> allPasses = passRepository.findAll();
-        Assertions.assertThat(allPasses).isNotEmpty();
+        Assertions.assertThat(allPasses).isEmpty();
         Optional<Checkpoint> optionalCheckpoint = checkpointRepository.findById(savedCheckPoint.getId());
         Assertions.assertThat(optionalCheckpoint).isEmpty();
     }

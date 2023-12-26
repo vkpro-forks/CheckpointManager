@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.exception.ExceptionUtils;
+import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
+import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.mapper.TerritoryMapper;
 import ru.ac.checkpointmanager.mapper.UserMapper;
 import ru.ac.checkpointmanager.model.Territory;
@@ -48,14 +50,22 @@ public class TerritoryServiceImpl implements TerritoryService {
     public TerritoryDTO findById(UUID territoryId) {
         log.debug(METHOD_CALLED_UUID_LOG, MethodLog.getMethodName(), territoryId);
         Territory territory = territoryRepository.findById(territoryId).orElseThrow(
-                () -> ExceptionUtils.logAndReturnTerritoryNotFoundException(territoryId));
+                () -> {
+                    log.warn(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
+                    return new TerritoryNotFoundException(ExceptionUtils.TERRITORY_NOT_FOUND_MSG
+                            .formatted(territoryId));
+                });
         return territoryMapper.toTerritoryDTO(territory);
     }
 
     @Override
     public Territory findTerritoryById(UUID territoryId) {
         return territoryRepository.findById(territoryId).orElseThrow(
-                () -> ExceptionUtils.logAndReturnTerritoryNotFoundException(territoryId));
+                () -> {
+                    log.warn(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
+                    return new TerritoryNotFoundException(ExceptionUtils.TERRITORY_NOT_FOUND_MSG
+                            .formatted(territoryId));
+                });
     }
 
     @Override
@@ -86,8 +96,11 @@ public class TerritoryServiceImpl implements TerritoryService {
         log.debug(METHOD_CALLED_UUID_LOG, MethodLog.getMethodName(), territoryId);
         trimThemAll(territoryDTO);
         Territory foundTerritory = territoryRepository.findById(territoryId).orElseThrow(
-                () -> ExceptionUtils.logAndReturnTerritoryNotFoundException(territoryId)
-        );
+                () -> {
+                    log.warn(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
+                    return new TerritoryNotFoundException(ExceptionUtils.TERRITORY_NOT_FOUND_MSG
+                            .formatted(territoryId));
+                });
 
         foundTerritory.setName(territoryDTO.getName());
         foundTerritory.setNote(territoryDTO.getNote());
@@ -101,9 +114,17 @@ public class TerritoryServiceImpl implements TerritoryService {
     public void attachUserToTerritory(UUID territoryId, UUID userId) {
         log.debug(METHOD_USER_TERR, MethodLog.getMethodName(), userId, territoryId);
         Territory territory = territoryRepository.findById(territoryId).orElseThrow(
-                () -> ExceptionUtils.logAndReturnTerritoryNotFoundException(territoryId));
+                () -> {
+                    log.warn(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
+                    return new TerritoryNotFoundException(ExceptionUtils.TERRITORY_NOT_FOUND_MSG
+                            .formatted(territoryId));
+                });
         User user = userRepository.findById(userId).orElseThrow(
-                () -> ExceptionUtils.logAndReturnUserNotFoundException(userId));
+                () -> {
+                    log.warn(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(userId));
+                    return new UserNotFoundException(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(userId));
+                });
+
         if (territoryRepository.checkUserTerritoryRelation(userId, territoryId)) {
             String message = String.format("User [%s] and territory [%s] are already connected", userId, territoryId);
             log.warn(message);
@@ -119,7 +140,8 @@ public class TerritoryServiceImpl implements TerritoryService {
     public void deleteTerritoryById(UUID territoryId) {
         log.debug(METHOD_CALLED_UUID_LOG, MethodLog.getMethodName(), territoryId);
         if (territoryRepository.findById(territoryId).isEmpty()) {
-            throw ExceptionUtils.logAndReturnTerritoryNotFoundException(territoryId);
+            log.warn(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
+            throw new TerritoryNotFoundException(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
         }
         log.info("Territory with [id: {}] was successfully deleted", territoryId);
         territoryRepository.deleteById(territoryId);
@@ -131,10 +153,16 @@ public class TerritoryServiceImpl implements TerritoryService {
         log.debug(METHOD_USER_TERR, MethodLog.getMethodName(), userId, territoryId);
 
         Territory territory = territoryRepository.findById(territoryId).orElseThrow(
-                () -> ExceptionUtils.logAndReturnTerritoryNotFoundException(territoryId));
+                () -> {
+                    log.warn(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
+                    return new TerritoryNotFoundException(ExceptionUtils.TERRITORY_NOT_FOUND_MSG
+                            .formatted(territoryId));
+                });
         User user = userRepository.findById(userId).orElseThrow(
-                () -> ExceptionUtils.logAndReturnUserNotFoundException(userId)
-        );
+                () -> {
+                    log.warn(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(userId));
+                    return new UserNotFoundException(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(userId));
+                });
         if (!territoryRepository.checkUserTerritoryRelation(userId, territoryId)) {
             String message = String.format("User [%s] and territory [%s] have no connection", userId, territoryId);
             log.warn(message);
