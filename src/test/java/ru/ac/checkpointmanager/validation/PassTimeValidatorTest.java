@@ -45,7 +45,7 @@ class PassTimeValidatorTest {
         PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTO();
         passUpdateDTO.setStartTime(LocalDateTime.now().plusHours(1));
         passUpdateDTO.setEndTime(LocalDateTime.now().plusHours(2));
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTO();
+        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
         passCreateDTO.setStartTime(LocalDateTime.now().plusHours(1));
         passCreateDTO.setEndTime(LocalDateTime.now().plusHours(2));
         return Stream.of(
@@ -55,7 +55,7 @@ class PassTimeValidatorTest {
     }
 
     private static Stream<Object> getIncorrectPassDtoArguments() {
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTO();
+        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
         passCreateDTO.setEndTime(LocalDateTime.now().plusHours(1));
         passCreateDTO.setStartTime(LocalDateTime.now().plusHours(2));
         PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTO();

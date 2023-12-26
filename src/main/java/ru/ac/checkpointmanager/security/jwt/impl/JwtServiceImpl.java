@@ -16,13 +16,14 @@ import ru.ac.checkpointmanager.security.jwt.JwtService;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.security.Key;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * Сервис для работы с JSON Web Token (JWT).
@@ -48,13 +49,14 @@ import java.util.stream.Collectors;
 @Slf4j
 public class JwtServiceImpl implements JwtService {
 
+    public static final String METHOD_TOKEN = "Method {} [Token {}]";
     @Value("${application.security.jwt.secret-key}")
     private String secretKey;
 
-    @Value("${application.security.jwt.expiration}") // 1 день
+    @Value("${application.security.jwt.expiration}")
     private long jwtExpiration;
 
-    @Value("${application.security.jwt.refresh-token.expiration}")  // 7 дней
+    @Value("${application.security.jwt.refresh-token.expiration}")
     private long refreshExpiration;
 
     /**
@@ -66,15 +68,12 @@ public class JwtServiceImpl implements JwtService {
      *
      * @param token JWT токен, из которого необходимо извлечь имя пользователя.
      * @return Имя пользователя, закодированное в токене.
+     * @throws InvalidTokenException if token doesn't contain username as subject
      */
     @Override
     public String extractUsername(String token) {
-        log.info("Method {} [Token {}]", MethodLog.getMethodName(), token);
-        String username = extractClaim(token, Claims::getSubject);
-        if (username == null || username.isBlank()) {
-            throw new InvalidTokenException("Username/email in JWT is null or empty");
-        }
-        return username;
+        log.debug(METHOD_TOKEN, MethodLog.getMethodName(), token);
+        return extractClaim(token, Claims::getSubject);
     }
 
     /**
@@ -89,8 +88,16 @@ public class JwtServiceImpl implements JwtService {
      */
     @Override
     public List<String> extractRole(String token) {
-        log.info("Method {} [Token {}]", MethodLog.getMethodName(), token);
-        return extractAllClaims(token).get("role", List.class);
+        log.info(METHOD_TOKEN, MethodLog.getMethodName(), token);
+        List<?> roles = extractAllClaims(token).get("role", List.class);
+        if (roles == null) {
+            return Collections.emptyList();
+        }
+
+        return roles.stream()
+                .filter(Objects::nonNull)
+                .map(Object::toString)
+                .toList();
     }
 
     /**
@@ -105,8 +112,12 @@ public class JwtServiceImpl implements JwtService {
      */
     @Override
     public UUID extractId(String token) {
-        log.info("Method {} [Token {}]", MethodLog.getMethodName(), token);
-        return extractAllClaims(token).get("id", UUID.class);
+        log.info(METHOD_TOKEN, MethodLog.getMethodName(), token);
+        String id = extractAllClaims(token).get("id", String.class);
+        if (id == null) {
+            throw new InvalidTokenException("Jwt hasn't ID claim");//TODO move to validator too
+        }
+        return UUID.fromString(id);
     }
 
     /**
@@ -131,85 +142,64 @@ public class JwtServiceImpl implements JwtService {
     /**
      * Генерирует JWT токен для указанных пользовательских данных.
      * <p>
-     * Метод предназначен для создания токена при аутентификации и регистрации пользователя.
-     * Использует стандартный набор утверждений.
+     * Этот метод предназначен для создания токена JWT в процессе аутентификации пользователя.
+     * Он включает стандартный набор утверждений (claims), таких, как имя пользователя и роли.
+     * В случае, если пользовательские данные являются экземпляром класса {@link User},
+     * дополнительно добавляется идентификатор пользователя.
      * <p>
+     * Метод возвращает сгенерированный токен, подписанный с использованием алгоритма HS256.
      *
      * @param userDetails Объект {@link UserDetails}, содержащий информацию о пользователе.
-     * @return Строка с сгенерированным JWT токеном.
+     * @return Строка со сгенерированным JWT токеном.
      */
     @Override
-    public String generateToken(UserDetails userDetails) {
-        log.debug("Method {}, User {}", MethodLog.getMethodName(), userDetails.getUsername());
-        return generateToken(new HashMap<>(), userDetails);
-    }
-
-    /**
-     * Генерирует JWT токен с дополнительными утверждениями для указанных пользовательских данных.
-     * <p>
-     * Этот метод позволяет добавить дополнительные утверждения в токен.
-     * <p>
-     *
-     * @param extraClaims Карта с дополнительными утверждениями.
-     * @param userDetails Объект {@link UserDetails}, содержащий информацию о пользователе.
-     * @return Строка с сгенерированным JWT токеном.
-     */
-    @Override
-    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-        log.info("Method {} was invoked", MethodLog.getMethodName());
-        return buildToken(extraClaims, userDetails, jwtExpiration);
-    }
-
-    /**
-     * Генерирует токен обновления для указанных пользовательских данных.
-     * <p>
-     * Метод предназначен для создания токена обновления, который используется при регистрации
-     * и аутентификации пользователя для последующего обновления основного токена доступа.
-     * <p>
-     *
-     * @param userDetails Объект {@link UserDetails}, содержащий информацию о пользователе.
-     * @return Строка с сгенерированным токеном обновления.
-     */
-    @Override
-    public String generateRefreshToken(UserDetails userDetails) {
+    public String generateAccessToken(UserDetails userDetails) {
         log.debug("Method {}, User {}", MethodLog.getMethodName(), userDetails.getUsername());
         Map<String, Object> extraClaims = new HashMap<>();
-        extraClaims.put("refresh", true);
-        return buildToken(extraClaims, userDetails, refreshExpiration);
-    }
-
-    /**
-     * Создаёт JWT токен для аутентификации пользователя.
-     * <p>
-     * Этот метод генерирует JWT токен на основе предоставленных утверждений (claims),
-     * деталей пользователя и заданного времени истечения. В токен включаются роли пользователя
-     * и его идентификатор (UUID), если он доступен. Токен подписывается с использованием
-     * заданного ключа подписи и алгоритма HS256.
-     * <p>
-     *
-     * @param extraClaims Дополнительные утверждения, которые необходимо включить в токен.
-     * @param userDetails Объект, содержащий информацию о пользователе, для которого создаётся токен.
-     * @param expiration  Время истечения срока действия токена в миллисекундах.
-     * @return Строковое представление JWT токена.
-     * @see Jwts
-     */
-    private String buildToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration) {
-        log.debug("Method {}, User {}", MethodLog.getMethodName(), userDetails.getUsername());
+        User user = (User) userDetails;
         List<String> rolesList = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
+                .toList();
         extraClaims.put("role", rolesList);
-
-        if (userDetails instanceof User user) {
-            extraClaims.put("id", user.getId());
-        }
+        extraClaims.put("id", user.getId());
 
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    /**
+     * Генерирует токен обновления для указанных пользовательских данных.
+     * <p>
+     * Этот метод предназначен для создания токена обновления, который выдается пользователям
+     * вместе с основным токеном доступа. Токен обновления используется для получения нового токена доступа,
+     * когда срок действия текущего токена доступа истекает. Это обеспечивает непрерывный доступ
+     * пользователя к системе без необходимости повторной аутентификации.
+     * Токен содержит уникальный идентификатор пользователя (если userDetails является экземпляром {@link User})
+     * и дополнительный claim, определяющий его как токен обновления.
+     * <p>
+     * Токен подписывается с использованием алгоритма HS256 и имеет установленное время жизни.
+     *
+     * @param userDetails Объект {@link UserDetails}, содержащий информацию о пользователе.
+     * @return Строка со сгенерированным токеном обновления.
+     */
+    @Override
+    public String generateRefreshToken(UserDetails userDetails) {
+        log.debug("Method {}, User {}", MethodLog.getMethodName(), userDetails.getUsername());
+        Map<String, Object> extraClaims = new HashMap<>();
+        extraClaims.put("refresh", true);
+
+        return Jwts
+                .builder()
+                .setClaims(extraClaims)
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + refreshExpiration))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

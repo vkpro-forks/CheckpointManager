@@ -29,7 +29,6 @@ public class PassMapper {
     }
 
     public Pass toPass(PassCreateDTO passCreateDTO) {
-
         if (passCreateDTO.getCar() != null) {
             if (passCreateDTO.getCar().getId() == null) {
                 passCreateDTO.getCar().setId(UUID.randomUUID());
@@ -38,6 +37,14 @@ public class PassMapper {
         } else {
             return modelMapper.map(passCreateDTO, PassWalk.class);
         }
+    }
+
+    public PassAuto toPassAuto(PassCreateDTO passCreateDTO) {
+        return modelMapper.map(passCreateDTO, PassAuto.class);
+    }
+
+    public PassWalk toPassWalk(PassCreateDTO passCreateDTO) {
+        return modelMapper.map(passCreateDTO, PassWalk.class);
     }
 
     public Pass toPass(PassUpdateDTO passUpdateDTO, User user, Territory territory) {
@@ -75,4 +82,5 @@ public class PassMapper {
         };
         modelMapper.addMappings(passWalkMapCreate);
     }
+
 }

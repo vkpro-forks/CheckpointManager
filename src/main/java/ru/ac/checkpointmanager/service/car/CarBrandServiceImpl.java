@@ -3,6 +3,7 @@ package ru.ac.checkpointmanager.service.car;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.ac.checkpointmanager.dto.CarBrandDTO;
 import ru.ac.checkpointmanager.exception.CarBrandAlreadyExistsException;
 import ru.ac.checkpointmanager.exception.CarBrandNotFoundException;
 import ru.ac.checkpointmanager.model.car.CarBrand;
@@ -34,13 +35,15 @@ public class CarBrandServiceImpl implements CarBrandService {
 
 
     @Override
-    public CarBrand addBrand(CarBrand brand) {
-        Optional<CarBrand> carBrandOptional = carBrandRepository.findByBrand(brand.getBrand());
+    public CarBrand addBrand(CarBrandDTO carBrand) {
+        Optional<CarBrand> carBrandOptional = carBrandRepository.findByBrand(carBrand.getBrand());
         if (carBrandOptional.isPresent()) {
-            log.warn(CAR_BRAND_EXISTS.formatted(brand.getBrand()));
-            throw new CarBrandAlreadyExistsException(CAR_BRAND_EXISTS.formatted(brand.getBrand()));
+            log.warn(CAR_BRAND_EXISTS.formatted(carBrand.getBrand()));
+            throw new CarBrandAlreadyExistsException(CAR_BRAND_EXISTS.formatted(carBrand.getBrand()));
         }
-        return carBrandRepository.save(brand);
+        CarBrand carBrandEntity = new CarBrand();
+        carBrandEntity.setBrand(carBrand.getBrand());
+        return carBrandRepository.save(carBrandEntity);
     }
 
 
@@ -58,12 +61,17 @@ public class CarBrandServiceImpl implements CarBrandService {
 
 
     @Override
-    public CarBrand updateBrand(Long brandId, CarBrand carBrand) {
+    public CarBrand updateBrand(Long brandId, CarBrandDTO carBrand) {
         CarBrand updateCarBrand = carBrandRepository.findById(brandId)
                 .orElseThrow(() -> {
                     log.warn(CAR_BRAND_NOT_FOUND_WITH_ID_MSG + " {}", brandId);
                     return new CarBrandNotFoundException(CAR_BRAND_NOT_FOUND_WITH_ID_MSG + " " + brandId);
                 });
+        Optional<CarBrand> carBrandOptional = carBrandRepository.findByBrand(carBrand.getBrand());
+        if (carBrandOptional.isPresent()) {
+            log.warn(CAR_BRAND_EXISTS.formatted(carBrand.getBrand()));
+            throw new CarBrandAlreadyExistsException(CAR_BRAND_EXISTS.formatted(carBrand.getBrand()));
+        }
         updateCarBrand.setBrand(carBrand.getBrand());
         CarBrand saved = carBrandRepository.save(updateCarBrand);
         log.info("Car brand with [id: {}] successfully updated", brandId);

@@ -2,6 +2,7 @@ package ru.ac.checkpointmanager.service.territories;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
@@ -110,6 +111,7 @@ public class TerritoryServiceImpl implements TerritoryService {
         return territoryMapper.toTerritoryDTO(foundTerritory);
     }
 
+    @CacheEvict(value = "user-territory", key = "#userId")
     @Override
     public void attachUserToTerritory(UUID territoryId, UUID userId) {
         log.debug(METHOD_USER_TERR, MethodLog.getMethodName(), userId, territoryId);
@@ -146,6 +148,7 @@ public class TerritoryServiceImpl implements TerritoryService {
         territoryRepository.deleteById(id);
     }
 
+    @CacheEvict(value = "user-territory", key = "#userId")
     @Override
     public void detachUserFromTerritory(UUID territoryId, UUID userId) {
         log.debug(METHOD_USER_TERR, MethodLog.getMethodName(), userId, territoryId);

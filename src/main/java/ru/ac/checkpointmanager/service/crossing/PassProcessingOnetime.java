@@ -23,9 +23,9 @@ public class PassProcessingOnetime implements PassProcessing {
         if (currentDirection == Direction.OUT) {
             pass.setStatus(PassStatus.COMPLETED);
             log.info(PASS_STATUS_CHANGED_LOG, pass.getId(), pass.getStatus());
-        } else if (pass.getCrossings().size() > 0) {
             //по-хорошему сделать в crossingRepository метод поиска пересечений по id пропуска, использовать его здесь
             //вместо pass.getCrossings(), соответственно из энтити Pass убрать поле crossings, ибо больше нигде не нужно
+        } else if (!pass.getCrossings().isEmpty()) {
             log.warn(PASS_ALREADY_USED.formatted(pass.getId()));
             throw new EntranceWasAlreadyException(PASS_ALREADY_USED.formatted(pass.getId()));
         }

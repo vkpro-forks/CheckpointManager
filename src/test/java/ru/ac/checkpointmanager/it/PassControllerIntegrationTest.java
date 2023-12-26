@@ -18,9 +18,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import ru.ac.checkpointmanager.config.CacheTestConfiguration;
 import ru.ac.checkpointmanager.config.CorsTestConfiguration;
 import ru.ac.checkpointmanager.config.OpenAllEndpointsTestConfiguration;
+import ru.ac.checkpointmanager.config.RedisAndPostgresTestContainersConfiguration;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
@@ -35,7 +35,6 @@ import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
 import ru.ac.checkpointmanager.repository.car.CarRepository;
-import ru.ac.checkpointmanager.testcontainers.PostgresContainersConfig;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 
@@ -47,10 +46,10 @@ import java.util.UUID;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
 @AutoConfigureMockMvc
-@Import({OpenAllEndpointsTestConfiguration.class, CorsTestConfiguration.class, CacheTestConfiguration.class})
+@Import({OpenAllEndpointsTestConfiguration.class, CorsTestConfiguration.class})
 @ActiveProfiles("test")
 @WithMockUser(roles = {"ADMIN"})
-class PassControllerIntegrationTest extends PostgresContainersConfig {
+class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfiguration {
 
     @Autowired
     MockMvc mockMvc;
@@ -90,13 +89,13 @@ class PassControllerIntegrationTest extends PostgresContainersConfig {
         territory.setUsers(List.of(savedUser));
         Territory savedTerritory = territoryRepository.saveAndFlush(territory);
         CarBrand carBrand = TestUtils.getCarBrand();
-        CarBrand savedCarBrand = carBrandRepository.saveAndFlush(carBrand);
+        carBrandRepository.saveAndFlush(carBrand);
 
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTO();
+        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
         passCreateDTO.setUserId(savedUser.getId());
         passCreateDTO.setTerritoryId(savedTerritory.getId());
         passCreateDTO.getCar().setId(null);
-        passCreateDTO.getCar().setBrand(savedCarBrand);//set saved car brand, if no car brand in DB, 404 will be thrown
+        passCreateDTO.getCar().setBrand(TestUtils.getCarBrandDTO());//set saved car brand, if no car brand in DB, 404 will be thrown
         String passCreateDtoString = TestUtils.jsonStringFromObject(passCreateDTO);
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
@@ -129,10 +128,10 @@ class PassControllerIntegrationTest extends PostgresContainersConfig {
         car.setBrand(savedCarBrand);
         car.setId(TestUtils.getCarDto().getId());
         Car savedCar = carRepository.saveAndFlush(car);//save car and repo change its id
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTO();
+        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
         passCreateDTO.setUserId(savedUser.getId());
         passCreateDTO.setTerritoryId(savedTerritory.getId());
-        passCreateDTO.getCar().setBrand(savedCarBrand);//set saved car brand, if no car brand in DB, 404 will be thrown
+        passCreateDTO.getCar().setBrand(TestUtils.getCarBrandDTO());//set saved car brand, if no car brand in DB, 404 will be thrown
         passCreateDTO.getCar().setId(savedCar.getId());
         passCreateDTO.getCar().setLicensePlate(savedCar.getLicensePlate());
         String passCreateDtoString = TestUtils.jsonStringFromObject(passCreateDTO);
@@ -168,10 +167,10 @@ class PassControllerIntegrationTest extends PostgresContainersConfig {
         car.setBrand(savedCarBrand);
         car.setId(TestUtils.getCarDto().getId());
         Car savedCar = carRepository.saveAndFlush(car);//save car and repo change its id
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTO();
+        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
         passCreateDTO.setUserId(savedUser.getId());
         passCreateDTO.setTerritoryId(savedTerritory.getId());
-        passCreateDTO.getCar().setBrand(savedCarBrand);//set saved car brand, if no car brand in DB, 404 will be thrown
+        passCreateDTO.getCar().setBrand(TestUtils.getCarBrandDTO());//set saved car brand, if no car brand in DB, 404 will be thrown
         passCreateDTO.getCar().setId(null);//don't pass ID of car, pass only license plate
         passCreateDTO.getCar().setLicensePlate(savedCar.getLicensePlate());
         String passCreateDtoString = TestUtils.jsonStringFromObject(passCreateDTO);
@@ -212,11 +211,11 @@ class PassControllerIntegrationTest extends PostgresContainersConfig {
         territory.setUsers(List.of(savedUser));
         Territory savedTerritory = territoryRepository.saveAndFlush(territory);
         CarBrand carBrand = TestUtils.getCarBrand();
-        CarBrand savedCarBrand = carBrandRepository.saveAndFlush(carBrand);
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTO();
+        carBrandRepository.saveAndFlush(carBrand);
+        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
         passCreateDTO.setUserId(savedUser.getId());
         passCreateDTO.setTerritoryId(savedTerritory.getId());
-        passCreateDTO.getCar().setBrand(savedCarBrand);//set saved car brand, if no car brand in DB, 404 will be thrown
+        passCreateDTO.getCar().setBrand(TestUtils.getCarBrandDTO());//set saved car brand, if no car brand in DB, 404 will be thrown
         passCreateDTO.getCar().setId(TestUtils.CAR_ID);
         passCreateDTO.getCar().setLicensePlate(TestUtils.LICENSE_PLATE);
         String passCreateDtoString = TestUtils.jsonStringFromObject(passCreateDTO);
@@ -260,20 +259,13 @@ class PassControllerIntegrationTest extends PostgresContainersConfig {
         car.setId(TestUtils.getCarDto().getId());
         Car savedCar = carRepository.saveAndFlush(car);
 
-        PassAuto pass = new PassAuto();
-        pass.setId(TestUtils.PASS_ID);
-        pass.setTypeTime(PassTypeTime.ONETIME);
-        pass.setStartTime(LocalDateTime.now());
-        pass.setEndTime(LocalDateTime.now().plusHours(5));
+        PassAuto pass = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
         pass.setStatus(passStatus);
-        pass.setTerritory(savedTerritory);
-        pass.setUser(savedUser);
-        pass.setCar(savedCar);
-        passRepository.saveAndFlush(pass);
+        PassAuto savedPass = passRepository.saveAndFlush(pass);
         List<Pass> allPasses = passRepository.findAll();
         Assertions.assertThat(allPasses).hasSize(1);//check if only one pass here
 
-        mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.PASS_URL + "/" + TestUtils.PASS_ID))
+        mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.PASS_URL + "/" + savedPass.getId()))
                 .andExpect(MockMvcResultMatchers.status().isNoContent());
 
         List<Pass> passesAfterDelete = passRepository.findAll();
@@ -316,7 +308,7 @@ class PassControllerIntegrationTest extends PostgresContainersConfig {
         List<Pass> allPasses = passRepository.findAll();
         Assertions.assertThat(allPasses).hasSize(5);
 
-        mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.PASS_URL + "/" + passes.get(0).getId()))
+        mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.PASS_URL + "/" + allPasses.get(0).getId()))
                 .andExpect(MockMvcResultMatchers.status().isNoContent());
 
         List<Pass> passesAfterDelete = passRepository.findAll();

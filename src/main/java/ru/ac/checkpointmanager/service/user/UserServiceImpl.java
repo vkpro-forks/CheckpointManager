@@ -2,7 +2,10 @@ package ru.ac.checkpointmanager.service.user;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSendException;
 import org.springframework.security.access.AccessDeniedException;
@@ -10,18 +13,20 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import ru.ac.checkpointmanager.dto.ChangeEmailRequest;
-import ru.ac.checkpointmanager.dto.ChangePasswordRequest;
 import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
+import ru.ac.checkpointmanager.dto.user.AuthenticationResponse;
+import ru.ac.checkpointmanager.dto.user.ChangeEmailRequest;
+import ru.ac.checkpointmanager.dto.user.ChangePasswordRequest;
+import ru.ac.checkpointmanager.dto.user.ConfirmChangeEmail;
 import ru.ac.checkpointmanager.dto.user.UserPutDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
+import ru.ac.checkpointmanager.exception.ObjectAlreadyExistsException;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.mapper.TerritoryMapper;
 import ru.ac.checkpointmanager.mapper.UserMapper;
-import ru.ac.checkpointmanager.model.TemporaryUser;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.avatar.Avatar;
@@ -29,14 +34,17 @@ import ru.ac.checkpointmanager.model.enums.PhoneNumberType;
 import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
+import ru.ac.checkpointmanager.security.AuthFacadeImpl;
+import ru.ac.checkpointmanager.security.AuthFacade;
+import ru.ac.checkpointmanager.security.jwt.JwtService;
 import ru.ac.checkpointmanager.service.email.EmailService;
 import ru.ac.checkpointmanager.service.phone.PhoneService;
 import ru.ac.checkpointmanager.utils.FieldsValidation;
 import ru.ac.checkpointmanager.utils.MethodLog;
-import ru.ac.checkpointmanager.utils.SecurityUtils;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -54,7 +62,7 @@ import java.util.UUID;
  * @see User
  * @see UserRepository
  * @see EmailService
- * @see SecurityUtils
+ * @see AuthFacadeImpl
  */
 @Service
 @RequiredArgsConstructor
@@ -70,9 +78,12 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PhoneRepository phoneRepository;
     private final PasswordEncoder passwordEncoder;
-    private final TemporaryUserService temporaryUserService;
     private final EmailService emailService;
     private final PhoneService phoneService;
+    private final AuthFacade authFacade;
+    private final RedisCacheManager cacheManager;
+    private final JwtService jwtService;
+
 
     /**
      * Находит пользователя по его уникальному идентификатору (UUID).
@@ -88,7 +99,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(value = "user", key = "#id") //на этом эндпоинте проверяла работу кэширования, остальное кэширование - отдельная таска
+    @Cacheable(value = "user", key = "#id")
     public UserResponseDTO findById(UUID id) {
         log.debug(METHOD_UUID, MethodLog.getMethodName(), id);
         User foundUser = findUserById(id);
@@ -116,6 +127,7 @@ public class UserServiceImpl implements UserService {
      * @throws TerritoryNotFoundException если территории для указанного пользователя не найдены.
      * @see TerritoryNotFoundException
      */
+    @Cacheable(value = "user-territory", key = "#userId")
     @Override
     public List<TerritoryDTO> findTerritoriesByUserId(UUID userId) {
         log.debug(METHOD_UUID, MethodLog.getMethodName(), userId);
@@ -135,6 +147,7 @@ public class UserServiceImpl implements UserService {
      * @return Коллекция {@link UserResponseDTO}, представляющая найденных пользователей.
      * @throws UserNotFoundException если пользователи с именем, содержащим указанную строку, не найдены.
      */
+    @Cacheable(value = "user", key = "#name")
     @Override
     public Collection<UserResponseDTO> findByName(String name) {
         log.info("Method {} was invoked", MethodLog.getMethodName());
@@ -157,6 +170,7 @@ public class UserServiceImpl implements UserService {
      * @see UserPutDTO
      * @see UserResponseDTO
      */
+    @CacheEvict(value = "user", key = "#userPutDTO.id")
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public UserResponseDTO updateUser(UserPutDTO userPutDTO) {
@@ -212,12 +226,12 @@ public class UserServiceImpl implements UserService {
      *
      * @param request Объект {@link ChangePasswordRequest}, содержащий текущий и новый пароли.
      * @throws IllegalStateException если текущий пароль не соответствует или новый пароль и его подтверждение не совпадают.
-     * @see SecurityUtils
+     * @see AuthFacadeImpl
      */
     @Override
     @Transactional
     public void changePassword(ChangePasswordRequest request) {
-        User user = SecurityUtils.getCurrentUser();
+        User user = authFacade.getCurrentUser();
         log.debug("Method {}, Username - {}", MethodLog.getMethodName(), user.getUsername());
 
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
@@ -241,10 +255,9 @@ public class UserServiceImpl implements UserService {
      * Метод выполняет следующие действия:
      * <ol>
      * <li>Проверяет, соответствует ли текущая электронная почта пользователя электронной почте, указанной в запросе.</li>
-     * <li>Создает временного пользователя {@link TemporaryUser} на основе данных основного пользователя.</li>
      * <li>Генерирует уникальный токен подтверждения и связывает его с временным пользователем.</li>
      * <li>Отправляет электронное письмо с подтверждением на новую электронную почту пользователя.</li>
-     * <li>Сохраняет временного пользователя в базе данных.</li>
+     * <li>Сохраняет временного пользователя в кэше.</li>
      * </ol>
      * <p>
      * В случае ошибки при отправке электронного письма генерируется исключение {@link MailSendException}.
@@ -255,34 +268,33 @@ public class UserServiceImpl implements UserService {
      * @throws IllegalStateException если текущая электронная почта пользователя не соответствует указанной в запросе.
      * @throws MailSendException     если происходит ошибка при отправке электронного письма.
      */
+    @CachePut(value = "email", key = "#result.verifiedToken")
     @Override
     @Transactional
-    public String changeEmail(ChangeEmailRequest request) {
-        User user = SecurityUtils.getCurrentUser();
+    public ConfirmChangeEmail changeEmail(ChangeEmailRequest request) {
+        User user = authFacade.getCurrentUser();
         log.debug("[Method {}], [Username - {}]", MethodLog.getMethodName(), user.getUsername());
 
         if (userRepository.findByEmail(request.getNewEmail()).isPresent()) {
             log.warn("[Email {}] already taken", request.getNewEmail());
-            throw new IllegalStateException(String.format("Email %s already taken", request.getNewEmail()));
+            throw new ObjectAlreadyExistsException(String.format("Email %s already taken", request.getNewEmail()));
         }
 
-        TemporaryUser tempUser = userMapper.toTemporaryUser(user);
-        tempUser.setPreviousEmail(user.getEmail());
-        tempUser.setEmail(request.getNewEmail());
+        ConfirmChangeEmail confirmEmail = userMapper.toConfirmChangeEmail(request);
+        confirmEmail.setPreviousEmail(user.getEmail());
 
         String token = UUID.randomUUID().toString();
-        tempUser.setVerifiedToken(token);
+        confirmEmail.setVerifiedToken(token);
 
         try {
-            emailService.sendEmailConfirm(tempUser.getEmail(), token);
+            emailService.sendEmailConfirm(confirmEmail.getNewEmail(), token);
             log.info("Email confirmation message was sent");
         } catch (MailException e) {
             log.error("Email sending failed");
             throw new MailSendException("Email sending failed", e);
         }
 
-        temporaryUserService.create(tempUser);
-        return token;
+        return confirmEmail;
     }
 
     /**
@@ -290,10 +302,10 @@ public class UserServiceImpl implements UserService {
      * <p>
      * Метод выполняет следующие действия:
      * <ol>
-     * <li>Ищет временного пользователя {@link TemporaryUser} по предоставленному токену.</li>
+     * <li>Ищет временного пользователя по предоставленному токену.</li>
      * <li>Если временный пользователь найден, находит основного пользователя по предыдущей электронной почте.</li>
      * <li>Обновляет электронную почту основного пользователя на новую, указанную во временном пользователе.</li>
-     * <li>Удаляет временного пользователя из базы данных после успешного обновления.</li>
+     * <li>Удаляет временного пользователя из кэшах после успешного обновления.</li>
      * </ol>
      * <p>
      * В случае ошибки, когда токен недействителен или истек, выводится сообщение об ошибке.
@@ -302,24 +314,30 @@ public class UserServiceImpl implements UserService {
      * @param token уникальный токен подтверждения, используемый для идентификации временного пользователя.
      * @throws UserNotFoundException если пользователь с указанной предыдущей электронной почтой не найден.
      */
+    @CacheEvict(value = "email", key = "#token")
     @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    public void confirmEmail(String token) {
+    @Transactional
+    public AuthenticationResponse confirmEmail(String token) {
         log.debug("[Method {}], [Temporary token {}]", MethodLog.getMethodName(), token);
-        TemporaryUser tempUser = temporaryUserService.findByVerifiedToken(token);
-        if (tempUser != null) {
-            String previousEmail = tempUser.getPreviousEmail();
+        Optional<ConfirmChangeEmail> confirmEmail = Optional.ofNullable(
+                        cacheManager.getCache("email"))
+                .map(cache -> cache.get(token, ConfirmChangeEmail.class));
+        if (confirmEmail.isPresent()) {
+            String previousEmail = confirmEmail.get().getPreviousEmail();
+            String newEmail = confirmEmail.get().getNewEmail();
             User user = userRepository.findByEmail(previousEmail).orElseThrow(
                     () -> {
                         log.warn("User with [email %s] not found".formatted(previousEmail));
                         return new UserNotFoundException("User with [email %s] not found".formatted(previousEmail));
                     });
-            user.setEmail(tempUser.getEmail());
+            user.setEmail(newEmail);
             userRepository.save(user);
-            log.info("User email updated from {} to {}, [UUID {}]", previousEmail, user.getEmail(), user.getId());
+            log.info("User email updated from {} to {}, [UUID {}]", previousEmail, newEmail, user.getId());
+            Objects.requireNonNull(cacheManager.getCache("user")).evict(user.getId());
 
-            temporaryUserService.delete(tempUser);
-            log.info("[Temporary user {}] deleted", tempUser.getId());
+            String accessToken = jwtService.generateAccessToken(user);
+            String refreshToken = jwtService.generateRefreshToken(user);
+            return new AuthenticationResponse(accessToken, refreshToken);
         } else {
             log.warn("Invalid or expired token");
             throw new EmailVerificationTokenException("Invalid or expired token");//TODO handle
@@ -341,6 +359,7 @@ public class UserServiceImpl implements UserService {
      * @throws AccessDeniedException если у пользователя, выполняющего операцию, нет прав на изменение роли.
      * @throws IllegalStateException если пользователь уже имеет указанную роль.
      */
+    @CacheEvict(value = "user", key = "#id")
     @Override
     @Transactional
     public void changeRole(UUID id, Role role) {
@@ -350,7 +369,7 @@ public class UserServiceImpl implements UserService {
                     log.warn(USER_NOT_FOUND_MSG.formatted(id));
                     return new UserNotFoundException(USER_NOT_FOUND_MSG.formatted(id));
                 });
-        User user = SecurityUtils.getCurrentUser();
+        User user = authFacade.getCurrentUser();
         if (role == Role.ADMIN && !user.getRole().equals(Role.ADMIN)) {
             log.error("Users with role {} do not have permission to change the role to ADMIN", user.getRole());
             throw new AccessDeniedException("You do not have permission to change the role to ADMIN");
@@ -384,6 +403,7 @@ public class UserServiceImpl implements UserService {
      * @throws UserNotFoundException если пользователь с заданным идентификатором не найден.
      * @throws IllegalStateException если статус блокировки пользователя уже соответствует указанному значению.
      */
+    @CacheEvict(value = "user", key = "#id")
     @Override
     @Transactional
     public UserResponseDTO updateBlockStatus(UUID id, Boolean isBlocked) {
@@ -415,6 +435,7 @@ public class UserServiceImpl implements UserService {
      * @throws UserNotFoundException если пользователь с указанным идентификатором не найден.
      * @throws IllegalStateException если пользователь уже заблокирован.
      */
+    @CacheEvict(value = "user", key = "#id")
     @Override
     @Transactional
     public void blockById(UUID id) {
@@ -442,6 +463,7 @@ public class UserServiceImpl implements UserService {
      * @throws UserNotFoundException если пользователь с указанным идентификатором не найден.
      * @throws IllegalStateException если пользователь уже разблокирован.
      */
+    @CacheEvict(value = "user", key = "#id")
     @Override
     @Transactional
     public void unblockById(UUID id) {
@@ -467,6 +489,7 @@ public class UserServiceImpl implements UserService {
      * @param id Идентификатор пользователя, которого необходимо удалить.
      * @throws UserNotFoundException если пользователь с указанным идентификатором не найден.
      */
+    @CacheEvict(value = "user", key = "#id")
     @Override
     @Transactional
     public void deleteUser(UUID id) {
@@ -531,5 +554,4 @@ public class UserServiceImpl implements UserService {
     public User findByPassId(UUID passId) {
         return userRepository.findByPassId(passId);
     }
-
 }

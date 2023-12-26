@@ -17,9 +17,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import ru.ac.checkpointmanager.config.CacheTestConfiguration;
 import ru.ac.checkpointmanager.config.CorsTestConfiguration;
 import ru.ac.checkpointmanager.config.OpenAllEndpointsTestConfiguration;
+import ru.ac.checkpointmanager.config.PostgresTestContainersConfiguration;
+import ru.ac.checkpointmanager.dto.CarBrandDTO;
+import ru.ac.checkpointmanager.config.RedisAndPostgresTestContainersConfiguration;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
@@ -31,7 +33,6 @@ import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
 import ru.ac.checkpointmanager.repository.car.CarRepository;
-import ru.ac.checkpointmanager.testcontainers.PostgresContainersConfig;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 
@@ -41,10 +42,10 @@ import java.util.Optional;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
 @AutoConfigureMockMvc
-@Import({OpenAllEndpointsTestConfiguration.class, CorsTestConfiguration.class, CacheTestConfiguration.class})
+@Import({OpenAllEndpointsTestConfiguration.class, CorsTestConfiguration.class})
 @ActiveProfiles("test")
 @WithMockUser(roles = {"ADMIN"})
-class CarControllerIntegrationTest extends PostgresContainersConfig {
+class CarControllerIntegrationTest extends RedisAndPostgresTestContainersConfiguration {
 
     @Autowired
     MockMvc mockMvc;
@@ -79,7 +80,7 @@ class CarControllerIntegrationTest extends PostgresContainersConfig {
         CarBrand savedCarBrand = saveCarBrandInRepo();
         CarDTO carDTO = new CarDTO();
         carDTO.setLicensePlate(TestUtils.LICENSE_PLATE);
-        carDTO.setBrand(savedCarBrand);
+        carDTO.setBrand(TestUtils.getCarBrandDTO());
         String carDtoString = TestUtils.jsonStringFromObject(carDTO);
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CAR_URL)
@@ -146,7 +147,7 @@ class CarControllerIntegrationTest extends PostgresContainersConfig {
         Car savedCar = carRepository.saveAndFlush(car);
         CarDTO carDto = TestUtils.getCarDto();
         carDto.setLicensePlate(newLicensePlate);
-        carDto.setBrand(carBrand);
+        carDto.setBrand(TestUtils.getCarBrandDTO());
         String carDtoString = TestUtils.jsonStringFromObject(carDto);
 
         mockMvc.perform(MockMvcRequestBuilders.put(UrlConstants.CAR_URL + "/" + savedCar.getId())
@@ -170,7 +171,7 @@ class CarControllerIntegrationTest extends PostgresContainersConfig {
         Car savedCar = carRepository.saveAndFlush(car);
         CarDTO carDto = TestUtils.getCarDto();
         carDto.setLicensePlate(newLicensePlate);
-        carDto.setBrand(savedAnotherCarBrand);
+        carDto.setBrand(new CarBrandDTO(evilCarBrand));
         String carDtoString = TestUtils.jsonStringFromObject(carDto);
 
         mockMvc.perform(MockMvcRequestBuilders.put(UrlConstants.CAR_URL + "/" + savedCar.getId())

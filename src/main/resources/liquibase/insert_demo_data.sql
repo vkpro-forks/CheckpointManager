@@ -87,8 +87,8 @@ DO $$
         INSERT INTO passes ( id, user_id, status, type_time, territory_id, added_at
                            , start_time, end_time, comment, car_id, visitor_id, dtype, favorite, expected_direction)
 
-               -- АКТИВНЫЕ ПРОПУСКА НА НЕДЕЛЮ, без пересечений, с ними можно проверять пересечения
-               -- автомобильный разовый
+        -- АКТИВНЫЕ ПРОПУСКА НА НЕДЕЛЮ, без пересечений, с ними можно проверять пересечения
+        -- автомобильный разовый
         VALUES (pass1_id, user1_id, 'ACTIVE', 'ONETIME', ter1_id, nowDT
                , nowDT, nowDT + interval '7 day', 'ACTIVE FOR WEEK 1', car1_id, null, 'AUTO', true, 'OUT'),
 
@@ -122,18 +122,17 @@ DO $$
                (pass8_id, user2_id, 'DELAYED', 'ONETIME', ter1_id, nowDT, nowDT + interval '1 minute'
                , nowDT + interval '1 day', 'should be ACTIVE', null, visitor2_id, 'WALK', false, 'IN');
 
-        INSERT INTO crossings (pass_id, checkpoint_id, local_date_time, direction)
-        VALUES (pass1_id, chp1_id, nowDT, 'IN'),
+        INSERT INTO crossings (pass_id, checkpoint_id, performed_at, local_date_time, direction)
+        VALUES (pass1_id, chp1_id, now() - interval '5 second', nowDT, 'IN'),
 
-               (pass2_id, chp2_id, nowDT + interval '1 second', 'IN'),
-               (pass2_id, chp2_id, nowDT + interval '2 second', 'OUT'),
-               (pass2_id, chp2_id, nowDT + interval '3 second', 'IN'),
-               (pass2_id, chp2_id, nowDT + interval '4 second', 'OUT'),
-               (pass2_id, chp2_id, nowDT + interval '5 second', 'IN'),
+               (pass2_id, chp2_id, now() + interval '1 second', nowDT + interval '1 second', 'IN'),
+               (pass2_id, chp2_id, now() + interval '2 second', nowDT + interval '2 second', 'OUT'),
+               (pass2_id, chp2_id, now() + interval '3 second', nowDT + interval '3 second', 'IN'),
+               (pass2_id, chp2_id, now() + interval '4 second', nowDT + interval '4 second', 'OUT'),
+               (pass2_id, chp2_id, now() + interval '5 second', nowDT + interval '5 second', 'IN'),
 
-               (pass6_id, chp1_id, nowDT, 'IN'),
+               (pass6_id, chp1_id, now() - interval '5 second', nowDT, 'IN'),
 
-               (pass7_id, chp1_id, nowDT, 'IN'),
-               (pass7_id, chp1_id, nowDT + interval '1 second', 'OUT');
-    END $$;
-
+               (pass7_id, chp1_id, now() - interval '3 second', nowDT, 'IN'),
+               (pass7_id, chp1_id, now() - interval '4 second', nowDT + interval '1 second', 'OUT');
+END $$;

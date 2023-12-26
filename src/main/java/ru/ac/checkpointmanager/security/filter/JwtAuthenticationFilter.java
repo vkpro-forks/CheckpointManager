@@ -14,20 +14,22 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import ru.ac.checkpointmanager.configuration.CustomAuthenticationToken;
+import org.springframework.web.servlet.HandlerExceptionResolver;
+import ru.ac.checkpointmanager.exception.InvalidTokenException;
+import ru.ac.checkpointmanager.model.User;
+import ru.ac.checkpointmanager.security.CustomAuthenticationToken;
 import ru.ac.checkpointmanager.security.jwt.JwtService;
 import ru.ac.checkpointmanager.security.jwt.JwtValidator;
-import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * Фильтр для аутентификации JWT.
@@ -49,6 +51,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final JwtValidator jwtValidator;
     private final UserDetailsService userDetailsService;
+    private final HandlerExceptionResolver handlerExceptionResolver;
 
     @Override
     protected void doFilterInternal(
@@ -57,36 +60,36 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain) throws ServletException, IOException {
         log.debug("Method {} was invoked", MethodLog.getMethodName());
 
-        if (request.getServletPath().contains("/api/v1/authentication")) {
-            log.debug("Authentication path '{}' requested, passing through the filter chain.", request.getRequestURI());
-            filterChain.doFilter(request, response);
-            return;
-        }
-
         Optional<String> jwtOpt = getJwtFromRequest(request);
-        if (jwtOpt.isEmpty()) {
+        if (jwtOpt.isEmpty()) { //если хедер пустой, то пускаем запрос дальше, будет работать наш фильтр (роль такого юзера Anonymous)
+            log.debug("Authorization header doesn't contain bearer token");
             filterChain.doFilter(request, response);
             return;
         }
-
         String jwt = jwtOpt.get();
         try {
             if (StringUtils.isNotBlank(jwt) && jwtValidator.validateAccessToken(jwt)) {
                 String userEmail = jwtService.extractUsername(jwt);
-                if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                    UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
-                    if (jwtValidator.isUsernameValid(jwt, userDetails)) {
-                        setAuthenticationContext(request, jwt, userDetails);
-                    }
+                if (SecurityContextHolder.getContext().getAuthentication() == null) {
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail); //will throw exception
+                    //TODO rework, auth manager must handle it
+                    setAuthenticationContext(request, jwt, userDetails);
                 }
             } else {
-                log.warn("Invalid JWT token [{}]", jwt);
+                log.debug("Invalid JWT token [{}]", jwt);
+                handlerExceptionResolver
+                        .resolveException(request, response, null, new InvalidTokenException("Jwt is invalid"));
+                return;
             }
         } catch (ExpiredJwtException exception) {
-            log.warn("Jwt is expired");
+            log.debug("Jwt is expired");
+            handlerExceptionResolver.resolveException(request, response, null, exception);
+            return;
+        } catch (UsernameNotFoundException exception) {
+            log.debug("User with email specified in JWT not found");
+            handlerExceptionResolver.resolveException(request, response, null, exception);
             return;
         }
-
         filterChain.doFilter(request, response);
     }
 
@@ -100,16 +103,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private void setAuthenticationContext(HttpServletRequest request, String jwt, UserDetails userDetails) {
         Collection<? extends GrantedAuthority> authorities = jwtService.extractRole(jwt).stream()
-                .map(SimpleGrantedAuthority::new).collect(Collectors.toList());
-
-        UUID userId = null;
-        if (userDetails instanceof User) {
-            userId = ((User) userDetails).getId();
-        }
-
+                .map(SimpleGrantedAuthority::new).toList();
+        User castedUser = (User) userDetails; //у нас других объектов реализующих юзер дитейлс нет, поэтому кастим сразу
+        UUID userId = castedUser.getId();
         CustomAuthenticationToken authToken = new CustomAuthenticationToken(
                 userDetails, null, userId, authorities);
-
         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authToken);
         log.info("Authentication set for user '{}'", userDetails.getUsername());

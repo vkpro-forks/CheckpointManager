@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import ru.ac.checkpointmanager.dto.CarBrandDTO;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.CheckpointDTO;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
@@ -41,7 +42,7 @@ import java.util.stream.Stream;
 class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandlerBasicTestConfig {
 
     private static final String TERRITORY = "Territory";
-    public static final String PHONE = "Phone";
+    private static final String PHONE = "Phone";
 
     @Autowired
     UserRepository userRepository;
@@ -123,7 +124,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
         Car savedCar = carRepository.saveAndFlush(car);
         CarDTO carDto = TestUtils.getCarDto();
         carDto.setLicensePlate(newLicensePlate);
-        carDto.setBrand(anotherCarBrand);
+        carDto.setBrand(new CarBrandDTO(evilCarBrand));
         String carDtoString = TestUtils.jsonStringFromObject(carDto);
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
@@ -294,7 +295,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
     @SneakyThrows
     void shouldHandleTerritoryNotFoundExceptionForAddPass() {
         User savedUser = userRepository.save(TestUtils.getUser());
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTO();
+        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
         passCreateDTO.setUserId(savedUser.getId());
         String passDtoCreate = TestUtils.jsonStringFromObject(passCreateDTO);
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)

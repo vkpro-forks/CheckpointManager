@@ -9,25 +9,29 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.cache.Cache;
+import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.mail.MailSendException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import ru.ac.checkpointmanager.dto.ChangeEmailRequest;
-import ru.ac.checkpointmanager.dto.ChangePasswordRequest;
 import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
+import ru.ac.checkpointmanager.dto.user.ChangeEmailRequest;
+import ru.ac.checkpointmanager.dto.user.ChangePasswordRequest;
+import ru.ac.checkpointmanager.dto.user.ConfirmChangeEmail;
 import ru.ac.checkpointmanager.dto.user.UserPutDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
 import ru.ac.checkpointmanager.mapper.TerritoryMapper;
 import ru.ac.checkpointmanager.mapper.UserMapper;
-import ru.ac.checkpointmanager.model.TemporaryUser;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.avatar.Avatar;
 import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
+import ru.ac.checkpointmanager.security.AuthFacade;
+import ru.ac.checkpointmanager.security.jwt.JwtService;
 import ru.ac.checkpointmanager.service.email.EmailService;
 import ru.ac.checkpointmanager.service.phone.PhoneService;
 import ru.ac.checkpointmanager.util.TestUtils;
@@ -56,11 +60,17 @@ class UserServiceImplTest {
     @Mock
     private PasswordEncoder passwordEncoder;
     @Mock
-    private TemporaryUserService temporaryUserService;
+    AuthFacade authenticationFacade;
     @Mock
     private EmailService emailService;
     @Mock
     private PhoneService phoneService;
+    @Mock
+    private RedisCacheManager cacheManager;
+    @Mock
+    private Cache cache;
+    @Mock
+    private JwtService jwtService;
 
     @InjectMocks
     UserServiceImpl userService;
@@ -104,7 +114,8 @@ class UserServiceImplTest {
         List<TerritoryDTO> result = userService.findTerritoriesByUserId(userId);
 
         Assertions.assertThat(result).isNotEmpty();
-        Assertions.assertThat(territories.size()).isEqualTo(territoryDTOs.size());
+
+        Assertions.assertThat(territories).hasSameSizeAs(territoryDTOs);
         Mockito.verify(userRepository).findTerritoriesByUserId(userId);
         Mockito.verify(territoryMapper).toTerritoriesDTO(territories);
     }
@@ -132,8 +143,7 @@ class UserServiceImplTest {
 
         Collection<UserResponseDTO> result = userService.findByName(anyString());
         Assertions.assertThat(result).isNotEmpty();
-        Assertions.assertThat(users).hasSize(1);
-        Assertions.assertThat(users.size()).isEqualTo(userResponseDTOS.size());
+        Assertions.assertThat(users).hasSameSizeAs(userResponseDTOS).hasSize(1);
         Mockito.verify(userRepository).findUserByFullNameContainingIgnoreCase(anyString());
         Mockito.verify(userMapper).toUserResponseDTOs(users);
     }
@@ -190,8 +200,8 @@ class UserServiceImplTest {
         String newPassword = request.getNewPassword();
         User user = TestUtils.getUser();
         user.setPassword(TestUtils.PASSWORD);
-        TestUtils.setSecurityContext(user);
 
+        Mockito.when(authenticationFacade.getCurrentUser()).thenReturn(user);
         Mockito.when(passwordEncoder.matches(user.getPassword(), request.getCurrentPassword())).thenReturn(true);
         Mockito.when(passwordEncoder.encode(newPassword)).thenReturn(newPassword);
 
@@ -204,8 +214,8 @@ class UserServiceImplTest {
     @Test
     void shouldThrowExceptionIfPassedPasswordDoesntMatchCurrent() {
         ChangePasswordRequest request = TestUtils.getChangePasswordRequest();
-        TestUtils.setSecurityContext(TestUtils.getUser());
 
+        Mockito.when(authenticationFacade.getCurrentUser()).thenReturn(TestUtils.getUser());
         Mockito.when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
 
         Assertions.assertThatExceptionOfType(IllegalStateException.class)
@@ -218,8 +228,8 @@ class UserServiceImplTest {
     void changePasswordWhenConfirmationDoNotMatchThrowsException() {
         ChangePasswordRequest request = TestUtils.getChangePasswordRequest();
         request.setConfirmationPassword("1");
-        TestUtils.setSecurityContext(TestUtils.getUser());
 
+        Mockito.when(authenticationFacade.getCurrentUser()).thenReturn(TestUtils.getUser());
         Mockito.when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
         Assertions.assertThatExceptionOfType(IllegalStateException.class)
                 .isThrownBy(() -> userService.changePassword(request))
@@ -229,25 +239,26 @@ class UserServiceImplTest {
     @Test
     void successfulChangeEmailRequest() {
         ChangeEmailRequest request = TestUtils.getChangeEmailRequest();
+        ConfirmChangeEmail confirm = TestUtils.getConfirmChangeEmail();
         User user = TestUtils.getUser();
-        TestUtils.setSecurityContext(user);
-        TemporaryUser temporaryUser = TestUtils.getTemporaryUser();
 
+        Mockito.when(authenticationFacade.getCurrentUser()).thenReturn(user);
         Mockito.when(userRepository.findByEmail(request.getNewEmail())).thenReturn(Optional.empty());
-        Mockito.when(userMapper.toTemporaryUser(user)).thenReturn(temporaryUser);
+        Mockito.when(userMapper.toConfirmChangeEmail(request)).thenReturn(confirm);
+//        Mockito.when(cacheManager.getCache("email")).thenReturn(cache); //TODO проверить кэш в интеграционном тесте
 
         userService.changeEmail(request);
         Mockito.verify(userRepository).findByEmail(anyString());
-        Mockito.verify(userMapper).toTemporaryUser(user);
         Mockito.verify(emailService).sendEmailConfirm(anyString(), anyString());
+//        Mockito.verify(cache).put(confirmChangeEmail.getVerifiedToken(), confirmChangeEmail);
     }
 
     @Test
     void changeEmailShouldThrowExceptionWhenEmailTaken() {
         ChangeEmailRequest request = TestUtils.getChangeEmailRequest();
         User user = TestUtils.getUser();
-        TestUtils.setSecurityContext(user);
 
+        Mockito.when(authenticationFacade.getCurrentUser()).thenReturn(user);
         Mockito.when(userRepository.findByEmail(request.getNewEmail())).thenReturn(Optional.ofNullable(user));
 
         Assertions.assertThatExceptionOfType(IllegalStateException.class)
@@ -260,11 +271,10 @@ class UserServiceImplTest {
     @Test
     void changeEmailThrowsMailSendException() {
         User user = TestUtils.getUser();
-        TestUtils.setSecurityContext(user);
-        TemporaryUser temporaryUser = TestUtils.getTemporaryUser();
         ChangeEmailRequest request = TestUtils.getChangeEmailRequest();
 
-        Mockito.when(userMapper.toTemporaryUser(user)).thenReturn(temporaryUser);
+        Mockito.when(authenticationFacade.getCurrentUser()).thenReturn(user);
+        Mockito.when(userMapper.toConfirmChangeEmail(request)).thenReturn(TestUtils.getConfirmChangeEmail());
         Mockito.doThrow(new MailSendException("failed")).when(emailService).sendEmailConfirm(anyString(), anyString());
 
         Assertions.assertThatExceptionOfType(MailSendException.class)
@@ -275,25 +285,25 @@ class UserServiceImplTest {
     @Test
     void confirmEmailSuccessfulConfirmationUpdatesUserEmail() {
         User user = TestUtils.getUser();
-        TemporaryUser tempUser = TestUtils.getTemporaryUser();
-        tempUser.setPreviousEmail(user.getEmail());
+        ConfirmChangeEmail changeEmail = TestUtils.getConfirmChangeEmail();
         String token = TestUtils.EMAIL_STRING_TOKEN;
 
-        Mockito.when(temporaryUserService.findByVerifiedToken(token)).thenReturn(tempUser);
-        Mockito.when(userRepository.findByEmail(tempUser.getPreviousEmail())).thenReturn(Optional.of(user));
+        Mockito.when(cacheManager.getCache("email")).thenReturn(cache);
+        Mockito.when(cacheManager.getCache("user")).thenReturn(cache);
+        Mockito.when(cache.get(Mockito.eq(token), Mockito.eq(ConfirmChangeEmail.class))).thenReturn(changeEmail);
+        Mockito.when(userRepository.findByEmail(changeEmail.getPreviousEmail())).thenReturn(Optional.of(user));
+        Mockito.when(jwtService.generateAccessToken(user)).thenReturn("mockAccessToken");
+        Mockito.when(jwtService.generateRefreshToken(user)).thenReturn("mockRefreshToken");
 
         userService.confirmEmail(token);
 
-        Assertions.assertThat(user.getEmail()).isEqualTo(tempUser.getEmail());
-        Mockito.verify(temporaryUserService).findByVerifiedToken(token);
+        Assertions.assertThat(user.getEmail()).isEqualTo(changeEmail.getNewEmail());
         Mockito.verify(userRepository).save(user);
-        Mockito.verify(temporaryUserService).delete(tempUser);
     }
 
     @Test
     void confirmEmailInvalidOrExpiredTokenNoActionTaken() {
         String token = "invalidToken";
-        when(temporaryUserService.findByVerifiedToken(token)).thenReturn(null);
 
         Assertions.assertThatThrownBy(
                         () -> userService.confirmEmail(token))
@@ -301,20 +311,21 @@ class UserServiceImplTest {
                 .hasMessageContaining("Invalid or expired token");
 
         Mockito.verify(userRepository, Mockito.never()).save(ArgumentMatchers.any(User.class));
-        Mockito.verify(temporaryUserService, Mockito.never()).delete(ArgumentMatchers.any(TemporaryUser.class));
     }
 
     @Test
     void confirmEmailUserNotFoundThrowsUserNotFoundException() {
         String token = "validToken";
-        TemporaryUser tempUser = TestUtils.getTemporaryUser();
-        when(temporaryUserService.findByVerifiedToken(token)).thenReturn(tempUser);
-        when(userRepository.findByEmail(tempUser.getPreviousEmail())).thenReturn(Optional.empty());
+        ConfirmChangeEmail changeEmail = TestUtils.getConfirmChangeEmail();
+
+        Mockito.when(cacheManager.getCache("email")).thenReturn(cache);
+        Mockito.when(cache.get(Mockito.eq(token), Mockito.eq(ConfirmChangeEmail.class))).thenReturn(changeEmail);
+        when(userRepository.findByEmail(changeEmail.getPreviousEmail())).thenReturn(Optional.empty());
 
         Assertions.assertThatThrownBy(
                         () -> userService.confirmEmail(token))
                 .isInstanceOf(EntityNotFoundException.class)
-                .hasMessageContaining("User with [email %s] not found", tempUser.getPreviousEmail());
+                .hasMessageContaining("User with [email %s] not found", changeEmail.getPreviousEmail());
 
     }
 
@@ -324,13 +335,13 @@ class UserServiceImplTest {
         User user = TestUtils.getUser();
         user.setRole(Role.USER);
         UUID userId = user.getId();
-        TestUtils.setSecurityContext(userInContext);
 
+        Mockito.when(authenticationFacade.getCurrentUser()).thenReturn(userInContext);
         Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
         userService.changeRole(userId, Role.MANAGER);
 
-        Assertions.assertThat(Role.MANAGER).isEqualTo(user.getRole());
+        Assertions.assertThat(user.getRole()).isEqualTo(Role.MANAGER);
         Mockito.verify(userRepository).save(user);
     }
 
@@ -341,8 +352,8 @@ class UserServiceImplTest {
         User user = TestUtils.getUser();
         user.setRole(Role.USER);
         UUID userId = user.getId();
-        TestUtils.setSecurityContext(userInContext);
 
+        Mockito.when(authenticationFacade.getCurrentUser()).thenReturn(userInContext);
         Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         Assertions.assertThatExceptionOfType(AccessDeniedException.class)
                 .isThrownBy(() -> userService.changeRole(userId, Role.ADMIN))
@@ -356,8 +367,8 @@ class UserServiceImplTest {
         User user = TestUtils.getUser();
         user.setRole(Role.ADMIN);
         UUID userId = user.getId();
-        TestUtils.setSecurityContext(userInContext);
 
+        Mockito.when(authenticationFacade.getCurrentUser()).thenReturn(userInContext);
         Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         Assertions.assertThatExceptionOfType(AccessDeniedException.class)
                 .isThrownBy(() -> userService.changeRole(userId, Role.USER))
@@ -371,8 +382,8 @@ class UserServiceImplTest {
         User user = TestUtils.getUser();
         user.setRole(Role.USER);
         UUID userId = user.getId();
-        TestUtils.setSecurityContext(userInContext);
 
+        Mockito.when(authenticationFacade.getCurrentUser()).thenReturn(userInContext);
         Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         Assertions.assertThatExceptionOfType(IllegalStateException.class)
                 .isThrownBy(() -> userService.changeRole(userId, Role.USER))
@@ -533,7 +544,7 @@ class UserServiceImplTest {
         Collection<String> result = userService.findUsersPhoneNumbers(userId);
 
         Assertions.assertThat(result).isNotEmpty().contains(phone);
-        Assertions.assertThat(phoneNumbers.size()).isEqualTo(result.size());
+        Assertions.assertThat(phoneNumbers).hasSameSizeAs(result);
         Mockito.verify(phoneRepository).getNumbersByUserId(userId);
     }
 

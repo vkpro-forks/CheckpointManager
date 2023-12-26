@@ -9,6 +9,7 @@ services:
     depends_on:
       - postgres-db
       - avatars-storage
+      - redis-cache
     volumes:
       - logs:/path/to/remote/logs # Использование именованного тома для логов
     environment:

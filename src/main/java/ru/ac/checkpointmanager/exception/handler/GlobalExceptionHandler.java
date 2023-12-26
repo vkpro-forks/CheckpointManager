@@ -1,5 +1,6 @@
 package ru.ac.checkpointmanager.exception.handler;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
@@ -7,8 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.mail.MailSendException;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -133,19 +133,29 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
-    @ExceptionHandler(DateOfBirthFormatException.class)
-    public ProblemDetail handleDateOfBirthFormatException(DateOfBirthFormatException e) {
-        ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
-        problemDetail.setTitle("Bad format of birth date"); //FIXME no usages, may be would be better to have VALIDATION
-        problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ProblemDetail handleAuthenticationException(AuthenticationException e) {
+        ProblemDetail problemDetail = createProblemDetail(HttpStatus.UNAUTHORIZED, e);
+        problemDetail.setTitle("Authentication error");
+        problemDetail.setProperty(ERROR_CODE, ErrorCode.UNAUTHORIZED.toString());
         log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }
 
-    @ExceptionHandler(IllegalStateException.class)
-    public ProblemDetail handleIllegalStateException(IllegalStateException e) {
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ProblemDetail handleExpiredJwtException(ExpiredJwtException e) {
+        ProblemDetail problemDetail = createProblemDetail(HttpStatus.FORBIDDEN, e);
+        problemDetail.setTitle("Jwt expired, send refresh token");
+        problemDetail.setProperty(ERROR_CODE, ErrorCode.TOKEN_EXPIRED.toString());
+        log.debug(LOG_MSG, e.getClass());
+        return problemDetail;
+    }
+
+    @ExceptionHandler(DateOfBirthFormatException.class)
+    public ProblemDetail handleDateOfBirthFormatException(DateOfBirthFormatException e) {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
-        problemDetail.setTitle("Illegal state exception occurred");//FIXME need new more suitable exception
+        problemDetail.setTitle("Bad format of birth date"); //FIXME no usages, may be would be better to have VALIDATION
         problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
         log.debug(LOG_MSG, e.getClass());
         return problemDetail;
@@ -156,15 +166,6 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.CONFLICT, e);
         problemDetail.setTitle("Phone number already exists");
         problemDetail.setProperty(ERROR_CODE, ErrorCode.CONFLICT.toString());
-        log.debug(LOG_MSG, e.getClass());
-        return problemDetail;
-    }
-
-    @ExceptionHandler(UsernameNotFoundException.class)
-    public ProblemDetail handleUsernameNotFoundException(UsernameNotFoundException e) {
-        ProblemDetail problemDetail = createProblemDetail(HttpStatus.NOT_FOUND, e);
-        problemDetail.setTitle("Username not found");
-        problemDetail.setProperty(ERROR_CODE, ErrorCode.NOT_FOUND.toString());
         log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }
@@ -188,20 +189,11 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
-    @ExceptionHandler(BadCredentialsException.class)
-    public ProblemDetail handleBadCredentialsException(BadCredentialsException e) {
-        ProblemDetail problemDetail = createProblemDetail(HttpStatus.UNAUTHORIZED, e);
-        problemDetail.setTitle("Bad credentials");
-        problemDetail.setProperty(ERROR_CODE, ErrorCode.UNAUTHORIZED.toString());
-        log.debug(LOG_MSG, e.getClass());
-        return problemDetail;
-    }
-
     @ExceptionHandler(InvalidTokenException.class)
     public ProblemDetail handleInvalidTokenException(InvalidTokenException e) {
-        ProblemDetail problemDetail = createProblemDetail(HttpStatus.UNAUTHORIZED, e);
+        ProblemDetail problemDetail = createProblemDetail(HttpStatus.FORBIDDEN, e);
         problemDetail.setTitle("Jwt is invalid");
-        problemDetail.setProperty(ERROR_CODE, ErrorCode.UNAUTHORIZED.toString());
+        problemDetail.setProperty(ERROR_CODE, ErrorCode.FORBIDDEN.toString());
         log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }

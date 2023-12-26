@@ -7,15 +7,15 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.session.SessionManagementFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -37,31 +37,38 @@ public class SecurityConfig {
     @Autowired
     public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter,
                           AuthenticationProvider authenticationProvider,
-                          @Lazy CorsFilter corsFilter) {
+                          @Lazy CorsFilter corsFilter, AccessDeniedHandler customAccessDeniedHandler, AuthenticationEntryPoint authenticationEntryPoint) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.authenticationProvider = authenticationProvider;
         this.corsFilter = corsFilter;
+        this.customAccessDeniedHandler = customAccessDeniedHandler;
+        this.authenticationEntryPoint = authenticationEntryPoint;
     }
 
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
     private final CorsFilter corsFilter;
 
+    private final AccessDeniedHandler customAccessDeniedHandler;
+
+    private final AuthenticationEntryPoint authenticationEntryPoint;
+
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        log.info("filter chain started");
+        log.debug("filter chain started");
         CharacterEncodingFilter filter = new CharacterEncodingFilter();
         filter.setEncoding("UTF-8");
         filter.setForceEncoding(true);
 
         http
                 .addFilterBefore(corsFilter, SessionManagementFilter.class) // Добавляем CorsFilter перед SessionManagementFilter
-                .exceptionHandling(exceptionHandling -> exceptionHandling
-                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
-                ) //  код обрабатывает ошибки аутентификации
+                .exceptionHandling(ex -> {
+                    ex.accessDeniedHandler(customAccessDeniedHandler);
+                    ex.authenticationEntryPoint(authenticationEntryPoint);
+                }) //пока эти друзья не отрабатывают т.к. исключения бросаются не из фильтра, но чуть позже заставлю их работать
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests((authorize) ->
+                .authorizeHttpRequests(authorize ->
                         authorize
                                 .requestMatchers("/api/v1/authentication/**", "/api/v1/confirm/**",
                                         "/swagger-ui/**", "/v3/api-docs/**",
@@ -76,6 +83,7 @@ public class SecurityConfig {
                         logout.logoutUrl("/logout")
                                 .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext())
                 );
+
         return http.build();
     }
 

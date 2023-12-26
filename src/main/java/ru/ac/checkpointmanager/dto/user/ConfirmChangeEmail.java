@@ -1,6 +1,5 @@
-package ru.ac.checkpointmanager.dto;
+package ru.ac.checkpointmanager.dto.user;
 
-import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,8 +7,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChangeEmailRequest {
+public class ConfirmChangeEmail {
 
-    @Email
+    private String previousEmail;
     private String newEmail;
+    private String verifiedToken;
 }

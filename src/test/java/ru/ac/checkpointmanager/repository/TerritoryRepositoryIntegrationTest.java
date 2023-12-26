@@ -12,9 +12,9 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import ru.ac.checkpointmanager.config.CorsTestConfiguration;
+import ru.ac.checkpointmanager.config.PostgresTestContainersConfiguration;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
-import ru.ac.checkpointmanager.testcontainers.PostgresContainersConfig;
 import ru.ac.checkpointmanager.util.TestUtils;
 
 import java.util.List;
@@ -24,7 +24,7 @@ import java.util.List;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")
 @Slf4j
-class TerritoryRepositoryIntegrationTest extends PostgresContainersConfig {
+class TerritoryRepositoryIntegrationTest extends PostgresTestContainersConfiguration {
 
     @Autowired
     UserRepository userRepository;

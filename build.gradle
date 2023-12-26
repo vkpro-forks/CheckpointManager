@@ -20,7 +20,7 @@ bootRun {
 
 
 group = 'ru.ac'
-version = '0.1.11-SNAPSHOT-TEST'
+version = '0.1.13-SNAPSHOT-TEST'
 
 java {
     sourceCompatibility = '17'
@@ -60,9 +60,11 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.hamcrest:hamcrest-library:2.2'
     testImplementation 'junit:junit:4.13.1'
-    testImplementation 'org.testcontainers:junit-jupiter:1.18.3'
+    testImplementation 'org.testcontainers:junit-jupiter:1.19.3'
+    testImplementation "com.redis:testcontainers-redis:2.0.1"
     testImplementation 'org.testcontainers:postgresql:1.18.3'
     testImplementation 'org.instancio:instancio-junit:3.5.0'
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
 }
 
 encryptProperties {

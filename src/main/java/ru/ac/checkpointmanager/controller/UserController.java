@@ -26,9 +26,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import ru.ac.checkpointmanager.dto.ChangeEmailRequest;
-import ru.ac.checkpointmanager.dto.ChangePasswordRequest;
+import ru.ac.checkpointmanager.dto.user.ChangeEmailRequest;
+import ru.ac.checkpointmanager.dto.user.ChangePasswordRequest;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
+import ru.ac.checkpointmanager.dto.user.ConfirmChangeEmail;
 import ru.ac.checkpointmanager.dto.user.UserPutDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.model.enums.Role;
@@ -94,7 +95,8 @@ public class UserController {
                     description = "NOT_FOUND: территории у переданного пользователя не найдены"
             )
     })
-    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
+    @PreAuthorize("@authFacade.isUserIdMatch(#userId) or " +
+                  "hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/{userId}/territories")
     public List<TerritoryDTO> getTerritoriesByUser(
             @Parameter(description = "Уникальный идентификатор пользователя", required = true)
@@ -165,7 +167,8 @@ public class UserController {
                     description = "NOT_FOUND: пользователь не найден"
             )
     })
-    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
+    @PreAuthorize("@authFacade.isUserIdMatch(#id) or " +
+                  "hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/numbers/{id}")
     public Collection<String> findUsersPhoneNumbers(
             @Parameter(description = "Уникальный идентификатор пользователя", required = true)
@@ -200,7 +203,7 @@ public class UserController {
                     description = "NOT_FOUND: пользователь не найден"
             )
     })
-    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER')")
+    @PreAuthorize("@authFacade.isUserIdMatch(#userPutDTO.id) or hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @PutMapping
     public UserResponseDTO updateUser(@Valid @RequestBody UserPutDTO userPutDTO) {
         return userService.updateUser(userPutDTO);
@@ -246,7 +249,7 @@ public class UserController {
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @PatchMapping("/email")
-    public String changeEmail(@RequestBody @Valid ChangeEmailRequest request) {
+    public ConfirmChangeEmail changeEmail(@RequestBody @Valid ChangeEmailRequest request) {
         return userService.changeEmail(request);
     }
 
@@ -387,7 +390,7 @@ public class UserController {
                     description = "NOT_FOUND: пользователь не найден"
             )
     })
-    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER')")
+    @PreAuthorize("@authFacade.isUserIdMatch(#id) or hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@Parameter(description = "Уникальный идентификатор пользователя", required = true)

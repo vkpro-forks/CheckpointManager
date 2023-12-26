@@ -22,7 +22,8 @@ public class CarDTO {
     @Pattern(regexp = "^[АВЕКМНОРСТУХавекмнорстухA-Za-z0-9]+$", message = "Invalid characters in license plate")
     private String licensePlate;
 
-    private CarBrand brand;//можно передать авто без бренда?
+    @NotNull
+    private CarBrandDTO brand;
 
     private String phone;//можно передать авто без телефона?
 
