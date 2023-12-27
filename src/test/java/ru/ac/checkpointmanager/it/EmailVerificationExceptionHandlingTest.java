@@ -24,25 +24,25 @@ class EmailVerificationExceptionHandlingTest extends GlobalExceptionHandlerBasic
                         .get(UrlConstants.CONFIRM_REG_URL)
                         .param("token", TestUtils.EMAIL_STRING_TOKEN))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
+        checkEmailVerificationTokenErrorFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldHandleUserNotFoundExceptionForConfirmEmail() {
+        log.info(TestMessage.PERFORM_HTTP, HttpMethod.GET.name(), UrlConstants.CONFIRM_EMAIL_URL);
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                        .get(UrlConstants.CONFIRM_EMAIL_URL)
+                        .param("token", TestUtils.EMAIL_STRING_TOKEN))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+        checkEmailVerificationTokenErrorFields(resultActions);
+    }
+
+    private static void checkEmailVerificationTokenErrorFields(ResultActions resultActions) throws Exception {
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_ERROR_CODE)
                         .value(ErrorCode.BAD_REQUEST.toString()))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_TITLE)
                         .value(Matchers.startsWith("Verification")));
     }
-
-    /*@Test
-    @SneakyThrows
-    void shouldHandleUserNotFoundExceptionForConfirmEmail() {
-        Cache emailCache = cacheManager.getCache("email");
-        ConfirmChangeEmail changeEmail = TestUtils.getConfirmChangeEmail();
-        assert emailCache != null;
-        emailCache.put(changeEmail.getVerifiedToken(), changeEmail);
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
-                        .get(UrlConstants.CONFIRM_EMAIL_URL)
-                        .param("token", changeEmail.getVerifiedToken()))
-                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
-                        .value(Matchers.startsWith(USER)));
-        TestUtils.checkNotFoundFields(resultActions);
-    }*/
 
 }
