@@ -1,14 +1,17 @@
 package ru.ac.checkpointmanager.dto.passes;
 
+import jakarta.validation.GroupSequence;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.groups.Default;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.VisitorDTO;
 import ru.ac.checkpointmanager.model.passes.PassTypeTime;
 import ru.ac.checkpointmanager.validation.annotation.CarOrVisitorFieldsCheck;
+import ru.ac.checkpointmanager.validation.annotation.CustomCheck;
 import ru.ac.checkpointmanager.validation.annotation.PassTimeCheck;
 
 import java.time.LocalDateTime;
@@ -17,7 +20,8 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @CarOrVisitorFieldsCheck
-@PassTimeCheck
+@PassTimeCheck(groups = CustomCheck.class)
+@GroupSequence({Default.class, CustomCheck.class})
 public class PassCreateDTO {
 
     @NotNull
@@ -32,8 +36,6 @@ public class PassCreateDTO {
     @NotNull
     private UUID territoryId;
 
-    //FIXME кажется, @PassTimeCheck работает раньше, чем аннотации над полями,
-    // и падает NPE при отсутсвии полей startTime или endTime
     @NotNull
     private LocalDateTime startTime;
 

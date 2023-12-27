@@ -132,6 +132,20 @@ class PassControllerValidationIntegrationTest {
         checkStartEndTimeFields(resultActions);
     }
 
+    @Test
+    @SneakyThrows
+    void shouldReturnValidationErrorIfStartOrEndTimeOfPassIsNull() {
+        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
+        passCreateDTO.setCar(new CarDTO());
+        passCreateDTO.setEndTime(null);
+        passCreateDTO.setStartTime(LocalDateTime.now().plusHours(3));
+        String passDtoCreateString = TestUtils.jsonStringFromObject(passCreateDTO);
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(passDtoCreateString));
+        TestUtils.checkCommonValidationFields(resultActions);
+    }
+
     private static void checkCarOrVisitorFields(ResultActions resultActions) throws Exception {
         TestUtils.checkCommonValidationFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0))
