@@ -81,7 +81,7 @@ public class UserController {
     }
 
     @Operation(summary = "Поиск территории по id пользователя",
-            description = "Доступ: USER, ADMIN, MANAGER, SECURITY."
+            description = "Доступ: USER - со своим id; ADMIN, MANAGER, SECURITY - с любым."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -91,8 +91,8 @@ public class UserController {
                             array = @ArraySchema(schema = @Schema(implementation = TerritoryDTO.class)))
             ),
             @ApiResponse(
-                    responseCode = "404",
-                    description = "NOT_FOUND: территории у переданного пользователя не найдены"
+                    responseCode = "403",
+                    description = "FORBIDDEN: роль пользователя не предоставляет доступ к данному api"
             )
     })
     @PreAuthorize("@authFacade.isUserIdMatch(#userId) or " +
@@ -113,10 +113,6 @@ public class UserController {
                     description = "OK: возвращает список пользователей, имена которых содержат указанный в параметрах запроса элемент",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = UserResponseDTO.class)))
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "NOT_FOUND: совпадения по имени не найдены"
             )
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
@@ -140,10 +136,6 @@ public class UserController {
             @ApiResponse(
                     responseCode = "403",
                     description = "FORBIDDEN: роль пользователя не предоставляет доступ к данному api"
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "NOT_FOUND: в базе нет пользователей"
             )
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
@@ -161,10 +153,6 @@ public class UserController {
                     description = "OK: возвращает список номеров, привязанных к пользователю",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = String.class)))
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "NOT_FOUND: пользователь не найден"
             )
     })
     @PreAuthorize("@authFacade.isUserIdMatch(#id) or " +

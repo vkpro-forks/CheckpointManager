@@ -61,6 +61,8 @@ public class TestUtils {
 
     public static final UUID USER_ID = UUID.randomUUID();
 
+    public static final String USER_NAME = "name";
+
     public static final UUID PASS_ID = UUID.randomUUID();
 
     public static final UUID CHECKPOINT_ID = UUID.randomUUID();
@@ -105,6 +107,8 @@ public class TestUtils {
     public static final String AUTH_HEADER = "Authorization";
 
     public static final String BEARER = "Bearer ";
+
+    public static final String USER_NOT_FOUND_MSG = "User with [id=%s] not found";
 
 
     public static CarBrand getCarBrand() {
