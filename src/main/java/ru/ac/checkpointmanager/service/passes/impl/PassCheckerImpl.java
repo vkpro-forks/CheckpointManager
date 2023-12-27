@@ -28,8 +28,8 @@ public class PassCheckerImpl implements PassChecker {
     @Override
     public void checkUserTerritoryRelation(UUID userId, UUID territoryId) {
         if (!passRepository.checkUserTerritoryRelation(userId, territoryId)) {
-            log.warn(ExceptionMessage.USER_TER_REL.formatted(userId, territoryId));
-            throw new UserTerritoryRelationException(ExceptionMessage.USER_TER_REL.formatted(userId, territoryId));
+            log.warn(ExceptionMessage.USER_TER_REL_MSG.formatted(userId, territoryId));
+            throw new UserTerritoryRelationException(ExceptionMessage.USER_TER_REL_MSG.formatted(userId, territoryId));
         }
     }
 

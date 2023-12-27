@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import ru.ac.checkpointmanager.exception.DateOfBirthFormatException;
+import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
 import ru.ac.checkpointmanager.exception.EntranceWasAlreadyException;
-import ru.ac.checkpointmanager.exception.InvalidPhoneNumberException;
 import ru.ac.checkpointmanager.exception.InvalidTokenException;
 import ru.ac.checkpointmanager.exception.ObjectAlreadyExistsException;
 import ru.ac.checkpointmanager.exception.PhoneAlreadyExistException;
@@ -198,10 +198,19 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
-    @ExceptionHandler(InvalidPhoneNumberException.class)
+    /*@ExceptionHandler(InvalidPhoneNumberException.class)
     public ProblemDetail handleInvalidPhoneNumberException(InvalidPhoneNumberException e) {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
         problemDetail.setTitle("Invalid phone number format"); //FIXME move to validation
+        problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
+        log.debug(LOG_MSG, e.getClass());
+        return problemDetail;
+    }*/
+
+    @ExceptionHandler(EmailVerificationTokenException.class)
+    public ProblemDetail handleEmailVerificationTokenException(EmailVerificationTokenException e) {
+        ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
+        problemDetail.setTitle("Verification token not found, or expired");
         problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
         log.debug(LOG_MSG, e.getClass());
         return problemDetail;

@@ -27,6 +27,7 @@ import ru.ac.checkpointmanager.dto.user.AuthenticationRequest;
 import ru.ac.checkpointmanager.dto.user.ChangeEmailRequest;
 import ru.ac.checkpointmanager.dto.user.ChangePasswordRequest;
 import ru.ac.checkpointmanager.dto.user.ConfirmChangeEmail;
+import ru.ac.checkpointmanager.dto.user.ConfirmRegistration;
 import ru.ac.checkpointmanager.dto.user.RefreshTokenDTO;
 import ru.ac.checkpointmanager.dto.user.UserPutDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
@@ -91,8 +92,9 @@ public class TestUtils {
 
     public static final String JSON_DETAIL = "$.detail";
 
-    public static final String EMAIL_STRING_TOKEN = UUID.randomUUID().toString();
     public static final UUID EMAIL_TOKEN = UUID.randomUUID();
+
+    public static final String EMAIL_STRING_TOKEN = EMAIL_TOKEN.toString();
 
     public static final UUID VISITOR_ID = UUID.randomUUID();
     public static final String PASSWORD = "password";
@@ -263,6 +265,15 @@ public class TestUtils {
 
     public static ChangeEmailRequest getChangeEmailRequest() {
         return new ChangeEmailRequest(NEW_EMAIL);
+    }
+
+    public static ConfirmRegistration getConfirmRegistration() {
+        return new ConfirmRegistration(
+                USERNAME,
+                EMAIL,
+                PASSWORD,
+                EMAIL_STRING_TOKEN
+        );
     }
 
     public static AuthenticationRequest getAuthenticationRequest() {
