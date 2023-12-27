@@ -20,7 +20,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @CarOrVisitorFieldsCheck(groups = CustomCheck.class)
 @PassTimeCheck(groups = CustomCheck.class)
-@GroupSequence({PassCreateDTO.class, CustomCheck.class}) // custom checks will be performed before default
+@GroupSequence({PassCreateDTO.class, CustomCheck.class}) // custom checks will be performed after default
 public class PassCreateDTO {
 
     @NotNull
