@@ -6,21 +6,21 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 import ru.ac.checkpointmanager.config.CorsTestConfiguration;
-import ru.ac.checkpointmanager.config.OpenAllEndpointsTestConfiguration;
 import ru.ac.checkpointmanager.config.RedisAndPostgresTestContainersConfiguration;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.enums.Role;
@@ -36,14 +36,12 @@ import java.util.List;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
-@AutoConfigureMockMvc
-@Import({OpenAllEndpointsTestConfiguration.class, CorsTestConfiguration.class})
+@Import({CorsTestConfiguration.class})
 @ActiveProfiles("test")
-@WithMockUser(roles = {"ADMIN"})
+//@WithMockUser(roles = {"ADMIN"})
 @Slf4j
 class UserControllerIntegrationTest extends RedisAndPostgresTestContainersConfiguration {
 
-    @Autowired
     MockMvc mockMvc;
 
     @Autowired
@@ -52,6 +50,9 @@ class UserControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
     @Autowired
     TerritoryRepository territoryRepository;
 
+    @Autowired
+    WebApplicationContext context;
+
     User savedUser;
 
     @BeforeEach
@@ -59,6 +60,9 @@ class UserControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         User user = TestUtils.getUser();
         user.setRole(Role.ADMIN);
         savedUser = userRepository.saveAndFlush(user);
+        mockMvc = MockMvcBuilders.webAppContextSetup(context)
+                .apply(SecurityMockMvcConfigurers.springSecurity())
+                .build();
     }
 
     @AfterEach
@@ -75,18 +79,17 @@ class UserControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         CustomAuthenticationToken authToken = new CustomAuthenticationToken(savedUser, null, savedUser.getId(), authorities);
         log.info(TestMessage.PERFORM_HTTP, HttpMethod.GET.name(),
                 UrlConstants.USER_TERR_URL.formatted(savedUser.getId()));
-        /*mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_TERR_URL
-                        .formatted("750cee36-b9dc-4534-9872-0c167cdc73c5")))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$").isEmpty());*/
         log.info("Empty list from database");
         mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_TERR_URL
                                 .formatted(savedUser.getId()))
                         .with(SecurityMockMvcRequestPostProcessors.authentication(authToken)))
-
-
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$").isEmpty());
         log.info("Empty list from Cache");
+        mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_TERR_URL
+                                .formatted(savedUser.getId()))
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken)))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$").isEmpty());
     }
 }
