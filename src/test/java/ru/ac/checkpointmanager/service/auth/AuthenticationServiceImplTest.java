@@ -53,18 +53,22 @@ class AuthenticationServiceImplTest {
     void shouldSaveUserIfVerificationTokenIsOk() {
         Cache mockCache = Mockito.mock(Cache.class);
         Mockito.when(cacheManager.getCache("registration")).thenReturn(mockCache);
+        ConfirmRegistration confirmRegistration = TestUtils.getConfirmRegistration();
         Mockito.when(mockCache.get(TestUtils.EMAIL_STRING_TOKEN, ConfirmRegistration.class))
-                .thenReturn(TestUtils.getConfirmRegistration());
+                .thenReturn(confirmRegistration);
 
         authenticationService.confirmRegistration(TestUtils.EMAIL_STRING_TOKEN);
 
         Mockito.verify(userRepository).save(userArgumentCaptor.capture());
         User captured = userArgumentCaptor.getValue();
-        Assertions.assertThat(captured.getRole()).isEqualTo(Role.USER);
-        Assertions.assertThat(captured.getIsBlocked()).isFalse();
-        Assertions.assertThat(captured.getUsername()).isEqualTo(TestUtils.EMAIL);
-        Assertions.assertThat(captured.getEmail()).isEqualTo(TestUtils.EMAIL);
-        Assertions.assertThat(captured.getFullName()).isEqualTo(TestUtils.USERNAME);
+        Assertions.assertThat(captured).extracting("role").as("Check if Role is USER").isEqualTo(Role.USER);
+        Assertions.assertThat(captured.getIsBlocked()).as("Check if isBlocked status set to False").isFalse();
+        Assertions.assertThat(captured.getUsername()).as("Check if user name is equals value from ConfirmRegistration")
+                .isEqualTo(confirmRegistration.getEmail());
+        Assertions.assertThat(captured.getEmail()).as("Check if email is equals value from ConfirmRegistration")
+                .isEqualTo(confirmRegistration.getEmail());
+        Assertions.assertThat(captured.getFullName()).as("Check if full name is equals value from ConfirmRegistration")
+                .isEqualTo(confirmRegistration.getFullName());
     }
 
 }

@@ -22,6 +22,7 @@ import ru.ac.checkpointmanager.dto.user.ConfirmChangeEmail;
 import ru.ac.checkpointmanager.dto.user.UserPutDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
+import ru.ac.checkpointmanager.exception.ObjectAlreadyExistsException;
 import ru.ac.checkpointmanager.mapper.TerritoryMapper;
 import ru.ac.checkpointmanager.mapper.UserMapper;
 import ru.ac.checkpointmanager.model.Territory;
@@ -261,7 +262,7 @@ class UserServiceImplTest {
         Mockito.when(authenticationFacade.getCurrentUser()).thenReturn(user);
         Mockito.when(userRepository.findByEmail(request.getNewEmail())).thenReturn(Optional.ofNullable(user));
 
-        Assertions.assertThatExceptionOfType(IllegalStateException.class)
+        Assertions.assertThatExceptionOfType(ObjectAlreadyExistsException.class)
                 .isThrownBy(() -> userService.changeEmail(request))
                 .withMessageContaining("already taken");
 

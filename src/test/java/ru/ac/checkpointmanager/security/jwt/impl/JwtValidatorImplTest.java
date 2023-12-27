@@ -35,7 +35,7 @@ class JwtValidatorImplTest {
     void shouldValidateAccessTokenWithoutRefreshClaim() {
         String token = TestUtils.getSimpleValidAccessToken();
         DefaultClaims claims = new DefaultClaims();
-        claims.setSubject(TestUtils.USERNAME);
+        claims.setSubject(TestUtils.EMAIL);
         Mockito.when(jwtService.extractAllClaims(token)).thenReturn(claims);
 
         boolean isValid = jwtValidator.validateAccessToken(token);
@@ -60,7 +60,7 @@ class JwtValidatorImplTest {
     void shouldNotValidateAccessTokenWithRefreshClaim() {
         String token = TestUtils.getSimpleValidAccessToken();
         DefaultClaims claims = new DefaultClaims();
-        claims.setSubject(TestUtils.USERNAME);
+        claims.setSubject(TestUtils.EMAIL);
         claims.put(REFRESH, true);
         Mockito.when(jwtService.extractAllClaims(token)).thenReturn(claims);
 
@@ -92,7 +92,7 @@ class JwtValidatorImplTest {
     void shouldValidateRefreshTokenWithRefreshClaim() {
         String token = TestUtils.getSimpleValidAccessToken();
         DefaultClaims claims = new DefaultClaims();
-        claims.setSubject(TestUtils.USERNAME);
+        claims.setSubject(TestUtils.EMAIL);
         claims.put(REFRESH, true);
         Mockito.when(jwtService.extractAllClaims(token)).thenReturn(claims);
 
@@ -103,7 +103,7 @@ class JwtValidatorImplTest {
     void shouldNotValidateRefreshTokenWithoutRefreshClaim() {
         String token = TestUtils.getSimpleValidAccessToken();
         DefaultClaims claims = new DefaultClaims();
-        claims.setSubject(TestUtils.USERNAME);
+        claims.setSubject(TestUtils.EMAIL);
         Mockito.when(jwtService.extractAllClaims(token)).thenReturn(claims);
 
         Assertions.assertThatThrownBy(() -> jwtValidator.validateRefreshToken(token))
