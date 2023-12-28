@@ -11,7 +11,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import ru.ac.checkpointmanager.config.CorsTestConfiguration;
 import ru.ac.checkpointmanager.config.OpenAllEndpointsTestConfiguration;
 import ru.ac.checkpointmanager.config.PostgresTestContainersConfiguration;
 import ru.ac.checkpointmanager.exception.handler.ErrorCode;
@@ -20,7 +19,7 @@ import ru.ac.checkpointmanager.util.UrlConstants;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-@Import({CorsTestConfiguration.class, OpenAllEndpointsTestConfiguration.class})
+@Import({OpenAllEndpointsTestConfiguration.class})
 @ActiveProfiles("test")
 class AuthExceptionHandlingIntegrationTest extends PostgresTestContainersConfiguration {
 

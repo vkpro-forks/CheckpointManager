@@ -14,7 +14,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import ru.ac.checkpointmanager.config.CorsTestConfiguration;
 import ru.ac.checkpointmanager.config.OpenAllEndpointsTestConfiguration;
 import ru.ac.checkpointmanager.config.ValidationTestConfiguration;
 import ru.ac.checkpointmanager.controller.PassController;
@@ -30,7 +29,7 @@ import ru.ac.checkpointmanager.util.UrlConstants;
 import java.time.LocalDateTime;
 
 @WebMvcTest(PassController.class)
-@Import({OpenAllEndpointsTestConfiguration.class, CorsTestConfiguration.class, ValidationTestConfiguration.class})
+@Import({OpenAllEndpointsTestConfiguration.class, ValidationTestConfiguration.class})
 @WithMockUser(roles = {"ADMIN"})
 @ActiveProfiles("test")
 class PassControllerValidationIntegrationTest {

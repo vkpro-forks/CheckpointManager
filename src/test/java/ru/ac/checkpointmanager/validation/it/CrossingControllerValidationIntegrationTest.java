@@ -16,7 +16,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import ru.ac.checkpointmanager.config.CorsTestConfiguration;
 import ru.ac.checkpointmanager.config.OpenAllEndpointsTestConfiguration;
 import ru.ac.checkpointmanager.config.ValidationTestConfiguration;
 import ru.ac.checkpointmanager.controller.CrossingController;
@@ -30,7 +29,7 @@ import java.time.ZonedDateTime;
 import java.util.stream.Stream;
 
 @WebMvcTest(CrossingController.class)
-@Import({OpenAllEndpointsTestConfiguration.class, CorsTestConfiguration.class,
+@Import({OpenAllEndpointsTestConfiguration.class,
         AvatarProperties.class, ValidationTestConfiguration.class})
 @WithMockUser(roles = {"ADMIN"})
 @ActiveProfiles("test")
