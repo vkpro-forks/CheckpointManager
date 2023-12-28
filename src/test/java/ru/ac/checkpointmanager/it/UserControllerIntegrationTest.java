@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import ru.ac.checkpointmanager.config.CorsTestConfiguration;
 import ru.ac.checkpointmanager.config.RedisAndPostgresTestContainersConfiguration;
+import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.repository.TerritoryRepository;
@@ -38,7 +39,6 @@ import java.util.List;
 @DirtiesContext
 @Import({CorsTestConfiguration.class})
 @ActiveProfiles("test")
-//@WithMockUser(roles = {"ADMIN"})
 @Slf4j
 class UserControllerIntegrationTest extends RedisAndPostgresTestContainersConfiguration {
 
@@ -91,5 +91,31 @@ class UserControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
                         .with(SecurityMockMvcRequestPostProcessors.authentication(authToken)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$").isEmpty());
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldReturnListWithTerritoriesFromDBAndFromCache() {
+        Territory territory = new Territory();
+        territory.setName(TestUtils.TERR_NAME);
+        territory.setUsers(List.of(savedUser));
+        territoryRepository.saveAndFlush(territory);
+        Collection<? extends GrantedAuthority> authorities = List
+                .of(new SimpleGrantedAuthority(savedUser.getRole().name()));
+        CustomAuthenticationToken authToken = new CustomAuthenticationToken(savedUser, null, savedUser.getId(), authorities);
+        log.info(TestMessage.PERFORM_HTTP, HttpMethod.GET.name(),
+                UrlConstants.USER_TERR_URL.formatted(savedUser.getId()));
+        log.info("List with territory from database");
+        mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_TERR_URL
+                                .formatted(savedUser.getId()))
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken)))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$").isNotEmpty());
+        log.info("List with territory from Cache");
+        mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_TERR_URL
+                                .formatted(savedUser.getId()))
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken)))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$").isNotEmpty());
     }
 }
