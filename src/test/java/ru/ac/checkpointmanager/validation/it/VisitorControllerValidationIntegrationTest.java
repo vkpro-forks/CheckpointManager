@@ -28,7 +28,7 @@ import ru.ac.checkpointmanager.util.UrlConstants;
 import java.util.stream.Stream;
 
 @WebMvcTest(VisitorController.class)
-@Import({OpenAllEndpointsTestConfiguration.class, ValidationTestConfiguration.class})
+@Import({ValidationTestConfiguration.class, OpenAllEndpointsTestConfiguration.class})
 @WithMockUser(roles = {"ADMIN"})
 @ActiveProfiles("test")
 class VisitorControllerValidationIntegrationTest {

@@ -24,8 +24,7 @@ import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 
 @WebMvcTest(AvatarController.class)
-@Import({OpenAllEndpointsTestConfiguration.class,
-        AvatarProperties.class, ValidationTestConfiguration.class})
+@Import({AvatarProperties.class, ValidationTestConfiguration.class, OpenAllEndpointsTestConfiguration.class})
 @WithMockUser(roles = {"ADMIN"})
 @ActiveProfiles("test")
 class AvatarControllerIntegrationTest {

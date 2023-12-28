@@ -30,8 +30,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 @WebMvcTest(CarController.class)
-@Import({OpenAllEndpointsTestConfiguration.class,
-        AvatarProperties.class, ValidationTestConfiguration.class})
+@Import({AvatarProperties.class, ValidationTestConfiguration.class, OpenAllEndpointsTestConfiguration.class})
 @WithMockUser(roles = {"ADMIN"})
 @ActiveProfiles("test")
 class CarControllerValidationIntegrationTest {

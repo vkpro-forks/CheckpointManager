@@ -29,7 +29,7 @@ import ru.ac.checkpointmanager.util.UrlConstants;
 import java.time.LocalDateTime;
 
 @WebMvcTest(PassController.class)
-@Import({OpenAllEndpointsTestConfiguration.class, ValidationTestConfiguration.class})
+@Import({ValidationTestConfiguration.class, OpenAllEndpointsTestConfiguration.class})
 @WithMockUser(roles = {"ADMIN"})
 @ActiveProfiles("test")
 class PassControllerValidationIntegrationTest {

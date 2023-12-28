@@ -29,8 +29,7 @@ import java.time.ZonedDateTime;
 import java.util.stream.Stream;
 
 @WebMvcTest(CrossingController.class)
-@Import({OpenAllEndpointsTestConfiguration.class,
-        AvatarProperties.class, ValidationTestConfiguration.class})
+@Import({AvatarProperties.class, ValidationTestConfiguration.class, OpenAllEndpointsTestConfiguration.class})
 @WithMockUser(roles = {"ADMIN"})
 @ActiveProfiles("test")
 public class CrossingControllerValidationIntegrationTest {
