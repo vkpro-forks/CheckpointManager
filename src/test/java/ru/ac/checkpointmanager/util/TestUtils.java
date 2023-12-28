@@ -150,6 +150,12 @@ public class TestUtils {
         );
     }
 
+    public static Territory getTerritoryForDB() {
+        Territory territory = new Territory();
+        territory.setName(TERR_NAME);
+        return territory;
+    }
+
     public static CheckpointDTO getCheckPointDTO() {
         return new CheckpointDTO(
                 CHECKPOINT_ID,
@@ -214,6 +220,14 @@ public class TestUtils {
                 USER_ID,
                 null
         );
+    }
+
+    public static User getUserForDB() {
+        User user = new User();
+        user.setFullName(USERNAME);
+        user.setEmail(EMAIL);
+        user.setPassword(PASSWORD);
+        return user;
     }
 
     public static User getUser() {
