@@ -23,13 +23,18 @@ import ru.ac.checkpointmanager.config.CacheTestConfiguration;
 import ru.ac.checkpointmanager.config.CorsTestConfiguration;
 import ru.ac.checkpointmanager.config.PostgresTestContainersConfiguration;
 import ru.ac.checkpointmanager.config.security.WithMockCustomUser;
+import ru.ac.checkpointmanager.dto.user.ChangePasswordRequest;
+import ru.ac.checkpointmanager.dto.user.UserPutDTO;
+import ru.ac.checkpointmanager.model.Phone;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
+import ru.ac.checkpointmanager.repository.PhoneRepository;
 import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.security.AuthFacade;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
+import ru.ac.checkpointmanager.utils.FieldsValidation;
 
 import java.util.List;
 import java.util.UUID;
@@ -53,6 +58,9 @@ class UserControllerIntegrationTest extends PostgresTestContainersConfiguration 
 
     @Autowired
     TerritoryRepository territoryRepository;
+
+    @Autowired
+    PhoneRepository phoneRepository;
 
     @Autowired
     private PasswordEncoder encoder;
@@ -120,14 +128,13 @@ class UserControllerIntegrationTest extends PostgresTestContainersConfiguration 
         UUID userId = user.getId();
 
         Mockito.when(authFacade.isUserIdMatch(userId)).thenReturn(true);
-
         mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL + "/{userId}/territories", userId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.length()", Matchers.is(territories.size())))
                 .andExpect(jsonPath("$[*].name", Matchers.hasItem(territory.getName())))
-                .andExpect(jsonPath("$[*].id", Matchers.hasItem(territory.getId())));
+                .andExpect(jsonPath("$[*].id", Matchers.hasItem(territory.getId().toString())));
     }
 
     @Test
@@ -163,7 +170,7 @@ class UserControllerIntegrationTest extends PostgresTestContainersConfiguration 
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.length()", Matchers.is(territories.size())))
                 .andExpect(jsonPath("$[*].name", Matchers.hasItem(territory.getName())))
-                .andExpect(jsonPath("$[*].id", Matchers.hasItem(territory.getId())));
+                .andExpect(jsonPath("$[*].id", Matchers.hasItem(territory.getId().toString())));
     }
 
     @Test
@@ -243,27 +250,201 @@ class UserControllerIntegrationTest extends PostgresTestContainersConfiguration 
     @SneakyThrows
     @WithMockCustomUser(role = "USER")
     void findUsersPhoneNumbersIsOkWithRightId() {
+        User user = TestUtils.getUserForDB();
+        Phone phone = TestUtils.getPhoneForDB();
+        userRepository.saveAndFlush(user);
+        phone.setUser(user);
+        phoneRepository.saveAndFlush(phone);
+        user.getNumbers().add(phone);
+        userRepository.saveAndFlush(user);
+        UUID userId = user.getId();
 
+        Mockito.when(authFacade.isUserIdMatch(userId)).thenReturn(true);
+        mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL + "/numbers/{id}", userId).
+                        contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.[*]", Matchers.hasItem(phone.getNumber())));
     }
 
     @Test
     @SneakyThrows
     @WithMockCustomUser(role = "USER")
     void findUsersPhoneNumbersIsForbiddenWithWrongId() {
+        User user = TestUtils.getUserForDB();
+        Phone phone = TestUtils.getPhoneForDB();
+        userRepository.saveAndFlush(user);
+        phone.setUser(user);
+        phoneRepository.saveAndFlush(phone);
+        user.getNumbers().add(phone);
+        userRepository.saveAndFlush(user);
+        UUID userId = user.getId();
 
+
+        Mockito.when(authFacade.isUserIdMatch(userId)).thenReturn(false);
+        mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL + "/numbers/{id}", userId).
+                        contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
     }
 
     @Test
     @SneakyThrows
     @WithMockCustomUser
     void findUsersPhoneNumbersIsOkWithRoleAdminAndAnyId() {
+        User user = TestUtils.getUserForDB();
+        Phone phone = TestUtils.getPhoneForDB();
+        userRepository.saveAndFlush(user);
+        phone.setUser(user);
+        phoneRepository.saveAndFlush(phone);
+        user.getNumbers().add(phone);
+        userRepository.saveAndFlush(user);
+        UUID userId = user.getId();
 
+        mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL + "/numbers/{id}", userId).
+                        contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.[*]", Matchers.hasItem(phone.getNumber())));
     }
 
     @Test
     @SneakyThrows
     @WithAnonymousUser
     void findUsersPhoneNumbersIsUnauthorized() {
+        User user = TestUtils.getUserForDB();
+        userRepository.saveAndFlush(user);
+        UUID userId = user.getId();
 
+        mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL + "/numbers/{id}", userId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockCustomUser(role = "USER")
+    void updateUserIsOkWithRightUserId() {
+        User user = TestUtils.getUserForDB();
+        userRepository.saveAndFlush(user);
+        UUID userId = user.getId();
+        UserPutDTO userPutDTO = TestUtils.getUserPutDTO();
+        userPutDTO.setId(userId);
+        userPutDTO.setMainNumber(FieldsValidation.cleanPhone(userPutDTO.getMainNumber()));
+        String userPutDTOString = TestUtils.jsonStringFromObject(userPutDTO);
+
+        Mockito.when(authFacade.isUserIdMatch(userId)).thenReturn(true);
+
+        mockMvc.perform(MockMvcRequestBuilders.put(UrlConstants.USER_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(userPutDTOString))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", Matchers.is(userPutDTO.getId().toString())))
+                .andExpect(jsonPath("$.fullName", Matchers.is(userPutDTO.getFullName())))
+                .andExpect(jsonPath("$.mainNumber", Matchers.is(userPutDTO.getMainNumber())));
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockCustomUser
+    void updateUserIsOkWithRoleAdmin() {
+        User user = TestUtils.getUserForDB();
+        userRepository.saveAndFlush(user);
+        UUID userId = user.getId();
+        UserPutDTO userPutDTO = TestUtils.getUserPutDTO();
+        userPutDTO.setId(userId);
+        userPutDTO.setMainNumber(FieldsValidation.cleanPhone(userPutDTO.getMainNumber()));
+        String userPutDTOString = TestUtils.jsonStringFromObject(userPutDTO);
+
+        mockMvc.perform(MockMvcRequestBuilders.put(UrlConstants.USER_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(userPutDTOString))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", Matchers.is(userPutDTO.getId().toString())))
+                .andExpect(jsonPath("$.fullName", Matchers.is(userPutDTO.getFullName())))
+                .andExpect(jsonPath("$.mainNumber", Matchers.is(userPutDTO.getMainNumber())));
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockCustomUser(role = "USER")
+    void updateUserIsForbiddenWithWrongUserId() {
+        User user = TestUtils.getUserForDB();
+        userRepository.saveAndFlush(user);
+        UUID userId = user.getId();
+        UserPutDTO userPutDTO = TestUtils.getUserPutDTO();
+        String userPutDTOString = TestUtils.jsonStringFromObject(userPutDTO);
+
+        Mockito.when(authFacade.isUserIdMatch(userId)).thenReturn(false);
+
+        mockMvc.perform(MockMvcRequestBuilders.put(UrlConstants.USER_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(userPutDTOString))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockCustomUser(role = "SECURITY")
+    void updateUserIsForbiddenWithRoleSecurity() {
+        UserPutDTO userPutDTO = TestUtils.getUserPutDTO();
+        String userPutDTOString = TestUtils.jsonStringFromObject(userPutDTO);
+
+        mockMvc.perform(MockMvcRequestBuilders.put(UrlConstants.USER_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(userPutDTOString))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockCustomUser
+    void updateUserIsBadRequest() {
+        User user = TestUtils.getUserForDB();
+        userRepository.saveAndFlush(user);
+        UUID userId = user.getId();
+        UserPutDTO userPutDTO = TestUtils.getUserPutDTO();
+        userPutDTO.setId(userId);
+        userPutDTO.setMainNumber("integration tests sucks");
+        userPutDTO.setFullName("have u seen capital letter?");
+        String userPutDTOString = TestUtils.jsonStringFromObject(userPutDTO);
+
+        mockMvc.perform(MockMvcRequestBuilders.put(UrlConstants.USER_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(userPutDTOString))
+                .andExpect(status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE))
+                .andExpect(jsonPath("$.title").isNotEmpty());
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockCustomUser
+    void updateUserIsNotFound() {
+        UserPutDTO userPutDTO = TestUtils.getUserPutDTO();
+        String userPutDTOString = TestUtils.jsonStringFromObject(userPutDTO);
+
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.put(UrlConstants.USER_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(userPutDTOString));
+        TestUtils.checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockCustomUser(username = "123@123.com", role = "USER")
+    void changePasswordIsNoContent() {
+        User user = TestUtils.getUserForDB();
+        user.setPassword(encoder.encode(user.getPassword()));
+        userRepository.saveAndFlush(user);
+
+        ChangePasswordRequest request = TestUtils.getChangePasswordRequest();
+        String requestString = TestUtils.jsonStringFromObject(request);
+
+        Mockito.when(authFacade.getCurrentUser()).thenReturn(user);
+
+        mockMvc.perform(MockMvcRequestBuilders.patch(UrlConstants.USER_URL + "/password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestString))
+                .andExpect(status().isNoContent());
     }
 }

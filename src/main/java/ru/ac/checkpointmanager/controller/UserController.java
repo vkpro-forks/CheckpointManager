@@ -179,7 +179,6 @@ public class UserController {
                     description = """
                             BAD_REQUEST: Ошибки валидации:
                             Имя: только латиница/кириллица, каждое новое слово начинается с заглавной;
-                            Дата рождения: не больше текущей даты;
                             Телефон: 11-20 символов"""
             ),
             @ApiResponse(
@@ -202,7 +201,7 @@ public class UserController {
     )
     @ApiResponses(value = {
             @ApiResponse(
-                    responseCode = "201",
+                    responseCode = "204",
                     description = "NO_CONTENT: пароль пользователя успешно изменен"
             ),
             @ApiResponse(

@@ -31,6 +31,7 @@ import ru.ac.checkpointmanager.dto.user.RefreshTokenDTO;
 import ru.ac.checkpointmanager.dto.user.UserPutDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.exception.handler.ErrorCode;
+import ru.ac.checkpointmanager.model.Phone;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.car.Car;
@@ -220,6 +221,13 @@ public class TestUtils {
                 USER_ID,
                 null
         );
+    }
+
+    public static Phone getPhoneForDB() {
+        Phone phone = new Phone();
+        phone.setNumber(PHONE_NUM);
+        phone.setType(PhoneNumberType.MOBILE);
+        return phone;
     }
 
     public static User getUserForDB() {
