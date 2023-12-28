@@ -46,7 +46,6 @@ public class RedisConfig {
         ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().build();
         PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
                 .allowIfBaseType(Object.class) // Разрешить сериализацию для базового типа Object и его подтипов
-                .allowIfSubTypeIsArray()
                 .allowIfBaseType(Object[].class)
                 .build();
         objectMapper.activateDefaultTyping(ptv, ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
