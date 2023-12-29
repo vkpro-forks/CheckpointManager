@@ -3,7 +3,7 @@ package ru.ac.checkpointmanager.service.passes.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.ac.checkpointmanager.exception.ExceptionMessage;
+import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.exception.pass.UserTerritoryRelationException;
 import ru.ac.checkpointmanager.repository.PassRepository;
 import ru.ac.checkpointmanager.service.passes.PassChecker;
@@ -28,8 +28,8 @@ public class PassCheckerImpl implements PassChecker {
     @Override
     public void checkUserTerritoryRelation(UUID userId, UUID territoryId) {
         if (!passRepository.checkUserTerritoryRelation(userId, territoryId)) {
-            log.warn(ExceptionMessage.USER_TER_REL.formatted(userId, territoryId));
-            throw new UserTerritoryRelationException(ExceptionMessage.USER_TER_REL.formatted(userId, territoryId));
+            log.warn(ExceptionUtils.USER_TER_REL.formatted(userId, territoryId));
+            throw new UserTerritoryRelationException(ExceptionUtils.USER_TER_REL.formatted(userId, territoryId));
         }
     }
 

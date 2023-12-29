@@ -6,6 +6,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
+import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.mapper.TerritoryMapper;
@@ -26,11 +27,6 @@ import static ru.ac.checkpointmanager.utils.StringTrimmer.trimThemAll;
 @RequiredArgsConstructor
 public class TerritoryServiceImpl implements TerritoryService {
 
-    private static final String TERRITORY_NOT_FOUND_MSG = "Territory with id: %s not found";
-    private static final String TERRITORY_NOT_FOUND_LOG = "Territory with id: {} not found";
-
-    private static final String USER_NOT_FOUND_LOG = "User with [id: {}] not found";
-    private static final String USER_NOT_FOUND_MSG = "User with id: %s not found";
     private static final String METHOD_CALLED_UUID_LOG = "Method {}, UUID - {}";
     public static final String METHOD_USER_TERR = "Method {}, user - {}, terr - {}";
 
@@ -51,22 +47,24 @@ public class TerritoryServiceImpl implements TerritoryService {
     }
 
     @Override
-    public TerritoryDTO findById(UUID id) {
-        log.debug(METHOD_CALLED_UUID_LOG, MethodLog.getMethodName(), id);
-        Territory territory = territoryRepository.findById(id).orElseThrow(
+    public TerritoryDTO findById(UUID territoryId) {
+        log.debug(METHOD_CALLED_UUID_LOG, MethodLog.getMethodName(), territoryId);
+        Territory territory = territoryRepository.findById(territoryId).orElseThrow(
                 () -> {
-                    log.warn(TERRITORY_NOT_FOUND_LOG, id);
-                    return new TerritoryNotFoundException(TERRITORY_NOT_FOUND_MSG.formatted(id));
+                    log.warn(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
+                    return new TerritoryNotFoundException(ExceptionUtils.TERRITORY_NOT_FOUND_MSG
+                            .formatted(territoryId));
                 });
         return territoryMapper.toTerritoryDTO(territory);
     }
 
     @Override
-    public Territory findTerritoryById(UUID id) {
-        return territoryRepository.findById(id).orElseThrow(
+    public Territory findTerritoryById(UUID territoryId) {
+        return territoryRepository.findById(territoryId).orElseThrow(
                 () -> {
-                    log.warn(TERRITORY_NOT_FOUND_LOG, id);
-                    return new TerritoryNotFoundException(TERRITORY_NOT_FOUND_MSG.formatted(id));
+                    log.warn(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
+                    return new TerritoryNotFoundException(ExceptionUtils.TERRITORY_NOT_FOUND_MSG
+                            .formatted(territoryId));
                 });
     }
 
@@ -97,12 +95,12 @@ public class TerritoryServiceImpl implements TerritoryService {
         UUID territoryId = territoryDTO.getId();
         log.debug(METHOD_CALLED_UUID_LOG, MethodLog.getMethodName(), territoryId);
         trimThemAll(territoryDTO);
-        Territory foundTerritory = territoryRepository.findById(territoryId)
-                .orElseThrow(() -> {
-                            log.warn(TERRITORY_NOT_FOUND_LOG, territoryId);
-                            return new TerritoryNotFoundException(TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
-                        }
-                );
+        Territory foundTerritory = territoryRepository.findById(territoryId).orElseThrow(
+                () -> {
+                    log.warn(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
+                    return new TerritoryNotFoundException(ExceptionUtils.TERRITORY_NOT_FOUND_MSG
+                            .formatted(territoryId));
+                });
 
         foundTerritory.setName(territoryDTO.getName());
         foundTerritory.setNote(territoryDTO.getNote());
@@ -117,35 +115,36 @@ public class TerritoryServiceImpl implements TerritoryService {
         log.debug(METHOD_USER_TERR, MethodLog.getMethodName(), userId, territoryId);
         Territory territory = territoryRepository.findById(territoryId).orElseThrow(
                 () -> {
-                    log.warn(TERRITORY_NOT_FOUND_LOG, territoryId);
-                    return new TerritoryNotFoundException(TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
+                    log.warn(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
+                    return new TerritoryNotFoundException(ExceptionUtils.TERRITORY_NOT_FOUND_MSG
+                            .formatted(territoryId));
                 });
         User user = userRepository.findById(userId).orElseThrow(
                 () -> {
-                    log.warn(USER_NOT_FOUND_LOG, userId);
-                    return new UserNotFoundException(USER_NOT_FOUND_MSG.formatted(userId));
-                }
-        );
+                    log.warn(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(userId));
+                    return new UserNotFoundException(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(userId));
+                });
+
         if (territoryRepository.checkUserTerritoryRelation(userId, territoryId)) {
             String message = String.format("User [%s] and territory [%s] are already connected", userId, territoryId);
             log.warn(message);
             throw new IllegalArgumentException(message);
         }
 
-
         territory.getUsers().add(user);
         territoryRepository.save(territory);
     }
 
+
     @Override
-    public void deleteTerritoryById(UUID id) {
-        log.debug(METHOD_CALLED_UUID_LOG, MethodLog.getMethodName(), id);
-        if (territoryRepository.findById(id).isEmpty()) {
-            log.warn(TERRITORY_NOT_FOUND_LOG, id);
-            throw new TerritoryNotFoundException(TERRITORY_NOT_FOUND_MSG.formatted(id));
+    public void deleteTerritoryById(UUID territoryId) {
+        log.debug(METHOD_CALLED_UUID_LOG, MethodLog.getMethodName(), territoryId);
+        if (territoryRepository.findById(territoryId).isEmpty()) {
+            log.warn(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
+            throw new TerritoryNotFoundException(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
         }
-        log.info("Territory with [id: {}] was successfully deleted", id);
-        territoryRepository.deleteById(id);
+        log.info("Territory with [id: {}] was successfully deleted", territoryId);
+        territoryRepository.deleteById(territoryId);
     }
 
     @CacheEvict(value = "user-territory", key = "#userId")
@@ -155,15 +154,15 @@ public class TerritoryServiceImpl implements TerritoryService {
 
         Territory territory = territoryRepository.findById(territoryId).orElseThrow(
                 () -> {
-                    log.warn(TERRITORY_NOT_FOUND_LOG, territoryId);
-                    return new TerritoryNotFoundException(TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
+                    log.warn(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
+                    return new TerritoryNotFoundException(ExceptionUtils.TERRITORY_NOT_FOUND_MSG
+                            .formatted(territoryId));
                 });
         User user = userRepository.findById(userId).orElseThrow(
                 () -> {
-                    log.warn(USER_NOT_FOUND_LOG, userId);
-                    return new UserNotFoundException(USER_NOT_FOUND_MSG.formatted(userId));
-                }
-        );
+                    log.warn(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(userId));
+                    return new UserNotFoundException(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(userId));
+                });
         if (!territoryRepository.checkUserTerritoryRelation(userId, territoryId)) {
             String message = String.format("User [%s] and territory [%s] have no connection", userId, territoryId);
             log.warn(message);
@@ -178,4 +177,5 @@ public class TerritoryServiceImpl implements TerritoryService {
     public Territory findByPassId(UUID passId) {
         return territoryRepository.findByPassId(passId);
     }
+
 }

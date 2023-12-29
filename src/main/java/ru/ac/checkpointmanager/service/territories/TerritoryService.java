@@ -11,9 +11,9 @@ public interface TerritoryService {
 
     TerritoryDTO addTerritory(TerritoryDTO territoryDTO);
 
-    TerritoryDTO findById(UUID id);
+    TerritoryDTO findById(UUID territoryId);
 
-    Territory findTerritoryById(UUID id);
+    Territory findTerritoryById(UUID territoryId);
 
     List<UserResponseDTO> findUsersByTerritoryId(UUID territoryId);
 
@@ -25,9 +25,10 @@ public interface TerritoryService {
 
     void attachUserToTerritory(UUID territoryId, UUID userId);
 
-    void deleteTerritoryById(UUID id);
+    void deleteTerritoryById(UUID territoryId);
 
     void detachUserFromTerritory(UUID territoryId, UUID userId);
 
     Territory findByPassId(UUID passId);
+
 }
