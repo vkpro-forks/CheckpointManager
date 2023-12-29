@@ -142,7 +142,7 @@ public class TerritoryController {
     }
 
     /* DELETE */
-    @Operation(summary = "Удалить территорию",
+    @Operation(summary = "Удалить территорию и все ее КПП",
             description = "Доступ: ADMIN.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Территория удалена"),
