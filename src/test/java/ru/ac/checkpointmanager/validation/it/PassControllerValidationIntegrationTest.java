@@ -1,12 +1,17 @@
 package ru.ac.checkpointmanager.validation.it;
 
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -24,15 +29,18 @@ import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.mapper.PassMapper;
 import ru.ac.checkpointmanager.service.passes.PassService;
+import ru.ac.checkpointmanager.util.TestMessage;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 
 import java.time.LocalDateTime;
+import java.util.stream.Stream;
 
 @WebMvcTest(PassController.class)
 @Import({OpenAllEndpointsTestConfiguration.class, CorsTestConfiguration.class, ValidationTestConfiguration.class})
 @WithMockUser(roles = {"ADMIN"})
 @ActiveProfiles("test")
+@Slf4j
 class PassControllerValidationIntegrationTest {
 
     private static final String CAR = "car";
@@ -125,11 +133,45 @@ class PassControllerValidationIntegrationTest {
         passUpdateDTO.setCar(new CarDTO());
         passUpdateDTO.setEndTime(LocalDateTime.now().plusHours(1));
         passUpdateDTO.setStartTime(LocalDateTime.now().plusHours(3));
-        String passDtoCreateString = TestUtils.jsonStringFromObject(passUpdateDTO);
+        String passDtoUpdateString = TestUtils.jsonStringFromObject(passUpdateDTO);
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.put(UrlConstants.PASS_URL)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(passDtoCreateString));
+                .content(passDtoUpdateString));
         checkStartEndTimeFields(resultActions);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getGoodPassTimeAndNull")
+    @SneakyThrows
+    void shouldReturnValidationErrorIfStartOrEndTimeOfPassIsNullInPassCreateDTO(LocalDateTime startTime, LocalDateTime endTime) {
+        log.info("Creating dto with one good date and one null");
+        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
+        passCreateDTO.setCar(new CarDTO());
+        passCreateDTO.setEndTime(startTime);
+        passCreateDTO.setStartTime(endTime);
+        String passDtoCreateString = TestUtils.jsonStringFromObject(passCreateDTO);
+        log.info(TestMessage.PERFORM_HTTP, HttpMethod.POST, UrlConstants.PASS_URL);
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(passDtoCreateString));
+        TestUtils.checkCommonValidationFields(resultActions);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getGoodPassTimeAndNull")
+    @SneakyThrows
+    void shouldReturnValidationErrorIfStartOrEndTimeOfPassIsNullInPassUpdateDTO(LocalDateTime startTime, LocalDateTime endTime) {
+        log.info("Creating dto with one good date and one null");
+        PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTO();
+        passUpdateDTO.setCar(new CarDTO());
+        passUpdateDTO.setEndTime(startTime);
+        passUpdateDTO.setStartTime(endTime);
+        log.info(TestMessage.PERFORM_HTTP, HttpMethod.PUT, UrlConstants.PASS_URL);
+        String passDtoUpdateString = TestUtils.jsonStringFromObject(passUpdateDTO);
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.put(UrlConstants.PASS_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(passDtoUpdateString));
+        TestUtils.checkCommonValidationFields(resultActions);
     }
 
     private static void checkCarOrVisitorFields(ResultActions resultActions) throws Exception {
@@ -146,6 +188,13 @@ class PassControllerValidationIntegrationTest {
                         .value(Matchers.anyOf(Matchers.is(START_TIME), Matchers.is(END_TIME))))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(1))
                         .value(Matchers.anyOf(Matchers.is(START_TIME), Matchers.is(END_TIME))));
+    }
+
+    private static Stream<Arguments> getGoodPassTimeAndNull() {
+        return Stream.of(
+                Arguments.of(LocalDateTime.now().plusHours(1), null),
+                Arguments.of(null, LocalDateTime.now().plusHours(1))
+        );
     }
 
 }
