@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.CarBrandDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
-import ru.ac.checkpointmanager.exception.ExceptionMessage;
+import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.mapper.PassMapper;
@@ -53,14 +53,14 @@ public class PassResolverImpl implements PassResolver {
         UUID territoryId = passCreateDTO.getTerritoryId();
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> {
-                    log.warn(ExceptionMessage.USER_NOT_FOUND_MSG.formatted(userId));
-                    return new UserNotFoundException(ExceptionMessage.USER_NOT_FOUND_MSG.formatted(userId));
+                    log.warn(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(userId));
+                    return new UserNotFoundException(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(userId));
                 });
         Territory territory = territoryRepository.findById(territoryId)
                 .orElseThrow(
                         () -> {
-                            log.warn(ExceptionMessage.TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
-                            return new TerritoryNotFoundException(ExceptionMessage
+                            log.warn(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
+                            return new TerritoryNotFoundException(ExceptionUtils
                                     .TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
                         });
         Pass pass;
