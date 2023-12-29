@@ -1,12 +1,9 @@
 package ru.ac.checkpointmanager.security;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -24,34 +21,20 @@ import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.filter.CorsFilter;
 import ru.ac.checkpointmanager.security.filter.JwtAuthenticationFilter;
 
-import java.util.Arrays;
-
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@RequiredArgsConstructor
 @Slf4j
 public class SecurityConfig {
 
-    @Autowired
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter,
-                          AuthenticationProvider authenticationProvider,
-                          @Lazy CorsFilter corsFilter, AccessDeniedHandler customAccessDeniedHandler, AuthenticationEntryPoint authenticationEntryPoint) {
-        this.jwtAuthFilter = jwtAuthFilter;
-        this.authenticationProvider = authenticationProvider;
-        this.corsFilter = corsFilter;
-        this.customAccessDeniedHandler = customAccessDeniedHandler;
-        this.authenticationEntryPoint = authenticationEntryPoint;
-    }
-
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
-    private final CorsFilter corsFilter;
-
     private final AccessDeniedHandler customAccessDeniedHandler;
-
     private final AuthenticationEntryPoint authenticationEntryPoint;
+    private final CorsProperties corsProperties;
 
 
     @Bean
@@ -62,11 +45,11 @@ public class SecurityConfig {
         filter.setForceEncoding(true);
 
         http
-                .addFilterBefore(corsFilter, SessionManagementFilter.class) // Добавляем CorsFilter перед SessionManagementFilter
+                .addFilterBefore(corsFilter(), SessionManagementFilter.class) // Добавляем CorsFilter перед SessionManagementFilter
                 .exceptionHandling(ex -> {
                     ex.accessDeniedHandler(customAccessDeniedHandler);
                     ex.authenticationEntryPoint(authenticationEntryPoint);
-                }) //пока эти друзья не отрабатывают т.к. исключения бросаются не из фильтра, но чуть позже заставлю их работать
+                }) //в этих хэндлерах исключения отправляются в ГлобалХэндлер
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize ->
                         authorize
@@ -88,14 +71,12 @@ public class SecurityConfig {
     }
 
     @Bean
-    @Profile("dev")
-    @Primary
-    public CorsFilter corsFilterDev() {
+    public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(true);
-        config.addAllowedOrigin("*");
-        config.addAllowedHeader("*");
-        config.addAllowedMethod("*");
+        config.setAllowCredentials(corsProperties.getAllowCredentials());
+        config.setAllowedOrigins(corsProperties.allowedOrigins);
+        config.setAllowedMethods(corsProperties.getAllowedMethods());
+        config.setAllowedHeaders(corsProperties.getAllowedHeaders());
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
@@ -103,28 +84,4 @@ public class SecurityConfig {
         return new CorsFilter(source);
     }
 
-    @Bean
-    @Profile("prod")
-    @Primary
-    public CorsFilter corsFilterProd() {
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(true);
-        config.setAllowedOrigins(Arrays.asList(
-                "http://localhost:3000", //React локал (удалить потом)
-                "http://192.168.1.37:3000", //Сонин Ip (удалить потом)
-                "http://192.168.31.74:3000", //Сони Ip (удалить потом)
-                "http://192.168.1.55:3000", //Жени Ip(удалить потом)
-                "https://checkpoint-manager.vercel.app", //Приложение для фронта(для тестирования).
-                "https://checkpoint-manager.ru",
-                "https://www.checkpoint-manager.ru",
-                "https://55ef-95-82-241-230.ngrok-free.app" //Наставник Сони
-        ));
-        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH"));
-        config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-
-        return new CorsFilter(source);
-    }
 }
