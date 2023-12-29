@@ -24,7 +24,7 @@ import ru.ac.checkpointmanager.dto.user.LoginResponse;
 import ru.ac.checkpointmanager.dto.user.RefreshTokenDTO;
 import ru.ac.checkpointmanager.dto.user.UserAuthDTO;
 import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
-import ru.ac.checkpointmanager.exception.ExceptionMessage;
+import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.mapper.UserMapper;
 import ru.ac.checkpointmanager.model.User;
@@ -133,8 +133,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                         cacheManager.getCache("registration"))
                 .map(cache -> cache.get(token, ConfirmRegistration.class));
         if (confirmUser.isEmpty()) {
-            log.warn(ExceptionMessage.INVALID_EMAIL_TOKEN_MSG.formatted(token));
-            throw new EmailVerificationTokenException(ExceptionMessage.INVALID_EMAIL_TOKEN_MSG.formatted(token));
+            log.warn(ExceptionUtils.INVALID_EMAIL_TOKEN_MSG.formatted(token));
+            throw new EmailVerificationTokenException(ExceptionUtils.INVALID_EMAIL_TOKEN_MSG.formatted(token));
         }
         User user = userMapper.toUser(confirmUser);
         user.setRole(Role.USER);
