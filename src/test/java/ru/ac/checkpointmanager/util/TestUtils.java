@@ -27,6 +27,7 @@ import ru.ac.checkpointmanager.dto.user.AuthenticationRequest;
 import ru.ac.checkpointmanager.dto.user.ChangeEmailRequest;
 import ru.ac.checkpointmanager.dto.user.ChangePasswordRequest;
 import ru.ac.checkpointmanager.dto.user.ConfirmChangeEmail;
+import ru.ac.checkpointmanager.dto.user.ConfirmRegistration;
 import ru.ac.checkpointmanager.dto.user.RefreshTokenDTO;
 import ru.ac.checkpointmanager.dto.user.UserPutDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
@@ -91,15 +92,16 @@ public class TestUtils {
 
     public static final String JSON_DETAIL = "$.detail";
 
-    public static final String EMAIL_STRING_TOKEN = UUID.randomUUID().toString();
     public static final UUID EMAIL_TOKEN = UUID.randomUUID();
+
+    public static final String EMAIL_STRING_TOKEN = EMAIL_TOKEN.toString();
 
     public static final UUID VISITOR_ID = UUID.randomUUID();
     public static final String PASSWORD = "password";
 
     public static final String EMAIL = "123@123.com";
     public static final String NEW_EMAIL = "new.com";
-    public static final String USERNAME = "Username";
+    public static final String FULL_NAME = "Username";
     public static final String NEW_PASSWORD = "new_password";
 
     public static final String AUTH_HEADER = "Authorization";
@@ -265,16 +267,25 @@ public class TestUtils {
         return new ChangeEmailRequest(NEW_EMAIL);
     }
 
+    public static ConfirmRegistration getConfirmRegistration() {
+        return new ConfirmRegistration(
+                FULL_NAME,
+                EMAIL,
+                PASSWORD,
+                EMAIL_STRING_TOKEN
+        );
+    }
+
     public static AuthenticationRequest getAuthenticationRequest() {
         return new AuthenticationRequest(EMAIL, PASSWORD);
     }
 
     public static RefreshTokenDTO getRefreshTokenDTO() {
-        return new RefreshTokenDTO(getJwt(86400000, USERNAME, List.of("ROLE_ADMIN"), true, true));
+        return new RefreshTokenDTO(getJwt(86400000, EMAIL, List.of("ROLE_ADMIN"), true, true));
     }
 
     public static String getSimpleValidAccessToken() {
-        return getJwt(60000, USERNAME, List.of("ADMIN"), false, true);
+        return getJwt(60000, EMAIL, List.of("ADMIN"), false, true);
     }
 
     public static String getJwt(Integer expired, String username, List<String> roles, boolean isRefresh,
@@ -301,7 +312,7 @@ public class TestUtils {
     public static VisitorDTO getVisitorDTO() {
         return new VisitorDTO(
                 VISITOR_ID,
-                USERNAME,
+                EMAIL,
                 PHONE_NUM,
                 "note"
         );

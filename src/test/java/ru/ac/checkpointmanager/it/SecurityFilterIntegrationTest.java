@@ -60,7 +60,7 @@ class SecurityFilterIntegrationTest extends PostgresTestContainersConfiguration 
     @Test
     @SneakyThrows
     void shouldReturnJwtExpiredErrorIfAccessTokenExpired() {
-        String jwt = TestUtils.getJwt(-1, TestUtils.USERNAME, List.of("ADMIN"), false, true);
+        String jwt = TestUtils.getJwt(-1, TestUtils.EMAIL, List.of("ADMIN"), false, true);
         mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL)
                         .header(TestUtils.AUTH_HEADER, TestUtils.BEARER + jwt))
                 .andExpect(MockMvcResultMatchers.status().isForbidden())
@@ -73,7 +73,7 @@ class SecurityFilterIntegrationTest extends PostgresTestContainersConfiguration 
     @Test
     @SneakyThrows
     void shouldReturn401IfUserFromJwtNotExists() {
-        String jwt = TestUtils.getJwt(600000, TestUtils.USERNAME, List.of("ADMIN"), false, true);
+        String jwt = TestUtils.getJwt(600000, TestUtils.EMAIL, List.of("ADMIN"), false, true);
         mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL)
                         .header(TestUtils.AUTH_HEADER, TestUtils.BEARER + jwt))
                 .andExpect(MockMvcResultMatchers.status().isUnauthorized())

@@ -340,7 +340,7 @@ public class UserServiceImpl implements UserService {
             return new AuthenticationResponse(accessToken, refreshToken);
         } else {
             log.warn("Invalid or expired token");
-            throw new EmailVerificationTokenException("Invalid or expired token");//TODO handle
+            throw new EmailVerificationTokenException("Invalid or expired token");
         }
     }
 

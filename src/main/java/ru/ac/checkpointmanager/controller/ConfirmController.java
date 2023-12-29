@@ -12,11 +12,12 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.security.SecuritySchemes;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.dto.user.AuthenticationResponse;
 import ru.ac.checkpointmanager.service.auth.AuthenticationService;
@@ -44,8 +45,8 @@ public class ConfirmController {
     @Operation(summary = "Подтверждение регистрации по ссылке")
     @ApiResponses(value = {
             @ApiResponse(
-                    responseCode = "200",
-                    description = "OK: Регистрация подтверждена"
+                    responseCode = "204",
+                    description = "NO CONTENT: Регистрация подтверждена"
             ),
             @ApiResponse(
                     responseCode = "404",
@@ -53,12 +54,11 @@ public class ConfirmController {
             )
     })
     @GetMapping("/registration")
-    public ResponseEntity<String> confirmRegistration(
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void confirmRegistration(
             @Parameter(description = "Токен из письма для подтверждения")
-            @RequestParam("token") String token
-    ) {
+            @RequestParam("token") String token) {
         authenticationService.confirmRegistration(token);
-        return ResponseEntity.ok("Регистрация подтверждена, войдите, используя указанные при регистрации email и пароль");
     }
 
     @Operation(summary = "Подтверждение новой электронной почты по ссылке")
