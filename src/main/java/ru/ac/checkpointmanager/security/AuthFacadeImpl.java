@@ -1,5 +1,6 @@
 package ru.ac.checkpointmanager.security;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,6 +21,7 @@ import java.util.UUID;
  * @see User
  */
 @Component("authFacade")
+@Slf4j
 public class AuthFacadeImpl implements AuthFacade {
 
     @Override
@@ -37,7 +39,7 @@ public class AuthFacadeImpl implements AuthFacade {
     @Override
     public User getCurrentUser() {
         Authentication authentication = getAuthentication();
-        if (!(authentication instanceof CustomAuthenticationToken)) {
+        if (authentication == null) {
             throw new AccessDeniedException("User is not authenticated");
         }
 
@@ -54,7 +56,7 @@ public class AuthFacadeImpl implements AuthFacade {
     @Override
     public UUID getUserUUID() {
         Authentication authentication = getAuthentication();
-        if (!(authentication instanceof CustomAuthenticationToken)) {
+        if (authentication == null) {
             throw new AccessDeniedException("User is not authenticated");
         }
         return ((CustomAuthenticationToken) authentication).getUserId();
@@ -62,11 +64,17 @@ public class AuthFacadeImpl implements AuthFacade {
 
     @Override
     public boolean isUserIdMatch(UUID userId) {
+        log.debug("ID {} is being checked", userId);
         Authentication authentication = getAuthentication();
-        if (!(authentication instanceof CustomAuthenticationToken customToken)) {
+
+        if (authentication == null) {
             throw new AccessDeniedException("User is not authenticated");
         }
+
+        CustomAuthenticationToken customToken = (CustomAuthenticationToken) authentication;
         UUID currentUserUUID = customToken.getUserId();
+        log.debug("User ID from token {}", currentUserUUID.toString());
         return currentUserUUID.equals(userId);
     }
+
 }

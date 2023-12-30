@@ -234,7 +234,7 @@ public class TestUtils {
 
     public static User getUserForDB() {
         User user = new User();
-        user.setFullName(USERNAME);
+        user.setFullName(FULL_NAME);
         user.setEmail(EMAIL);
         user.setPassword(PASSWORD);
         return user;

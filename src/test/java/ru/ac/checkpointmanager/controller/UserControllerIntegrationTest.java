@@ -1,26 +1,31 @@
 package ru.ac.checkpointmanager.controller;
 
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 import ru.ac.checkpointmanager.config.CacheTestConfiguration;
-import ru.ac.checkpointmanager.config.CorsTestConfiguration;
 import ru.ac.checkpointmanager.config.PostgresTestContainersConfiguration;
 import ru.ac.checkpointmanager.config.security.WithMockCustomUser;
 import ru.ac.checkpointmanager.dto.user.ChangePasswordRequest;
@@ -28,14 +33,17 @@ import ru.ac.checkpointmanager.dto.user.UserPutDTO;
 import ru.ac.checkpointmanager.model.Phone;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
+import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
 import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
-import ru.ac.checkpointmanager.security.AuthFacade;
+import ru.ac.checkpointmanager.security.CustomAuthenticationToken;
+import ru.ac.checkpointmanager.util.TestMessage;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 import ru.ac.checkpointmanager.utils.FieldsValidation;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -45,12 +53,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
-@AutoConfigureMockMvc
-@Import({CorsTestConfiguration.class, CacheTestConfiguration.class})
+@Import(CacheTestConfiguration.class)
 @ActiveProfiles("test")
+@Slf4j
 class UserControllerIntegrationTest extends PostgresTestContainersConfiguration {
 
-    @Autowired
     MockMvc mockMvc;
 
     @Autowired
@@ -63,33 +70,51 @@ class UserControllerIntegrationTest extends PostgresTestContainersConfiguration 
     PhoneRepository phoneRepository;
 
     @Autowired
-    private PasswordEncoder encoder;
+    PasswordEncoder encoder;
 
-    @MockBean
-    AuthFacade authFacade;
+    @Autowired
+    WebApplicationContext context;
+
+    User savedUser;
 
     public static final String USER = "User";
+
+    @BeforeEach
+    void init() {
+        User user = TestUtils.getUser();
+        user.setRole(Role.USER);
+        savedUser = userRepository.saveAndFlush(user);
+        mockMvc = MockMvcBuilders.webAppContextSetup(context)
+                .apply(SecurityMockMvcConfigurers.springSecurity())
+                .build();
+    }
 
     @AfterEach
     void clear() {
         userRepository.deleteAll();
         territoryRepository.deleteAll();
+        phoneRepository.deleteAll();
+    }
+
+    private CustomAuthenticationToken getAuthToken(User user) { // мб в утилсы перекинуть?
+        Collection<? extends GrantedAuthority> authorities = List
+                .of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+        return new CustomAuthenticationToken(user, null, user.getId(), authorities);
     }
 
     @Test
     @SneakyThrows
-    @WithMockCustomUser
     void findUserByIdIsOK() {
-        User user = TestUtils.getUserForDB();
-        userRepository.saveAndFlush(user);
-        UUID userId = user.getId();
+        UUID userId = savedUser.getId();
+        CustomAuthenticationToken authToken = getAuthToken(savedUser);
 
         mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL + "/{id}", userId)
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", Matchers.is(userId.toString())))
-                .andExpect(jsonPath("$.fullName", Matchers.is(user.getFullName())))
-                .andExpect(jsonPath("$.email", Matchers.is(user.getEmail())));
+                .andExpect(jsonPath("$.fullName", Matchers.is(savedUser.getFullName())))
+                .andExpect(jsonPath("$.email", Matchers.is(savedUser.getEmail())));
     }
 
     @Test
@@ -112,23 +137,25 @@ class UserControllerIntegrationTest extends PostgresTestContainersConfiguration 
 
         mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL + "/{id}", userId))
                 .andExpect(MockMvcResultMatchers.status().isUnauthorized());
-
     }
 
     @Test
     @SneakyThrows
-    @WithMockCustomUser(role = "USER")
     void getTerritoriesByUserIsOKWithRightId() {
-        User user = TestUtils.getUserForDB();
+        CustomAuthenticationToken authToken = getAuthToken(savedUser);
+        log.info("Authorization token: {}", authToken);
         Territory territory = TestUtils.getTerritoryForDB();
+        territory.setUsers(List.of(savedUser));
         territoryRepository.saveAndFlush(territory);
         List<Territory> territories = List.of(territory);
-        user.setTerritories(territories);
-        userRepository.saveAndFlush(user);
-        UUID userId = user.getId();
+        UUID userId = savedUser.getId();
 
-        Mockito.when(authFacade.isUserIdMatch(userId)).thenReturn(true);
+        log.info(TestMessage.PERFORM_HTTP, HttpMethod.GET.name(),
+                UrlConstants.USER_TERR_URL.formatted(savedUser.getId()));
+        log.info("saved user id {}", userId);
+        log.info("Auth {}", authToken.getUserId());
         mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL + "/{userId}/territories", userId)
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -139,12 +166,12 @@ class UserControllerIntegrationTest extends PostgresTestContainersConfiguration 
 
     @Test
     @SneakyThrows
-    @WithMockCustomUser(role = "USER")
     void getTerritoriesByUserIsForbiddenWithWrongId() {
-        UUID userId = TestUtils.USER_ID;
-        Mockito.when(authFacade.isUserIdMatch(userId)).thenReturn(false);
+        CustomAuthenticationToken authToken = getAuthToken(savedUser);
+        UUID anotherID = UUID.randomUUID();
 
-        mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL + "/{userId}/territories", userId)
+        mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL + "/{userId}/territories", anotherID)
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden());
 
@@ -161,8 +188,6 @@ class UserControllerIntegrationTest extends PostgresTestContainersConfiguration 
         user.setTerritories(territories);
         userRepository.saveAndFlush(user);
         UUID userId = user.getId();
-
-        Mockito.when(authFacade.isUserIdMatch(userId)).thenReturn(false);
 
         mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL + "/{userId}/territories", userId)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -210,22 +235,18 @@ class UserControllerIntegrationTest extends PostgresTestContainersConfiguration 
                         .param("name", name)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized());
-
     }
 
     @Test
     @SneakyThrows
     @WithMockCustomUser
     void getAllIsOkWithAdminRole() {
-        User user = TestUtils.getUserForDB();
-        userRepository.saveAndFlush(user);
-
         mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[*].id", Matchers.hasItem(user.getId().toString())))
-                .andExpect(jsonPath("$[*].fullName", Matchers.hasItem(user.getFullName())))
-                .andExpect(jsonPath("$[*].email", Matchers.hasItem(user.getEmail())));
+                .andExpect(jsonPath("$[*].id", Matchers.hasItem(savedUser.getId().toString())))
+                .andExpect(jsonPath("$[*].fullName", Matchers.hasItem(savedUser.getFullName())))
+                .andExpect(jsonPath("$[*].email", Matchers.hasItem(savedUser.getEmail())));
     }
 
     @Test
@@ -248,20 +269,18 @@ class UserControllerIntegrationTest extends PostgresTestContainersConfiguration 
 
     @Test
     @SneakyThrows
-    @WithMockCustomUser(role = "USER")
     void findUsersPhoneNumbersIsOkWithRightId() {
-        User user = TestUtils.getUserForDB();
+        CustomAuthenticationToken authToken = getAuthToken(savedUser);
         Phone phone = TestUtils.getPhoneForDB();
-        userRepository.saveAndFlush(user);
-        phone.setUser(user);
+        phone.setUser(savedUser);
         phoneRepository.saveAndFlush(phone);
-        user.getNumbers().add(phone);
-        userRepository.saveAndFlush(user);
-        UUID userId = user.getId();
+        savedUser.getNumbers().add(phone);
+        userRepository.saveAndFlush(savedUser);
+        UUID userId = savedUser.getId();
 
-        Mockito.when(authFacade.isUserIdMatch(userId)).thenReturn(true);
-        mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL + "/numbers/{id}", userId).
-                        contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL + "/numbers/{id}", userId)
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.[*]", Matchers.hasItem(phone.getNumber())));
@@ -269,21 +288,13 @@ class UserControllerIntegrationTest extends PostgresTestContainersConfiguration 
 
     @Test
     @SneakyThrows
-    @WithMockCustomUser(role = "USER")
     void findUsersPhoneNumbersIsForbiddenWithWrongId() {
-        User user = TestUtils.getUserForDB();
-        Phone phone = TestUtils.getPhoneForDB();
-        userRepository.saveAndFlush(user);
-        phone.setUser(user);
-        phoneRepository.saveAndFlush(phone);
-        user.getNumbers().add(phone);
-        userRepository.saveAndFlush(user);
-        UUID userId = user.getId();
+        CustomAuthenticationToken authToken = getAuthToken(savedUser);
+        UUID anotherId = UUID.randomUUID();
 
-
-        Mockito.when(authFacade.isUserIdMatch(userId)).thenReturn(false);
-        mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL + "/numbers/{id}", userId).
-                        contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL + "/numbers/{id}", anotherId)
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden());
     }
 
@@ -291,14 +302,12 @@ class UserControllerIntegrationTest extends PostgresTestContainersConfiguration 
     @SneakyThrows
     @WithMockCustomUser
     void findUsersPhoneNumbersIsOkWithRoleAdminAndAnyId() {
-        User user = TestUtils.getUserForDB();
         Phone phone = TestUtils.getPhoneForDB();
-        userRepository.saveAndFlush(user);
-        phone.setUser(user);
+        phone.setUser(savedUser);
         phoneRepository.saveAndFlush(phone);
-        user.getNumbers().add(phone);
-        userRepository.saveAndFlush(user);
-        UUID userId = user.getId();
+        savedUser.getNumbers().add(phone);
+        userRepository.saveAndFlush(savedUser);
+        UUID userId = savedUser.getId();
 
         mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL + "/numbers/{id}", userId).
                         contentType(MediaType.APPLICATION_JSON))
@@ -311,9 +320,7 @@ class UserControllerIntegrationTest extends PostgresTestContainersConfiguration 
     @SneakyThrows
     @WithAnonymousUser
     void findUsersPhoneNumbersIsUnauthorized() {
-        User user = TestUtils.getUserForDB();
-        userRepository.saveAndFlush(user);
-        UUID userId = user.getId();
+        UUID userId = TestUtils.USER_ID;
 
         mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL + "/numbers/{id}", userId)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -322,19 +329,16 @@ class UserControllerIntegrationTest extends PostgresTestContainersConfiguration 
 
     @Test
     @SneakyThrows
-    @WithMockCustomUser(role = "USER")
     void updateUserIsOkWithRightUserId() {
-        User user = TestUtils.getUserForDB();
-        userRepository.saveAndFlush(user);
-        UUID userId = user.getId();
+        CustomAuthenticationToken authToken = getAuthToken(savedUser);
+        UUID userId = savedUser.getId();
         UserPutDTO userPutDTO = TestUtils.getUserPutDTO();
         userPutDTO.setId(userId);
         userPutDTO.setMainNumber(FieldsValidation.cleanPhone(userPutDTO.getMainNumber()));
         String userPutDTOString = TestUtils.jsonStringFromObject(userPutDTO);
 
-        Mockito.when(authFacade.isUserIdMatch(userId)).thenReturn(true);
-
         mockMvc.perform(MockMvcRequestBuilders.put(UrlConstants.USER_URL)
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(userPutDTOString))
                 .andExpect(status().isOk())
@@ -347,9 +351,7 @@ class UserControllerIntegrationTest extends PostgresTestContainersConfiguration 
     @SneakyThrows
     @WithMockCustomUser
     void updateUserIsOkWithRoleAdmin() {
-        User user = TestUtils.getUserForDB();
-        userRepository.saveAndFlush(user);
-        UUID userId = user.getId();
+        UUID userId = savedUser.getId();
         UserPutDTO userPutDTO = TestUtils.getUserPutDTO();
         userPutDTO.setId(userId);
         userPutDTO.setMainNumber(FieldsValidation.cleanPhone(userPutDTO.getMainNumber()));
@@ -366,30 +368,15 @@ class UserControllerIntegrationTest extends PostgresTestContainersConfiguration 
 
     @Test
     @SneakyThrows
-    @WithMockCustomUser(role = "USER")
     void updateUserIsForbiddenWithWrongUserId() {
-        User user = TestUtils.getUserForDB();
-        userRepository.saveAndFlush(user);
-        UUID userId = user.getId();
+        CustomAuthenticationToken authToken = getAuthToken(savedUser);
+        UUID userId = UUID.randomUUID();
         UserPutDTO userPutDTO = TestUtils.getUserPutDTO();
-        String userPutDTOString = TestUtils.jsonStringFromObject(userPutDTO);
-
-        Mockito.when(authFacade.isUserIdMatch(userId)).thenReturn(false);
-
-        mockMvc.perform(MockMvcRequestBuilders.put(UrlConstants.USER_URL)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(userPutDTOString))
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
-    @SneakyThrows
-    @WithMockCustomUser(role = "SECURITY")
-    void updateUserIsForbiddenWithRoleSecurity() {
-        UserPutDTO userPutDTO = TestUtils.getUserPutDTO();
+        userPutDTO.setId(userId);
         String userPutDTOString = TestUtils.jsonStringFromObject(userPutDTO);
 
         mockMvc.perform(MockMvcRequestBuilders.put(UrlConstants.USER_URL)
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(userPutDTOString))
                 .andExpect(status().isForbidden());
@@ -399,9 +386,7 @@ class UserControllerIntegrationTest extends PostgresTestContainersConfiguration 
     @SneakyThrows
     @WithMockCustomUser
     void updateUserIsBadRequest() {
-        User user = TestUtils.getUserForDB();
-        userRepository.saveAndFlush(user);
-        UUID userId = user.getId();
+        UUID userId = savedUser.getId();
         UserPutDTO userPutDTO = TestUtils.getUserPutDTO();
         userPutDTO.setId(userId);
         userPutDTO.setMainNumber("integration tests sucks");
@@ -431,18 +416,16 @@ class UserControllerIntegrationTest extends PostgresTestContainersConfiguration 
 
     @Test
     @SneakyThrows
-    @WithMockCustomUser(username = "123@123.com", role = "USER")
     void changePasswordIsNoContent() {
-        User user = TestUtils.getUserForDB();
-        user.setPassword(encoder.encode(user.getPassword()));
-        userRepository.saveAndFlush(user);
-
+        CustomAuthenticationToken authToken = getAuthToken(savedUser);
         ChangePasswordRequest request = TestUtils.getChangePasswordRequest();
+        request.setCurrentPassword(savedUser.getPassword());
+        savedUser.setPassword(encoder.encode(savedUser.getPassword()));
+        userRepository.saveAndFlush(savedUser);
         String requestString = TestUtils.jsonStringFromObject(request);
 
-        Mockito.when(authFacade.getCurrentUser()).thenReturn(user);
-
         mockMvc.perform(MockMvcRequestBuilders.patch(UrlConstants.USER_URL + "/password")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestString))
                 .andExpect(status().isNoContent());
