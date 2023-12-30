@@ -56,7 +56,7 @@ public abstract class Pass {
     private PassStatus status;
 
     @Enumerated(EnumType.STRING)
-    private PassTypeTime typeTime;
+    private PassTimeType timeType;
 
     @ManyToOne
     @JoinColumn(name = "territory_id")
@@ -97,7 +97,7 @@ public abstract class Pass {
                 ", user=" + user.getId() +
                 ", comment=" + comment +
                 ", status=" + status +
-                ", typeTime=" + typeTime +
+                ", typeTime=" + timeType +
                 ", territory=" + territory.getId() +
                 ", startTime=" + startTime +
                 ", endTime=" + endTime +

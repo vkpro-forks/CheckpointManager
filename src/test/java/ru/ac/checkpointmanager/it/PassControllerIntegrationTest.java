@@ -26,7 +26,7 @@ import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
-import ru.ac.checkpointmanager.model.passes.PassTypeTime;
+import ru.ac.checkpointmanager.model.passes.PassTimeType;
 import ru.ac.checkpointmanager.repository.PassRepository;
 import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
@@ -291,7 +291,7 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         for (int i = 0; i < 5; i++) {
             PassAuto pass = new PassAuto();
             pass.setId(UUID.randomUUID());
-            pass.setTypeTime(PassTypeTime.ONETIME);
+            pass.setTimeType(PassTimeType.ONETIME);
             pass.setStartTime(LocalDateTime.now().plusHours(i));
             pass.setEndTime(LocalDateTime.now().plusHours(5 + i));
             pass.setStatus(passStatus);
@@ -334,7 +334,7 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         for (int i = 0; i < 5; i++) {
             PassAuto pass = new PassAuto();
             pass.setId(UUID.randomUUID());
-            pass.setTypeTime(PassTypeTime.ONETIME);
+            pass.setTimeType(PassTimeType.ONETIME);
             pass.setStartTime(LocalDateTime.now().plusHours(i));
             pass.setEndTime(LocalDateTime.now().plusHours(5 + i));
             pass.setStatus(passStatus);

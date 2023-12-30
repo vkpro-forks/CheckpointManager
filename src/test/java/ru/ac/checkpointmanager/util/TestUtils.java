@@ -43,7 +43,7 @@ import ru.ac.checkpointmanager.model.enums.PhoneNumberType;
 import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
-import ru.ac.checkpointmanager.model.passes.PassTypeTime;
+import ru.ac.checkpointmanager.model.passes.PassTimeType;
 
 import java.security.Key;
 import java.time.LocalDateTime;
@@ -170,7 +170,7 @@ public class TestUtils {
         return new PassUpdateDTO(
                 PASS_ID,
                 "comment",
-                PassTypeTime.ONETIME,
+                PassTimeType.ONETIME,
                 LocalDateTime.now().plusHours(1),
                 LocalDateTime.now().plusHours(7),
                 null,
@@ -182,7 +182,7 @@ public class TestUtils {
         return new PassCreateDTO(
                 USER_ID,
                 "comment",
-                PassTypeTime.ONETIME,
+                PassTimeType.ONETIME,
                 TERR_ID,
                 LocalDateTime.now().plusHours(1),
                 LocalDateTime.now().plusHours(7),
@@ -195,7 +195,7 @@ public class TestUtils {
         return new PassCreateDTO(
                 USER_ID,
                 "comment",
-                PassTypeTime.ONETIME,
+                PassTimeType.ONETIME,
                 TERR_ID,
                 LocalDateTime.now().plusHours(1),
                 LocalDateTime.now().plusHours(7),
@@ -323,7 +323,7 @@ public class TestUtils {
         passAuto.setStartTime(LocalDateTime.now());
         passAuto.setEndTime(LocalDateTime.now().plusHours(3));
         passAuto.setId(UUID.randomUUID());
-        passAuto.setTypeTime(PassTypeTime.ONETIME);
+        passAuto.setTimeType(PassTimeType.ONETIME);
         passAuto.setDtype("AUTO");
         passAuto.setStatus(PassStatus.ACTIVE);
         passAuto.setCar(car);
