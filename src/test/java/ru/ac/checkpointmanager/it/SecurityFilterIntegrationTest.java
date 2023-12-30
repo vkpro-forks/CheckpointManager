@@ -7,13 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import ru.ac.checkpointmanager.config.CorsTestConfiguration;
-import ru.ac.checkpointmanager.config.PostgresTestContainersConfiguration;
+import ru.ac.checkpointmanager.config.RedisAndPostgresTestContainersConfiguration;
 import ru.ac.checkpointmanager.exception.handler.ErrorCode;
 import ru.ac.checkpointmanager.service.user.UserService;
 import ru.ac.checkpointmanager.util.TestUtils;
@@ -23,9 +22,9 @@ import java.util.List;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-@Import({CorsTestConfiguration.class})
+@DirtiesContext
 @ActiveProfiles("test")
-class SecurityFilterIntegrationTest extends PostgresTestContainersConfiguration {
+class SecurityFilterIntegrationTest extends RedisAndPostgresTestContainersConfiguration {
 
     @MockBean
     UserService userService;
@@ -60,7 +59,7 @@ class SecurityFilterIntegrationTest extends PostgresTestContainersConfiguration 
     @Test
     @SneakyThrows
     void shouldReturnJwtExpiredErrorIfAccessTokenExpired() {
-        String jwt = TestUtils.getJwt(-1, TestUtils.USERNAME, List.of("ADMIN"), false, true);
+        String jwt = TestUtils.getJwt(-1, TestUtils.EMAIL, List.of("ADMIN"), false, true);
         mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL)
                         .header(TestUtils.AUTH_HEADER, TestUtils.BEARER + jwt))
                 .andExpect(MockMvcResultMatchers.status().isForbidden())
@@ -73,7 +72,7 @@ class SecurityFilterIntegrationTest extends PostgresTestContainersConfiguration 
     @Test
     @SneakyThrows
     void shouldReturn401IfUserFromJwtNotExists() {
-        String jwt = TestUtils.getJwt(600000, TestUtils.USERNAME, List.of("ADMIN"), false, true);
+        String jwt = TestUtils.getJwt(600000, TestUtils.EMAIL, List.of("ADMIN"), false, true);
         mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL)
                         .header(TestUtils.AUTH_HEADER, TestUtils.BEARER + jwt))
                 .andExpect(MockMvcResultMatchers.status().isUnauthorized())

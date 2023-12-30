@@ -64,6 +64,17 @@ application:
       expiration: 86400000 # a day
       refresh-token:
         expiration: 604800000 # 7 days
+
+cors:
+  allowed-origins:
+    - "*"
+  allowed-methods:
+    - "*"
+  allowed-headers:
+    - "*"
+
+  allow-credentials: true
+
 avatars:
   dir:
   extensions: jpg, jpeg, png, ico, gif, eps, svg, bmp
@@ -71,5 +82,6 @@ avatars:
   max-width: 400 # максимальная ширина изображения
   max-height: 400 # максимальная высота изображения
   content-type: "image/"
+
 logging:
   config: classpath:logback-local.xml

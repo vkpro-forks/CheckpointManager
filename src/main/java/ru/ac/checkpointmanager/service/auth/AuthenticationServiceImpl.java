@@ -24,6 +24,7 @@ import ru.ac.checkpointmanager.dto.user.LoginResponse;
 import ru.ac.checkpointmanager.dto.user.RefreshTokenDTO;
 import ru.ac.checkpointmanager.dto.user.UserAuthDTO;
 import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
+import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.mapper.UserMapper;
 import ru.ac.checkpointmanager.model.User;
@@ -118,7 +119,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
      * В случае сбоя на каком-либо этапе, все изменения, внесенные в методе, будут отменены.
      *
      * @param token токен подтверждения регистрации.
-     * @throws UserNotFoundException если пользователь с указанным токеном не найден.
+     * @throws EmailVerificationTokenException если токен подтверждения не найден
+     * @throws UserNotFoundException           если пользователь с указанным токеном не найден.
      * @see User
      * @see JwtService
      */
@@ -131,7 +133,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                         cacheManager.getCache("registration"))
                 .map(cache -> cache.get(token, ConfirmRegistration.class));
         if (confirmUser.isEmpty()) {
-            throw new EmailVerificationTokenException(String.format("Invalid or expired token %s", token));//TODO handle
+            log.warn(ExceptionUtils.INVALID_EMAIL_TOKEN_MSG.formatted(token));
+            throw new EmailVerificationTokenException(ExceptionUtils.INVALID_EMAIL_TOKEN_MSG.formatted(token));
         }
         User user = userMapper.toUser(confirmUser);
         user.setRole(Role.USER);

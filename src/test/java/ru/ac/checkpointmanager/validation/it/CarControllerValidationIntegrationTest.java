@@ -16,7 +16,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import ru.ac.checkpointmanager.config.CorsTestConfiguration;
 import ru.ac.checkpointmanager.config.OpenAllEndpointsTestConfiguration;
 import ru.ac.checkpointmanager.config.ValidationTestConfiguration;
 import ru.ac.checkpointmanager.controller.car.CarController;
@@ -31,8 +30,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 @WebMvcTest(CarController.class)
-@Import({OpenAllEndpointsTestConfiguration.class, CorsTestConfiguration.class,
-        AvatarProperties.class, ValidationTestConfiguration.class})
+@Import({AvatarProperties.class, ValidationTestConfiguration.class, OpenAllEndpointsTestConfiguration.class})
 @WithMockUser(roles = {"ADMIN"})
 @ActiveProfiles("test")
 class CarControllerValidationIntegrationTest {

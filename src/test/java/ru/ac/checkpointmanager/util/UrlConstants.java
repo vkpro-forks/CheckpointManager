@@ -42,9 +42,13 @@ public class UrlConstants {
 
     public static final String USER_ROLE_URL = USER_URL + "/role";
 
+    public static final String USER_TERR_URL = USER_URL + "/%s/territories";
+
     public static final String CONFIRM_URL = "/api/v1/confirm";
 
     public static final String CONFIRM_EMAIL_URL = CONFIRM_URL + "/email";
+
+    public static final String CONFIRM_REG_URL = CONFIRM_URL + "/registration";
 
     public static final String AUTH_URL = "/api/v1/authentication";
 

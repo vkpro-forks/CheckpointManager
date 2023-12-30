@@ -1,5 +1,6 @@
 package ru.ac.checkpointmanager.dto.passes;
 
+import jakarta.validation.GroupSequence;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -10,14 +11,16 @@ import ru.ac.checkpointmanager.dto.VisitorDTO;
 import ru.ac.checkpointmanager.model.passes.PassTypeTime;
 import ru.ac.checkpointmanager.validation.annotation.CarOrVisitorFieldsCheck;
 import ru.ac.checkpointmanager.validation.annotation.PassTimeCheck;
+import ru.ac.checkpointmanager.validation.group.CustomCheck;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
 @AllArgsConstructor
-@CarOrVisitorFieldsCheck
-@PassTimeCheck
+@CarOrVisitorFieldsCheck(groups = CustomCheck.class)
+@PassTimeCheck(groups = CustomCheck.class)
+@GroupSequence({PassUpdateDTO.class, CustomCheck.class}) // custom checks will be performed after default
 public class PassUpdateDTO {
 
     @NotNull

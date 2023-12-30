@@ -34,8 +34,8 @@ import ru.ac.checkpointmanager.model.enums.PhoneNumberType;
 import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
-import ru.ac.checkpointmanager.security.AuthFacadeImpl;
 import ru.ac.checkpointmanager.security.AuthFacade;
+import ru.ac.checkpointmanager.security.AuthFacadeImpl;
 import ru.ac.checkpointmanager.security.jwt.JwtService;
 import ru.ac.checkpointmanager.service.email.EmailService;
 import ru.ac.checkpointmanager.service.phone.PhoneService;
@@ -131,6 +131,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<TerritoryDTO> findTerritoriesByUserId(UUID userId) {
         log.debug(METHOD_UUID, MethodLog.getMethodName(), userId);
+        //FIXME Если юзера нет, то просто даст пустой список, вместо ошибки, баг?
         List<Territory> territories = userRepository.findTerritoriesByUserId(userId);
         return territoryMapper.toTerritoriesDTO(territories);
     }
@@ -340,7 +341,7 @@ public class UserServiceImpl implements UserService {
             return new AuthenticationResponse(accessToken, refreshToken);
         } else {
             log.warn("Invalid or expired token");
-            throw new EmailVerificationTokenException("Invalid or expired token");//TODO handle
+            throw new EmailVerificationTokenException("Invalid or expired token");
         }
     }
 
