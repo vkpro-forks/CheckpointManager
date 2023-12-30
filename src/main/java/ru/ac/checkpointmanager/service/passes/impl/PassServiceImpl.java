@@ -233,6 +233,7 @@ public class PassServiceImpl implements PassService {
     }
 
     @Override
+    @Transactional
     public PassResponseDTO activateCancelledPass(UUID id) {
         log.info(METHOD_INVOKE, MethodLog.getMethodName(), id);
 
@@ -260,6 +261,7 @@ public class PassServiceImpl implements PassService {
     }
 
     @Override
+    @Transactional
     public PassResponseDTO unWarningPass(UUID id) {
         log.info(METHOD_INVOKE, MethodLog.getMethodName(), id);
 

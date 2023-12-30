@@ -3,6 +3,7 @@ package ru.ac.checkpointmanager.service.checkpoints;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.CheckpointDTO;
 import ru.ac.checkpointmanager.exception.CheckpointNotFoundException;
 import ru.ac.checkpointmanager.mapper.CheckpointMapper;
@@ -31,6 +32,7 @@ public class CheckpointServiceImpl implements CheckpointService {
     private final CheckpointMapper checkpointMapper;
 
     @Override
+    @Transactional
     public CheckpointDTO addCheckpoint(CheckpointDTO checkpointDTO) {
         log.info(METHOD_CALLED_LOG, MethodLog.getMethodName(), checkpointDTO.getId());
         Checkpoint checkpoint = checkpointMapper.toCheckpoint(checkpointDTO);
@@ -85,6 +87,7 @@ public class CheckpointServiceImpl implements CheckpointService {
     }
 
     @Override
+    @Transactional
     public CheckpointDTO updateCheckpoint(CheckpointDTO checkpointDTO) {
         UUID checkpointId = checkpointDTO.getId();
         log.info(METHOD_CALLED_LOG, MethodLog.getMethodName(), checkpointId);
