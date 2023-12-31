@@ -1,0 +1,15 @@
+output.logstash:
+  # The Logstash hosts
+  hosts: [ "logstash:5044" ]
+  enabled: true
+  index: "chp"
+
+filebeat.inputs:
+  - type: log
+    paths:
+      - /var/log/filebeat/logs/*.log
+    enabled: true
+
+
+
+
