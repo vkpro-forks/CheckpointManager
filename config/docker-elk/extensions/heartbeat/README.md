@@ -18,7 +18,7 @@ $ docker-compose -f docker-compose.yml -f extensions/heartbeat/heartbeat-compose
 
 ## Configuring Heartbeat
 
-The Heartbeat configuration is stored in [`config/heartbeat.yml`](./config/heartbeat.yml). You can modify this file
+The Heartbeat configuration is stored in [`config/heartbeat.yml`](config/heartbeat.yml). You can modify this file
 with the help of the [Configuration reference][heartbeat-config].
 
 Any change to the Heartbeat configuration requires a restart of the Heartbeat container:

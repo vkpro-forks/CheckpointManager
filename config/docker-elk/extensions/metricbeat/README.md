@@ -19,7 +19,7 @@ $ docker-compose -f docker-compose.yml -f extensions/metricbeat/metricbeat-compo
 
 ## Configuring Metricbeat
 
-The Metricbeat configuration is stored in [`config/metricbeat.yml`](./config/metricbeat.yml). You can modify this file
+The Metricbeat configuration is stored in [`config/metricbeat.yml`](config/metricbeat.yml). You can modify this file
 with the help of the [Configuration reference][metricbeat-config].
 
 Any change to the Metricbeat configuration requires a restart of the Metricbeat container:

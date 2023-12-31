@@ -20,7 +20,7 @@ services:
     profiles:
       - setup
     build:
-      context: setup/
+      context: setup
       args:
         ELASTIC_VERSION: ${ELASTIC_VERSION}
     init: true
@@ -44,7 +44,7 @@ services:
 
   elasticsearch:
     build:
-      context: elasticsearch/
+      context: elasticsearch
       args:
         ELASTIC_VERSION: ${ELASTIC_VERSION}
     volumes:
@@ -70,14 +70,14 @@ services:
   logstash:
     container_name: logstash
     build:
-      context: logstash/
+      context: logstash
       args:
         ELASTIC_VERSION: ${ELASTIC_VERSION}
     volumes:
       - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro,Z
       - ./logstash/pipeline:/usr/share/logstash/pipeline:ro,Z
     ports:
-      - "5044:5044/tcp"
+      - "5044:5044"
       - "50000:50000/tcp"
       - "50000:50000/udp"
       - "9600:9600"
@@ -92,7 +92,7 @@ services:
 
   kibana:
     build:
-      context: kibana/
+      context: kibana
       args:
         ELASTIC_VERSION: ${ELASTIC_VERSION}
     volumes:
@@ -111,12 +111,14 @@ services:
     container_name: filebeat
     image: elastic/filebeat:8.11.3
     volumes:
-      - ./logs:/var/log/filebeat/logs
+      - ../../logs:/var/log/filebeat/logs
       - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
       - elasticsearch:/usr/share/filebeat/data
     command: filebeat -e -strict.perms=false
     networks:
       - elk
+    depends_on:
+      - logstash
     ports:
       - "9000:9000"
 

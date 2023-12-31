@@ -9,7 +9,3 @@ filebeat.inputs:
     paths:
       - /var/log/filebeat/logs/*.log
     enabled: true
-
-
-
-
