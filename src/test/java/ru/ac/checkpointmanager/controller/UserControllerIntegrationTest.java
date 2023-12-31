@@ -28,6 +28,7 @@ import org.springframework.web.context.WebApplicationContext;
 import ru.ac.checkpointmanager.config.CacheTestConfiguration;
 import ru.ac.checkpointmanager.config.PostgresTestContainersConfiguration;
 import ru.ac.checkpointmanager.config.security.WithMockCustomUser;
+import ru.ac.checkpointmanager.dto.user.ChangeEmailRequest;
 import ru.ac.checkpointmanager.dto.user.ChangePasswordRequest;
 import ru.ac.checkpointmanager.dto.user.UserPutDTO;
 import ru.ac.checkpointmanager.model.Phone;
@@ -429,5 +430,269 @@ class UserControllerIntegrationTest extends PostgresTestContainersConfiguration 
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestString))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @SneakyThrows
+    void changePasswordIdConflictWithWrongCurrentPassword() {
+        CustomAuthenticationToken authToken = getAuthToken(savedUser);
+        ChangePasswordRequest request = TestUtils.getChangePasswordRequest();
+        savedUser.setPassword(encoder.encode(savedUser.getPassword()));
+        userRepository.saveAndFlush(savedUser);
+        String requestString = TestUtils.jsonStringFromObject(request);
+
+        mockMvc.perform(MockMvcRequestBuilders.patch(UrlConstants.USER_URL + "/password")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestString))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.title").isNotEmpty());
+    }
+
+    @Test
+    @SneakyThrows
+    void changePasswordIsBadRequest() {
+        CustomAuthenticationToken authToken = getAuthToken(savedUser);
+        ChangePasswordRequest request = TestUtils.getChangePasswordRequest();
+        request.setCurrentPassword(savedUser.getPassword());
+        request.setConfirmationPassword("some wrong password");
+        savedUser.setPassword(encoder.encode(savedUser.getPassword()));
+        userRepository.saveAndFlush(savedUser);
+        String requestString = TestUtils.jsonStringFromObject(request);
+
+        mockMvc.perform(MockMvcRequestBuilders.patch(UrlConstants.USER_URL + "/password")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestString))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").isNotEmpty());
+    }
+
+    @Test
+    @SneakyThrows
+    void changeEmailIsOk() {
+        CustomAuthenticationToken authToken = getAuthToken(savedUser);
+        ChangeEmailRequest request = TestUtils.getChangeEmailRequest();
+        String requestString = TestUtils.jsonStringFromObject(request);
+
+        mockMvc.perform(MockMvcRequestBuilders.patch(UrlConstants.USER_URL + "/email")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
+                        .content(requestString)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @SneakyThrows
+    void changeEmailIsBadRequestWhenEmailAlreadyExist() {
+        CustomAuthenticationToken authToken = getAuthToken(savedUser);
+        ChangeEmailRequest request = TestUtils.getChangeEmailRequest();
+        request.setNewEmail(savedUser.getEmail());
+        String requestString = TestUtils.jsonStringFromObject(request);
+
+        mockMvc.perform(MockMvcRequestBuilders.patch(UrlConstants.USER_URL + "/email")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
+                        .content(requestString)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.title").isNotEmpty());
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockCustomUser
+    void changeRoleIsNoContentWithAdminRole() {
+        UUID userId = savedUser.getId();
+        String newRole = Role.MANAGER.name();
+
+        mockMvc.perform(MockMvcRequestBuilders.patch(UrlConstants.USER_URL + "/role/{id}", userId)
+                        .param("role", newRole))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockCustomUser(role = "MANAGER")
+    void changeRoleIsForbiddenWhenManagerChangeRoleToAdmin() {
+        UUID userId = savedUser.getId();
+        String newRole = Role.ADMIN.name();
+
+        mockMvc.perform(MockMvcRequestBuilders.patch(UrlConstants.USER_URL + "/role/{id}", userId)
+                        .param("role", newRole))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockCustomUser(role = "MANAGER")
+    void changeRoleIsForbiddenWhenManagerChangeRoleFromAdminToAnother() {
+        savedUser.setRole(Role.ADMIN);
+        userRepository.saveAndFlush(savedUser);
+        UUID userId = savedUser.getId();
+        String newRole = Role.USER.name();
+
+        mockMvc.perform(MockMvcRequestBuilders.patch(UrlConstants.USER_URL + "/role/{id}", userId)
+                        .param("role", newRole))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockCustomUser
+    void changeRoleIsConflictWhenNewRoleMatchedPrevious() {
+        UUID userId = savedUser.getId();
+        String newRole = Role.USER.name();
+
+        mockMvc.perform(MockMvcRequestBuilders.patch(UrlConstants.USER_URL + "/role/{id}", userId)
+                        .param("role", newRole))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockCustomUser
+    void changeRoleIsUserNotFound() {
+        UUID userId = UUID.randomUUID();
+        String newRole = Role.SECURITY.name();
+
+        mockMvc.perform(MockMvcRequestBuilders.patch(UrlConstants.USER_URL + "/role/{id}", userId)
+                        .param("role", newRole))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockCustomUser
+    void updateBlockStatusIsOk() {
+        UUID userId = savedUser.getId();
+        Boolean isBlocked = true;
+
+        mockMvc.perform(MockMvcRequestBuilders.patch(UrlConstants.USER_URL + "/{id}", userId)
+                        .param("isBlocked", isBlocked.toString()))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockCustomUser(role = "USER")
+    void updateBlockStatusIsForbidden() {
+        UUID userId = savedUser.getId();
+        Boolean isBlocked = true;
+
+        mockMvc.perform(MockMvcRequestBuilders.patch(UrlConstants.USER_URL + "/{id}", userId)
+                        .param("isBlocked", isBlocked.toString()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockCustomUser
+    void updateBlockStatusIsNotFound() {
+        UUID userId = UUID.randomUUID();
+        Boolean isBlocked = true;
+
+        mockMvc.perform(MockMvcRequestBuilders.patch(UrlConstants.USER_URL + "/{id}", userId)
+                        .param("isBlocked", isBlocked.toString()))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockCustomUser
+    void blockByIdIsNoContent() {
+        UUID userId = savedUser.getId();
+
+        mockMvc.perform(MockMvcRequestBuilders.patch(UrlConstants.USER_URL + "/block/{id}", userId))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockCustomUser(role = "USER")
+    void blockByIdIsForbidden() {
+        UUID userId = savedUser.getId();
+
+        mockMvc.perform(MockMvcRequestBuilders.patch(UrlConstants.USER_URL + "/block/{id}", userId))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockCustomUser
+    void blockByIdIsNotFound() {
+        UUID userId = UUID.randomUUID();
+        mockMvc.perform(MockMvcRequestBuilders.patch(UrlConstants.USER_URL + "/block/{id}", userId))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockCustomUser
+    void unblockByIdIsNoContent() {
+        UUID userId = savedUser.getId();
+
+        mockMvc.perform(MockMvcRequestBuilders.patch(UrlConstants.USER_URL + "/unblock/{id}", userId))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockCustomUser(role = "USER")
+    void unblockByIdIsForbidden() {
+        UUID userId = savedUser.getId();
+
+        mockMvc.perform(MockMvcRequestBuilders.patch(UrlConstants.USER_URL + "/unblock/{id}", userId))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockCustomUser
+    void unblockByIdIsNotFound() {
+        UUID userId = UUID.randomUUID();
+        mockMvc.perform(MockMvcRequestBuilders.patch(UrlConstants.USER_URL + "/unblock/{id}", userId))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @SneakyThrows
+    void deleteUserIsNoContentWithRightId() {
+        CustomAuthenticationToken authToken = getAuthToken(savedUser);
+        UUID userId = savedUser.getId();
+
+        mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.USER_URL + "/{id}", userId)
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken)))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @SneakyThrows
+    void deleteUserIsForbiddenWithWrongId() {
+        CustomAuthenticationToken authToken = getAuthToken(savedUser);
+        UUID userId = UUID.randomUUID();
+
+        mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.USER_URL + "/{id}", userId)
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockCustomUser
+    void deleteUserIsNoContentWithAdminRole() {
+        UUID userId = savedUser.getId();
+
+        mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.USER_URL + "/{id}", userId))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockCustomUser
+    void deleteUserIsNotFound() {
+        UUID userId = UUID.randomUUID();
+
+        mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.USER_URL + "/{id}", userId))
+                .andExpect(status().isNotFound());
     }
 }

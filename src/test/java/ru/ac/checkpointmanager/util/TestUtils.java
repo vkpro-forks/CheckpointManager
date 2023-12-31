@@ -103,7 +103,7 @@ public class TestUtils {
     public static final String PASSWORD = "password";
 
     public static final String EMAIL = "123@123.com";
-    public static final String NEW_EMAIL = "new.com";
+    public static final String NEW_EMAIL = "new@com.com";
     public static final String FULL_NAME = "Username";
     public static final String NEW_PASSWORD = "new_password";
 

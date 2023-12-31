@@ -22,7 +22,9 @@ import ru.ac.checkpointmanager.dto.user.ConfirmChangeEmail;
 import ru.ac.checkpointmanager.dto.user.UserPutDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
+import ru.ac.checkpointmanager.exception.MismatchCurrentPasswordException;
 import ru.ac.checkpointmanager.exception.ObjectAlreadyExistsException;
+import ru.ac.checkpointmanager.exception.PasswordConfirmationException;
 import ru.ac.checkpointmanager.mapper.TerritoryMapper;
 import ru.ac.checkpointmanager.mapper.UserMapper;
 import ru.ac.checkpointmanager.model.Territory;
@@ -219,7 +221,7 @@ class UserServiceImplTest {
         Mockito.when(authenticationFacade.getCurrentUser()).thenReturn(TestUtils.getUser());
         Mockito.when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
 
-        Assertions.assertThatExceptionOfType(IllegalStateException.class)
+        Assertions.assertThatExceptionOfType(MismatchCurrentPasswordException.class)
                 .isThrownBy(() -> userService.changePassword(request))
                 .withMessageContaining("Current password not matched");
         Mockito.verify(passwordEncoder).matches(anyString(), anyString());
@@ -232,7 +234,7 @@ class UserServiceImplTest {
 
         Mockito.when(authenticationFacade.getCurrentUser()).thenReturn(TestUtils.getUser());
         Mockito.when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
-        Assertions.assertThatExceptionOfType(IllegalStateException.class)
+        Assertions.assertThatExceptionOfType(PasswordConfirmationException.class)
                 .isThrownBy(() -> userService.changePassword(request))
                 .withMessageContaining("Passwords are not the same");
     }
@@ -386,7 +388,7 @@ class UserServiceImplTest {
 
         Mockito.when(authenticationFacade.getCurrentUser()).thenReturn(userInContext);
         Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        Assertions.assertThatExceptionOfType(IllegalStateException.class)
+        Assertions.assertThatExceptionOfType(ObjectAlreadyExistsException.class)
                 .isThrownBy(() -> userService.changeRole(userId, Role.USER))
                 .withMessageContaining("This user already has role %s", user.getRole());
     }
@@ -448,9 +450,7 @@ class UserServiceImplTest {
         user.setIsBlocked(true);
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        Assertions.assertThatExceptionOfType(IllegalStateException.class)
-                .isThrownBy(() -> userService.blockById(userId))
-                .withMessageContaining("User already blocked [id=%s]", userId);
+        Assertions.assertThatNoException().isThrownBy(() -> userService.blockById(userId));
     }
 
     @Test
@@ -482,9 +482,7 @@ class UserServiceImplTest {
         user.setIsBlocked(false);
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        Assertions.assertThatExceptionOfType(IllegalStateException.class)
-                .isThrownBy(() -> userService.unblockById(userId))
-                .withMessageContaining("User already unblocked [id=%s]", userId);
+        Assertions.assertThatNoException().isThrownBy(() -> userService.unblockById(userId));
     }
 
     @Test
