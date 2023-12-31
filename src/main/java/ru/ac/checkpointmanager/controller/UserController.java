@@ -145,7 +145,7 @@ public class UserController {
     }
 
     @Operation(summary = "Получения списка номеров телефона, привязанных к пользователю",
-            description = "Доступ: USER, ADMIN, MANAGER, SECURITY."
+            description = "Доступ: USER - со своим id; ADMIN, MANAGER, SECURITY - с любым."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -165,7 +165,7 @@ public class UserController {
     }
 
     @Operation(summary = "Изменение данных пользователя",
-            description = "Доступ: USER, ADMIN, MANAGER"
+            description = "Доступ: USER, SECURITY - со своим id; ADMIN, MANAGER - с любым."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -353,7 +353,7 @@ public class UserController {
     }
 
     @Operation(summary = "Удалить пользователя по id",
-            description = "Доступ: ADMIN, MANAGER, USER"
+            description = "Доступ: USER, SECURITY - со своим id; ADMIN, MANAGER - с любым."
     )
     @ApiResponses(value = {
             @ApiResponse(
