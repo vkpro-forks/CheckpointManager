@@ -75,6 +75,8 @@ databaseChangeLog:
       file: liquibase/scripts/V_208__drop_temporary_users_table.sql
   - include:
       file: liquibase/scripts/V_216__alter_table_passes_delete_cascade_on_delete_territory.yaml
+  - include:
+      file: liquibase/scripts/V_199__alter_passes.sql
 
 
   ## ВНЕСЕНИЕ ДЕМО-ДАННЫХ, ОСТАВЛЯЙТЕ ВСЕГДА В КОНЦЕ ФАЙЛА

@@ -8,7 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.VisitorDTO;
-import ru.ac.checkpointmanager.model.passes.PassTypeTime;
+import ru.ac.checkpointmanager.model.passes.PassTimeType;
 import ru.ac.checkpointmanager.validation.annotation.CarOrVisitorFieldsCheck;
 import ru.ac.checkpointmanager.validation.group.CustomCheck;
 import ru.ac.checkpointmanager.validation.annotation.PassTimeCheck;
@@ -30,7 +30,7 @@ public class PassCreateDTO {
     private String comment;
 
     @NotNull
-    private PassTypeTime typeTime;
+    private PassTimeType timeType;
 
     @NotNull
     private UUID territoryId;

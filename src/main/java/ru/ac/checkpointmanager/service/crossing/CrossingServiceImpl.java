@@ -91,7 +91,7 @@ public class CrossingServiceImpl implements CrossingService {
      * @param currentDirection направление текущего (добавляемого) пересечения
      */
     public void processPass(Pass pass, Direction currentDirection) {
-        String passTimeType = pass.getTypeTime().toString();
+        String passTimeType = pass.getTimeType().toString();
         PassProcessing passProcessing = passProcessingMap.get(passTimeType);
         if (passProcessing == null) {
             log.error("Unsupported pass time type - %s".formatted(passTimeType));

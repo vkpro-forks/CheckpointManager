@@ -1,12 +1,12 @@
 package ru.ac.checkpointmanager.model.passes;
 
-public enum PassTypeTime {
+public enum PassTimeType {
     ONETIME("Разовый"),
     PERMANENT("Постоянный");
 
     private final String description;
 
-    PassTypeTime(String description) {
+    PassTimeType(String description) {
         this.description = description;
     }
 
