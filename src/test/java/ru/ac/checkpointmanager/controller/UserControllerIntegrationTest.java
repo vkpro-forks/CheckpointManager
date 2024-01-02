@@ -8,11 +8,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
@@ -25,8 +22,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import ru.ac.checkpointmanager.config.CacheTestConfiguration;
-import ru.ac.checkpointmanager.config.PostgresTestContainersConfiguration;
+import ru.ac.checkpointmanager.config.RedisAndPostgresTestContainersConfiguration;
 import ru.ac.checkpointmanager.config.security.WithMockCustomUser;
 import ru.ac.checkpointmanager.dto.user.ChangeEmailRequest;
 import ru.ac.checkpointmanager.dto.user.ChangePasswordRequest;
@@ -44,7 +40,6 @@ import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 import ru.ac.checkpointmanager.utils.FieldsValidation;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -54,10 +49,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
-@Import(CacheTestConfiguration.class)
 @ActiveProfiles("test")
 @Slf4j
-class UserControllerIntegrationTest extends PostgresTestContainersConfiguration {
+class UserControllerIntegrationTest extends RedisAndPostgresTestContainersConfiguration {
 
     MockMvc mockMvc;
 
@@ -97,17 +91,11 @@ class UserControllerIntegrationTest extends PostgresTestContainersConfiguration 
         phoneRepository.deleteAll();
     }
 
-    private CustomAuthenticationToken getAuthToken(User user) { // мб в утилсы перекинуть?
-        Collection<? extends GrantedAuthority> authorities = List
-                .of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
-        return new CustomAuthenticationToken(user, null, user.getId(), authorities);
-    }
-
     @Test
     @SneakyThrows
     void findUserByIdIsOK() {
         UUID userId = savedUser.getId();
-        CustomAuthenticationToken authToken = getAuthToken(savedUser);
+        CustomAuthenticationToken authToken = TestUtils.getAuthToken(savedUser);
 
         mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL + "/{id}", userId)
                         .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
@@ -143,7 +131,7 @@ class UserControllerIntegrationTest extends PostgresTestContainersConfiguration 
     @Test
     @SneakyThrows
     void getTerritoriesByUserIsOKWithRightId() {
-        CustomAuthenticationToken authToken = getAuthToken(savedUser);
+        CustomAuthenticationToken authToken = TestUtils.getAuthToken(savedUser);
         log.info("Authorization token: {}", authToken);
         Territory territory = TestUtils.getTerritoryForDB();
         territory.setUsers(List.of(savedUser));
@@ -168,7 +156,7 @@ class UserControllerIntegrationTest extends PostgresTestContainersConfiguration 
     @Test
     @SneakyThrows
     void getTerritoriesByUserIsForbiddenWithWrongId() {
-        CustomAuthenticationToken authToken = getAuthToken(savedUser);
+        CustomAuthenticationToken authToken = TestUtils.getAuthToken(savedUser);
         UUID anotherID = UUID.randomUUID();
 
         mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL + "/{userId}/territories", anotherID)
@@ -271,7 +259,7 @@ class UserControllerIntegrationTest extends PostgresTestContainersConfiguration 
     @Test
     @SneakyThrows
     void findUsersPhoneNumbersIsOkWithRightId() {
-        CustomAuthenticationToken authToken = getAuthToken(savedUser);
+        CustomAuthenticationToken authToken = TestUtils.getAuthToken(savedUser);
         Phone phone = TestUtils.getPhoneForDB();
         phone.setUser(savedUser);
         phoneRepository.saveAndFlush(phone);
@@ -290,7 +278,7 @@ class UserControllerIntegrationTest extends PostgresTestContainersConfiguration 
     @Test
     @SneakyThrows
     void findUsersPhoneNumbersIsForbiddenWithWrongId() {
-        CustomAuthenticationToken authToken = getAuthToken(savedUser);
+        CustomAuthenticationToken authToken = TestUtils.getAuthToken(savedUser);
         UUID anotherId = UUID.randomUUID();
 
         mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL + "/numbers/{id}", anotherId)
@@ -331,7 +319,7 @@ class UserControllerIntegrationTest extends PostgresTestContainersConfiguration 
     @Test
     @SneakyThrows
     void updateUserIsOkWithRightUserId() {
-        CustomAuthenticationToken authToken = getAuthToken(savedUser);
+        CustomAuthenticationToken authToken = TestUtils.getAuthToken(savedUser);
         UUID userId = savedUser.getId();
         UserPutDTO userPutDTO = TestUtils.getUserPutDTO();
         userPutDTO.setId(userId);
@@ -370,7 +358,7 @@ class UserControllerIntegrationTest extends PostgresTestContainersConfiguration 
     @Test
     @SneakyThrows
     void updateUserIsForbiddenWithWrongUserId() {
-        CustomAuthenticationToken authToken = getAuthToken(savedUser);
+        CustomAuthenticationToken authToken = TestUtils.getAuthToken(savedUser);
         UUID userId = UUID.randomUUID();
         UserPutDTO userPutDTO = TestUtils.getUserPutDTO();
         userPutDTO.setId(userId);
@@ -418,7 +406,7 @@ class UserControllerIntegrationTest extends PostgresTestContainersConfiguration 
     @Test
     @SneakyThrows
     void changePasswordIsNoContent() {
-        CustomAuthenticationToken authToken = getAuthToken(savedUser);
+        CustomAuthenticationToken authToken = TestUtils.getAuthToken(savedUser);
         ChangePasswordRequest request = TestUtils.getChangePasswordRequest();
         request.setCurrentPassword(savedUser.getPassword());
         savedUser.setPassword(encoder.encode(savedUser.getPassword()));
@@ -435,7 +423,7 @@ class UserControllerIntegrationTest extends PostgresTestContainersConfiguration 
     @Test
     @SneakyThrows
     void changePasswordIdConflictWithWrongCurrentPassword() {
-        CustomAuthenticationToken authToken = getAuthToken(savedUser);
+        CustomAuthenticationToken authToken = TestUtils.getAuthToken(savedUser);
         ChangePasswordRequest request = TestUtils.getChangePasswordRequest();
         savedUser.setPassword(encoder.encode(savedUser.getPassword()));
         userRepository.saveAndFlush(savedUser);
@@ -452,7 +440,7 @@ class UserControllerIntegrationTest extends PostgresTestContainersConfiguration 
     @Test
     @SneakyThrows
     void changePasswordIsBadRequest() {
-        CustomAuthenticationToken authToken = getAuthToken(savedUser);
+        CustomAuthenticationToken authToken = TestUtils.getAuthToken(savedUser);
         ChangePasswordRequest request = TestUtils.getChangePasswordRequest();
         request.setCurrentPassword(savedUser.getPassword());
         request.setConfirmationPassword("some wrong password");
@@ -471,7 +459,7 @@ class UserControllerIntegrationTest extends PostgresTestContainersConfiguration 
     @Test
     @SneakyThrows
     void changeEmailIsOk() {
-        CustomAuthenticationToken authToken = getAuthToken(savedUser);
+        CustomAuthenticationToken authToken = TestUtils.getAuthToken(savedUser);
         ChangeEmailRequest request = TestUtils.getChangeEmailRequest();
         String requestString = TestUtils.jsonStringFromObject(request);
 
@@ -485,7 +473,7 @@ class UserControllerIntegrationTest extends PostgresTestContainersConfiguration 
     @Test
     @SneakyThrows
     void changeEmailIsBadRequestWhenEmailAlreadyExist() {
-        CustomAuthenticationToken authToken = getAuthToken(savedUser);
+        CustomAuthenticationToken authToken = TestUtils.getAuthToken(savedUser);
         ChangeEmailRequest request = TestUtils.getChangeEmailRequest();
         request.setNewEmail(savedUser.getEmail());
         String requestString = TestUtils.jsonStringFromObject(request);
@@ -657,7 +645,7 @@ class UserControllerIntegrationTest extends PostgresTestContainersConfiguration 
     @Test
     @SneakyThrows
     void deleteUserIsNoContentWithRightId() {
-        CustomAuthenticationToken authToken = getAuthToken(savedUser);
+        CustomAuthenticationToken authToken = TestUtils.getAuthToken(savedUser);
         UUID userId = savedUser.getId();
 
         mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.USER_URL + "/{id}", userId)
@@ -668,7 +656,7 @@ class UserControllerIntegrationTest extends PostgresTestContainersConfiguration 
     @Test
     @SneakyThrows
     void deleteUserIsForbiddenWithWrongId() {
-        CustomAuthenticationToken authToken = getAuthToken(savedUser);
+        CustomAuthenticationToken authToken = TestUtils.getAuthToken(savedUser);
         UUID userId = UUID.randomUUID();
 
         mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.USER_URL + "/{id}", userId)

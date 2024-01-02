@@ -12,6 +12,8 @@ import org.instancio.Instancio;
 import org.instancio.Model;
 import org.instancio.Select;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.ac.checkpointmanager.dto.CarBrandDTO;
@@ -45,10 +47,12 @@ import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.model.passes.PassTypeTime;
+import ru.ac.checkpointmanager.security.CustomAuthenticationToken;
 
 import java.security.Key;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -401,6 +405,12 @@ public class TestUtils {
 
     public static String getKey() {
         return "8790D58F7205C4C250CD67DD6D9B6F8B20D2E928FFAA6D4A2BEB2AD2189B01D1";
+    }
+
+    public static CustomAuthenticationToken getAuthToken(User user) {
+        Collection<? extends GrantedAuthority> authorities = List
+                .of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+        return new CustomAuthenticationToken(user, null, user.getId(), authorities);
     }
 
     private TestUtils() {
