@@ -84,7 +84,7 @@ DO $$
         VALUES (visitor1_id, 'Петрович', '+79991234567', 'электрик'),
                (visitor2_id, 'Дон Румата Эсторский', '+79991234568', null);
 
-        INSERT INTO passes ( id, user_id, status, type_time, territory_id, added_at
+        INSERT INTO passes ( id, user_id, status, time_type, territory_id, added_at
                            , start_time, end_time, comment, car_id, visitor_id, dtype, favorite, expected_direction)
 
         -- АКТИВНЫЕ ПРОПУСКА НА НЕДЕЛЮ, без пересечений, с ними можно проверять пересечения

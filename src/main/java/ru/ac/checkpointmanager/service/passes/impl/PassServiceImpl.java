@@ -71,7 +71,7 @@ public class PassServiceImpl implements PassService {
     @Override
     @Transactional
     public PassResponseDTO addPass(PassCreateDTO passCreateDTO) {
-        log.info(METHOD_INVOKE, MethodLog.getMethodName(), passCreateDTO);
+        log.debug(METHOD_INVOKE, MethodLog.getMethodName(), passCreateDTO);
 
         Pass pass = passResolver.createPass(passCreateDTO);
         passChecker.checkUserTerritoryRelation(pass.getUser().getId(), pass.getTerritory().getId());
@@ -192,7 +192,7 @@ public class PassServiceImpl implements PassService {
         trimThemAll(newStatePass);
 
         existPass.setComment(newStatePass.getComment());
-        existPass.setTypeTime(newStatePass.getTypeTime());
+        existPass.setTimeType(newStatePass.getTimeType());
         existPass.setStartTime(newStatePass.getStartTime());
         existPass.setEndTime(newStatePass.getEndTime());
         existPass.setAttachedEntity(newStatePass);
@@ -233,6 +233,7 @@ public class PassServiceImpl implements PassService {
     }
 
     @Override
+    @Transactional
     public PassResponseDTO activateCancelledPass(UUID id) {
         log.info(METHOD_INVOKE, MethodLog.getMethodName(), id);
 
@@ -260,6 +261,7 @@ public class PassServiceImpl implements PassService {
     }
 
     @Override
+    @Transactional
     public PassResponseDTO unWarningPass(UUID id) {
         log.info(METHOD_INVOKE, MethodLog.getMethodName(), id);
 

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.exception.ExceptionUtils;
@@ -37,6 +38,7 @@ public class TerritoryServiceImpl implements TerritoryService {
 
 
     @Override
+    @Transactional
     public TerritoryDTO addTerritory(TerritoryDTO territoryDTO) {
         log.debug(METHOD_CALLED_UUID_LOG, MethodLog.getMethodName(), territoryDTO.getId());
         Territory territory = territoryMapper.toTerritory(territoryDTO);
@@ -91,6 +93,7 @@ public class TerritoryServiceImpl implements TerritoryService {
     }
 
     @Override
+    @Transactional
     public TerritoryDTO updateTerritory(TerritoryDTO territoryDTO) {
         UUID territoryId = territoryDTO.getId();
         log.debug(METHOD_CALLED_UUID_LOG, MethodLog.getMethodName(), territoryId);
@@ -131,8 +134,8 @@ public class TerritoryServiceImpl implements TerritoryService {
             throw new IllegalArgumentException(message);
         }
 
-        territory.getUsers().add(user);
-        territoryRepository.save(territory);
+        user.getTerritories().add(territory);
+        userRepository.save(user);
     }
 
 
@@ -169,8 +172,8 @@ public class TerritoryServiceImpl implements TerritoryService {
             throw new IllegalArgumentException(message);
         }
 
-        territory.getUsers().remove(user);
-        territoryRepository.save(territory);
+        user.getTerritories().remove(territory);
+        userRepository.save(user);
     }
 
     @Override
