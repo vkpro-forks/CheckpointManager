@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.annotation.PagingParam;
+import ru.ac.checkpointmanager.dto.passes.FilterParams;
 import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassResponseDTO;
@@ -71,8 +72,11 @@ public class PassController {
     @Operation(summary = "Получить список всех пропусков",
             description = "Доступ: ADMIN.",
             parameters = {
-                    @Parameter(in = ParameterIn.QUERY, name = "page", example = "0"),
-                    @Parameter(in = ParameterIn.QUERY, name = "size", example = "20")
+                    @Parameter(in = ParameterIn.QUERY, name = "page"),
+                    @Parameter(in = ParameterIn.QUERY, name = "size"),
+                    @Parameter(in = ParameterIn.QUERY, name = "dtype"),
+                    @Parameter(in = ParameterIn.QUERY, name = "territory"),
+                    @Parameter(in = ParameterIn.QUERY, name = "status")
             })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуска найдены",
@@ -81,9 +85,9 @@ public class PassController {
             @ApiResponse(responseCode = "404", description = "Пропуска не найдены")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @GetMapping
-    public ResponseEntity<Page<PassResponseDTO>> getPasses(@Schema(hidden = true)
-                                                           @Valid @PagingParam PagingParams pagingParams) {
-        Page<PassResponseDTO> passPage = service.findPasses(pagingParams);
+    public ResponseEntity<Page<PassResponseDTO>> getPasses(@Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams,
+                                                           @Schema(hidden = true) FilterParams filterParams) {
+        Page<PassResponseDTO> passPage = service.findPasses(pagingParams, filterParams);
         return ResponseEntity.ok(passPage);
     }
 
@@ -104,8 +108,11 @@ public class PassController {
     @Operation(summary = "Получить список пропусков конкретного пользователя",
             description = "Доступ: ADMIN, USER.",
             parameters = {
-                    @Parameter(in = ParameterIn.QUERY, name = "page", example = "0"),
-                    @Parameter(in = ParameterIn.QUERY, name = "size", example = "20")
+                    @Parameter(in = ParameterIn.QUERY, name = "page"),
+                    @Parameter(in = ParameterIn.QUERY, name = "size"),
+                    @Parameter(in = ParameterIn.QUERY, name = "dtype"),
+                    @Parameter(in = ParameterIn.QUERY, name = "territory"),
+                    @Parameter(in = ParameterIn.QUERY, name = "status")
             })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуска найдены",
@@ -115,16 +122,20 @@ public class PassController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
     @GetMapping("/user/{userId}")
     public ResponseEntity<Page<PassResponseDTO>> getPassesByUserId(@PathVariable UUID userId,
-                                                                   @Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams) {
-        Page<PassResponseDTO> passPage = service.findPassesByUser(userId, pagingParams);
+                                                                   @Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams,
+                                                                   @Schema(hidden = true) FilterParams filterParams) {
+        Page<PassResponseDTO> passPage = service.findPassesByUser(userId, pagingParams, filterParams);
         return ResponseEntity.ok(passPage);
     }
 
     @Operation(summary = "Получить список пропусков на конкретную территорию",
             description = "Доступ: ADMIN, MANAGER, SECURITY.",
             parameters = {
-                    @Parameter(in = ParameterIn.QUERY, name = "page", example = "0"),
-                    @Parameter(in = ParameterIn.QUERY, name = "size", example = "20")
+                    @Parameter(in = ParameterIn.QUERY, name = "page"),
+                    @Parameter(in = ParameterIn.QUERY, name = "size"),
+                    @Parameter(in = ParameterIn.QUERY, name = "dtype"),
+                    @Parameter(in = ParameterIn.QUERY, name = "territory"),
+                    @Parameter(in = ParameterIn.QUERY, name = "status")
             })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуска найдены",
@@ -134,9 +145,10 @@ public class PassController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/territory/{territoryId}")
     public ResponseEntity<Page<PassResponseDTO>> getPassesByTerritoryId(@PathVariable UUID territoryId,
-                                                                        @Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams) {
+                                                                        @Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams,
+                                                                        @Schema(hidden = true) FilterParams filterParams) {
 
-        Page<PassResponseDTO> passPage = service.findPassesByTerritory(territoryId, pagingParams);
+        Page<PassResponseDTO> passPage = service.findPassesByTerritory(territoryId, pagingParams, filterParams);
         return ResponseEntity.ok(passPage);
     }
 

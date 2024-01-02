@@ -100,7 +100,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(PassException.class)
     public ProblemDetail handlePassException(PassException e) {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
-        problemDetail.setTitle("Pass creating error");
+        problemDetail.setTitle("Error related to passes");
         problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
         log.debug(LOG_MSG, e.getClass());
         return problemDetail;

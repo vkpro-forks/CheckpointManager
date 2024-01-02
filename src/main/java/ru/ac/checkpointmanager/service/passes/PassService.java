@@ -1,6 +1,7 @@
 package ru.ac.checkpointmanager.service.passes;
 
 import org.springframework.data.domain.Page;
+import ru.ac.checkpointmanager.dto.passes.FilterParams;
 import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassResponseDTO;
@@ -14,15 +15,15 @@ public interface PassService {
 
     PassResponseDTO addPass(PassCreateDTO passCreateDTO);
 
-    Page<PassResponseDTO> findPasses(PagingParams pagingParams);
+    Page<PassResponseDTO> findPasses(PagingParams pagingParams, FilterParams filterParams);
 
     PassResponseDTO findById(UUID id);
 
     Pass findPassById(UUID id);
 
-    Page<PassResponseDTO> findPassesByUser(UUID userId, PagingParams pagingParams);
+    Page<PassResponseDTO> findPassesByUser(UUID userId, PagingParams pagingParams, FilterParams filterParams);
 
-    Page<PassResponseDTO> findPassesByTerritory(UUID terId, PagingParams pagingParams);
+    Page<PassResponseDTO> findPassesByTerritory(UUID terId, PagingParams pagingParams, FilterParams filterParams);
 
     Page<PassInOutViewProjection> findEventsByUser(UUID userId, PagingParams pagingParams);
 
