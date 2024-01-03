@@ -26,9 +26,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.user.ChangeEmailRequest;
 import ru.ac.checkpointmanager.dto.user.ChangePasswordRequest;
-import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.user.ConfirmChangeEmail;
 import ru.ac.checkpointmanager.dto.user.UserPutDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
@@ -45,7 +45,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Пользовательский интерфейс", description = "Комплекс операций по управлению жизненным циклом " +
-        "пользовательских учетных записей, включая создание, модификацию, просмотр и удаление аккаунтов")
+                                                        "пользовательских учетных записей, включая создание, модификацию, просмотр и удаление аккаунтов")
 @ApiResponses(value = {
         @ApiResponse(responseCode = "401",
                 description = "UNAUTHORIZED: пользователь не авторизован"),
@@ -150,6 +150,31 @@ public class UserController {
     @GetMapping()
     public Collection<UserResponseDTO> getAll() {
         return userService.getAll();
+    }
+
+    @Operation(summary = "Поиск пользователя по почте",
+            description = "Доступ: ADMIN, MANAGER."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "OK: возвращает пользователя с указанной почтой",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = UserResponseDTO.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "FORBIDDEN: роль пользователя не предоставляет доступ к данному api"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "NOT_FOUND: совпадения по почте не найдены"
+            )
+    })
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    @GetMapping("/email")
+    public UserResponseDTO getByEmail(@RequestParam String email) {
+        return userService.findByEmail(email);
     }
 
     @Operation(summary = "Получения списка номеров телефона, привязанных к пользователю",
