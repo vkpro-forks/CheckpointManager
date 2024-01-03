@@ -57,8 +57,7 @@ public class PhoneServiceImpl implements PhoneService {
     @Transactional(readOnly = true)
     public PhoneDTO findById(UUID id) {
         log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), id);
-        Phone foundPhone = findPhoneById(id);
-        return phoneMapper.toPhoneDTO(foundPhone);
+        return phoneMapper.toPhoneDTO(findPhoneById(id));
     }
 
     @Override
