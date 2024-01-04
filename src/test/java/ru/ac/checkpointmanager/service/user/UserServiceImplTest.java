@@ -295,7 +295,7 @@ class UserServiceImplTest {
 
         Assertions.assertThatExceptionOfType(EmailAlreadyExistsException.class)
                 .isThrownBy(() -> userService.changeEmail(request))
-                .withMessageContaining("already taken");
+                .withMessageContaining("already exists");
 
         Mockito.verify(userRepository).findByEmail(anyString());
     }
