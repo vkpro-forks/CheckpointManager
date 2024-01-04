@@ -23,6 +23,7 @@ import ru.ac.checkpointmanager.dto.user.IsAuthenticatedResponse;
 import ru.ac.checkpointmanager.dto.user.LoginResponse;
 import ru.ac.checkpointmanager.dto.user.RefreshTokenDTO;
 import ru.ac.checkpointmanager.dto.user.UserAuthDTO;
+import ru.ac.checkpointmanager.exception.EmailAlreadyExistsException;
 import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
 import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
@@ -49,7 +50,6 @@ import java.util.UUID;
 @Slf4j
 public class AuthenticationServiceImpl implements AuthenticationService {
     public static final String METHOD_WAS_INVOKED = "Method {} was invoked";
-    private static final String USER_NOT_FOUND_MSG = "User with [email=%s] not found";
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final JwtValidator jwtValidator;
@@ -88,8 +88,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         log.debug(METHOD_WAS_INVOKED, MethodLog.getMethodName());
         boolean userExist = userRepository.findByEmail(userAuthDTO.getEmail()).isPresent();
         if (userExist) {
-            log.warn("Email {} already taken", userAuthDTO.getEmail());
-            throw new IllegalStateException(String.format("Email %s already taken", userAuthDTO.getEmail()));
+            log.warn(ExceptionUtils.EMAIL_EXISTS.formatted(userAuthDTO.getEmail()));
+            throw new EmailAlreadyExistsException(ExceptionUtils.EMAIL_EXISTS.formatted(userAuthDTO.getEmail()));
         }
         ConfirmRegistration confirmUser = userMapper.toConfirmRegistration(userAuthDTO);
         String encodedPassword = passwordEncoder.encode(confirmUser.getPassword());
@@ -207,8 +207,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         jwtValidator.validateRefreshToken(refreshToken);
         String username = jwtService.extractUsername(refreshToken);
         User user = userRepository.findByEmail(username).orElseThrow(() -> {
-            log.warn(USER_NOT_FOUND_MSG.formatted(username));
-            return new UserNotFoundException(String.format(USER_NOT_FOUND_MSG.formatted(username)));
+            log.warn(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(username));
+            return new UserNotFoundException(String.format(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(username)));
         });
         String accessToken = jwtService.generateAccessToken(user);
         return new AuthenticationResponse(accessToken, refreshToken);

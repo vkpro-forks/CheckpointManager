@@ -7,7 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -38,7 +37,7 @@ import java.util.List;
 @DirtiesContext
 @ActiveProfiles("test")
 @Slf4j
-class UserControllerIntegrationTest extends RedisAndPostgresTestContainersConfiguration {
+class UserControllerIntegrationTest extends RedisAndPostgresTestContainersConfiguration { //TODO move to controller pkg
 
     MockMvc mockMvc;
 

@@ -21,7 +21,9 @@ import ru.ac.checkpointmanager.dto.user.ChangePasswordRequest;
 import ru.ac.checkpointmanager.dto.user.ConfirmChangeEmail;
 import ru.ac.checkpointmanager.dto.user.UserPutDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
+import ru.ac.checkpointmanager.exception.EmailAlreadyExistsException;
 import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
+import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.exception.MismatchCurrentPasswordException;
 import ru.ac.checkpointmanager.exception.ObjectAlreadyExistsException;
 import ru.ac.checkpointmanager.exception.PasswordConfirmationException;
@@ -289,8 +291,8 @@ public class UserServiceImpl implements UserService {
         log.debug("[Method {}], [Username - {}]", MethodLog.getMethodName(), user.getUsername());
 
         if (userRepository.findByEmail(request.getNewEmail()).isPresent()) {
-            log.warn("[Email {}] already taken", request.getNewEmail());
-            throw new ObjectAlreadyExistsException(String.format("Email %s already taken", request.getNewEmail()));
+            log.warn(ExceptionUtils.EMAIL_EXISTS.formatted(request.getNewEmail()));
+            throw new EmailAlreadyExistsException(ExceptionUtils.EMAIL_EXISTS.formatted(request.getNewEmail()));
         }
 
         ConfirmChangeEmail confirmEmail = userMapper.toConfirmChangeEmail(request);

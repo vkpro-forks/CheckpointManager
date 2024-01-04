@@ -10,6 +10,8 @@ public class ExceptionUtils {
 
     public static final String INVALID_EMAIL_TOKEN_MSG = "Invalid or expired token %s";
 
+    public static final String EMAIL_EXISTS = "[Email: %s] already exists";
+
     private ExceptionUtils() {
     }
 

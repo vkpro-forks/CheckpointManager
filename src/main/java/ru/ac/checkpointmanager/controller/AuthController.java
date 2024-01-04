@@ -22,17 +22,17 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.dto.user.AuthenticationRequest;
 import ru.ac.checkpointmanager.dto.user.AuthenticationResponse;
+import ru.ac.checkpointmanager.dto.user.ConfirmRegistration;
 import ru.ac.checkpointmanager.dto.user.IsAuthenticatedResponse;
 import ru.ac.checkpointmanager.dto.user.LoginResponse;
 import ru.ac.checkpointmanager.dto.user.RefreshTokenDTO;
 import ru.ac.checkpointmanager.dto.user.UserAuthDTO;
 import ru.ac.checkpointmanager.service.auth.AuthenticationService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
-
-import static ru.ac.checkpointmanager.utils.ErrorUtils.errorsList;
 
 @RestController
 @RequiredArgsConstructor
@@ -79,13 +79,9 @@ public class AuthController {
             )
     })
     @PostMapping("/registration")
-    public ResponseEntity<?> register(@RequestBody @Valid UserAuthDTO user,
-                                      BindingResult result
-    ) {
-        if (result.hasErrors()) {
-            return new ResponseEntity<>(errorsList(result), HttpStatus.BAD_REQUEST);
-        }
-        return new ResponseEntity<>(authenticationService.preRegister(user), HttpStatus.CREATED);
+    @ResponseStatus(HttpStatus.CREATED)
+    public ConfirmRegistration register(@RequestBody @Valid UserAuthDTO user) {
+        return authenticationService.preRegister(user);
     }
 
     @PostMapping("/login")

@@ -31,6 +31,7 @@ import ru.ac.checkpointmanager.dto.user.ChangePasswordRequest;
 import ru.ac.checkpointmanager.dto.user.ConfirmChangeEmail;
 import ru.ac.checkpointmanager.dto.user.ConfirmRegistration;
 import ru.ac.checkpointmanager.dto.user.RefreshTokenDTO;
+import ru.ac.checkpointmanager.dto.user.UserAuthDTO;
 import ru.ac.checkpointmanager.dto.user.UserPutDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.exception.handler.ErrorCode;
@@ -48,6 +49,7 @@ import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.model.passes.PassTimeType;
 import ru.ac.checkpointmanager.security.CustomAuthenticationToken;
+
 import java.security.Key;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -113,8 +115,6 @@ public class TestUtils {
     public static final String AUTH_HEADER = "Authorization";
 
     public static final String BEARER = "Bearer ";
-
-    public static final String USER_NOT_FOUND_MSG = "User with [id=%s] not found";
 
 
     public static CarBrand getCarBrand() {
@@ -413,5 +413,14 @@ public class TestUtils {
     }
 
     private TestUtils() {
+    }
+
+    public static UserAuthDTO getUserAuthDTO() {
+        return new UserAuthDTO(
+                TestUtils.USER_ID,
+                TestUtils.FULL_NAME,
+                TestUtils.EMAIL,
+                TestUtils.PASSWORD
+        );
     }
 }
