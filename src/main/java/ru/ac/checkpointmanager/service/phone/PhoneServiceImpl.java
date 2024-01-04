@@ -57,12 +57,16 @@ public class PhoneServiceImpl implements PhoneService {
     @Transactional(readOnly = true)
     public PhoneDTO findById(UUID id) {
         log.debug("Method {}, UUID - {}", MethodLog.getMethodName(), id);
-        Phone foundPhone = phoneRepository.findById(id).orElseThrow(
+        return phoneMapper.toPhoneDTO(findPhoneById(id));
+    }
+
+    @Override
+    public Phone findPhoneById(UUID id) {
+        return phoneRepository.findById(id).orElseThrow(
                 () -> {
                     log.warn(PHONE_NUMBER_NOT_FOUND_LOG, id);
                     return new PhoneNumberNotFoundException(PHONE_NUMBER_NOT_FOUND_MSG.formatted(id));
                 });
-        return phoneMapper.toPhoneDTO(foundPhone);
     }
 
     @CacheEvict(value = "phone", key = "#phoneDTO.id")
