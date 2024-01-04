@@ -26,9 +26,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.user.ChangeEmailRequest;
 import ru.ac.checkpointmanager.dto.user.ChangePasswordRequest;
-import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.user.ConfirmChangeEmail;
 import ru.ac.checkpointmanager.dto.user.UserPutDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
@@ -45,7 +45,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Пользовательский интерфейс", description = "Комплекс операций по управлению жизненным циклом " +
-        "пользовательских учетных записей, включая создание, модификацию, просмотр и удаление аккаунтов")
+                                                        "пользовательских учетных записей, включая создание, модификацию, просмотр и удаление аккаунтов")
 @ApiResponses(value = {
         @ApiResponse(responseCode = "401",
                 description = "UNAUTHORIZED: пользователь не авторизован"),
@@ -81,7 +81,7 @@ public class UserController {
     }
 
     @Operation(summary = "Поиск территории по id пользователя",
-            description = "Доступ: USER, ADMIN, MANAGER, SECURITY."
+            description = "Доступ: USER - со своим id; ADMIN, MANAGER, SECURITY - с любым."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -91,8 +91,8 @@ public class UserController {
                             array = @ArraySchema(schema = @Schema(implementation = TerritoryDTO.class)))
             ),
             @ApiResponse(
-                    responseCode = "404",
-                    description = "NOT_FOUND: территории у переданного пользователя не найдены"
+                    responseCode = "403",
+                    description = "FORBIDDEN: роль пользователя не предоставляет доступ к данному api"
             )
     })
     @PreAuthorize("@authFacade.isUserIdMatch(#userId) or " +
@@ -113,10 +113,6 @@ public class UserController {
                     description = "OK: возвращает список пользователей, имена которых содержат указанный в параметрах запроса элемент",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = UserResponseDTO.class)))
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "NOT_FOUND: совпадения по имени не найдены"
             )
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
@@ -140,10 +136,6 @@ public class UserController {
             @ApiResponse(
                     responseCode = "403",
                     description = "FORBIDDEN: роль пользователя не предоставляет доступ к данному api"
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "NOT_FOUND: в базе нет пользователей"
             )
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
@@ -152,8 +144,33 @@ public class UserController {
         return userService.getAll();
     }
 
+    @Operation(summary = "Поиск пользователя по почте",
+            description = "Доступ: ADMIN, MANAGER."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "OK: возвращает пользователя с указанной почтой",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = UserResponseDTO.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "FORBIDDEN: роль пользователя не предоставляет доступ к данному api"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "NOT_FOUND: совпадения по почте не найдены"
+            )
+    })
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    @GetMapping("/email")
+    public UserResponseDTO getByEmail(@RequestParam String email) {
+        return userService.findByEmail(email);
+    }
+
     @Operation(summary = "Получения списка номеров телефона, привязанных к пользователю",
-            description = "Доступ: USER, ADMIN, MANAGER, SECURITY."
+            description = "Доступ: USER - со своим id; ADMIN, MANAGER, SECURITY - с любым."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -161,10 +178,6 @@ public class UserController {
                     description = "OK: возвращает список номеров, привязанных к пользователю",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = String.class)))
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "NOT_FOUND: пользователь не найден"
             )
     })
     @PreAuthorize("@authFacade.isUserIdMatch(#id) or " +
@@ -177,7 +190,7 @@ public class UserController {
     }
 
     @Operation(summary = "Изменение данных пользователя",
-            description = "Доступ: USER, ADMIN, MANAGER"
+            description = "Доступ: USER, SECURITY - со своим id; ADMIN, MANAGER - с любым."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -191,7 +204,6 @@ public class UserController {
                     description = """
                             BAD_REQUEST: Ошибки валидации:
                             Имя: только латиница/кириллица, каждое новое слово начинается с заглавной;
-                            Дата рождения: не больше текущей даты;
                             Телефон: 11-20 символов"""
             ),
             @ApiResponse(
@@ -214,15 +226,16 @@ public class UserController {
     )
     @ApiResponses(value = {
             @ApiResponse(
-                    responseCode = "201",
+                    responseCode = "204",
                     description = "NO_CONTENT: пароль пользователя успешно изменен"
             ),
             @ApiResponse(
+                    responseCode = "400",
+                    description = "BAD_REQUEST: новый пароль не совпадает с паролем подтверждения"
+            ),
+            @ApiResponse(
                     responseCode = "409",
-                    description = """
-                            CONFLICT:
-                            1. Передан неверный текущий пароль пользователя;
-                            2. Новый пароль не совпадает с паролем подтверждения."""
+                    description = "CONFLICT: Передан неверный текущий пароль пользователя"
             )
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
@@ -244,7 +257,7 @@ public class UserController {
             ),
             @ApiResponse(
                     responseCode = "409",
-                    description = "CONFLICT: Передана неверная текущая почта пользователя"
+                    description = "CONFLICT: указанная почта уже используется"
             )
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
@@ -268,6 +281,10 @@ public class UserController {
                             1. Роль пользователя не предоставляет доступ к данному api;
                             2. Пользователь без прав администратора пытается назначить кому-либо роль ADMIN;
                             3. Пользователь без прав администратора пытается изменить роль с ADMIN на другую."""
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "NOT_FOUND: пользователь не найден"
             ),
             @ApiResponse(
                     responseCode = "409",
@@ -299,10 +316,6 @@ public class UserController {
             @ApiResponse(
                     responseCode = "404",
                     description = "NOT_FOUND: пользователь не найден"
-            ),
-            @ApiResponse(
-                    responseCode = "409",
-                    description = "CONFLICT: назначенный статус блокировки совпадает с текущим"
             )
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
@@ -329,10 +342,6 @@ public class UserController {
             @ApiResponse(
                     responseCode = "404",
                     description = "NOT_FOUND: пользователь не найден"
-            ),
-            @ApiResponse(
-                    responseCode = "409",
-                    description = "CONFLICT: назначенный статус блокировки совпадает с текущим"
             )
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
@@ -358,10 +367,6 @@ public class UserController {
             @ApiResponse(
                     responseCode = "404",
                     description = "NOT_FOUND: пользователь не найден"
-            ),
-            @ApiResponse(
-                    responseCode = "409",
-                    description = "CONFLICT: назначенный статус блокировки совпадает с текущим"
             )
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
@@ -372,9 +377,8 @@ public class UserController {
         userService.unblockById(id);
     }
 
-
     @Operation(summary = "Удалить пользователя по id",
-            description = "Доступ: ADMIN, MANAGER, USER"
+            description = "Доступ: USER, SECURITY - со своим id; ADMIN, MANAGER - с любым."
     )
     @ApiResponses(value = {
             @ApiResponse(

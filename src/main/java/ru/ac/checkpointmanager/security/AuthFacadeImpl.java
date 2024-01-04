@@ -1,6 +1,7 @@
 package ru.ac.checkpointmanager.security;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,6 +25,7 @@ import java.util.UUID;
  */
 @Component("authFacade")
 @RequiredArgsConstructor
+@Slf4j
 public class AuthFacadeImpl implements AuthFacade {
 
     private final PhoneService phoneService;
@@ -43,7 +45,7 @@ public class AuthFacadeImpl implements AuthFacade {
     @Override
     public User getCurrentUser() {
         Authentication authentication = getAuthentication();
-        if (!(authentication instanceof CustomAuthenticationToken)) {
+        if (authentication == null) {
             throw new AccessDeniedException("User is not authenticated");
         }
 
@@ -60,7 +62,7 @@ public class AuthFacadeImpl implements AuthFacade {
     @Override
     public UUID getUserUUID() {
         Authentication authentication = getAuthentication();
-        if (!(authentication instanceof CustomAuthenticationToken)) {
+        if (authentication == null) {
             throw new AccessDeniedException("User is not authenticated");
         }
         return ((CustomAuthenticationToken) authentication).getUserId();
@@ -68,6 +70,7 @@ public class AuthFacadeImpl implements AuthFacade {
 
     @Override
     public boolean isUserIdMatch(UUID userId) {
+
         UUID currentUserUUID = getUserUUID();
         return currentUserUUID.equals(userId);
     }
