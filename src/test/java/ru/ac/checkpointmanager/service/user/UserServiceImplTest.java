@@ -21,6 +21,7 @@ import ru.ac.checkpointmanager.dto.user.ChangePasswordRequest;
 import ru.ac.checkpointmanager.dto.user.ConfirmChangeEmail;
 import ru.ac.checkpointmanager.dto.user.UserPutDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
+import ru.ac.checkpointmanager.exception.EmailAlreadyExistsException;
 import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
 import ru.ac.checkpointmanager.exception.MismatchCurrentPasswordException;
 import ru.ac.checkpointmanager.exception.ObjectAlreadyExistsException;
@@ -292,7 +293,7 @@ class UserServiceImplTest {
         Mockito.when(authenticationFacade.getCurrentUser()).thenReturn(user);
         Mockito.when(userRepository.findByEmail(request.getNewEmail())).thenReturn(Optional.ofNullable(user));
 
-        Assertions.assertThatExceptionOfType(ObjectAlreadyExistsException.class)
+        Assertions.assertThatExceptionOfType(EmailAlreadyExistsException.class)
                 .isThrownBy(() -> userService.changeEmail(request))
                 .withMessageContaining("already taken");
 
