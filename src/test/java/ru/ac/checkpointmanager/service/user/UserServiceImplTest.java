@@ -165,6 +165,34 @@ class UserServiceImplTest {
     }
 
     @Test
+    void shouldFindByEmailAndReturnUserResponseDTO() {
+        User user = TestUtils.getUser();
+        String email = user.getEmail();
+
+        Mockito.when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        Mockito.when(userMapper.toUserResponseDTO(user)).thenReturn(TestUtils.getUserResponseDTO());
+
+        UserResponseDTO result = userService.findByEmail(email);
+
+        Assertions.assertThat(result).isNotNull();
+        Mockito.verify(userRepository).findByEmail(email);
+        Mockito.verify(userMapper).toUserResponseDTO(user);
+    }
+
+    @Test
+    void shouldFindByEmailAndThrowException() {
+        User user = TestUtils.getUser();
+        String email = user.getEmail();
+        when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
+
+        Assertions.assertThatThrownBy(
+                        () -> userService.findByEmail(email))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("not found");
+        Mockito.verify(userRepository).findByEmail(email);
+    }
+
+    @Test
     void shouldUpdateUser() {
         User user = TestUtils.getUser();
         UUID userId = user.getId();

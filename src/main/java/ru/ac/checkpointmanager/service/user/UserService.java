@@ -25,6 +25,8 @@ public interface UserService {
 
     Collection<UserResponseDTO> findByName(String name);
 
+    UserResponseDTO findByEmail(String email);
+
     UserResponseDTO updateUser(UserPutDTO userPutDTO);
 
     void changePassword(ChangePasswordRequest request);

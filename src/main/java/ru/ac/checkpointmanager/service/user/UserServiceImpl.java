@@ -158,6 +158,16 @@ public class UserServiceImpl implements UserService {
                 .findUserByFullNameContainingIgnoreCase(name));
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public UserResponseDTO findByEmail(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> {
+            log.warn(USER_NOT_FOUND_MSG.formatted(email));
+            return new UserNotFoundException(USER_NOT_FOUND_MSG.formatted(email));
+        });
+        return userMapper.toUserResponseDTO(user);
+    }
+
     /**
      * Обновляет информацию о пользователе на основе предоставленных данных.
      * <p>

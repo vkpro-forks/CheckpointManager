@@ -144,6 +144,31 @@ public class UserController {
         return userService.getAll();
     }
 
+    @Operation(summary = "Поиск пользователя по почте",
+            description = "Доступ: ADMIN, MANAGER."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "OK: возвращает пользователя с указанной почтой",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = UserResponseDTO.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "FORBIDDEN: роль пользователя не предоставляет доступ к данному api"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "NOT_FOUND: совпадения по почте не найдены"
+            )
+    })
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    @GetMapping("/email")
+    public UserResponseDTO getByEmail(@RequestParam String email) {
+        return userService.findByEmail(email);
+    }
+
     @Operation(summary = "Получения списка номеров телефона, привязанных к пользователю",
             description = "Доступ: USER - со своим id; ADMIN, MANAGER, SECURITY - с любым."
     )
