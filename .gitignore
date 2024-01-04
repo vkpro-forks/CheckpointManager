@@ -39,3 +39,4 @@ out/
 
 ### Logger ####
 logFile*.log
+/logs/

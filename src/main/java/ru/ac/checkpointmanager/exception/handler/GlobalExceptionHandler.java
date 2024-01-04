@@ -18,6 +18,7 @@ import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
 import ru.ac.checkpointmanager.exception.EntranceWasAlreadyException;
 import ru.ac.checkpointmanager.exception.InvalidTokenException;
 import ru.ac.checkpointmanager.exception.ObjectAlreadyExistsException;
+import ru.ac.checkpointmanager.exception.ObjectsRelationConflictException;
 import ru.ac.checkpointmanager.exception.PhoneAlreadyExistException;
 import ru.ac.checkpointmanager.exception.VisitorNotFoundException;
 import ru.ac.checkpointmanager.exception.pass.InactivePassException;
@@ -110,6 +111,15 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleAlreadyExistsException(ObjectAlreadyExistsException e) {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.CONFLICT, e);
         problemDetail.setTitle("Object already exists");
+        problemDetail.setProperty(ERROR_CODE, ErrorCode.CONFLICT.toString());
+        log.debug(LOG_MSG, e.getClass());
+        return problemDetail;
+    }
+
+    @ExceptionHandler(ObjectsRelationConflictException.class)
+    public ProblemDetail handleAlreadyExistsException(ObjectsRelationConflictException e) {
+        ProblemDetail problemDetail = createProblemDetail(HttpStatus.CONFLICT, e);
+        problemDetail.setTitle("Objects relation already exists or has conflict");
         problemDetail.setProperty(ERROR_CODE, ErrorCode.CONFLICT.toString());
         log.debug(LOG_MSG, e.getClass());
         return problemDetail;
