@@ -3,6 +3,7 @@ package ru.ac.checkpointmanager.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -19,14 +20,16 @@ import java.util.UUID;
  * @author Dmitry Ldv236
  */
 @Repository
-public interface PassRepository extends JpaRepository<Pass, UUID> {
+public interface PassRepository extends JpaRepository<Pass, UUID>, JpaSpecificationExecutor<Pass> {
 
     /**
      * Фрагмент SQL, определяющий логику сортировки списка пропусков.
      * Эта логика сортирует сущности в первую очередь на основе их статуса в определённом порядке:
      * WARNING, ACTIVE, DELAYED, за которыми следуют все остальные статусы.
      * При одинаковых статусах сортируются по времени начала действия в порядке убывания
+     * @deprecated после введения фильтрации с помощью jpa specification
      */
+    @Deprecated(since="0.1.14", forRemoval=true)
     String SORT_LOGIC = "ORDER BY CASE " +
             "p.status WHEN 'WARNING' THEN 1 WHEN 'ACTIVE' THEN 2 WHEN 'DELAYED' THEN 3 ELSE 4 END, " +
             "p.start_time DESC";
@@ -35,7 +38,9 @@ public interface PassRepository extends JpaRepository<Pass, UUID> {
      * Получает страницу объектов Pass, отсортированных по заданной логике.
      * @param pageable объект {@link Pageable}, содержащий информацию о пагинации
      * @return {@link Page} объектов Pass, отсортированных в соответствии с заданной логикой
+     * @deprecated после введения фильтрации с помощью jpa specification
      */
+    @Deprecated(since="0.1.14", forRemoval=true)
     @Query(value = "SELECT * FROM passes p " + SORT_LOGIC, nativeQuery = true)
     Page<Pass> findAll(Pageable pageable);
 
@@ -53,7 +58,9 @@ public interface PassRepository extends JpaRepository<Pass, UUID> {
      * @param pageable объект {@link Pageable}, содержащий информацию о пагинации
      * @return {@link Page} объектов Pass, связанных с указанным пользователем
      * и отсортированных в соответствии с заданной логикой
+     * @deprecated после введения фильтрации с помощью jpa specification
      */
+    @Deprecated(since="0.1.14", forRemoval=true)
     @Query(value = "SELECT * FROM passes p WHERE p.user_id = :userId " + SORT_LOGIC, nativeQuery = true)
     Page<Pass> findPassesByUserId(UUID userId, Pageable pageable);
 
@@ -63,7 +70,9 @@ public interface PassRepository extends JpaRepository<Pass, UUID> {
      * @param pageable объект {@link Pageable}, содержащий информацию о пагинации
      * @return {@link Page} объектов Pass, связанных с указанной территорией
      * и отсортированных в соответствии с заданной логикой
+     * @deprecated после введения фильтрации с помощью jpa specification
      */
+    @Deprecated(since="0.1.14", forRemoval=true)
     @Query(value = "SELECT * FROM passes p WHERE p.territory_id = :territoryId " + SORT_LOGIC, nativeQuery = true)
     Page<Pass> findPassesByTerritoryId(UUID territoryId, Pageable pageable);
 

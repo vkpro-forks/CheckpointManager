@@ -5,9 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.ac.checkpointmanager.dto.passes.FilterParams;
 import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassResponseDTO;
@@ -96,13 +98,15 @@ public class PassServiceImpl implements PassService {
     }
 
     @Override
-    public Page<PassResponseDTO> findPasses(PagingParams pagingParams) {
+    public Page<PassResponseDTO> findPasses(PagingParams pagingParams, FilterParams filterParams) {
         log.debug(METHOD_INVOKE, MethodLog.getMethodName(), "all");
 
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
-        Page<Pass> foundPasses = passRepository.findAll(pageable);
+        Specification<Pass> spec = PassSpecification.byFilterParams(filterParams);
+
+        Page<Pass> foundPasses = passRepository.findAll(spec, pageable);
         if (!foundPasses.hasContent()) {
-            log.warn(PAGE_NO_CONTENT.formatted(pageable.getPageNumber(), pageable.getPageSize(),
+            log.info(PAGE_NO_CONTENT.formatted(pageable.getPageNumber(), pageable.getPageSize(),
                     foundPasses.getTotalPages(), foundPasses.getTotalElements()));
         }
 
@@ -116,6 +120,7 @@ public class PassServiceImpl implements PassService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Pass findPassById(UUID id) {
         return passRepository.findById(id).orElseThrow(
                 () -> {
@@ -125,14 +130,17 @@ public class PassServiceImpl implements PassService {
     }
 
     @Override
-    public Page<PassResponseDTO> findPassesByUser(UUID userId, PagingParams pagingParams) {
+    public Page<PassResponseDTO> findPassesByUser(UUID userId, PagingParams pagingParams, FilterParams filterParams) {
         log.debug(METHOD_INVOKE, MethodLog.getMethodName(), userId);
-        Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
         userService.findById(userId);
 
-        Page<Pass> foundPasses = passRepository.findPassesByUserId(userId, pageable);
+        Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
+        Specification<Pass> spec = Specification.where(PassSpecification.byUserId(userId))
+            .and(PassSpecification.byFilterParams(filterParams));
+
+        Page<Pass> foundPasses = passRepository.findAll(spec, pageable);
         if (!foundPasses.hasContent()) {
-            log.warn(PAGE_NO_CONTENT.formatted(pageable.getPageNumber(), pageable.getPageSize(),
+            log.info(PAGE_NO_CONTENT.formatted(pageable.getPageNumber(), pageable.getPageSize(),
                     foundPasses.getTotalPages(), foundPasses.getTotalElements()));
         }
 
@@ -140,13 +148,17 @@ public class PassServiceImpl implements PassService {
     }
 
     @Override
-    public Page<PassResponseDTO> findPassesByTerritory(UUID terId, PagingParams pagingParams) {
+    public Page<PassResponseDTO> findPassesByTerritory(UUID terId, PagingParams pagingParams, FilterParams filterParams) {
         log.debug(METHOD_INVOKE, MethodLog.getMethodName(), terId);
-        Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
         territoryService.findById(terId);
-        Page<Pass> foundPasses = passRepository.findPassesByTerritoryId(terId, pageable);
+
+        Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
+        Specification<Pass> spec = Specification.where(PassSpecification.byTerritoryId(terId))
+            .and(PassSpecification.byFilterParams(filterParams));
+
+        Page<Pass> foundPasses = passRepository.findAll(spec, pageable);
         if (!foundPasses.hasContent()) {
-            log.warn(PAGE_NO_CONTENT.formatted(pageable.getPageNumber(), pageable.getPageSize(),
+            log.info(PAGE_NO_CONTENT.formatted(pageable.getPageNumber(), pageable.getPageSize(),
                     foundPasses.getTotalPages(), foundPasses.getTotalElements()));
         }
         return foundPasses.map(mapper::toPassDTO);
@@ -278,6 +290,7 @@ public class PassServiceImpl implements PassService {
     }
 
     @Override
+    @Transactional
     public void markFavorite(UUID id) {
         log.info(METHOD_INVOKE, MethodLog.getMethodName(), id);
         Pass pass = findPassById(id);
@@ -287,6 +300,7 @@ public class PassServiceImpl implements PassService {
     }
 
     @Override
+    @Transactional
     public void unmarkFavorite(UUID id) {
         log.info(METHOD_INVOKE, MethodLog.getMethodName(), id);
         Pass pass = findPassById(id);
@@ -296,6 +310,7 @@ public class PassServiceImpl implements PassService {
     }
 
     @Override
+    @Transactional
     public void deletePass(UUID id) {
         log.info(METHOD_INVOKE, MethodLog.getMethodName(), id);
         findPassById(id);
