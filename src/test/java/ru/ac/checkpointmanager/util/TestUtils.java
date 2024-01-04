@@ -12,6 +12,8 @@ import org.instancio.Instancio;
 import org.instancio.Model;
 import org.instancio.Select;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.ac.checkpointmanager.dto.CarBrandDTO;
@@ -32,6 +34,7 @@ import ru.ac.checkpointmanager.dto.user.RefreshTokenDTO;
 import ru.ac.checkpointmanager.dto.user.UserPutDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.exception.handler.ErrorCode;
+import ru.ac.checkpointmanager.model.Phone;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.car.Car;
@@ -44,10 +47,11 @@ import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.model.passes.PassTimeType;
-
+import ru.ac.checkpointmanager.security.CustomAuthenticationToken;
 import java.security.Key;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -61,6 +65,8 @@ public class TestUtils {
     public static final String CAR_BRAND_ID_STR = CAR_BRAND_ID.toString();
 
     public static final UUID USER_ID = UUID.randomUUID();
+
+    public static final String USER_NAME = "name";
 
     public static final UUID PASS_ID = UUID.randomUUID();
 
@@ -100,13 +106,15 @@ public class TestUtils {
     public static final String PASSWORD = "password";
 
     public static final String EMAIL = "123@123.com";
-    public static final String NEW_EMAIL = "new.com";
+    public static final String NEW_EMAIL = "new@com.com";
     public static final String FULL_NAME = "Username";
     public static final String NEW_PASSWORD = "new_password";
 
     public static final String AUTH_HEADER = "Authorization";
 
     public static final String BEARER = "Bearer ";
+
+    public static final String USER_NOT_FOUND_MSG = "User with [id=%s] not found";
 
 
     public static CarBrand getCarBrand() {
@@ -146,6 +154,12 @@ public class TestUtils {
                 TERR_NAME,
                 "note"
         );
+    }
+
+    public static Territory getTerritoryForDB() {
+        Territory territory = new Territory();
+        territory.setName(TERR_NAME);
+        return territory;
     }
 
     public static CheckpointDTO getCheckPointDTO() {
@@ -212,6 +226,21 @@ public class TestUtils {
                 USER_ID,
                 null
         );
+    }
+
+    public static Phone getPhoneForDB() {
+        Phone phone = new Phone();
+        phone.setNumber(PHONE_NUM);
+        phone.setType(PhoneNumberType.MOBILE);
+        return phone;
+    }
+
+    public static User getUserForDB() {
+        User user = new User();
+        user.setFullName(FULL_NAME);
+        user.setEmail(EMAIL);
+        user.setPassword(PASSWORD);
+        return user;
     }
 
     public static User getUser() {
@@ -375,6 +404,12 @@ public class TestUtils {
 
     public static String getKey() {
         return "8790D58F7205C4C250CD67DD6D9B6F8B20D2E928FFAA6D4A2BEB2AD2189B01D1";
+    }
+
+    public static CustomAuthenticationToken getAuthToken(User user) {
+        Collection<? extends GrantedAuthority> authorities = List
+                .of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+        return new CustomAuthenticationToken(user, null, user.getId(), authorities);
     }
 
     private TestUtils() {

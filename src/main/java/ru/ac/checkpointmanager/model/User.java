@@ -32,6 +32,7 @@ import ru.ac.checkpointmanager.model.passes.Pass;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -69,7 +70,7 @@ public class User implements UserDetails {
     private Role role;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Phone> numbers;
+    private Set<Phone> numbers = new HashSet<>();
 
     @Column(name = "added_at")
     @CreationTimestamp(source = SourceType.VM)
