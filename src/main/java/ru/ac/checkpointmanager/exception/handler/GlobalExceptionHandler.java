@@ -18,7 +18,6 @@ import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
 import ru.ac.checkpointmanager.exception.EntranceWasAlreadyException;
 import ru.ac.checkpointmanager.exception.InvalidTokenException;
 import ru.ac.checkpointmanager.exception.ObjectAlreadyExistsException;
-import ru.ac.checkpointmanager.exception.ObjectsRelationConflictException;
 import ru.ac.checkpointmanager.exception.PhoneAlreadyExistException;
 import ru.ac.checkpointmanager.exception.VisitorNotFoundException;
 import ru.ac.checkpointmanager.exception.pass.InactivePassException;
@@ -221,6 +220,24 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleEmailVerificationTokenException(EmailVerificationTokenException e) {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
         problemDetail.setTitle("Verification token not found, or expired");
+        problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
+        log.debug(LOG_MSG, e.getClass());
+        return problemDetail;
+    }
+
+    @ExceptionHandler(MismatchCurrentPasswordException.class)
+    public ProblemDetail handlePhoneAlreadyExistException(MismatchCurrentPasswordException e) {
+        ProblemDetail problemDetail = createProblemDetail(HttpStatus.CONFLICT, e);
+        problemDetail.setTitle("Current password not matched");
+        problemDetail.setProperty(ERROR_CODE, ErrorCode.CONFLICT.toString());
+        log.debug(LOG_MSG, e.getClass());
+        return problemDetail;
+    }
+
+    @ExceptionHandler(PasswordConfirmationException.class)
+    public ProblemDetail handleEmailVerificationTokenException(PasswordConfirmationException e) {
+        ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
+        problemDetail.setTitle("Passwords are not the same");
         problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
         log.debug(LOG_MSG, e.getClass());
         return problemDetail;

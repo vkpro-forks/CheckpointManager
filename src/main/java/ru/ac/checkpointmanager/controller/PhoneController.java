@@ -37,7 +37,6 @@ import java.util.UUID;
 @Validated
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
-@PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
 @Tag(name = "Телефоны пользователей", description = "API для управления телефонными номерами пользователей")
 @ApiResponses(value = {
         @ApiResponse(responseCode = "401",
@@ -47,7 +46,8 @@ import java.util.UUID;
 public class PhoneController {
     private final PhoneService phoneService;
 
-    @Operation(summary = "Создание нового номера телефона")
+    @Operation(summary = "Создание нового номера телефона",
+            description = "Доступ: USER, SECURITY - со своим id; ADMIN, MANAGER - с любым.")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "201",
@@ -58,16 +58,18 @@ public class PhoneController {
             @ApiResponse(
                     responseCode = "400",
                     description = "BAD_REQUEST: номер уже существует; " +
-                            "\nОшибка валидации: 11-20 символов, только цифры, пробелы и символы '(', ')', '-', '+';"
+                                  "\nОшибка валидации: 11-20 символов, только цифры, пробелы и символы '(', ')', '-', '+';"
             )
     })
+    @PreAuthorize("@authFacade.isUserIdMatch(#phoneDTO.userId) or hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public PhoneDTO createPhoneNumber(@Valid @RequestBody PhoneDTO phoneDTO) {
         return phoneService.createPhoneNumber(phoneDTO);
     }
 
-    @Operation(summary = "Поиск номера по id")
+    @Operation(summary = "Поиск номера по id",
+            description = "Доступ: USER - со своим id; ADMIN, MANAGER, SECURITY - с любым.")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
@@ -80,13 +82,15 @@ public class PhoneController {
                     description = "NOT_FOUND: номера с таким id не найдено"
             )
     })
+    @PreAuthorize("@authFacade.isPhoneIdMatch(#id) or hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/{id}")
     public PhoneDTO findById(@Parameter(description = "Уникальный идентификатор телефона")
                              @PathVariable UUID id) {
         return phoneService.findById(id);
     }
 
-    @Operation(summary = "Получить список всех номеров")
+    @Operation(summary = "Получить список всех номеров",
+            description = "Доступ: ADMIN, MANAGER, SECURITY.")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
@@ -100,13 +104,15 @@ public class PhoneController {
                     description = "NOT_FOUND: в базе нет номеров"
             )
     })
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping
     public ResponseEntity<Collection<PhoneDTO>> getAll() {
         Collection<PhoneDTO> phones = phoneService.getAll();
         return ResponseEntity.ok(phones);
     }
 
-    @Operation(summary = "Изменение параметров телефона")
+    @Operation(summary = "Изменение параметров телефона",
+            description = "Доступ: USER, SECURITY - со своим id; ADMIN, MANAGER - с любым.")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
@@ -123,12 +129,14 @@ public class PhoneController {
                     description = "NOT_FOUND: телефон не найден"
             )
     })
+    @PreAuthorize("@authFacade.isPhoneIdMatch(#phoneDTO.id) or hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @PutMapping
     public PhoneDTO updateNumber(@Valid @RequestBody PhoneDTO phoneDTO) {
         return phoneService.updatePhoneNumber(phoneDTO);
     }
 
-    @Operation(summary = "Удалить телефон по id")
+    @Operation(summary = "Удалить телефон по id",
+            description = "Доступ: USER, SECURITY - со своим id; ADMIN, MANAGER - с любым.")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "204",
@@ -139,6 +147,7 @@ public class PhoneController {
                     description = "NOT_FOUND: телефон не найден"
             )
     })
+    @PreAuthorize("@authFacade.isPhoneIdMatch(#id) or hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteNumber(@Parameter(description = "Уникальный идентификатор телефона")

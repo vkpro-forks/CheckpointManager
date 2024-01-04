@@ -22,7 +22,9 @@ import ru.ac.checkpointmanager.dto.user.ConfirmChangeEmail;
 import ru.ac.checkpointmanager.dto.user.UserPutDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
+import ru.ac.checkpointmanager.exception.MismatchCurrentPasswordException;
 import ru.ac.checkpointmanager.exception.ObjectAlreadyExistsException;
+import ru.ac.checkpointmanager.exception.PasswordConfirmationException;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.mapper.TerritoryMapper;
@@ -156,6 +158,16 @@ public class UserServiceImpl implements UserService {
                 .findUserByFullNameContainingIgnoreCase(name));
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public UserResponseDTO findByEmail(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> {
+            log.warn(USER_NOT_FOUND_MSG.formatted(email));
+            return new UserNotFoundException(USER_NOT_FOUND_MSG.formatted(email));
+        });
+        return userMapper.toUserResponseDTO(user);
+    }
+
     /**
      * Обновляет информацию о пользователе на основе предоставленных данных.
      * <p>
@@ -237,12 +249,12 @@ public class UserServiceImpl implements UserService {
 
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
             log.warn("Current password not matched for {}", user.getEmail());
-            throw new IllegalStateException("Current password not matched");
+            throw new MismatchCurrentPasswordException("Current password not matched");
         }
 
         if (!request.getNewPassword().equals(request.getConfirmationPassword())) {
             log.warn("Passwords are not the same ");
-            throw new IllegalStateException("Passwords are not the same");
+            throw new PasswordConfirmationException("Passwords are not the same");
         }
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
@@ -382,7 +394,7 @@ public class UserServiceImpl implements UserService {
         }
         if (existingUser.getRole().equals(role)) {
             log.warn("User {} already has role {}", existingUser.getId(), existingUser.getRole());
-            throw new IllegalStateException(String.format("This user already has role %s", role));
+            throw new ObjectAlreadyExistsException(String.format("This user already has role %s", role));
         }
         existingUser.setRole(role);
         userRepository.save(existingUser);
@@ -395,14 +407,12 @@ public class UserServiceImpl implements UserService {
      * Этот метод позволяет изменить статус блокировки пользователя. Если пользователь с указанным
      * идентификатором не найден, выбрасывается исключение {@link UserNotFoundException}. Метод проверяет,
      * отличается ли новый статус блокировки от текущего, и, в случае различия, обновляет его.
-     * Если статус уже соответствует указанному, генерируется {@link IllegalStateException}.
      * <p>
      *
      * @param id        Идентификатор пользователя, статус блокировки которого нужно обновить.
      * @param isBlocked Новый статус блокировки пользователя (true для блокировки, false для разблокировки).
      * @return {@link UserResponseDTO} - DTO пользователя с обновленным статусом.
      * @throws UserNotFoundException если пользователь с заданным идентификатором не найден.
-     * @throws IllegalStateException если статус блокировки пользователя уже соответствует указанному значению.
      */
     @CacheEvict(value = "user", key = "#id")
     @Override
@@ -429,12 +439,10 @@ public class UserServiceImpl implements UserService {
      * <p>
      * Этот метод устанавливает статус блокировки пользователя на 'true'. Если пользователь
      * с указанным идентификатором не найден, выбрасывается исключение {@link UserNotFoundException}.
-     * В случае, если пользователь уже заблокирован, выбрасывается {@link IllegalStateException}.
      * <p>
      *
      * @param id Идентификатор пользователя, которого необходимо заблокировать.
      * @throws UserNotFoundException если пользователь с указанным идентификатором не найден.
-     * @throws IllegalStateException если пользователь уже заблокирован.
      */
     @CacheEvict(value = "user", key = "#id")
     @Override
@@ -448,7 +456,6 @@ public class UserServiceImpl implements UserService {
             log.debug("User {} successfully blocked", id);
         } else {
             log.warn("User {} already blocked", id);
-            throw new IllegalStateException(String.format("User already blocked [id=%s]", id));
         }
     }
 
@@ -462,7 +469,6 @@ public class UserServiceImpl implements UserService {
      *
      * @param id Идентификатор пользователя, которого необходимо разблокировать.
      * @throws UserNotFoundException если пользователь с указанным идентификатором не найден.
-     * @throws IllegalStateException если пользователь уже разблокирован.
      */
     @CacheEvict(value = "user", key = "#id")
     @Override
@@ -476,7 +482,6 @@ public class UserServiceImpl implements UserService {
             log.debug("User {} successfully unblocked", id);
         } else {
             log.warn("User {} already unblocked", id);
-            throw new IllegalStateException(String.format("User already unblocked [id=%s]", id));
         }
     }
 

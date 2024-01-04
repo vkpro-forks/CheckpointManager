@@ -1,10 +1,14 @@
 package ru.ac.checkpointmanager.security;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import ru.ac.checkpointmanager.model.Phone;
 import ru.ac.checkpointmanager.model.User;
+import ru.ac.checkpointmanager.service.phone.PhoneService;
 
 import java.util.UUID;
 
@@ -20,7 +24,11 @@ import java.util.UUID;
  * @see User
  */
 @Component("authFacade")
+@RequiredArgsConstructor
+@Slf4j
 public class AuthFacadeImpl implements AuthFacade {
+
+    private final PhoneService phoneService;
 
     @Override
     public Authentication getAuthentication() {
@@ -37,7 +45,7 @@ public class AuthFacadeImpl implements AuthFacade {
     @Override
     public User getCurrentUser() {
         Authentication authentication = getAuthentication();
-        if (!(authentication instanceof CustomAuthenticationToken)) {
+        if (authentication == null) {
             throw new AccessDeniedException("User is not authenticated");
         }
 
@@ -54,7 +62,7 @@ public class AuthFacadeImpl implements AuthFacade {
     @Override
     public UUID getUserUUID() {
         Authentication authentication = getAuthentication();
-        if (!(authentication instanceof CustomAuthenticationToken)) {
+        if (authentication == null) {
             throw new AccessDeniedException("User is not authenticated");
         }
         return ((CustomAuthenticationToken) authentication).getUserId();
@@ -62,11 +70,15 @@ public class AuthFacadeImpl implements AuthFacade {
 
     @Override
     public boolean isUserIdMatch(UUID userId) {
-        Authentication authentication = getAuthentication();
-        if (!(authentication instanceof CustomAuthenticationToken customToken)) {
-            throw new AccessDeniedException("User is not authenticated");
-        }
-        UUID currentUserUUID = customToken.getUserId();
+
+        UUID currentUserUUID = getUserUUID();
         return currentUserUUID.equals(userId);
+    }
+
+    @Override
+    public boolean isPhoneIdMatch(UUID phoneId) {
+        User user = getCurrentUser();
+        Phone phone = phoneService.findPhoneById(phoneId);
+        return phone.getUser().equals(user);
     }
 }

@@ -10,6 +10,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -415,8 +416,11 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
     @Test
     @SneakyThrows
     void shouldHandlePhoneNotFoundExceptionForGetNumber() {
+        User user = TestUtils.getUser();
+        userRepository.saveAndFlush(user);
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
-                        .get(UrlConstants.PHONE_URL + "/" + TestUtils.PHONE_ID))
+                        .get(UrlConstants.PHONE_URL + "/" + TestUtils.PHONE_ID)
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(TestUtils.getAuthToken(user))))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith(PHONE)));
         TestUtils.checkNotFoundFields(resultActions);
@@ -425,8 +429,11 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
     @Test
     @SneakyThrows
     void shouldHandlePhoneNotFoundExceptionForDeleteNumber() {
+        User user = TestUtils.getUser();
+        userRepository.saveAndFlush(user);
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
-                        .delete(UrlConstants.PHONE_URL + "/" + TestUtils.PHONE_ID))
+                        .delete(UrlConstants.PHONE_URL + "/" + TestUtils.PHONE_ID)
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(TestUtils.getAuthToken(user))))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith(PHONE)));
         TestUtils.checkNotFoundFields(resultActions);
@@ -435,10 +442,13 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
     @Test
     @SneakyThrows
     void shouldHandlePhoneNotFoundExceptionForUpdateNumber() {
+        User user = TestUtils.getUser();
+        userRepository.saveAndFlush(user);
         String phoneDto = TestUtils.jsonStringFromObject(TestUtils.getPhoneDto());
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                         .put(UrlConstants.PHONE_URL)
                         .contentType(MediaType.APPLICATION_JSON)
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(TestUtils.getAuthToken(user)))
                         .content(phoneDto)
                 )
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)

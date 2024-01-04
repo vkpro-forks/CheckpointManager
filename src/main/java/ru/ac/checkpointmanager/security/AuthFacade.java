@@ -13,4 +13,6 @@ public interface AuthFacade {
     UUID getUserUUID();
 
     boolean isUserIdMatch(UUID userId);
+
+    boolean isPhoneIdMatch(UUID phoneId);
 }
