@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,9 +12,10 @@ import java.util.UUID;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class UserAuthDTO {
 
-    private UUID id;
+    private UUID id; //FIXME айди тут нужен или он присваивается юзеру гдето дальше, регистрация проходит и без id?
 
     @NotEmpty
     @Size(min = 2, max = 100)
