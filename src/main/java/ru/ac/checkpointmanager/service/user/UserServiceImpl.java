@@ -1,7 +1,7 @@
 package ru.ac.checkpointmanager.service.user;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -36,8 +36,7 @@ import ru.ac.checkpointmanager.model.enums.PhoneNumberType;
 import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
-import ru.ac.checkpointmanager.security.AuthFacade;
-import ru.ac.checkpointmanager.security.AuthFacadeImpl;
+import ru.ac.checkpointmanager.security.authfacade.AuthFacade;
 import ru.ac.checkpointmanager.security.jwt.JwtService;
 import ru.ac.checkpointmanager.service.email.EmailService;
 import ru.ac.checkpointmanager.service.phone.PhoneService;
@@ -64,10 +63,9 @@ import java.util.UUID;
  * @see User
  * @see UserRepository
  * @see EmailService
- * @see AuthFacadeImpl
+ * @see AuthFacade
  */
 @Service
-@RequiredArgsConstructor
 @Slf4j
 @Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
@@ -82,10 +80,33 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final PhoneService phoneService;
-    private final AuthFacade authFacade;
     private final RedisCacheManager cacheManager;
     private final JwtService jwtService;
 
+    @Qualifier("userFacade")
+    private final AuthFacade authFacade;
+
+    public UserServiceImpl(UserMapper userMapper,
+                           TerritoryMapper territoryMapper,
+                           UserRepository userRepository,
+                           PhoneRepository phoneRepository,
+                           PasswordEncoder passwordEncoder,
+                           EmailService emailService,
+                           PhoneService phoneService,
+                           RedisCacheManager cacheManager,
+                           JwtService jwtService,
+                           @Qualifier("userFacade") AuthFacade authFacade) {
+        this.userMapper = userMapper;
+        this.territoryMapper = territoryMapper;
+        this.userRepository = userRepository;
+        this.phoneRepository = phoneRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
+        this.phoneService = phoneService;
+        this.cacheManager = cacheManager;
+        this.jwtService = jwtService;
+        this.authFacade = authFacade;
+    }
 
     /**
      * Находит пользователя по его уникальному идентификатору (UUID).
@@ -100,7 +121,6 @@ public class UserServiceImpl implements UserService {
      * @see UserNotFoundException
      */
     @Override
-    @Transactional(readOnly = true)
     @Cacheable(value = "user", key = "#id")
     public UserResponseDTO findById(UUID id) {
         log.debug(METHOD_UUID, MethodLog.getMethodName(), id);
@@ -159,7 +179,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public UserResponseDTO findByEmail(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> {
             log.warn(USER_NOT_FOUND_MSG.formatted(email));
@@ -239,7 +258,7 @@ public class UserServiceImpl implements UserService {
      *
      * @param request Объект {@link ChangePasswordRequest}, содержащий текущий и новый пароли.
      * @throws IllegalStateException если текущий пароль не соответствует или новый пароль и его подтверждение не совпадают.
-     * @see AuthFacadeImpl
+     * @see AuthFacade
      */
     @Override
     @Transactional
