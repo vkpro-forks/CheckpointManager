@@ -9,6 +9,7 @@ import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
+import ru.ac.checkpointmanager.exception.UserTerritoryRelationException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.mapper.TerritoryMapper;
 import ru.ac.checkpointmanager.mapper.UserMapper;
@@ -131,7 +132,7 @@ public class TerritoryServiceImpl implements TerritoryService {
         if (territoryRepository.checkUserTerritoryRelation(userId, territoryId)) {
             String message = String.format("User [%s] and territory [%s] are already connected", userId, territoryId);
             log.warn(message);
-            throw new IllegalArgumentException(message);
+            throw new UserTerritoryRelationException(message);
         }
 
         user.getTerritories().add(territory);
@@ -169,7 +170,7 @@ public class TerritoryServiceImpl implements TerritoryService {
         if (!territoryRepository.checkUserTerritoryRelation(userId, territoryId)) {
             String message = String.format("User [%s] and territory [%s] have no connection", userId, territoryId);
             log.warn(message);
-            throw new IllegalArgumentException(message);
+            throw new UserTerritoryRelationException(message);
         }
 
         user.getTerritories().remove(territory);

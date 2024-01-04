@@ -3,6 +3,7 @@ package ru.ac.checkpointmanager.it;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -135,6 +136,82 @@ class TerritoryControllerIntegrationTest extends RedisAndPostgresTestContainersC
         Assertions.assertThat(allPasses).isEmpty();
         Optional<Checkpoint> optionalCheckpoint = checkpointRepository.findById(savedCheckPoint.getId());
         Assertions.assertThat(optionalCheckpoint).isEmpty();
+    }
+
+    @Test
+    @SneakyThrows
+    void attachUserToTerritory_ifUserAlreadyAttachedToTerritory_handleExceptionAndReturn409() {
+        log.info("Saving user and territory with him");
+        Territory territory = TestUtils.getTerritory();
+        User user = TestUtils.getUser();
+        User savedUser = userRepository.saveAndFlush(user);
+        territory.setUsers(List.of(savedUser));
+        Territory savedTerritory = territoryRepository.saveAndFlush(territory);
+        String url = UrlConstants.TERR_ATTACH_DETACH_URL
+                .formatted(savedTerritory.getId(), savedUser.getId());
+        log.info(TestMessage.PERFORM_HTTP, HttpMethod.PATCH, url);
+        mockMvc.perform(MockMvcRequestBuilders.patch(url))
+                .andExpect(MockMvcResultMatchers.status().isConflict())
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(Matchers.startsWith("User")));
+    }
+
+    @Test
+    @SneakyThrows
+    void attachUserToTerritory_ifUserNotConnectedToTerritory_attachAndReturnNoContent() {
+        log.info("Saving user and territory");
+        Territory territory = TestUtils.getTerritory();
+        User user = TestUtils.getUser();
+        User savedUser = userRepository.saveAndFlush(user);
+        Territory savedTerritory = territoryRepository.saveAndFlush(territory);
+        String url = UrlConstants.TERR_ATTACH_DETACH_URL
+                .formatted(savedTerritory.getId(), savedUser.getId());
+        log.info(TestMessage.PERFORM_HTTP, HttpMethod.PATCH, url);
+        mockMvc.perform(MockMvcRequestBuilders.patch(url))
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
+
+        boolean relation = territoryRepository.checkUserTerritoryRelation(savedUser.getId(), savedTerritory.getId());
+
+        log.info("Check if attaching was ok");
+        Assertions.assertThat(relation).isTrue();
+    }
+
+    @Test
+    @SneakyThrows
+    void detachUserFromTerritory_ifUserNotConnectedToTerritory_handleExceptionAndReturn409() {
+        log.info("Saving user and territory");
+        Territory territory = TestUtils.getTerritory();
+        User user = TestUtils.getUser();
+        User savedUser = userRepository.saveAndFlush(user);
+        Territory savedTerritory = territoryRepository.saveAndFlush(territory);
+        String url = UrlConstants.TERR_ATTACH_DETACH_URL
+                .formatted(savedTerritory.getId(), savedUser.getId());
+        log.info(TestMessage.PERFORM_HTTP, HttpMethod.DELETE, url);
+        mockMvc.perform(MockMvcRequestBuilders.delete(url))
+                .andExpect(MockMvcResultMatchers.status().isConflict())
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(Matchers.startsWith("User")));
+    }
+
+    @Test
+    @SneakyThrows
+    void detachUserToTerritory_ifUserConnectedToTerritory_detachAndReturnNoContent() {
+        log.info("Saving user and territory");
+        Territory territory = TestUtils.getTerritory();
+        User user = TestUtils.getUser();
+        User savedUser = userRepository.saveAndFlush(user);
+        territory.setUsers(List.of(savedUser));
+        Territory savedTerritory = territoryRepository.saveAndFlush(territory);
+        String url = UrlConstants.TERR_ATTACH_DETACH_URL
+                .formatted(savedTerritory.getId(), savedUser.getId());
+        log.info(TestMessage.PERFORM_HTTP, HttpMethod.DELETE, url);
+        mockMvc.perform(MockMvcRequestBuilders.delete(url))
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
+
+        boolean relation = territoryRepository.checkUserTerritoryRelation(savedUser.getId(), savedTerritory.getId());
+
+        log.info("Check if detaching was ok");
+        Assertions.assertThat(relation).isFalse();
     }
 
 }

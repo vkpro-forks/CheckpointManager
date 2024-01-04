@@ -30,6 +30,7 @@ import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.model.passes.Pass;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -81,7 +82,7 @@ public class User implements UserDetails {
     @JoinTable(name = "user_territory",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "territory_id"))
-    private List<Territory> territories;
+    private List<Territory> territories = new ArrayList<>();
 
     @JsonIgnore
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
@@ -129,12 +130,12 @@ public class User implements UserDetails {
     @Override
     public String toString() {
         return "User{" +
-               "id=" + id +
-               ", fullName='" + fullName + '\'' +
-               ", mainNumber='" + mainNumber + '\'' +
-               ", email='" + email + '\'' +
-               ", isBlocked=" + isBlocked +
-               ", role=" + role +
-               '}';
+                "id=" + id +
+                ", fullName='" + fullName + '\'' +
+                ", mainNumber='" + mainNumber + '\'' +
+                ", email='" + email + '\'' +
+                ", isBlocked=" + isBlocked +
+                ", role=" + role +
+                '}';
     }
 }
