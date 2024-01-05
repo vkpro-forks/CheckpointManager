@@ -15,6 +15,8 @@ public interface AvatarService {
 
     AvatarDTO uploadAvatar(UUID userId, MultipartFile avatarFile);
 
+    AvatarDTO uploadAvatarByTerritory(UUID territoryId, MultipartFile avatarFile);
+
     AvatarImageDTO getAvatarByUserId(UUID userId);
 
 
