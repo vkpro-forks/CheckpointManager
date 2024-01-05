@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.ac.checkpointmanager.dto.passes.PassBaseDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.ext.ValidationContextTestResolver;
@@ -27,7 +28,7 @@ class PassTimeValidatorTest {
 
     @ParameterizedTest
     @MethodSource("getCorrectPassDtoArguments")
-    void shouldValidateForCorrectPathDto(Object passDto) {
+    void shouldValidateForCorrectPathDto(PassBaseDTO passDto) {
         boolean valid = passTimeValidator.isValid(passDto, constraintContext);
 
         Assertions.assertThat(valid).isTrue();
@@ -35,7 +36,7 @@ class PassTimeValidatorTest {
 
     @ParameterizedTest
     @MethodSource("getIncorrectPassDtoArguments")
-    void shouldNotValidateForIncorrectPassDto(Object passDto) {
+    void shouldNotValidateForIncorrectPassDto(PassBaseDTO passDto) {
         boolean valid = passTimeValidator.isValid(passDto, constraintContext);
 
         Assertions.assertThat(valid).isFalse();

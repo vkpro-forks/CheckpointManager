@@ -3,15 +3,14 @@ package ru.ac.checkpointmanager.validation;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import lombok.extern.slf4j.Slf4j;
-import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
-import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
+import ru.ac.checkpointmanager.dto.passes.PassBaseDTO;
 import ru.ac.checkpointmanager.validation.annotation.PassTimeCheck;
 
 /**
  * Класс проверяет, что в пропуске дата начала < дата окончания
  */
 @Slf4j
-public class PassTimeValidator implements ConstraintValidator<PassTimeCheck, Object> {
+public class PassTimeValidator implements ConstraintValidator<PassTimeCheck, PassBaseDTO> {
 
     private String validationMessage;
 
@@ -22,7 +21,7 @@ public class PassTimeValidator implements ConstraintValidator<PassTimeCheck, Obj
     }
 
     @Override
-    public boolean isValid(Object value, ConstraintValidatorContext context) {
+    public boolean isValid(PassBaseDTO value, ConstraintValidatorContext context) {
         log.debug("Validating pass time...");
         context.buildConstraintViolationWithTemplate(validationMessage)
                 .addPropertyNode("startTime")
@@ -33,13 +32,12 @@ public class PassTimeValidator implements ConstraintValidator<PassTimeCheck, Obj
         if (value == null) {
             return true;//not responsibility of this annotation
         }
-        if (value instanceof PassUpdateDTO passUpdateDTO) {
-            return passUpdateDTO.getStartTime().isBefore(passUpdateDTO.getEndTime());
-        }
-        if (value instanceof PassCreateDTO passCreateDTO) {
-            return passCreateDTO.getStartTime().isBefore(passCreateDTO.getEndTime());
+        boolean isValid = value.getStartTime().isBefore(value.getEndTime());
+        if (!isValid) {
+            log.debug("Pass time validation failed");
+            return false;
         }
         log.debug("Pass time validation successful");
-        return false;
+        return true;
     }
 }

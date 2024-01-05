@@ -3,18 +3,17 @@ package ru.ac.checkpointmanager.validation;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import lombok.extern.slf4j.Slf4j;
-import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
-import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
+import ru.ac.checkpointmanager.dto.passes.PassBaseDTO;
 import ru.ac.checkpointmanager.validation.annotation.CarOrVisitorFieldsCheck;
 
 /**
- * Класс проверяет содержит ли Объект поля Car и Visitor: в логике допустимо только одно поле
+ * Класс проверяет, содержит ли Объект поля Car и Visitor: в логике допустимо только одно поле
  * ЛИБО Car, ЛИБО Visitor;
  * Если передаются оба поля - ошибка валидации
  * Если оба поля null - ошибка валидации
  */
 @Slf4j
-public class CarOrVisitorFieldsValidator implements ConstraintValidator<CarOrVisitorFieldsCheck, Object> {
+public class CarOrVisitorFieldsValidator implements ConstraintValidator<CarOrVisitorFieldsCheck, PassBaseDTO> {
 
     public static final String VALIDATION_MSG = "%s field is null, or present with %s;" +
             " should be only Car or Visitor field";
@@ -27,7 +26,7 @@ public class CarOrVisitorFieldsValidator implements ConstraintValidator<CarOrVis
     }
 
     @Override
-    public boolean isValid(Object value, ConstraintValidatorContext context) {
+    public boolean isValid(PassBaseDTO value, ConstraintValidatorContext context) {
         log.debug("Validating Car or Visitor in Pass...");
         context.buildConstraintViolationWithTemplate(VALIDATION_MSG.formatted(CAR, VISITOR))
                 .addPropertyNode(CAR)
@@ -39,13 +38,12 @@ public class CarOrVisitorFieldsValidator implements ConstraintValidator<CarOrVis
             return true;//not responsibility of this annotation
         }
         //true if only one of parameters is null (null+ null = false, present+present = false)
-        if (value instanceof PassUpdateDTO passUpdateDTO) {
-            return passUpdateDTO.getVisitor() != null ^ passUpdateDTO.getCar() != null;
+        boolean isValid = value.getVisitor() != null ^ value.getCar() != null;
+        if (isValid) {
+            log.debug("Pass has only car, or only visitor: validation successful");
+            return true;
         }
-        if (value instanceof PassCreateDTO passCreateDTO) {
-            return passCreateDTO.getVisitor() != null ^ passCreateDTO.getCar() != null;
-        }
-        log.debug("Pass has only car, or only visitor: validation successful");
+        log.debug("Validation failed");
         return false;
     }
 

@@ -8,6 +8,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.VisitorDTO;
+import ru.ac.checkpointmanager.dto.passes.PassBaseDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.ext.ValidationContextTestResolver;
@@ -28,7 +29,7 @@ class CarOrVisitorFieldsCheckValidatorTest {
 
     @ParameterizedTest
     @MethodSource("getPassDtoWithBotCarAndVisitor")
-    void shouldValidateWithNotValidForBothFieldsPresent(Object passDto) {
+    void shouldValidateWithNotValidForBothFieldsPresent(PassBaseDTO passDto) {
         boolean valid = carOrVisitorFieldsValidator.isValid(passDto, constraintContext);
 
         Assertions.assertThat(valid).isFalse();
@@ -36,7 +37,7 @@ class CarOrVisitorFieldsCheckValidatorTest {
 
     @ParameterizedTest
     @MethodSource("getPassDtoWithCarAndVisitorNulls")
-    void shouldValidateWithNotValidForBothFieldsNull(Object passDto) {
+    void shouldValidateWithNotValidForBothFieldsNull(PassBaseDTO passDto) {
         boolean valid = carOrVisitorFieldsValidator.isValid(passDto, constraintContext);
 
         Assertions.assertThat(valid).isFalse();
@@ -44,7 +45,7 @@ class CarOrVisitorFieldsCheckValidatorTest {
 
     @ParameterizedTest
     @MethodSource("getPassDtoWithOnlyCar")
-    void shouldValidateWithValidIfOnlyCarPresent(Object passDto) {
+    void shouldValidateWithValidIfOnlyCarPresent(PassBaseDTO passDto) {
         boolean valid = carOrVisitorFieldsValidator.isValid(passDto, constraintContext);
 
         Assertions.assertThat(valid).isTrue();
@@ -52,7 +53,7 @@ class CarOrVisitorFieldsCheckValidatorTest {
 
     @ParameterizedTest
     @MethodSource("getPassDtoWithOnlyVisitor")
-    void shouldValidateWithValidIfOnlyVisitorPresent(Object passDto) {
+    void shouldValidateWithValidIfOnlyVisitorPresent(PassBaseDTO passDto) {
         boolean valid = carOrVisitorFieldsValidator.isValid(passDto, constraintContext);
 
         Assertions.assertThat(valid).isTrue();
