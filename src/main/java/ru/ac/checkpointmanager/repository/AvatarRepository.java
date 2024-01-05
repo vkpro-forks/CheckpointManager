@@ -11,6 +11,6 @@ import java.util.UUID;
 public interface AvatarRepository extends JpaRepository<Avatar, UUID> {
 
     Optional<Avatar> findByUserId(UUID userId);
-    Optional<Avatar> findByTerritoryId(UUID userId);
+    Optional<Avatar> findByTerritoryId(UUID territoryId);
 
 }

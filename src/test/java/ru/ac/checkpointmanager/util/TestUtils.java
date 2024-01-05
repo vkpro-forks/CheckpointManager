@@ -80,6 +80,8 @@ public class TestUtils {
 
     public static final UUID TERR_ID = UUID.randomUUID();
 
+    public static final UUID AVATAR_ID = UUID.randomUUID();
+
     public static final String TERR_NAME = "Territory";
 
     public static final UUID CAR_ID = UUID.randomUUID();
@@ -145,6 +147,7 @@ public class TestUtils {
                 .ignore(Select.field(Territory::getCheckpoints))
                 .set(Select.field(Territory::getName), TERR_NAME)
                 .set(Select.field(Territory::getId), TERR_ID)
+                .set(Select.field(Territory::getAvatar), AVATAR_ID)
                 .create();
     }
 
