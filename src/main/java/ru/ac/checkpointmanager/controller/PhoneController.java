@@ -61,7 +61,7 @@ public class PhoneController {
                                   "\nОшибка валидации: 11-20 символов, только цифры, пробелы и символы '(', ')', '-', '+';"
             )
     })
-    @PreAuthorize("@authFacade.isUserIdMatch(#phoneDTO.userId) or hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    @PreAuthorize("@userFacade.isIdMatch(#phoneDTO.userId) or hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public PhoneDTO createPhoneNumber(@Valid @RequestBody PhoneDTO phoneDTO) {
@@ -82,7 +82,7 @@ public class PhoneController {
                     description = "NOT_FOUND: номера с таким id не найдено"
             )
     })
-    @PreAuthorize("@authFacade.isPhoneIdMatch(#id) or hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
+    @PreAuthorize("@phoneFacade.isIdMatch(#id) or hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/{id}")
     public PhoneDTO findById(@Parameter(description = "Уникальный идентификатор телефона")
                              @PathVariable UUID id) {
@@ -129,7 +129,7 @@ public class PhoneController {
                     description = "NOT_FOUND: телефон не найден"
             )
     })
-    @PreAuthorize("@authFacade.isPhoneIdMatch(#phoneDTO.id) or hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    @PreAuthorize("@phoneFacade.isIdMatch(#phoneDTO.id) or hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @PutMapping
     public PhoneDTO updateNumber(@Valid @RequestBody PhoneDTO phoneDTO) {
         return phoneService.updatePhoneNumber(phoneDTO);
@@ -147,7 +147,7 @@ public class PhoneController {
                     description = "NOT_FOUND: телефон не найден"
             )
     })
-    @PreAuthorize("@authFacade.isPhoneIdMatch(#id) or hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    @PreAuthorize("@phoneFacade.isIdMatch(#id) or hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteNumber(@Parameter(description = "Уникальный идентификатор телефона")
