@@ -140,7 +140,7 @@ public class AvatarServiceImpl implements AvatarService {
     @Override
     public AvatarImageDTO getAvatarImageByAvatarId(UUID avatarId) {
         log.debug("Fetching avatar image for avatar ID: {}", avatarId);
-        Avatar avatar = repository.findById(avatarId)
+        Avatar avatar = repository.findByTerritoryId(avatarId)
                 .orElseThrow(() -> new AvatarNotFoundException(AVATAR_NOT_FOUND_MSG.formatted(avatarId)));
         return avatarHelper.createAvatarImageDTO(avatar);
     }

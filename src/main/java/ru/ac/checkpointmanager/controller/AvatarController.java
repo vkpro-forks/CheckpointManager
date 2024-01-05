@@ -136,11 +136,11 @@ public class AvatarController {
             @ApiResponse(responseCode = "400", description = "BAD_REQUEST: Неверные данные запроса",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
     })
-    @PostMapping(value = "/{territoryId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/territory/{territoryId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public AvatarDTO uploadAvatarByTerritory(@PathVariable UUID territoryId,
                                   @RequestPart @AvatarImageCheck MultipartFile avatarFile) {
-        return service.uploadAvatar(territoryId, avatarFile);
+        return service.uploadAvatarByTerritory(territoryId, avatarFile);
     }
 
     @Operation(summary = "Получить аватар по Id территории")
@@ -151,9 +151,9 @@ public class AvatarController {
             @ApiResponse(responseCode = "404", description = "NOT_FOUND: Аватар не найден",
                     content = @Content(schema = @Schema(implementation = AvatarNotFoundException.class))),
     })
-    @GetMapping("/{territoryId}")
+    @GetMapping("/territory/{territoryId}")
     public ResponseEntity<byte[]> getAvatarByTerritory(@PathVariable UUID territoryId) {
-        AvatarImageDTO avatarImageDTO = service.getAvatarByUserId(territoryId);
+        AvatarImageDTO avatarImageDTO = service.getAvatarImageByAvatarId(territoryId);
         return createResponseEntity(avatarImageDTO);
     }
 }
