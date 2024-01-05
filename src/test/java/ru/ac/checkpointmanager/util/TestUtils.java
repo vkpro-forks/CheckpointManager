@@ -38,6 +38,7 @@ import ru.ac.checkpointmanager.exception.handler.ErrorCode;
 import ru.ac.checkpointmanager.model.Phone;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
+import ru.ac.checkpointmanager.model.avatar.Avatar;
 import ru.ac.checkpointmanager.model.car.Car;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
@@ -81,6 +82,10 @@ public class TestUtils {
     public static final UUID TERR_ID = UUID.randomUUID();
 
     public static final UUID AVATAR_ID = UUID.randomUUID();
+
+    public static final String DEFAULT_MEDIA_TYPE = "image/jpeg";
+
+    public static final String DEFAULT_FILE_PATH = "/path/to/image.jpg";
 
     public static final String TERR_NAME = "Territory";
 
@@ -147,7 +152,7 @@ public class TestUtils {
                 .ignore(Select.field(Territory::getCheckpoints))
                 .set(Select.field(Territory::getName), TERR_NAME)
                 .set(Select.field(Territory::getId), TERR_ID)
-                .set(Select.field(Territory::getAvatar), AVATAR_ID)
+                .ignore(Select.field(Territory::getAvatar))
                 .create();
     }
 
@@ -426,4 +431,14 @@ public class TestUtils {
                 TestUtils.PASSWORD
         );
     }
+
+    public static Avatar createTestAvatar() {
+        Avatar avatar = new Avatar();
+        avatar.setMediaType(DEFAULT_MEDIA_TYPE);
+        avatar.setFilePath(DEFAULT_FILE_PATH);
+        avatar.setFileSize(1024L);
+        avatar.setPreview(new byte[10]);
+        return avatar;
+    }
+
 }
