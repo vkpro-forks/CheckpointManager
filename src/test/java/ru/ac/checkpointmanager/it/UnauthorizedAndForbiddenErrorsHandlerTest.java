@@ -22,7 +22,7 @@ class UnauthorizedAndForbiddenErrorsHandlerTest extends GlobalExceptionHandlerBa
     @Test
     @SneakyThrows
     void shouldHandleBadCredentialsExceptionForLogin() {
-        String loginDto = TestUtils.jsonStringFromObject(TestUtils.getAuthenticationRequest());
+        String loginDto = TestUtils.jsonStringFromObject(TestUtils.getAuthRequestDTO());
         mockMvc.perform(MockMvcRequestBuilders
                         .post(UrlConstants.AUTH_LOGIN_URL)
                         .contentType(MediaType.APPLICATION_JSON)

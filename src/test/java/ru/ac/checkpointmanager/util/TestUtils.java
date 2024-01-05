@@ -25,14 +25,14 @@ import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.VisitorDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
-import ru.ac.checkpointmanager.dto.user.AuthenticationRequest;
-import ru.ac.checkpointmanager.dto.user.ChangeEmailRequest;
-import ru.ac.checkpointmanager.dto.user.ChangePasswordRequest;
-import ru.ac.checkpointmanager.dto.user.ConfirmChangeEmail;
-import ru.ac.checkpointmanager.dto.user.ConfirmRegistration;
+import ru.ac.checkpointmanager.dto.user.AuthRequestDTO;
+import ru.ac.checkpointmanager.dto.user.ConfirmationRegistrationDTO;
+import ru.ac.checkpointmanager.dto.user.NewEmailDTO;
+import ru.ac.checkpointmanager.dto.user.NewPasswordDTO;
+import ru.ac.checkpointmanager.dto.user.ConfirmationEmailDTO;
 import ru.ac.checkpointmanager.dto.user.RefreshTokenDTO;
-import ru.ac.checkpointmanager.dto.user.UserAuthDTO;
-import ru.ac.checkpointmanager.dto.user.UserPutDTO;
+import ru.ac.checkpointmanager.dto.user.RegistrationDTO;
+import ru.ac.checkpointmanager.dto.user.UserChangeDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.exception.handler.ErrorCode;
 import ru.ac.checkpointmanager.model.Phone;
@@ -256,8 +256,8 @@ public class TestUtils {
                 .generate(Select.field("email"), gen -> gen.text().pattern("#a#a#a#a#a@example.com")).toModel();
     }
 
-    public static UserPutDTO getUserPutDTO() {
-        return new UserPutDTO(
+    public static UserChangeDTO getUserChangeDTO() {
+        return new UserChangeDTO(
                 USER_ID,
                 "Vasin Vasya Petya",
                 "+79167868345"
@@ -276,28 +276,28 @@ public class TestUtils {
         );
     }
 
-    public static ChangePasswordRequest getChangePasswordRequest() {
-        return new ChangePasswordRequest(
+    public static NewPasswordDTO getNewPasswordDTO() {
+        return new NewPasswordDTO(
                 PASSWORD,
                 NEW_PASSWORD,
                 NEW_PASSWORD
         );
     }
 
-    public static ConfirmChangeEmail getConfirmChangeEmail() {
-        return new ConfirmChangeEmail(
+    public static ConfirmationEmailDTO getConfirmationEmailDTO() {
+        return new ConfirmationEmailDTO(
                 EMAIL,
                 NEW_EMAIL,
                 EMAIL_STRING_TOKEN
         );
     }
 
-    public static ChangeEmailRequest getChangeEmailRequest() {
-        return new ChangeEmailRequest(NEW_EMAIL);
+    public static NewEmailDTO getNewEmailDTO() {
+        return new NewEmailDTO(NEW_EMAIL);
     }
 
-    public static ConfirmRegistration getConfirmRegistration() {
-        return new ConfirmRegistration(
+    public static ConfirmationRegistrationDTO getConfirmationRegistrationDTO() {
+        return new ConfirmationRegistrationDTO(
                 FULL_NAME,
                 EMAIL,
                 PASSWORD,
@@ -305,8 +305,8 @@ public class TestUtils {
         );
     }
 
-    public static AuthenticationRequest getAuthenticationRequest() {
-        return new AuthenticationRequest(EMAIL, PASSWORD);
+    public static AuthRequestDTO getAuthRequestDTO() {
+        return new AuthRequestDTO(EMAIL, PASSWORD);
     }
 
     public static RefreshTokenDTO getRefreshTokenDTO() {
@@ -415,9 +415,8 @@ public class TestUtils {
     private TestUtils() {
     }
 
-    public static UserAuthDTO getUserAuthDTO() {
-        return new UserAuthDTO(
-                TestUtils.USER_ID,
+    public static RegistrationDTO getRegistrationDTO() {
+        return new RegistrationDTO(
                 TestUtils.FULL_NAME,
                 TestUtils.EMAIL,
                 TestUtils.PASSWORD

@@ -16,13 +16,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import ru.ac.checkpointmanager.dto.user.AuthenticationRequest;
-import ru.ac.checkpointmanager.dto.user.AuthenticationResponse;
-import ru.ac.checkpointmanager.dto.user.ConfirmRegistration;
-import ru.ac.checkpointmanager.dto.user.IsAuthenticatedResponse;
-import ru.ac.checkpointmanager.dto.user.LoginResponse;
+import ru.ac.checkpointmanager.dto.user.AuthRequestDTO;
+import ru.ac.checkpointmanager.dto.user.AuthResponseDTO;
+import ru.ac.checkpointmanager.dto.user.ConfirmationRegistrationDTO;
+import ru.ac.checkpointmanager.dto.user.PreAuthResponseDTO;
+import ru.ac.checkpointmanager.dto.user.LoginResponseDTO;
 import ru.ac.checkpointmanager.dto.user.RefreshTokenDTO;
-import ru.ac.checkpointmanager.dto.user.UserAuthDTO;
+import ru.ac.checkpointmanager.dto.user.RegistrationDTO;
 import ru.ac.checkpointmanager.exception.EmailAlreadyExistsException;
 import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
 import ru.ac.checkpointmanager.exception.ExceptionUtils;
@@ -73,35 +73,35 @@ public class AuthenticationServiceImpl implements AuthenticationService {
      * <p>
      * В случае сбоя на каком-либо этапе, все изменения, внесенные в методе, будут отменены.
      *
-     * @param userAuthDTO объект передачи данных пользователя.
+     * @param registrationDTO объект передачи данных пользователя.
      * @return TemporaryUser, представляющий предварительно зарегистрированного пользователя.
      * @throws IllegalStateException если пользователь с указанным email уже существует.
      * @throws MailSendException     если отправка письма с токеном подтверждения не удалась.
-     * @see UserAuthDTO
+     * @see RegistrationDTO
      * @see FieldsValidation
      * @see EmailService
      */
     @CachePut(value = "registration", key = "#result.verifiedToken")
     @Transactional
     @Override
-    public ConfirmRegistration preRegister(UserAuthDTO userAuthDTO) {
+    public ConfirmationRegistrationDTO preRegister(RegistrationDTO registrationDTO) {
         log.debug(METHOD_WAS_INVOKED, MethodLog.getMethodName());
-        boolean userExist = userRepository.findByEmail(userAuthDTO.getEmail()).isPresent();
+        boolean userExist = userRepository.findByEmail(registrationDTO.getEmail()).isPresent();
         if (userExist) {
-            log.warn(ExceptionUtils.EMAIL_EXISTS.formatted(userAuthDTO.getEmail()));
-            throw new EmailAlreadyExistsException(ExceptionUtils.EMAIL_EXISTS.formatted(userAuthDTO.getEmail()));
+            log.warn(ExceptionUtils.EMAIL_EXISTS.formatted(registrationDTO.getEmail()));
+            throw new EmailAlreadyExistsException(ExceptionUtils.EMAIL_EXISTS.formatted(registrationDTO.getEmail()));
         }
-        ConfirmRegistration confirmUser = userMapper.toConfirmRegistration(userAuthDTO);
+        ConfirmationRegistrationDTO confirmUser = userMapper.toConfirmRegistration(registrationDTO);
         String encodedPassword = passwordEncoder.encode(confirmUser.getPassword());
         confirmUser.setPassword(encodedPassword);
         String token = UUID.randomUUID().toString();
         confirmUser.setVerifiedToken(token);
 
         try {
-            emailService.sendRegisterConfirm(userAuthDTO.getEmail(), token);
-            log.info("Mail message was sent to {}", userAuthDTO.getEmail());
+            emailService.sendRegisterConfirm(registrationDTO.getEmail(), token);
+            log.info("Mail message was sent to {}", registrationDTO.getEmail());
         } catch (MailException e) {
-            log.error("Email sending failed for {}. Error: {}", userAuthDTO.getEmail(), e.getMessage());
+            log.error("Email sending failed for {}. Error: {}", registrationDTO.getEmail(), e.getMessage());
             throw new MailSendException("Email sending failed", e);
         }
 
@@ -129,9 +129,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public void confirmRegistration(String token) {
         log.debug(METHOD_WAS_INVOKED, MethodLog.getMethodName());
-        Optional<ConfirmRegistration> confirmUser = Optional.ofNullable(
+        Optional<ConfirmationRegistrationDTO> confirmUser = Optional.ofNullable(
                         cacheManager.getCache("registration"))
-                .map(cache -> cache.get(token, ConfirmRegistration.class));
+                .map(cache -> cache.get(token, ConfirmationRegistrationDTO.class));
         if (confirmUser.isEmpty()) {
             log.warn(ExceptionUtils.INVALID_EMAIL_TOKEN_MSG.formatted(token));
             throw new EmailVerificationTokenException(ExceptionUtils.INVALID_EMAIL_TOKEN_MSG.formatted(token));
@@ -145,11 +145,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     @Transactional(readOnly = true)
-    public IsAuthenticatedResponse isUserAuthenticated(String email) {
+    public PreAuthResponseDTO isUserAuthenticated(String email) {
         log.debug("Method {}, email {}", MethodLog.getMethodName(), email);
         Optional<User> foundUser = userRepository.findByEmail(email);
-        return foundUser.map(user -> new IsAuthenticatedResponse(true, user.getFullName()))
-                .orElseGet(() -> new IsAuthenticatedResponse(false, null));
+        return foundUser.map(user -> new PreAuthResponseDTO(true, user.getFullName()))
+                .orElseGet(() -> new PreAuthResponseDTO(false, null));
     }
 
     /**
@@ -162,13 +162,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
      * Если пользователь не найден в репозитории, выбрасывается исключение {@code UsernameNotFoundException}.
      *
      * @param request объект с данными {@code email} и {@code password}.
-     * @return {@link AuthenticationResponse} - объект с данными аутентификации пользователя.
+     * @return {@link AuthResponseDTO} - объект с данными аутентификации пользователя.
      * @throws UsernameNotFoundException если пользователь с указанным email не найден.
      * @see JwtService
      * @see UsernamePasswordAuthenticationToken
      */
     @Override
-    public LoginResponse authenticate(AuthenticationRequest request) {
+    public LoginResponseDTO authenticate(AuthRequestDTO request) {
         log.debug("Method {}, Username {}", MethodLog.getMethodName(), request.getEmail());
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -181,7 +181,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         String refreshToken = jwtService.generateRefreshToken(user);
         log.debug("Access and refresh tokens for {} created", user.getEmail());
 
-        LoginResponse response = userMapper.toLoginResponse(user);
+        LoginResponseDTO response = userMapper.toLoginResponse(user);
         response.setAccessToken(jwtToken);
         response.setRefreshToken(refreshToken);
         return response;
@@ -196,12 +196,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
      * <p>
      *
      * @param refreshTokenDTO Объект {@link RefreshTokenDTO}, содержащий токен обновления.
-     * @return {@link AuthenticationResponse}, содержащий новый токен доступа и токен обновления.
+     * @return {@link AuthResponseDTO}, содержащий новый токен доступа и токен обновления.
      * @throws UserNotFoundException если пользователь не найден.
      */
     @Override
     @Transactional(readOnly = true)
-    public AuthenticationResponse refreshToken(RefreshTokenDTO refreshTokenDTO) {
+    public AuthResponseDTO refreshToken(RefreshTokenDTO refreshTokenDTO) {
         log.debug(METHOD_WAS_INVOKED, MethodLog.getMethodName());
         final String refreshToken = refreshTokenDTO.getRefreshToken();
         jwtValidator.validateRefreshToken(refreshToken);
@@ -211,6 +211,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             return new UserNotFoundException(String.format(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(username)));
         });
         String accessToken = jwtService.generateAccessToken(user);
-        return new AuthenticationResponse(accessToken, refreshToken);
+        return new AuthResponseDTO(accessToken, refreshToken);
     }
 }

@@ -24,13 +24,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import ru.ac.checkpointmanager.dto.user.AuthenticationRequest;
-import ru.ac.checkpointmanager.dto.user.AuthenticationResponse;
-import ru.ac.checkpointmanager.dto.user.ConfirmRegistration;
-import ru.ac.checkpointmanager.dto.user.IsAuthenticatedResponse;
-import ru.ac.checkpointmanager.dto.user.LoginResponse;
+import ru.ac.checkpointmanager.dto.user.AuthRequestDTO;
+import ru.ac.checkpointmanager.dto.user.AuthResponseDTO;
+import ru.ac.checkpointmanager.dto.user.ConfirmationRegistrationDTO;
+import ru.ac.checkpointmanager.dto.user.PreAuthResponseDTO;
+import ru.ac.checkpointmanager.dto.user.LoginResponseDTO;
 import ru.ac.checkpointmanager.dto.user.RefreshTokenDTO;
-import ru.ac.checkpointmanager.dto.user.UserAuthDTO;
+import ru.ac.checkpointmanager.dto.user.RegistrationDTO;
 import ru.ac.checkpointmanager.service.auth.AuthenticationService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
 
@@ -57,7 +57,7 @@ public class AuthController {
                     responseCode = "201",
                     description = "CREATED: Данные валидны, письмо для подтверждения отправлено",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = UserAuthDTO.class))}
+                            schema = @Schema(implementation = RegistrationDTO.class))}
             ),
             @ApiResponse(
                     responseCode = "400",
@@ -80,7 +80,7 @@ public class AuthController {
     })
     @PostMapping("/registration")
     @ResponseStatus(HttpStatus.CREATED)
-    public ConfirmRegistration register(@RequestBody @Valid UserAuthDTO user) {
+    public ConfirmationRegistrationDTO register(@RequestBody @Valid RegistrationDTO user) {
         return authenticationService.preRegister(user);
     }
 
@@ -91,7 +91,7 @@ public class AuthController {
                             responseCode = "200",
                             description = "OK: Аутентификация прошла успешно",
                             content = @Content(
-                                    schema = @Schema(implementation = LoginResponse.class)
+                                    schema = @Schema(implementation = LoginResponseDTO.class)
                             )
                     ),
                     @ApiResponse(
@@ -104,7 +104,7 @@ public class AuthController {
                     )
             }
     )
-    public ResponseEntity<?> authenticate(@RequestBody AuthenticationRequest request,
+    public ResponseEntity<?> authenticate(@RequestBody AuthRequestDTO request,
                                           BindingResult result
     ) {
         if (result.hasErrors()) {
@@ -121,7 +121,7 @@ public class AuthController {
                             responseCode = "200",
                             description = "OK: Токен успешно обновлен",
                             content = @Content(
-                                    schema = @Schema(implementation = AuthenticationResponse.class),
+                                    schema = @Schema(implementation = AuthResponseDTO.class),
                                     mediaType = MediaType.APPLICATION_JSON_VALUE
                             )
                     ),
@@ -131,7 +131,7 @@ public class AuthController {
                     )
             }
     )
-    public AuthenticationResponse refreshToken(@Valid @RequestBody RefreshTokenDTO refreshTokenDTO) {
+    public AuthResponseDTO refreshToken(@Valid @RequestBody RefreshTokenDTO refreshTokenDTO) {
         return authenticationService.refreshToken(refreshTokenDTO);
     }
 
@@ -141,7 +141,7 @@ public class AuthController {
                     responseCode = "200",
                     description = "OK: Ответ получен",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = IsAuthenticatedResponse.class))
+                            schema = @Schema(implementation = PreAuthResponseDTO.class))
             ),
             @ApiResponse(
                     responseCode = "400",
@@ -150,7 +150,7 @@ public class AuthController {
     })
     @GetMapping("/is-authenticated")
     public ResponseEntity<?> isUserAuthenticated(@RequestParam String email) {
-        IsAuthenticatedResponse response = authenticationService.isUserAuthenticated(email);
+        PreAuthResponseDTO response = authenticationService.isUserAuthenticated(email);
         return ResponseEntity.ok(response);
     }
 }

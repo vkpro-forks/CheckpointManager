@@ -4,11 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ru.ac.checkpointmanager.dto.user.ChangeEmailRequest;
-import ru.ac.checkpointmanager.dto.user.ConfirmChangeEmail;
-import ru.ac.checkpointmanager.dto.user.ConfirmRegistration;
-import ru.ac.checkpointmanager.dto.user.LoginResponse;
-import ru.ac.checkpointmanager.dto.user.UserAuthDTO;
+import ru.ac.checkpointmanager.dto.user.ConfirmationRegistrationDTO;
+import ru.ac.checkpointmanager.dto.user.NewEmailDTO;
+import ru.ac.checkpointmanager.dto.user.ConfirmationEmailDTO;
+import ru.ac.checkpointmanager.dto.user.LoginResponseDTO;
+import ru.ac.checkpointmanager.dto.user.RegistrationDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.model.User;
 
@@ -37,20 +37,20 @@ public class UserMapper {
                 .toList();
     }
 
-    public LoginResponse toLoginResponse(User user) {
-        return modelMapper.map(user, LoginResponse.class);
+    public LoginResponseDTO toLoginResponse(User user) {
+        return modelMapper.map(user, LoginResponseDTO.class);
     }
 
-    public ConfirmRegistration toConfirmRegistration(UserAuthDTO userAuthDTO) {
-        log.debug("{} was converted to object of ConfirmRegistration.class", userAuthDTO.getEmail());
-        return modelMapper.map(userAuthDTO, ConfirmRegistration.class);
+    public ConfirmationRegistrationDTO toConfirmRegistration(RegistrationDTO registrationDTO) {
+        log.debug("{} was converted to object of ConfirmRegistration.class", registrationDTO.getEmail());
+        return modelMapper.map(registrationDTO, ConfirmationRegistrationDTO.class);
     }
 
-    public ConfirmChangeEmail toConfirmChangeEmail(ChangeEmailRequest request) {
-        return modelMapper.map(request, ConfirmChangeEmail.class);
+    public ConfirmationEmailDTO toConfirmChangeEmail(NewEmailDTO request) {
+        return modelMapper.map(request, ConfirmationEmailDTO.class);
     }
 
-    public User toUser(Optional<ConfirmRegistration> confirmRegistration) {
+    public User toUser(Optional<ConfirmationRegistrationDTO> confirmRegistration) {
         return modelMapper.map(confirmRegistration, User.class);
     }
 }

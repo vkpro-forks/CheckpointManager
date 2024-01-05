@@ -14,7 +14,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.cache.Cache;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.test.util.ReflectionTestUtils;
-import ru.ac.checkpointmanager.dto.user.ConfirmRegistration;
+import ru.ac.checkpointmanager.dto.user.ConfirmationRegistrationDTO;
 import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
 import ru.ac.checkpointmanager.mapper.UserMapper;
 import ru.ac.checkpointmanager.model.User;
@@ -53,9 +53,9 @@ class AuthenticationServiceImplTest {
     void shouldSaveUserIfVerificationTokenIsOk() {
         Cache mockCache = Mockito.mock(Cache.class);
         Mockito.when(cacheManager.getCache("registration")).thenReturn(mockCache);
-        ConfirmRegistration confirmRegistration = TestUtils.getConfirmRegistration();
-        Mockito.when(mockCache.get(TestUtils.EMAIL_STRING_TOKEN, ConfirmRegistration.class))
-                .thenReturn(confirmRegistration);
+        ConfirmationRegistrationDTO confirmationRegistrationDTO = TestUtils.getConfirmationRegistrationDTO();
+        Mockito.when(mockCache.get(TestUtils.EMAIL_STRING_TOKEN, ConfirmationRegistrationDTO.class))
+                .thenReturn(confirmationRegistrationDTO);
 
         authenticationService.confirmRegistration(TestUtils.EMAIL_STRING_TOKEN);
 
@@ -64,11 +64,11 @@ class AuthenticationServiceImplTest {
         Assertions.assertThat(captured).extracting("role").as("Check if Role is USER").isEqualTo(Role.USER);
         Assertions.assertThat(captured.getIsBlocked()).as("Check if isBlocked status set to False").isFalse();
         Assertions.assertThat(captured.getUsername()).as("Check if user name is equals value from ConfirmRegistration")
-                .isEqualTo(confirmRegistration.getEmail());
+                .isEqualTo(confirmationRegistrationDTO.getEmail());
         Assertions.assertThat(captured.getEmail()).as("Check if email is equals value from ConfirmRegistration")
-                .isEqualTo(confirmRegistration.getEmail());
+                .isEqualTo(confirmationRegistrationDTO.getEmail());
         Assertions.assertThat(captured.getFullName()).as("Check if full name is equals value from ConfirmRegistration")
-                .isEqualTo(confirmRegistration.getFullName());
+                .isEqualTo(confirmationRegistrationDTO.getFullName());
     }
 
 }

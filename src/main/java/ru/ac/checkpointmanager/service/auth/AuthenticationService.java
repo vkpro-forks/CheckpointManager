@@ -1,22 +1,22 @@
 package ru.ac.checkpointmanager.service.auth;
 
-import ru.ac.checkpointmanager.dto.user.AuthenticationRequest;
-import ru.ac.checkpointmanager.dto.user.AuthenticationResponse;
-import ru.ac.checkpointmanager.dto.user.IsAuthenticatedResponse;
-import ru.ac.checkpointmanager.dto.user.ConfirmRegistration;
-import ru.ac.checkpointmanager.dto.user.LoginResponse;
+import ru.ac.checkpointmanager.dto.user.AuthRequestDTO;
+import ru.ac.checkpointmanager.dto.user.AuthResponseDTO;
+import ru.ac.checkpointmanager.dto.user.PreAuthResponseDTO;
+import ru.ac.checkpointmanager.dto.user.ConfirmationRegistrationDTO;
+import ru.ac.checkpointmanager.dto.user.LoginResponseDTO;
 import ru.ac.checkpointmanager.dto.user.RefreshTokenDTO;
-import ru.ac.checkpointmanager.dto.user.UserAuthDTO;
+import ru.ac.checkpointmanager.dto.user.RegistrationDTO;
 
 public interface AuthenticationService {
 
-    ConfirmRegistration preRegister(UserAuthDTO userAuthDTO);
+    ConfirmationRegistrationDTO preRegister(RegistrationDTO registrationDTO);
 
     void confirmRegistration(String token);
 
-    IsAuthenticatedResponse isUserAuthenticated(String email);
+    PreAuthResponseDTO isUserAuthenticated(String email);
 
-    LoginResponse authenticate(AuthenticationRequest request);
+    LoginResponseDTO authenticate(AuthRequestDTO request);
 
-    AuthenticationResponse refreshToken(RefreshTokenDTO refreshTokenDTO);
+    AuthResponseDTO refreshToken(RefreshTokenDTO refreshTokenDTO);
 }
