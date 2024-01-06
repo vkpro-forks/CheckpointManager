@@ -56,7 +56,7 @@ public class AvatarController {
             @ApiResponse(responseCode = "400", description = "BAD_REQUEST: Неверные данные запроса",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
     })
-    @PreAuthorize("@userFacade.isIdMatch(#userId) or hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY') or @userFacade.isIdMatch(#userId)")
     @PostMapping(value = "/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public AvatarDTO uploadAvatar(@PathVariable UUID userId,
@@ -85,7 +85,7 @@ public class AvatarController {
             @ApiResponse(responseCode = "404", description = "NOT_FOUND: Аватар не найден",
                     content = @Content(schema = @Schema(implementation = AvatarNotFoundException.class))),
     })
-    @PreAuthorize("@avatarAuthFacade.isIdMatch(#avatarId) or hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY') or @avatarAuthFacade.isIdMatch(#avatarId)")
     @DeleteMapping("/{avatarId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteAvatar(@PathVariable UUID avatarId) {
