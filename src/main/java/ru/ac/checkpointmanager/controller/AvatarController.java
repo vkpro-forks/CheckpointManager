@@ -85,7 +85,7 @@ public class AvatarController {
             @ApiResponse(responseCode = "404", description = "NOT_FOUND: Аватар не найден",
                     content = @Content(schema = @Schema(implementation = AvatarNotFoundException.class))),
     })
-    @PreAuthorize("@avatarFacade.isIdMatch(#avatarId) or hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
+    @PreAuthorize("@avatarAuthFacade.isIdMatch(#avatarId) or hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @DeleteMapping("/{avatarId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteAvatar(@PathVariable UUID avatarId) {
@@ -123,7 +123,7 @@ public class AvatarController {
             @ApiResponse(responseCode = "404", description = "NOT_FOUND: Аватар не найден",
                     content = @Content(schema = @Schema(implementation = AvatarNotFoundException.class))),
     })
-    @PreAuthorize("@userFacade.isIdMatch(#userId) or hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/fromSofa/{userId}")
     public ResponseEntity<AvatarImageDTO> getAvatarByUserId(@PathVariable UUID userId) {
         AvatarImageDTO avatarImageDTO = service.getAvatarByUserId(userId);

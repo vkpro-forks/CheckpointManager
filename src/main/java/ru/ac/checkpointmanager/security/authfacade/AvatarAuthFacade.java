@@ -8,10 +8,10 @@ import ru.ac.checkpointmanager.model.avatar.Avatar;
 import ru.ac.checkpointmanager.service.avatar.AvatarService;
 
 import java.util.UUID;
-@Component("avatarFacade")
+@Component("avatarAuthFacade")
 @AllArgsConstructor
 @Slf4j
-public class AvatarFacade implements AuthFacade {
+public class AvatarAuthFacade implements AuthFacade {
 
     private AvatarService avatarService;
 
@@ -19,6 +19,6 @@ public class AvatarFacade implements AuthFacade {
     public boolean isIdMatch(UUID avatarId) {
         User user = getCurrentUser();
         Avatar avatar = avatarService.findAvatarById(avatarId);
-        return avatar.getUser().equals(user);
+        return avatar.getUser().getId().equals(user.getId());
     }
 }

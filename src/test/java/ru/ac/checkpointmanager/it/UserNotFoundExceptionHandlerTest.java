@@ -70,6 +70,7 @@ class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestCo
 
     @Test
     @SneakyThrows
+    @WithMockCustomUser
     void shouldHandleUserNotFoundExceptionForUploadAvatar() {
         MockMultipartFile file
                 = new MockMultipartFile("avatarFile", "avatar.png", MediaType.IMAGE_PNG_VALUE, new byte[]{1, 2, 3});
