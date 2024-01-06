@@ -17,11 +17,10 @@ public interface AvatarService {
 
     AvatarImageDTO getAvatarByUserId(UUID userId);
 
-
     void deleteAvatarIfExists(UUID avatarId);
 
     AvatarImageDTO getAvatarImageByAvatarId(UUID avatarId);
 
-    Avatar findAvatarById(UUID userId);
+    Avatar findAvatarById(UUID avatarId);
 
 }
