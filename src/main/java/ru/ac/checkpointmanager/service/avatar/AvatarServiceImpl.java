@@ -8,10 +8,13 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.ac.checkpointmanager.dto.avatar.AvatarDTO;
 import ru.ac.checkpointmanager.dto.avatar.AvatarImageDTO;
 import ru.ac.checkpointmanager.exception.AvatarNotFoundException;
+import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.mapper.avatar.AvatarMapper;
+import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.avatar.Avatar;
 import ru.ac.checkpointmanager.repository.AvatarRepository;
+import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 
 import java.util.UUID;
@@ -22,14 +25,19 @@ import java.util.UUID;
 @Slf4j
 public class AvatarServiceImpl implements AvatarService {
 
+
     public static final String AVATAR_NOT_FOUND_LOG = "[Avatar with id: {}] not found";
     public static final String AVATAR_NOT_FOUND_MSG = "Avatar with id: %s not found";
 
     private static final String USER_NOT_FOUND_LOG = "User with [id: {}] not found";
     private static final String USER_NOT_FOUND_MSG = "User with id: %s not found";
 
+    private static final String TERRITORY_NOT_FOUND_LOG = "Territory with [id: {}] not found";
+    private static final String TERRITORY_NOT_FOUND_MSG = "Territory with id: %s not found";
+
     private final AvatarRepository repository;
     private final UserRepository userRepository;
+    private final TerritoryRepository territoryRepository;
 
     private final AvatarMapper avatarMapper;
     private final AvatarHelper avatarHelper;
@@ -45,7 +53,6 @@ public class AvatarServiceImpl implements AvatarService {
      */
     @Override
     public AvatarDTO uploadAvatar(UUID userId, MultipartFile avatarFile) {
-        log.info("Method uploadAvatar invoked for entityId: {}", userId);
         //FIXME временно здесь пока не реализуем логику по другому
         userRepository.findById(userId)
                 .orElseThrow(() -> {
@@ -71,6 +78,25 @@ public class AvatarServiceImpl implements AvatarService {
         avatarHelper.updateUserAvatar(userId, avatar);//TODO проверяем есть ли юзер в базе только здесь
 
         log.info("Avatar ID updated for user {}", userId);
+        return avatarMapper.toAvatarDTO(avatar);
+    }
+
+    //TODO есть идея сделать метод загрузки один для всех сущностей, а далее распределять.
+    @Override
+    public AvatarDTO uploadAvatarByTerritory(UUID territoryId, MultipartFile avatarFile) {
+        territoryRepository.findById(territoryId)
+                .orElseThrow(() -> {
+            log.warn(TERRITORY_NOT_FOUND_LOG, territoryId);
+            return new TerritoryNotFoundException(TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
+        });
+
+        Avatar avatar = avatarHelper.getOrCreateAvatarByTerritory(territoryId);
+        avatarHelper.configureAvatar(avatar, avatarFile);
+        avatarHelper.processAndSetAvatarImage(avatar, avatarFile);//TODO мы его с конфигурируем, сделали работу
+        avatar = avatarHelper.saveAvatar(avatar);//TODO  сохраняем даже в бд.
+        avatarHelper.updateTerritoryAvatar(territoryId, avatar);//TODO проверяем есть ли юзер в базе только здесь
+
+        log.info("Avatar ID updated for user {}", territoryId);
         return avatarMapper.toAvatarDTO(avatar);
     }
 
@@ -114,7 +140,7 @@ public class AvatarServiceImpl implements AvatarService {
     @Override
     public AvatarImageDTO getAvatarImageByAvatarId(UUID avatarId) {
         log.debug("Fetching avatar image for avatar ID: {}", avatarId);
-        Avatar avatar = repository.findById(avatarId)
+        Avatar avatar = repository.findByTerritoryId(avatarId)
                 .orElseThrow(() -> new AvatarNotFoundException(AVATAR_NOT_FOUND_MSG.formatted(avatarId)));
         return avatarHelper.createAvatarImageDTO(avatar);
     }

@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -38,6 +39,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @RequestMapping("api/v1/avatars")
 @SecurityRequirement(name = "bearerAuth")
+@Tag(name = "Аватары для объектов", description = "User и Territory")
 @ApiResponses(value = {
         @ApiResponse(responseCode = "401", description = "UNAUTHORIZED: пользователь не авторизован",
                 content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
@@ -62,7 +64,6 @@ public class AvatarController {
     public AvatarDTO uploadAvatar(@PathVariable UUID userId,
                                   @RequestPart @AvatarImageCheck MultipartFile avatarFile) {
         return service.uploadAvatar(userId, avatarFile);
-
     }
 
     @Operation(summary = "Получить аватар по Id пользователя")
@@ -125,5 +126,34 @@ public class AvatarController {
     public ResponseEntity<AvatarImageDTO> getAvatarByUserId(@PathVariable UUID userId) {
         AvatarImageDTO avatarImageDTO = service.getAvatarByUserId(userId);
         return ResponseEntity.ok(avatarImageDTO);
+    }
+
+    @Operation(summary = "Загрузить аватар территории(выбрать id территории и картинку).")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Аватар успешно добавлен",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = AvatarDTO.class))),
+            @ApiResponse(responseCode = "400", description = "BAD_REQUEST: Неверные данные запроса",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+    })
+    @PostMapping(value = "/territory/{territoryId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
+    public AvatarDTO uploadAvatarByTerritory(@PathVariable UUID territoryId,
+                                  @RequestPart @AvatarImageCheck MultipartFile avatarFile) {
+        return service.uploadAvatarByTerritory(territoryId, avatarFile);
+    }
+
+    @Operation(summary = "Получить аватар по Id территории")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Аватар получен. Контент содержит изображение в формате JPEG.",
+                    content = @Content(mediaType = MediaType.IMAGE_JPEG_VALUE,
+                            schema = @Schema(implementation = byte[].class))),
+            @ApiResponse(responseCode = "404", description = "NOT_FOUND: Аватар не найден",
+                    content = @Content(schema = @Schema(implementation = AvatarNotFoundException.class))),
+    })
+    @GetMapping("/territory/{territoryId}")
+    public ResponseEntity<byte[]> getAvatarByTerritory(@PathVariable UUID territoryId) {
+        AvatarImageDTO avatarImageDTO = service.getAvatarImageByAvatarId(territoryId);
+        return createResponseEntity(avatarImageDTO);
     }
 }

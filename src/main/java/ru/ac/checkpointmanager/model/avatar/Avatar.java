@@ -3,6 +3,7 @@ package ru.ac.checkpointmanager.model.avatar;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 
 import java.util.UUID;
@@ -34,4 +35,7 @@ public class Avatar {
 
     @OneToOne(mappedBy = "avatar", fetch = FetchType.LAZY, optional = false)
     private User user;
+
+    @OneToOne(mappedBy = "avatar", fetch = FetchType.LAZY, optional = false)
+    private Territory territory;
 }
