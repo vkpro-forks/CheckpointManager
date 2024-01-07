@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.user.AuthRequestDTO;
 import ru.ac.checkpointmanager.dto.user.AuthResponseDTO;
-import ru.ac.checkpointmanager.dto.user.ConfirmationRegistrationDTO;
+import ru.ac.checkpointmanager.dto.user.RegistrationConfirmationDTO;
 import ru.ac.checkpointmanager.dto.user.PreAuthResponseDTO;
 import ru.ac.checkpointmanager.dto.user.LoginResponseDTO;
 import ru.ac.checkpointmanager.dto.user.RefreshTokenDTO;
@@ -84,14 +84,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @CachePut(value = "registration", key = "#result.verifiedToken")
     @Transactional
     @Override
-    public ConfirmationRegistrationDTO preRegister(RegistrationDTO registrationDTO) {
+    public RegistrationConfirmationDTO preRegister(RegistrationDTO registrationDTO) {
         log.debug(METHOD_WAS_INVOKED, MethodLog.getMethodName());
         boolean userExist = userRepository.findByEmail(registrationDTO.getEmail()).isPresent();
         if (userExist) {
             log.warn(ExceptionUtils.EMAIL_EXISTS.formatted(registrationDTO.getEmail()));
             throw new EmailAlreadyExistsException(ExceptionUtils.EMAIL_EXISTS.formatted(registrationDTO.getEmail()));
         }
-        ConfirmationRegistrationDTO confirmUser = userMapper.toConfirmRegistration(registrationDTO);
+        RegistrationConfirmationDTO confirmUser = userMapper.toConfirmRegistration(registrationDTO);
         String encodedPassword = passwordEncoder.encode(confirmUser.getPassword());
         confirmUser.setPassword(encodedPassword);
         String token = UUID.randomUUID().toString();
@@ -129,9 +129,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public void confirmRegistration(String token) {
         log.debug(METHOD_WAS_INVOKED, MethodLog.getMethodName());
-        Optional<ConfirmationRegistrationDTO> confirmUser = Optional.ofNullable(
+        Optional<RegistrationConfirmationDTO> confirmUser = Optional.ofNullable(
                         cacheManager.getCache("registration"))
-                .map(cache -> cache.get(token, ConfirmationRegistrationDTO.class));
+                .map(cache -> cache.get(token, RegistrationConfirmationDTO.class));
         if (confirmUser.isEmpty()) {
             log.warn(ExceptionUtils.INVALID_EMAIL_TOKEN_MSG.formatted(token));
             throw new EmailVerificationTokenException(ExceptionUtils.INVALID_EMAIL_TOKEN_MSG.formatted(token));

@@ -4,8 +4,8 @@ import ru.ac.checkpointmanager.dto.user.AuthResponseDTO;
 import ru.ac.checkpointmanager.dto.user.NewEmailDTO;
 import ru.ac.checkpointmanager.dto.user.NewPasswordDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
-import ru.ac.checkpointmanager.dto.user.ConfirmationEmailDTO;
-import ru.ac.checkpointmanager.dto.user.UserChangeDTO;
+import ru.ac.checkpointmanager.dto.user.EmailConfirmationDTO;
+import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.model.avatar.Avatar;
 import ru.ac.checkpointmanager.model.User;
@@ -27,11 +27,11 @@ public interface UserService {
 
     UserResponseDTO findByEmail(String email);
 
-    UserResponseDTO updateUser(UserChangeDTO userChangeDTO);
+    UserResponseDTO updateUser(UserUpdateDTO userUpdateDTO);
 
     void changePassword(NewPasswordDTO request);
 
-    ConfirmationEmailDTO changeEmail(NewEmailDTO request);
+    EmailConfirmationDTO changeEmail(NewEmailDTO request);
 
     AuthResponseDTO confirmEmail(String token);
 

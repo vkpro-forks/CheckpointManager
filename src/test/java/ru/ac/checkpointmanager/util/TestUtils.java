@@ -26,13 +26,13 @@ import ru.ac.checkpointmanager.dto.VisitorDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.dto.user.AuthRequestDTO;
-import ru.ac.checkpointmanager.dto.user.ConfirmationRegistrationDTO;
+import ru.ac.checkpointmanager.dto.user.RegistrationConfirmationDTO;
 import ru.ac.checkpointmanager.dto.user.NewEmailDTO;
 import ru.ac.checkpointmanager.dto.user.NewPasswordDTO;
-import ru.ac.checkpointmanager.dto.user.ConfirmationEmailDTO;
+import ru.ac.checkpointmanager.dto.user.EmailConfirmationDTO;
 import ru.ac.checkpointmanager.dto.user.RefreshTokenDTO;
 import ru.ac.checkpointmanager.dto.user.RegistrationDTO;
-import ru.ac.checkpointmanager.dto.user.UserChangeDTO;
+import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.exception.handler.ErrorCode;
 import ru.ac.checkpointmanager.model.Phone;
@@ -256,8 +256,8 @@ public class TestUtils {
                 .generate(Select.field("email"), gen -> gen.text().pattern("#a#a#a#a#a@example.com")).toModel();
     }
 
-    public static UserChangeDTO getUserChangeDTO() {
-        return new UserChangeDTO(
+    public static UserUpdateDTO getUserUpdateDTO() {
+        return new UserUpdateDTO(
                 USER_ID,
                 "Vasin Vasya Petya",
                 "+79167868345"
@@ -284,8 +284,8 @@ public class TestUtils {
         );
     }
 
-    public static ConfirmationEmailDTO getConfirmationEmailDTO() {
-        return new ConfirmationEmailDTO(
+    public static EmailConfirmationDTO getEmailConfirmationDTO() {
+        return new EmailConfirmationDTO(
                 EMAIL,
                 NEW_EMAIL,
                 EMAIL_STRING_TOKEN
@@ -296,8 +296,8 @@ public class TestUtils {
         return new NewEmailDTO(NEW_EMAIL);
     }
 
-    public static ConfirmationRegistrationDTO getConfirmationRegistrationDTO() {
-        return new ConfirmationRegistrationDTO(
+    public static RegistrationConfirmationDTO getRegistrationConfirmationDTO() {
+        return new RegistrationConfirmationDTO(
                 FULL_NAME,
                 EMAIL,
                 PASSWORD,

@@ -29,8 +29,8 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.user.NewEmailDTO;
 import ru.ac.checkpointmanager.dto.user.NewPasswordDTO;
-import ru.ac.checkpointmanager.dto.user.ConfirmationEmailDTO;
-import ru.ac.checkpointmanager.dto.user.UserChangeDTO;
+import ru.ac.checkpointmanager.dto.user.EmailConfirmationDTO;
+import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.service.user.UserService;
@@ -215,10 +215,10 @@ public class UserController {
                     description = "NOT_FOUND: пользователь не найден"
             )
     })
-    @PreAuthorize("@userFacade.isIdMatch(#userChangeDTO.id) or hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    @PreAuthorize("@userFacade.isIdMatch(#userUpdateDTO.id) or hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @PutMapping
-    public UserResponseDTO updateUser(@Valid @RequestBody UserChangeDTO userChangeDTO) {
-        return userService.updateUser(userChangeDTO);
+    public UserResponseDTO updateUser(@Valid @RequestBody UserUpdateDTO userUpdateDTO) {
+        return userService.updateUser(userUpdateDTO);
     }
 
     @Operation(summary = "Изменение пароля пользователя",
@@ -262,7 +262,7 @@ public class UserController {
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @PatchMapping("/email")
-    public ConfirmationEmailDTO changeEmail(@RequestBody @Valid NewEmailDTO request) {
+    public EmailConfirmationDTO changeEmail(@RequestBody @Valid NewEmailDTO request) {
         return userService.changeEmail(request);
     }
 

@@ -26,7 +26,7 @@ import ru.ac.checkpointmanager.config.RedisAndPostgresTestContainersConfiguratio
 import ru.ac.checkpointmanager.config.security.WithMockCustomUser;
 import ru.ac.checkpointmanager.dto.user.NewEmailDTO;
 import ru.ac.checkpointmanager.dto.user.NewPasswordDTO;
-import ru.ac.checkpointmanager.dto.user.UserChangeDTO;
+import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
 import ru.ac.checkpointmanager.model.Phone;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
@@ -321,19 +321,19 @@ class UserControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
     void updateUserIsOkWithRightUserId() {
         CustomAuthenticationToken authToken = TestUtils.getAuthToken(savedUser);
         UUID userId = savedUser.getId();
-        UserChangeDTO userChangeDTO = TestUtils.getUserChangeDTO();
-        userChangeDTO.setId(userId);
-        userChangeDTO.setMainNumber(FieldsValidation.cleanPhone(userChangeDTO.getMainNumber()));
-        String userPutDTOString = TestUtils.jsonStringFromObject(userChangeDTO);
+        UserUpdateDTO userUpdateDTO = TestUtils.getUserUpdateDTO();
+        userUpdateDTO.setId(userId);
+        userUpdateDTO.setMainNumber(FieldsValidation.cleanPhone(userUpdateDTO.getMainNumber()));
+        String userPutDTOString = TestUtils.jsonStringFromObject(userUpdateDTO);
 
         mockMvc.perform(MockMvcRequestBuilders.put(UrlConstants.USER_URL)
                         .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(userPutDTOString))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", Matchers.is(userChangeDTO.getId().toString())))
-                .andExpect(jsonPath("$.fullName", Matchers.is(userChangeDTO.getFullName())))
-                .andExpect(jsonPath("$.mainNumber", Matchers.is(userChangeDTO.getMainNumber())));
+                .andExpect(jsonPath("$.id", Matchers.is(userUpdateDTO.getId().toString())))
+                .andExpect(jsonPath("$.fullName", Matchers.is(userUpdateDTO.getFullName())))
+                .andExpect(jsonPath("$.mainNumber", Matchers.is(userUpdateDTO.getMainNumber())));
     }
 
     @Test
@@ -341,18 +341,18 @@ class UserControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
     @WithMockCustomUser
     void updateUserIsOkWithRoleAdmin() {
         UUID userId = savedUser.getId();
-        UserChangeDTO userChangeDTO = TestUtils.getUserChangeDTO();
-        userChangeDTO.setId(userId);
-        userChangeDTO.setMainNumber(FieldsValidation.cleanPhone(userChangeDTO.getMainNumber()));
-        String userPutDTOString = TestUtils.jsonStringFromObject(userChangeDTO);
+        UserUpdateDTO userUpdateDTO = TestUtils.getUserUpdateDTO();
+        userUpdateDTO.setId(userId);
+        userUpdateDTO.setMainNumber(FieldsValidation.cleanPhone(userUpdateDTO.getMainNumber()));
+        String userPutDTOString = TestUtils.jsonStringFromObject(userUpdateDTO);
 
         mockMvc.perform(MockMvcRequestBuilders.put(UrlConstants.USER_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(userPutDTOString))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", Matchers.is(userChangeDTO.getId().toString())))
-                .andExpect(jsonPath("$.fullName", Matchers.is(userChangeDTO.getFullName())))
-                .andExpect(jsonPath("$.mainNumber", Matchers.is(userChangeDTO.getMainNumber())));
+                .andExpect(jsonPath("$.id", Matchers.is(userUpdateDTO.getId().toString())))
+                .andExpect(jsonPath("$.fullName", Matchers.is(userUpdateDTO.getFullName())))
+                .andExpect(jsonPath("$.mainNumber", Matchers.is(userUpdateDTO.getMainNumber())));
     }
 
     @Test
@@ -360,9 +360,9 @@ class UserControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
     void updateUserIsForbiddenWithWrongUserId() {
         CustomAuthenticationToken authToken = TestUtils.getAuthToken(savedUser);
         UUID userId = UUID.randomUUID();
-        UserChangeDTO userChangeDTO = TestUtils.getUserChangeDTO();
-        userChangeDTO.setId(userId);
-        String userPutDTOString = TestUtils.jsonStringFromObject(userChangeDTO);
+        UserUpdateDTO userUpdateDTO = TestUtils.getUserUpdateDTO();
+        userUpdateDTO.setId(userId);
+        String userPutDTOString = TestUtils.jsonStringFromObject(userUpdateDTO);
 
         mockMvc.perform(MockMvcRequestBuilders.put(UrlConstants.USER_URL)
                         .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
@@ -376,11 +376,11 @@ class UserControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
     @WithMockCustomUser
     void updateUserIsBadRequest() {
         UUID userId = savedUser.getId();
-        UserChangeDTO userChangeDTO = TestUtils.getUserChangeDTO();
-        userChangeDTO.setId(userId);
-        userChangeDTO.setMainNumber("integration tests sucks");
-        userChangeDTO.setFullName("have u seen capital letter?");
-        String userPutDTOString = TestUtils.jsonStringFromObject(userChangeDTO);
+        UserUpdateDTO userUpdateDTO = TestUtils.getUserUpdateDTO();
+        userUpdateDTO.setId(userId);
+        userUpdateDTO.setMainNumber("integration tests sucks");
+        userUpdateDTO.setFullName("have u seen capital letter?");
+        String userPutDTOString = TestUtils.jsonStringFromObject(userUpdateDTO);
 
         mockMvc.perform(MockMvcRequestBuilders.put(UrlConstants.USER_URL)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -394,8 +394,8 @@ class UserControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
     @SneakyThrows
     @WithMockCustomUser
     void updateUserIsNotFound() {
-        UserChangeDTO userChangeDTO = TestUtils.getUserChangeDTO();
-        String userPutDTOString = TestUtils.jsonStringFromObject(userChangeDTO);
+        UserUpdateDTO userUpdateDTO = TestUtils.getUserUpdateDTO();
+        String userPutDTOString = TestUtils.jsonStringFromObject(userUpdateDTO);
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.put(UrlConstants.USER_URL)
                 .contentType(MediaType.APPLICATION_JSON)

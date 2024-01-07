@@ -18,8 +18,8 @@ import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.user.AuthResponseDTO;
 import ru.ac.checkpointmanager.dto.user.NewEmailDTO;
 import ru.ac.checkpointmanager.dto.user.NewPasswordDTO;
-import ru.ac.checkpointmanager.dto.user.ConfirmationEmailDTO;
-import ru.ac.checkpointmanager.dto.user.UserChangeDTO;
+import ru.ac.checkpointmanager.dto.user.EmailConfirmationDTO;
+import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.exception.EmailAlreadyExistsException;
 import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
@@ -197,18 +197,18 @@ public class UserServiceImpl implements UserService {
      * После обновления данных пользователя, эти изменения сохраняются в базе данных.
      * </p>
      *
-     * @param userChangeDTO DTO пользователя, содержащее обновленные данные. Должно включать идентификатор пользователя,
+     * @param userUpdateDTO DTO пользователя, содержащее обновленные данные. Должно включать идентификатор пользователя,
      *                   а также может включать новое полное имя и основной номер телефона.
      * @return UserResponseDTO, содержащий обновленные данные пользователя.
      * @throws UserNotFoundException если пользователь с предоставленным идентификатором не найден.
-     * @see UserChangeDTO
+     * @see UserUpdateDTO
      * @see UserResponseDTO
      */
-    @CacheEvict(value = "user", key = "#userChangeDTO.id")
+    @CacheEvict(value = "user", key = "#userUpdateDTO.id")
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public UserResponseDTO updateUser(UserChangeDTO userChangeDTO) {
-        UUID updateUserId = userChangeDTO.getId();
+    public UserResponseDTO updateUser(UserUpdateDTO userUpdateDTO) {
+        UUID updateUserId = userUpdateDTO.getId();
         log.debug("Updating user with [UUID - {}]", updateUserId);
         User foundUser = userRepository.findById(updateUserId)
                 .orElseThrow(() -> {
@@ -216,9 +216,9 @@ public class UserServiceImpl implements UserService {
                     return new UserNotFoundException(USER_NOT_FOUND_MSG.formatted(updateUserId));
                 });
 
-        foundUser.setFullName(userChangeDTO.getFullName());
+        foundUser.setFullName(userUpdateDTO.getFullName());
 
-        Optional.ofNullable(userChangeDTO.getMainNumber())
+        Optional.ofNullable(userUpdateDTO.getMainNumber())
                 .filter(mainNumber -> !mainNumber.isEmpty())
                 .map(FieldsValidation::cleanPhone)
                 .ifPresent(newMainNumber -> {
@@ -305,7 +305,7 @@ public class UserServiceImpl implements UserService {
     @CachePut(value = "email", key = "#result.verifiedToken")
     @Override
     @Transactional
-    public ConfirmationEmailDTO changeEmail(NewEmailDTO request) {
+    public EmailConfirmationDTO changeEmail(NewEmailDTO request) {
         User user = authFacade.getCurrentUser();
         log.debug("[Method {}], [Username - {}]", MethodLog.getMethodName(), user.getUsername());
 
@@ -314,7 +314,7 @@ public class UserServiceImpl implements UserService {
             throw new EmailAlreadyExistsException(ExceptionUtils.EMAIL_EXISTS.formatted(request.getNewEmail()));
         }
 
-        ConfirmationEmailDTO confirmEmail = userMapper.toConfirmChangeEmail(request);
+        EmailConfirmationDTO confirmEmail = userMapper.toConfirmChangeEmail(request);
         confirmEmail.setPreviousEmail(user.getEmail());
 
         String token = UUID.randomUUID().toString();
@@ -353,9 +353,9 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public AuthResponseDTO confirmEmail(String token) {
         log.debug("[Method {}], [Temporary token {}]", MethodLog.getMethodName(), token);
-        Optional<ConfirmationEmailDTO> confirmEmail = Optional.ofNullable(
+        Optional<EmailConfirmationDTO> confirmEmail = Optional.ofNullable(
                         cacheManager.getCache("email"))
-                .map(cache -> cache.get(token, ConfirmationEmailDTO.class));
+                .map(cache -> cache.get(token, EmailConfirmationDTO.class));
         if (confirmEmail.isPresent()) {
             String previousEmail = confirmEmail.get().getPreviousEmail();
             String newEmail = confirmEmail.get().getNewEmail();

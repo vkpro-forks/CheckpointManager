@@ -4,9 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ru.ac.checkpointmanager.dto.user.ConfirmationRegistrationDTO;
+import ru.ac.checkpointmanager.dto.user.RegistrationConfirmationDTO;
 import ru.ac.checkpointmanager.dto.user.NewEmailDTO;
-import ru.ac.checkpointmanager.dto.user.ConfirmationEmailDTO;
+import ru.ac.checkpointmanager.dto.user.EmailConfirmationDTO;
 import ru.ac.checkpointmanager.dto.user.LoginResponseDTO;
 import ru.ac.checkpointmanager.dto.user.RegistrationDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
@@ -41,16 +41,16 @@ public class UserMapper {
         return modelMapper.map(user, LoginResponseDTO.class);
     }
 
-    public ConfirmationRegistrationDTO toConfirmRegistration(RegistrationDTO registrationDTO) {
+    public RegistrationConfirmationDTO toConfirmRegistration(RegistrationDTO registrationDTO) {
         log.debug("{} was converted to object of ConfirmRegistration.class", registrationDTO.getEmail());
-        return modelMapper.map(registrationDTO, ConfirmationRegistrationDTO.class);
+        return modelMapper.map(registrationDTO, RegistrationConfirmationDTO.class);
     }
 
-    public ConfirmationEmailDTO toConfirmChangeEmail(NewEmailDTO request) {
-        return modelMapper.map(request, ConfirmationEmailDTO.class);
+    public EmailConfirmationDTO toConfirmChangeEmail(NewEmailDTO request) {
+        return modelMapper.map(request, EmailConfirmationDTO.class);
     }
 
-    public User toUser(Optional<ConfirmationRegistrationDTO> confirmRegistration) {
+    public User toUser(Optional<RegistrationConfirmationDTO> confirmRegistration) {
         return modelMapper.map(confirmRegistration, User.class);
     }
 }

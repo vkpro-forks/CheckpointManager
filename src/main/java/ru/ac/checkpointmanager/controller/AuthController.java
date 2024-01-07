@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.dto.user.AuthRequestDTO;
 import ru.ac.checkpointmanager.dto.user.AuthResponseDTO;
-import ru.ac.checkpointmanager.dto.user.ConfirmationRegistrationDTO;
+import ru.ac.checkpointmanager.dto.user.RegistrationConfirmationDTO;
 import ru.ac.checkpointmanager.dto.user.PreAuthResponseDTO;
 import ru.ac.checkpointmanager.dto.user.LoginResponseDTO;
 import ru.ac.checkpointmanager.dto.user.RefreshTokenDTO;
@@ -80,7 +80,7 @@ public class AuthController {
     })
     @PostMapping("/registration")
     @ResponseStatus(HttpStatus.CREATED)
-    public ConfirmationRegistrationDTO register(@RequestBody @Valid RegistrationDTO user) {
+    public RegistrationConfirmationDTO register(@RequestBody @Valid RegistrationDTO user) {
         return authenticationService.preRegister(user);
     }
 

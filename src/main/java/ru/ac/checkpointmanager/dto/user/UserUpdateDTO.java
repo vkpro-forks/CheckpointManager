@@ -12,7 +12,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserChangeDTO {
+public class UserUpdateDTO {
 
     @NotNull
     private UUID id;
