@@ -16,10 +16,10 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
-import ru.ac.checkpointmanager.dto.user.ChangeEmailRequest;
-import ru.ac.checkpointmanager.dto.user.ChangePasswordRequest;
-import ru.ac.checkpointmanager.dto.user.ConfirmChangeEmail;
-import ru.ac.checkpointmanager.dto.user.UserPutDTO;
+import ru.ac.checkpointmanager.dto.user.NewEmailDTO;
+import ru.ac.checkpointmanager.dto.user.NewPasswordDTO;
+import ru.ac.checkpointmanager.dto.user.EmailConfirmationDTO;
+import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.exception.EmailAlreadyExistsException;
 import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
@@ -199,14 +199,14 @@ class UserServiceImplTest {
         UUID userId = user.getId();
         UserResponseDTO userResponseDTO = TestUtils.getUserResponseDTO();
         userResponseDTO.setId(userId);
-        UserPutDTO userPutDTO = TestUtils.getUserPutDTO();
-        userPutDTO.setId(userId);
+        UserUpdateDTO userUpdateDTO = TestUtils.getUserUpdateDTO();
+        userUpdateDTO.setId(userId);
 
         Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         Mockito.when(userMapper.toUserResponseDTO(user)).thenReturn(userResponseDTO);
         when(phoneService.createPhoneNumber(any(PhoneDTO.class))).thenReturn(any(PhoneDTO.class));
 
-        UserResponseDTO result = userService.updateUser(userPutDTO);
+        UserResponseDTO result = userService.updateUser(userUpdateDTO);
 
         Assertions.assertThat(result).isNotNull().isEqualTo(userResponseDTO);
         Mockito.verify(userRepository).save(user);
@@ -215,12 +215,12 @@ class UserServiceImplTest {
 
     @Test
     void updateUserShouldThrowsUserNotFoundException() {
-        UserPutDTO userPutDTO = TestUtils.getUserPutDTO();
+        UserUpdateDTO userUpdateDTO = TestUtils.getUserUpdateDTO();
         UUID userId = TestUtils.USER_ID;
 
         Mockito.when(userRepository.findById(userId)).thenReturn(Optional.empty());
         Assertions.assertThatThrownBy(
-                        () -> userService.updateUser(userPutDTO))
+                        () -> userService.updateUser(userUpdateDTO))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessageContaining("not found");
         Mockito.verify(userRepository).findById(userId);
@@ -228,7 +228,7 @@ class UserServiceImplTest {
 
     @Test
     void shouldChangePassword() {
-        ChangePasswordRequest request = TestUtils.getChangePasswordRequest();
+        NewPasswordDTO request = TestUtils.getNewPasswordDTO();
         String newPassword = request.getNewPassword();
         User user = TestUtils.getUser();
         user.setPassword(TestUtils.PASSWORD);
@@ -245,7 +245,7 @@ class UserServiceImplTest {
 
     @Test
     void shouldThrowExceptionIfPassedPasswordDoesntMatchCurrent() {
-        ChangePasswordRequest request = TestUtils.getChangePasswordRequest();
+        NewPasswordDTO request = TestUtils.getNewPasswordDTO();
 
         Mockito.when(authenticationFacade.getCurrentUser()).thenReturn(TestUtils.getUser());
         Mockito.when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
@@ -258,7 +258,7 @@ class UserServiceImplTest {
 
     @Test
     void changePasswordWhenConfirmationDoNotMatchThrowsException() {
-        ChangePasswordRequest request = TestUtils.getChangePasswordRequest();
+        NewPasswordDTO request = TestUtils.getNewPasswordDTO();
         request.setConfirmationPassword("1");
 
         Mockito.when(authenticationFacade.getCurrentUser()).thenReturn(TestUtils.getUser());
@@ -270,8 +270,8 @@ class UserServiceImplTest {
 
     @Test
     void successfulChangeEmailRequest() {
-        ChangeEmailRequest request = TestUtils.getChangeEmailRequest();
-        ConfirmChangeEmail confirm = TestUtils.getConfirmChangeEmail();
+        NewEmailDTO request = TestUtils.getNewEmailDTO();
+        EmailConfirmationDTO confirm = TestUtils.getEmailConfirmationDTO();
         User user = TestUtils.getUser();
 
         Mockito.when(authenticationFacade.getCurrentUser()).thenReturn(user);
@@ -287,7 +287,7 @@ class UserServiceImplTest {
 
     @Test
     void changeEmailShouldThrowExceptionWhenEmailTaken() {
-        ChangeEmailRequest request = TestUtils.getChangeEmailRequest();
+        NewEmailDTO request = TestUtils.getNewEmailDTO();
         User user = TestUtils.getUser();
 
         Mockito.when(authenticationFacade.getCurrentUser()).thenReturn(user);
@@ -303,10 +303,10 @@ class UserServiceImplTest {
     @Test
     void changeEmailThrowsMailSendException() {
         User user = TestUtils.getUser();
-        ChangeEmailRequest request = TestUtils.getChangeEmailRequest();
+        NewEmailDTO request = TestUtils.getNewEmailDTO();
 
         Mockito.when(authenticationFacade.getCurrentUser()).thenReturn(user);
-        Mockito.when(userMapper.toConfirmChangeEmail(request)).thenReturn(TestUtils.getConfirmChangeEmail());
+        Mockito.when(userMapper.toConfirmChangeEmail(request)).thenReturn(TestUtils.getEmailConfirmationDTO());
         Mockito.doThrow(new MailSendException("failed")).when(emailService).sendEmailConfirm(anyString(), anyString());
 
         Assertions.assertThatExceptionOfType(MailSendException.class)
@@ -317,12 +317,12 @@ class UserServiceImplTest {
     @Test
     void confirmEmailSuccessfulConfirmationUpdatesUserEmail() {
         User user = TestUtils.getUser();
-        ConfirmChangeEmail changeEmail = TestUtils.getConfirmChangeEmail();
+        EmailConfirmationDTO changeEmail = TestUtils.getEmailConfirmationDTO();
         String token = TestUtils.EMAIL_STRING_TOKEN;
 
         Mockito.when(cacheManager.getCache("email")).thenReturn(cache);
         Mockito.when(cacheManager.getCache("user")).thenReturn(cache);
-        Mockito.when(cache.get(Mockito.eq(token), Mockito.eq(ConfirmChangeEmail.class))).thenReturn(changeEmail);
+        Mockito.when(cache.get(Mockito.eq(token), Mockito.eq(EmailConfirmationDTO.class))).thenReturn(changeEmail);
         Mockito.when(userRepository.findByEmail(changeEmail.getPreviousEmail())).thenReturn(Optional.of(user));
         Mockito.when(jwtService.generateAccessToken(user)).thenReturn("mockAccessToken");
         Mockito.when(jwtService.generateRefreshToken(user)).thenReturn("mockRefreshToken");
@@ -348,10 +348,10 @@ class UserServiceImplTest {
     @Test
     void confirmEmailUserNotFoundThrowsUserNotFoundException() {
         String token = "validToken";
-        ConfirmChangeEmail changeEmail = TestUtils.getConfirmChangeEmail();
+        EmailConfirmationDTO changeEmail = TestUtils.getEmailConfirmationDTO();
 
         Mockito.when(cacheManager.getCache("email")).thenReturn(cache);
-        Mockito.when(cache.get(Mockito.eq(token), Mockito.eq(ConfirmChangeEmail.class))).thenReturn(changeEmail);
+        Mockito.when(cache.get(Mockito.eq(token), Mockito.eq(EmailConfirmationDTO.class))).thenReturn(changeEmail);
         when(userRepository.findByEmail(changeEmail.getPreviousEmail())).thenReturn(Optional.empty());
 
         Assertions.assertThatThrownBy(

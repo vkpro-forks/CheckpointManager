@@ -9,7 +9,7 @@ import java.util.UUID;
 
 @Data
 @NoArgsConstructor
-public class LoginResponse {
+public class LoginResponseDTO {
 
     private UUID id;
 

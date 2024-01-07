@@ -1,6 +1,5 @@
 package ru.ac.checkpointmanager.dto.user;
 
-import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,8 +7,10 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChangeEmailRequest {
+public class RegistrationConfirmationDTO {
 
-    @Email
-    private String newEmail;
+    private String fullName;
+    private String email;
+    private String password;
+    private String verifiedToken;
 }

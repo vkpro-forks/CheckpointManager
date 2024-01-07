@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ConfirmChangeEmail {
+public class EmailConfirmationDTO {
 
     private String previousEmail;
     private String newEmail;
