@@ -190,39 +190,39 @@ public class TestUtils {
 
     public static PassUpdateDTO getPassUpdateDTO() {
         return new PassUpdateDTO(
-                PASS_ID,
                 "comment",
                 PassTimeType.ONETIME,
                 LocalDateTime.now().plusHours(1),
                 LocalDateTime.now().plusHours(7),
                 null,
-                getCarDto()
+                getCarDto(),
+                PASS_ID
         );
     }
 
     public static PassCreateDTO getPassCreateDTOWithCar() {
         return new PassCreateDTO(
-                USER_ID,
                 "comment",
                 PassTimeType.ONETIME,
-                TERR_ID,
                 LocalDateTime.now().plusHours(1),
                 LocalDateTime.now().plusHours(7),
                 null,
-                getCarDto()
+                getCarDto(),
+                USER_ID,
+                TERR_ID
         );
     }
 
     public static PassCreateDTO getPassCreateDTOWithVisitor() {
         return new PassCreateDTO(
-                USER_ID,
                 "comment",
                 PassTimeType.ONETIME,
-                TERR_ID,
                 LocalDateTime.now().plusHours(1),
                 LocalDateTime.now().plusHours(7),
                 getVisitorDTO(),
-                null
+                null,
+                USER_ID,
+                TERR_ID
         );
     }
 

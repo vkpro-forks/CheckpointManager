@@ -1,48 +1,33 @@
 package ru.ac.checkpointmanager.dto.passes;
 
-import jakarta.validation.GroupSequence;
-import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.VisitorDTO;
 import ru.ac.checkpointmanager.model.passes.PassTimeType;
-import ru.ac.checkpointmanager.validation.annotation.CarOrVisitorFieldsCheck;
-import ru.ac.checkpointmanager.validation.group.CustomCheck;
-import ru.ac.checkpointmanager.validation.annotation.PassTimeCheck;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
-@AllArgsConstructor
-@CarOrVisitorFieldsCheck(groups = CustomCheck.class)
-@PassTimeCheck(groups = CustomCheck.class)
-@GroupSequence({PassCreateDTO.class, CustomCheck.class}) // custom checks will be performed after default
-public class PassCreateDTO {
+@EqualsAndHashCode(callSuper = true)
+@NoArgsConstructor
+public class PassCreateDTO extends PassBaseDTO {
 
     @NotNull
     private UUID userId;
 
-    @Size(max = 30)
-    private String comment;
-
-    @NotNull
-    private PassTimeType timeType;
-
     @NotNull
     private UUID territoryId;
 
-    @NotNull
-    private LocalDateTime startTime;
+    public PassCreateDTO(String comment, PassTimeType timeType, LocalDateTime startTime,
+                         LocalDateTime endTime, VisitorDTO visitor, CarDTO car,
+                         UUID userId, UUID territoryId) {
+        super(comment, timeType, startTime, endTime, visitor, car);
+        this.userId = userId;
+        this.territoryId = territoryId;
+    }
 
-    @NotNull
-    @Future
-    private LocalDateTime endTime;
-
-    private VisitorDTO visitor;
-
-    private CarDTO car;
 }
