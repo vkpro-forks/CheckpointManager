@@ -49,7 +49,7 @@ class UserControllerRolesIntegrationTest extends RedisAndPostgresTestContainersC
     @Autowired
     TerritoryRepository territoryRepository;
 
-    @Qualifier("userFacade")
+    @Qualifier("userAuthFacade")
     @MockBean
     AuthFacade authFacade;
 
