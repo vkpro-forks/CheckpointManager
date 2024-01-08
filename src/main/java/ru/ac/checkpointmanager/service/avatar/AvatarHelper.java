@@ -13,6 +13,8 @@ interface AvatarHelper {
 
     Avatar getOrCreateAvatar(UUID userId);
 
+    Avatar getOrCreateAvatarByTerritory(UUID territoryId);
+
     void configureAvatar(Avatar avatar, MultipartFile avatarFile);
 
     void processAndSetAvatarImage(Avatar avatar, MultipartFile avatarFile);
@@ -24,4 +26,6 @@ interface AvatarHelper {
     void updateUserAvatar(UUID userId, Avatar avatar);
 
     AvatarImageDTO createAvatarImageDTO(Avatar avatar);
+
+    void updateTerritoryAvatar(UUID territoryId, Avatar avatar);
 }

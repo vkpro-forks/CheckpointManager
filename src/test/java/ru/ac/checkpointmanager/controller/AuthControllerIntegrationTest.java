@@ -16,7 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.ac.checkpointmanager.config.RedisAndPostgresTestContainersConfiguration;
-import ru.ac.checkpointmanager.dto.user.UserAuthDTO;
+import ru.ac.checkpointmanager.dto.user.RegistrationDTO;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.util.TestMessage;
@@ -46,11 +46,10 @@ public class AuthControllerIntegrationTest extends RedisAndPostgresTestContainer
     void register_ifEmailAlreadyExists_handleErrorAndReturn409() {
         User user = TestUtils.getUser();
         user.setEmail(TestUtils.EMAIL);
-        User savedUser = userRepository.save(user);
+        userRepository.save(user);
         log.info("Saving user to repo");
-        UserAuthDTO userAuthDTO = TestUtils.getUserAuthDTO();
-        userAuthDTO.setId(savedUser.getId());
-        String userAuthDtoString = TestUtils.jsonStringFromObject(userAuthDTO);
+        RegistrationDTO registrationDTO = TestUtils.getRegistrationDTO();
+        String userAuthDtoString = TestUtils.jsonStringFromObject(registrationDTO);
         log.info(TestMessage.PERFORM_HTTP, HttpMethod.POST, UrlConstants.AUTH_REG_URL);
         mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.AUTH_REG_URL)
                         .contentType(MediaType.APPLICATION_JSON)

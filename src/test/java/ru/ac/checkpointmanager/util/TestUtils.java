@@ -25,19 +25,20 @@ import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.VisitorDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
-import ru.ac.checkpointmanager.dto.user.AuthenticationRequest;
-import ru.ac.checkpointmanager.dto.user.ChangeEmailRequest;
-import ru.ac.checkpointmanager.dto.user.ChangePasswordRequest;
-import ru.ac.checkpointmanager.dto.user.ConfirmChangeEmail;
-import ru.ac.checkpointmanager.dto.user.ConfirmRegistration;
+import ru.ac.checkpointmanager.dto.user.AuthRequestDTO;
+import ru.ac.checkpointmanager.dto.user.RegistrationConfirmationDTO;
+import ru.ac.checkpointmanager.dto.user.NewEmailDTO;
+import ru.ac.checkpointmanager.dto.user.NewPasswordDTO;
+import ru.ac.checkpointmanager.dto.user.EmailConfirmationDTO;
 import ru.ac.checkpointmanager.dto.user.RefreshTokenDTO;
-import ru.ac.checkpointmanager.dto.user.UserAuthDTO;
-import ru.ac.checkpointmanager.dto.user.UserPutDTO;
+import ru.ac.checkpointmanager.dto.user.RegistrationDTO;
+import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.exception.handler.ErrorCode;
 import ru.ac.checkpointmanager.model.Phone;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
+import ru.ac.checkpointmanager.model.avatar.Avatar;
 import ru.ac.checkpointmanager.model.car.Car;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
@@ -79,6 +80,12 @@ public class TestUtils {
     public static final String CHECKPOINT_NAME = "ch_name";
 
     public static final UUID TERR_ID = UUID.randomUUID();
+
+    public static final UUID AVATAR_ID = UUID.randomUUID();
+
+    public static final String DEFAULT_MEDIA_TYPE = "image/jpeg";
+
+    public static final String DEFAULT_FILE_PATH = "/path/to/image.jpg";
 
     public static final String TERR_NAME = "Territory";
 
@@ -145,6 +152,7 @@ public class TestUtils {
                 .ignore(Select.field(Territory::getCheckpoints))
                 .set(Select.field(Territory::getName), TERR_NAME)
                 .set(Select.field(Territory::getId), TERR_ID)
+                .ignore(Select.field(Territory::getAvatar))
                 .create();
     }
 
@@ -256,8 +264,8 @@ public class TestUtils {
                 .generate(Select.field("email"), gen -> gen.text().pattern("#a#a#a#a#a@example.com")).toModel();
     }
 
-    public static UserPutDTO getUserPutDTO() {
-        return new UserPutDTO(
+    public static UserUpdateDTO getUserUpdateDTO() {
+        return new UserUpdateDTO(
                 USER_ID,
                 "Vasin Vasya Petya",
                 "+79167868345"
@@ -276,28 +284,28 @@ public class TestUtils {
         );
     }
 
-    public static ChangePasswordRequest getChangePasswordRequest() {
-        return new ChangePasswordRequest(
+    public static NewPasswordDTO getNewPasswordDTO() {
+        return new NewPasswordDTO(
                 PASSWORD,
                 NEW_PASSWORD,
                 NEW_PASSWORD
         );
     }
 
-    public static ConfirmChangeEmail getConfirmChangeEmail() {
-        return new ConfirmChangeEmail(
+    public static EmailConfirmationDTO getEmailConfirmationDTO() {
+        return new EmailConfirmationDTO(
                 EMAIL,
                 NEW_EMAIL,
                 EMAIL_STRING_TOKEN
         );
     }
 
-    public static ChangeEmailRequest getChangeEmailRequest() {
-        return new ChangeEmailRequest(NEW_EMAIL);
+    public static NewEmailDTO getNewEmailDTO() {
+        return new NewEmailDTO(NEW_EMAIL);
     }
 
-    public static ConfirmRegistration getConfirmRegistration() {
-        return new ConfirmRegistration(
+    public static RegistrationConfirmationDTO getRegistrationConfirmationDTO() {
+        return new RegistrationConfirmationDTO(
                 FULL_NAME,
                 EMAIL,
                 PASSWORD,
@@ -305,8 +313,8 @@ public class TestUtils {
         );
     }
 
-    public static AuthenticationRequest getAuthenticationRequest() {
-        return new AuthenticationRequest(EMAIL, PASSWORD);
+    public static AuthRequestDTO getAuthRequestDTO() {
+        return new AuthRequestDTO(EMAIL, PASSWORD);
     }
 
     public static RefreshTokenDTO getRefreshTokenDTO() {
@@ -415,12 +423,21 @@ public class TestUtils {
     private TestUtils() {
     }
 
-    public static UserAuthDTO getUserAuthDTO() {
-        return new UserAuthDTO(
-                TestUtils.USER_ID,
+    public static RegistrationDTO getRegistrationDTO() {
+        return new RegistrationDTO(
                 TestUtils.FULL_NAME,
                 TestUtils.EMAIL,
                 TestUtils.PASSWORD
         );
     }
+
+    public static Avatar createTestAvatar() {
+        Avatar avatar = new Avatar();
+        avatar.setMediaType(DEFAULT_MEDIA_TYPE);
+        avatar.setFilePath(DEFAULT_FILE_PATH);
+        avatar.setFileSize(1024L);
+        avatar.setPreview(new byte[10]);
+        return avatar;
+    }
+
 }

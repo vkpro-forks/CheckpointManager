@@ -1,11 +1,11 @@
 package ru.ac.checkpointmanager.service.user;
 
-import ru.ac.checkpointmanager.dto.user.AuthenticationResponse;
-import ru.ac.checkpointmanager.dto.user.ChangeEmailRequest;
-import ru.ac.checkpointmanager.dto.user.ChangePasswordRequest;
+import ru.ac.checkpointmanager.dto.user.AuthResponseDTO;
+import ru.ac.checkpointmanager.dto.user.NewEmailDTO;
+import ru.ac.checkpointmanager.dto.user.NewPasswordDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
-import ru.ac.checkpointmanager.dto.user.ConfirmChangeEmail;
-import ru.ac.checkpointmanager.dto.user.UserPutDTO;
+import ru.ac.checkpointmanager.dto.user.EmailConfirmationDTO;
+import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.model.avatar.Avatar;
 import ru.ac.checkpointmanager.model.User;
@@ -27,13 +27,13 @@ public interface UserService {
 
     UserResponseDTO findByEmail(String email);
 
-    UserResponseDTO updateUser(UserPutDTO userPutDTO);
+    UserResponseDTO updateUser(UserUpdateDTO userUpdateDTO);
 
-    void changePassword(ChangePasswordRequest request);
+    void changePassword(NewPasswordDTO request);
 
-    ConfirmChangeEmail changeEmail(ChangeEmailRequest request);
+    EmailConfirmationDTO changeEmail(NewEmailDTO request);
 
-    AuthenticationResponse confirmEmail(String token);
+    AuthResponseDTO confirmEmail(String token);
 
     void changeRole(UUID id, Role role);
 

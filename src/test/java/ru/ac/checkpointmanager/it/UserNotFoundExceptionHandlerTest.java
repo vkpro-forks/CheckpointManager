@@ -14,8 +14,8 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.ac.checkpointmanager.config.security.WithMockCustomUser;
-import ru.ac.checkpointmanager.dto.user.ConfirmChangeEmail;
-import ru.ac.checkpointmanager.dto.user.UserPutDTO;
+import ru.ac.checkpointmanager.dto.user.EmailConfirmationDTO;
+import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
@@ -70,6 +70,7 @@ class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestCo
 
     @Test
     @SneakyThrows
+    @WithMockCustomUser
     void shouldHandleUserNotFoundExceptionForUploadAvatar() {
         MockMultipartFile file
                 = new MockMultipartFile("avatarFile", "avatar.png", MediaType.IMAGE_PNG_VALUE, new byte[]{1, 2, 3});
@@ -134,7 +135,7 @@ class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestCo
     @SneakyThrows
     void shouldHandleUserNotFoundExceptionForConfirmEmail() {
         Cache emailCache = cacheManager.getCache("email");
-        ConfirmChangeEmail changeEmail = TestUtils.getConfirmChangeEmail();
+        EmailConfirmationDTO changeEmail = TestUtils.getEmailConfirmationDTO();
         assert emailCache != null;
         emailCache.put(changeEmail.getVerifiedToken(), changeEmail);
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
@@ -160,9 +161,9 @@ class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestCo
     @SneakyThrows
     @WithMockCustomUser(id = "bf03cd3b-8b20-4cac-8be9-e1cdf825c165")
     void shouldHandleUserNotFoundExceptionForUpdateUser() {
-        UserPutDTO userPutDto = TestUtils.getUserPutDTO();
-        userPutDto.setId(UUID.fromString("bf03cd3b-8b20-4cac-8be9-e1cdf825c165"));
-        String userPutDtoStr = TestUtils.jsonStringFromObject(userPutDto);
+        UserUpdateDTO userUpdateDto = TestUtils.getUserUpdateDTO();
+        userUpdateDto.setId(UUID.fromString("bf03cd3b-8b20-4cac-8be9-e1cdf825c165"));
+        String userPutDtoStr = TestUtils.jsonStringFromObject(userUpdateDto);
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                         .put(UrlConstants.USER_URL)
                         .contentType(MediaType.APPLICATION_JSON)

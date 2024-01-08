@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class IsAuthenticatedResponse {
+public class PreAuthResponseDTO {
 
     @NotNull
     private Boolean isAuthenticated;

@@ -7,11 +7,14 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.ac.checkpointmanager.dto.avatar.AvatarImageDTO;
 import ru.ac.checkpointmanager.exception.AvatarLoadingException;
 import ru.ac.checkpointmanager.exception.AvatarProcessingException;
+import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
+import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.avatar.Avatar;
 import ru.ac.checkpointmanager.model.avatar.AvatarProperties;
 import ru.ac.checkpointmanager.repository.AvatarRepository;
+import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 
 import javax.imageio.ImageIO;
@@ -29,6 +32,7 @@ class AvatarHelperImpl implements AvatarHelper {
     private final AvatarRepository repository;
     private final AvatarProperties avatarProperties;
     private final UserRepository userRepository;
+    private final TerritoryRepository territoryRepository;
 
     /**
      * Изменяет размер переданного изображения с сохранением пропорций.
@@ -71,6 +75,11 @@ class AvatarHelperImpl implements AvatarHelper {
     @Override
     public Avatar getOrCreateAvatar(UUID userId) {
         return repository.findByUserId(userId).orElse(new Avatar());
+    }
+
+    @Override
+    public Avatar getOrCreateAvatarByTerritory(UUID territoryId) {
+        return repository.findByTerritoryId(territoryId).orElse(new Avatar());
     }
 
     /**
@@ -195,5 +204,24 @@ class AvatarHelperImpl implements AvatarHelper {
                 null,
                 avatar.getFileSize()
         );
+    }
+
+    /**
+     * Обновляет аватар для заданной территории. Если территория не найдена, выбрасывает исключение.
+     *
+     * @param territoryId Идентификатор территорий, для которой нужно обновить аватар.
+     * @param avatar Объект Avatar, который будет установлен как аватар пользователя.
+     * @throws TerritoryNotFoundException если пользователь с данным идентификатором не найден.
+     */
+    @Override
+    public void updateTerritoryAvatar(UUID territoryId, Avatar avatar) {
+        log.debug("Attempting to update avatar for user ID: {}", territoryId);
+        Territory territory = territoryRepository.findById(territoryId)
+                .orElseThrow(() -> {
+                    return new TerritoryNotFoundException("This check should be not here");//FIXME это должно перед обработкой картинки
+                });
+        territory.setAvatar(avatar);
+        territoryRepository.save(territory);
+        log.info("Avatar updated successfully for user ID: {}", territoryId);
     }
 }

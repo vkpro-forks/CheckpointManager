@@ -15,13 +15,14 @@ public interface AvatarService {
 
     AvatarDTO uploadAvatar(UUID userId, MultipartFile avatarFile);
 
-    AvatarImageDTO getAvatarByUserId(UUID userId);
+    AvatarDTO uploadAvatarByTerritory(UUID territoryId, MultipartFile avatarFile);
 
+    AvatarImageDTO getAvatarByUserId(UUID userId);
 
     void deleteAvatarIfExists(UUID avatarId);
 
     AvatarImageDTO getAvatarImageByAvatarId(UUID avatarId);
 
-    Avatar findAvatarById(UUID userId);
+    Avatar findAvatarById(UUID avatarId);
 
 }
