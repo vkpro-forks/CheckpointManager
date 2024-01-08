@@ -92,6 +92,7 @@ class UserControllerRolesIntegrationTest extends RedisAndPostgresTestContainersC
                 .andExpect(jsonPath("$[*].name", Matchers.hasItem(territory.getName())))
                 .andExpect(jsonPath("$[*].id", Matchers.hasItem(territory.getId().toString())));
 
-        Mockito.verify(authFacade, Mockito.never()).isIdMatch(UUID.randomUUID());
+        Mockito.verify(authFacade, Mockito.never()).isIdMatch(Mockito.any());
+        Mockito.verifyNoInteractions(authFacade);
     }
 }
