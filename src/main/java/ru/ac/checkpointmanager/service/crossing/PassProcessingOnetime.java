@@ -34,12 +34,12 @@ public class PassProcessingOnetime implements PassProcessing {
         if (currentDirection == Direction.OUT) {
             pass.setStatus(PassStatus.COMPLETED);
             log.info(PASS_STATUS_CHANGED_LOG, pass.getId(), pass.getStatus());
-            //такое уже есть, если честно лучше так чем тащить за собой 100500 потенциальных пересечений
+            //такое уже есть, если честно лучше так чем тащить за собой 100500 потенциальных пересечений #FIXME
         } else if (!crossingRepository.findCrossingsByPassId(pass.getId()).isEmpty()) {
             log.warn(ExceptionUtils.PASS_ALREADY_USED.formatted(pass.getId()));
             throw new PassAlreadyUsedException(ExceptionUtils.PASS_ALREADY_USED.formatted(pass.getId()));
         } else {
-            //а если был IN по пассу, то ничего не делается? давай хотя бы залогируем
+            //а если был IN по пассу, то ничего не делается? давай хотя бы залогируем #FIXME
             log.debug("Pass was processed for IN Direction");
         }
     }

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class MemoryAppender extends ListAppender<ILoggingEvent> {
+
     public void reset() {
         this.list.clear();
     }
@@ -45,4 +46,5 @@ public class MemoryAppender extends ListAppender<ILoggingEvent> {
     public List<ILoggingEvent> getLoggedEvents() {
         return Collections.unmodifiableList(this.list);
     }
+
 }

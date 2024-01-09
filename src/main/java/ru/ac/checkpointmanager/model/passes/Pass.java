@@ -57,7 +57,7 @@ public abstract class Pass {
     @ManyToOne
     @JoinColumn(name = "territory_id")
     private Territory territory;
-
+    //#FIXME удалить crossing is зависимостей пасса если есть
     @CreationTimestamp(source = SourceType.VM)
     private LocalDateTime addedAt;
 

@@ -369,6 +369,20 @@ public class TestUtils {
         return passAuto;
     }
 
+    public static PassAuto getSimpleActivePermanentAutoFor3Hours(User user, Territory territory, Car car) {
+        PassAuto passAuto = new PassAuto();
+        passAuto.setStartTime(LocalDateTime.now());
+        passAuto.setEndTime(LocalDateTime.now().plusHours(3));
+        passAuto.setId(UUID.randomUUID());
+        passAuto.setTimeType(PassTimeType.PERMANENT);
+        passAuto.setDtype("AUTO");
+        passAuto.setStatus(PassStatus.ACTIVE);
+        passAuto.setCar(car);
+        passAuto.setUser(user);
+        passAuto.setTerritory(territory);
+        return passAuto;
+    }
+
     public static Checkpoint getCheckpoint(CheckpointType type, Territory territory) {
         Checkpoint checkpoint = new Checkpoint();
         checkpoint.setName(CHECKPOINT_NAME);

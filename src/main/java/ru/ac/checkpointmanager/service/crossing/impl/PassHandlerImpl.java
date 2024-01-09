@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.exception.pass.PassException;
 import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.passes.Pass;
@@ -14,7 +15,6 @@ import ru.ac.checkpointmanager.service.crossing.PassProcessing;
 import java.util.Map;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 @Slf4j
 public class PassHandlerImpl implements PassHandler {
@@ -30,17 +30,18 @@ public class PassHandlerImpl implements PassHandler {
      *
      * @param pass             пропуск, использованный при пересечении
      * @param currentDirection направление текущего (добавляемого) пересечения
-     * @throws PassException            если передан пропуск не поддерживаемого типа
-     *
+     * @throws PassException если передан пропуск не поддерживаемого типа
      */
     @Override
+    @Transactional
     public void handle(Pass pass, Direction currentDirection) {
         String passTimeType = pass.getTimeType().toString();
         PassProcessing passProcessing = passProcessingMap.get(passTimeType);
         if (passProcessing == null) {
-            log.error("Unsupported pass time type - %s".formatted(passTimeType));
-            throw new PassException("Unsupported pass time type - %s".formatted(passTimeType));
+            log.error(ExceptionUtils.UNSUPPORTED_PASS_TYPE.formatted(passTimeType));
+            throw new PassException(ExceptionUtils.UNSUPPORTED_PASS_TYPE.formatted(passTimeType));
         }
+
         passProcessing.process(pass, currentDirection);
 
         Direction nextDirectionForUsedPass = switch (currentDirection) {
