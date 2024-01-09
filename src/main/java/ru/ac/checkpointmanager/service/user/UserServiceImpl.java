@@ -373,8 +373,8 @@ public class UserServiceImpl implements UserService {
             String refreshToken = jwtService.generateRefreshToken(user);
             return new AuthResponseDTO(accessToken, refreshToken);
         } else {
-            log.warn("Invalid or expired token");
-            throw new EmailVerificationTokenException("Invalid or expired token");
+            log.warn(ExceptionUtils.INVALID_EMAIL_TOKEN_MSG.formatted(token));
+            throw new EmailVerificationTokenException(ExceptionUtils.INVALID_EMAIL_TOKEN_MSG.formatted(token));
         }
     }
 

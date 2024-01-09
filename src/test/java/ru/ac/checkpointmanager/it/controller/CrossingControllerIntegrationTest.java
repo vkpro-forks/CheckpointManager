@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.it;
+package ru.ac.checkpointmanager.it.controller;
 
 import lombok.SneakyThrows;
 import org.assertj.core.api.Assertions;
