@@ -9,7 +9,6 @@ import ru.ac.checkpointmanager.dto.CrossingRequestDTO;
 import ru.ac.checkpointmanager.exception.CrossingNotFoundException;
 import ru.ac.checkpointmanager.exception.MismatchedTerritoryException;
 import ru.ac.checkpointmanager.exception.pass.InactivePassException;
-import ru.ac.checkpointmanager.exception.pass.PassException;
 import ru.ac.checkpointmanager.mapper.CrossingMapper;
 import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
@@ -18,13 +17,11 @@ import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.repository.CrossingRepository;
-import ru.ac.checkpointmanager.repository.PassRepository;
 import ru.ac.checkpointmanager.service.checkpoints.CheckpointService;
 import ru.ac.checkpointmanager.service.passes.PassService;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.time.ZonedDateTime;
-import java.util.Map;
 import java.util.UUID;
 
 @Transactional
@@ -37,10 +34,9 @@ public class CrossingServiceImpl implements CrossingService {
 
     private final CrossingRepository crossingRepository;
     private final PassService passService;
-    private final PassRepository passRepository;
     private final CheckpointService checkpointService;
+    private final PassHandler passHandler;
     private final CrossingMapper mapper;
-    private final Map<String, PassProcessing> passProcessingMap;
 
     @Override
     public CrossingDTO addCrossing(CrossingRequestDTO crossingDTO, Direction direction) {
@@ -65,7 +61,7 @@ public class CrossingServiceImpl implements CrossingService {
                     .formatted(passId, pass.getTerritory()));
         }
 
-        processPass(pass, direction);
+        passHandler.handle(pass, direction);
         Crossing crossing = toCrossing(direction, pass, checkpoint, crossingDTO.getPerformedAt());
         crossing = crossingRepository.save(crossing);
         log.info("Crossing added [{}]", crossing);
@@ -80,33 +76,6 @@ public class CrossingServiceImpl implements CrossingService {
         });
         log.debug("Retrieved crossing with id {}", crossingId);
         return mapper.toCrossingDTO(crossing);
-    }
-
-    /**
-     * Обрабатывает использованный при пересечении пропуск в зависимости от его временного типа,
-     * затем устанавливает ожидаемое направление следующего пересечения
-     * на противоположное направлению текущего пересечения
-     *
-     * @param pass             пропуск, использованный при пересечении
-     * @param currentDirection направление текущего (добавляемого) пересечения
-     */
-    public void processPass(Pass pass, Direction currentDirection) {
-        String passTimeType = pass.getTimeType().toString();
-        PassProcessing passProcessing = passProcessingMap.get(passTimeType);
-        if (passProcessing == null) {
-            log.error("Unsupported pass time type - %s".formatted(passTimeType));
-            throw new PassException("Unsupported pass time type - %s".formatted(passTimeType));
-        }
-        passProcessing.process(pass, currentDirection);
-
-        Direction nextDirectionForUsedPass = switch (currentDirection) {
-            case IN -> Direction.OUT;
-            case OUT -> Direction.IN;
-        };
-        pass.setExpectedDirection(nextDirectionForUsedPass);
-        log.debug("Pass [{}], changed expected direction to {}", pass.getId(), nextDirectionForUsedPass);
-
-        passRepository.save(pass);
     }
 
     private Crossing toCrossing(Direction direction, Pass pass, Checkpoint checkpoint, ZonedDateTime performedAt) {
