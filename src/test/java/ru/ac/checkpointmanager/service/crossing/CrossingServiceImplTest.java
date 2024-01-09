@@ -69,19 +69,20 @@ class CrossingServiceImplTest {
 
         crossingService.addCrossing(crossingRequestDTO, Direction.IN);
 
+        Mockito.verify(crossingPassHandler).handle(passAuto, Direction.IN);
         Mockito.verify(crossingRepository).save(crossingArgumentCaptor.capture());
         Crossing captured = crossingArgumentCaptor.getValue();
-
-        Assertions.assertThat(captured.getDirection())
-                .as("Check if direction passed correct")
-                .isEqualTo(Direction.IN);
-        Assertions.assertThat(captured.getPass()).as("Check if pass attached to crossing")
-                .isEqualTo(passAuto);
-        Assertions.assertThat(captured.getCheckpoint()).as("Check if checkpoint attached to crossing")
-                .isEqualTo(checkpoint);
-        Assertions.assertThat(captured.getPerformedAt()).as("Check if performedAt attached to crossing")
-                .isEqualTo(crossingRequestDTO.getPerformedAt());
-
+        org.junit.jupiter.api.Assertions.assertAll(
+                () -> Assertions.assertThat(captured.getDirection())
+                        .as("Check if direction passed correct")
+                        .isEqualTo(Direction.IN),
+                () -> Assertions.assertThat(captured.getPass()).as("Check if pass attached to crossing")
+                        .isEqualTo(passAuto),
+                () -> Assertions.assertThat(captured.getCheckpoint()).as("Check if checkpoint attached to crossing")
+                        .isEqualTo(checkpoint),
+                () -> Assertions.assertThat(captured.getPerformedAt()).as("Check if performedAt attached to crossing")
+                        .isEqualTo(crossingRequestDTO.getPerformedAt())
+        );
     }
 
 }
