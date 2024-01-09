@@ -1,6 +1,5 @@
 package ru.ac.checkpointmanager.model.passes;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;
 import jakarta.persistence.DiscriminatorType;
@@ -13,21 +12,18 @@ import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SourceType;
-import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.enums.Direction;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -71,10 +67,6 @@ public abstract class Pass {
 
     @Column(insertable=false, updatable=false)
     private String dtype;
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "pass")
-    private List<Crossing> crossings;
 
     private Boolean favorite = false;
 

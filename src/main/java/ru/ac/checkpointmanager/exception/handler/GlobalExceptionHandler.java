@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import ru.ac.checkpointmanager.exception.DateOfBirthFormatException;
 import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
-import ru.ac.checkpointmanager.exception.EntranceWasAlreadyException;
+import ru.ac.checkpointmanager.exception.PassAlreadyUsedException;
 import ru.ac.checkpointmanager.exception.InvalidTokenException;
 import ru.ac.checkpointmanager.exception.MismatchCurrentPasswordException;
 import ru.ac.checkpointmanager.exception.ObjectAlreadyExistsException;
@@ -82,8 +82,8 @@ public class GlobalExceptionHandler {
         return configuredProblemDetails;
     }
 
-    @ExceptionHandler(EntranceWasAlreadyException.class)
-    public ProblemDetail handleEntranceWasAlreadyException(EntranceWasAlreadyException e) {
+    @ExceptionHandler(PassAlreadyUsedException.class)
+    public ProblemDetail handleEntranceWasAlreadyException(PassAlreadyUsedException e) {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.CONFLICT, e);
         problemDetail.setTitle("Entrance was already");
         problemDetail.setProperty(ERROR_CODE, ErrorCode.CONFLICT.toString());
