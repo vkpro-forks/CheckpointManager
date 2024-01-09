@@ -20,6 +20,7 @@ import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.model.passes.PassTimeType;
 import ru.ac.checkpointmanager.repository.PassRepository;
+import ru.ac.checkpointmanager.service.crossing.CrossingPassHandler;
 import ru.ac.checkpointmanager.service.crossing.PassProcessing;
 import ru.ac.checkpointmanager.service.crossing.PassProcessingOnetime;
 import ru.ac.checkpointmanager.service.crossing.PassProcessingPermanent;
@@ -30,7 +31,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 @ExtendWith(MockitoExtension.class)
-class PassHandlerImplTest {
+class CrossingPassHandlerImplTest {
 
     @Mock
     PassRepository passRepository;
@@ -42,7 +43,7 @@ class PassHandlerImplTest {
     PassProcessingPermanent passProcessingPermanent;
 
     @InjectMocks
-    PassHandlerImpl passHandler;
+    CrossingPassHandler crossingPassHandler;
 
     @Captor
     ArgumentCaptor<Pass> passArgumentCaptor;
@@ -53,7 +54,7 @@ class PassHandlerImplTest {
                 "ONETIME", passProcessingOnetime,
                 "PERMANENT", passProcessingPermanent
         );
-        ReflectionTestUtils.setField(passHandler, "passProcessingMap", passProcessingMap);
+        ReflectionTestUtils.setField(crossingPassHandler, "passProcessingMap", passProcessingMap);
     }
 
     @ParameterizedTest
@@ -64,7 +65,7 @@ class PassHandlerImplTest {
                 TestUtils.getCar(TestUtils.getCarBrand()));
         passAuto.setExpectedDirection(in);
 
-        passHandler.handle(passAuto, in);
+        crossingPassHandler.handle(passAuto, in);
 
         Mockito.verify(passRepository).save(passArgumentCaptor.capture());
         Pass captured = passArgumentCaptor.getValue();
@@ -82,7 +83,7 @@ class PassHandlerImplTest {
                 TestUtils.getCar(TestUtils.getCarBrand()));
         passAuto.setExpectedDirection(in);
 
-        passHandler.handle(passAuto, in);
+        crossingPassHandler.handle(passAuto, in);
 
         Mockito.verify(passRepository).save(passArgumentCaptor.capture());
         Pass captured = passArgumentCaptor.getValue();
@@ -97,11 +98,11 @@ class PassHandlerImplTest {
         PassAuto passAuto = new PassAuto();
 
         passAuto.setTimeType(PassTimeType.ONETIME);
-        ReflectionTestUtils.setField(passHandler, "passProcessingMap", Collections.emptyMap());
+        ReflectionTestUtils.setField(crossingPassHandler, "passProcessingMap", Collections.emptyMap());
 
         Assertions.assertThatExceptionOfType(PassException.class)
                 .as("Check if exception will be thrown, if no suitable processor found in map")
-                .isThrownBy(() -> passHandler.handle(passAuto, Direction.IN));
+                .isThrownBy(() -> crossingPassHandler.handle(passAuto, Direction.IN));
     }
 
     private static Stream<Arguments> getTestDirections() {

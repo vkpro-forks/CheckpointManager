@@ -9,7 +9,7 @@ import ru.ac.checkpointmanager.exception.pass.PassException;
 import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.repository.PassRepository;
-import ru.ac.checkpointmanager.service.crossing.PassHandler;
+import ru.ac.checkpointmanager.service.crossing.CrossingPassHandler;
 import ru.ac.checkpointmanager.service.crossing.PassProcessing;
 
 import java.util.Map;
@@ -17,7 +17,7 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class PassHandlerImpl implements PassHandler {
+class CrossingPassHandlerImpl implements CrossingPassHandler {
 
     private final PassRepository passRepository;
 
