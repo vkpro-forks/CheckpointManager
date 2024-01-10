@@ -36,6 +36,7 @@ import ru.ac.checkpointmanager.dto.user.RegistrationDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
 import ru.ac.checkpointmanager.exception.handler.ErrorCode;
+import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.model.Phone;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
@@ -47,6 +48,7 @@ import ru.ac.checkpointmanager.model.checkpoints.CheckpointType;
 import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.enums.PhoneNumberType;
 import ru.ac.checkpointmanager.model.enums.Role;
+import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.model.passes.PassTimeType;
@@ -152,6 +154,12 @@ public class TestUtils {
                 CHECKPOINT_ID,
                 ZonedDateTime.now()
         );
+    }
+
+    public static Crossing getCrossing(Pass pass, Checkpoint checkpoint, Direction direction) {
+        return new Crossing(CROSSING_ID, pass,checkpoint, ZonedDateTime.now(), LocalDateTime.now(),
+                direction
+                );
     }
 
     public static Territory getTerritory() {

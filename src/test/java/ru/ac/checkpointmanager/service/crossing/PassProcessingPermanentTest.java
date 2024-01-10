@@ -1,17 +1,17 @@
 package ru.ac.checkpointmanager.service.crossing;
 
 import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.LoggerContext;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.LoggerFactory;
+import org.junit.jupiter.api.extension.ExtendWith;
+import ru.ac.checkpointmanager.ext.LoggingMemoryAppenderTestResolver;
 import ru.ac.checkpointmanager.ext.MemoryAppender;
 import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.util.TestUtils;
 
+@ExtendWith(LoggingMemoryAppenderTestResolver.class)
 class PassProcessingPermanentTest {
 
     PassProcessingPermanent passProcessingPermanent = new PassProcessingPermanent();
@@ -19,12 +19,8 @@ class PassProcessingPermanentTest {
     MemoryAppender memoryAppender;
 
     @BeforeEach
-    public void setup() {
-        Logger logger = (Logger) LoggerFactory.getLogger("ru.ac.checkpointmanager");
-        memoryAppender = new MemoryAppender();
-        memoryAppender.setContext((LoggerContext) LoggerFactory.getILoggerFactory());
-        logger.setLevel(Level.DEBUG);
-        logger.addAppender(memoryAppender);
+    public void init(MemoryAppender memoryAppender) {
+        this.memoryAppender = memoryAppender;
         memoryAppender.start();
     }
 

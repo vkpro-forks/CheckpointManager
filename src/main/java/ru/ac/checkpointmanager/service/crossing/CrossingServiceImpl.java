@@ -39,6 +39,15 @@ public class CrossingServiceImpl implements CrossingService {
     private final CrossingPassHandler crossingPassHandler;
     private final CrossingMapper mapper;
 
+    /**
+     * Добавляет пересечение
+     *
+     * @param crossingDTO параметры пересечения
+     * @param direction   направление
+     * @return {@link CrossingDTO} сохраненное пересечение со всеми необходимыми для отображения параметрами
+     * @throws InactivePassException        если пропуск не активен
+     * @throws MismatchedTerritoryException если территория пропуск не соответствует территории чекпоинта
+     */
     @Transactional
     @Override
     public CrossingDTO addCrossing(CrossingRequestDTO crossingDTO, Direction direction) {
@@ -50,8 +59,8 @@ public class CrossingServiceImpl implements CrossingService {
 
         UUID checkpointId = crossingDTO.getCheckpointId();
         Checkpoint checkpoint = checkpointService.findCheckpointById(checkpointId);
-        checkPassAndCheckpointAreCompatible(checkpoint, pass);
         checkPassAndCheckpointTerritories(checkpoint, pass);
+        checkPassAndCheckpointAreCompatible(checkpoint, pass);
 
         crossingPassHandler.handle(pass, direction);
         Crossing crossing = toCrossing(direction, pass, checkpoint, crossingDTO.getPerformedAt());
