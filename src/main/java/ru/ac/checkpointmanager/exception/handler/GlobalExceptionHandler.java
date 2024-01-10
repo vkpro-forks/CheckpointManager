@@ -48,7 +48,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(EntityNotFoundException.class)
     public ProblemDetail handleEntityNotFoundException(EntityNotFoundException e) {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.NOT_FOUND, e);
-        problemDetail.setTitle("Object not found");
+        problemDetail.setTitle(ErrorMessage.OBJECT_NOT_FOUND);
         problemDetail.setProperty(ERROR_CODE, ErrorCode.NOT_FOUND.toString());
         log.debug(LOG_MSG, e.getClass());
         return problemDetail;
@@ -103,7 +103,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ObjectAlreadyExistsException.class)
     public ProblemDetail handleAlreadyExistsException(ObjectAlreadyExistsException e) {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.CONFLICT, e);
-        problemDetail.setTitle("Object already exists");
+        problemDetail.setTitle(ErrorMessage.OBJECT_ALREADY_EXISTS);
         problemDetail.setProperty(ERROR_CODE, ErrorCode.CONFLICT.toString());
         log.debug(LOG_MSG, e.getClass());
         return problemDetail;

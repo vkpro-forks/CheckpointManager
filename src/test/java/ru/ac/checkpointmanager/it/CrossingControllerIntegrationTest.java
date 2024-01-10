@@ -44,6 +44,8 @@ import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
 import ru.ac.checkpointmanager.repository.car.CarRepository;
 import ru.ac.checkpointmanager.service.crossing.CrossingPassHandler;
+import ru.ac.checkpointmanager.service.crossing.impl.PassProcessorOnetime;
+import ru.ac.checkpointmanager.service.crossing.impl.PassProcessorPermanent;
 import ru.ac.checkpointmanager.util.TestMessage;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
@@ -51,6 +53,7 @@ import ru.ac.checkpointmanager.util.UrlConstants;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -88,6 +91,12 @@ class CrossingControllerIntegrationTest extends RedisAndPostgresTestContainersCo
     @Autowired
     CrossingPassHandler crossingPassHandler;
 
+    @Autowired
+    PassProcessorOnetime passProcessingOnetime;
+
+    @Autowired
+    PassProcessorPermanent passProcessingPermanent;
+
     @AfterEach
     void clear() {
         passRepository.deleteAll();
@@ -97,30 +106,34 @@ class CrossingControllerIntegrationTest extends RedisAndPostgresTestContainersCo
         territoryRepository.deleteAll();
         userRepository.deleteAll();
         crossingRepository.deleteAll();
+        ReflectionTestUtils.setField(crossingPassHandler, "passProcessingMap",
+                Map.of(
+                        "ONETIME", passProcessingOnetime,
+                        "PERMANENT", passProcessingPermanent
+                ));
     }
 
 
     @Test
     @SneakyThrows
-    void shouldAddCrossingForInDirection() {
+    void addCrossing_InDirection_ReturnCrossingDTO() {
+        //given
         Pass savedPass = setupAndSavePass(PassStatus.ACTIVE);
-
         Checkpoint checkpoint = TestUtils.getCheckpoint(CheckpointType.AUTO, savedPass.getTerritory());
         Checkpoint savedCheckPoint = checkpointRepository.saveAndFlush(checkpoint);
-
         CrossingRequestDTO crossingRequestDTO = new CrossingRequestDTO(savedPass.getId(),
                 savedCheckPoint.getId(),
                 ZonedDateTime.now());
         String crossingDtoString = TestUtils.jsonStringFromObject(crossingRequestDTO);
-
-        mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CROSSING_URL + "/in")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(crossingDtoString))
-                .andExpect(MockMvcResultMatchers.status().isOk())
+        //when
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CROSSING_URL + "/in")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(crossingDtoString));
+        //then
+        resultActions.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.direction").value(Direction.IN.toString()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").isNotEmpty())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.performedAt").isNotEmpty());
-
         Optional<Pass> passOptional = passRepository.findById(savedPass.getId());
         Assertions.assertThat(passOptional).isPresent();
         Assertions.assertThat(passOptional.get().getExpectedDirection()).isEqualTo(Direction.OUT);
@@ -128,26 +141,24 @@ class CrossingControllerIntegrationTest extends RedisAndPostgresTestContainersCo
 
     @Test
     @SneakyThrows
-    void shouldAddCrossingForOutDirection() {
+    void addCrossing_OutDirection_ReturnCrossingDTO() {
+        //given
         Pass savedPass = setupAndSavePass(PassStatus.ACTIVE);
-
         Checkpoint checkpoint = TestUtils.getCheckpoint(CheckpointType.AUTO, savedPass.getTerritory());
         Checkpoint savedCheckPoint = checkpointRepository.saveAndFlush(checkpoint);
-
         CrossingRequestDTO crossingRequestDTO = new CrossingRequestDTO(savedPass.getId(),
                 savedCheckPoint.getId(),
                 ZonedDateTime.now());
-
         String crossingDtoString = TestUtils.jsonStringFromObject(crossingRequestDTO);
-
-        mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CROSSING_URL + "/out")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(crossingDtoString))
-                .andExpect(MockMvcResultMatchers.status().isOk())
+        //when
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CROSSING_URL + "/out")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(crossingDtoString));
+        //then
+        resultActions.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.direction").value(Direction.OUT.toString()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").isNotEmpty())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.performedAt").isNotEmpty());
-
         Optional<Pass> passOptional = passRepository.findById(savedPass.getId());
         Assertions.assertThat(passOptional).isPresent();
         Assertions.assertThat(passOptional.get().getExpectedDirection()).isEqualTo(Direction.IN);
@@ -157,6 +168,7 @@ class CrossingControllerIntegrationTest extends RedisAndPostgresTestContainersCo
     @ValueSource(strings = {"/in", "/out"})
     @SneakyThrows
     void addCrossing_PassNotExists_HandleErrorAndReturnNotFound(String direction) {
+        //given
         log.info("Saving checkpoint and territory");
         Checkpoint checkpoint = new Checkpoint();
         checkpoint.setName(TestUtils.CHECKPOINT_NAME);
@@ -169,13 +181,14 @@ class CrossingControllerIntegrationTest extends RedisAndPostgresTestContainersCo
         CrossingRequestDTO crossingDTO = TestUtils.getCrossingRequestDTO();
         crossingDTO.setCheckpointId(savedCheckPoint.getId());
         String crossingDto = TestUtils.jsonStringFromObject(crossingDTO);
-
+        //when
         log.info(TestMessage.PERFORM_HTTP, HttpMethod.POST, UrlConstants.CROSSING_URL + direction);
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CROSSING_URL + direction)
-                        .content(crossingDto)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
-                        .value(ExceptionUtils.PASS_NOT_FOUND.formatted(TestUtils.PASS_ID)));
+                .content(crossingDto)
+                .contentType(MediaType.APPLICATION_JSON));
+        //then
+        resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                .value(ExceptionUtils.PASS_NOT_FOUND.formatted(TestUtils.PASS_ID)));
         TestUtils.checkNotFoundFields(resultActions);
     }
 
@@ -183,19 +196,19 @@ class CrossingControllerIntegrationTest extends RedisAndPostgresTestContainersCo
     @ValueSource(strings = {"/in", "/out"})
     @SneakyThrows
     void addCrossing_PassInactive_HandleErrorAndReturnBadRequest(String direction) {
-        log.info("Saving territory, car, brand and INACTIVE PASS");
+        //given
         Pass savedPass = setupAndSavePass(PassStatus.OUTDATED);
-
         CrossingRequestDTO crossingRequestDTO = new CrossingRequestDTO(savedPass.getId(),
                 TestUtils.CHECKPOINT_ID, //doesn't matter because pass inactive
                 ZonedDateTime.now());
         String crossingDtoString = TestUtils.jsonStringFromObject(crossingRequestDTO);
-
+        //when
         log.info(TestMessage.PERFORM_HTTP, HttpMethod.POST, UrlConstants.CROSSING_URL + direction);
-        mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CROSSING_URL + direction)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(crossingDtoString))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CROSSING_URL + direction)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(crossingDtoString));
+        //then
+        resultActions.andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(MockMvcResultMatchers
                         .jsonPath(TestUtils.JSON_ERROR_CODE).value(ErrorCode.BAD_REQUEST.toString()))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
@@ -208,24 +221,24 @@ class CrossingControllerIntegrationTest extends RedisAndPostgresTestContainersCo
     @ValueSource(strings = {"/in", "/out"})
     @SneakyThrows
     void addCrossing_PassAndCheckpointWithDifferentTerritories_HandleErrorAndReturnBadRequest(String direction) {
-        log.info("Saving territory, car, brand and INACTIVE PASS");
+        //given
         Pass savedPass = setupAndSavePass(PassStatus.ACTIVE);
         Territory anotherTerritory = new Territory();
         anotherTerritory.setName("Another territory");
         Territory savedAnotherTerritory = territoryRepository.saveAndFlush(anotherTerritory);
         Checkpoint checkpoint = TestUtils.getCheckpoint(CheckpointType.AUTO, savedAnotherTerritory);
         Checkpoint savedCheckPoint = checkpointRepository.saveAndFlush(checkpoint);
-
         CrossingRequestDTO crossingRequestDTO = new CrossingRequestDTO(savedPass.getId(),
                 savedCheckPoint.getId(),
                 ZonedDateTime.now());
         String crossingDtoString = TestUtils.jsonStringFromObject(crossingRequestDTO);
-
+        //when
         log.info(TestMessage.PERFORM_HTTP, HttpMethod.POST, UrlConstants.CROSSING_URL + direction);
-        mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CROSSING_URL + direction)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(crossingDtoString))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CROSSING_URL + direction)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(crossingDtoString));
+        //then
+        resultActions.andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(MockMvcResultMatchers
                         .jsonPath(TestUtils.JSON_ERROR_CODE).value(ErrorCode.BAD_REQUEST.toString()))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
@@ -239,21 +252,23 @@ class CrossingControllerIntegrationTest extends RedisAndPostgresTestContainersCo
     @ValueSource(strings = {"/in", "/out"})
     @SneakyThrows
     void addCrossing_UnsupportedPassProcessor_HandleErrorAndReturnInternalServerError(String direction) {
+        //given
+        log.info("Delete Pass processors from map");
         ReflectionTestUtils.setField(crossingPassHandler, "passProcessingMap", Collections.emptyMap());
         Pass savedPass = setupAndSavePass(PassStatus.ACTIVE);
-
         Checkpoint checkpoint = TestUtils.getCheckpoint(CheckpointType.AUTO, savedPass.getTerritory());
         Checkpoint savedCheckPoint = checkpointRepository.saveAndFlush(checkpoint);
-
         CrossingRequestDTO crossingRequestDTO = new CrossingRequestDTO(savedPass.getId(),
                 savedCheckPoint.getId(),
                 ZonedDateTime.now());
         String crossingDtoString = TestUtils.jsonStringFromObject(crossingRequestDTO);
-
-        mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CROSSING_URL + direction)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(crossingDtoString))
-                .andExpect(MockMvcResultMatchers.status().isInternalServerError())
+        //when
+        log.info(TestMessage.PERFORM_HTTP, HttpMethod.POST, UrlConstants.CROSSING_URL + direction);
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CROSSING_URL + direction)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(crossingDtoString));
+        //then
+        resultActions.andExpect(MockMvcResultMatchers.status().isInternalServerError())
                 .andExpect(MockMvcResultMatchers
                         .jsonPath(TestUtils.JSON_ERROR_CODE).value(ErrorCode.INTERNAL_SERVER_ERROR.toString()))
                 .andExpect(MockMvcResultMatchers
@@ -265,23 +280,23 @@ class CrossingControllerIntegrationTest extends RedisAndPostgresTestContainersCo
     @Test
     @SneakyThrows
     void addCrossing_OneTimePassAlreadyUsed_HandleErrorAndReturnBadRequest() {
+        //given
         Pass savedPass = setupAndSavePass(PassStatus.ACTIVE);
-
         Checkpoint checkpoint = TestUtils.getCheckpoint(CheckpointType.AUTO, savedPass.getTerritory());
         Checkpoint savedCheckPoint = checkpointRepository.saveAndFlush(checkpoint);
         Crossing crossing = TestUtils.getCrossing(savedPass, savedCheckPoint, Direction.OUT);
         crossingRepository.saveAndFlush(crossing);
-
         CrossingRequestDTO crossingRequestDTO = new CrossingRequestDTO(savedPass.getId(),
                 savedCheckPoint.getId(),
                 ZonedDateTime.now());
-
         String crossingDtoString = TestUtils.jsonStringFromObject(crossingRequestDTO);
-
-        mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CROSSING_URL + "/in")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(crossingDtoString))
-                .andExpect(MockMvcResultMatchers.status().isConflict())
+        //when
+        log.info(TestMessage.PERFORM_HTTP, HttpMethod.POST, UrlConstants.CROSSING_URL + "/in");
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CROSSING_URL + "/in")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(crossingDtoString));
+        //then
+        resultActions.andExpect(MockMvcResultMatchers.status().isConflict())
                 .andExpect(MockMvcResultMatchers
                         .jsonPath(TestUtils.JSON_ERROR_CODE).value(ErrorCode.CONFLICT.toString()))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
@@ -291,23 +306,26 @@ class CrossingControllerIntegrationTest extends RedisAndPostgresTestContainersCo
     @ParameterizedTest
     @ValueSource(strings = {"/in", "/out"})
     @SneakyThrows
-    void addCrossing_CheckpointNotExists_HandleErrorAndReturnNotFound() {
+    void addCrossing_CheckpointNotExists_HandleErrorAndReturnNotFound(String direction) {
+        //given
         Pass savedPass = setupAndSavePass(PassStatus.ACTIVE);
-
         CrossingRequestDTO crossingRequestDTO = new CrossingRequestDTO(savedPass.getId(),
                 TestUtils.CHECKPOINT_ID, //not in repository
                 ZonedDateTime.now());
-
         String crossingDto = TestUtils.jsonStringFromObject(crossingRequestDTO);
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CROSSING_URL)
-                        .content(crossingDto)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
-                        .value(ExceptionUtils.CHECKPOINT_NOT_FOUND.formatted(TestUtils.CHECKPOINT_ID)));
+        //when
+        log.info(TestMessage.PERFORM_HTTP, HttpMethod.POST, UrlConstants.CROSSING_URL + direction);
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CROSSING_URL + direction)
+                .content(crossingDto)
+                .contentType(MediaType.APPLICATION_JSON));
+        //then
+        resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                .value(ExceptionUtils.CHECKPOINT_NOT_FOUND.formatted(TestUtils.CHECKPOINT_ID)));
         TestUtils.checkNotFoundFields(resultActions);
     }
 
     private Pass setupAndSavePass(PassStatus passStatus) {
+        log.info("Saving Territory, User, Car, Brand, and Pass with status {}", passStatus);
         Territory territory = new Territory();
         territory.setName(TestUtils.TERR_NAME);
         User user = TestUtils.getUser();
