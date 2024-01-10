@@ -50,8 +50,8 @@ public class CrossingServiceImpl implements CrossingService {
      * @throws InactivePassException        если пропуск не активен
      * @throws MismatchedTerritoryException если территория пропуск не соответствует территории чекпоинта
      */
-    @Transactional
     @Override
+    @Transactional
     public CrossingDTO addCrossing(CrossingRequestDTO crossingDTO, Direction direction) {
         log.debug(METHOD_UUID, MethodLog.getMethodName(), crossingDTO);
 

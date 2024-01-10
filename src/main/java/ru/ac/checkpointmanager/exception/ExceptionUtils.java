@@ -23,6 +23,8 @@ public class ExceptionUtils {
     public static final String PASS_MISMATCHED_TERRITORY = "Pass [%s] is issued to another territory: [%s]," +
             "checkpoint here: [%s]";
 
+    public static final String CHECKPOINT_NOT_FOUND = "[Checkpoint with id: %s] not found";
+
     private ExceptionUtils() {
     }
 

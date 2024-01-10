@@ -187,7 +187,7 @@ class CrossingControllerIntegrationTest extends RedisAndPostgresTestContainersCo
         Pass savedPass = setupAndSavePass(PassStatus.OUTDATED);
 
         CrossingRequestDTO crossingRequestDTO = new CrossingRequestDTO(savedPass.getId(),
-                TestUtils.CHECKPOINT_ID, //doesnt matter because pass inactive
+                TestUtils.CHECKPOINT_ID, //doesn't matter because pass inactive
                 ZonedDateTime.now());
         String crossingDtoString = TestUtils.jsonStringFromObject(crossingRequestDTO);
 
@@ -288,6 +288,25 @@ class CrossingControllerIntegrationTest extends RedisAndPostgresTestContainersCo
                         .value(ExceptionUtils.PASS_ALREADY_USED.formatted(savedPass.getId())));
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"/in", "/out"})
+    @SneakyThrows
+    void addCrossing_CheckpointNotExists_HandleErrorAndReturnNotFound() {
+        Pass savedPass = setupAndSavePass(PassStatus.ACTIVE);
+
+        CrossingRequestDTO crossingRequestDTO = new CrossingRequestDTO(savedPass.getId(),
+                TestUtils.CHECKPOINT_ID, //not in repository
+                ZonedDateTime.now());
+
+        String crossingDto = TestUtils.jsonStringFromObject(crossingRequestDTO);
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CROSSING_URL)
+                        .content(crossingDto)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(ExceptionUtils.CHECKPOINT_NOT_FOUND.formatted(TestUtils.CHECKPOINT_ID)));
+        TestUtils.checkNotFoundFields(resultActions);
+    }
+
     private Pass setupAndSavePass(PassStatus passStatus) {
         Territory territory = new Territory();
         territory.setName(TestUtils.TERR_NAME);
@@ -305,6 +324,5 @@ class CrossingControllerIntegrationTest extends RedisAndPostgresTestContainersCo
         pass.setStatus(passStatus);
         return passRepository.saveAndFlush(pass);
     }
-
 
 }
