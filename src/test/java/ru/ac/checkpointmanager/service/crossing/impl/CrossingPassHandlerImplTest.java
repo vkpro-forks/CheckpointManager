@@ -14,16 +14,14 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-import ru.ac.checkpointmanager.exception.pass.PassException;
+import ru.ac.checkpointmanager.exception.PassProcessorException;
 import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.model.passes.PassTimeType;
 import ru.ac.checkpointmanager.repository.PassRepository;
 import ru.ac.checkpointmanager.service.crossing.CrossingPassHandler;
-import ru.ac.checkpointmanager.service.crossing.PassProcessing;
-import ru.ac.checkpointmanager.service.crossing.PassProcessingOnetime;
-import ru.ac.checkpointmanager.service.crossing.PassProcessingPermanent;
+import ru.ac.checkpointmanager.service.crossing.PassProcessor;
 import ru.ac.checkpointmanager.util.TestUtils;
 
 import java.util.Collections;
@@ -37,10 +35,10 @@ class CrossingPassHandlerImplTest {
     PassRepository passRepository;
 
     @Mock
-    PassProcessingOnetime passProcessingOnetime;
+    PassProcessorOnetime passProcessingOnetime;
 
     @Mock
-    PassProcessingPermanent passProcessingPermanent;
+    PassProcessorPermanent passProcessingPermanent;
 
     @InjectMocks
     CrossingPassHandler crossingPassHandler;
@@ -50,7 +48,7 @@ class CrossingPassHandlerImplTest {
 
     @BeforeEach
     void init() {
-        Map<String, PassProcessing> passProcessingMap = Map.of(
+        Map<String, PassProcessor> passProcessingMap = Map.of(
                 "ONETIME", passProcessingOnetime,
                 "PERMANENT", passProcessingPermanent
         );
@@ -100,7 +98,7 @@ class CrossingPassHandlerImplTest {
         passAuto.setTimeType(PassTimeType.ONETIME);
         ReflectionTestUtils.setField(crossingPassHandler, "passProcessingMap", Collections.emptyMap());
 
-        Assertions.assertThatExceptionOfType(PassException.class)
+        Assertions.assertThatExceptionOfType(PassProcessorException.class)
                 .as("Check if exception will be thrown, if no suitable processor found in map")
                 .isThrownBy(() -> crossingPassHandler.handle(passAuto, Direction.IN));
     }

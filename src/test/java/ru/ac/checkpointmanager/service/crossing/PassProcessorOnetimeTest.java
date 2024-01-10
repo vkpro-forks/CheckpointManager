@@ -13,19 +13,20 @@ import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.repository.CrossingRepository;
+import ru.ac.checkpointmanager.service.crossing.impl.PassProcessorOnetime;
 import ru.ac.checkpointmanager.util.TestUtils;
 
 import java.util.Collections;
 import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
-class PassProcessingOnetimeTest {
+class PassProcessorOnetimeTest {
 
     @Mock
     CrossingRepository crossingRepository;
 
     @InjectMocks
-    PassProcessingOnetime passProcessingOnetime;
+    PassProcessorOnetime passProcessingOnetime;
 
     @Test
     void processPass_ifDirectionOut_setStatusWithoutExceptions() {

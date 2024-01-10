@@ -13,6 +13,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import ru.ac.checkpointmanager.exception.CriticalServerException;
 import ru.ac.checkpointmanager.exception.DateOfBirthFormatException;
 import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
 import ru.ac.checkpointmanager.exception.InvalidTokenException;
@@ -232,6 +233,16 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
         problemDetail.setTitle("Passwords are not the same");
         problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
+        log.debug(LOG_MSG, e.getClass());
+        return problemDetail;
+    }
+
+    // 500
+    @ExceptionHandler(CriticalServerException.class)
+    public ProblemDetail handleCriticalServerException(CriticalServerException e) {
+        ProblemDetail problemDetail = createProblemDetail(HttpStatus.INTERNAL_SERVER_ERROR, e);
+        problemDetail.setTitle(ErrorMessage.INTERNAL_SERVER_ERROR);
+        problemDetail.setProperty(ERROR_CODE, ErrorCode.INTERNAL_SERVER_ERROR.toString());
         log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }

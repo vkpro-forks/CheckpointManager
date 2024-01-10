@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.service.crossing;
+package ru.ac.checkpointmanager.service.crossing.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,11 +9,12 @@ import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.repository.CrossingRepository;
+import ru.ac.checkpointmanager.service.crossing.PassProcessor;
 
 @Service("ONETIME")
 @Slf4j
 @RequiredArgsConstructor
-public class PassProcessingOnetime implements PassProcessing {
+public class PassProcessorOnetime implements PassProcessor {
 
     private final CrossingRepository crossingRepository;
 

@@ -29,6 +29,7 @@ import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.repository.CrossingRepository;
 import ru.ac.checkpointmanager.service.checkpoints.CheckpointService;
+import ru.ac.checkpointmanager.service.crossing.impl.CrossingServiceImpl;
 import ru.ac.checkpointmanager.service.passes.PassService;
 import ru.ac.checkpointmanager.util.TestUtils;
 

@@ -9,12 +9,13 @@ import ru.ac.checkpointmanager.ext.LoggingMemoryAppenderTestResolver;
 import ru.ac.checkpointmanager.ext.MemoryAppender;
 import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
+import ru.ac.checkpointmanager.service.crossing.impl.PassProcessorPermanent;
 import ru.ac.checkpointmanager.util.TestUtils;
 
 @ExtendWith(LoggingMemoryAppenderTestResolver.class)
-class PassProcessingPermanentTest {
+class PassProcessorPermanentTest {
 
-    PassProcessingPermanent passProcessingPermanent = new PassProcessingPermanent();
+    PassProcessorPermanent passProcessingPermanent = new PassProcessorPermanent();
 
     MemoryAppender memoryAppender;
 

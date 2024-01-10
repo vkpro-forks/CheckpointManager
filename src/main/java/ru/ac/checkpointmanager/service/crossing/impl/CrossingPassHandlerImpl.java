@@ -5,12 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.exception.ExceptionUtils;
-import ru.ac.checkpointmanager.exception.pass.PassException;
+import ru.ac.checkpointmanager.exception.PassProcessorException;
 import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.repository.PassRepository;
 import ru.ac.checkpointmanager.service.crossing.CrossingPassHandler;
-import ru.ac.checkpointmanager.service.crossing.PassProcessing;
+import ru.ac.checkpointmanager.service.crossing.PassProcessor;
 
 import java.util.Map;
 
@@ -21,7 +21,7 @@ class CrossingPassHandlerImpl implements CrossingPassHandler {
 
     private final PassRepository passRepository;
 
-    private final Map<String, PassProcessing> passProcessingMap;
+    private final Map<String, PassProcessor> passProcessingMap;
 
     /**
      * Обрабатывает использованный при пересечении пропуск в зависимости от его временного типа,
@@ -30,19 +30,19 @@ class CrossingPassHandlerImpl implements CrossingPassHandler {
      *
      * @param pass             пропуск, использованный при пересечении
      * @param currentDirection направление текущего (добавляемого) пересечения
-     * @throws PassException если передан пропуск не поддерживаемого типа
+     * @throws PassProcessorException процессор для типа пропуска не установлен
      */
     @Override
     @Transactional
     public void handle(Pass pass, Direction currentDirection) {
         String passTimeType = pass.getTimeType().toString();
-        PassProcessing passProcessing = passProcessingMap.get(passTimeType);
-        if (passProcessing == null) {
+        PassProcessor passProcessor = passProcessingMap.get(passTimeType);
+        if (passProcessor == null) { // это 500 прям FIXME
             log.error(ExceptionUtils.UNSUPPORTED_PASS_TYPE.formatted(passTimeType));
-            throw new PassException(ExceptionUtils.UNSUPPORTED_PASS_TYPE.formatted(passTimeType));
+            throw new PassProcessorException(ExceptionUtils.UNSUPPORTED_PASS_TYPE.formatted(passTimeType));
         }
 
-        passProcessing.process(pass, currentDirection);
+        passProcessor.process(pass, currentDirection);
 
         Direction nextDirectionForUsedPass = switch (currentDirection) {
             case IN -> Direction.OUT;

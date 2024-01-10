@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.service.crossing;
+package ru.ac.checkpointmanager.service.crossing.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +19,8 @@ import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.repository.CrossingRepository;
 import ru.ac.checkpointmanager.service.checkpoints.CheckpointService;
+import ru.ac.checkpointmanager.service.crossing.CrossingPassHandler;
+import ru.ac.checkpointmanager.service.crossing.CrossingService;
 import ru.ac.checkpointmanager.service.passes.PassService;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
