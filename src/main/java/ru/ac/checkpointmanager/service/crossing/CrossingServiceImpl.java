@@ -96,10 +96,12 @@ public class CrossingServiceImpl implements CrossingService {
     }
 
     private void checkPassAndCheckpointTerritories(Checkpoint checkpoint, Pass pass) {
-        if (!checkpoint.getTerritory().equals(pass.getTerritory())) {
-            log.warn(ExceptionUtils.PASS_MISMATCHED_TERRITORY.formatted(pass.getId(), pass.getTerritory()));
+        if (!checkpoint.getTerritory().getId().equals(pass.getTerritory().getId())) { //FIXME лучше по айди сравнивать, вдруг у нас поменяются поля вложенных сущностей
+            log.warn(ExceptionUtils.PASS_MISMATCHED_TERRITORY.formatted(pass.getId(), pass.getTerritory(),
+                    checkpoint.getTerritory()));
             throw new MismatchedTerritoryException(ExceptionUtils.PASS_MISMATCHED_TERRITORY
-                    .formatted(pass.getId(), pass.getTerritory()));
+                    .formatted(pass.getId(), pass.getTerritory(), checkpoint.getTerritory())); //FIXME Зачем мы в лог всю территорию пишем
+            //нам недостаточно будет просто айди?
         }
     }
 

@@ -20,7 +20,8 @@ public class ExceptionUtils {
 
     public static final String PASS_NOT_FOUND = "Pass [%s] not found";
 
-    public static final String PASS_MISMATCHED_TERRITORY = "Pass [%s] is issued to another territory [%s]";
+    public static final String PASS_MISMATCHED_TERRITORY = "Pass [%s] is issued to another territory: [%s]," +
+            "checkpoint here: [%s]";
 
     private ExceptionUtils() {
     }

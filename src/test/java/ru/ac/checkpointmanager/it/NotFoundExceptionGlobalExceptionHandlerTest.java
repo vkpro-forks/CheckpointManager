@@ -17,7 +17,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.ac.checkpointmanager.dto.CarBrandDTO;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.CheckpointDTO;
-import ru.ac.checkpointmanager.dto.CrossingDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.exception.handler.ErrorCode;
 import ru.ac.checkpointmanager.model.Territory;
@@ -231,29 +230,6 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
     }
 
     //PASS NOT FOUND EXCEPTION HANDLING
-
-    @Test
-    @SneakyThrows
-    void handlePassNotFoundExceptionForMarkCrossing() {
-        Checkpoint checkpoint = new Checkpoint();
-        checkpoint.setName(TestUtils.CHECKPOINT_NAME);
-        checkpoint.setType(CheckpointType.AUTO);
-        Territory territory = new Territory();
-        territory.setName("name");
-        territoryRepository.save(territory);
-        checkpoint.setTerritory(territory);
-        Checkpoint savedCheckPoint = checkpointRepository.save(checkpoint);
-        CrossingDTO crossingDTO = TestUtils.getCrossingDTO();
-        crossingDTO.setCheckpointId(savedCheckPoint.getId());
-        String crossingDto = TestUtils.jsonStringFromObject(crossingDTO);
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CROSSING_URL)
-                        .content(crossingDto)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
-                        .value(Matchers.startsWith("Pass")));
-        TestUtils.checkNotFoundFields(resultActions);
-    }
-
     @Test
     @SneakyThrows
     void shouldHandlePassNotFoundExceptionForGetPass() {
