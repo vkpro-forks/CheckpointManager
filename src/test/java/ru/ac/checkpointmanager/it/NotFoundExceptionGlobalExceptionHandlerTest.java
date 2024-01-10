@@ -152,7 +152,6 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
     }
 
     //CHECKPOINT NOT FOUND EXCEPTION HANDLING
-
     @Test
     @SneakyThrows
     void shouldHandleCheckPointNotFoundExceptionForGetCheckPoint() {

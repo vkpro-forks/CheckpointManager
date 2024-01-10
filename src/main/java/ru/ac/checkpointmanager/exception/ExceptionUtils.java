@@ -26,6 +26,7 @@ public class ExceptionUtils {
     public static final String CHECKPOINT_NOT_FOUND = "[Checkpoint with id: %s] not found";
 
     private ExceptionUtils() {
+        throw new AssertionError("No instances, please");
     }
 
 }

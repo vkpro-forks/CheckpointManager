@@ -12,6 +12,7 @@ import ru.ac.checkpointmanager.exception.MismatchedTerritoryException;
 import ru.ac.checkpointmanager.exception.pass.InactivePassException;
 import ru.ac.checkpointmanager.mapper.CrossingMapper;
 import ru.ac.checkpointmanager.model.Crossing;
+import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
 import ru.ac.checkpointmanager.model.checkpoints.CheckpointType;
 import ru.ac.checkpointmanager.model.enums.Direction;
@@ -98,12 +99,16 @@ public class CrossingServiceImpl implements CrossingService {
     }
 
     private void checkPassAndCheckpointTerritories(Checkpoint checkpoint, Pass pass) {
-        if (!checkpoint.getTerritory().getId().equals(pass.getTerritory().getId())) { //FIXME лучше по айди сравнивать, вдруг у нас поменяются поля вложенных сущностей
+        Territory checkPointTerritory = checkpoint.getTerritory();
+        Territory passTerritory = pass.getTerritory();
+        if (checkPointTerritory == null ||
+                passTerritory == null ||
+                !checkPointTerritory.getId().equals(passTerritory.getId())) { //FIXME лучше по айди сравнивать, вдруг у нас поменяются поля вложенных сущностей
             log.warn(ExceptionUtils.PASS_MISMATCHED_TERRITORY.formatted(pass.getId(), pass.getTerritory(),
                     checkpoint.getTerritory()));
             throw new MismatchedTerritoryException(ExceptionUtils.PASS_MISMATCHED_TERRITORY
                     .formatted(pass.getId(), pass.getTerritory(), checkpoint.getTerritory())); //FIXME Зачем мы в лог всю территорию пишем
-            //нам недостаточно будет просто айди?
+            //нам недостаточно будет просто айди записать?
         }
     }
 

@@ -5,6 +5,9 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -34,6 +37,7 @@ import ru.ac.checkpointmanager.service.passes.PassService;
 import ru.ac.checkpointmanager.util.TestUtils;
 
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @ExtendWith({MockitoExtension.class, LoggingMemoryAppenderTestResolver.class})
 class CrossingServiceImplTest {
@@ -116,29 +120,6 @@ class CrossingServiceImplTest {
     }
 
     @Test
-    void addCrossing_PassActiveWithDifferentFromCheckpointTerritory_ThrowMismatchedTerritoryException() {
-        CrossingRequestDTO crossingRequestDTO = TestUtils.getCrossingRequestDTO();
-        PassAuto passAuto = new PassAuto();
-        passAuto.setStatus(PassStatus.ACTIVE);
-        Territory territory = TestUtils.getTerritory();
-        passAuto.setTerritory(territory);
-        Territory anotherTerritory = new Territory();
-        anotherTerritory.setId(UUID.randomUUID());
-        Checkpoint checkpoint = TestUtils.getCheckpoint(CheckpointType.UNIVERSAL, anotherTerritory);
-        Mockito.when(passService.findPassById(TestUtils.PASS_ID))
-                .thenReturn(passAuto);
-        Mockito.when(checkpointService.findCheckpointById(TestUtils.CHECKPOINT_ID))
-                .thenReturn(checkpoint);
-
-        Assertions.assertThatExceptionOfType(MismatchedTerritoryException.class)
-                .as("Check if MismatchedTerritoryException will be thrown")
-                .isThrownBy(() -> crossingService.addCrossing(crossingRequestDTO, Direction.IN))
-                .isInstanceOf(PassException.class);
-
-        Mockito.verifyNoInteractions(crossingPassHandler, crossingRepository);
-    }
-
-    @Test
     void addCrossing_PassTypeIncompatibleWithCheckpointType() {
         memoryAppender.start();
         CrossingRequestDTO crossingRequestDTO = TestUtils.getCrossingRequestDTO();
@@ -165,6 +146,39 @@ class CrossingServiceImplTest {
         Mockito.verify(crossingPassHandler).handle(passAuto, Direction.IN);
         Mockito.verify(crossingRepository).save(Mockito.any());
 
+    }
+
+    @ParameterizedTest
+    @MethodSource("getTerritoriesForCheckpointAndPass")
+    void addCrossing_PassActiveWithDifferentFromCheckpoint_ThrowMismatchedTerritoryException(
+            Territory territory, Territory anotherTerritory) {
+        CrossingRequestDTO crossingRequestDTO = TestUtils.getCrossingRequestDTO();
+        PassAuto passAuto = new PassAuto();
+        passAuto.setStatus(PassStatus.ACTIVE);
+        passAuto.setTerritory(territory);
+        Checkpoint checkpoint = TestUtils.getCheckpoint(CheckpointType.UNIVERSAL, anotherTerritory);
+        Mockito.when(passService.findPassById(TestUtils.PASS_ID))
+                .thenReturn(passAuto);
+        Mockito.when(checkpointService.findCheckpointById(TestUtils.CHECKPOINT_ID))
+                .thenReturn(checkpoint);
+
+        Assertions.assertThatExceptionOfType(MismatchedTerritoryException.class)
+                .as("Check if MismatchedTerritoryException will be thrown")
+                .isThrownBy(() -> crossingService.addCrossing(crossingRequestDTO, Direction.IN))
+                .isInstanceOf(PassException.class);
+
+        Mockito.verifyNoInteractions(crossingPassHandler, crossingRepository);
+    }
+
+    private static Stream<Arguments> getTerritoriesForCheckpointAndPass() {
+        Territory territory = TestUtils.getTerritory();
+        Territory anotherTerritory = new Territory();
+        anotherTerritory.setId(UUID.randomUUID());
+        return Stream.of(
+                Arguments.of(territory, anotherTerritory),
+                Arguments.of(territory, null),
+                Arguments.of(null, territory)
+        );
     }
 
 }
