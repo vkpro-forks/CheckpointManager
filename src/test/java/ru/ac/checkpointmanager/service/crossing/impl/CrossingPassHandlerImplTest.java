@@ -20,7 +20,6 @@ import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.model.passes.PassTimeType;
 import ru.ac.checkpointmanager.repository.PassRepository;
-import ru.ac.checkpointmanager.service.crossing.CrossingPassHandler;
 import ru.ac.checkpointmanager.service.crossing.PassProcessor;
 import ru.ac.checkpointmanager.util.TestUtils;
 
@@ -41,7 +40,7 @@ class CrossingPassHandlerImplTest {
     PassProcessorPermanent passProcessingPermanent;
 
     @InjectMocks
-    CrossingPassHandler crossingPassHandler;
+    CrossingPassHandlerImpl crossingPassHandler;
 
     @Captor
     ArgumentCaptor<Pass> passArgumentCaptor;
@@ -57,7 +56,7 @@ class CrossingPassHandlerImplTest {
 
     @ParameterizedTest
     @MethodSource("getTestDirections")
-    void handle_ifOneTimePass_changeDirectionAndSave(Direction in, Direction changed) {
+    void handle_OneTimePass_ChangeDirectionAndSave(Direction in, Direction changed) {
         PassAuto passAuto = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(TestUtils.getUser(),
                 TestUtils.getTerritory(),
                 TestUtils.getCar(TestUtils.getCarBrand()));
@@ -75,7 +74,7 @@ class CrossingPassHandlerImplTest {
 
     @ParameterizedTest
     @MethodSource("getTestDirections")
-    void handle_ifPermanentPass_changeDirectionAndSave(Direction in, Direction changed) {
+    void handle_PermanentPass_ChangeDirectionAndSave(Direction in, Direction changed) {
         PassAuto passAuto = TestUtils.getSimpleActivePermanentAutoFor3Hours(TestUtils.getUser(),
                 TestUtils.getTerritory(),
                 TestUtils.getCar(TestUtils.getCarBrand()));
@@ -92,9 +91,8 @@ class CrossingPassHandlerImplTest {
     }
 
     @Test
-    void handle_ifPassTypeNotInMap_throwException() {
+    void handle_PassTypeNotInMap_ThrowPassProcessorException() {
         PassAuto passAuto = new PassAuto();
-
         passAuto.setTimeType(PassTimeType.ONETIME);
         ReflectionTestUtils.setField(crossingPassHandler, "passProcessingMap", Collections.emptyMap());
 
