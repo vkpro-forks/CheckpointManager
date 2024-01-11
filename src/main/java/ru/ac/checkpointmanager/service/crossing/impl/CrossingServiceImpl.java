@@ -7,21 +7,18 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
 import ru.ac.checkpointmanager.dto.CrossingRequestDTO;
 import ru.ac.checkpointmanager.exception.CrossingNotFoundException;
-import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.exception.MismatchedTerritoryException;
 import ru.ac.checkpointmanager.exception.pass.InactivePassException;
 import ru.ac.checkpointmanager.mapper.CrossingMapper;
 import ru.ac.checkpointmanager.model.Crossing;
-import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
-import ru.ac.checkpointmanager.model.checkpoints.CheckpointType;
 import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.passes.Pass;
-import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.repository.CrossingRepository;
 import ru.ac.checkpointmanager.service.checkpoints.CheckpointService;
 import ru.ac.checkpointmanager.service.crossing.CrossingPassHandler;
 import ru.ac.checkpointmanager.service.crossing.CrossingService;
+import ru.ac.checkpointmanager.service.passes.PassChecker;
 import ru.ac.checkpointmanager.service.passes.PassService;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
@@ -40,6 +37,7 @@ public class CrossingServiceImpl implements CrossingService {
     private final PassService passService;
     private final CheckpointService checkpointService;
     private final CrossingPassHandler crossingPassHandler;
+    private final PassChecker passChecker;
     private final CrossingMapper mapper;
 
     /**
@@ -58,12 +56,12 @@ public class CrossingServiceImpl implements CrossingService {
 
         UUID passId = crossingDTO.getPassId();
         Pass pass = passService.findPassById(passId);
-        checkPassIsActive(pass);
+        passChecker.checkPassActivity(pass);
 
         UUID checkpointId = crossingDTO.getCheckpointId();
         Checkpoint checkpoint = checkpointService.findCheckpointById(checkpointId);
-        checkPassAndCheckpointTerritories(checkpoint, pass);
-        checkPassAndCheckpointAreCompatible(checkpoint, pass);
+        passChecker.checkPassAndCheckpointTerritories(pass, checkpoint);
+        passChecker.checkPassAndCheckpointCompatibility(pass, checkpoint);
 
         crossingPassHandler.handle(pass, direction);
         Crossing crossing = toCrossing(direction, pass, checkpoint, crossingDTO.getPerformedAt());
@@ -89,35 +87,6 @@ public class CrossingServiceImpl implements CrossingService {
         crossing.setDirection(direction);
         crossing.setPerformedAt(performedAt);
         return crossing;
-    }
-
-    private void checkPassIsActive(Pass pass) {
-        if (pass.getStatus() != PassStatus.ACTIVE) {
-            log.warn(ExceptionUtils.INACTIVE_PASS.formatted(pass.getId()));
-            throw new InactivePassException(ExceptionUtils.INACTIVE_PASS.formatted(pass.getId()));
-        }
-    }
-
-    private void checkPassAndCheckpointTerritories(Checkpoint checkpoint, Pass pass) {
-        Territory checkPointTerritory = checkpoint.getTerritory();
-        Territory passTerritory = pass.getTerritory();
-        if (checkPointTerritory == null ||
-                passTerritory == null ||
-                !checkPointTerritory.getId().equals(passTerritory.getId())) { //FIXME лучше по айди сравнивать, вдруг у нас поменяются поля вложенных сущностей
-            log.warn(ExceptionUtils.PASS_MISMATCHED_TERRITORY.formatted(pass.getId(), pass.getTerritory(),
-                    checkpoint.getTerritory()));
-            throw new MismatchedTerritoryException(ExceptionUtils.PASS_MISMATCHED_TERRITORY
-                    .formatted(pass.getId(), pass.getTerritory(), checkpoint.getTerritory())); //FIXME Зачем мы в лог всю территорию пишем
-            //нам недостаточно будет просто айди записать?
-        }
-    }
-
-    private void checkPassAndCheckpointAreCompatible(Checkpoint checkpoint, Pass pass) {
-        if (checkpoint.getType() != CheckpointType.UNIVERSAL &&
-                !pass.getDtype().equals(checkpoint.getType().toString())) {
-            log.warn("Conflict between the types of pass and checkpoint [pass - %s, %s], [checkpoint - %s, %s]"
-                    .formatted(pass.getId(), pass.getDtype(), checkpoint.getId(), checkpoint.getType()));
-        }
     }
 
 }
