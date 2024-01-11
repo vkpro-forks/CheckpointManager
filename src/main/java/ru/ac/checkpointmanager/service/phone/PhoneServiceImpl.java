@@ -38,21 +38,22 @@ public class PhoneServiceImpl implements PhoneService {
     @Transactional
     public PhoneDTO createPhoneNumber(PhoneDTO phoneDTO) {
         log.debug(METHOD_CALLED, MethodLog.getMethodName());
+        String cleanedPhone = cleanPhone(phoneDTO.getNumber());
 
-        phoneDTO.setNumber(cleanPhone(phoneDTO.getNumber()));
         User user = userRepository.findById(phoneDTO.getUserId()).orElseThrow(
                 () -> {
                     log.warn(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(phoneDTO.getUserId()));
                     return new UserNotFoundException(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(phoneDTO.getUserId()));
                 }
         );
-        if (phoneRepository.existsByNumber(phoneDTO.getNumber())) {
+        if (phoneRepository.existsByNumber(cleanedPhone)) {
             String phoneNumber = phoneDTO.getNumber();
             log.warn(ExceptionUtils.PHONE_EXISTS.formatted(phoneNumber));
             throw new PhoneAlreadyExistException(ExceptionUtils.PHONE_EXISTS.formatted(phoneNumber));
         }
         Phone phone = phoneMapper.toPhone(phoneDTO);
         phone.setUser(user);
+        phone.setNumber(cleanedPhone);
         Phone savedPhone = phoneRepository.save(phone);
 
         log.info("Phone {} saved", phone.getNumber());
@@ -127,4 +128,6 @@ public class PhoneServiceImpl implements PhoneService {
         log.debug(METHOD_CALLED, MethodLog.getMethodName());
         return phoneRepository.existsByNumber(number);
     }
+
+
 }
