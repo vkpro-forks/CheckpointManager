@@ -223,7 +223,7 @@ public class UserServiceImpl implements UserService {
                 .map(FieldsValidation::cleanPhone)
                 .ifPresent(newMainNumber -> {
                     foundUser.setMainNumber(newMainNumber);
-                    phoneService.createPhoneNumber(createPhoneDTO(foundUser));
+                    phoneService.createPhoneNumber(createPhoneDTO(foundUser)); //FIXME тут тоже надо менять
                 });
 
         userRepository.save(foundUser);
