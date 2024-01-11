@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.controller;
+package ru.ac.checkpointmanager.it.controller;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +28,7 @@ import ru.ac.checkpointmanager.util.UrlConstants;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Slf4j
-public class AuthControllerIntegrationTest extends RedisAndPostgresTestContainersConfiguration {
+class AuthControllerIntegrationTest extends RedisAndPostgresTestContainersConfiguration {
 
     @Autowired
     MockMvc mockMvc;

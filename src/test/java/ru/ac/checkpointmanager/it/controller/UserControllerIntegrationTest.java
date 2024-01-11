@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.controller;
+package ru.ac.checkpointmanager.it.controller;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
@@ -40,6 +42,7 @@ import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 import ru.ac.checkpointmanager.utils.FieldsValidation;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -683,4 +686,68 @@ class UserControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.USER_URL + "/{id}", userId))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    @SneakyThrows
+    void shouldReturnEmptyListWithTerritoriesFromDBAndFromCache() {
+        Collection<? extends GrantedAuthority> authorities = List
+                .of(new SimpleGrantedAuthority(savedUser.getRole().name()));
+        CustomAuthenticationToken authToken = new CustomAuthenticationToken(savedUser, null, savedUser.getId(),
+                authorities);
+        log.info(TestMessage.PERFORM_HTTP, HttpMethod.GET.name(),
+                UrlConstants.USER_TERR_URL.formatted(savedUser.getId()));
+        log.info("Empty list from database");
+        mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_TERR_URL
+                                .formatted(savedUser.getId()))
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken)))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$").isEmpty());
+        log.info("Empty list from Cache");
+        mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_TERR_URL
+                                .formatted(savedUser.getId()))
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken)))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$").isEmpty());
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldReturnListWithTerritoriesFromDBAndFromCache() {
+        Territory territory = new Territory();
+        territory.setName(TestUtils.TERR_NAME);
+        territory.setUsers(List.of(savedUser));
+        territoryRepository.saveAndFlush(territory);
+        Collection<? extends GrantedAuthority> authorities = List
+                .of(new SimpleGrantedAuthority(savedUser.getRole().name()));
+        CustomAuthenticationToken authToken = new CustomAuthenticationToken(savedUser, null, savedUser.getId(),
+                authorities);
+        log.info(TestMessage.PERFORM_HTTP, HttpMethod.GET.name(),
+                UrlConstants.USER_TERR_URL.formatted(savedUser.getId()));
+        log.info("List with territory from database");
+        mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_TERR_URL
+                                .formatted(savedUser.getId()))
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken)))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$").isNotEmpty());
+        log.info("List with territory from Cache");
+        mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_TERR_URL
+                                .formatted(savedUser.getId()))
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken)))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$").isNotEmpty());
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldPassWithGoodTokenAndGetResult() {
+        User user = TestUtils.getUser();
+        user.setRole(Role.ADMIN);
+        User savedUser = userRepository.saveAndFlush(user);
+
+        String jwt = TestUtils.getJwt(1000000, savedUser.getUsername(), List.of("ROLE_ADMIN"), false, true);
+        mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL)
+                        .header(TestUtils.AUTH_HEADER, TestUtils.BEARER + jwt))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
 }
