@@ -10,23 +10,27 @@ import ru.ac.checkpointmanager.exception.ExceptionUtils;
 public class RedisCacheErrorHandler implements CacheErrorHandler {
 
     @Override
-    public void handleCacheGetError(RuntimeException exception, @NonNull Cache cache, @NonNull Object key) {
-        log.warn(ExceptionUtils.CACHING_FAILED, exception.getMessage());
+    public void handleCacheGetError(@NonNull RuntimeException exception, @NonNull Cache cache, @NonNull Object key) {
+        logError(exception);
     }
 
     @Override
-    public void handleCachePutError(RuntimeException exception, @NonNull Cache cache, @NonNull Object key, Object value) {
-        log.warn(ExceptionUtils.CACHING_FAILED, exception.getMessage());
+    public void handleCachePutError(@NonNull RuntimeException exception, @NonNull Cache cache, @NonNull Object key, Object value) {
+        logError(exception);
     }
 
     @Override
-    public void handleCacheEvictError(RuntimeException exception, @NonNull Cache cache, @NonNull Object key) {
-        log.warn(ExceptionUtils.CACHING_FAILED, exception.getMessage());
+    public void handleCacheEvictError(@NonNull RuntimeException exception, @NonNull Cache cache, @NonNull Object key) {
+        logError(exception);
     }
 
     @Override
-    public void handleCacheClearError(RuntimeException exception, @NonNull Cache cache) {
-        log.warn(ExceptionUtils.CACHING_FAILED, exception.getMessage());
+    public void handleCacheClearError(@NonNull RuntimeException exception, @NonNull Cache cache) {
+        logError(exception);
+    }
+
+    private void logError(Exception exception) {
+        log.error(ExceptionUtils.CACHING_FAILED, exception.getMessage());
     }
 
 }
