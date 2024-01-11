@@ -15,14 +15,14 @@ services:
     environment:
       - LOGGING_CONFIG=classpath:logback-prod-docker.xml
       - LOG_PATH=/path/to/remote/logs
-      - DB_URL=jdbc:postgresql://postgres-db:5432/chpmanDB
+      - DB_URL=jdbc:postgresql://postgres-db:5432/${PG_DB}
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/chpmanDB
-      - SPRING_DATASOURCE_USERNAME=chpman
-      - SPRING_DATASOURCE_PASSWORD=chpmanPass%
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/${PG_DB}
+      - SPRING_DATASOURCE_USERNAME=${PG_USER}
+      - SPRING_DATASOURCE_PASSWORD=${PG_PASS}
       - SPRING_DATA_REDIS_HOST=redis-cache
       - SPRING_DATA_REDIS_PORT=6379
-      - SPRING_DATA_REDIS_PASSWORD=admin
+      - SPRING_DATA_REDIS_PASSWORD=${REDIS_PASS}
       - AVATAR_STORAGE_PATH=/avatars
       - TZ=UTC
       - JASYPT_ENCRYPTOR_PASSWORD=${JASYPT_ENCRYPTOR_PASSWORD}
@@ -35,9 +35,9 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=chpmanDB
-      - POSTGRES_USER=chpman
-      - POSTGRES_PASSWORD=chpmanPass%
+      - POSTGRES_DB=${PG_DB}
+      - POSTGRES_USER=${PG_USER}
+      - POSTGRES_PASSWORD=${PG_PASS}
       - TZ=UTC
 
   #Сервис для кеширования в Redis
@@ -51,7 +51,7 @@ services:
     volumes:
       - ./config/redis/redis.conf:/usr/local/etc/redis/redis.conf #copy config to redis
       - redis-cache-data:/data
-    command: redis-server /usr/local/etc/redis/redis.conf #start with our config
+    command: redis-server /usr/local/etc/redis/redis.conf --requirepass ${REDIS_PASS} #start with our config
 
 
   # Сервис для хранения аватаров
