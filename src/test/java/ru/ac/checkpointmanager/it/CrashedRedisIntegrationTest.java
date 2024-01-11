@@ -105,7 +105,7 @@ class CrashedRedisIntegrationTest {
                         .with(SecurityMockMvcRequestPostProcessors.authentication(authToken)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$").isNotEmpty());
-        log.info("List with territory from Cache");
+        log.info("List with territory again from DB");
 
         mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_TERR_URL
                                 .formatted(savedUser.getId()))
