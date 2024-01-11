@@ -1,5 +1,6 @@
 package ru.ac.checkpointmanager.dto.user;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
@@ -39,5 +40,7 @@ public class UserResponseDTO {
     private Role role;
 
     @JsonProperty("avatar")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private AvatarDTO avatarDTO;
+
 }

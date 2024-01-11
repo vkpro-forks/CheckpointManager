@@ -235,7 +235,8 @@ class UserControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[*].id", Matchers.hasItem(savedUser.getId().toString())))
                 .andExpect(jsonPath("$[*].fullName", Matchers.hasItem(savedUser.getFullName())))
-                .andExpect(jsonPath("$[*].email", Matchers.hasItem(savedUser.getEmail())));
+                .andExpect(jsonPath("$[*].email", Matchers.hasItem(savedUser.getEmail())))
+                .andExpect(jsonPath("$[*].avatar").doesNotExist());
     }
 
     @Test
@@ -553,10 +554,10 @@ class UserControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
     @WithMockCustomUser
     void updateBlockStatusIsOk() {
         UUID userId = savedUser.getId();
-        Boolean isBlocked = true;
+        boolean isBlocked = true;
 
         mockMvc.perform(MockMvcRequestBuilders.patch(UrlConstants.USER_URL + "/{id}", userId)
-                        .param("isBlocked", isBlocked.toString()))
+                        .param("isBlocked", Boolean.toString(isBlocked)))
                 .andExpect(status().isOk());
     }
 
@@ -565,10 +566,10 @@ class UserControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
     @WithMockCustomUser(role = "USER")
     void updateBlockStatusIsForbidden() {
         UUID userId = savedUser.getId();
-        Boolean isBlocked = true;
+        boolean isBlocked = true;
 
         mockMvc.perform(MockMvcRequestBuilders.patch(UrlConstants.USER_URL + "/{id}", userId)
-                        .param("isBlocked", isBlocked.toString()))
+                        .param("isBlocked", Boolean.toString(isBlocked)))
                 .andExpect(status().isForbidden());
     }
 
@@ -577,10 +578,10 @@ class UserControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
     @WithMockCustomUser
     void updateBlockStatusIsNotFound() {
         UUID userId = UUID.randomUUID();
-        Boolean isBlocked = true;
+        boolean isBlocked = true;
 
         mockMvc.perform(MockMvcRequestBuilders.patch(UrlConstants.USER_URL + "/{id}", userId)
-                        .param("isBlocked", isBlocked.toString()))
+                        .param("isBlocked", Boolean.toString(isBlocked)))
                 .andExpect(status().isNotFound());
     }
 
