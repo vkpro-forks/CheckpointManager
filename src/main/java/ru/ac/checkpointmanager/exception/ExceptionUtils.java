@@ -14,7 +14,21 @@ public class ExceptionUtils {
 
     public static final String CACHING_FAILED = "Caching failed: {}";
 
+    public static final String PASS_ALREADY_USED = "OnetimePass [%s] has already been used, it is not possible to enter";
+
+    public static final String UNSUPPORTED_PASS_TYPE = "Unsupported pass time type - %s";
+
+    public static final String INACTIVE_PASS = "The pass is not active now %s";
+
+    public static final String PASS_NOT_FOUND = "Pass [%s] not found";
+
+    public static final String PASS_MISMATCHED_TERRITORY = "Pass [%s] is issued to another territory: [%s]," +
+            "checkpoint here: [%s]";
+
+    public static final String CHECKPOINT_NOT_FOUND = "[Checkpoint with id: %s] not found";
+
     private ExceptionUtils() {
+        throw new AssertionError("No instances, please");
     }
 
 }

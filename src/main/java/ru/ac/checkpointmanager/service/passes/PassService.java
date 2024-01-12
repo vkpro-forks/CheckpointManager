@@ -19,7 +19,7 @@ public interface PassService {
 
     PassResponseDTO findById(UUID id);
 
-    Pass findPassById(UUID id);
+    Pass findPassById(UUID passId);
 
     Page<PassResponseDTO> findPassesByUser(UUID userId, PagingParams pagingParams, FilterParams filterParams);
 
