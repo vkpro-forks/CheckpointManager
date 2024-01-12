@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.it;
+package ru.ac.checkpointmanager.it.controller;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
