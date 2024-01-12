@@ -9,10 +9,10 @@ import ru.ac.checkpointmanager.service.phone.PhoneService;
 
 import java.util.UUID;
 
-@Component("phoneFacade")
+@Component("phoneAuthFacade")
 @RequiredArgsConstructor
 @Slf4j
-public class PhoneFacade implements AuthFacade {
+public class PhoneAuthFacade implements AuthFacade {
 
     private final PhoneService phoneService;
 
