@@ -95,8 +95,7 @@ public class UserController {
                     description = "FORBIDDEN: роль пользователя не предоставляет доступ к данному api"
             )
     })
-    @PreAuthorize("@userFacade.isIdMatch(#userId) or " +
-                  "hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY') or @userAuthFacade.isIdMatch(#userId)")
     @GetMapping("/{userId}/territories")
     public List<TerritoryDTO> getTerritoriesByUser(
             @Parameter(description = "Уникальный идентификатор пользователя", required = true)
@@ -180,8 +179,7 @@ public class UserController {
                             array = @ArraySchema(schema = @Schema(implementation = String.class)))
             )
     })
-    @PreAuthorize("@userFacade.isIdMatch(#id) or " +
-                  "hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY') or @userAuthFacade.isIdMatch(#id)")
     @GetMapping("/numbers/{id}")
     public Collection<String> findUsersPhoneNumbers(
             @Parameter(description = "Уникальный идентификатор пользователя", required = true)
@@ -215,7 +213,7 @@ public class UserController {
                     description = "NOT_FOUND: пользователь не найден"
             )
     })
-    @PreAuthorize("@userFacade.isIdMatch(#userUpdateDTO.id) or hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER') or @userAuthFacade.isIdMatch(#userUpdateDTO.id)")
     @PutMapping
     public UserResponseDTO updateUser(@Valid @RequestBody UserUpdateDTO userUpdateDTO) {
         return userService.updateUser(userUpdateDTO);
@@ -394,7 +392,7 @@ public class UserController {
                     description = "NOT_FOUND: пользователь не найден"
             )
     })
-    @PreAuthorize("@userFacade.isIdMatch(#id) or hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER') or @userAuthFacade.isIdMatch(#id)")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@Parameter(description = "Уникальный идентификатор пользователя", required = true)
