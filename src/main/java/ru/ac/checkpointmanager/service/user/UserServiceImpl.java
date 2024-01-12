@@ -16,17 +16,18 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.user.AuthResponseDTO;
+import ru.ac.checkpointmanager.dto.user.EmailConfirmationDTO;
 import ru.ac.checkpointmanager.dto.user.NewEmailDTO;
 import ru.ac.checkpointmanager.dto.user.NewPasswordDTO;
-import ru.ac.checkpointmanager.dto.user.EmailConfirmationDTO;
-import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
+import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
 import ru.ac.checkpointmanager.exception.EmailAlreadyExistsException;
 import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
 import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.exception.MismatchCurrentPasswordException;
 import ru.ac.checkpointmanager.exception.ObjectAlreadyExistsException;
 import ru.ac.checkpointmanager.exception.PasswordConfirmationException;
+import ru.ac.checkpointmanager.exception.PhoneAlreadyExistException;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.mapper.TerritoryMapper;
@@ -41,7 +42,6 @@ import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.security.authfacade.AuthFacade;
 import ru.ac.checkpointmanager.security.jwt.JwtService;
 import ru.ac.checkpointmanager.service.email.EmailService;
-import ru.ac.checkpointmanager.service.phone.PhoneService;
 import ru.ac.checkpointmanager.utils.FieldsValidation;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
@@ -81,7 +81,6 @@ public class UserServiceImpl implements UserService {
     private final PhoneRepository phoneRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
-    private final PhoneService phoneService;
     private final RedisCacheManager cacheManager;
     private final JwtService jwtService;
 
@@ -94,7 +93,6 @@ public class UserServiceImpl implements UserService {
                            PhoneRepository phoneRepository,
                            PasswordEncoder passwordEncoder,
                            EmailService emailService,
-                           PhoneService phoneService,
                            RedisCacheManager cacheManager,
                            JwtService jwtService,
                            @Qualifier("userFacade") AuthFacade authFacade) {
@@ -104,7 +102,6 @@ public class UserServiceImpl implements UserService {
         this.phoneRepository = phoneRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
-        this.phoneService = phoneService;
         this.cacheManager = cacheManager;
         this.jwtService = jwtService;
         this.authFacade = authFacade;
@@ -198,7 +195,7 @@ public class UserServiceImpl implements UserService {
      * </p>
      *
      * @param userUpdateDTO DTO пользователя, содержащее обновленные данные. Должно включать идентификатор пользователя,
-     *                   а также может включать новое полное имя и основной номер телефона.
+     *                      а также может включать новое полное имя и основной номер телефона.
      * @return UserResponseDTO, содержащий обновленные данные пользователя.
      * @throws UserNotFoundException если пользователь с предоставленным идентификатором не найден.
      * @see UserUpdateDTO
@@ -218,13 +215,16 @@ public class UserServiceImpl implements UserService {
 
         foundUser.setFullName(userUpdateDTO.getFullName());
 
-        Optional.ofNullable(userUpdateDTO.getMainNumber())
-                .filter(mainNumber -> !mainNumber.isEmpty())
-                .map(FieldsValidation::cleanPhone)
-                .ifPresent(newMainNumber -> {
-                    foundUser.setMainNumber(newMainNumber);
-                    phoneService.createPhoneNumber(createPhoneDTO(foundUser)); //FIXME тут тоже надо менять
-                });
+        if (userUpdateDTO.getMainNumber() != null) {
+            String newMainNumber = userUpdateDTO.getMainNumber();
+            if (!foundUser.getMainNumber().equals(FieldsValidation.cleanPhone(newMainNumber))) {
+                if (phoneRepository.existsByNumber(FieldsValidation.cleanPhone(newMainNumber))) {
+                    log.warn(ExceptionUtils.PHONE_EXISTS.formatted(newMainNumber));
+                    throw new PhoneAlreadyExistException(ExceptionUtils.PHONE_EXISTS.formatted(newMainNumber));
+                }
+                foundUser.setMainNumber(FieldsValidation.cleanPhone(newMainNumber));
+            }
+        }
 
         userRepository.save(foundUser);
         log.info("[User {}] updated", foundUser.getId());
@@ -445,7 +445,7 @@ public class UserServiceImpl implements UserService {
                     log.warn(USER_NOT_FOUND_MSG.formatted(id));
                     return new UserNotFoundException(USER_NOT_FOUND_MSG.formatted(id));
                 });
-        if (existingUser.getIsBlocked() != isBlocked) {
+        if (!Objects.equals(existingUser.getIsBlocked(), isBlocked)) {
             existingUser.setIsBlocked(isBlocked);
             userRepository.save(existingUser);
             log.debug("Block status {} for {} successfully changed", isBlocked, id);
