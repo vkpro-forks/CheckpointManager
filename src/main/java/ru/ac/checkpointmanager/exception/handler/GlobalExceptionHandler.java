@@ -13,17 +13,17 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import ru.ac.checkpointmanager.exception.CriticalServerException;
 import ru.ac.checkpointmanager.exception.DateOfBirthFormatException;
 import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
-import ru.ac.checkpointmanager.exception.EntranceWasAlreadyException;
 import ru.ac.checkpointmanager.exception.InvalidTokenException;
 import ru.ac.checkpointmanager.exception.MismatchCurrentPasswordException;
 import ru.ac.checkpointmanager.exception.ObjectAlreadyExistsException;
 import ru.ac.checkpointmanager.exception.ObjectsRelationConflictException;
+import ru.ac.checkpointmanager.exception.PassAlreadyUsedException;
 import ru.ac.checkpointmanager.exception.PasswordConfirmationException;
 import ru.ac.checkpointmanager.exception.PhoneAlreadyExistException;
 import ru.ac.checkpointmanager.exception.VisitorNotFoundException;
-import ru.ac.checkpointmanager.exception.pass.InactivePassException;
 import ru.ac.checkpointmanager.exception.pass.PassException;
 
 import java.time.Instant;
@@ -48,7 +48,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(EntityNotFoundException.class)
     public ProblemDetail handleEntityNotFoundException(EntityNotFoundException e) {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.NOT_FOUND, e);
-        problemDetail.setTitle("Object not found");
+        problemDetail.setTitle(ErrorMessage.OBJECT_NOT_FOUND);
         problemDetail.setProperty(ERROR_CODE, ErrorCode.NOT_FOUND.toString());
         log.debug(LOG_MSG, e.getClass());
         return problemDetail;
@@ -82,8 +82,8 @@ public class GlobalExceptionHandler {
         return configuredProblemDetails;
     }
 
-    @ExceptionHandler(EntranceWasAlreadyException.class)
-    public ProblemDetail handleEntranceWasAlreadyException(EntranceWasAlreadyException e) {
+    @ExceptionHandler(PassAlreadyUsedException.class)
+    public ProblemDetail handleEntranceWasAlreadyException(PassAlreadyUsedException e) {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.CONFLICT, e);
         problemDetail.setTitle("Entrance was already");
         problemDetail.setProperty(ERROR_CODE, ErrorCode.CONFLICT.toString());
@@ -91,19 +91,10 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
-    @ExceptionHandler(InactivePassException.class)
-    public ProblemDetail handleNoActivePassException(InactivePassException e) {
-        ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
-        problemDetail.setTitle("Inactive pass");
-        problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
-        log.debug(LOG_MSG, e.getClass());
-        return problemDetail;
-    }
-
     @ExceptionHandler(PassException.class)
     public ProblemDetail handlePassException(PassException e) {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
-        problemDetail.setTitle("Error related to passes");
+        problemDetail.setTitle(ErrorMessage.PASS_EXCEPTION_TITLE);
         problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
         log.debug(LOG_MSG, e.getClass());
         return problemDetail;
@@ -112,7 +103,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ObjectAlreadyExistsException.class)
     public ProblemDetail handleAlreadyExistsException(ObjectAlreadyExistsException e) {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.CONFLICT, e);
-        problemDetail.setTitle("Object already exists");
+        problemDetail.setTitle(ErrorMessage.OBJECT_ALREADY_EXISTS);
         problemDetail.setProperty(ERROR_CODE, ErrorCode.CONFLICT.toString());
         log.debug(LOG_MSG, e.getClass());
         return problemDetail;
@@ -242,6 +233,16 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
         problemDetail.setTitle("Passwords are not the same");
         problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
+        log.debug(LOG_MSG, e.getClass());
+        return problemDetail;
+    }
+
+    // 500
+    @ExceptionHandler(CriticalServerException.class)
+    public ProblemDetail handleCriticalServerException(CriticalServerException e) {
+        ProblemDetail problemDetail = createProblemDetail(HttpStatus.INTERNAL_SERVER_ERROR, e);
+        problemDetail.setTitle(ErrorMessage.INTERNAL_SERVER_ERROR);
+        problemDetail.setProperty(ERROR_CODE, ErrorCode.INTERNAL_SERVER_ERROR.toString());
         log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }
