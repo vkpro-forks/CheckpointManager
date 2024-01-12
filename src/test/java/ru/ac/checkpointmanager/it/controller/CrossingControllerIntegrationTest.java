@@ -243,7 +243,7 @@ class CrossingControllerIntegrationTest extends RedisAndPostgresTestContainersCo
                         .jsonPath(TestUtils.JSON_ERROR_CODE).value(ErrorCode.BAD_REQUEST.toString()))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(ExceptionUtils.PASS_MISMATCHED_TERRITORY.formatted(savedPass.getId(),
-                                savedPass.getTerritory(), savedAnotherTerritory)))
+                                savedPass.getTerritory().getId(), savedAnotherTerritory.getId())))
                 .andExpect(MockMvcResultMatchers
                         .jsonPath(TestUtils.JSON_TITLE).value(ErrorMessage.PASS_EXCEPTION_TITLE));
     }
