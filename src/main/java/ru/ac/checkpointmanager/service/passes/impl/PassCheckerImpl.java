@@ -68,12 +68,14 @@ public class PassCheckerImpl implements PassChecker {
         Territory passTerritory = pass.getTerritory();
         if (checkPointTerritory == null ||
                 passTerritory == null ||
-                !checkPointTerritory.getId().equals(passTerritory.getId())) { //FIXME лучше по айди сравнивать, вдруг у нас поменяются поля вложенных сущностей
-            log.warn(ExceptionUtils.PASS_MISMATCHED_TERRITORY.formatted(pass.getId(), pass.getTerritory(),
-                    checkpoint.getTerritory()));
-            throw new MismatchedTerritoryException(ExceptionUtils.PASS_MISMATCHED_TERRITORY
-                    .formatted(pass.getId(), pass.getTerritory(), checkpoint.getTerritory())); //FIXME Зачем мы в лог всю территорию пишем
-            //нам недостаточно будет просто айди записать?
+                !checkPointTerritory.getId().equals(passTerritory.getId())) {
+            log.warn(ExceptionUtils.PASS_MISMATCHED_TERRITORY.formatted(pass.getId(),
+                    passTerritory != null ? passTerritory.getId() : "null",
+                    checkPointTerritory != null ? checkPointTerritory.getId() : "null"
+            ));
+            throw new MismatchedTerritoryException(ExceptionUtils.PASS_MISMATCHED_TERRITORY.formatted(pass.getId(),
+                    passTerritory != null ? passTerritory.getId() : "null",
+                    checkPointTerritory != null ? checkPointTerritory.getId() : "null"));
         }
     }
 

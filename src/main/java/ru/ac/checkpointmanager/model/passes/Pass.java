@@ -34,7 +34,7 @@ import java.util.UUID;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @RequiredArgsConstructor
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name="dtype", discriminatorType = DiscriminatorType.STRING)
+@DiscriminatorColumn(name = "dtype", discriminatorType = DiscriminatorType.STRING)
 public abstract class Pass {
 
     @Id
@@ -57,7 +57,7 @@ public abstract class Pass {
     @ManyToOne
     @JoinColumn(name = "territory_id")
     private Territory territory;
-    //#FIXME удалить crossing is зависимостей пасса если есть
+
     @CreationTimestamp(source = SourceType.VM)
     private LocalDateTime addedAt;
 
@@ -65,7 +65,7 @@ public abstract class Pass {
 
     private LocalDateTime endTime;
 
-    @Column(insertable=false, updatable=false)
+    @Column(insertable = false, updatable = false)
     private String dtype;
 
     private Boolean favorite = false;
@@ -74,7 +74,7 @@ public abstract class Pass {
     private Direction expectedDirection = Direction.IN;
 
     public boolean compareByFields(Pass other) {
-        return  (Objects.equals(this.getUser(), other.getUser()) &&
+        return (Objects.equals(this.getUser(), other.getUser()) &&
                 !Objects.equals(this.getId(), other.getId()) &&
                 Objects.equals(this.getTerritory(), other.getTerritory()) &&
                 this.getEndTime().isAfter(other.getStartTime()) &&

@@ -37,7 +37,7 @@ class CrossingPassHandlerImpl implements CrossingPassHandler {
     public void handle(Pass pass, Direction currentDirection) {
         String passTimeType = pass.getTimeType().toString();
         PassProcessor passProcessor = passProcessingMap.get(passTimeType);
-        if (passProcessor == null) { // это 500 прям FIXME
+        if (passProcessor == null) {
             log.error(ExceptionUtils.UNSUPPORTED_PASS_TYPE.formatted(passTimeType));
             throw new PassProcessorException(ExceptionUtils.UNSUPPORTED_PASS_TYPE.formatted(passTimeType));
         }
