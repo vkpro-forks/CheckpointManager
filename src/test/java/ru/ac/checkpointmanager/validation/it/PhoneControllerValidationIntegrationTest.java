@@ -31,9 +31,12 @@ import java.util.stream.Stream;
 @ActiveProfiles("test")
 public class PhoneControllerValidationIntegrationTest {
 
-    public static final String TYPE = "type";
-    public static final String USER_ID = "userId";
-    public static final String NUMBER = "number";
+    private static final String TYPE = "type";
+
+    private static final String USER_ID = "userId";
+
+    private static final String NUMBER = "number";
+
     @Autowired
     MockMvc mockMvc;
 
