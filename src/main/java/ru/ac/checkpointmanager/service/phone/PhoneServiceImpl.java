@@ -80,7 +80,7 @@ public class PhoneServiceImpl implements PhoneService {
                     log.warn(PHONE_NUMBER_NOT_FOUND_LOG, phoneId);
                     return new PhoneNumberNotFoundException(PHONE_NUMBER_NOT_FOUND_MSG.formatted(phoneId));
                 });
-        if (phoneRepository.existsByNumber(phoneDTO.getNumber())) {
+        if (phoneRepository.existsByNumber(cleanPhone(phoneDTO.getNumber()))) {
             log.warn("Phone {} already taken", phoneDTO.getNumber());
             throw new PhoneAlreadyExistException(String.format
                     ("Phone number %s already exist", phoneDTO.getNumber()));

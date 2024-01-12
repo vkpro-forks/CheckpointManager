@@ -26,14 +26,14 @@ import ru.ac.checkpointmanager.dto.VisitorDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.dto.user.AuthRequestDTO;
-import ru.ac.checkpointmanager.dto.user.RegistrationConfirmationDTO;
+import ru.ac.checkpointmanager.dto.user.EmailConfirmationDTO;
 import ru.ac.checkpointmanager.dto.user.NewEmailDTO;
 import ru.ac.checkpointmanager.dto.user.NewPasswordDTO;
-import ru.ac.checkpointmanager.dto.user.EmailConfirmationDTO;
 import ru.ac.checkpointmanager.dto.user.RefreshTokenDTO;
+import ru.ac.checkpointmanager.dto.user.RegistrationConfirmationDTO;
 import ru.ac.checkpointmanager.dto.user.RegistrationDTO;
-import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
+import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
 import ru.ac.checkpointmanager.exception.handler.ErrorCode;
 import ru.ac.checkpointmanager.model.Phone;
 import ru.ac.checkpointmanager.model.Territory;
@@ -241,6 +241,12 @@ public class TestUtils {
         phone.setNumber(PHONE_NUM);
         phone.setType(PhoneNumberType.MOBILE);
         return phone;
+    }
+
+    public static Phone getPhone() {
+        return Instancio.of(Phone.class)
+                .ignore(Select.field("user"))
+                .create();
     }
 
     public static User getUserForDB() {
