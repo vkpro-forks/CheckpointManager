@@ -23,6 +23,7 @@ import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
 import ru.ac.checkpointmanager.exception.EmailAlreadyExistsException;
 import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
+import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.exception.MismatchCurrentPasswordException;
 import ru.ac.checkpointmanager.exception.ObjectAlreadyExistsException;
 import ru.ac.checkpointmanager.exception.PasswordConfirmationException;
@@ -356,7 +357,7 @@ class UserServiceImplTest {
         Assertions.assertThatThrownBy(
                         () -> userService.confirmEmail(token))
                 .isInstanceOf(EmailVerificationTokenException.class)
-                .hasMessageContaining("Invalid or expired token");
+                .hasMessageContaining(ExceptionUtils.INVALID_EMAIL_TOKEN_MSG.formatted(token));
 
         Mockito.verify(userRepository, Mockito.never()).save(ArgumentMatchers.any(User.class));
     }

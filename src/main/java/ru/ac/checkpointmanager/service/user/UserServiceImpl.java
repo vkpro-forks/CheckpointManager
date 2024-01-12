@@ -85,7 +85,7 @@ public class UserServiceImpl implements UserService {
     private final RedisCacheManager cacheManager;
     private final JwtService jwtService;
 
-    @Qualifier("userFacade")
+    @Qualifier("userAuthFacade")
     private final AuthFacade authFacade;
 
     public UserServiceImpl(UserMapper userMapper,
@@ -97,7 +97,7 @@ public class UserServiceImpl implements UserService {
                            PhoneService phoneService,
                            RedisCacheManager cacheManager,
                            JwtService jwtService,
-                           @Qualifier("userFacade") AuthFacade authFacade) {
+                           @Qualifier("userAuthFacade") AuthFacade authFacade) {
         this.userMapper = userMapper;
         this.territoryMapper = territoryMapper;
         this.userRepository = userRepository;
@@ -378,8 +378,8 @@ public class UserServiceImpl implements UserService {
             String refreshToken = jwtService.generateRefreshToken(user);
             return new AuthResponseDTO(accessToken, refreshToken);
         } else {
-            log.warn("Invalid or expired token");
-            throw new EmailVerificationTokenException("Invalid or expired token");
+            log.warn(ExceptionUtils.INVALID_EMAIL_TOKEN_MSG.formatted(token));
+            throw new EmailVerificationTokenException(ExceptionUtils.INVALID_EMAIL_TOKEN_MSG.formatted(token));
         }
     }
 

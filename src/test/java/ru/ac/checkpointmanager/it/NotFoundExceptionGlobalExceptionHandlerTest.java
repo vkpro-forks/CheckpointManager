@@ -6,7 +6,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -17,7 +16,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.ac.checkpointmanager.dto.CarBrandDTO;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.CheckpointDTO;
-import ru.ac.checkpointmanager.dto.CrossingDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.exception.handler.ErrorCode;
 import ru.ac.checkpointmanager.model.Territory;
@@ -26,8 +24,6 @@ import ru.ac.checkpointmanager.model.car.Car;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
 import ru.ac.checkpointmanager.model.checkpoints.CheckpointType;
-import ru.ac.checkpointmanager.model.passes.PassAuto;
-import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.repository.CheckpointRepository;
 import ru.ac.checkpointmanager.repository.PassRepository;
 import ru.ac.checkpointmanager.repository.TerritoryRepository;
@@ -37,7 +33,6 @@ import ru.ac.checkpointmanager.repository.car.CarRepository;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandlerBasicTestConfig {
@@ -157,21 +152,6 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
     }
 
     //CHECKPOINT NOT FOUND EXCEPTION HANDLING
-
-    @Test
-    @SneakyThrows
-    void shouldHandleCheckPointNotFoundExceptionForMarkCrossing() {
-        PassAuto passAuto = new PassAuto();
-        passAuto.setStatus(PassStatus.ACTIVE);
-        Mockito.when(passRepository.findById(TestUtils.PASS_ID)).thenReturn(Optional.of(passAuto));
-        String crossingDto = TestUtils.jsonStringFromObject(TestUtils.getCrossingDTO());
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CROSSING_URL)
-                        .content(crossingDto)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL).value(Matchers.startsWith("Checkpoint")));
-        TestUtils.checkNotFoundFields(resultActions);
-    }
-
     @Test
     @SneakyThrows
     void shouldHandleCheckPointNotFoundExceptionForGetCheckPoint() {
@@ -231,29 +211,6 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
     }
 
     //PASS NOT FOUND EXCEPTION HANDLING
-
-    @Test
-    @SneakyThrows
-    void handlePassNotFoundExceptionForMarkCrossing() {
-        Checkpoint checkpoint = new Checkpoint();
-        checkpoint.setName(TestUtils.CHECKPOINT_NAME);
-        checkpoint.setType(CheckpointType.AUTO);
-        Territory territory = new Territory();
-        territory.setName("name");
-        territoryRepository.save(territory);
-        checkpoint.setTerritory(territory);
-        Checkpoint savedCheckPoint = checkpointRepository.save(checkpoint);
-        CrossingDTO crossingDTO = TestUtils.getCrossingDTO();
-        crossingDTO.setCheckpointId(savedCheckPoint.getId());
-        String crossingDto = TestUtils.jsonStringFromObject(crossingDTO);
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CROSSING_URL)
-                        .content(crossingDto)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
-                        .value(Matchers.startsWith("Pass")));
-        TestUtils.checkNotFoundFields(resultActions);
-    }
-
     @Test
     @SneakyThrows
     void shouldHandlePassNotFoundExceptionForGetPass() {

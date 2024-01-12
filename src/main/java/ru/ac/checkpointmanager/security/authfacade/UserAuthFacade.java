@@ -7,10 +7,10 @@ import ru.ac.checkpointmanager.model.User;
 
 import java.util.UUID;
 
-@Component("userFacade")
+@Component("userAuthFacade")
 @RequiredArgsConstructor
 @Slf4j
-public class UserFacade implements AuthFacade {
+public class UserAuthFacade implements AuthFacade {
 
     @Override
     public boolean isIdMatch(UUID userId) {
