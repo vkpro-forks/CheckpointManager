@@ -14,7 +14,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.test.util.ReflectionTestUtils;
 import ru.ac.checkpointmanager.dto.PhoneDTO;
-
 import ru.ac.checkpointmanager.exception.ObjectAlreadyExistsException;
 import ru.ac.checkpointmanager.exception.PhoneAlreadyExistException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
@@ -51,7 +50,7 @@ class PhoneServiceImplTest {
     void init() {
         ReflectionTestUtils.setField(phoneService, "phoneMapper", new PhoneMapper(new ModelMapper()));
     }
-  
+
     @Test
     void findByIdReturnPhoneDTO() {
         Phone phone = TestUtils.getPhone();
@@ -167,8 +166,8 @@ class PhoneServiceImplTest {
         Mockito.when(phoneRepository.findAll()).thenReturn(Collections.emptyList());
         Assertions.assertThatNoException().isThrownBy(() -> phoneService.getAll());
     }
-}
 
+    @Test
     void createPhoneNumber_AllOk_SavePhoneNumber() {
         User user = TestUtils.getUser();
         PhoneDTO phoneDto = TestUtils.getPhoneDto();
@@ -213,6 +212,5 @@ class PhoneServiceImplTest {
 
         Mockito.verify(phoneRepository, Mockito.never()).save(Mockito.any());
     }
-
 }
 
