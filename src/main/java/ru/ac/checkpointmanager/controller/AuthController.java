@@ -64,14 +64,12 @@ public class AuthController {
                     description = """
                             BAD_REQUEST: Ошибки валидации:
                             Имя: только латиница/кириллица, каждое новое слово начинается с заглавной;
-                            Дата рождения: не больше текущей даты;
-                            Телефон: 11-20 символов, только цифры, пробелы и символы '(', ')', '-', '+';
                             Email: валидация по RFC 5322;
                             Пароль: без пробелов, 6-20 символов"""
             ),
             @ApiResponse(
                     responseCode = "409",
-                    description = "CONFLICT: Email/телефон уже заняты"
+                    description = "CONFLICT: Email уже используется"
             ),
             @ApiResponse(
                     responseCode = "500",
@@ -95,8 +93,8 @@ public class AuthController {
                             )
                     ),
                     @ApiResponse(
-                            responseCode = "400",
-                            description = "BAD_REQUEST: неверный логин или пароль"
+                            responseCode = "401",
+                            description = "UNAUTHORIZED: неверный логин или пароль/пользователь заблокирован"
                     ),
                     @ApiResponse(
                             responseCode = "500",
@@ -125,9 +123,13 @@ public class AuthController {
                                     mediaType = MediaType.APPLICATION_JSON_VALUE
                             )
                     ),
+//                    @ApiResponse(
+//                            responseCode = "401",
+//                            description = "UNAUTHORIZED: Невалидный токен обновления"
+//                    ),
                     @ApiResponse(
-                            responseCode = "401",
-                            description = "UNAUTHORIZED: Недействительный токен обновления или проблемы с аутентификацией пользователя"
+                            responseCode = "403",
+                            description = "FORBIDDEN: Невалидный токен обновления"
                     )
             }
     )

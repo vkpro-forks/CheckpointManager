@@ -194,7 +194,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(InvalidTokenException.class)
     public ProblemDetail handleInvalidTokenException(InvalidTokenException e) {
-        ProblemDetail problemDetail = createProblemDetail(HttpStatus.FORBIDDEN, e);
+        ProblemDetail problemDetail = createProblemDetail(HttpStatus.FORBIDDEN, e); // а не 401?
         problemDetail.setTitle("Jwt is invalid");
         problemDetail.setProperty(ERROR_CODE, ErrorCode.FORBIDDEN.toString());
         log.debug(LOG_MSG, e.getClass());
