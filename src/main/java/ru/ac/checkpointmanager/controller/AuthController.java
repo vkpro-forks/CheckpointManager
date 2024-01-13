@@ -26,10 +26,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.dto.user.AuthRequestDTO;
 import ru.ac.checkpointmanager.dto.user.AuthResponseDTO;
-import ru.ac.checkpointmanager.dto.user.RegistrationConfirmationDTO;
-import ru.ac.checkpointmanager.dto.user.PreAuthResponseDTO;
 import ru.ac.checkpointmanager.dto.user.LoginResponseDTO;
+import ru.ac.checkpointmanager.dto.user.PreAuthResponseDTO;
 import ru.ac.checkpointmanager.dto.user.RefreshTokenDTO;
+import ru.ac.checkpointmanager.dto.user.RegistrationConfirmationDTO;
 import ru.ac.checkpointmanager.dto.user.RegistrationDTO;
 import ru.ac.checkpointmanager.service.auth.AuthenticationService;
 import ru.ac.checkpointmanager.utils.ErrorUtils;
@@ -64,14 +64,12 @@ public class AuthController {
                     description = """
                             BAD_REQUEST: Ошибки валидации:
                             Имя: только латиница/кириллица, каждое новое слово начинается с заглавной;
-                            Дата рождения: не больше текущей даты;
-                            Телефон: 11-20 символов, только цифры, пробелы и символы '(', ')', '-', '+';
                             Email: валидация по RFC 5322;
                             Пароль: без пробелов, 6-20 символов"""
             ),
             @ApiResponse(
                     responseCode = "409",
-                    description = "CONFLICT: Email/телефон уже заняты"
+                    description = "CONFLICT: Email уже используется"
             ),
             @ApiResponse(
                     responseCode = "500",
@@ -95,8 +93,8 @@ public class AuthController {
                             )
                     ),
                     @ApiResponse(
-                            responseCode = "400",
-                            description = "BAD_REQUEST: неверный логин или пароль"
+                            responseCode = "401",
+                            description = "UNAUTHORIZED: неверный логин или пароль/пользователь заблокирован"
                     ),
                     @ApiResponse(
                             responseCode = "500",
@@ -126,8 +124,8 @@ public class AuthController {
                             )
                     ),
                     @ApiResponse(
-                            responseCode = "401",
-                            description = "UNAUTHORIZED: Недействительный токен обновления или проблемы с аутентификацией пользователя"
+                            responseCode = "403",
+                            description = "FORBIDDEN: Невалидный токен обновления"
                     )
             }
     )
