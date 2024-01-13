@@ -16,11 +16,11 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.user.AuthResponseDTO;
+import ru.ac.checkpointmanager.dto.user.EmailConfirmationDTO;
 import ru.ac.checkpointmanager.dto.user.NewEmailDTO;
 import ru.ac.checkpointmanager.dto.user.NewPasswordDTO;
-import ru.ac.checkpointmanager.dto.user.EmailConfirmationDTO;
-import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
+import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
 import ru.ac.checkpointmanager.exception.EmailAlreadyExistsException;
 import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
 import ru.ac.checkpointmanager.exception.ExceptionUtils;
@@ -155,8 +155,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<TerritoryDTO> findTerritoriesByUserId(UUID userId) {
         log.debug(METHOD_UUID, MethodLog.getMethodName(), userId);
-        //FIXME Если юзера нет, то просто даст пустой список, вместо ошибки, баг?
-        List<Territory> territories = userRepository.findTerritoriesByUserId(userId);
+        User user = userRepository.findUserWithTerritoriesById(userId).orElseThrow(
+                () -> {
+                    log.warn(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(userId));
+                    return new UserNotFoundException(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(userId));
+                }
+        );
+        List<Territory> territories = user.getTerritories();
         return territoryMapper.toTerritoriesDTO(territories);
     }
 
@@ -198,7 +203,7 @@ public class UserServiceImpl implements UserService {
      * </p>
      *
      * @param userUpdateDTO DTO пользователя, содержащее обновленные данные. Должно включать идентификатор пользователя,
-     *                   а также может включать новое полное имя и основной номер телефона.
+     *                      а также может включать новое полное имя и основной номер телефона.
      * @return UserResponseDTO, содержащий обновленные данные пользователя.
      * @throws UserNotFoundException если пользователь с предоставленным идентификатором не найден.
      * @see UserUpdateDTO

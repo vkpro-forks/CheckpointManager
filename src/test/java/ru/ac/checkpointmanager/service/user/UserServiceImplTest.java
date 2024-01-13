@@ -16,17 +16,18 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
+import ru.ac.checkpointmanager.dto.user.EmailConfirmationDTO;
 import ru.ac.checkpointmanager.dto.user.NewEmailDTO;
 import ru.ac.checkpointmanager.dto.user.NewPasswordDTO;
-import ru.ac.checkpointmanager.dto.user.EmailConfirmationDTO;
-import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
+import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
 import ru.ac.checkpointmanager.exception.EmailAlreadyExistsException;
 import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
 import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.exception.MismatchCurrentPasswordException;
 import ru.ac.checkpointmanager.exception.ObjectAlreadyExistsException;
 import ru.ac.checkpointmanager.exception.PasswordConfirmationException;
+import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.mapper.TerritoryMapper;
 import ru.ac.checkpointmanager.mapper.UserMapper;
 import ru.ac.checkpointmanager.model.Territory;
@@ -112,16 +113,17 @@ class UserServiceImplTest {
         UUID userId = TestUtils.USER_ID;
         List<Territory> territories = List.of(TestUtils.getTerritory());
         List<TerritoryDTO> territoryDTOs = List.of(TestUtils.getTerritoryDTO());
+        User user = TestUtils.getUser();
+        user.setTerritories(territories);
 
-        Mockito.when(userRepository.findTerritoriesByUserId(userId)).thenReturn(territories);
+        Mockito.when(userRepository.findUserWithTerritoriesById(userId)).thenReturn(Optional.of(user));
         Mockito.when(territoryMapper.toTerritoriesDTO(territories)).thenReturn(territoryDTOs);
-
         List<TerritoryDTO> result = userService.findTerritoriesByUserId(userId);
 
         Assertions.assertThat(result).isNotEmpty();
 
         Assertions.assertThat(territories).hasSameSizeAs(territoryDTOs);
-        Mockito.verify(userRepository).findTerritoriesByUserId(userId);
+        Mockito.verify(userRepository).findUserWithTerritoriesById(userId);
         Mockito.verify(territoryMapper).toTerritoriesDTO(territories);
     }
 
@@ -130,12 +132,26 @@ class UserServiceImplTest {
         UUID userId = TestUtils.USER_ID;
         List<Territory> territories = Collections.emptyList();
         List<TerritoryDTO> territoryDTOS = Collections.emptyList();
-        Mockito.when(userRepository.findTerritoriesByUserId(userId)).thenReturn(territories);
+        User user = TestUtils.getUser();
+        user.setTerritories(territories);
+        Mockito.when(userRepository.findUserWithTerritoriesById(userId)).thenReturn(Optional.of(user));
         Mockito.when(territoryMapper.toTerritoriesDTO(territories)).thenReturn(territoryDTOS);
 
         Assertions.assertThatNoException().isThrownBy(() -> userService.findTerritoriesByUserId(userId));
-        Mockito.verify(userRepository).findTerritoriesByUserId(userId);
+        Mockito.verify(userRepository).findUserWithTerritoriesById(userId);
         Mockito.verify(territoryMapper).toTerritoriesDTO(territories);
+    }
+
+    @Test
+    void findTerritoriesByUserId_UserNotFound_ThrowUserNotFoundException() {
+        UUID userId = TestUtils.USER_ID;
+        Mockito.when(userRepository.findUserWithTerritoriesById(userId)).thenReturn(Optional.empty());
+
+        Assertions.assertThatExceptionOfType(UserNotFoundException.class)
+                .isThrownBy(() -> userService.findTerritoriesByUserId(userId))
+                .isInstanceOf(EntityNotFoundException.class);
+
+        Mockito.verify(userRepository).findUserWithTerritoriesById(userId);
     }
 
     @Test

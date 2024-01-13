@@ -29,6 +29,7 @@ import ru.ac.checkpointmanager.config.security.WithMockCustomUser;
 import ru.ac.checkpointmanager.dto.user.NewEmailDTO;
 import ru.ac.checkpointmanager.dto.user.NewPasswordDTO;
 import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
+import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.model.Phone;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
@@ -154,6 +155,34 @@ class UserControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
                 .andExpect(jsonPath("$.length()", Matchers.is(territories.size())))
                 .andExpect(jsonPath("$[*].name", Matchers.hasItem(territory.getName())))
                 .andExpect(jsonPath("$[*].id", Matchers.hasItem(territory.getId().toString())));
+    }
+
+    @Test
+    @SneakyThrows
+    void getTerritoriesByUser_UserNotExists_HandleExceptionAndReturnNotFound() {
+        //given
+        CustomAuthenticationToken authToken = TestUtils.getAuthToken(savedUser);
+        log.info("Authorization token: {}", authToken);
+        Territory territory = TestUtils.getTerritoryForDB();
+        territory.setUsers(List.of(savedUser));
+        territoryRepository.saveAndFlush(territory);
+        UUID userId = savedUser.getId();
+        userRepository.deleteById(userId);
+
+        log.info("saved user id {}", userId);
+        log.info("Auth {}", authToken.getUserId());
+        //when
+        log.info(TestMessage.PERFORM_HTTP, HttpMethod.GET.name(),
+                UrlConstants.USER_TERR_URL.formatted(savedUser.getId()));
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .get(UrlConstants.USER_TERR_URL.formatted(userId))
+                .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
+                .contentType(MediaType.APPLICATION_JSON));
+        //then
+        resultActions.andExpect(status().isNotFound())
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(userId)));
+        TestUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
