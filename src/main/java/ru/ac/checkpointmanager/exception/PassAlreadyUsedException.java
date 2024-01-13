@@ -2,9 +2,9 @@ package ru.ac.checkpointmanager.exception;
 
 import ru.ac.checkpointmanager.exception.pass.PassException;
 
-public class MismatchedTerritoryException extends PassException {
+public class PassAlreadyUsedException extends PassException {
 
-    public MismatchedTerritoryException(String message) {
+    public PassAlreadyUsedException(String message) {
         super(message);
     }
 

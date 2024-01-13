@@ -14,6 +14,7 @@ import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassResponseDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
+import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.exception.pass.ModifyPassException;
 import ru.ac.checkpointmanager.exception.pass.OverlapPassException;
 import ru.ac.checkpointmanager.exception.pass.PassNotFoundException;
@@ -50,7 +51,6 @@ import static ru.ac.checkpointmanager.utils.StringTrimmer.trimThemAll;
 @RequiredArgsConstructor
 public class PassServiceImpl implements PassService {
 
-    private static final String PASS_NOT_FOUND = "Pass [%s] not found";
     private static final String PAGE_NO_CONTENT = "Page %d, size - %d, has no content (total pages - %d, total elements - %d)";
     private static final String PASS_NOT_UPDATE = "Pass [%s] cannot be updated (%s)";
     private static final String PASS_NOT_CANCEL = "Pass [%s] cannot be canceled (%s)";
@@ -121,11 +121,11 @@ public class PassServiceImpl implements PassService {
 
     @Override
     @Transactional(readOnly = true)
-    public Pass findPassById(UUID id) {
-        return passRepository.findById(id).orElseThrow(
+    public Pass findPassById(UUID passId) {
+        return passRepository.findById(passId).orElseThrow(
                 () -> {
-                    log.warn(PASS_NOT_FOUND.formatted(id));
-                    return new PassNotFoundException(PASS_NOT_FOUND.formatted(id));
+                    log.warn(ExceptionUtils.PASS_NOT_FOUND.formatted(passId));
+                    return new PassNotFoundException(ExceptionUtils.PASS_NOT_FOUND.formatted(passId));
                 });
     }
 
@@ -136,7 +136,7 @@ public class PassServiceImpl implements PassService {
 
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
         Specification<Pass> spec = Specification.where(PassSpecification.byUserId(userId))
-            .and(PassSpecification.byFilterParams(filterParams));
+                .and(PassSpecification.byFilterParams(filterParams));
 
         Page<Pass> foundPasses = passRepository.findAll(spec, pageable);
         if (!foundPasses.hasContent()) {
@@ -154,7 +154,7 @@ public class PassServiceImpl implements PassService {
 
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
         Specification<Pass> spec = Specification.where(PassSpecification.byTerritoryId(terId))
-            .and(PassSpecification.byFilterParams(filterParams));
+                .and(PassSpecification.byFilterParams(filterParams));
 
         Page<Pass> foundPasses = passRepository.findAll(spec, pageable);
         if (!foundPasses.hasContent()) {

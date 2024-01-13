@@ -7,24 +7,27 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.PhoneDTO;
-import ru.ac.checkpointmanager.exception.InvalidPhoneNumberException;
+import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.exception.PhoneAlreadyExistException;
 import ru.ac.checkpointmanager.exception.PhoneNumberNotFoundException;
+import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.mapper.PhoneMapper;
 import ru.ac.checkpointmanager.model.Phone;
+import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
+import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.util.Collection;
 import java.util.UUID;
 
 import static ru.ac.checkpointmanager.utils.FieldsValidation.cleanPhone;
-import static ru.ac.checkpointmanager.utils.FieldsValidation.isValidPhoneNumber;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class PhoneServiceImpl implements PhoneService {
+    private final UserRepository userRepository;
     private static final String PHONE_NUMBER_NOT_FOUND_MSG = "Phone number with id: %s doesn't exist";
     private static final String PHONE_NUMBER_NOT_FOUND_LOG = "Phone number with [id: {}] doesn't exist";
     private static final String METHOD_CALLED = "Method {}";
@@ -35,21 +38,26 @@ public class PhoneServiceImpl implements PhoneService {
     @Transactional
     public PhoneDTO createPhoneNumber(PhoneDTO phoneDTO) {
         log.debug(METHOD_CALLED, MethodLog.getMethodName());
+        String cleanedPhone = cleanPhone(phoneDTO.getNumber());
 
-        if (!isValidPhoneNumber(phoneDTO.getNumber())) {
-            log.warn("Phone number {} contains invalid characters", phoneDTO.getNumber());
-            throw new InvalidPhoneNumberException(String.format("Phone number %s contains invalid characters", phoneDTO.getNumber()));
+        User user = userRepository.findById(phoneDTO.getUserId()).orElseThrow(
+                () -> {
+                    log.warn(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(phoneDTO.getUserId()));
+                    return new UserNotFoundException(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(phoneDTO.getUserId()));
+                }
+        );
+        if (phoneRepository.existsByNumber(cleanedPhone)) {
+            String phoneNumber = phoneDTO.getNumber();
+            log.warn(ExceptionUtils.PHONE_EXISTS.formatted(phoneNumber));
+            throw new PhoneAlreadyExistException(ExceptionUtils.PHONE_EXISTS.formatted(phoneNumber));
         }
-        phoneDTO.setNumber(cleanPhone(phoneDTO.getNumber()));
+        Phone phone = phoneMapper.toPhone(phoneDTO);
+        phone.setUser(user);
+        phone.setNumber(cleanedPhone);
+        Phone savedPhone = phoneRepository.save(phone);
 
-        if (phoneRepository.existsByNumber(phoneDTO.getNumber())) {
-            log.warn("Phone {} already exist or NULL", phoneDTO.getNumber());
-            throw new PhoneAlreadyExistException(String.format
-                    ("Phone number %s already exist", phoneDTO.getNumber()));
-        }
-        Phone phone = phoneRepository.save(phoneMapper.toPhone(phoneDTO));
         log.info("Phone {} saved", phone.getNumber());
-        return phoneMapper.toPhoneDTO(phone);
+        return phoneMapper.toPhoneDTO(savedPhone);
     }
 
     @Cacheable(value = "phone", key = "#id")
@@ -120,4 +128,6 @@ public class PhoneServiceImpl implements PhoneService {
         log.debug(METHOD_CALLED, MethodLog.getMethodName());
         return phoneRepository.existsByNumber(number);
     }
+
+
 }

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.CheckpointDTO;
 import ru.ac.checkpointmanager.exception.CheckpointNotFoundException;
+import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.mapper.CheckpointMapper;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
@@ -23,8 +24,6 @@ import static ru.ac.checkpointmanager.utils.StringTrimmer.trimThemAll;
 @RequiredArgsConstructor
 public class CheckpointServiceImpl implements CheckpointService {
 
-    private static final String CHECKPOINT_NOT_FOUND_LOG = "[Checkpoint with id: {}] not found";
-    private static final String CHECKPOINT_NOT_FOUND_MSG = "Checkpoint with id: %s not found";
     private static final String METHOD_CALLED_LOG = "Method {}, UUID - {}";
 
     private final CheckpointRepository checkpointRepository;
@@ -48,8 +47,8 @@ public class CheckpointServiceImpl implements CheckpointService {
         log.debug(METHOD_CALLED_LOG, MethodLog.getMethodName(), id);
         Checkpoint foundCheckpoint = checkpointRepository.findById(id).orElseThrow(
                 () -> {
-                    log.warn(CHECKPOINT_NOT_FOUND_LOG, id);
-                    return new CheckpointNotFoundException(CHECKPOINT_NOT_FOUND_MSG.formatted(id));
+                    log.warn(ExceptionUtils.CHECKPOINT_NOT_FOUND.formatted(id));
+                    return new CheckpointNotFoundException(ExceptionUtils.CHECKPOINT_NOT_FOUND.formatted(id));
                 });
         return checkpointMapper.toCheckpointDTO(foundCheckpoint);
     }
@@ -59,8 +58,8 @@ public class CheckpointServiceImpl implements CheckpointService {
         log.debug(METHOD_CALLED_LOG, MethodLog.getMethodName(), id);
         return checkpointRepository.findById(id).orElseThrow(
                 () -> {
-                    log.warn(CHECKPOINT_NOT_FOUND_LOG, id);
-                    return new CheckpointNotFoundException(CHECKPOINT_NOT_FOUND_MSG.formatted(id));
+                    log.warn(ExceptionUtils.CHECKPOINT_NOT_FOUND.formatted(id));
+                    return new CheckpointNotFoundException(ExceptionUtils.CHECKPOINT_NOT_FOUND.formatted(id));
                 });
     }
 
@@ -93,11 +92,10 @@ public class CheckpointServiceImpl implements CheckpointService {
         log.info(METHOD_CALLED_LOG, MethodLog.getMethodName(), checkpointId);
         Checkpoint foundCheckpoint = checkpointRepository.findById(checkpointId)
                 .orElseThrow(() -> {
-                    log.warn(CHECKPOINT_NOT_FOUND_LOG, checkpointId);
-                    return new CheckpointNotFoundException(CHECKPOINT_NOT_FOUND_MSG.formatted(checkpointId));
+                    log.warn(ExceptionUtils.CHECKPOINT_NOT_FOUND.formatted(checkpointId));
+                    return new CheckpointNotFoundException(ExceptionUtils.CHECKPOINT_NOT_FOUND.formatted(checkpointId));
                 });
-        //FIXME It would be better to find entity here and bind it to checkpoint
-        //FIXME we don't need to go to DB if territory shouldn't change
+
         Territory territory = territoryService.findTerritoryById(checkpointDTO.getTerritory().getId());
         trimThemAll(checkpointDTO);
 
@@ -115,8 +113,8 @@ public class CheckpointServiceImpl implements CheckpointService {
     public void deleteCheckpointById(UUID id) {
         log.info(METHOD_CALLED_LOG, MethodLog.getMethodName(), id);
         if (checkpointRepository.findById(id).isEmpty()) {
-            log.warn(CHECKPOINT_NOT_FOUND_LOG, id);
-            throw new CheckpointNotFoundException(CHECKPOINT_NOT_FOUND_MSG.formatted(id));
+            log.warn(ExceptionUtils.CHECKPOINT_NOT_FOUND.formatted(id));
+            throw new CheckpointNotFoundException(ExceptionUtils.CHECKPOINT_NOT_FOUND.formatted(id));
         }
         checkpointRepository.deleteById(id);
         log.info("[Checkpoint with id: {}] successfully deleted", id);

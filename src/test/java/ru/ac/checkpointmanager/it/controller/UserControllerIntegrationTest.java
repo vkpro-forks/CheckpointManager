@@ -29,9 +29,13 @@ import ru.ac.checkpointmanager.config.security.WithMockCustomUser;
 import ru.ac.checkpointmanager.dto.user.NewEmailDTO;
 import ru.ac.checkpointmanager.dto.user.NewPasswordDTO;
 import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
+import ru.ac.checkpointmanager.exception.ExceptionUtils;
+import ru.ac.checkpointmanager.exception.handler.ErrorCode;
+import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.model.Phone;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
+import ru.ac.checkpointmanager.model.enums.PhoneNumberType;
 import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
 import ru.ac.checkpointmanager.repository.TerritoryRepository;
@@ -158,6 +162,34 @@ class UserControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
 
     @Test
     @SneakyThrows
+    void getTerritoriesByUser_UserNotExists_HandleExceptionAndReturnNotFound() {
+        //given
+        CustomAuthenticationToken authToken = TestUtils.getAuthToken(savedUser);
+        log.info("Authorization token: {}", authToken);
+        Territory territory = TestUtils.getTerritoryForDB();
+        territory.setUsers(List.of(savedUser));
+        territoryRepository.saveAndFlush(territory);
+        UUID userId = savedUser.getId();
+        userRepository.deleteById(userId);
+
+        log.info("saved user id {}", userId);
+        log.info("Auth {}", authToken.getUserId());
+        //when
+        log.info(TestMessage.PERFORM_HTTP, HttpMethod.GET.name(),
+                UrlConstants.USER_TERR_URL.formatted(savedUser.getId()));
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .get(UrlConstants.USER_TERR_URL.formatted(userId))
+                .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
+                .contentType(MediaType.APPLICATION_JSON));
+        //then
+        resultActions.andExpect(status().isNotFound())
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                        .value(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(userId)));
+        TestUtils.checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
     void getTerritoriesByUserIsForbiddenWithWrongId() {
         CustomAuthenticationToken authToken = TestUtils.getAuthToken(savedUser);
         UUID anotherID = UUID.randomUUID();
@@ -166,7 +198,6 @@ class UserControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
                         .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden());
-
     }
 
     @Test
@@ -238,7 +269,8 @@ class UserControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[*].id", Matchers.hasItem(savedUser.getId().toString())))
                 .andExpect(jsonPath("$[*].fullName", Matchers.hasItem(savedUser.getFullName())))
-                .andExpect(jsonPath("$[*].email", Matchers.hasItem(savedUser.getEmail())));
+                .andExpect(jsonPath("$[*].email", Matchers.hasItem(savedUser.getEmail())))
+                .andExpect(jsonPath("$[*].avatar").doesNotExist());
     }
 
     @Test
@@ -356,6 +388,33 @@ class UserControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
                 .andExpect(jsonPath("$.id", Matchers.is(userUpdateDTO.getId().toString())))
                 .andExpect(jsonPath("$.fullName", Matchers.is(userUpdateDTO.getFullName())))
                 .andExpect(jsonPath("$.mainNumber", Matchers.is(userUpdateDTO.getMainNumber())));
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockCustomUser
+    void updateUser_IfPhoneNumberExists_HandleAndReturnConflictError() {
+        //given
+        UUID userId = savedUser.getId();
+        UserUpdateDTO userUpdateDTO = TestUtils.getUserUpdateDTO();
+        userUpdateDTO.setId(userId);
+        String cleanedPhone = FieldsValidation.cleanPhone(userUpdateDTO.getMainNumber());
+        userUpdateDTO.setMainNumber(cleanedPhone);
+        Phone phone = new Phone();
+        phone.setNumber(cleanedPhone);
+        phone.setType(PhoneNumberType.MOBILE);
+        phone.setUser(savedUser);
+        phoneRepository.saveAndFlush(phone);
+        String userPutDTOString = TestUtils.jsonStringFromObject(userUpdateDTO);
+        //when
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.put(UrlConstants.USER_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(userPutDTOString));
+        //then
+        resultActions.andExpect(status().isConflict())
+                .andExpect(jsonPath(TestUtils.JSON_ERROR_CODE)
+                        .value(ErrorCode.CONFLICT.toString()))
+                .andExpect(jsonPath(TestUtils.JSON_DETAIL).value(ExceptionUtils.PHONE_EXISTS.formatted(cleanedPhone)));
     }
 
     @Test
@@ -556,10 +615,10 @@ class UserControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
     @WithMockCustomUser
     void updateBlockStatusIsOk() {
         UUID userId = savedUser.getId();
-        Boolean isBlocked = true;
+        boolean isBlocked = true;
 
         mockMvc.perform(MockMvcRequestBuilders.patch(UrlConstants.USER_URL + "/{id}", userId)
-                        .param("isBlocked", isBlocked.toString()))
+                        .param("isBlocked", Boolean.toString(isBlocked)))
                 .andExpect(status().isOk());
     }
 
@@ -568,10 +627,10 @@ class UserControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
     @WithMockCustomUser(role = "USER")
     void updateBlockStatusIsForbidden() {
         UUID userId = savedUser.getId();
-        Boolean isBlocked = true;
+        boolean isBlocked = true;
 
         mockMvc.perform(MockMvcRequestBuilders.patch(UrlConstants.USER_URL + "/{id}", userId)
-                        .param("isBlocked", isBlocked.toString()))
+                        .param("isBlocked", Boolean.toString(isBlocked)))
                 .andExpect(status().isForbidden());
     }
 
@@ -580,10 +639,10 @@ class UserControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
     @WithMockCustomUser
     void updateBlockStatusIsNotFound() {
         UUID userId = UUID.randomUUID();
-        Boolean isBlocked = true;
+        boolean isBlocked = true;
 
         mockMvc.perform(MockMvcRequestBuilders.patch(UrlConstants.USER_URL + "/{id}", userId)
-                        .param("isBlocked", isBlocked.toString()))
+                        .param("isBlocked", Boolean.toString(isBlocked)))
                 .andExpect(status().isNotFound());
     }
 

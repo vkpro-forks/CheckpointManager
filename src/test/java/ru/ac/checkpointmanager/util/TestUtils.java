@@ -20,6 +20,7 @@ import ru.ac.checkpointmanager.dto.CarBrandDTO;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.CheckpointDTO;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
+import ru.ac.checkpointmanager.dto.CrossingRequestDTO;
 import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.VisitorDTO;
@@ -35,6 +36,7 @@ import ru.ac.checkpointmanager.dto.user.RegistrationDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
 import ru.ac.checkpointmanager.exception.handler.ErrorCode;
+import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.model.Phone;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
@@ -46,6 +48,7 @@ import ru.ac.checkpointmanager.model.checkpoints.CheckpointType;
 import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.enums.PhoneNumberType;
 import ru.ac.checkpointmanager.model.enums.Role;
+import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.model.passes.PassTimeType;
@@ -143,6 +146,20 @@ public class TestUtils {
                 ZonedDateTime.now(),
                 Direction.IN
         );
+    }
+
+    public static CrossingRequestDTO getCrossingRequestDTO() {
+        return new CrossingRequestDTO(
+                PASS_ID,
+                CHECKPOINT_ID,
+                ZonedDateTime.now()
+        );
+    }
+
+    public static Crossing getCrossing(Pass pass, Checkpoint checkpoint, Direction direction) {
+        return new Crossing(CROSSING_ID, pass,checkpoint, ZonedDateTime.now(), LocalDateTime.now(),
+                direction
+                );
     }
 
     public static Territory getTerritory() {
@@ -367,6 +384,20 @@ public class TestUtils {
         passAuto.setEndTime(LocalDateTime.now().plusHours(3));
         passAuto.setId(UUID.randomUUID());
         passAuto.setTimeType(PassTimeType.ONETIME);
+        passAuto.setDtype("AUTO");
+        passAuto.setStatus(PassStatus.ACTIVE);
+        passAuto.setCar(car);
+        passAuto.setUser(user);
+        passAuto.setTerritory(territory);
+        return passAuto;
+    }
+
+    public static PassAuto getSimpleActivePermanentAutoFor3Hours(User user, Territory territory, Car car) {
+        PassAuto passAuto = new PassAuto();
+        passAuto.setStartTime(LocalDateTime.now());
+        passAuto.setEndTime(LocalDateTime.now().plusHours(3));
+        passAuto.setId(UUID.randomUUID());
+        passAuto.setTimeType(PassTimeType.PERMANENT);
         passAuto.setDtype("AUTO");
         passAuto.setStatus(PassStatus.ACTIVE);
         passAuto.setCar(car);
