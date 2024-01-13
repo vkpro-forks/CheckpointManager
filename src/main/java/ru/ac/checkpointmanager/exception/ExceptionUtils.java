@@ -14,6 +14,8 @@ public class ExceptionUtils {
 
     public static final String PHONE_EXISTS = "Phone number %s already exist";
 
+    public static final String CACHING_FAILED = "Caching failed: {}";
+
     public static final String PASS_ALREADY_USED = "OnetimePass [%s] has already been used, it is not possible to enter";
 
     public static final String UNSUPPORTED_PASS_TYPE = "Unsupported pass time type - %s";

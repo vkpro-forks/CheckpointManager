@@ -152,8 +152,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<TerritoryDTO> findTerritoriesByUserId(UUID userId) {
         log.debug(METHOD_UUID, MethodLog.getMethodName(), userId);
-        //FIXME Если юзера нет, то просто даст пустой список, вместо ошибки, баг?
-        List<Territory> territories = userRepository.findTerritoriesByUserId(userId);
+        User user = userRepository.findUserWithTerritoriesById(userId).orElseThrow(
+                () -> {
+                    log.warn(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(userId));
+                    return new UserNotFoundException(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(userId));
+                }
+        );
+        List<Territory> territories = user.getTerritories();
         return territoryMapper.toTerritoriesDTO(territories);
     }
 

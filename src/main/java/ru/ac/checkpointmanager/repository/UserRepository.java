@@ -6,22 +6,20 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import ru.ac.checkpointmanager.model.avatar.Avatar;
-import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
+import ru.ac.checkpointmanager.model.avatar.Avatar;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Repository
+@Repository //FIXME кстати можно не ставить спринг все что экстендится от JPA репозитори считает репо
 public interface UserRepository extends JpaRepository<User, UUID> {
     Collection<User> findUserByFullNameContainingIgnoreCase(String name);
 
     Optional<User> findByEmail(String email);
 
-    @Transactional
+    @Transactional // FIXME оно и без это транзакции будет в транзакции (просто для информации, тут эта аннотация лишняя)
     @Modifying
     @Query(value = "UPDATE users u SET is_blocked = true WHERE u.id = :id", nativeQuery = true)
     void blockById(@Param("id") UUID id);
@@ -31,8 +29,8 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     @Query(value = "UPDATE users u SET is_blocked = false WHERE u.id = :id", nativeQuery = true)
     void unblockById(@Param("id") UUID id);
 
-    @Query("SELECT u.territories FROM User u WHERE u.id = :userId")
-    List<Territory> findTerritoriesByUserId(@Param("userId") UUID userId);
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.territories WHERE u.id= :userId")
+    Optional<User> findUserWithTerritoriesById(@Param("userId") UUID userId);
 
     @Modifying
     @Query("update User u set u.avatar = :avatar where u.id = :userId")
