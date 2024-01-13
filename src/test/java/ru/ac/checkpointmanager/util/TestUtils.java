@@ -51,6 +51,8 @@ import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.model.passes.PassTimeType;
 import ru.ac.checkpointmanager.security.CustomAuthenticationToken;
 
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.security.Key;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -74,6 +76,14 @@ public class TestUtils {
     public static final String ERROR_MESSAGE_SHOULD = "This check should be not here";
 
     public static final UUID PASS_ID = UUID.randomUUID();
+
+    public static final int NO_VALID_WIDTH = 2000;
+
+    public static final int NO_VALID_HEIGHT = 2000;
+
+    public static final int NORMAL_HEIGHT = 150;
+
+    public static final int NORMAL_WIDTH = 150;
 
     public static final UUID CHECKPOINT_ID = UUID.randomUUID();
 
@@ -452,14 +462,26 @@ public class TestUtils {
         return avatar;
     }
 
-    public static Avatar createTestAvatarNotWithPreview() {
-        Avatar avatar = new Avatar();
-        avatar.setId(AVATAR_ID);
-        avatar.setMediaType(DEFAULT_MEDIA_TYPE);
-        avatar.setFilePath(DEFAULT_FILE_PATH);
-        avatar.setFileSize(1024L);
-        avatar.setPreview(null);
-        return avatar;
+    public static BufferedImage createLargeBufferedImage() {
+        int width = NO_VALID_WIDTH;
+        int height = NO_VALID_HEIGHT;
+        BufferedImage largeImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = largeImage.createGraphics();
+        g2d.setColor(Color.RED);
+        g2d.fillRect(0, 0, width, height);
+        g2d.dispose();
+        return largeImage;
+    }
+
+    public static BufferedImage createSmallBufferedImage() {
+        int width = NORMAL_WIDTH;
+        int height = NORMAL_HEIGHT;
+        BufferedImage smallImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = smallImage.createGraphics();
+        g2d.setColor(Color.BLUE);
+        g2d.fillRect(0, 0, width, height);
+        g2d.dispose();
+        return smallImage;
     }
 
 }
