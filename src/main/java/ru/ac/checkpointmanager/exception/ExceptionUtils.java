@@ -12,6 +12,8 @@ public class ExceptionUtils {
 
     public static final String EMAIL_EXISTS = "[Email: %s] already exists";
 
+    public static final String PHONE_EXISTS = "Phone number %s already exist";
+
     public static final String CACHING_FAILED = "Caching failed: {}";
 
     public static final String PASS_ALREADY_USED = "OnetimePass [%s] has already been used, it is not possible to enter";

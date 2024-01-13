@@ -16,12 +16,6 @@ public class FieldsValidation {
         return cleanedPhone;
     }
 
-    public static boolean isValidPhoneNumber(String phoneNumber) {
-        String regex = "^([+]?[\\s0-9]+)?(\\d{3}|[(]?[0-9]+[)])?([-]?[\\s]?[0-9])+$";
-        Pattern pattern = Pattern.compile(regex);
-        return pattern.matcher(phoneNumber).matches();
-    }
-
     @Deprecated
     public static Boolean validateDOB(LocalDate dateOfBirth) {
         LocalDate currentDate = LocalDate.now();

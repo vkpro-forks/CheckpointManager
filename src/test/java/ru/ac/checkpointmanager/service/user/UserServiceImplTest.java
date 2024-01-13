@@ -14,7 +14,6 @@ import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.mail.MailSendException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.user.EmailConfirmationDTO;
 import ru.ac.checkpointmanager.dto.user.NewEmailDTO;
@@ -27,6 +26,7 @@ import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.exception.MismatchCurrentPasswordException;
 import ru.ac.checkpointmanager.exception.ObjectAlreadyExistsException;
 import ru.ac.checkpointmanager.exception.PasswordConfirmationException;
+import ru.ac.checkpointmanager.exception.PhoneAlreadyExistException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.mapper.TerritoryMapper;
 import ru.ac.checkpointmanager.mapper.UserMapper;
@@ -39,8 +39,8 @@ import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.security.authfacade.AuthFacade;
 import ru.ac.checkpointmanager.security.jwt.JwtService;
 import ru.ac.checkpointmanager.service.email.EmailService;
-import ru.ac.checkpointmanager.service.phone.PhoneService;
 import ru.ac.checkpointmanager.util.TestUtils;
+import ru.ac.checkpointmanager.utils.FieldsValidation;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -48,7 +48,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -69,8 +68,7 @@ class UserServiceImplTest {
     AuthFacade authenticationFacade;
     @Mock
     private EmailService emailService;
-    @Mock
-    private PhoneService phoneService;
+
     @Mock
     private RedisCacheManager cacheManager;
     @Mock
@@ -221,13 +219,33 @@ class UserServiceImplTest {
 
         Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         Mockito.when(userMapper.toUserResponseDTO(user)).thenReturn(userResponseDTO);
-        when(phoneService.createPhoneNumber(any(PhoneDTO.class))).thenReturn(any(PhoneDTO.class));
 
         UserResponseDTO result = userService.updateUser(userUpdateDTO);
 
         Assertions.assertThat(result).isNotNull().isEqualTo(userResponseDTO);
         Mockito.verify(userRepository).save(user);
         Mockito.verify(userMapper).toUserResponseDTO(user);
+    }
+
+    @Test
+    void updateUser_IfNewPhoneTheSameAsCurrent_NotSetPhone() {
+        User user = TestUtils.getUser();
+        UUID userId = user.getId();
+        user.setMainNumber(FieldsValidation.cleanPhone(TestUtils.PHONE_NUM));
+        UserResponseDTO userResponseDTO = TestUtils.getUserResponseDTO();
+        userResponseDTO.setId(userId);
+        UserUpdateDTO userUpdateDTO = TestUtils.getUserUpdateDTO();
+        userUpdateDTO.setId(userId);
+        userUpdateDTO.setMainNumber(TestUtils.PHONE_NUM);
+        Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        Mockito.when(userMapper.toUserResponseDTO(user)).thenReturn(userResponseDTO);
+
+        UserResponseDTO result = userService.updateUser(userUpdateDTO);
+
+        Assertions.assertThat(result).isNotNull().isEqualTo(userResponseDTO);
+        Mockito.verify(userRepository).save(user);
+        Mockito.verify(userMapper).toUserResponseDTO(user);
+        Mockito.verify(phoneRepository, Mockito.never()).existsByNumber(Mockito.any());
     }
 
     @Test
@@ -241,6 +259,26 @@ class UserServiceImplTest {
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessageContaining("not found");
         Mockito.verify(userRepository).findById(userId);
+    }
+
+    @Test
+    void updateUser_IfPhoneExists_ThrowException() {
+        User user = TestUtils.getUser();
+        UUID userId = user.getId();
+        UserResponseDTO userResponseDTO = TestUtils.getUserResponseDTO();
+        userResponseDTO.setId(userId);
+        UserUpdateDTO userUpdateDTO = TestUtils.getUserUpdateDTO();
+        userUpdateDTO.setId(userId);
+
+        Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        Mockito.when(phoneRepository.existsByNumber(Mockito.any()))
+                .thenReturn(true);
+
+        Assertions.assertThatExceptionOfType(PhoneAlreadyExistException.class)
+                .isThrownBy(() -> userService.updateUser(userUpdateDTO)
+                ).isInstanceOf(ObjectAlreadyExistsException.class);
+
+        Mockito.verify(userRepository, Mockito.never()).save(Mockito.any());
     }
 
     @Test
