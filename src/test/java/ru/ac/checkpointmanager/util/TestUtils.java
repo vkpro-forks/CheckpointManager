@@ -71,6 +71,8 @@ public class TestUtils {
 
     public static final String USER_NAME = "name";
 
+    public static final String ERROR_MESSAGE_SHOULD = "This check should be not here";
+
     public static final UUID PASS_ID = UUID.randomUUID();
 
     public static final UUID CHECKPOINT_ID = UUID.randomUUID();
@@ -438,6 +440,25 @@ public class TestUtils {
         avatar.setFilePath(DEFAULT_FILE_PATH);
         avatar.setFileSize(1024L);
         avatar.setPreview(new byte[10]);
+        return avatar;
+    }
+
+    public static Avatar createTestAvatarWithEmptyImageData() {
+        Avatar avatar = new Avatar();
+        avatar.setId(UUID.randomUUID());
+        avatar.setPreview(new byte[0]);
+        avatar.setMediaType(null);
+        avatar.setFileSize(0L);
+        return avatar;
+    }
+
+    public static Avatar createTestAvatarNotWithPreview() {
+        Avatar avatar = new Avatar();
+        avatar.setId(AVATAR_ID);
+        avatar.setMediaType(DEFAULT_MEDIA_TYPE);
+        avatar.setFilePath(DEFAULT_FILE_PATH);
+        avatar.setFileSize(1024L);
+        avatar.setPreview(null);
         return avatar;
     }
 
