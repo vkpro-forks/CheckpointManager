@@ -1,9 +1,11 @@
-package ru.ac.checkpointmanager.configuration;
+package ru.ac.checkpointmanager.configuration.cache;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
+import org.springframework.cache.annotation.CachingConfigurer;
+import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
@@ -26,7 +28,7 @@ import java.util.Map;
  * включая настройку шаблона RedisTemplate и менеджера кэша RedisCacheManager.
  */
 @Configuration
-public class RedisConfig {
+public class RedisConfig implements CachingConfigurer {
 
     /**
      * Создаёт и настраивает {@link RedisTemplate} для сериализации и десериализации объектов Redis.
@@ -88,6 +90,11 @@ public class RedisConfig {
                 .cacheDefaults(config)
                 .withInitialCacheConfigurations(tempCache)
                 .build();
+    }
+
+    @Override
+    public CacheErrorHandler errorHandler() {
+        return new RedisCacheErrorHandler();
     }
 
 }
