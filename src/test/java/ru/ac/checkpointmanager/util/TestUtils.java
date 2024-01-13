@@ -260,6 +260,12 @@ public class TestUtils {
         return phone;
     }
 
+    public static Phone getPhone() {
+        return Instancio.of(Phone.class)
+                .ignore(Select.field("user"))
+                .create();
+    }
+
     public static User getUserForDB() {
         User user = new User();
         user.setFullName(FULL_NAME);

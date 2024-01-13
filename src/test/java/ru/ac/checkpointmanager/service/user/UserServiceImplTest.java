@@ -332,12 +332,10 @@ class UserServiceImplTest {
         Mockito.when(authenticationFacade.getCurrentUser()).thenReturn(user);
         Mockito.when(userRepository.findByEmail(request.getNewEmail())).thenReturn(Optional.empty());
         Mockito.when(userMapper.toConfirmChangeEmail(request)).thenReturn(confirm);
-//        Mockito.when(cacheManager.getCache("email")).thenReturn(cache); //TODO проверить кэш в интеграционном тесте
 
         userService.changeEmail(request);
         Mockito.verify(userRepository).findByEmail(anyString());
         Mockito.verify(emailService).sendEmailConfirm(anyString(), anyString());
-//        Mockito.verify(cache).put(confirmChangeEmail.getVerifiedToken(), confirmChangeEmail);
     }
 
     @Test
