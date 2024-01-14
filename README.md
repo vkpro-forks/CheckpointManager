@@ -1,3 +1,4 @@
+[![](https://img.shields.io/badge/Spring%20Boot%20Version-3.1.2-orange)](/build.gradle) [![](https://img.shields.io/badge/Java%20Version-17-orange)](/build.gradle)
 # Checkpoint Manager
 _описание чё за херь вообще и зачем - про проект в целом и про сам сервис_
 
