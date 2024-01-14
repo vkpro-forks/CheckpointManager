@@ -27,4 +27,8 @@ public class TerritoryDTO {
 
     @Size(max = 200)
     private String note;
+
+    private String city;
+
+    private String address;
 }

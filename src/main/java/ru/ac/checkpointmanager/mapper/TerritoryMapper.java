@@ -32,7 +32,7 @@ public class TerritoryMapper {
         return territories.stream()
                 .map(e -> modelMapper.map(e, TerritoryDTO.class))
                 .collect(Collectors.toList()); //if we will replace to Stream.toList() it will cause
-        // deserialization error in Redis
+        // deserialization error in Redis FIXME можно пояснить?
     }
 
     public List<Territory> toTerritories(List<TerritoryDTO> territoriesDTO) {
