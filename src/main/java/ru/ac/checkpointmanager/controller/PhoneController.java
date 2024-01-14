@@ -126,7 +126,7 @@ public class PhoneController {
             ),
             @ApiResponse(
                     responseCode = "409",
-                    description = "BAD_REQUEST: номер уже существует"
+                    description = "CONFLICT: номер уже существует"
             ),
             @ApiResponse(
                     responseCode = "404",
