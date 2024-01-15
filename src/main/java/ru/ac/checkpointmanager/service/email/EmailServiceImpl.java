@@ -67,7 +67,7 @@ public class EmailServiceImpl implements EmailService {
 
             helper.setFrom(prodEmail);
             helper.setTo(to);
-            helper.setSubject("Registration");
+            helper.setSubject("Регистрация");
             helper.setText(htmlContent, true);
 
             mailSender.send(message);
@@ -100,7 +100,7 @@ public class EmailServiceImpl implements EmailService {
 
             helper.setFrom(prodEmail);
             helper.setTo(to);
-            helper.setSubject("Email confirmation");
+            helper.setSubject("Подтверждение смены электронной почты");
             helper.setText(htmlContent, true);
 
             mailSender.send(message);
@@ -111,6 +111,7 @@ public class EmailServiceImpl implements EmailService {
 
     private String processContent(ClassPathResource resource, String link, String token) throws IOException {
         String htmlContent = StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
-        return htmlContent.replace("${link}", link).replace("${token}", token);
+        return htmlContent.replace("${link}", link)
+                .replace("${token}", token);
     }
 }
