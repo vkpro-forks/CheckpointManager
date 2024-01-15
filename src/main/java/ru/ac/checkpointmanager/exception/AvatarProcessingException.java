@@ -1,9 +1,8 @@
 package ru.ac.checkpointmanager.exception;
 
-import java.io.IOException;
-
-public class AvatarProcessingException extends RuntimeException {
-    public AvatarProcessingException(String message, Throwable cause) {
-        super(message, cause);
+public class AvatarProcessingException extends ImageProcessingException {
+    public AvatarProcessingException(String message) {
+        super(message);
     }
+
 }

@@ -8,10 +8,10 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.ac.checkpointmanager.dto.avatar.AvatarDTO;
 import ru.ac.checkpointmanager.dto.avatar.AvatarImageDTO;
 import ru.ac.checkpointmanager.exception.AvatarNotFoundException;
+import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.mapper.avatar.AvatarMapper;
-import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.avatar.Avatar;
 import ru.ac.checkpointmanager.repository.AvatarRepository;
 import ru.ac.checkpointmanager.repository.TerritoryRepository;
@@ -28,12 +28,6 @@ public class AvatarServiceImpl implements AvatarService {
 
     public static final String AVATAR_NOT_FOUND_LOG = "[Avatar with id: {}] not found";
     public static final String AVATAR_NOT_FOUND_MSG = "Avatar with id: %s not found";
-
-    private static final String USER_NOT_FOUND_LOG = "User with [id: {}] not found";
-    private static final String USER_NOT_FOUND_MSG = "User with id: %s not found";
-
-    private static final String TERRITORY_NOT_FOUND_LOG = "Territory with [id: {}] not found";
-    private static final String TERRITORY_NOT_FOUND_MSG = "Territory with id: %s not found";
 
     private final AvatarRepository repository;
     private final UserRepository userRepository;
@@ -56,8 +50,8 @@ public class AvatarServiceImpl implements AvatarService {
         //FIXME временно здесь пока не реализуем логику по другому
         userRepository.findById(userId)
                 .orElseThrow(() -> {
-                    log.warn(USER_NOT_FOUND_LOG, userId);
-                    return new UserNotFoundException(USER_NOT_FOUND_MSG.formatted(userId));
+                    log.warn(ExceptionUtils.USER_NOT_FOUND_MSG, userId);
+                    return new UserNotFoundException(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(userId));
                 });
         //- достали юзера из бд
         //- сделали работу по подготовке аватарки к загрузке
@@ -86,9 +80,10 @@ public class AvatarServiceImpl implements AvatarService {
     public AvatarDTO uploadAvatarByTerritory(UUID territoryId, MultipartFile avatarFile) {
         territoryRepository.findById(territoryId)
                 .orElseThrow(() -> {
-            log.warn(TERRITORY_NOT_FOUND_LOG, territoryId);
-            return new TerritoryNotFoundException(TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
-        });
+                    log.warn(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
+                    return new TerritoryNotFoundException(ExceptionUtils.TERRITORY_NOT_FOUND_MSG
+                            .formatted(territoryId));
+                });
 
         Avatar avatar = avatarHelper.getOrCreateAvatarByTerritory(territoryId);
         avatarHelper.configureAvatar(avatar, avatarFile);
