@@ -59,10 +59,6 @@ public class VisitorServiceImpl implements VisitorService {
 
     @Override
     public List<Visitor> findByNamePart(String name) {
-        if (name == null || name.isEmpty()) {
-            log.warn("Attempt to find Visitor by null or empty name");
-            throw new IllegalArgumentException("Name part cannot be null or empty");
-        }
         log.info("Searching for Visitors with name containing: {}", name);
         return visitorRepository.findByNameContainingIgnoreCase(name);
     }
