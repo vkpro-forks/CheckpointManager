@@ -134,8 +134,9 @@ public class AvatarServiceImpl implements AvatarService {
      * @throws AvatarNotFoundException если аватар не найден (у юзера нет аватарок)
      */
     @Override
+    @Transactional
     public void deleteAvatarByUserId(UUID userId) {
-        User user = userRepository.findUserWithAvatarById(userId)
+        User user = userRepository.findUserWithAvatarIdById(userId)
                 .orElseThrow(() -> {
                     log.warn(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(userId));
                     return new UserNotFoundException(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(userId));

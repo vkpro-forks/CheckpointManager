@@ -468,7 +468,7 @@ public class TestUtils {
         );
     }
 
-    public static Avatar createTestAvatar() {
+    public static Avatar getAvatar() {
         Avatar avatar = new Avatar();
         avatar.setMediaType(DEFAULT_MEDIA_TYPE);
         avatar.setFilePath(DEFAULT_FILE_PATH);

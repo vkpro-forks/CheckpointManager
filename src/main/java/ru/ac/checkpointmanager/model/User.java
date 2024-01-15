@@ -138,4 +138,12 @@ public class User implements UserDetails {
                 ", role=" + role +
                 '}';
     }
+
+    public User(UUID id, UUID avatarId) {
+        this.id = id;
+        Avatar avatarWithIdOnly = new Avatar();
+        avatarWithIdOnly.setId(avatarId);
+        this.avatar = avatarWithIdOnly;
+    }
+
 }

@@ -88,7 +88,7 @@ public class AvatarController {
                     content = @Content(schema = @Schema(implementation = AvatarNotFoundException.class))),
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY') or @userAuthFacade.isIdMatch(#userId)")
-    @DeleteMapping("/{userId}")
+    @DeleteMapping("/user/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteAvatarByUserId(@PathVariable UUID userId) {
         avatarService.deleteAvatarByUserId(userId);

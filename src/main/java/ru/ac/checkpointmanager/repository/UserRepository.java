@@ -32,8 +32,8 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     @Query("SELECT u FROM User u LEFT JOIN FETCH u.territories WHERE u.id= :userId")
     Optional<User> findUserWithTerritoriesById(@Param("userId") UUID userId);
 
-    @Query("SELECT u FROM User u LEFT JOIN FETCH u.avatar WHERE  u.id= :userId")
-    Optional<User> findUserWithAvatarById(@Param("userId") UUID uuid);
+    @Query("SELECT new ru.ac.checkpointmanager.model.User(u.id, a.id) FROM User u LEFT JOIN u.avatar a WHERE  u.id= :userId")
+    Optional<User> findUserWithAvatarIdById(@Param("userId") UUID uuid);
 
     @Modifying
     @Query("update User u set u.avatar = :avatar where u.id = :userId")
