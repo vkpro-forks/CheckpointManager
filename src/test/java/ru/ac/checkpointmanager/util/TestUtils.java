@@ -92,6 +92,12 @@ public class TestUtils {
 
     public static final String TERR_NAME = "Territory";
 
+    public static final String TERR_NOTE = "some note";
+
+    private static final String TERR_CITY = "Yelets";
+
+    private static final String TERR_ADDRESS = "Lenina str.";
+
     public static final UUID CAR_ID = UUID.randomUUID();
 
     public static final String LICENSE_PLATE = "А420ВХ799";
@@ -169,6 +175,8 @@ public class TestUtils {
                 .ignore(Select.field(Territory::getCheckpoints))
                 .set(Select.field(Territory::getName), TERR_NAME)
                 .set(Select.field(Territory::getId), TERR_ID)
+                .set(Select.field(Territory::getCity), TERR_CITY)
+                .set(Select.field(Territory::getAddress), TERR_ADDRESS)
                 .ignore(Select.field(Territory::getAvatar))
                 .create();
     }
@@ -177,7 +185,9 @@ public class TestUtils {
         return new TerritoryDTO(
                 TERR_ID,
                 TERR_NAME,
-                "note"
+                TERR_NOTE,
+                TERR_CITY,
+                TERR_ADDRESS
         );
     }
 

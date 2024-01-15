@@ -76,7 +76,8 @@ public class PassController {
                     @Parameter(in = ParameterIn.QUERY, name = "size"),
                     @Parameter(in = ParameterIn.QUERY, name = "dtype"),
                     @Parameter(in = ParameterIn.QUERY, name = "territory"),
-                    @Parameter(in = ParameterIn.QUERY, name = "status")
+                    @Parameter(in = ParameterIn.QUERY, name = "status"),
+                    @Parameter(in = ParameterIn.QUERY, name = "favorite")
             })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуска найдены",
@@ -112,7 +113,8 @@ public class PassController {
                     @Parameter(in = ParameterIn.QUERY, name = "size"),
                     @Parameter(in = ParameterIn.QUERY, name = "dtype"),
                     @Parameter(in = ParameterIn.QUERY, name = "territory"),
-                    @Parameter(in = ParameterIn.QUERY, name = "status")
+                    @Parameter(in = ParameterIn.QUERY, name = "status"),
+                    @Parameter(in = ParameterIn.QUERY, name = "favorite")
             })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуска найдены",
@@ -135,7 +137,8 @@ public class PassController {
                     @Parameter(in = ParameterIn.QUERY, name = "size"),
                     @Parameter(in = ParameterIn.QUERY, name = "dtype"),
                     @Parameter(in = ParameterIn.QUERY, name = "territory"),
-                    @Parameter(in = ParameterIn.QUERY, name = "status")
+                    @Parameter(in = ParameterIn.QUERY, name = "status"),
+                    @Parameter(in = ParameterIn.QUERY, name = "favorite")
             })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуска найдены",

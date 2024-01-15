@@ -31,8 +31,8 @@ public class TerritoryMapper {
     public List<TerritoryDTO> toTerritoriesDTO(List<Territory> territories) {
         return territories.stream()
                 .map(e -> modelMapper.map(e, TerritoryDTO.class))
-                .collect(Collectors.toList()); //if we will replace to Stream.toList() it will cause
-        // deserialization error in Redis
+                //if we will replace to Stream.toList() it will cause deserialization error in Redis
+                .collect(Collectors.toList());
     }
 
     public List<Territory> toTerritories(List<TerritoryDTO> territoriesDTO) {
