@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.annotation.PagingParam;
 import ru.ac.checkpointmanager.dto.passes.FilterParams;
+import ru.ac.checkpointmanager.dto.passes.FullPassDTO;
 import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassResponseDTO;
@@ -102,6 +103,20 @@ public class PassController {
     @GetMapping("/{id}")
     public ResponseEntity<PassResponseDTO> getPass(@PathVariable("id") UUID id) {
         PassResponseDTO foundPass = service.findById(id);
+        return ResponseEntity.ok(foundPass);
+    }
+
+    @Operation(summary = "Получить полную информацию о пропуске",
+            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Пропуск найден",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = PassResponseDTO.class))}),
+            @ApiResponse(responseCode = "404", description = "Пропуск не найден")})
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
+    @GetMapping("/full/{id}")
+    public ResponseEntity<FullPassDTO> getPassInfo(@PathVariable("id") UUID id) {
+        FullPassDTO foundPass = service.getPassInfo(id);
         return ResponseEntity.ok(foundPass);
     }
 

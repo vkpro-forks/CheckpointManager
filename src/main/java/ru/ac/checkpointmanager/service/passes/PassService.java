@@ -2,6 +2,7 @@ package ru.ac.checkpointmanager.service.passes;
 
 import org.springframework.data.domain.Page;
 import ru.ac.checkpointmanager.dto.passes.FilterParams;
+import ru.ac.checkpointmanager.dto.passes.FullPassDTO;
 import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassResponseDTO;
@@ -20,6 +21,8 @@ public interface PassService {
     PassResponseDTO findById(UUID id);
 
     Pass findPassById(UUID passId);
+
+    FullPassDTO getPassInfo(UUID passId);
 
     Page<PassResponseDTO> findPassesByUser(UUID userId, PagingParams pagingParams, FilterParams filterParams);
 

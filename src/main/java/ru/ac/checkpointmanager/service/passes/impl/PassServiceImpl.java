@@ -9,7 +9,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.ac.checkpointmanager.dto.CrossingDTO;
 import ru.ac.checkpointmanager.dto.passes.FilterParams;
+import ru.ac.checkpointmanager.dto.passes.FullPassDTO;
 import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassResponseDTO;
@@ -18,6 +20,7 @@ import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.exception.pass.ModifyPassException;
 import ru.ac.checkpointmanager.exception.pass.OverlapPassException;
 import ru.ac.checkpointmanager.exception.pass.PassNotFoundException;
+import ru.ac.checkpointmanager.mapper.CrossingMapper;
 import ru.ac.checkpointmanager.mapper.PassMapper;
 import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.model.Territory;
@@ -65,6 +68,7 @@ public class PassServiceImpl implements PassService {
     private final UserService userService;
     private final TerritoryService territoryService;
     private final PassMapper mapper;
+    private final CrossingMapper crossingMapper;
     private final PassResolver passResolver;
     private final PassChecker passChecker;
 
@@ -127,6 +131,14 @@ public class PassServiceImpl implements PassService {
                     log.warn(ExceptionUtils.PASS_NOT_FOUND.formatted(passId));
                     return new PassNotFoundException(ExceptionUtils.PASS_NOT_FOUND.formatted(passId));
                 });
+    }
+
+    @Override
+    public FullPassDTO getPassInfo(UUID passId) {
+        FullPassDTO passDTO = mapper.toFullPassDTO(findPassById(passId));
+        List<CrossingDTO> crossings = crossingMapper.toCrossingsDTO(crossingRepository.findCrossingsByPassId(passId));
+        passDTO.setCrossings(crossings);
+        return passDTO;
     }
 
     @Override
@@ -330,7 +342,7 @@ public class PassServiceImpl implements PassService {
         Optional<Pass> overlapPass = passesByUser.stream()
                 .filter(existPass -> existPass.getClass().equals(newPass.getClass()))
                 .filter(existPass -> existPass.getStatus().equals(PassStatus.ACTIVE) ||
-                        existPass.getStatus().equals(PassStatus.DELAYED))
+                                     existPass.getStatus().equals(PassStatus.DELAYED))
                 .filter(existPass -> existPass.compareByFields(newPass))
                 .findFirst();
 
