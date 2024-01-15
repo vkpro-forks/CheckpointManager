@@ -123,12 +123,11 @@ public class AvatarHelperImplTest {
     @Test
     void createAvatarImageDTOUsesDefaultMimeType() {
         AvatarImageDTO result = avatarHelper.createAvatarImageDTO(avatar);
-        Assertions.assertEquals("image/jpeg", result.getMediaType());
+        Assertions.assertEquals(TestUtils.DEFAULT_MEDIA_TYPE, result.getMediaType());
     }
 
     @Test
     void updateUserAvatarWithExistingUserUpdatesAvatar() {
-        Avatar avatar = TestUtils.createTestAvatar();
         User user = TestUtils.getUser();
         ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));

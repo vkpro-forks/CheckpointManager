@@ -1,6 +1,7 @@
 package ru.ac.checkpointmanager.service.avatar;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -50,10 +51,21 @@ public class AvatarServiceImplTest {
     @Mock
     private UserRepository userRepository;
 
+    private UUID id;
+    private Avatar avatar;
+    private UUID userId;
+    private UUID territoryId;
+
+    @BeforeEach
+    void setUIp() {
+        id = TestUtils.AVATAR_ID;
+        avatar = TestUtils.createTestAvatar();
+        userId = TestUtils.USER_ID;
+        territoryId = UUID.randomUUID();
+    }
+
     @Test
     void whenValidIdThenReturnAvatarImageDTO() {
-        UUID id = TestUtils.AVATAR_ID;
-        Avatar avatar = TestUtils.createTestAvatar();
         AvatarImageDTO expectedDto = new AvatarImageDTO();
         when(avatarRepository.findByTerritoryId(id)).thenReturn(Optional.of(avatar));
         when(avatarHelper.createAvatarImageDTO(avatar)).thenReturn(expectedDto);
@@ -63,7 +75,6 @@ public class AvatarServiceImplTest {
 
     @Test
     void whenInvalidIdThenThrowAvatarNotFoundExceptionInGetAvatarImage() {
-        UUID id = TestUtils.AVATAR_ID;
         when(avatarRepository.findByTerritoryId(id)).thenReturn(Optional.empty());
         AvatarNotFoundException thrown = assertThrows(AvatarNotFoundException.class, () -> {
             avatarService.getAvatarImageByAvatarId(id);
@@ -74,7 +85,6 @@ public class AvatarServiceImplTest {
 
     @Test
     void whenValidIdThenReturnAvatar() {
-        UUID id = TestUtils.AVATAR_ID;
         Avatar expectedAvatar = TestUtils.createTestAvatar();
         when(avatarRepository.findById(id)).thenReturn(Optional.of(expectedAvatar));
         Avatar result = avatarService.findAvatarById(id);
@@ -84,7 +94,6 @@ public class AvatarServiceImplTest {
 
     @Test
     void whenInvalidIdThenThrowAvatarNotFoundExceptionInFindAvatarById() {
-        UUID id = TestUtils.AVATAR_ID;
         when(avatarRepository.findById(id)).thenReturn(Optional.empty());
         AvatarNotFoundException thrown = assertThrows(AvatarNotFoundException.class, () -> {
             avatarService.findAvatarById(id);
@@ -95,8 +104,6 @@ public class AvatarServiceImplTest {
 
     @Test
     void whenAvatarExistsThenDelete() {
-        UUID id = TestUtils.AVATAR_ID;
-        Avatar avatar = TestUtils.createTestAvatar();
         when(avatarRepository.findById(id)).thenReturn(Optional.of(avatar));
         avatarService.deleteAvatarIfExists(id);
         verify(avatarRepository).delete(avatar);
@@ -104,8 +111,6 @@ public class AvatarServiceImplTest {
 
     @Test
     void whenGetAvatarByUserIdAndAvatarExistsThenReturnAvatarImageDTO() {
-        UUID userId = TestUtils.USER_ID;
-        Avatar avatar = TestUtils.createTestAvatar();
         AvatarImageDTO avatarImageDTO = new AvatarImageDTO();
         when(avatarRepository.findByUserId(userId)).thenReturn(Optional.of(avatar));
         when(avatarHelper.createAvatarImageDTO(avatar)).thenReturn(avatarImageDTO);
@@ -117,16 +122,13 @@ public class AvatarServiceImplTest {
 
     @Test
     void whenGetAvatarByUserIdAndAvatarDoesNotExistThenThrowException() {
-        UUID uuid = TestUtils.USER_ID;
-        when(avatarRepository.findByUserId(uuid)).thenReturn(Optional.empty());
-        Assertions.assertThrows(AvatarNotFoundException.class, () -> avatarService.getAvatarByUserId(uuid));
-        verify(avatarRepository).findByUserId(uuid);
+        when(avatarRepository.findByUserId(userId)).thenReturn(Optional.empty());
+        Assertions.assertThrows(AvatarNotFoundException.class, () -> avatarService.getAvatarByUserId(userId));
+        verify(avatarRepository).findByUserId(userId);
     }
 
     @Test
     void whenUploadAvatarByTerritoryAndTerritoryExistsThenReturnAvatarDTO() {
-        UUID territoryId = UUID.randomUUID();
-        Avatar avatar = TestUtils.createTestAvatar();
         AvatarDTO expectedAvatarDTO = new AvatarDTO();
 
         when(territoryRepository.findById(territoryId)).thenReturn(Optional.of(new Territory()));
@@ -150,7 +152,6 @@ public class AvatarServiceImplTest {
 
     @Test
     void whenUploadAvatarByTerritoryAndTerritoryDoesNotExistThenThrowException() {
-        UUID territoryId = UUID.randomUUID();
         when(territoryRepository.findById(territoryId)).thenReturn(Optional.empty());
         assertThrows(TerritoryNotFoundException.class, () -> avatarService.uploadAvatarByTerritory(territoryId, avatarFile));
         verify(territoryRepository).findById(territoryId);
@@ -158,8 +159,6 @@ public class AvatarServiceImplTest {
 
     @Test
     void whenUploadAvatarAndUserExistsThenReturnAvatarDTO() {
-        UUID userId = TestUtils.USER_ID;
-        Avatar avatar = TestUtils.createTestAvatar();
         AvatarDTO avatarDTO = new AvatarDTO();
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(TestUtils.getUser()));
@@ -184,7 +183,6 @@ public class AvatarServiceImplTest {
 
     @Test
     void whenUploadAvatarAndUserDoesNotExistThenThrowException() {
-        UUID userId = TestUtils.USER_ID;
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
         Assertions.assertThrows(UserNotFoundException.class, () -> {
             avatarService.uploadAvatar(userId, avatarFile);
