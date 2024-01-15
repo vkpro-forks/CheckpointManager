@@ -9,9 +9,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.ac.checkpointmanager.dto.CrossingDTO;
 import ru.ac.checkpointmanager.dto.passes.FilterParams;
-import ru.ac.checkpointmanager.dto.passes.FullPassDTO;
 import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassResponseDTO;
@@ -131,14 +129,6 @@ public class PassServiceImpl implements PassService {
                     log.warn(ExceptionUtils.PASS_NOT_FOUND.formatted(passId));
                     return new PassNotFoundException(ExceptionUtils.PASS_NOT_FOUND.formatted(passId));
                 });
-    }
-
-    @Override
-    public FullPassDTO getPassInfo(UUID passId) {
-        FullPassDTO passDTO = mapper.toFullPassDTO(findPassById(passId));
-        List<CrossingDTO> crossings = crossingMapper.toCrossingsDTO(crossingRepository.findCrossingsByPassId(passId));
-        passDTO.setCrossings(crossings);
-        return passDTO;
     }
 
     @Override

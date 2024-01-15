@@ -5,7 +5,6 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ru.ac.checkpointmanager.dto.passes.FullPassDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassResponseDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
@@ -64,10 +63,6 @@ public class PassMapper {
 
     public PassResponseDTO toPassDTO(Pass pass) {
         return modelMapper.map(pass, PassResponseDTO.class);
-    }
-
-    public FullPassDTO toFullPassDTO(Pass pass) {
-        return modelMapper.map(pass, FullPassDTO.class);
     }
 
     private void configureModelMapper() {
