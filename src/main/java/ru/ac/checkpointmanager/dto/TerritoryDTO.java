@@ -19,7 +19,7 @@ public class TerritoryDTO {
 
     private UUID id;
 
-    @NotBlank()
+    @NotBlank
     @Size(min = 2, max = 60)
     @Pattern(regexp = "^(?=.*[a-zA-Zа-яА-Я]).*$",
             message = "Name must contain at least one letter")
@@ -28,7 +28,9 @@ public class TerritoryDTO {
     @Size(max = 200)
     private String note;
 
+    @NotBlank
     private String city;
 
+    @NotBlank
     private String address;
 }
