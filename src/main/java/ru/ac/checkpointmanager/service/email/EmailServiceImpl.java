@@ -1,14 +1,21 @@
 package ru.ac.checkpointmanager.service.email;
 
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StreamUtils;
 import ru.ac.checkpointmanager.utils.MethodLog;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Сервис для отправки электронных писем.
@@ -51,15 +58,22 @@ public class EmailServiceImpl implements EmailService {
     @Async
     public void sendRegisterConfirm(String to, String token) {
         log.debug("Method {}", MethodLog.getMethodName());
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(prodEmail);
-        message.setTo(to);
-        message.setSubject("Registration");
-        message.setText("Для подтверждения регистрации, пожалуйста, перейдите по следующей ссылке: "
-                + confirmationRegistrationLink + token +
-                "\nЕсли, это были не вы, игнорируйте это письмо.");
+        String htmlContent;
+        try {
+            ClassPathResource resource = new ClassPathResource("templates/registration-confirmation.html");
+            htmlContent = processContent(resource, confirmationRegistrationLink, token);
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
 
-        mailSender.send(message);
+            helper.setFrom(prodEmail);
+            helper.setTo(to);
+            helper.setSubject("Registration");
+            helper.setText(htmlContent, true);
+
+            mailSender.send(message);
+        } catch (IOException | MessagingException e) {
+            log.warn("Error processing email", e);
+        }
     }
 
     /**
@@ -77,13 +91,26 @@ public class EmailServiceImpl implements EmailService {
     @Async
     public void sendEmailConfirm(String to, String token) {
         log.info("Method sendEmailConfirm was invoked");
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(prodEmail);
-        message.setTo(to);
-        message.setSubject("Email confirmation");
-        message.setText("Чтобы подтвердить новый адрес электронной почты, перейдите по ссылке: "
-                + emailChangeConfirmationLink + token +
-                "\nЕсли, это были не вы, игнорируйте это письмо.");
-        mailSender.send(message);
+        String htmlContent;
+        try {
+            ClassPathResource resource = new ClassPathResource("templates/email-confirmation.html");
+            htmlContent = processContent(resource, emailChangeConfirmationLink, token);
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
+
+            helper.setFrom(prodEmail);
+            helper.setTo(to);
+            helper.setSubject("Email confirmation");
+            helper.setText(htmlContent, true);
+
+            mailSender.send(message);
+        } catch (IOException | MessagingException e) {
+            log.warn("Error processing email", e);
+        }
+    }
+
+    private String processContent(ClassPathResource resource, String link, String token) throws IOException {
+        String htmlContent = StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
+        return htmlContent.replace("${link}", link).replace("${token}", token);
     }
 }
