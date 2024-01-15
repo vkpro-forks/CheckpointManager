@@ -320,7 +320,7 @@ public class PassServiceImpl implements PassService {
 
     /**
      * @param newPass добавляемый или изменяемый пропуск
-     * @throws IllegalArgumentException, если в системе существует другой активный пропуск,
+     * @throws OverlapPassException, если в системе существует другой активный пропуск,
      *                                   созданный тем же юзером, в котором совпадает территория, данные машины/человека
      *                                   и пересекается (накладывается) время действия
      */

@@ -24,5 +24,4 @@ public interface VisitorService {
 
     List<Visitor> findByUserId(UUID userId);
 
-    boolean existsById(UUID id);
 }

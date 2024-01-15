@@ -99,7 +99,7 @@ class AvatarHelperImpl implements AvatarHelper {
      *
      * @param avatar     Объект Avatar для установки изображения.
      * @param avatarFile Мультипарт-файл, содержащий изображение аватара.
-     * @throws IllegalArgumentException если файл не является изображением.
+     * @throws AvatarProcessingException если возникла проблема с обработкой изображения
      */
     @Override
     public void processAndSetAvatarImage(Avatar avatar, MultipartFile avatarFile) {

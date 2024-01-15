@@ -3,6 +3,7 @@ package ru.ac.checkpointmanager.service.visitor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.exception.VisitorNotFoundException;
 import ru.ac.checkpointmanager.model.Visitor;
 import ru.ac.checkpointmanager.repository.VisitorRepository;
@@ -18,26 +19,21 @@ import java.util.UUID;
 @Slf4j
 public class VisitorServiceImpl implements VisitorService {
 
-    public static final String VISITOR_NOT_FOUND = "Visitor with [id: %s] not found";
-    private final VisitorRepository repository;
+    private final VisitorRepository visitorRepository;
     private final UserService userService;
 
     @Override
     public Visitor addVisitor(Visitor visitor) {
-        if (visitor == null) {
-            log.warn("Attempt to add null Visitor");
-            throw new IllegalArgumentException("Visitor cannot be null");
-        }
         log.info("Adding new Visitor: {}", visitor);
-        return repository.save(visitor);
+        return visitorRepository.save(visitor);
     }
 
     @Override
-    public Visitor getVisitor(UUID uuid) {
-        Optional<Visitor> visitorOptional = repository.findById(uuid);
+    public Visitor getVisitor(UUID visitorId) {
+        Optional<Visitor> visitorOptional = visitorRepository.findById(visitorId);
         return visitorOptional.orElseThrow(() -> {
-            log.warn(VISITOR_NOT_FOUND.formatted(uuid));
-            return new VisitorNotFoundException(VISITOR_NOT_FOUND.formatted(uuid));
+            log.warn(ExceptionUtils.VISITOR_NOT_FOUND.formatted(visitorId));
+            return new VisitorNotFoundException(ExceptionUtils.VISITOR_NOT_FOUND.formatted(visitorId));
         });
     }
 
@@ -48,21 +44,17 @@ public class VisitorServiceImpl implements VisitorService {
         existVisitor.setName(visitor.getName());
         existVisitor.setPhone(visitor.getPhone());
         existVisitor.setNote(visitor.getNote());
-        return repository.save(existVisitor);
+        return visitorRepository.save(existVisitor);
     }
 
     @Override
-    public void deleteVisitor(UUID uuid) {
-        if (uuid == null) {
-            log.warn("Attempt to delete Visitor with null UUID");
-            throw new IllegalArgumentException("UUID cannot be null");
+    public void deleteVisitor(UUID visitorId) {
+        if (!visitorRepository.existsById(visitorId)) {
+            log.warn(ExceptionUtils.VISITOR_NOT_FOUND.formatted(visitorId));
+            throw new VisitorNotFoundException(ExceptionUtils.VISITOR_NOT_FOUND.formatted(visitorId));
         }
-        if (!repository.existsById(uuid)) {
-            log.warn("Failed to delete visitor: No visitor found with ID {}", uuid);
-            throw new VisitorNotFoundException("Visitor with ID " + uuid + " not found");
-        }
-        log.info("Deleting Visitor with UUID: {}", uuid);
-        repository.deleteById(uuid);
+        visitorRepository.deleteById(visitorId);
+        log.info("Visitor with id: {} deleted", visitorId);
     }
 
     @Override
@@ -72,27 +64,19 @@ public class VisitorServiceImpl implements VisitorService {
             throw new IllegalArgumentException("Name part cannot be null or empty");
         }
         log.info("Searching for Visitors with name containing: {}", name);
-        return repository.findByNameContainingIgnoreCase(name);
+        return visitorRepository.findByNameContainingIgnoreCase(name);
     }
 
     @Override
     public List<Visitor> findByPhonePart(String phone) {
-        if (phone == null || phone.isEmpty()) { //TODO after validation we can remove this check
-            log.warn("Attempt to find Visitor by null or empty phone");
-            throw new IllegalArgumentException("Phone part cannot be null or empty");
-        }
         log.info("Searching for Visitors with phone containing: {}", phone);
-        return repository.findByPhoneContaining(phone);
+        return visitorRepository.findByPhoneContaining(phone);
     }
 
     @Override
     public Optional<Visitor> findByPassId(UUID passId) {
-        if (passId == null) {
-            log.warn("Attempt to find Visitor by null passId");
-            throw new IllegalArgumentException("Pass ID cannot be null");
-        }
         log.info("Searching for Visitor with Pass ID: {}", passId);
-        return repository.findVisitorByPasses_Id(passId);
+        return visitorRepository.findVisitorByPasses_Id(passId);
     }
 
     @Override
@@ -100,13 +84,9 @@ public class VisitorServiceImpl implements VisitorService {
         log.debug("Method {} [UUID - {}]", MethodLog.getMethodName(), userId);
         userService.findById(userId);
 
-        List<Visitor> foundVisitors = repository.findVisitorsByUserId(userId);
+        List<Visitor> foundVisitors = visitorRepository.findVisitorsByUserId(userId);
         log.debug("Find {} Visitors for user [UUID - {}]", foundVisitors.size(), userId);
         return foundVisitors;
     }
 
-    @Override
-    public boolean existsById(UUID id) {
-        return repository.existsById(id);
-    }
 }

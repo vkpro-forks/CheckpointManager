@@ -115,7 +115,7 @@ public class VisitorController {
         log.info("Visitor with ID {} deleted", id);
     }
 
-    @Operation(summary = "Найти посетителя по номеру телефона.",
+    @Operation(summary = "Найти посетителя по номеру телефона (части номера).",
             description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Посетитель успешно найден.",
@@ -124,14 +124,14 @@ public class VisitorController {
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/phone")
-    public List<VisitorDTO> searchByPhone(@RequestParam @NotBlank String phone) {
+    public List<VisitorDTO> searchByPhonePart(@RequestParam @NotBlank String phone) {
         List<Visitor> visitors = visitorService.findByPhonePart(phone);
         log.debug("Visitors found with phone part: {}", phone);
         return mapper.toVisitorDTOS(visitors);
     }
 
 
-    @Operation(summary = "Найти посетителя по имени.",
+    @Operation(summary = "Найти посетителя по имени (части имени).",
             description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Посетитель успешно найден.",
@@ -140,7 +140,7 @@ public class VisitorController {
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/name")
-    public List<VisitorDTO> searchByName(@RequestParam String name) {
+    public List<VisitorDTO> searchByNamePart(@RequestParam @NotBlank String name) {
         List<Visitor> visitors = visitorService.findByNamePart(name);
         log.debug("Visitors found with name part: {}", name);
         return mapper.toVisitorDTOS(visitors);
