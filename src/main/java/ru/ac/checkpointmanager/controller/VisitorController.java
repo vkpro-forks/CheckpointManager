@@ -45,7 +45,7 @@ import java.util.UUID;
 public class VisitorController {
 
     private final VisitorService visitorService;
-    private final VisitorMapper mapper;
+    private final VisitorMapper visitorMapper;
 
     @Operation(summary = "Добавить нового посетителя.",
             description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
@@ -59,9 +59,9 @@ public class VisitorController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public VisitorDTO addVisitor(@Valid @RequestBody VisitorDTO visitorDTO) {
-        Visitor newVisitor = visitorService.addVisitor(mapper.toVisitor(visitorDTO));
+        Visitor newVisitor = visitorService.addVisitor(visitorMapper.toVisitor(visitorDTO));
         log.info("New visitor added: {}", newVisitor);
-        return mapper.toVisitorDTO(newVisitor);
+        return visitorMapper.toVisitorDTO(newVisitor);
     }
 
     @Operation(summary = "Получение посетителя по id.",
@@ -76,7 +76,7 @@ public class VisitorController {
     public VisitorDTO getVisitor(@PathVariable UUID id) {
         Visitor existVisitor = visitorService.getVisitor(id);
         log.debug("Retrieved visitor with ID {}", id);
-        return mapper.toVisitorDTO(existVisitor);
+        return visitorMapper.toVisitorDTO(existVisitor);
     }
 
 
@@ -92,10 +92,10 @@ public class VisitorController {
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @PutMapping("/{id}")
     public VisitorDTO updateVisitor(@PathVariable UUID id, @RequestBody @Valid VisitorDTO visitorDTO) {
-        Visitor visitor = mapper.toVisitor(visitorDTO);
+        Visitor visitor = visitorMapper.toVisitor(visitorDTO);
         Visitor updatedVisitor = visitorService.updateVisitor(id, visitor);
         log.info("Visitor updated with ID {}", id);
-        return mapper.toVisitorDTO(updatedVisitor);
+        return visitorMapper.toVisitorDTO(updatedVisitor);
     }
 
 
@@ -127,7 +127,7 @@ public class VisitorController {
     public List<VisitorDTO> searchByPhonePart(@RequestParam @NotBlank String phone) {
         List<Visitor> visitors = visitorService.findByPhonePart(phone);
         log.debug("Visitors found with phone part: {}", phone);
-        return mapper.toVisitorDTOS(visitors);
+        return visitorMapper.toVisitorDTOS(visitors);
     }
 
 
@@ -143,7 +143,7 @@ public class VisitorController {
     public List<VisitorDTO> searchByNamePart(@RequestParam @NotBlank String name) {
         List<Visitor> visitors = visitorService.findByNamePart(name);
         log.debug("Visitors found with name part: {}", name);
-        return mapper.toVisitorDTOS(visitors);
+        return visitorMapper.toVisitorDTOS(visitors);
     }
 
     @Operation(summary = "Найти посетителя по Id пропуска.",
@@ -159,7 +159,7 @@ public class VisitorController {
     public ResponseEntity<?> searchByPassId(@RequestParam UUID uuid) {
         Visitor existVisitor = visitorService.findByPassId(uuid).orElse(null);
         log.debug("Visitor found for pass ID: {}", uuid);
-        return new ResponseEntity<>(mapper.toVisitorDTO(existVisitor), HttpStatus.OK);
+        return new ResponseEntity<>(visitorMapper.toVisitorDTO(existVisitor), HttpStatus.OK);
     }
 
 
@@ -176,7 +176,7 @@ public class VisitorController {
     public ResponseEntity<List<VisitorDTO>> searchByUserId(@PathVariable UUID userId) {
         List<Visitor> visitors = visitorService.findByUserId(userId);
         log.debug("Visitors found for user ID: {}", userId);
-        return new ResponseEntity<>(mapper.toVisitorDTOS(visitors), HttpStatus.OK);
+        return new ResponseEntity<>(visitorMapper.toVisitorDTOS(visitors), HttpStatus.OK);
     }
 
 }

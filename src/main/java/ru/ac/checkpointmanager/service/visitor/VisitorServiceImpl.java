@@ -24,8 +24,9 @@ public class VisitorServiceImpl implements VisitorService {
 
     @Override
     public Visitor addVisitor(Visitor visitor) {
-        log.info("Adding new Visitor: {}", visitor);
-        return visitorRepository.save(visitor);
+        Visitor savedVisitor = visitorRepository.save(visitor);
+        log.info("Added new Visitor: {}", visitor);
+        return savedVisitor;
     }
 
     @Override
