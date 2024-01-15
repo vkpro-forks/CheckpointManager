@@ -16,6 +16,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.testcontainers.shaded.org.apache.commons.io.output.ByteArrayOutputStream;
 import ru.ac.checkpointmanager.dto.CarBrandDTO;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.CheckpointDTO;
@@ -51,8 +52,10 @@ import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.model.passes.PassTimeType;
 import ru.ac.checkpointmanager.security.CustomAuthenticationToken;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.security.Key;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -80,6 +83,8 @@ public class TestUtils {
     public static final int NO_VALID_WIDTH = 2000;
 
     public static final int NO_VALID_HEIGHT = 2000;
+
+    public static final long FILE_SIZE = 123L;
 
     public static final int NORMAL_HEIGHT = 150;
 
@@ -482,6 +487,12 @@ public class TestUtils {
         g2d.fillRect(0, 0, width, height);
         g2d.dispose();
         return smallImage;
+    }
+
+    public static byte[] convertBufferedImageToByteArray(BufferedImage image) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(image, "png", baos);
+        return baos.toByteArray();
     }
 
 }

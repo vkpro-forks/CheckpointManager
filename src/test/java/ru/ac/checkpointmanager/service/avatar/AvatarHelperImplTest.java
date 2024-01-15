@@ -1,14 +1,17 @@
 package ru.ac.checkpointmanager.service.avatar;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.multipart.MultipartFile;
 import ru.ac.checkpointmanager.dto.avatar.AvatarImageDTO;
 import ru.ac.checkpointmanager.exception.AvatarLoadingException;
+import ru.ac.checkpointmanager.exception.AvatarProcessingException;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.model.Territory;
@@ -21,6 +24,8 @@ import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.util.TestUtils;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -43,14 +48,26 @@ public class AvatarHelperImplTest {
     private AvatarRepository avatarRepository;
     @Mock
     private AvatarProperties avatarProperties;
+    @Mock
+    private MultipartFile avatarFile;
     @InjectMocks
     private AvatarHelperImpl avatarHelper;
 
+    private UUID userId;
+    private UUID territoryId;
+    private Territory territory;
+    private Avatar avatar;
+
+    @BeforeEach
+    void setUp() {
+        userId = TestUtils.USER_ID;
+        territoryId = TestUtils.TERR_ID;
+        territory = TestUtils.getTerritory();
+        avatar = TestUtils.createTestAvatar();
+    }
+
     @Test
     void whenUpdateTerritoryAvatarAndTerritoryExistsThenAvatarIsUpdated() {
-        UUID territoryId = UUID.randomUUID();
-        Avatar avatar = TestUtils.createTestAvatar();
-        Territory territory = TestUtils.getTerritory();
         territory.setAvatar(avatar);
         when(territoryRepository.findById(territoryId)).thenReturn(Optional.of(territory));
         avatarHelper.updateTerritoryAvatar(territoryId, avatar);
@@ -61,8 +78,6 @@ public class AvatarHelperImplTest {
 
     @Test
     void whenUpdateTerritoryAvatarAndTerritoryNotFoundThenThrowException() {
-        UUID territoryId = UUID.randomUUID();
-        Avatar avatar = TestUtils.createTestAvatar();
         when(territoryRepository.findById(territoryId)).thenReturn(Optional.empty());
         Assertions.assertThrows(TerritoryNotFoundException.class, () -> {
             avatarHelper.updateTerritoryAvatar(territoryId, avatar);
@@ -73,8 +88,6 @@ public class AvatarHelperImplTest {
 
     @Test
     void whenUpdateTerritoryAvatarAndTerritoryNotFoundThenExceptionMessageIsCorrect() {
-        UUID territoryId = UUID.randomUUID();
-        Avatar avatar = TestUtils.createTestAvatar();
         when(territoryRepository.findById(territoryId)).thenReturn(Optional.empty());
         Exception exception = Assertions.assertThrows(TerritoryNotFoundException.class, () -> {
             avatarHelper.updateTerritoryAvatar(territoryId, avatar);
@@ -100,7 +113,6 @@ public class AvatarHelperImplTest {
 
     @Test
     void createAvatarImageDTOWithValidDataReturnsDTO() {
-        Avatar avatar = TestUtils.createTestAvatar();
         AvatarImageDTO result = avatarHelper.createAvatarImageDTO(avatar);
         Assertions.assertEquals(avatar.getId(), result.getAvatarId());
         Assertions.assertEquals(avatar.getMediaType(), result.getMediaType());
@@ -110,14 +122,12 @@ public class AvatarHelperImplTest {
 
     @Test
     void createAvatarImageDTOUsesDefaultMimeType() {
-        Avatar avatar = TestUtils.createTestAvatar();
         AvatarImageDTO result = avatarHelper.createAvatarImageDTO(avatar);
         Assertions.assertEquals("image/jpeg", result.getMediaType());
     }
 
     @Test
     void updateUserAvatarWithExistingUserUpdatesAvatar() {
-        UUID userId = TestUtils.USER_ID;
         Avatar avatar = TestUtils.createTestAvatar();
         User user = TestUtils.getUser();
         ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
@@ -130,20 +140,18 @@ public class AvatarHelperImplTest {
 
     @Test
     void updateUserAvatarWithNonExistingUserThrowsException() {
-        UUID userId = UUID.randomUUID();
-        Avatar newAvatar = TestUtils.createTestAvatar();
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
-        assertThrows(UserNotFoundException.class, () -> avatarHelper.updateUserAvatar(userId, newAvatar));
+        assertThrows(UserNotFoundException.class, () -> avatarHelper.updateUserAvatar(userId, avatar));
     }
 
     @Test
     void saveAvatarSavesAndReturnsAvatar() {
-        Avatar avatar = TestUtils.createTestAvatar();
-        ArgumentCaptor<Avatar> avatarCaptor = ArgumentCaptor.forClass(Avatar.class);
+        avatar.setMediaType(TestUtils.DEFAULT_MEDIA_TYPE);
+        avatar.setFilePath(TestUtils.DEFAULT_FILE_PATH);
+        avatar.setFileSize(TestUtils.FILE_SIZE);
         when(avatarRepository.save(any(Avatar.class))).thenReturn(avatar);
         Avatar saveAvatar = avatarHelper.saveAvatar(avatar);
-        verify(avatarRepository).save(avatarCaptor.capture());
-        Assertions.assertEquals(avatar, avatarCaptor.getValue());
+        verify(avatarRepository).save(saveAvatar);
         Assertions.assertEquals(avatar, saveAvatar);
     }
 
@@ -159,7 +167,7 @@ public class AvatarHelperImplTest {
     }
 
     @Test
-    void processImage_withImageWithinMaxSize_returnsOriginalImage() {
+    void processImageWithImageWithinMaxSizeReturnsOriginalImage() {
         BufferedImage originalImage = TestUtils.createSmallBufferedImage();
         when(avatarProperties.getMaxWidth()).thenReturn(TestUtils.NORMAL_WIDTH);
         when(avatarProperties.getMaxHeight()).thenReturn(TestUtils.NORMAL_HEIGHT);
@@ -167,5 +175,73 @@ public class AvatarHelperImplTest {
         Assertions.assertEquals(originalImage, processedImage);
     }
 
+    @Test
+    void processAndSetAvatarImageWithInvalidFileThrowsException() throws IOException {
+        when(avatarFile.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[0]));
+        assertThrows(IllegalArgumentException.class,
+                () -> avatarHelper.processAndSetAvatarImage(avatar, avatarFile));
+    }
+
+    @Test
+    void processAndSetAvatarImageWithIOExceptionThrowsException() throws IOException {
+        when(avatarFile.getInputStream()).thenThrow(new IOException());
+        Avatar avatar = TestUtils.createTestAvatar();
+        assertThrows(AvatarProcessingException.class,
+                () -> avatarHelper.processAndSetAvatarImage(avatar, avatarFile));
+    }
+
+    @Test
+    void processAndSetAvatarImageSuccess() throws IOException {
+        BufferedImage testImages = TestUtils.createLargeBufferedImage();
+        when(avatarProperties.getMaxWidth()).thenReturn(200);
+        when(avatarProperties.getMaxHeight()).thenReturn(200);
+        when(avatarFile.getInputStream())
+                .thenReturn(new ByteArrayInputStream(TestUtils.convertBufferedImageToByteArray(testImages)));
+        avatarHelper.processAndSetAvatarImage(avatar, avatarFile);
+        Assertions.assertNotNull(avatar.getPreview());
+    }
+
+    @Test
+    void processAndSetAvatarImageThrowsIOException() throws IOException {
+        when(avatarFile.getInputStream()).thenThrow(new IOException());
+        assertThrows(AvatarProcessingException.class, () -> avatarHelper.processAndSetAvatarImage(avatar, avatarFile));
+    }
+
+    @Test
+    void getOrCreateAvatarByTerritory_ReturnsExistingAvatar() {
+        when(avatarRepository.findByTerritoryId(territoryId)).thenReturn(Optional.of(avatar));
+        Avatar result = avatarHelper.getOrCreateAvatarByTerritory(territoryId);
+        Assertions.assertEquals(avatar, result);
+    }
+
+    @Test
+    void getOrCreateAvatarByTerritory_CreatesNewAvatar() {
+        when(avatarRepository.findByTerritoryId(territoryId)).thenReturn(Optional.empty());
+        Avatar result = avatarHelper.getOrCreateAvatarByTerritory(territoryId);
+        Assertions.assertNotNull(result);
+    }
+
+    @Test
+    void configureAvatar_SetsFileSizeAndMediaType() {
+        when(avatarFile.getSize()).thenReturn(TestUtils.FILE_SIZE);
+        when(avatarFile.getContentType()).thenReturn(TestUtils.DEFAULT_MEDIA_TYPE);
+        avatarHelper.configureAvatar(avatar, avatarFile);
+        Assertions.assertEquals(TestUtils.FILE_SIZE, avatar.getFileSize());
+        Assertions.assertEquals(TestUtils.DEFAULT_MEDIA_TYPE, avatar.getMediaType());
+    }
+
+    @Test
+    void getOrCreateAvatar_ReturnsExistingAvatar() {
+        when(avatarRepository.findByUserId(userId)).thenReturn(Optional.of(avatar));
+        Avatar result = avatarHelper.getOrCreateAvatar(userId);
+        Assertions.assertEquals(avatar, result);
+    }
+
+    @Test
+    void getOrCreateAvatar_CreatesNewAvatar() {
+        when(avatarRepository.findByUserId(userId)).thenReturn(Optional.empty());
+        Avatar result = avatarHelper.getOrCreateAvatar(userId);
+        Assertions.assertNotNull(result);
+    }
 }
 
