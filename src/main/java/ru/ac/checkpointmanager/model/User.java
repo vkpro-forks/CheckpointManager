@@ -141,9 +141,11 @@ public class User implements UserDetails {
 
     public User(UUID id, UUID avatarId) {
         this.id = id;
-        Avatar avatarWithIdOnly = new Avatar();
-        avatarWithIdOnly.setId(avatarId);
-        this.avatar = avatarWithIdOnly;
+        if (avatarId != null) {
+            Avatar avatarWithIdOnly = new Avatar();
+            avatarWithIdOnly.setId(avatarId);
+            this.avatar = avatarWithIdOnly;
+        }
     }
 
 }
