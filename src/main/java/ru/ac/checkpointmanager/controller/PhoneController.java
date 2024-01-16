@@ -44,6 +44,7 @@ import java.util.UUID;
         @ApiResponse(responseCode = "500",
                 description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса")})
 public class PhoneController {
+
     private final PhoneService phoneService;
 
     @Operation(summary = "Создание нового номера телефона",
@@ -57,8 +58,15 @@ public class PhoneController {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "BAD_REQUEST: номер уже существует; " +
-                                  "\nОшибка валидации: 11-20 символов, только цифры, пробелы и символы '(', ')', '-', '+';"
+                    description = "BAD_REQUEST: Ошибка валидации: 11-20 символов, только цифры, пробелы и символы '(', ')', '-', '+'"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "NOT_FOUND: пользователь для присвоения номера не найден"
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "CONFLICT: номер уже существует"
             )
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER') or @userAuthFacade.isIdMatch(#phoneDTO.userId)")
@@ -98,10 +106,6 @@ public class PhoneController {
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = PhoneDTO.class))
                     )
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "NOT_FOUND: в базе нет номеров"
             )
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
@@ -121,8 +125,8 @@ public class PhoneController {
                             schema = @Schema(implementation = PhoneDTO.class))
             ),
             @ApiResponse(
-                    responseCode = "400",
-                    description = "BAD_REQUEST: номер уже существует"
+                    responseCode = "409",
+                    description = "CONFLICT: номер уже существует"
             ),
             @ApiResponse(
                     responseCode = "404",

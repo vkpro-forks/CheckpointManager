@@ -62,6 +62,8 @@ class TerritoryServiceImplTest {
         Assertions.assertThat(captured.getId()).isEqualTo(territoryDTO.getId());
         Assertions.assertThat(captured.getName()).isEqualTo(territoryDTO.getName().replaceAll("\\s+", " ").trim());
         Assertions.assertThat(captured.getNote()).isEqualTo(territoryDTO.getNote().replaceAll("\\s+", " ").trim());
+        Assertions.assertThat(captured.getCity()).isEqualTo(territoryDTO.getCity().replaceAll("\\s+", " ").trim());
+        Assertions.assertThat(captured.getAddress()).isEqualTo(territoryDTO.getAddress().replaceAll("\\s+", " ").trim());
     }
 
     @Test

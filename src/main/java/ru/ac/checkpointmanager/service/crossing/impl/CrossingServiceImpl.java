@@ -23,6 +23,7 @@ import ru.ac.checkpointmanager.service.passes.PassService;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Transactional(readOnly = true)
@@ -78,6 +79,12 @@ public class CrossingServiceImpl implements CrossingService {
         });
         log.debug("Retrieved crossing with id {}", crossingId);
         return mapper.toCrossingDTO(crossing);
+    }
+
+    @Override
+    public List<CrossingDTO> getByPassId(UUID passId) {
+        passService.findPassById(passId);
+        return mapper.toCrossingsDTO(crossingRepository.findCrossingsByPassId(passId));
     }
 
     private Crossing toCrossing(Direction direction, Pass pass, Checkpoint checkpoint, ZonedDateTime performedAt) {

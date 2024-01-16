@@ -41,10 +41,10 @@ DO $$
         pass8_id UUID := uuid_generate_v4();
 
     BEGIN
-        INSERT INTO territories (id, name, note, added_at)
-        VALUES (ter1_id, 'territory1', 'описание1', nowDT),
-               (ter2_id, 'territory2', 'описание2', nowDT),
-               (ter3_id, 'territory3', 'описание3', nowDT);
+        INSERT INTO territories (id, name, note, added_at, city, address)
+        VALUES (ter1_id, 'territory1', 'описание1', nowDT, 'city1', 'address1'),
+               (ter2_id, 'territory2', 'описание2', nowDT, 'city2', 'address2'),
+               (ter3_id, 'territory3', 'описание3', nowDT, 'city3', 'address3');
 
         INSERT INTO checkpoints (id, name, type, note, added_at, territory_id)
         VALUES (chp1_id, 'kpp1', 'UNIVERSAL',   'тер1 - универс',   nowDT, ter1_id),
