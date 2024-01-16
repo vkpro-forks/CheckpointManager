@@ -72,7 +72,7 @@ public class EmailServiceImpl implements EmailService {
 
             mailSender.send(message);
         } catch (IOException | MessagingException e) {
-            log.warn("Error processing email", e);
+            log.error("Error processing email", e);
         }
     }
 
@@ -105,7 +105,7 @@ public class EmailServiceImpl implements EmailService {
 
             mailSender.send(message);
         } catch (IOException | MessagingException e) {
-            log.warn("Error processing email", e);
+            log.error("Error processing email", e);
         }
     }
 
