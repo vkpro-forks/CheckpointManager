@@ -51,7 +51,7 @@ public class CrossingController {
 
     private final CrossingService crossingService;
 
-    @Operation(summary = "Создание события: въезд на территорию",
+    @Operation(summary = "Создание события: въезд/вход на территорию",
             description = "Доступ: ADMIN, SECURITY.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пересечение успешно добавлено.",
@@ -66,7 +66,7 @@ public class CrossingController {
         return crossingService.addCrossing(crossingDTO, Direction.IN);
     }
 
-    @Operation(summary = "Создание события: выезд с территории",
+    @Operation(summary = "Создание события: выезд/выход с территории",
             description = "Доступ: ADMIN, SECURITY.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пересечение успешно добавлено.",
