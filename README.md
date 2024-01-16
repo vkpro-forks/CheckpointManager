@@ -91,7 +91,7 @@
 
 <div align="center">
   <img alt="Форма регистрации" src="https://github.com/AnvilCoder/CheckpointManager/assets/124284597/a578480e-8270-4dc3-96b2-a68ec7c76afc" height="400" width="400"/>
-  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+  &nbsp; &nbsp; 
   <img alt="Письмо" src="https://github.com/AnvilCoder/CheckpointManager/assets/124284597/7fad9df1-d87d-4681-bfc1-26e9c4656280" height="400" width="400"/>
 </div>
 
