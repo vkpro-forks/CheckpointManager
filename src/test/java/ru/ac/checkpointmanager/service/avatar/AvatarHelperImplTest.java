@@ -38,7 +38,7 @@ import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
-public class AvatarHelperImplTest {
+class AvatarHelperImplTest {
 
     @Mock
     private TerritoryRepository territoryRepository;
@@ -63,14 +63,16 @@ public class AvatarHelperImplTest {
         userId = TestUtils.USER_ID;
         territoryId = TestUtils.TERR_ID;
         territory = TestUtils.getTerritory();
-        avatar = TestUtils.createTestAvatar();
+        avatar = TestUtils.getAvatar();
     }
 
     @Test
     void whenUpdateTerritoryAvatarAndTerritoryExistsThenAvatarIsUpdated() {
         territory.setAvatar(avatar);
         when(territoryRepository.findById(territoryId)).thenReturn(Optional.of(territory));
+
         avatarHelper.updateTerritoryAvatar(territoryId, avatar);
+
         verify(territoryRepository).findById(territoryId);
         verify(territoryRepository).save(territory);
         Assertions.assertEquals(territory.getAvatar(), avatar);
@@ -79,9 +81,10 @@ public class AvatarHelperImplTest {
     @Test
     void whenUpdateTerritoryAvatarAndTerritoryNotFoundThenThrowException() {
         when(territoryRepository.findById(territoryId)).thenReturn(Optional.empty());
-        Assertions.assertThrows(TerritoryNotFoundException.class, () -> {
-            avatarHelper.updateTerritoryAvatar(territoryId, avatar);
-        });
+
+        Assertions.assertThrows(TerritoryNotFoundException.class, () ->
+                avatarHelper.updateTerritoryAvatar(territoryId, avatar));
+
         verify(territoryRepository).findById(territoryId);
         verify(territoryRepository, never()).save(any(Territory.class));
     }
@@ -89,9 +92,10 @@ public class AvatarHelperImplTest {
     @Test
     void whenUpdateTerritoryAvatarAndTerritoryNotFoundThenExceptionMessageIsCorrect() {
         when(territoryRepository.findById(territoryId)).thenReturn(Optional.empty());
-        Exception exception = Assertions.assertThrows(TerritoryNotFoundException.class, () -> {
-            avatarHelper.updateTerritoryAvatar(territoryId, avatar);
-        });
+
+        Exception exception = Assertions.assertThrows(TerritoryNotFoundException.class,
+                () -> avatarHelper.updateTerritoryAvatar(territoryId, avatar));
+
         String expectedMessage = TestUtils.ERROR_MESSAGE_SHOULD;
         String actualMessage = exception.getMessage();
         Assertions.assertTrue(actualMessage.contains(expectedMessage));
@@ -102,18 +106,21 @@ public class AvatarHelperImplTest {
     @Test
     void createAvatarImageDTOWithNullImageDataThrowsException() {
         Avatar avatar = TestUtils.createTestAvatarWithEmptyImageData();
+
         assertThrows(AvatarLoadingException.class, () -> avatarHelper.createAvatarImageDTO(avatar));
     }
 
     @Test
     void createAvatarImageDTOWithEmptyImageDataThrowsException() {
         Avatar avatar = TestUtils.createTestAvatarWithEmptyImageData();
+
         assertThrows(AvatarLoadingException.class, () -> avatarHelper.createAvatarImageDTO(avatar));
     }
 
     @Test
     void createAvatarImageDTOWithValidDataReturnsDTO() {
         AvatarImageDTO result = avatarHelper.createAvatarImageDTO(avatar);
+
         Assertions.assertEquals(avatar.getId(), result.getAvatarId());
         Assertions.assertEquals(avatar.getMediaType(), result.getMediaType());
         assertArrayEquals(avatar.getPreview(), result.getImageData());
@@ -123,6 +130,7 @@ public class AvatarHelperImplTest {
     @Test
     void createAvatarImageDTOUsesDefaultMimeType() {
         AvatarImageDTO result = avatarHelper.createAvatarImageDTO(avatar);
+
         Assertions.assertEquals(TestUtils.DEFAULT_MEDIA_TYPE, result.getMediaType());
     }
 
@@ -131,7 +139,9 @@ public class AvatarHelperImplTest {
         User user = TestUtils.getUser();
         ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
         avatarHelper.updateUserAvatar(userId, avatar);
+
         verify(userRepository).save(userArgumentCaptor.capture());
         User updateUser = userArgumentCaptor.getValue();
         Assertions.assertEquals(avatar, updateUser.getAvatar());
@@ -140,6 +150,7 @@ public class AvatarHelperImplTest {
     @Test
     void updateUserAvatarWithNonExistingUserThrowsException() {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
         assertThrows(UserNotFoundException.class, () -> avatarHelper.updateUserAvatar(userId, avatar));
     }
 
@@ -149,7 +160,9 @@ public class AvatarHelperImplTest {
         avatar.setFilePath(TestUtils.DEFAULT_FILE_PATH);
         avatar.setFileSize(TestUtils.FILE_SIZE);
         when(avatarRepository.save(any(Avatar.class))).thenReturn(avatar);
+
         Avatar saveAvatar = avatarHelper.saveAvatar(avatar);
+
         verify(avatarRepository).save(saveAvatar);
         Assertions.assertEquals(avatar, saveAvatar);
     }
@@ -159,7 +172,9 @@ public class AvatarHelperImplTest {
         BufferedImage originalImage = TestUtils.createLargeBufferedImage();
         when(avatarProperties.getMaxWidth()).thenReturn(100);
         when(avatarProperties.getMaxHeight()).thenReturn(100);
+
         BufferedImage processedImage = avatarHelper.processImage(originalImage);
+
         Assertions.assertNotEquals(originalImage, processedImage);
         Assertions.assertTrue(processedImage.getWidth() <= TestUtils.NORMAL_HEIGHT);
         Assertions.assertTrue(processedImage.getHeight() <= TestUtils.NORMAL_HEIGHT);
@@ -170,13 +185,16 @@ public class AvatarHelperImplTest {
         BufferedImage originalImage = TestUtils.createSmallBufferedImage();
         when(avatarProperties.getMaxWidth()).thenReturn(TestUtils.NORMAL_WIDTH);
         when(avatarProperties.getMaxHeight()).thenReturn(TestUtils.NORMAL_HEIGHT);
+
         BufferedImage processedImage = avatarHelper.processImage(originalImage);
+
         Assertions.assertEquals(originalImage, processedImage);
     }
 
     @Test
     void processAndSetAvatarImageWithInvalidFileThrowsException() throws IOException {
         when(avatarFile.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[0]));
+
         assertThrows(IllegalArgumentException.class,
                 () -> avatarHelper.processAndSetAvatarImage(avatar, avatarFile));
     }
@@ -184,7 +202,9 @@ public class AvatarHelperImplTest {
     @Test
     void processAndSetAvatarImageWithIOExceptionThrowsException() throws IOException {
         when(avatarFile.getInputStream()).thenThrow(new IOException());
-        Avatar avatar = TestUtils.createTestAvatar();
+
+        Avatar avatar = TestUtils.getAvatar();
+
         assertThrows(AvatarProcessingException.class,
                 () -> avatarHelper.processAndSetAvatarImage(avatar, avatarFile));
     }
@@ -196,27 +216,34 @@ public class AvatarHelperImplTest {
         when(avatarProperties.getMaxHeight()).thenReturn(200);
         when(avatarFile.getInputStream())
                 .thenReturn(new ByteArrayInputStream(TestUtils.convertBufferedImageToByteArray(testImages)));
+
         avatarHelper.processAndSetAvatarImage(avatar, avatarFile);
+
         Assertions.assertNotNull(avatar.getPreview());
     }
 
     @Test
     void processAndSetAvatarImageThrowsIOException() throws IOException {
         when(avatarFile.getInputStream()).thenThrow(new IOException());
+
         assertThrows(AvatarProcessingException.class, () -> avatarHelper.processAndSetAvatarImage(avatar, avatarFile));
     }
 
     @Test
     void getOrCreateAvatarByTerritory_ReturnsExistingAvatar() {
         when(avatarRepository.findByTerritoryId(territoryId)).thenReturn(Optional.of(avatar));
+
         Avatar result = avatarHelper.getOrCreateAvatarByTerritory(territoryId);
+
         Assertions.assertEquals(avatar, result);
     }
 
     @Test
     void getOrCreateAvatarByTerritory_CreatesNewAvatar() {
         when(avatarRepository.findByTerritoryId(territoryId)).thenReturn(Optional.empty());
+
         Avatar result = avatarHelper.getOrCreateAvatarByTerritory(territoryId);
+
         Assertions.assertNotNull(result);
     }
 
@@ -224,7 +251,9 @@ public class AvatarHelperImplTest {
     void configureAvatar_SetsFileSizeAndMediaType() {
         when(avatarFile.getSize()).thenReturn(TestUtils.FILE_SIZE);
         when(avatarFile.getContentType()).thenReturn(TestUtils.DEFAULT_MEDIA_TYPE);
+
         avatarHelper.configureAvatar(avatar, avatarFile);
+
         Assertions.assertEquals(TestUtils.FILE_SIZE, avatar.getFileSize());
         Assertions.assertEquals(TestUtils.DEFAULT_MEDIA_TYPE, avatar.getMediaType());
     }
@@ -232,15 +261,20 @@ public class AvatarHelperImplTest {
     @Test
     void getOrCreateAvatar_ReturnsExistingAvatar() {
         when(avatarRepository.findByUserId(userId)).thenReturn(Optional.of(avatar));
+
         Avatar result = avatarHelper.getOrCreateAvatar(userId);
+
         Assertions.assertEquals(avatar, result);
     }
 
     @Test
     void getOrCreateAvatar_CreatesNewAvatar() {
         when(avatarRepository.findByUserId(userId)).thenReturn(Optional.empty());
+
         Avatar result = avatarHelper.getOrCreateAvatar(userId);
+
         Assertions.assertNotNull(result);
     }
+
 }
 

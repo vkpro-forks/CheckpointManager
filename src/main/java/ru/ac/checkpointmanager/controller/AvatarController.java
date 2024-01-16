@@ -48,7 +48,7 @@ import java.util.UUID;
 })
 public class AvatarController {
 
-    private final AvatarService service;
+    private final AvatarService avatarService;
 
     @Operation(summary = "Загрузить аватар пользователю(выбрать id пользователя и картинку).")
     @ApiResponses(value = {
@@ -63,7 +63,7 @@ public class AvatarController {
     @ResponseStatus(HttpStatus.CREATED)
     public AvatarDTO uploadAvatar(@PathVariable UUID userId,
                                   @RequestPart @AvatarImageCheck MultipartFile avatarFile) {
-        return service.uploadAvatar(userId, avatarFile);
+        return avatarService.uploadAvatar(userId, avatarFile);
     }
 
     @Operation(summary = "Получить аватар по Id пользователя")
@@ -77,8 +77,21 @@ public class AvatarController {
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/{userId}")
     public ResponseEntity<byte[]> getAvatar(@PathVariable UUID userId) {
-        AvatarImageDTO avatarImageDTO = service.getAvatarByUserId(userId);
+        AvatarImageDTO avatarImageDTO = avatarService.getAvatarByUserId(userId);
         return createResponseEntity(avatarImageDTO);
+    }
+
+    @Operation(summary = "Удалить аватар по Id пользователя")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Аватар удален."),
+            @ApiResponse(responseCode = "404", description = "NOT_FOUND: Аватар не найден",
+                    content = @Content(schema = @Schema(implementation = AvatarNotFoundException.class))),
+    })
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY') or @userAuthFacade.isIdMatch(#userId)")
+    @DeleteMapping("/user/{userId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteAvatarByUserId(@PathVariable UUID userId) {
+        avatarService.deleteAvatarByUserId(userId);
     }
 
     @Operation(summary = "Удалить аватара по Id")
@@ -91,7 +104,7 @@ public class AvatarController {
     @DeleteMapping("/{avatarId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteAvatar(@PathVariable UUID avatarId) {
-        service.deleteAvatarIfExists(avatarId);
+        avatarService.deleteAvatarIfExists(avatarId);
     }
 
     @Operation(summary = "Получить аватар по Id аватара.")
@@ -105,7 +118,7 @@ public class AvatarController {
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/avatars/{avatarId}")
     public ResponseEntity<byte[]> getAvatarById(@PathVariable UUID avatarId) {
-        AvatarImageDTO avatarImageDTO = service.getAvatarImageByAvatarId(avatarId);
+        AvatarImageDTO avatarImageDTO = avatarService.getAvatarImageByAvatarId(avatarId);
         return createResponseEntity(avatarImageDTO);
     }
 
@@ -128,7 +141,7 @@ public class AvatarController {
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/fromSofa/{userId}")
     public ResponseEntity<AvatarImageDTO> getAvatarByUserId(@PathVariable UUID userId) {
-        AvatarImageDTO avatarImageDTO = service.getAvatarByUserId(userId);
+        AvatarImageDTO avatarImageDTO = avatarService.getAvatarByUserId(userId);
         return ResponseEntity.ok(avatarImageDTO);
     }
 
@@ -143,8 +156,8 @@ public class AvatarController {
     @PostMapping(value = "/territory/{territoryId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public AvatarDTO uploadAvatarByTerritory(@PathVariable UUID territoryId,
-                                  @RequestPart @AvatarImageCheck MultipartFile avatarFile) {
-        return service.uploadAvatarByTerritory(territoryId, avatarFile);
+                                             @RequestPart @AvatarImageCheck MultipartFile avatarFile) {
+        return avatarService.uploadAvatarByTerritory(territoryId, avatarFile);
     }
 
     @Operation(summary = "Получить аватар по Id территории")
@@ -157,7 +170,7 @@ public class AvatarController {
     })
     @GetMapping("/territory/{territoryId}")
     public ResponseEntity<byte[]> getAvatarByTerritory(@PathVariable UUID territoryId) {
-        AvatarImageDTO avatarImageDTO = service.getAvatarImageByAvatarId(territoryId);
+        AvatarImageDTO avatarImageDTO = avatarService.getAvatarImageByAvatarId(territoryId);
         return createResponseEntity(avatarImageDTO);
     }
 }

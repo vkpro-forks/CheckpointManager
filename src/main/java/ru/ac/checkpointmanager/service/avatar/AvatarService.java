@@ -25,4 +25,5 @@ public interface AvatarService {
 
     Avatar findAvatarById(UUID avatarId);
 
+    void deleteAvatarByUserId(UUID userId);
 }
