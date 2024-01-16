@@ -2,6 +2,7 @@ package ru.ac.checkpointmanager.it.controller;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import ru.ac.checkpointmanager.repository.VisitorRepository;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -78,22 +80,6 @@ class VisitorControllerIntegrationTest extends RedisAndPostgresTestContainersCon
 
     @Test
     @SneakyThrows
-    void updateVisitor_AllOk_ReturnVisitor() {
-        Visitor visitor = TestUtils.getVisitorUnsaved();
-        Visitor savedVisitor = visitorRepository.saveAndFlush(visitor);
-        UUID visitorId = savedVisitor.getId();
-
-        ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.get(UrlConstants.VISITOR_URL + "/{visitorId}", visitorId));
-
-        resultActions.andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(visitorId.toString()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(savedVisitor.getName()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.phone").value(savedVisitor.getPhone()));
-    }
-
-    @Test
-    @SneakyThrows
     void getVisitor_VisitorNotFound_HandleErrorAndReturnNotFound() {
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                 .get(UrlConstants.VISITOR_URL + "/" + TestUtils.VISITOR_ID));
@@ -102,7 +88,26 @@ class VisitorControllerIntegrationTest extends RedisAndPostgresTestContainersCon
                 .value(ExceptionUtils.VISITOR_NOT_FOUND.formatted(TestUtils.VISITOR_ID)));
     }
 
+    @Test
+    @SneakyThrows
+    void updateVisitor_AllOk_ReturnVisitor() {
+        Visitor visitor = TestUtils.getVisitorUnsaved();
+        Visitor savedVisitor = visitorRepository.saveAndFlush(visitor);
+        UUID visitorId = savedVisitor.getId();
+        Visitor visitorForUpdate = TestUtils.getVisitorUnsaved();
+        visitorForUpdate.setName("Huggy Wuggy");
+        String visitorDTOToSend = TestUtils.jsonStringFromObject(visitorForUpdate);
 
+        ResultActions resultActions = mockMvc.perform(
+                MockMvcRequestBuilders.put(UrlConstants.VISITOR_URL + "/{visitorId}", visitorId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(visitorDTOToSend));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(visitorId.toString()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Huggy Wuggy"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.phone").value(savedVisitor.getPhone()));
+    }
 
     @Test
     @SneakyThrows
@@ -112,6 +117,31 @@ class VisitorControllerIntegrationTest extends RedisAndPostgresTestContainersCon
                 .put(UrlConstants.VISITOR_URL + "/" + TestUtils.VISITOR_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(visitorDto));
+        TestUtils.checkNotFoundFields(resultActions);
+        resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                .value(ExceptionUtils.VISITOR_NOT_FOUND.formatted(TestUtils.VISITOR_ID)));
+    }
+
+    @Test
+    @SneakyThrows
+    void deleteVisitor_AllOk_DeleteAndReturnNoContent() {
+        Visitor visitor = TestUtils.getVisitorUnsaved();
+        Visitor savedVisitor = visitorRepository.saveAndFlush(visitor);
+        UUID visitorId = savedVisitor.getId();
+
+        ResultActions resultActions = mockMvc.perform(
+                MockMvcRequestBuilders.delete(UrlConstants.VISITOR_URL + "/{visitorId}", visitorId));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isNoContent());
+        Optional<Visitor> optionalVisitor = visitorRepository.findById(visitorId);
+        Assertions.assertThat(optionalVisitor).as("Check if visitor was not in repo").isEmpty();
+    }
+
+    @Test
+    @SneakyThrows
+    void deleteVisitor_VisitorNotFound_HandleErrorAndReturnNotFound() {
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .delete(UrlConstants.VISITOR_URL + "/" + TestUtils.VISITOR_ID));
         TestUtils.checkNotFoundFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                 .value(ExceptionUtils.VISITOR_NOT_FOUND.formatted(TestUtils.VISITOR_ID)));
