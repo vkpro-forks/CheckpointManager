@@ -15,12 +15,15 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.test.web.servlet.result.ModelResultMatchers;
 import ru.ac.checkpointmanager.config.RedisAndPostgresTestContainersConfiguration;
 import ru.ac.checkpointmanager.dto.VisitorDTO;
+import ru.ac.checkpointmanager.exception.ExceptionUtils;
+import ru.ac.checkpointmanager.model.Visitor;
 import ru.ac.checkpointmanager.repository.VisitorRepository;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
+
+import java.util.UUID;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
@@ -43,16 +46,75 @@ class VisitorControllerIntegrationTest extends RedisAndPostgresTestContainersCon
 
     @Test
     @SneakyThrows
-    void addVisitor_AllOk_CreateAndRetudnVisitor() {
+    void addVisitor_AllOk_CreateAndReturnVisitor() {
         VisitorDTO visitorDTO = TestUtils.getVisitorDTO();
         String visitorDTOToSend = TestUtils.jsonStringFromObject(visitorDTO);
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.VISITOR_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(visitorDTOToSend));
-        resultActions.andExpect(MockMvcResultMatchers.status().isCreated());
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").isNotEmpty())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(visitorDTO.getName()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.phone").value(visitorDTO.getPhone()));
+    }
+
+    @Test
+    @SneakyThrows
+    void getVisitor_AllOk_ReturnVisitor() {
+        Visitor visitor = TestUtils.getVisitorUnsaved();
+        Visitor savedVisitor = visitorRepository.saveAndFlush(visitor);
+        UUID visitorId = savedVisitor.getId();
+
+        ResultActions resultActions = mockMvc.perform(
+                MockMvcRequestBuilders.get(UrlConstants.VISITOR_URL + "/{visitorId}", visitorId));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(visitorId.toString()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(savedVisitor.getName()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.phone").value(savedVisitor.getPhone()));
+    }
+
+    @Test
+    @SneakyThrows
+    void updateVisitor_AllOk_ReturnVisitor() {
+        Visitor visitor = TestUtils.getVisitorUnsaved();
+        Visitor savedVisitor = visitorRepository.saveAndFlush(visitor);
+        UUID visitorId = savedVisitor.getId();
+
+        ResultActions resultActions = mockMvc.perform(
+                MockMvcRequestBuilders.get(UrlConstants.VISITOR_URL + "/{visitorId}", visitorId));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(visitorId.toString()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(savedVisitor.getName()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.phone").value(savedVisitor.getPhone()));
+    }
+
+    @Test
+    @SneakyThrows
+    void getVisitor_VisitorNotFound_HandleErrorAndReturnNotFound() {
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .get(UrlConstants.VISITOR_URL + "/" + TestUtils.VISITOR_ID));
+        TestUtils.checkNotFoundFields(resultActions);
+        resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                .value(ExceptionUtils.VISITOR_NOT_FOUND.formatted(TestUtils.VISITOR_ID)));
+    }
 
 
+
+    @Test
+    @SneakyThrows
+    void updateVisitor_VisitorNotFound_HandleErrorAndReturnNotFound() {
+        String visitorDto = TestUtils.jsonStringFromObject(TestUtils.getVisitorDTO());
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .put(UrlConstants.VISITOR_URL + "/" + TestUtils.VISITOR_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(visitorDto));
+        TestUtils.checkNotFoundFields(resultActions);
+        resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                .value(ExceptionUtils.VISITOR_NOT_FOUND.formatted(TestUtils.VISITOR_ID)));
     }
 
 

@@ -12,7 +12,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,8 +26,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.dto.VisitorDTO;
-import ru.ac.checkpointmanager.mapper.VisitorMapper;
-import ru.ac.checkpointmanager.model.Visitor;
 import ru.ac.checkpointmanager.service.visitor.VisitorService;
 
 import java.util.List;
@@ -45,66 +43,54 @@ import java.util.UUID;
 public class VisitorController {
 
     private final VisitorService visitorService;
-    private final VisitorMapper visitorMapper;
 
     @Operation(summary = "Добавить нового посетителя.",
             description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Посетитель успешно добавлен.",
-                    content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Visitor.class))}),
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = VisitorDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей.")
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public VisitorDTO addVisitor(@Valid @RequestBody VisitorDTO visitorDTO) {
-        Visitor newVisitor = visitorService.addVisitor(visitorMapper.toVisitor(visitorDTO));
-        log.info("New visitor added: {}", newVisitor);
-        return visitorMapper.toVisitorDTO(newVisitor);
+        return visitorService.addVisitor(visitorDTO);
     }
 
     @Operation(summary = "Получение посетителя по id.",
             description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Посетитель получен.",
-                    content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Visitor.class))}),
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = VisitorDTO.class))}),
             @ApiResponse(responseCode = "404", description = "Посетитель не существует.")
     })
     @GetMapping("/{id}")
     public VisitorDTO getVisitor(@PathVariable UUID id) {
-        Visitor existVisitor = visitorService.getVisitor(id);
-        log.debug("Retrieved visitor with ID {}", id);
-        return visitorMapper.toVisitorDTO(existVisitor);
+        return visitorService.getVisitor(id);
     }
-
 
     @Operation(summary = "Обновить информацию о посетителе по ID",
             description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Посетитель успешно обновлен",
-                    content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Visitor.class))}),
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = VisitorDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей."),
             @ApiResponse(responseCode = "404", description = "Посетителя с таким ID не существует.")
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @PutMapping("/{id}")
     public VisitorDTO updateVisitor(@PathVariable UUID id, @RequestBody @Valid VisitorDTO visitorDTO) {
-        Visitor visitor = visitorMapper.toVisitor(visitorDTO);
-        Visitor updatedVisitor = visitorService.updateVisitor(id, visitor);
-        log.info("Visitor updated with ID {}", id);
-        return visitorMapper.toVisitorDTO(updatedVisitor);
+        return visitorService.updateVisitor(id, visitorDTO);
     }
-
 
     @Operation(summary = "Удалить посетителя.",
             description = "Доступ: ADMIN.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Посетитель успешно удален",
-                    content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Visitor.class))}),
+            @ApiResponse(responseCode = "204", description = "Посетитель успешно удален"),
             @ApiResponse(responseCode = "404", description = "Посетитель не существует.")
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
@@ -112,22 +98,19 @@ public class VisitorController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteVisitor(@PathVariable UUID id) {
         visitorService.deleteVisitor(id);
-        log.info("Visitor with ID {} deleted", id);
     }
 
     @Operation(summary = "Найти посетителя по номеру телефона (части номера).",
             description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Посетитель успешно найден.",
-                    content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Visitor.class))}),
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = VisitorDTO.class))}),
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/phone")
     public List<VisitorDTO> searchByPhonePart(@RequestParam @NotBlank String phone) {
-        List<Visitor> visitors = visitorService.findByPhonePart(phone);
-        log.debug("Visitors found with phone part: {}", phone);
-        return visitorMapper.toVisitorDTOS(visitors);
+        return visitorService.findByPhonePart(phone);
     }
 
 
@@ -135,48 +118,41 @@ public class VisitorController {
             description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Посетитель успешно найден.",
-                    content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Visitor.class))}),
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = VisitorDTO.class))}),
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/name")
     public List<VisitorDTO> searchByNamePart(@RequestParam @NotBlank String name) {
-        List<Visitor> visitors = visitorService.findByNamePart(name);
-        log.debug("Visitors found with name part: {}", name);
-        return visitorMapper.toVisitorDTOS(visitors);
+        return visitorService.findByNamePart(name);
     }
 
     @Operation(summary = "Найти посетителя по Id пропуска.",
             description = "Доступ: ADMIN, MANAGER, SECURITY.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Посетитель успешно найден.",
-                    content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Visitor.class))}),
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = VisitorDTO.class))}),
             @ApiResponse(responseCode = "404", description = "Посетитель с id пропуска, не существует.")
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/pass")
-    public ResponseEntity<?> searchByPassId(@RequestParam UUID uuid) {
-        Visitor existVisitor = visitorService.findByPassId(uuid).orElse(null);
-        log.debug("Visitor found for pass ID: {}", uuid);
-        return new ResponseEntity<>(visitorMapper.toVisitorDTO(existVisitor), HttpStatus.OK);
+    public VisitorDTO searchByPassId(@RequestParam UUID uuid) {
+        return visitorService.findByPassId(uuid);
     }
 
-
-    @Operation(summary = "Найти посетителя по Id user",
+    @Operation(summary = "Найти посетителя по Id пользователя",
             description = "Доступ: ADMIN, MANAGER, SECURITY.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Посетитель успешно найден",
-                    content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Visitor.class))}),
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = VisitorDTO.class))}),
             @ApiResponse(responseCode = "404", description = "Посетитель с id user, не существует.")
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<VisitorDTO>> searchByUserId(@PathVariable UUID userId) {
-        List<Visitor> visitors = visitorService.findByUserId(userId);
-        log.debug("Visitors found for user ID: {}", userId);
-        return new ResponseEntity<>(visitorMapper.toVisitorDTOS(visitors), HttpStatus.OK);
+    public List<VisitorDTO> searchByUserId(@PathVariable UUID userId) {
+        return visitorService.findByUserId(userId);
     }
 
 }

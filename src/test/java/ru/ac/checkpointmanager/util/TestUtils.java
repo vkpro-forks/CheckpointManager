@@ -41,6 +41,7 @@ import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.model.Phone;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
+import ru.ac.checkpointmanager.model.Visitor;
 import ru.ac.checkpointmanager.model.avatar.Avatar;
 import ru.ac.checkpointmanager.model.car.Car;
 import ru.ac.checkpointmanager.model.car.CarBrand;
@@ -56,7 +57,7 @@ import ru.ac.checkpointmanager.model.passes.PassTimeType;
 import ru.ac.checkpointmanager.security.CustomAuthenticationToken;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
+import java.awt.*; //optimize imports все равно сворачивает в звездочку
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.security.Key;
@@ -180,9 +181,9 @@ public class TestUtils {
     }
 
     public static Crossing getCrossing(Pass pass, Checkpoint checkpoint, Direction direction) {
-        return new Crossing(CROSSING_ID, pass,checkpoint, ZonedDateTime.now(), LocalDateTime.now(),
+        return new Crossing(CROSSING_ID, pass, checkpoint, ZonedDateTime.now(), LocalDateTime.now(),
                 direction
-                );
+        );
     }
 
     public static Territory getTerritory() {
@@ -495,21 +496,22 @@ public class TestUtils {
         );
     }
 
+    public static Visitor getVisitorUnsaved() {
+        return new Visitor(
+                null,
+                FULL_NAME,
+                PHONE_NUM,
+                null,
+                "note"
+        );
+    }
+
     public static Avatar getAvatar() {
         Avatar avatar = new Avatar();
         avatar.setMediaType(DEFAULT_MEDIA_TYPE);
         avatar.setFilePath(DEFAULT_FILE_PATH);
         avatar.setFileSize(1024L);
         avatar.setPreview(new byte[10]);
-        return avatar;
-    }
-
-    public static Avatar createTestAvatarWithEmptyImageData() {
-        Avatar avatar = new Avatar();
-        avatar.setId(UUID.randomUUID());
-        avatar.setPreview(new byte[0]);
-        avatar.setMediaType(null);
-        avatar.setFileSize(0L);
         return avatar;
     }
 

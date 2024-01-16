@@ -14,8 +14,11 @@ import java.util.UUID;
 public interface VisitorRepository extends JpaRepository<Visitor, UUID> {
 
     List<Visitor> findByNameContainingIgnoreCase(String name);
+
     List<Visitor> findByPhoneContaining(String phone);
-    Optional<Visitor> findVisitorByPasses_Id(UUID passId);
+
+    Optional<Visitor> findVisitorByPasses_Id(UUID passId); //TODO проверить что за запрос получается
+
     Optional<Visitor> findByPhone(String name);
 
     @Query(value = "SELECT v.* FROM visitors v JOIN passes p ON v.id = p.visitor_id WHERE p.user_id = :userId"

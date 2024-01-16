@@ -3,52 +3,64 @@ package ru.ac.checkpointmanager.service.visitor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import ru.ac.checkpointmanager.dto.VisitorDTO;
 import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.exception.VisitorNotFoundException;
+import ru.ac.checkpointmanager.mapper.VisitorMapper;
 import ru.ac.checkpointmanager.model.Visitor;
 import ru.ac.checkpointmanager.repository.VisitorRepository;
 import ru.ac.checkpointmanager.service.user.UserService;
-import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 @Slf4j
 public class VisitorServiceImpl implements VisitorService {
 
     private final VisitorRepository visitorRepository;
     private final UserService userService;
+    private final VisitorMapper visitorMapper;
 
     @Override
-    public Visitor addVisitor(Visitor visitor) {
+    @Transactional
+    public VisitorDTO addVisitor(VisitorDTO visitorDTO) {
+        Visitor visitor = visitorMapper.toVisitor(visitorDTO);
         Visitor savedVisitor = visitorRepository.save(visitor);
-        log.info("Added new Visitor: {}", visitor);
-        return savedVisitor;
+        log.info("New Visitor added id: {}", visitorDTO);
+        return visitorMapper.toVisitorDTO(savedVisitor);
     }
 
     @Override
-    public Visitor getVisitor(UUID visitorId) {
-        Optional<Visitor> visitorOptional = visitorRepository.findById(visitorId);
-        return visitorOptional.orElseThrow(() -> {
+    public VisitorDTO getVisitor(UUID visitorId) {
+        Visitor visitor = visitorRepository.findById(visitorId).orElseThrow(() -> {
             log.warn(ExceptionUtils.VISITOR_NOT_FOUND.formatted(visitorId));
             return new VisitorNotFoundException(ExceptionUtils.VISITOR_NOT_FOUND.formatted(visitorId));
         });
+        log.debug("Visitor with id {} retrieved from DB", visitorId);
+        return visitorMapper.toVisitorDTO(visitor);
     }
 
     @Override
-    public Visitor updateVisitor(UUID uuid, Visitor visitor) {
-        Visitor existVisitor = getVisitor(uuid);
-        log.info("Updating Visitor with UUID: {}, new data: {}", uuid, visitor);
-        existVisitor.setName(visitor.getName());
-        existVisitor.setPhone(visitor.getPhone());
-        existVisitor.setNote(visitor.getNote());
-        return visitorRepository.save(existVisitor);
+    @Transactional
+    public VisitorDTO updateVisitor(UUID visitorId, VisitorDTO visitorDTO) {
+        Visitor existVisitor = visitorRepository.findById(visitorId).orElseThrow(() -> {
+            log.warn(ExceptionUtils.VISITOR_NOT_FOUND.formatted(visitorId));
+            return new VisitorNotFoundException(ExceptionUtils.VISITOR_NOT_FOUND.formatted(visitorId));
+        });
+        existVisitor.setName(visitorDTO.getName());
+        existVisitor.setPhone(visitorDTO.getPhone());
+        existVisitor.setNote(visitorDTO.getNote());
+        Visitor updatedVisitor = visitorRepository.save(existVisitor);
+        log.info("Visitor with id: {} updated", visitorId);
+        return visitorMapper.toVisitorDTO(updatedVisitor);
     }
 
     @Override
+    @Transactional
     public void deleteVisitor(UUID visitorId) {
         if (!visitorRepository.existsById(visitorId)) {
             log.warn(ExceptionUtils.VISITOR_NOT_FOUND.formatted(visitorId));
@@ -59,31 +71,35 @@ public class VisitorServiceImpl implements VisitorService {
     }
 
     @Override
-    public List<Visitor> findByNamePart(String name) {
-        log.info("Searching for Visitors with name containing: {}", name);
-        return visitorRepository.findByNameContainingIgnoreCase(name);
+    public List<VisitorDTO> findByNamePart(String name) {
+        log.debug("Searching for Visitors with name containing: {}", name);
+        List<Visitor> visitors = visitorRepository.findByNameContainingIgnoreCase(name);
+        return visitorMapper.toVisitorDTOS(visitors);
     }
 
     @Override
-    public List<Visitor> findByPhonePart(String phone) {
-        log.info("Searching for Visitors with phone containing: {}", phone);
-        return visitorRepository.findByPhoneContaining(phone);
+    public List<VisitorDTO> findByPhonePart(String phone) {
+        log.debug("Searching for Visitors with phone containing: {}", phone);
+        List<Visitor> visitors = visitorRepository.findByPhoneContaining(phone);
+        return visitorMapper.toVisitorDTOS(visitors);
     }
 
     @Override
-    public Optional<Visitor> findByPassId(UUID passId) {
-        log.info("Searching for Visitor with Pass ID: {}", passId);
-        return visitorRepository.findVisitorByPasses_Id(passId);
+    public VisitorDTO findByPassId(UUID passId) {
+        Visitor visitor = visitorRepository.findVisitorByPasses_Id(passId).orElseThrow(() -> {
+            log.warn(ExceptionUtils.VISITOR_BY_PASS_NOT_FOUND.formatted(passId));
+            return new VisitorNotFoundException(ExceptionUtils.VISITOR_BY_PASS_NOT_FOUND.formatted(passId));
+        });
+        log.info("Visitor with [pass id: {}] retrieved from DB", passId);
+        return visitorMapper.toVisitorDTO(visitor);
     }
 
     @Override
-    public List<Visitor> findByUserId(UUID userId) {
-        log.debug("Method {} [UUID - {}]", MethodLog.getMethodName(), userId);
+    public List<VisitorDTO> findByUserId(UUID userId) {
         userService.findById(userId);
-
         List<Visitor> foundVisitors = visitorRepository.findVisitorsByUserId(userId);
         log.debug("Find {} Visitors for user [UUID - {}]", foundVisitors.size(), userId);
-        return foundVisitors;
+        return visitorMapper.toVisitorDTOS(foundVisitors);
     }
 
 }

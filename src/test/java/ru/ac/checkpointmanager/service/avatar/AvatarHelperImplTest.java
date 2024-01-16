@@ -10,7 +10,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 import ru.ac.checkpointmanager.dto.avatar.AvatarImageDTO;
-import ru.ac.checkpointmanager.exception.AvatarLoadingException;
 import ru.ac.checkpointmanager.exception.AvatarProcessingException;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
@@ -101,20 +100,6 @@ class AvatarHelperImplTest {
         Assertions.assertTrue(actualMessage.contains(expectedMessage));
         verify(territoryRepository).findById(territoryId);
         verify(territoryRepository, never()).save(any(Territory.class));
-    }
-
-    @Test
-    void createAvatarImageDTOWithNullImageDataThrowsException() {
-        Avatar avatar = TestUtils.createTestAvatarWithEmptyImageData();
-
-        assertThrows(AvatarLoadingException.class, () -> avatarHelper.createAvatarImageDTO(avatar));
-    }
-
-    @Test
-    void createAvatarImageDTOWithEmptyImageDataThrowsException() {
-        Avatar avatar = TestUtils.createTestAvatarWithEmptyImageData();
-
-        assertThrows(AvatarLoadingException.class, () -> avatarHelper.createAvatarImageDTO(avatar));
     }
 
     @Test

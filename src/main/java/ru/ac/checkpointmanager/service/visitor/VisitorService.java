@@ -1,27 +1,26 @@
 package ru.ac.checkpointmanager.service.visitor;
 
-import ru.ac.checkpointmanager.model.Visitor;
+import ru.ac.checkpointmanager.dto.VisitorDTO;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 public interface VisitorService {
 
-    Visitor addVisitor(Visitor visitor);
+    VisitorDTO addVisitor(VisitorDTO visitorDTO);
 
-    Visitor getVisitor(UUID uuid);
+    VisitorDTO getVisitor(UUID visitorId);
 
-    Visitor updateVisitor(UUID uuid, Visitor visitor);
+    VisitorDTO updateVisitor(UUID visitorId, VisitorDTO visitorDTO);
 
-    void deleteVisitor(UUID uuid);
+    void deleteVisitor(UUID visitorId);
 
-    List<Visitor> findByNamePart(String name);
+    List<VisitorDTO> findByNamePart(String name);
 
-    List<Visitor> findByPhonePart(String phone);
+    List<VisitorDTO> findByPhonePart(String phone);
 
-    Optional<Visitor> findByPassId(UUID passId);
+    VisitorDTO findByPassId(UUID passId);
 
-    List<Visitor> findByUserId(UUID userId);
+    List<VisitorDTO> findByUserId(UUID userId);
 
 }
