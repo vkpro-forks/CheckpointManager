@@ -29,8 +29,6 @@ public class AvatarServiceImpl implements AvatarService {
 
     public static final String AVATAR_NOT_FOUND_LOG = "[Avatar with id: {}] not found";
 
-    public static final String AVATAR_NOT_FOUND_MSG = "Avatar with id: %s not found";
-
     private final AvatarRepository avatarRepository;
     private final UserRepository userRepository;
     private final TerritoryRepository territoryRepository;
@@ -161,7 +159,7 @@ public class AvatarServiceImpl implements AvatarService {
     public AvatarImageDTO getAvatarImageByAvatarId(UUID avatarId) {
         log.debug("Fetching avatar image for avatar ID: {}", avatarId);
         Avatar avatar = avatarRepository.findByTerritoryId(avatarId)
-                .orElseThrow(() -> new AvatarNotFoundException(AVATAR_NOT_FOUND_MSG.formatted(avatarId)));
+                .orElseThrow(() -> new AvatarNotFoundException(ExceptionUtils.AVATAR_NOT_FOUND.formatted(avatarId)));
         return avatarHelper.createAvatarImageDTO(avatar);
     }
 
@@ -177,7 +175,7 @@ public class AvatarServiceImpl implements AvatarService {
         log.debug("Searching for avatar with ID: {}", avatarId);
         return avatarRepository.findById(avatarId).orElseThrow(() -> {
             log.warn(AVATAR_NOT_FOUND_LOG, avatarId);
-            return new AvatarNotFoundException(AVATAR_NOT_FOUND_MSG.formatted(avatarId));
+            return new AvatarNotFoundException(ExceptionUtils.AVATAR_NOT_FOUND.formatted(avatarId));
         });
     }
 }
