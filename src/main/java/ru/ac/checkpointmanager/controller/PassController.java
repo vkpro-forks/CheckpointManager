@@ -59,7 +59,7 @@ public class PassController {
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = PassResponseDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей; пользователь не имеет права " +
-                    "создавать пропуск на эту территорию; у пользователя найден накладывающийся пропуск"),
+                                                             "создавать пропуск на эту территорию; у пользователя найден накладывающийся пропуск"),
             @ApiResponse(responseCode = "404", description = "Не найден пользователь или территория")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @PostMapping
@@ -203,7 +203,7 @@ public class PassController {
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = PassResponseDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Неуспешная валидаци полей; пользователь не имеет права " +
-                    "создавать пропуск на эту территорию; у пользователя найден накладывающийся пропуск"),
+                                                             "создавать пропуск на эту территорию; у пользователя найден накладывающийся пропуск"),
             @ApiResponse(responseCode = "404", description = "Не найден пользователь или территория")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @PutMapping
