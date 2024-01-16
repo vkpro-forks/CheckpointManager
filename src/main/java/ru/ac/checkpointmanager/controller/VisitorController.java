@@ -136,9 +136,9 @@ public class VisitorController {
             @ApiResponse(responseCode = "404", description = "Посетитель с id пропуска, не существует.")
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
-    @GetMapping("/pass")
-    public VisitorDTO searchByPassId(@RequestParam UUID uuid) {
-        return visitorService.findByPassId(uuid);
+    @GetMapping("/pass/{passId}")
+    public VisitorDTO searchByPassId(@PathVariable UUID passId) {
+        return visitorService.findByPassId(passId);
     }
 
     @Operation(summary = "Найти посетителя по Id пользователя",

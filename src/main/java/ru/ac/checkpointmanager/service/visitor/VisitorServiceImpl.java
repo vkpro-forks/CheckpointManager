@@ -10,7 +10,6 @@ import ru.ac.checkpointmanager.exception.VisitorNotFoundException;
 import ru.ac.checkpointmanager.mapper.VisitorMapper;
 import ru.ac.checkpointmanager.model.Visitor;
 import ru.ac.checkpointmanager.repository.VisitorRepository;
-import ru.ac.checkpointmanager.service.user.UserService;
 
 import java.util.List;
 import java.util.UUID;
@@ -22,7 +21,6 @@ import java.util.UUID;
 public class VisitorServiceImpl implements VisitorService {
 
     private final VisitorRepository visitorRepository;
-    private final UserService userService;
     private final VisitorMapper visitorMapper;
 
     @Override
@@ -95,8 +93,7 @@ public class VisitorServiceImpl implements VisitorService {
     }
 
     @Override
-    public List<VisitorDTO> findByUserId(UUID userId) {
-        userService.findById(userId);
+    public List<VisitorDTO> findByUserId(UUID userId) { //TODO придумать как проверять есть ли юзер, и доставать его визиторов за один запрос
         List<Visitor> foundVisitors = visitorRepository.findVisitorsByUserId(userId);
         log.debug("Find {} Visitors for user [UUID - {}]", foundVisitors.size(), userId);
         return visitorMapper.toVisitorDTOS(foundVisitors);

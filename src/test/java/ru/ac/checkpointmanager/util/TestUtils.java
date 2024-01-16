@@ -54,10 +54,11 @@ import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.model.passes.PassTimeType;
+import ru.ac.checkpointmanager.model.passes.PassWalk;
 import ru.ac.checkpointmanager.security.CustomAuthenticationToken;
 
 import javax.imageio.ImageIO;
-import java.awt.*; //optimize imports все равно сворачивает в звездочку
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.security.Key;
@@ -432,6 +433,20 @@ public class TestUtils {
         passAuto.setUser(user);
         passAuto.setTerritory(territory);
         return passAuto;
+    }
+
+    public static PassWalk getSimpleActiveOneTimePassWalkFor3Hours(User user, Territory territory, Visitor visitor) {
+        PassWalk passWalk = new PassWalk();
+        passWalk.setStartTime(LocalDateTime.now());
+        passWalk.setEndTime(LocalDateTime.now().plusHours(3));
+        passWalk.setId(UUID.randomUUID());
+        passWalk.setTimeType(PassTimeType.ONETIME);
+        passWalk.setDtype("AUTO");
+        passWalk.setStatus(PassStatus.ACTIVE);
+        passWalk.setVisitor(visitor);
+        passWalk.setUser(user);
+        passWalk.setTerritory(territory);
+        return passWalk;
     }
 
     public static Checkpoint getCheckpoint(CheckpointType type, Territory territory) {
