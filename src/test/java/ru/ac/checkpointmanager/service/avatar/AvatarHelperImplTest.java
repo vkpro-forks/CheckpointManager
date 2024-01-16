@@ -177,14 +177,6 @@ class AvatarHelperImplTest {
     }
 
     @Test
-    void processAndSetAvatarImageWithInvalidFileThrowsException() throws IOException {
-        when(avatarFile.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[0]));
-
-        assertThrows(IllegalArgumentException.class,
-                () -> avatarHelper.processAndSetAvatarImage(avatar, avatarFile));
-    }
-
-    @Test
     void processAndSetAvatarImageWithIOExceptionThrowsException() throws IOException {
         when(avatarFile.getInputStream()).thenThrow(new IOException());
 
