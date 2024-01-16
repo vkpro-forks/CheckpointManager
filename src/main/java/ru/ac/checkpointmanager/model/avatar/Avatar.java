@@ -27,15 +27,16 @@ public class Avatar {
 
     private String mediaType;
 
-    private String filePath; // Путь к файлу большого изображения
+    private String filePath;
 
     private Long fileSize;
 
-    private byte[] preview; // Данные маленького превью изображения
+    private byte[] preview;
 
     @OneToOne(mappedBy = "avatar", fetch = FetchType.LAZY, optional = false)
     private User user;
 
     @OneToOne(mappedBy = "avatar", fetch = FetchType.LAZY, optional = false)
     private Territory territory;
+
 }
