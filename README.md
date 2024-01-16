@@ -229,7 +229,7 @@ QA)**, **дизайна** и **управления проектами**. Каж
 |  Backend   | Александра |    [Telegram](https://t.me/fifimova)     |   [GitHub](https://github.com/fifimova)    |
 |  Backend   |  Николай   |    [Telegram](https://t.me/VeselovND)    |  [GitHub](https://github.com/veselovnd88)  |
 |  Frontend  |  Евгений   |     [Telegram](https://t.me/lepehun)     | [GitHub](https://github.com/PipolaPopala)  |
-|  Frontend  |   Софья    |        [Telegram](https://t.me/ )        |  [GitHub](https://github.com/YakovlevaSS)  |
+|  Frontend  |   Софья    |  [Telegram](https://t.me/SofyaIakov)     |  [GitHub](https://github.com/YakovlevaSS)  |
 |  Frontend  |   Диана    | [Telegram](https://t.me/@Miiniistrelia)  | [GitHub](https://github.com/DianaSemenova) |
 |     QA     |  Алексей   |   [Telegram](https://t.me/@alexfef72)    |                                            |
 |     QA     | Александр  | [Telegram](https://t.me/@Aleksandr_9473) |                                            |
