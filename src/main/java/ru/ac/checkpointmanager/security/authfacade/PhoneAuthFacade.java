@@ -20,6 +20,6 @@ public class PhoneAuthFacade implements AuthFacade {
     public boolean isIdMatch(UUID phoneId) {
         User user = getCurrentUser();
         Phone phone = phoneService.findPhoneById(phoneId);
-        return phone.getUser().equals(user);
+        return phone.getUser().getId().equals(user.getId());
     }
 }

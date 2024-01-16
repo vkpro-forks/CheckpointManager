@@ -16,6 +16,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.testcontainers.shaded.org.apache.commons.io.output.ByteArrayOutputStream;
 import ru.ac.checkpointmanager.dto.CarBrandDTO;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.CheckpointDTO;
@@ -54,6 +55,10 @@ import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.model.passes.PassTimeType;
 import ru.ac.checkpointmanager.security.CustomAuthenticationToken;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.security.Key;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -74,7 +79,19 @@ public class TestUtils {
 
     public static final String USER_NAME = "name";
 
+    public static final String ERROR_MESSAGE_SHOULD = "This check should be not here";
+
     public static final UUID PASS_ID = UUID.randomUUID();
+
+    public static final int NO_VALID_WIDTH = 2000;
+
+    public static final int NO_VALID_HEIGHT = 2000;
+
+    public static final long FILE_SIZE = 123L;
+
+    public static final int NORMAL_HEIGHT = 150;
+
+    public static final int NORMAL_WIDTH = 150;
 
     public static final UUID CHECKPOINT_ID = UUID.randomUUID();
 
@@ -91,6 +108,12 @@ public class TestUtils {
     public static final String DEFAULT_FILE_PATH = "/path/to/image.jpg";
 
     public static final String TERR_NAME = "Territory";
+
+    public static final String TERR_NOTE = "some note";
+
+    private static final String TERR_CITY = "Yelets";
+
+    private static final String TERR_ADDRESS = "Lenina str.";
 
     public static final UUID CAR_ID = UUID.randomUUID();
 
@@ -169,6 +192,8 @@ public class TestUtils {
                 .ignore(Select.field(Territory::getCheckpoints))
                 .set(Select.field(Territory::getName), TERR_NAME)
                 .set(Select.field(Territory::getId), TERR_ID)
+                .set(Select.field(Territory::getCity), TERR_CITY)
+                .set(Select.field(Territory::getAddress), TERR_ADDRESS)
                 .ignore(Select.field(Territory::getAvatar))
                 .create();
     }
@@ -177,7 +202,9 @@ public class TestUtils {
         return new TerritoryDTO(
                 TERR_ID,
                 TERR_NAME,
-                "note"
+                TERR_NOTE,
+                TERR_CITY,
+                TERR_ADDRESS
         );
     }
 
@@ -468,13 +495,50 @@ public class TestUtils {
         );
     }
 
-    public static Avatar createTestAvatar() {
+    public static Avatar getAvatar() {
         Avatar avatar = new Avatar();
         avatar.setMediaType(DEFAULT_MEDIA_TYPE);
         avatar.setFilePath(DEFAULT_FILE_PATH);
         avatar.setFileSize(1024L);
         avatar.setPreview(new byte[10]);
         return avatar;
+    }
+
+    public static Avatar createTestAvatarWithEmptyImageData() {
+        Avatar avatar = new Avatar();
+        avatar.setId(UUID.randomUUID());
+        avatar.setPreview(new byte[0]);
+        avatar.setMediaType(null);
+        avatar.setFileSize(0L);
+        return avatar;
+    }
+
+    public static BufferedImage createLargeBufferedImage() {
+        int width = NO_VALID_WIDTH;
+        int height = NO_VALID_HEIGHT;
+        BufferedImage largeImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = largeImage.createGraphics();
+        g2d.setColor(Color.RED);
+        g2d.fillRect(0, 0, width, height);
+        g2d.dispose();
+        return largeImage;
+    }
+
+    public static BufferedImage createSmallBufferedImage() {
+        int width = NORMAL_WIDTH;
+        int height = NORMAL_HEIGHT;
+        BufferedImage smallImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = smallImage.createGraphics();
+        g2d.setColor(Color.BLUE);
+        g2d.fillRect(0, 0, width, height);
+        g2d.dispose();
+        return smallImage;
+    }
+
+    public static byte[] convertBufferedImageToByteArray(BufferedImage image) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(image, "png", baos);
+        return baos.toByteArray();
     }
 
 }

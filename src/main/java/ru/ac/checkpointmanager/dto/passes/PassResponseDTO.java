@@ -27,6 +27,8 @@ public class PassResponseDTO {
 
     private TerritoryDTO territory;
 
+    private LocalDateTime addedAt;
+
     private LocalDateTime startTime;
 
     private LocalDateTime endTime;

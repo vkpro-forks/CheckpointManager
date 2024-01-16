@@ -13,13 +13,13 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 
-@Repository //FIXME кстати можно не ставить спринг все что экстендится от JPA репозитори считает репо
+@Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
     Collection<User> findUserByFullNameContainingIgnoreCase(String name);
 
     Optional<User> findByEmail(String email);
 
-    @Transactional // FIXME оно и без это транзакции будет в транзакции (просто для информации, тут эта аннотация лишняя)
+    @Transactional
     @Modifying
     @Query(value = "UPDATE users u SET is_blocked = true WHERE u.id = :id", nativeQuery = true)
     void blockById(@Param("id") UUID id);
@@ -31,6 +31,9 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     @Query("SELECT u FROM User u LEFT JOIN FETCH u.territories WHERE u.id= :userId")
     Optional<User> findUserWithTerritoriesById(@Param("userId") UUID userId);
+
+    @Query("SELECT new ru.ac.checkpointmanager.model.User(u.id, a.id) FROM User u LEFT JOIN u.avatar a WHERE  u.id= :userId")
+    Optional<User> findUserWithAvatarIdById(@Param("userId") UUID uuid);
 
     @Modifying
     @Query("update User u set u.avatar = :avatar where u.id = :userId")

@@ -61,12 +61,18 @@ public class Territory {
     @JoinColumn(name = "avatar_id", referencedColumnName = "id")
     private Avatar avatar;
 
+    private String city;
+
+    private String address;
+
     @Override
     public String toString() {
         return "Territory{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", note='" + note + '\'' +
+                ", city='" + city + '\'' +
+                ", address='" + address + '\'' +
                 '}';
     }
 }

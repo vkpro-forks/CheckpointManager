@@ -12,6 +12,7 @@ import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.mapper.avatar.AvatarMapper;
+import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.avatar.Avatar;
 import ru.ac.checkpointmanager.repository.AvatarRepository;
 import ru.ac.checkpointmanager.repository.TerritoryRepository;
@@ -27,9 +28,8 @@ public class AvatarServiceImpl implements AvatarService {
 
 
     public static final String AVATAR_NOT_FOUND_LOG = "[Avatar with id: {}] not found";
-    public static final String AVATAR_NOT_FOUND_MSG = "Avatar with id: %s not found";
 
-    private final AvatarRepository repository;
+    private final AvatarRepository avatarRepository;
     private final UserRepository userRepository;
     private final TerritoryRepository territoryRepository;
 
@@ -108,7 +108,7 @@ public class AvatarServiceImpl implements AvatarService {
         //смоделировать, зачем сначала лазить в юзер репо за аваАйди, а потом лезть в ава репо за самой авой
         //можно за один заход сходить в аватар репозиторий и достать по юзер айди, там даже метод такой есть
         log.debug("Searching [avatar with for user id: {}]", userId);
-        Avatar avatar = repository.findByUserId(userId)
+        Avatar avatar = avatarRepository.findByUserId(userId)
                 .orElseThrow(() -> new AvatarNotFoundException("Avatar for user [id: {}] not found"));
         return avatarHelper.createAvatarImageDTO(avatar);
     }
@@ -121,8 +121,32 @@ public class AvatarServiceImpl implements AvatarService {
     public void deleteAvatarIfExists(UUID avatarId) {
         log.debug("Attempting to delete avatar for avatarId ID: {}", avatarId);
         Avatar avatar = findAvatarById(avatarId);
-        repository.delete(avatar);
+        avatarRepository.delete(avatar);
         log.info("Avatar with ID: {} deleted successfully", avatarId);
+    }
+
+    /**
+     * Удаляет аватар пользователя по id пользователя
+     *
+     * @param userId идентификатор пользователя
+     * @throws UserNotFoundException   если пользователь не существует
+     * @throws AvatarNotFoundException если аватар не найден (у юзера нет аватарок)
+     */
+    @Override
+    @Transactional
+    public void deleteAvatarByUserId(UUID userId) {
+        User user = userRepository.findUserWithAvatarIdById(userId)
+                .orElseThrow(() -> {
+                    log.warn(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(userId));
+                    return new UserNotFoundException(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(userId));
+                });
+        if (user.getAvatar() == null) {
+            log.warn(ExceptionUtils.AVATAR_NOT_FOUND_FOR_USER.formatted(userId));
+            throw new AvatarNotFoundException(ExceptionUtils.AVATAR_NOT_FOUND_FOR_USER.formatted(userId));
+        }
+        UUID avatarId = user.getAvatar().getId();
+        avatarRepository.deleteById(avatarId);
+        log.info("Avatar for user with [id: {}] was deleted", userId);
     }
 
     /**
@@ -135,8 +159,8 @@ public class AvatarServiceImpl implements AvatarService {
     @Override
     public AvatarImageDTO getAvatarImageByAvatarId(UUID avatarId) {
         log.debug("Fetching avatar image for avatar ID: {}", avatarId);
-        Avatar avatar = repository.findByTerritoryId(avatarId)
-                .orElseThrow(() -> new AvatarNotFoundException(AVATAR_NOT_FOUND_MSG.formatted(avatarId)));
+        Avatar avatar = avatarRepository.findByTerritoryId(avatarId)
+                .orElseThrow(() -> new AvatarNotFoundException(ExceptionUtils.AVATAR_NOT_FOUND.formatted(avatarId)));
         return avatarHelper.createAvatarImageDTO(avatar);
     }
 
@@ -150,9 +174,9 @@ public class AvatarServiceImpl implements AvatarService {
     @Override
     public Avatar findAvatarById(UUID avatarId) {
         log.debug("Searching for avatar with ID: {}", avatarId);
-        return repository.findById(avatarId).orElseThrow(() -> {
+        return avatarRepository.findById(avatarId).orElseThrow(() -> {
             log.warn(AVATAR_NOT_FOUND_LOG, avatarId);
-            return new AvatarNotFoundException(AVATAR_NOT_FOUND_MSG.formatted(avatarId));
+            return new AvatarNotFoundException(ExceptionUtils.AVATAR_NOT_FOUND.formatted(avatarId));
         });
     }
 }

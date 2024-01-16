@@ -79,6 +79,8 @@ databaseChangeLog:
       file: liquibase/scripts/V_199__alter_passes.sql
   - include:
       file: liquibase/scripts/V_111__add avatar_for_territory.sql
+  - include:
+      file: liquibase/scripts/V_255__alter_territories.sql
 
 
   ## ВНЕСЕНИЕ ДЕМО-ДАННЫХ, ОСТАВЛЯЙТЕ ВСЕГДА В КОНЦЕ ФАЙЛА

@@ -2,6 +2,7 @@ package ru.ac.checkpointmanager.controller;
 
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -30,6 +31,7 @@ import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.service.crossing.CrossingService;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -49,7 +51,7 @@ public class CrossingController {
 
     private final CrossingService crossingService;
 
-    @Operation(summary = "Создание пересечения, имитирует проезд или проход объекта через КПП, НА (IN) территорию",
+    @Operation(summary = "Создание события: въезд/вход на территорию",
             description = "Доступ: ADMIN, SECURITY.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пересечение успешно добавлено.",
@@ -64,8 +66,7 @@ public class CrossingController {
         return crossingService.addCrossing(crossingDTO, Direction.IN);
     }
 
-    @Operation(summary = "Создание пересечения, имитирует проезд или проход объекта через КПП," +
-            " С (OUT) территории",
+    @Operation(summary = "Создание события: выезд/выход с территории",
             description = "Доступ: ADMIN, SECURITY.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пересечение успешно добавлено.",
@@ -86,7 +87,7 @@ public class CrossingController {
      *
      * @deprecated
      */
-    @Operation(summary = "Создание пересечения, имитирует проезд или проход объекта через КПП",
+    @Operation(summary = "Создание события: въезд, выезд",
             description = "Доступ: ADMIN, SECURITY.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пересечение успешно добавлено",
@@ -119,4 +120,18 @@ public class CrossingController {
         return new ResponseEntity<>(crossing, HttpStatus.OK);
     }
 
+    @Operation(summary = "Получить список пересечений по id пропуска",
+            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Найдены пересечения по пропуску",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            array = @ArraySchema(schema = @Schema(implementation = CrossingDTO.class)))}),
+            @ApiResponse(responseCode = "404", description = "Пропуск не найден")
+    })
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
+    @GetMapping("/pass/{id}")
+    public ResponseEntity<List<CrossingDTO>> getByPassId(@PathVariable UUID id) {
+        List<CrossingDTO> foundCrossings = crossingService.getByPassId(id);
+        return ResponseEntity.ok(foundCrossings);
+    }
 }

@@ -26,6 +26,7 @@ public final class PassSpecification {
         String dtype = filterParams.getDtype();
         String territory = filterParams.getTerritory();
         String status = filterParams.getStatus();
+        Boolean favorite = filterParams.getFavorite();
 
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -54,6 +55,10 @@ public final class PassSpecification {
                 if (!validStatuses.isEmpty()) {
                     predicates.add(root.get("status").in(validStatuses));
                 }
+            }
+
+            if (favorite != null) {
+                predicates.add(cb.equal(root.get("favorite"), favorite));
             }
 
             if (!query.getResultType().equals(Long.class)) {
