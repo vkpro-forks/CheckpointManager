@@ -11,11 +11,8 @@ import io.jsonwebtoken.security.Keys;
 import org.instancio.Instancio;
 import org.instancio.Model;
 import org.instancio.Select;
-import org.springframework.http.MediaType;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.testcontainers.shaded.org.apache.commons.io.output.ByteArrayOutputStream;
 import ru.ac.checkpointmanager.dto.CarBrandDTO;
 import ru.ac.checkpointmanager.dto.CarDTO;
@@ -36,7 +33,6 @@ import ru.ac.checkpointmanager.dto.user.RegistrationConfirmationDTO;
 import ru.ac.checkpointmanager.dto.user.RegistrationDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
-import ru.ac.checkpointmanager.exception.handler.ErrorCode;
 import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.model.Phone;
 import ru.ac.checkpointmanager.model.Territory;
@@ -452,21 +448,6 @@ public class TestUtils {
     public static String jsonStringFromObject(Object object) throws JsonProcessingException {
         ObjectMapper objectMapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
         return objectMapper.writeValueAsString(object);
-    }
-
-    public static void checkCommonValidationFields(ResultActions resultActions) throws Exception {
-        resultActions.andExpect(MockMvcResultMatchers.status().is4xxClientError())
-                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_ERROR_CODE)
-                        .value(ErrorCode.VALIDATION.toString()));
-    }
-
-    public static void checkNotFoundFields(ResultActions resultActions) throws Exception {
-        resultActions.andExpect(MockMvcResultMatchers.status().isNotFound())
-                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE))
-                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_ERROR_CODE)
-                        .value(ErrorCode.NOT_FOUND.toString()))
-                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_TIMESTAMP).isNotEmpty())
-                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_TITLE).isNotEmpty());
     }
 
     private static Key getSignInKey() {

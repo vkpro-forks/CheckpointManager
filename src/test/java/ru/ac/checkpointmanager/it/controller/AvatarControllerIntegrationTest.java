@@ -27,6 +27,7 @@ import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.repository.AvatarRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.security.CustomAuthenticationToken;
+import ru.ac.checkpointmanager.util.ResultCheckUtils;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 
@@ -102,7 +103,7 @@ class AvatarControllerIntegrationTest extends RedisAndPostgresTestContainersConf
         resultActions.andExpect(status().isNotFound());
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                 .value(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(notSavedUser.getId())));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -123,7 +124,7 @@ class AvatarControllerIntegrationTest extends RedisAndPostgresTestContainersConf
         resultActions.andExpect(status().isNotFound());
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                 .value(ExceptionUtils.AVATAR_NOT_FOUND_FOR_USER.formatted(savedUser.getId())));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
 }

@@ -12,6 +12,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import ru.ac.checkpointmanager.exception.CriticalServerException;
 import ru.ac.checkpointmanager.exception.DateOfBirthFormatException;
@@ -237,6 +238,15 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ProblemDetail handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
+        ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
+        problemDetail.setTitle(ErrorMessage.WRONG_ARGUMENT_PASSED);
+        problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
+        log.debug(LOG_MSG, e.getClass());
+        return problemDetail;
+    }
+
     // 500
     @ExceptionHandler(CriticalServerException.class)
     public ProblemDetail handleCriticalServerException(CriticalServerException e) {
@@ -246,6 +256,8 @@ public class GlobalExceptionHandler {
         log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }
+
+
 
     private ProblemDetail createProblemDetail(HttpStatus status, Exception e) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(status, e.getMessage());

@@ -22,6 +22,7 @@ import ru.ac.checkpointmanager.controller.VisitorController;
 import ru.ac.checkpointmanager.dto.VisitorDTO;
 import ru.ac.checkpointmanager.mapper.VisitorMapper;
 import ru.ac.checkpointmanager.service.visitor.VisitorService;
+import ru.ac.checkpointmanager.util.ResultCheckUtils;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 
@@ -50,7 +51,7 @@ class VisitorControllerValidationIntegrationTest {
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.VISITOR_URL)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(visitorDtoString));
-        TestUtils.checkCommonValidationFields(resultActions);
+        ResultCheckUtils.checkCommonValidationFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0))
                 .value(Matchers.anyOf(
                         Matchers.startsWithIgnoringCase("name"),
@@ -67,7 +68,7 @@ class VisitorControllerValidationIntegrationTest {
                 .put(UrlConstants.VISITOR_URL + "/" + TestUtils.VISITOR_ID)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(visitorDtoString));
-        TestUtils.checkCommonValidationFields(resultActions);
+        ResultCheckUtils.checkCommonValidationFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0))
                 .value(Matchers.anyOf(
                         Matchers.startsWithIgnoringCase("name"),
@@ -81,7 +82,7 @@ class VisitorControllerValidationIntegrationTest {
     void shouldHandleValidationErrorForBadPhoneGetByPhone(String phone) {
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.VISITOR_PHONE_URL)
                 .param("phone", phone));
-        TestUtils.checkCommonValidationFields(resultActions);
+        ResultCheckUtils.checkCommonValidationFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0))
                 .value(Matchers.startsWithIgnoringCase("phone")));
     }

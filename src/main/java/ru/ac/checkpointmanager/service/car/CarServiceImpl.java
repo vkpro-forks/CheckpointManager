@@ -70,8 +70,8 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
-    public Car updateCar(String carId, CarDTO updateCar) {
-        Car existingCar = carRepository.findById(UUID.fromString(carId))
+    public Car updateCar(UUID carId, CarDTO updateCar) {
+        Car existingCar = carRepository.findById(carId)
                 .orElseThrow(() -> {
                     log.warn(CAR_NOT_FOUND_LOG, carId);
                     return new CarNotFoundException(CAR_NOT_FOUND_MSG.formatted(carId));

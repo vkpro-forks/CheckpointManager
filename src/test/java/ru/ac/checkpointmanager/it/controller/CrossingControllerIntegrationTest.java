@@ -46,6 +46,7 @@ import ru.ac.checkpointmanager.repository.car.CarRepository;
 import ru.ac.checkpointmanager.service.crossing.CrossingPassHandler;
 import ru.ac.checkpointmanager.service.crossing.impl.PassProcessorOnetime;
 import ru.ac.checkpointmanager.service.crossing.impl.PassProcessorPermanent;
+import ru.ac.checkpointmanager.util.ResultCheckUtils;
 import ru.ac.checkpointmanager.util.TestMessage;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
@@ -189,7 +190,7 @@ class CrossingControllerIntegrationTest extends RedisAndPostgresTestContainersCo
         //then
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                 .value(ExceptionUtils.PASS_NOT_FOUND.formatted(TestUtils.PASS_ID)));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @ParameterizedTest
@@ -321,7 +322,7 @@ class CrossingControllerIntegrationTest extends RedisAndPostgresTestContainersCo
         //then
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                 .value(ExceptionUtils.CHECKPOINT_NOT_FOUND.formatted(TestUtils.CHECKPOINT_ID)));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     private Pass setupAndSavePass(PassStatus passStatus) {
