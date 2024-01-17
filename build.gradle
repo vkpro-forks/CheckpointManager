@@ -20,7 +20,7 @@ bootRun {
 
 
 group = 'ru.ac'
-version = '0.1.14-SNAPSHOT-TEST'
+version = '0.1.15-SNAPSHOT-TEST'
 
 java {
     sourceCompatibility = '17'
