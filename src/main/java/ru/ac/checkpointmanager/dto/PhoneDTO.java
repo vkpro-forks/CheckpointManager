@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.ac.checkpointmanager.model.enums.PhoneNumberType;
+import ru.ac.checkpointmanager.utils.ValidationUtils;
 
 import java.util.UUID;
 
@@ -20,7 +21,7 @@ public class PhoneDTO {
 
     @NotEmpty
     @Size(min = 11, max = 20)
-    @Pattern(regexp = "^([+]?[\\s0-9]+)?(\\d{3}|[(]?[0-9]+[)])?([-]?[\\s]?[0-9])+$",
+    @Pattern(regexp = ValidationUtils.PHONE_REGEXP,
             message = "должно соответствовать формату номера телефона")
     private String number;
 

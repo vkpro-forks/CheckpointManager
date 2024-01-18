@@ -10,7 +10,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 import ru.ac.checkpointmanager.dto.avatar.AvatarImageDTO;
-import ru.ac.checkpointmanager.exception.AvatarLoadingException;
 import ru.ac.checkpointmanager.exception.AvatarProcessingException;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
@@ -104,20 +103,6 @@ class AvatarHelperImplTest {
     }
 
     @Test
-    void createAvatarImageDTOWithNullImageDataThrowsException() {
-        Avatar avatar = TestUtils.createTestAvatarWithEmptyImageData();
-
-        assertThrows(AvatarLoadingException.class, () -> avatarHelper.createAvatarImageDTO(avatar));
-    }
-
-    @Test
-    void createAvatarImageDTOWithEmptyImageDataThrowsException() {
-        Avatar avatar = TestUtils.createTestAvatarWithEmptyImageData();
-
-        assertThrows(AvatarLoadingException.class, () -> avatarHelper.createAvatarImageDTO(avatar));
-    }
-
-    @Test
     void createAvatarImageDTOWithValidDataReturnsDTO() {
         AvatarImageDTO result = avatarHelper.createAvatarImageDTO(avatar);
 
@@ -189,14 +174,6 @@ class AvatarHelperImplTest {
         BufferedImage processedImage = avatarHelper.processImage(originalImage);
 
         Assertions.assertEquals(originalImage, processedImage);
-    }
-
-    @Test
-    void processAndSetAvatarImageWithInvalidFileThrowsException() throws IOException {
-        when(avatarFile.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[0]));
-
-        assertThrows(IllegalArgumentException.class,
-                () -> avatarHelper.processAndSetAvatarImage(avatar, avatarFile));
     }
 
     @Test

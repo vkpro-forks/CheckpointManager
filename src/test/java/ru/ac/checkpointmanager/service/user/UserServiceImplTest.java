@@ -462,7 +462,7 @@ class UserServiceImplTest {
 
 
     @Test
-    void changeRoleUserAlreadyHasRoleThrowsIllegalStateException() {
+    void changeRoleUserAlreadyHasRoleThrowsObjectAlreadyExistsException() {
         User userInContext = TestUtils.getUser();
         User user = TestUtils.getUser();
         user.setRole(Role.USER);
@@ -526,7 +526,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void blockByIdUserAlreadyBlockedThrowsIllegalStateException() {
+    void blockByIdUserAlreadyBlockedNoException() {
         User user = TestUtils.getUser();
         UUID userId = TestUtils.USER_ID;
         user.setIsBlocked(true);
@@ -558,7 +558,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void unblockByIdUserAlreadyUnblockedThrowsIllegalStateException() {
+    void unblockByIdUserAlreadyUnblockedNoException() {
         User user = TestUtils.getUser();
         UUID userId = TestUtils.USER_ID;
         user.setIsBlocked(false);

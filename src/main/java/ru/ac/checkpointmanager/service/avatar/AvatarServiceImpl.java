@@ -50,7 +50,7 @@ public class AvatarServiceImpl implements AvatarService {
         //FIXME временно здесь пока не реализуем логику по другому
         userRepository.findById(userId)
                 .orElseThrow(() -> {
-                    log.warn(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(userId));
+                    log.warn(ExceptionUtils.USER_NOT_FOUND_MSG, userId);
                     return new UserNotFoundException(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(userId));
                 });
         //- достали юзера из бд
@@ -81,7 +81,8 @@ public class AvatarServiceImpl implements AvatarService {
         territoryRepository.findById(territoryId)
                 .orElseThrow(() -> {
                     log.warn(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
-                    return new TerritoryNotFoundException(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
+                    return new TerritoryNotFoundException(ExceptionUtils.TERRITORY_NOT_FOUND_MSG
+                            .formatted(territoryId));
                 });
 
         Avatar avatar = avatarHelper.getOrCreateAvatarByTerritory(territoryId);

@@ -29,6 +29,11 @@ public class ExceptionUtils {
 
     public static final String CHECKPOINT_NOT_FOUND = "[Checkpoint with id: %s] not found";
 
+    public static final String AVATAR_PROCESSING_ERROR = "Error processing avatar: %s";
+    public static final String VISITOR_NOT_FOUND = "Visitor with [id %s] not found";
+
+    public static final String VISITOR_BY_PASS_NOT_FOUND = "Visitor with [pass id %s] not found";
+
     public static final String AVATAR_NOT_FOUND_FOR_USER = "Avatar for [user id: %s] not found";
 
     public static final String AVATAR_NOT_FOUND = "Avatar with [id: %s] not found";

@@ -60,7 +60,13 @@ public class UrlConstants {
 
     public static final String VISITOR_URL = "/api/v1/visitor";
 
-    public static final String VISITOR_PHONE_URL = "/api/v1/visitor/phone";
+    public static final String VISITOR_PHONE_URL = VISITOR_URL + "/phone";
+
+    public static final String VISITOR_NAME_URL = VISITOR_URL + "/name";
+
+    public static final String VISITOR_PASS_URL = VISITOR_URL + "/pass/{passId}";
+
+    public static final String VISITOR_USER_URL = VISITOR_URL + "/user/{userId}";
 
 
     private UrlConstants() {
