@@ -19,6 +19,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SourceType;
+import org.hibernate.annotations.Type;
+import ru.ac.checkpointmanager.converter.PassStatusType;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.enums.Direction;
@@ -49,6 +51,8 @@ public abstract class Pass {
     private String comment;
 
     @Enumerated(EnumType.STRING)
+    @Type(PassStatusType.class)
+    @Column(name = "status", columnDefinition = "pass_status_enum")
     private PassStatus status;
 
     @Enumerated(EnumType.STRING)

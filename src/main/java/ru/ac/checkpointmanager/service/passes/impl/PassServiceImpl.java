@@ -332,7 +332,7 @@ public class PassServiceImpl implements PassService {
         Optional<Pass> overlapPass = passesByUser.stream()
                 .filter(existPass -> existPass.getClass().equals(newPass.getClass()))
                 .filter(existPass -> existPass.getStatus().equals(PassStatus.ACTIVE) ||
-                                     existPass.getStatus().equals(PassStatus.DELAYED))
+                        existPass.getStatus().equals(PassStatus.DELAYED))
                 .filter(existPass -> existPass.compareByFields(newPass))
                 .findFirst();
 
@@ -373,7 +373,7 @@ public class PassServiceImpl implements PassService {
         PassStatus sourceStatus = PassStatus.DELAYED;
         PassStatus targetStatus = PassStatus.ACTIVE;
 
-        List<Pass> passes = passRepository.findPassesByStatusAndTimeBefore(sourceStatus.toString(),
+        List<Pass> passes = passRepository.findPassesByStatusAndTimeBefore(sourceStatus,
                 "startTime", LocalDateTime.now().plusMinutes(1));
         if (passes.isEmpty()) {
             return;
@@ -401,7 +401,7 @@ public class PassServiceImpl implements PassService {
         PassStatus sourceStatus = PassStatus.ACTIVE;
         PassStatus targetStatus;
 
-        List<Pass> passes = passRepository.findPassesByStatusAndTimeBefore(sourceStatus.toString(),
+        List<Pass> passes = passRepository.findPassesByStatusAndTimeBefore(sourceStatus,
                 "endTime", LocalDateTime.now());
         if (passes.isEmpty()) {
             return;
