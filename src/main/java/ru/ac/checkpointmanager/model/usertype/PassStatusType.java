@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.converter;
+package ru.ac.checkpointmanager.model.usertype;
 
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;

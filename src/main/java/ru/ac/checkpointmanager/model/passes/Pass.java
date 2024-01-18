@@ -20,7 +20,7 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SourceType;
 import org.hibernate.annotations.Type;
-import ru.ac.checkpointmanager.converter.PassStatusType;
+import ru.ac.checkpointmanager.model.usertype.PassStatusType;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.enums.Direction;
