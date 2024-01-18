@@ -90,6 +90,13 @@ public interface PassRepository extends JpaRepository<Pass, UUID>, JpaSpecificat
      * @param time       дата и время для сравнения со столбцом timeColumn.
      * @return список найденных пропусков.
      */
+
+/*    @Query(value = "SELECT * FROM passes WHERE status = :status AND " +
+            "CASE WHEN :column = 'startTime' THEN start_time " +
+            "WHEN :column = 'endTime' THEN end_time " +
+            "END < :time" , nativeQuery = true)
+            native query по другому надо настраивать для настройки с пг енамами, здесь конвертер не срабатывает
+            */
     @Query(value = "SELECT p FROM Pass p WHERE p.status = :status AND " +
             "(CASE WHEN :column = 'startTime' THEN p.startTime " +
             "WHEN :column = 'endTime' THEN p.endTime " +

@@ -11,7 +11,7 @@ $$
 
 -- удалили view, далее создается enum, меняется тип столбца на enum, переносятся предыдущие значения
         CREATE TYPE pass_status_enum AS ENUM (
-            'DELAYED', 'ACTIVE', 'COMPLETED', 'CANCELED', 'OUTDATED', 'WARNING'
+            'DELAYED', 'ACTIVE', 'COMPLETED', 'CANCELLED', 'OUTDATED', 'WARNING'
             );
 
         ALTER TABLE passes
