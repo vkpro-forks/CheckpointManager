@@ -48,9 +48,11 @@ class VisitorControllerValidationIntegrationTest {
     @MethodSource("getBadVisitorDto")
     void addVisitor_BadDto_HandleValidationErrorAndReturnBadRequest(VisitorDTO visitorDTO) {
         String visitorDtoString = TestUtils.jsonStringFromObject(visitorDTO);
+
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.VISITOR_URL)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(visitorDtoString));
+
         ResultCheckUtils.checkCommonValidationFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0))
                 .value(Matchers.anyOf(
@@ -65,10 +67,12 @@ class VisitorControllerValidationIntegrationTest {
     @MethodSource("getBadVisitorDto")
     void updateVisitor_BadDto_HandleValidationErrorAndReturnBadRequest(VisitorDTO visitorDTO) {
         String visitorDtoString = TestUtils.jsonStringFromObject(visitorDTO);
+
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                 .put(UrlConstants.VISITOR_URL + "/" + TestUtils.VISITOR_ID)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(visitorDtoString));
+
         ResultCheckUtils.checkCommonValidationFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0))
                 .value(Matchers.anyOf(
@@ -83,6 +87,7 @@ class VisitorControllerValidationIntegrationTest {
     void getByPhonePart_EmptyString_HandleValidationErrorAndReturnBadRequest(String phone) {
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.VISITOR_PHONE_URL)
                 .param("phone", phone));
+
         ResultCheckUtils.checkCommonValidationFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0))
                 .value(Matchers.startsWithIgnoringCase("phone")));
@@ -94,7 +99,8 @@ class VisitorControllerValidationIntegrationTest {
     void getByNamePart_EmptyString_HandleValidationErrorAndReturnBadRequest(String name) {
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.VISITOR_NAME_URL)
                 .param("name", name));
-        TestUtils.checkCommonValidationFields(resultActions);
+
+        ResultCheckUtils.checkCommonValidationFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0))
                 .value(Matchers.startsWithIgnoringCase("name")));
     }

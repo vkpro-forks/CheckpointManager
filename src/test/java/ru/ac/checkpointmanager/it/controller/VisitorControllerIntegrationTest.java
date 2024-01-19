@@ -33,6 +33,7 @@ import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.repository.VisitorRepository;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
 import ru.ac.checkpointmanager.repository.car.CarRepository;
+import ru.ac.checkpointmanager.util.ResultCheckUtils;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 
@@ -116,7 +117,8 @@ class VisitorControllerIntegrationTest extends RedisAndPostgresTestContainersCon
     void getVisitor_VisitorNotFound_HandleErrorAndReturnNotFound() {
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                 .get(UrlConstants.VISITOR_URL + "/" + TestUtils.VISITOR_ID));
-        TestUtils.checkNotFoundFields(resultActions);
+
+        ResultCheckUtils.checkNotFoundFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                 .value(ExceptionUtils.VISITOR_NOT_FOUND.formatted(TestUtils.VISITOR_ID)));
     }
@@ -146,11 +148,13 @@ class VisitorControllerIntegrationTest extends RedisAndPostgresTestContainersCon
     @SneakyThrows
     void updateVisitor_VisitorNotFound_HandleErrorAndReturnNotFound() {
         String visitorDto = TestUtils.jsonStringFromObject(TestUtils.getVisitorDTO());
+
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                 .put(UrlConstants.VISITOR_URL + "/" + TestUtils.VISITOR_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(visitorDto));
-        TestUtils.checkNotFoundFields(resultActions);
+
+        ResultCheckUtils.checkNotFoundFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                 .value(ExceptionUtils.VISITOR_NOT_FOUND.formatted(TestUtils.VISITOR_ID)));
     }
@@ -175,7 +179,8 @@ class VisitorControllerIntegrationTest extends RedisAndPostgresTestContainersCon
     void deleteVisitor_VisitorNotFound_HandleErrorAndReturnNotFound() {
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                 .delete(UrlConstants.VISITOR_URL + "/" + TestUtils.VISITOR_ID));
-        TestUtils.checkNotFoundFields(resultActions);
+
+        ResultCheckUtils.checkNotFoundFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                 .value(ExceptionUtils.VISITOR_NOT_FOUND.formatted(TestUtils.VISITOR_ID)));
     }
@@ -276,6 +281,7 @@ class VisitorControllerIntegrationTest extends RedisAndPostgresTestContainersCon
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                 .get(UrlConstants.VISITOR_PASS_URL, savedPass.getId()));
+
         resultActions.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(savedVisitor.getId().toString()));
     }
@@ -306,7 +312,7 @@ class VisitorControllerIntegrationTest extends RedisAndPostgresTestContainersCon
         resultActions.andExpect(MockMvcResultMatchers.status().isNotFound());
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                 .value(ExceptionUtils.VISITOR_BY_PASS_NOT_FOUND.formatted(savedPass.getId())));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -321,7 +327,7 @@ class VisitorControllerIntegrationTest extends RedisAndPostgresTestContainersCon
         resultActions.andExpect(MockMvcResultMatchers.status().isNotFound());
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                 .value(ExceptionUtils.VISITOR_BY_PASS_NOT_FOUND.formatted(TestUtils.PASS_ID)));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
