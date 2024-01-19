@@ -30,6 +30,7 @@ import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
 import ru.ac.checkpointmanager.repository.car.CarRepository;
+import ru.ac.checkpointmanager.util.ResultCheckUtils;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 
@@ -90,7 +91,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
                 .perform(MockMvcRequestBuilders.put(UrlConstants.CAR_BRANDS_URL + "/" + TestUtils.CAR_BRAND_ID_STR)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(contentString));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -104,7 +105,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
                         .content(carDtoString))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith("CarBrand")));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -129,7 +130,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
                         .content(carDtoString))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith("CarBrand")));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -137,7 +138,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
     void handleCarBrandNotFoundExceptionForDeleteCarBrand() {
         ResultActions resultActions = mockMvc
                 .perform(MockMvcRequestBuilders.delete(UrlConstants.CAR_BRANDS_URL + "/" + TestUtils.CAR_BRAND_ID_STR));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     //AVATAR NOT FOUND EXCEPTION HANDLING
@@ -148,7 +149,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
         ResultActions resultActions = mockMvc
                 .perform(MockMvcRequestBuilders.get(UrlConstants.AVATAR_URL + "/" + TestUtils.USER_ID))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL).value(Matchers.startsWith("Avatar")));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     //CHECKPOINT NOT FOUND EXCEPTION HANDLING
@@ -157,7 +158,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
     void shouldHandleCheckPointNotFoundExceptionForGetCheckPoint() {
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                 .get(UrlConstants.CHECKPOINT_URL + "/" + TestUtils.CHECKPOINT_ID));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -168,7 +169,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
                 .put(UrlConstants.CHECKPOINT_URL)
                 .content(checkPointDto)
                 .contentType(MediaType.APPLICATION_JSON));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -176,7 +177,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
     void shouldHandleCheckPointNotFoundExceptionForDeleteCheckPoint() {
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                 .delete(UrlConstants.CHECKPOINT_URL + "/" + TestUtils.CHECKPOINT_ID));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     //CROSSING NOT FOUND EXCEPTION HANDLING
@@ -186,7 +187,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
     void shouldHandleCrossingNotFoundExceptionForGetCrossing() {
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                 .get(UrlConstants.CROSSING_URL + "/" + TestUtils.CROSSING_ID));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     //CAR NOT FOUND EXCEPTION HANDLING
@@ -196,7 +197,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
     void shouldHandleCarNotFoundExceptionForDeleteCar() {
         ResultActions resultActions = mockMvc
                 .perform(MockMvcRequestBuilders.delete(UrlConstants.CAR_URL + "/" + TestUtils.CAR_ID));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -207,7 +208,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
                 .put(UrlConstants.CAR_URL + "/" + TestUtils.CAR_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(updateCarDto));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     //PASS NOT FOUND EXCEPTION HANDLING
@@ -216,7 +217,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
     void shouldHandlePassNotFoundExceptionForGetPass() {
         ResultActions resultActions = mockMvc
                 .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_URL + "/" + TestUtils.PASS_ID));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -227,7 +228,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
                 .perform(MockMvcRequestBuilders.put(UrlConstants.PASS_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(passUpdateDto));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -235,7 +236,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
     void shouldHandlePassNotFoundExceptionForDeletePass() {
         ResultActions resultActions = mockMvc
                 .perform(MockMvcRequestBuilders.delete(UrlConstants.PASS_URL + "/" + TestUtils.PASS_ID));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @ParameterizedTest
@@ -244,7 +245,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
     void shouldHandlePassNotFoundExceptionsForPatchPassMethods(String url) {
         ResultActions resultActions = mockMvc
                 .perform(MockMvcRequestBuilders.patch(url.formatted(TestUtils.PASS_ID)));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
 //TERRITORY NOT FOUND EXCEPTION HANDLING
@@ -261,7 +262,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
                         .content(passDtoCreate))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith(TERRITORY)));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -269,7 +270,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
     void shouldHandleTerritoryNotFoundExceptionForGetPassesByTerritory() {
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                 .get(UrlConstants.PASS_URL_TERRITORY.formatted(TestUtils.TERR_ID)));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -277,7 +278,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
     void shouldHandleTerritoryNotFoundExceptionForGetTerritory() {
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                 .get(UrlConstants.TERR_URL + "/" + TestUtils.TERR_ID));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -291,7 +292,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith(TERRITORY)));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -314,7 +315,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith(TERRITORY)));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -324,7 +325,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
                         .get(UrlConstants.TERR_USERS_URL.formatted(TestUtils.TERR_ID)))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith(TERRITORY)));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -336,7 +337,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
                         .content(territoryDto))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith(TERRITORY)));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -346,7 +347,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
                         .patch(UrlConstants.TERR_ATTACH_DETACH_URL.formatted(TestUtils.TERR_ID, TestUtils.USER_ID)))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith(TERRITORY)));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -356,7 +357,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
                         .delete(UrlConstants.TERR_URL + "/" + TestUtils.TERR_ID))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith(TERRITORY)));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -366,7 +367,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
                         .delete(UrlConstants.TERR_ATTACH_DETACH_URL.formatted(TestUtils.TERR_ID, TestUtils.USER_ID)))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith(TERRITORY)));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     //PHONE NOT FOUND EXCEPTION HANDLING
@@ -380,7 +381,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
                         .with(SecurityMockMvcRequestPostProcessors.authentication(TestUtils.getAuthToken(user))))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith(PHONE)));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -393,7 +394,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
                         .with(SecurityMockMvcRequestPostProcessors.authentication(TestUtils.getAuthToken(user))))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith(PHONE)));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -410,7 +411,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
                 )
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith(PHONE)));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     private static Stream<String> passUrlsForPatchMethodsArguments() {

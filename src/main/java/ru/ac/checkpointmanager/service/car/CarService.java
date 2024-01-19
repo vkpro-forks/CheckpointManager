@@ -12,7 +12,7 @@ public interface CarService {
 
     void deleteCar(UUID carId);
 
-    Car updateCar(String carId, CarDTO updateCar);
+    Car updateCar(UUID carId, CarDTO updateCar);
 
     Car getCarById(UUID carId);
 

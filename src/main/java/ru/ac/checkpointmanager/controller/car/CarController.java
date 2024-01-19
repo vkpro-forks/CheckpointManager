@@ -12,8 +12,8 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -55,7 +55,7 @@ public class CarController {
             description = "Доступ: ADMIN.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Машина успешно добавлен",
-                    content = {@Content(mediaType = "application/json",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CarDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей.",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
@@ -73,32 +73,29 @@ public class CarController {
             description = "Доступ: ADMIN.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Машина успешно обновлена",
-                    content = {@Content(mediaType = "application/json",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CarDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей.",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @PutMapping("/{carId}")
-    public Car updateCar(@org.hibernate.validator.constraints.UUID
-                                       @PathVariable String carId,
-                                       @Valid @RequestBody CarDTO updateCarDto) {
-        return  carService.updateCar(carId, updateCarDto);
+    public Car updateCar(@PathVariable UUID carId,
+                         @Valid @RequestBody CarDTO updateCarDto) {
+        return carService.updateCar(carId, updateCarDto);
     }
 
     @Operation(summary = "Удалить машину",
             description = "Доступ: ADMIN.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Машина успешно удален",
-                    content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = CarDTO.class))}),
+            @ApiResponse(responseCode = "204", description = "Машина успешно удалена"),
             @ApiResponse(responseCode = "404", description = "Такой машины не существует.",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @DeleteMapping("/{carId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deletedCar(@PathVariable UUID carId) {
+    public void deleteCar(@PathVariable UUID carId) {
         carService.deleteCar(carId);
     }
 
@@ -106,31 +103,28 @@ public class CarController {
             description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Список машин получен",
-                    content = {@Content(mediaType = "application/json",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CarDTO.class))}),
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping
-    public ResponseEntity<List<CarDTO>> getAllCars() {
+    public List<CarDTO> getAllCars() {
         List<Car> carList = carService.getAllCars();
-        log.debug("Retrieved all cars");
-        return ResponseEntity.ok(mapper.toCarDTOs(carList));
+        return mapper.toCarDTOs(carList);
     }
 
     @Operation(summary = "Получение всех машин по user.",
             description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Список машин получен",
-                    content = {@Content(mediaType = "application/json",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CarDTO.class))}),
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<CarDTO>> searchByUserId(@PathVariable UUID userId) {
+    public List<CarDTO> searchByUserId(@PathVariable UUID userId) {
         List<Car> cars = carService.findByUserId(userId);
-        List<CarDTO> carDTOs = mapper.toCarDTOs(cars);
-        log.debug("Retrieved cars for user ID {}", userId);
-        return new ResponseEntity<>(carDTOs, HttpStatus.OK);
+        return mapper.toCarDTOs(cars);
     }
 
     @Operation(summary = "Найти машину по номеру телефона.",
@@ -138,14 +132,13 @@ public class CarController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Машина успешно найдена. " +
                     "Может вернуть пустой список если машины не найдены.",
-                    content = {@Content(mediaType = "application/json",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CarDTO.class))}),
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/phone")
     public List<CarDTO> searchByPhone(@RequestParam @NotBlank String phone) {
         List<Car> cars = carService.findByPhonePart(phone);
-        log.debug("Cars found with phone part: {}", phone);
         return mapper.toCarDTOs(cars);
     }
 
