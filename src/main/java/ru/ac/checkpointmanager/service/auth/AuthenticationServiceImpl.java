@@ -18,10 +18,10 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.user.AuthRequestDTO;
 import ru.ac.checkpointmanager.dto.user.AuthResponseDTO;
-import ru.ac.checkpointmanager.dto.user.RegistrationConfirmationDTO;
-import ru.ac.checkpointmanager.dto.user.PreAuthResponseDTO;
 import ru.ac.checkpointmanager.dto.user.LoginResponseDTO;
+import ru.ac.checkpointmanager.dto.user.PreAuthResponseDTO;
 import ru.ac.checkpointmanager.dto.user.RefreshTokenDTO;
+import ru.ac.checkpointmanager.dto.user.RegistrationConfirmationDTO;
 import ru.ac.checkpointmanager.dto.user.RegistrationDTO;
 import ru.ac.checkpointmanager.exception.EmailAlreadyExistsException;
 import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
@@ -75,8 +75,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
      *
      * @param registrationDTO объект передачи данных пользователя.
      * @return TemporaryUser, представляющий предварительно зарегистрированного пользователя.
-     * @throws IllegalStateException если пользователь с указанным email уже существует.
-     * @throws MailSendException     если отправка письма с токеном подтверждения не удалась.
+     * @throws EmailAlreadyExistsException если пользователь с указанным email уже существует.
+     * @throws MailSendException           если отправка письма с токеном подтверждения не удалась.
      * @see RegistrationDTO
      * @see FieldsValidation
      * @see EmailService

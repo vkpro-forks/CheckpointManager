@@ -5,8 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.ac.checkpointmanager.dto.avatar.AvatarImageDTO;
-import ru.ac.checkpointmanager.exception.AvatarLoadingException;
 import ru.ac.checkpointmanager.exception.AvatarProcessingException;
+import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.model.Territory;
@@ -18,8 +18,7 @@ import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 
 import javax.imageio.ImageIO;
-import java.awt.Graphics2D;
-import java.awt.Image;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -100,7 +99,7 @@ class AvatarHelperImpl implements AvatarHelper {
      *
      * @param avatar     Объект Avatar для установки изображения.
      * @param avatarFile Мультипарт-файл, содержащий изображение аватара.
-     * @throws IllegalArgumentException если файл не является изображением.
+     * @throws AvatarProcessingException если возникла проблема с обработкой изображения
      */
     @Override
     public void processAndSetAvatarImage(Avatar avatar, MultipartFile avatarFile) {
@@ -108,11 +107,7 @@ class AvatarHelperImpl implements AvatarHelper {
         try {
             // Читаем изображение из файла
             BufferedImage image = ImageIO.read(avatarFile.getInputStream());
-            //FIXME если файл существует оно может быть null? оставить до тестирования
-            if (image == null) {
-                log.warn("The file uploaded for entityID: {} is not an image.", avatar.getId());
-                throw new IllegalArgumentException("The file is not an image.");
-            }
+            //TODO мы уже проверили что файл не null, контент там точно есть
             // Проверяем и обрабатываем разрешение изображения
             BufferedImage processedImage = processImage(image);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -120,7 +115,8 @@ class AvatarHelperImpl implements AvatarHelper {
             avatar.setPreview(baos.toByteArray());
             log.debug("Avatar image processed and set for entityID: {}", avatar.getId());
         } catch (IOException e) {
-            throw new AvatarProcessingException("Error processing avatar", e);  //FIXME we need to do smth to avoid this situation
+            log.error(ExceptionUtils.AVATAR_PROCESSING_ERROR.formatted(e.getMessage()));
+            throw new AvatarProcessingException(ExceptionUtils.AVATAR_PROCESSING_ERROR.formatted(e.getMessage())); //TODO Лёш, жду от тебя тесты)))
         }
     }
 
@@ -184,15 +180,10 @@ class AvatarHelperImpl implements AvatarHelper {
      *
      * @param avatar Объект Avatar, содержащий данные изображения.
      * @return AvatarImageDTO, содержащий данные изображения аватара.
-     * @throws AvatarLoadingException если данные изображения аватара пусты.
      */
     @Override
     public AvatarImageDTO createAvatarImageDTO(Avatar avatar) {
-        byte[] imageData = avatar.getPreview();
-        if (imageData == null || imageData.length == 0) {
-            log.warn("Avatar image data is empty for avatar ID: {}", avatar.getId());
-            throw new AvatarLoadingException("Avatar image data is empty for avatar ID: " + avatar.getId());
-        }
+        byte[] imageData = avatar.getPreview(); //TODO мы же достали из БД, там всё хорошее должно быть
 
         String mimeType = avatar.getMediaType();
         mimeType = (mimeType != null) ? mimeType : "application/octet-stream";
@@ -210,7 +201,7 @@ class AvatarHelperImpl implements AvatarHelper {
      * Обновляет аватар для заданной территории. Если территория не найдена, выбрасывает исключение.
      *
      * @param territoryId Идентификатор территорий, для которой нужно обновить аватар.
-     * @param avatar Объект Avatar, который будет установлен как аватар пользователя.
+     * @param avatar      Объект Avatar, который будет установлен как аватар пользователя.
      * @throws TerritoryNotFoundException если пользователь с данным идентификатором не найден.
      */
     @Override

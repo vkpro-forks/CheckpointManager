@@ -33,6 +33,7 @@
 
 
     <logger name="org.testcontainers" level="INFO"/>
+    <logger name="org.springframework.web.filter.CommonsRequestLoggingFilter" level="DEBUG"/>
     <logger name="com.github.dockerjava" level="WARN"/>
     <logger name="ru.ac.checkpointmanager" level="debug"/>
 </configuration>

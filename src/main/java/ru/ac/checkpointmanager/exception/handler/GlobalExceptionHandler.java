@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import ru.ac.checkpointmanager.exception.CriticalServerException;
-import ru.ac.checkpointmanager.exception.DateOfBirthFormatException;
 import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
+import ru.ac.checkpointmanager.exception.ImageProcessingException;
 import ru.ac.checkpointmanager.exception.InvalidTokenException;
 import ru.ac.checkpointmanager.exception.MismatchCurrentPasswordException;
 import ru.ac.checkpointmanager.exception.ObjectAlreadyExistsException;
@@ -156,15 +156,6 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
-    @ExceptionHandler(DateOfBirthFormatException.class)
-    public ProblemDetail handleDateOfBirthFormatException(DateOfBirthFormatException e) {
-        ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
-        problemDetail.setTitle("Bad format of birth date"); //FIXME no usages, may be would be better to have VALIDATION
-        problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
-        log.debug(LOG_MSG, e.getClass());
-        return problemDetail;
-    }
-
     @ExceptionHandler(PhoneAlreadyExistException.class)
     public ProblemDetail handlePhoneAlreadyExistException(PhoneAlreadyExistException e) {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.CONFLICT, e);
@@ -202,19 +193,19 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
-    /*@ExceptionHandler(InvalidPhoneNumberException.class)
-    public ProblemDetail handleInvalidPhoneNumberException(InvalidPhoneNumberException e) {
-        ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
-        problemDetail.setTitle("Invalid phone number format"); //FIXME move to validation
-        problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
-        log.debug(LOG_MSG, e.getClass());
-        return problemDetail;
-    }*/
-
     @ExceptionHandler(EmailVerificationTokenException.class)
     public ProblemDetail handleEmailVerificationTokenException(EmailVerificationTokenException e) {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
         problemDetail.setTitle("Verification token not found, or expired");
+        problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
+        log.debug(LOG_MSG, e.getClass());
+        return problemDetail;
+    }
+
+    @ExceptionHandler(ImageProcessingException.class)
+    public ProblemDetail handleImageProcessingException(ImageProcessingException e) {
+        ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
+        problemDetail.setTitle("Image processing exception");
         problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
         log.debug(LOG_MSG, e.getClass());
         return problemDetail;

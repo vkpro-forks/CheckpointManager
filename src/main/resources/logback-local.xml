@@ -36,5 +36,6 @@
     <logger name="ru.ac.checkpointmanager" level="debug">
         <appender-ref ref="FILE"/>
     </logger>
+    <logger name="org.springframework.web.filter.CommonsRequestLoggingFilter" level="DEBUG"/>
 
 </configuration>

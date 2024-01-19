@@ -264,7 +264,8 @@ public class UserServiceImpl implements UserService {
      * <p>
      *
      * @param request Объект {@link NewPasswordDTO}, содержащий текущий и новый пароли.
-     * @throws IllegalStateException если текущий пароль не соответствует или новый пароль и его подтверждение не совпадают.
+     * @throws PasswordConfirmationException    если новый пароль и его подтверждение не совпадают.
+     * @throws MismatchCurrentPasswordException если переданный пароль не соответствует текущему
      * @see AuthFacade
      */
     @Override
@@ -304,8 +305,8 @@ public class UserServiceImpl implements UserService {
      *
      * @param request объект запроса, содержащий текущую и новую электронные почты пользователя.
      * @return объект запроса {@link NewEmailDTO} с обновленными данными.
-     * @throws IllegalStateException если текущая электронная почта пользователя не соответствует указанной в запросе.
-     * @throws MailSendException     если происходит ошибка при отправке электронного письма.
+     * @throws EmailAlreadyExistsException если текущая электронная почта уже существует
+     * @throws MailSendException           если происходит ошибка при отправке электронного письма.
      */
     @CachePut(value = "email", key = "#result.verifiedToken")
     @Override
@@ -394,9 +395,9 @@ public class UserServiceImpl implements UserService {
      *
      * @param id   Идентификатор пользователя, роль которого нужно изменить.
      * @param role Новая роль, которую необходимо назначить пользователю.
-     * @throws UserNotFoundException если пользователь с заданным идентификатором не найден.
-     * @throws AccessDeniedException если у пользователя, выполняющего операцию, нет прав на изменение роли.
-     * @throws IllegalStateException если пользователь уже имеет указанную роль.
+     * @throws UserNotFoundException        если пользователь с заданным идентификатором не найден.
+     * @throws AccessDeniedException        если у пользователя, выполняющего операцию, нет прав на изменение роли.
+     * @throws ObjectAlreadyExistsException если пользователь уже имеет указанную роль.
      */
     @CacheEvict(value = "user", key = "#id")
     @Override
@@ -490,7 +491,6 @@ public class UserServiceImpl implements UserService {
      * <p>
      * Этот метод устанавливает статус блокировки пользователя на 'false'. Если пользователь
      * с указанным идентификатором не найден, выбрасывается исключение {@link UserNotFoundException}.
-     * В случае, если пользователь уже разблокирован, выбрасывается {@link IllegalStateException}.
      * <p>
      *
      * @param id Идентификатор пользователя, которого необходимо разблокировать.

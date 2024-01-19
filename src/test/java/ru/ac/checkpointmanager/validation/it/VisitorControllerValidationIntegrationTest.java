@@ -46,7 +46,7 @@ class VisitorControllerValidationIntegrationTest {
     @ParameterizedTest
     @SneakyThrows
     @MethodSource("getBadVisitorDto")
-    void shouldHandleValidationErrorForBadVisitorDtoForAddVisitor(VisitorDTO visitorDTO) {
+    void addVisitor_BadDto_HandleValidationErrorAndReturnBadRequest(VisitorDTO visitorDTO) {
         String visitorDtoString = TestUtils.jsonStringFromObject(visitorDTO);
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.VISITOR_URL)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -59,10 +59,11 @@ class VisitorControllerValidationIntegrationTest {
                 )));
     }
 
+
     @ParameterizedTest
     @SneakyThrows
     @MethodSource("getBadVisitorDto")
-    void shouldHandleValidationErrorForBadVisitorDtoForUpdateVisitor(VisitorDTO visitorDTO) {
+    void updateVisitor_BadDto_HandleValidationErrorAndReturnBadRequest(VisitorDTO visitorDTO) {
         String visitorDtoString = TestUtils.jsonStringFromObject(visitorDTO);
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                 .put(UrlConstants.VISITOR_URL + "/" + TestUtils.VISITOR_ID)
@@ -79,12 +80,23 @@ class VisitorControllerValidationIntegrationTest {
     @ParameterizedTest
     @EmptySource
     @SneakyThrows
-    void shouldHandleValidationErrorForBadPhoneGetByPhone(String phone) {
+    void getByPhonePart_EmptyString_HandleValidationErrorAndReturnBadRequest(String phone) {
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.VISITOR_PHONE_URL)
                 .param("phone", phone));
         ResultCheckUtils.checkCommonValidationFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0))
                 .value(Matchers.startsWithIgnoringCase("phone")));
+    }
+
+    @ParameterizedTest
+    @EmptySource
+    @SneakyThrows
+    void getByNamePart_EmptyString_HandleValidationErrorAndReturnBadRequest(String name) {
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.VISITOR_NAME_URL)
+                .param("name", name));
+        TestUtils.checkCommonValidationFields(resultActions);
+        resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0))
+                .value(Matchers.startsWithIgnoringCase("name")));
     }
 
     private static Stream<VisitorDTO> getBadVisitorDto() {
