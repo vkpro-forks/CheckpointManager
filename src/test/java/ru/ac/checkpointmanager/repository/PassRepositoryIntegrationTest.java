@@ -2,7 +2,8 @@ package ru.ac.checkpointmanager.repository;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jdbc.JdbcConnectionDetails;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -19,6 +20,7 @@ import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.Visitor;
 import ru.ac.checkpointmanager.model.passes.Pass;
+import ru.ac.checkpointmanager.model.passes.PassConstant;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.model.passes.PassTimeType;
 import ru.ac.checkpointmanager.model.passes.PassWalk;
@@ -57,6 +59,12 @@ class PassRepositoryIntegrationTest {
     @Autowired
     VisitorRepository visitorRepository;
 
+    User savedUser;
+
+    Territory savedTerritory;
+
+    Visitor savedVisitor;
+
     @AfterEach
     void clear() {
         userRepository.deleteAll();
@@ -65,20 +73,10 @@ class PassRepositoryIntegrationTest {
         passRepository.deleteAll();
     }
 
-    @Test
-    void findPassesByStatusAndTimeBefore_AllOk_ReturnListOfPasses() {
-        Territory territory = new Territory();
-        territory.setName(TestUtils.TERR_NAME);
-        User user = TestUtils.getUser();
-        User savedUser = userRepository.saveAndFlush(user);
-        territory.setUsers(List.of(savedUser));
-        Territory savedTerritory = territoryRepository.saveAndFlush(territory);
-        Visitor visitor = new Visitor();
-        visitor.setName(TestUtils.FULL_NAME);
-        visitor.setPhone(TestUtils.PHONE_NUM);
-        Visitor savedVisitor = visitorRepository.saveAndFlush(visitor);
-
-        PassStatus status = PassStatus.ACTIVE;
+    @ParameterizedTest
+    @EnumSource(PassStatus.class)
+    void findPassesByStatusAndTimeBefore_ActiveBeforeEndTime_ReturnListOfPasses(PassStatus status) {
+        saveUserTerritoryVisitor();
         PassWalk passWalk = new PassWalk();
         passWalk.setStatus(status);
         passWalk.setStartTime(LocalDateTime.now().minusDays(1));
@@ -94,28 +92,48 @@ class PassRepositoryIntegrationTest {
         passWalk2.setStartTime(LocalDateTime.now().minusDays(1));
         passWalk2.setEndTime(LocalDateTime.now().plusDays(3));
         passWalk2.setUser(savedUser);
-        passWalk2.setTerritory(territory);
+        passWalk2.setTerritory(savedTerritory);
         passWalk2.setVisitor(savedVisitor);
         passWalk2.setTimeType(PassTimeType.ONETIME);
 
-        List<Pass> passes = passRepository.findPassesByStatusAndTimeBefore(status, "endTime", LocalDateTime.now().plusDays(2));
+        List<Pass> passes = passRepository.findPassesByStatusAndTimeBefore(status, PassConstant.END_TIME, LocalDateTime.now().plusDays(2));
 
         Assertions.assertThat(passes).isNotEmpty();
-        Assertions.assertThat(passes.get(0).getStatus()).isEqualTo(PassStatus.ACTIVE);
+        Assertions.assertThat(passes.get(0).getStatus()).isEqualTo(status);
+    }
+
+    @ParameterizedTest
+    @EnumSource(PassStatus.class)
+    void findPassesByStatusAndTimeBefore_CompletedBeforeStart_ReturnListOfPasses(PassStatus status) {
+        saveUserTerritoryVisitor();
+        PassWalk passWalk = new PassWalk();
+        passWalk.setStatus(status);
+        passWalk.setStartTime(LocalDateTime.now().minusDays(1));
+        passWalk.setEndTime(LocalDateTime.now().plusDays(1));
+        passWalk.setUser(savedUser);
+        passWalk.setTerritory(savedTerritory);
+        passWalk.setVisitor(savedVisitor);
+        passWalk.setTimeType(PassTimeType.ONETIME);
+        passRepository.saveAndFlush(passWalk);
+
+        PassWalk passWalk2 = new PassWalk();
+        passWalk2.setStatus(status);
+        passWalk2.setStartTime(LocalDateTime.now().minusDays(1));
+        passWalk2.setEndTime(LocalDateTime.now().plusDays(3));
+        passWalk2.setUser(savedUser);
+        passWalk2.setTerritory(savedTerritory);
+        passWalk2.setVisitor(savedVisitor);
+        passWalk2.setTimeType(PassTimeType.ONETIME);
+
+        List<Pass> passes = passRepository.findPassesByStatusAndTimeBefore(status, PassConstant.START_TIME, LocalDateTime.now().plusDays(2));
+
+        Assertions.assertThat(passes).isNotEmpty();
+        Assertions.assertThat(passes.get(0).getStatus()).isEqualTo(status);
     }
 
     /*@Test
     void findPassesByStatusAndTimeBefore_ExperimentalEnumAndPgTypesDoesntMatch_ReturnListOfPasses() {
-        Territory territory = new Territory();
-        territory.setName(TestUtils.TERR_NAME);
-        User user = TestUtils.getUser();
-        User savedUser = userRepository.saveAndFlush(user);
-        territory.setUsers(List.of(savedUser));
-        Territory savedTerritory = territoryRepository.saveAndFlush(territory);
-        Visitor visitor = new Visitor();
-        visitor.setName(TestUtils.FULL_NAME);
-        visitor.setPhone(TestUtils.PHONE_NUM);
-        Visitor savedVisitor = visitorRepository.saveAndFlush(visitor);
+        saveUserTerritoryVisitor();
 
         PassStatus status = PassStatus.STATUS_NOT_IN_PG;
         PassWalk passWalk = new PassWalk();
@@ -134,5 +152,18 @@ class PassRepositoryIntegrationTest {
         Assertions.assertThat(passes.get(0).getStatus()).isEqualTo(PassStatus.ACTIVE);
     }
 */
+
+    private void saveUserTerritoryVisitor() {
+        Territory territory = new Territory();
+        territory.setName(TestUtils.TERR_NAME);
+        User user = TestUtils.getUser();
+        savedUser = userRepository.saveAndFlush(user);
+        territory.setUsers(List.of(savedUser));
+        savedTerritory = territoryRepository.saveAndFlush(territory);
+        Visitor visitor = new Visitor();
+        visitor.setName(TestUtils.FULL_NAME);
+        visitor.setPhone(TestUtils.PHONE_NUM);
+        savedVisitor = visitorRepository.saveAndFlush(visitor);
+    }
 
 }
