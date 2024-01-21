@@ -90,7 +90,7 @@ public interface PassRepository extends JpaRepository<Pass, UUID>, JpaSpecificat
      * @param time       дата и время для сравнения со столбцом timeColumn.
      * @return список найденных пропусков.
      */
-    /*@Query(value = "SELECT * FROM passes WHERE status = " +
+            /*@Query(value = "SELECT * FROM passes WHERE status = " +
             "CAST(:#{#status.name()} as pass_status_enum) AND " +
             "CASE " +
             "WHEN :column = 'startTime' THEN start_time " +
@@ -102,8 +102,8 @@ public interface PassRepository extends JpaRepository<Pass, UUID>, JpaSpecificat
     //просто оставлю этот пример, если вдруг понадобится написать native query
     @Query(value = "SELECT p FROM Pass p WHERE p.status = :status AND " +
             "(CASE " +
-            "WHEN :column = 'startTime' THEN p.startTime " +
-            "WHEN :column = 'endTime' THEN p.endTime " +
+            "WHEN :column =  ?#{T(ru.ac.checkpointmanager.model.passes.PassConstant).START_TIME} THEN p.startTime " +
+            "WHEN :column = ?#{T(ru.ac.checkpointmanager.model.passes.PassConstant).END_TIME} THEN p.endTime " +
             "END) " +
             "< :time")
     List<Pass> findPassesByStatusAndTimeBefore(@Param("status") PassStatus status,

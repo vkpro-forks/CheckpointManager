@@ -24,6 +24,7 @@ import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.passes.Pass;
+import ru.ac.checkpointmanager.model.passes.PassConstant;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.projection.PassInOutViewProjection;
 import ru.ac.checkpointmanager.repository.CrossingRepository;
@@ -374,7 +375,7 @@ public class PassServiceImpl implements PassService {
         PassStatus targetStatus = PassStatus.ACTIVE;
 
         List<Pass> passes = passRepository.findPassesByStatusAndTimeBefore(sourceStatus,
-                "startTime", LocalDateTime.now().plusMinutes(1));
+                PassConstant.START_TIME, LocalDateTime.now().plusMinutes(1));
         if (passes.isEmpty()) {
             return;
         }
@@ -402,7 +403,7 @@ public class PassServiceImpl implements PassService {
         PassStatus targetStatus;
 
         List<Pass> passes = passRepository.findPassesByStatusAndTimeBefore(sourceStatus,
-                "endTime", LocalDateTime.now());
+                PassConstant.END_TIME, LocalDateTime.now());
         if (passes.isEmpty()) {
             return;
         }
