@@ -11,11 +11,8 @@ import io.jsonwebtoken.security.Keys;
 import org.instancio.Instancio;
 import org.instancio.Model;
 import org.instancio.Select;
-import org.springframework.http.MediaType;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.testcontainers.shaded.org.apache.commons.io.output.ByteArrayOutputStream;
 import ru.ac.checkpointmanager.dto.CarBrandDTO;
 import ru.ac.checkpointmanager.dto.CarDTO;
@@ -36,11 +33,11 @@ import ru.ac.checkpointmanager.dto.user.RegistrationConfirmationDTO;
 import ru.ac.checkpointmanager.dto.user.RegistrationDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
-import ru.ac.checkpointmanager.exception.handler.ErrorCode;
 import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.model.Phone;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
+import ru.ac.checkpointmanager.model.Visitor;
 import ru.ac.checkpointmanager.model.avatar.Avatar;
 import ru.ac.checkpointmanager.model.car.Car;
 import ru.ac.checkpointmanager.model.car.CarBrand;
@@ -53,6 +50,7 @@ import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.model.passes.PassTimeType;
+import ru.ac.checkpointmanager.model.passes.PassWalk;
 import ru.ac.checkpointmanager.security.CustomAuthenticationToken;
 
 import javax.imageio.ImageIO;
@@ -180,9 +178,9 @@ public class TestUtils {
     }
 
     public static Crossing getCrossing(Pass pass, Checkpoint checkpoint, Direction direction) {
-        return new Crossing(CROSSING_ID, pass,checkpoint, ZonedDateTime.now(), LocalDateTime.now(),
+        return new Crossing(CROSSING_ID, pass, checkpoint, ZonedDateTime.now(), LocalDateTime.now(),
                 direction
-                );
+        );
     }
 
     public static Territory getTerritory() {
@@ -433,6 +431,20 @@ public class TestUtils {
         return passAuto;
     }
 
+    public static PassWalk getSimpleActiveOneTimePassWalkFor3Hours(User user, Territory territory, Visitor visitor) {
+        PassWalk passWalk = new PassWalk();
+        passWalk.setStartTime(LocalDateTime.now());
+        passWalk.setEndTime(LocalDateTime.now().plusHours(3));
+        passWalk.setId(UUID.randomUUID());
+        passWalk.setTimeType(PassTimeType.ONETIME);
+        passWalk.setDtype("AUTO");
+        passWalk.setStatus(PassStatus.ACTIVE);
+        passWalk.setVisitor(visitor);
+        passWalk.setUser(user);
+        passWalk.setTerritory(territory);
+        return passWalk;
+    }
+
     public static Checkpoint getCheckpoint(CheckpointType type, Territory territory) {
         Checkpoint checkpoint = new Checkpoint();
         checkpoint.setName(CHECKPOINT_NAME);
@@ -452,21 +464,6 @@ public class TestUtils {
     public static String jsonStringFromObject(Object object) throws JsonProcessingException {
         ObjectMapper objectMapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
         return objectMapper.writeValueAsString(object);
-    }
-
-    public static void checkCommonValidationFields(ResultActions resultActions) throws Exception {
-        resultActions.andExpect(MockMvcResultMatchers.status().is4xxClientError())
-                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_ERROR_CODE)
-                        .value(ErrorCode.VALIDATION.toString()));
-    }
-
-    public static void checkNotFoundFields(ResultActions resultActions) throws Exception {
-        resultActions.andExpect(MockMvcResultMatchers.status().isNotFound())
-                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE))
-                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_ERROR_CODE)
-                        .value(ErrorCode.NOT_FOUND.toString()))
-                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_TIMESTAMP).isNotEmpty())
-                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_TITLE).isNotEmpty());
     }
 
     private static Key getSignInKey() {
@@ -495,21 +492,22 @@ public class TestUtils {
         );
     }
 
+    public static Visitor getVisitorUnsaved() {
+        return new Visitor(
+                null,
+                FULL_NAME,
+                PHONE_NUM,
+                null,
+                "note"
+        );
+    }
+
     public static Avatar getAvatar() {
         Avatar avatar = new Avatar();
         avatar.setMediaType(DEFAULT_MEDIA_TYPE);
         avatar.setFilePath(DEFAULT_FILE_PATH);
         avatar.setFileSize(1024L);
         avatar.setPreview(new byte[10]);
-        return avatar;
-    }
-
-    public static Avatar createTestAvatarWithEmptyImageData() {
-        Avatar avatar = new Avatar();
-        avatar.setId(UUID.randomUUID());
-        avatar.setPreview(new byte[0]);
-        avatar.setMediaType(null);
-        avatar.setFileSize(0L);
         return avatar;
     }
 

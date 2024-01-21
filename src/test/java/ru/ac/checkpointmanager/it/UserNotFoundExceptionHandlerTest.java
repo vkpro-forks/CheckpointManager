@@ -19,6 +19,7 @@ import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
+import ru.ac.checkpointmanager.util.ResultCheckUtils;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 
@@ -53,7 +54,7 @@ class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestCo
                         .content(passDtoCreate))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith(USER)));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -65,7 +66,7 @@ class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestCo
                         .content(passDtoCreate))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith(USER)));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -78,7 +79,7 @@ class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestCo
                         HttpMethod.POST, UrlConstants.AVATAR_URL + "/" + TestUtils.USER_ID).file(file))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith(USER)));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -92,7 +93,7 @@ class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestCo
                                 .formatted(savedTerritory.getId(), TestUtils.USER_ID)))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith(USER)));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -106,7 +107,7 @@ class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestCo
                                 .formatted(savedTerritory.getId(), TestUtils.USER_ID)))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith(USER)));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
 
@@ -117,7 +118,7 @@ class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestCo
                         .get(UrlConstants.USER_URL + "/" + TestUtils.USER_ID))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith(USER)));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -128,7 +129,7 @@ class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestCo
                         .delete(UrlConstants.USER_URL + "/" + "bf03cd3b-8b20-4cac-8be9-e1cdf825c165"))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith(USER)));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -143,7 +144,7 @@ class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestCo
                         .param("token", changeEmail.getVerifiedToken()))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith(USER)));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -154,7 +155,7 @@ class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestCo
                         .param("role", "ADMIN"))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith(USER)));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -170,7 +171,7 @@ class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestCo
                         .content(userPutDtoStr))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith(USER)));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -181,7 +182,7 @@ class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestCo
                         .param("isBlocked", "true"))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith(USER)));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -194,7 +195,7 @@ class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestCo
                         .content(refreshTokenString))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith(USER)));
-        TestUtils.checkNotFoundFields(resultActions);
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
 }

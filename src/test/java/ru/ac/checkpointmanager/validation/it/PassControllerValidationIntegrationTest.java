@@ -28,6 +28,7 @@ import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.mapper.PassMapper;
 import ru.ac.checkpointmanager.service.passes.PassService;
+import ru.ac.checkpointmanager.util.ResultCheckUtils;
 import ru.ac.checkpointmanager.util.TestMessage;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
@@ -153,7 +154,7 @@ class PassControllerValidationIntegrationTest {
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(passDtoCreateString));
-        TestUtils.checkCommonValidationFields(resultActions);
+        ResultCheckUtils.checkCommonValidationFields(resultActions);
     }
 
     @ParameterizedTest
@@ -170,11 +171,11 @@ class PassControllerValidationIntegrationTest {
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.put(UrlConstants.PASS_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(passDtoUpdateString));
-        TestUtils.checkCommonValidationFields(resultActions);
+        ResultCheckUtils.checkCommonValidationFields(resultActions);
     }
 
     private static void checkCarOrVisitorFields(ResultActions resultActions) throws Exception {
-        TestUtils.checkCommonValidationFields(resultActions);
+        ResultCheckUtils.checkCommonValidationFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0))
                         .value(Matchers.anyOf(Matchers.is(CAR), Matchers.is(VISITOR))))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(1))
@@ -182,7 +183,7 @@ class PassControllerValidationIntegrationTest {
     }
 
     private static void checkStartEndTimeFields(ResultActions resultActions) throws Exception {
-        TestUtils.checkCommonValidationFields(resultActions);
+        ResultCheckUtils.checkCommonValidationFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0))
                         .value(Matchers.anyOf(Matchers.is(START_TIME), Matchers.is(END_TIME))))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(1))
