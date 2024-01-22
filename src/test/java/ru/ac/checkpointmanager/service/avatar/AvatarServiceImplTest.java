@@ -146,7 +146,7 @@ class AvatarServiceImplTest {
         when(territoryRepository.findTerritoryByIdWithAvatar(TestUtils.TERR_ID)).thenReturn(Optional.of(territory));
         when(avatarHelper.createAvatarImageDTO(avatar)).thenReturn(expectedDto);
 
-        AvatarImageDTO result = avatarService.getAvatarImageByAvatarId(TestUtils.TERR_ID);
+        AvatarImageDTO result = avatarService.getAvatarImageByTerritoryId(TestUtils.TERR_ID);
 
         assertEquals(expectedDto, result);
     }
