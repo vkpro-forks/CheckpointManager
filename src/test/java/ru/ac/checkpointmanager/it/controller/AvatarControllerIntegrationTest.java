@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.test.annotation.DirtiesContext;
@@ -21,10 +22,12 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import ru.ac.checkpointmanager.config.RedisAndPostgresTestContainersConfiguration;
 import ru.ac.checkpointmanager.exception.ExceptionUtils;
+import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.avatar.Avatar;
 import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.repository.AvatarRepository;
+import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.security.CustomAuthenticationToken;
 import ru.ac.checkpointmanager.util.ResultCheckUtils;
@@ -51,6 +54,9 @@ class AvatarControllerIntegrationTest extends RedisAndPostgresTestContainersConf
     AvatarRepository avatarRepository;
 
     @Autowired
+    TerritoryRepository territoryRepository;
+
+    @Autowired
     WebApplicationContext context;
 
     @BeforeEach
@@ -64,12 +70,92 @@ class AvatarControllerIntegrationTest extends RedisAndPostgresTestContainersConf
     void clear() {
         avatarRepository.deleteAll();
         userRepository.deleteAll();
+        territoryRepository.deleteAll();
+    }
+
+    @Test
+    @SneakyThrows
+    void getAvatarImageByAvatarId_AllOk_ReturnAvatarImage() {
+        //given
+        Avatar avatar = TestUtils.getAvatar();
+        Avatar savedAvatar = avatarRepository.saveAndFlush(avatar);
+        User user = TestUtils.getUser();
+        user.setRole(Role.USER);
+        user.setAvatar(savedAvatar);
+        User savedUser = userRepository.saveAndFlush(user);
+        CustomAuthenticationToken authToken = TestUtils.getAuthToken(savedUser);
+        //when
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .get(UrlConstants.AVATAR_AVATARS_URL, savedAvatar.getId())
+                .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
+                .contentType(MediaType.APPLICATION_JSON));
+        //then
+        resultActions.andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.IMAGE_JPEG_VALUE));
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockUser(roles = "ADMIN")
+    void getAvatarImageByAvatarId_NoAvatar_HandleExceptionAndReturnNotFound() {
+        ResultActions resultActions = mockMvc
+                .perform(MockMvcRequestBuilders.get(UrlConstants.AVATAR_AVATARS_URL, TestUtils.AVATAR_ID));
+
+        resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                .value(ExceptionUtils.AVATAR_NOT_FOUND.formatted(TestUtils.AVATAR_ID)));
+        ResultCheckUtils.checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockUser(roles = "ADMIN")
+    void getAvatarImageByTerritoryId_AllOk_ReturnAvatarImage() {
+        Avatar avatar = TestUtils.getAvatar();
+        Avatar savedAvatar = avatarRepository.saveAndFlush(avatar);
+        Territory territory = TestUtils.getTerritory();
+        territory.setAvatar(savedAvatar);
+        Territory savedTerritory = territoryRepository.saveAndFlush(territory);
+
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .get(UrlConstants.AVATAR_TERRITORY_URL, savedTerritory.getId())
+                .contentType(MediaType.APPLICATION_JSON));
+
+        resultActions.andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.IMAGE_JPEG_VALUE));
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockUser(roles = "ADMIN")
+    void getAvatarImageByTerritoryId_NoTerritory_HandleExceptionAndReturnNotFound() {
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .get(UrlConstants.AVATAR_TERRITORY_URL, TestUtils.TERR_ID)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                .value(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(TestUtils.TERR_ID)));
+        ResultCheckUtils.checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockUser(roles = "ADMIN")
+    void getAvatarImageByTerritoryId_NoAvatar_HandleExceptionAndReturnNotFound() {
+        Territory territory = TestUtils.getTerritory();
+        Territory savedTerritory = territoryRepository.saveAndFlush(territory);
+
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .get(UrlConstants.AVATAR_TERRITORY_URL, savedTerritory.getId())
+                .contentType(MediaType.APPLICATION_JSON));
+
+        resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                .value(ExceptionUtils.AVATAR_NOT_FOUND_FOR_TERRITORY.formatted(savedTerritory.getId())));
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
     @SneakyThrows
     void deleteAvatarByUserId_AllOk_DeleteAvatarAndReturnNoContent() {
-        //given
         Avatar avatar = TestUtils.getAvatar();
         Avatar savedAvatar = avatarRepository.saveAndFlush(avatar);
         User user = TestUtils.getUser();
@@ -78,11 +164,11 @@ class AvatarControllerIntegrationTest extends RedisAndPostgresTestContainersConf
         User savedUser = userRepository.saveAndFlush(user);
         UUID userId = savedUser.getId();
         CustomAuthenticationToken authToken = TestUtils.getAuthToken(savedUser);
-        //when
+
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.AVATAR_URL + "/user/{userId}", userId)
                 .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
                 .contentType(MediaType.APPLICATION_JSON));
-        //then
+
         resultActions.andExpect(status().isNoContent());
         Optional<Avatar> optionalAvatar = avatarRepository.findById(savedAvatar.getId());
         Assertions.assertThat(optionalAvatar).as("Check if avatar was deleted").isEmpty();
@@ -91,15 +177,14 @@ class AvatarControllerIntegrationTest extends RedisAndPostgresTestContainersConf
     @Test
     @SneakyThrows
     void deleteAvatarByUserId_UserNotFound_HandleErrorAndReturnNotFound() {
-        //given
         User notSavedUser = TestUtils.getUser();
         CustomAuthenticationToken authToken = TestUtils.getAuthToken(notSavedUser);
-        //when
+
         ResultActions resultActions = mockMvc
-                .perform(MockMvcRequestBuilders.delete(UrlConstants.AVATAR_URL + "/user/{userId}", notSavedUser.getId())
+                .perform(MockMvcRequestBuilders.delete(UrlConstants.AVATAR_USER_URL, notSavedUser.getId())
                         .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON));
-        //then
+
         resultActions.andExpect(status().isNotFound());
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                 .value(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(notSavedUser.getId())));
@@ -109,18 +194,17 @@ class AvatarControllerIntegrationTest extends RedisAndPostgresTestContainersConf
     @Test
     @SneakyThrows
     void deleteAvatarByUserId_UserHasNoAvatar_HandleErrorAndReturnNotFound() {
-        //given
         User user = TestUtils.getUser();
         user.setRole(Role.USER);
         User savedUser = userRepository.saveAndFlush(user);
         UUID userId = savedUser.getId();
         CustomAuthenticationToken authToken = TestUtils.getAuthToken(savedUser);
-        //when
+
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
-                .delete(UrlConstants.AVATAR_URL + "/user/{userId}", userId)
+                .delete(UrlConstants.AVATAR_USER_URL, userId)
                 .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
                 .contentType(MediaType.APPLICATION_JSON));
-        //then
+
         resultActions.andExpect(status().isNotFound());
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                 .value(ExceptionUtils.AVATAR_NOT_FOUND_FOR_USER.formatted(savedUser.getId())));
