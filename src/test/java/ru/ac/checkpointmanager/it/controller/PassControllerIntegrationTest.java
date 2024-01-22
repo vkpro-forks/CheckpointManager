@@ -2,10 +2,13 @@ package ru.ac.checkpointmanager.it.controller;
 
 import lombok.SneakyThrows;
 import org.assertj.core.api.Assertions;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,6 +42,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
@@ -238,15 +242,7 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         List<Pass> passes = new ArrayList<>();
         //created 5 passes for one car
         for (int i = 0; i < 5; i++) {
-            PassAuto pass = new PassAuto();
-            pass.setId(UUID.randomUUID());
-            pass.setTimeType(PassTimeType.ONETIME);
-            pass.setStartTime(LocalDateTime.now().plusHours(i));
-            pass.setEndTime(LocalDateTime.now().plusHours(5 + i));
-            pass.setStatus(passStatus);
-            pass.setTerritory(savedTerritory);
-            pass.setUser(savedUser);
-            pass.setCar(savedCar);
+            PassAuto pass = createPassWithStatusAndTime(passStatus, i);
             passes.add(pass);
         }
         passRepository.saveAllAndFlush(passes);
@@ -260,25 +256,18 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         Assertions.assertThat(passesAfterDelete).hasSize(4);
     }
 
+    //GETTING PASSES
     @ParameterizedTest
     @EnumSource(PassStatus.class)
     @SneakyThrows
-    void shouldGetPassAutoForUser(PassStatus passStatus) {
+    void getPasses_FivePassesForUser_ReturnPassDTOs(PassStatus passStatus) {
         //creating a passes for territory with one car
         saveTerritoryUserCarBrand();
         saveCar();
         List<Pass> passes = new ArrayList<>();
         //created 5 passes for one car
         for (int i = 0; i < 5; i++) {
-            PassAuto pass = new PassAuto();
-            pass.setId(UUID.randomUUID());
-            pass.setTimeType(PassTimeType.ONETIME);
-            pass.setStartTime(LocalDateTime.now().plusHours(i));
-            pass.setEndTime(LocalDateTime.now().plusHours(5 + i));
-            pass.setStatus(passStatus);
-            pass.setTerritory(savedTerritory);
-            pass.setUser(savedUser);
-            pass.setCar(savedCar);
+            PassAuto pass = createPassWithStatusAndTime(passStatus, i);
             passes.add(pass);
         }
         passRepository.saveAllAndFlush(passes);
@@ -291,6 +280,76 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
                 .andExpect(MockMvcResultMatchers.jsonPath("$.content.size()").value(5));
     }
 
+    @Test
+    @SneakyThrows
+    void getPasses_FilteredByActive_ReturnPassDTOs() {
+        saveTerritoryUserCarBrand();
+        saveCar();
+        List<Pass> passes = new ArrayList<>();
+        //created 5 passes for one car
+        PassStatus passStatus;
+        for (int i = 0; i < 5; i++) {
+            if (i < 3) {
+                passStatus = PassStatus.ACTIVE;
+            } else {
+                passStatus = PassStatus.DELAYED;
+            }
+            PassAuto pass = createPassWithStatusAndTime(passStatus, i);
+            passes.add(pass);
+        }
+        passRepository.saveAllAndFlush(passes);
+
+        ResultActions resultActions = mockMvc
+                .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_USER_URL, savedUser.getId())
+                        .param("status", PassStatus.ACTIVE.name()));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content.size()").value(3));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getPassesForFilterByStatus")
+    @SneakyThrows
+    void getPasses_FilteredByActiveAndDelayed_ReturnPassDTOs(int total, int numIf, PassStatus statusIf,
+                                                             PassStatus statusElse, String filterParams,
+                                                             int totalFound) {
+        saveTerritoryUserCarBrand();
+        saveCar();
+        List<Pass> passes = new ArrayList<>();
+        //created 5 passes for one car
+        PassStatus passStatus;
+        for (int i = 0; i < total; i++) {
+            if (i < numIf) {
+                passStatus = statusIf;
+            } else {
+                passStatus = statusElse;
+            }
+            PassAuto pass = createPassWithStatusAndTime(passStatus, i);
+            passes.add(pass);
+        }
+        passRepository.saveAllAndFlush(passes);
+
+        ResultActions resultActions = mockMvc
+                .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_USER_URL, savedUser.getId())
+                        .param("status", filterParams));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content.size()").value(totalFound));
+    }
+
+    @NotNull
+    private PassAuto createPassWithStatusAndTime(PassStatus passStatus, int i) {
+        PassAuto pass = new PassAuto();
+        pass.setId(UUID.randomUUID());
+        pass.setTimeType(PassTimeType.ONETIME);
+        pass.setStartTime(LocalDateTime.now().plusHours(i));
+        pass.setEndTime(LocalDateTime.now().plusHours(5 + i));
+        pass.setStatus(passStatus);
+        pass.setTerritory(savedTerritory);
+        pass.setUser(savedUser);
+        pass.setCar(savedCar);
+        return pass;
+    }
 
     private void saveTerritoryUserCarBrand() {
         Territory territory = new Territory();
@@ -309,6 +368,35 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         car.setBrand(savedCarBrand);
         car.setId(TestUtils.getCarDto().getId());
         savedCar = carRepository.saveAndFlush(car);//save car and repo change its id
+    }
+
+    private static Stream<Arguments> getPassesForFilterByStatus() {
+        //total, first, statusIf, statusElse, filterParams, total found
+        return Stream.of(
+                Arguments.of(
+                        5, 3, PassStatus.ACTIVE, PassStatus.DELAYED,
+                        String.join(",", PassStatus.ACTIVE.name(), PassStatus.DELAYED.name()),
+                        5
+                ),
+                Arguments.of(
+                        5, 3, PassStatus.ACTIVE, PassStatus.DELAYED,
+                        PassStatus.ACTIVE.name(), 3
+                ),
+                Arguments.of(
+                        10, 3, PassStatus.WARNING, PassStatus.OUTDATED,
+                        PassStatus.ACTIVE.name(), 0
+                ),
+                Arguments.of(
+                        10, 3, PassStatus.WARNING, PassStatus.OUTDATED,
+                        String.join(",", PassStatus.ACTIVE.name(), PassStatus.DELAYED.name(),
+                                PassStatus.COMPLETED.name()), 0
+                ),
+                Arguments.of(
+                        10, 3, PassStatus.WARNING, PassStatus.OUTDATED,
+                        String.join(",", PassStatus.ACTIVE.name(), PassStatus.DELAYED.name(),
+                                PassStatus.COMPLETED.name(), PassStatus.WARNING.name()), 3
+                )
+        );
     }
 
 }
