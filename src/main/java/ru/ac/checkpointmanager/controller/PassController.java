@@ -34,7 +34,6 @@ import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassResponseDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
-import ru.ac.checkpointmanager.projection.PassInOutViewProjection;
 import ru.ac.checkpointmanager.service.passes.PassService;
 
 import java.util.UUID;
@@ -153,46 +152,6 @@ public class PassController {
 
         Page<PassResponseDTO> passPage = service.findPassesByTerritory(territoryId, pagingParams, filterParams);
         return ResponseEntity.ok(passPage);
-    }
-
-    @Operation(summary = "Получить список событий по пропускам пользователя",
-            description = "Доступ: ADMIN, USER.",
-            parameters = {
-                    @Parameter(in = ParameterIn.QUERY, name = "page", example = "0"),
-                    @Parameter(in = ParameterIn.QUERY, name = "size", example = "20")
-            })
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "События найдены",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            array = @ArraySchema(schema = @Schema(implementation = PassInOutViewProjection.class)))),
-            @ApiResponse(responseCode = "404", description = "Пользователь не найден")})
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
-    @GetMapping("/user/{userId}/events")
-    public ResponseEntity<Page<PassInOutViewProjection>> getEventsByUserId(@PathVariable UUID userId,
-                                                                           @Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams) {
-
-        Page<PassInOutViewProjection> events = service.findEventsByUser(userId, pagingParams);
-        return ResponseEntity.ok(events);
-    }
-
-    @Operation(summary = "Получить список событий по конкретной территории",
-            description = "Доступ: ADMIN, MANAGER, SECURITY.",
-            parameters = {
-                    @Parameter(in = ParameterIn.QUERY, name = "page", example = "0"),
-                    @Parameter(in = ParameterIn.QUERY, name = "size", example = "20")
-            })
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "События найдены",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            array = @ArraySchema(schema = @Schema(implementation = PassInOutViewProjection.class)))),
-            @ApiResponse(responseCode = "404", description = "Территория не найдена")})
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
-    @GetMapping("/territory/{territoryId}/events")
-    public ResponseEntity<Page<PassInOutViewProjection>> getEventsByTerritoryId(@PathVariable UUID territoryId,
-                                                                                @Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams) {
-
-        Page<PassInOutViewProjection> events = service.findEventsByTerritory(territoryId, pagingParams);
-        return ResponseEntity.ok(events);
     }
 
     /* UPDATE */
