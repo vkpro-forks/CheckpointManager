@@ -13,7 +13,7 @@ import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
-import ru.ac.checkpointmanager.repository.PassInOutViewRepository;
+import ru.ac.checkpointmanager.repository.PassRepository;
 import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.util.TestUtils;
@@ -22,7 +22,7 @@ import ru.ac.checkpointmanager.util.TestUtils;
 class PassInOutViewServiceImplTest {
 
     @Mock
-    PassInOutViewRepository passInOutViewRepository;
+    PassRepository passRepository;
 
     @Mock
     TerritoryRepository territoryRepository;
@@ -41,7 +41,7 @@ class PassInOutViewServiceImplTest {
 
         passInOutViewService.findEventsByUser(TestUtils.USER_ID, pagingParams);
 
-        Mockito.verify(passInOutViewRepository, Mockito.times(1))
+        Mockito.verify(passRepository, Mockito.times(1))
                 .findEventsByUser(TestUtils.USER_ID, PageRequest.of(pagingParams.getPage(), pagingParams.getSize()));
     }
 
@@ -54,7 +54,7 @@ class PassInOutViewServiceImplTest {
                 .isInstanceOf(EntityNotFoundException.class)
                 .withMessage(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(TestUtils.USER_ID));
 
-        Mockito.verify(passInOutViewRepository, Mockito.never()).findEventsByUser(Mockito.any(), Mockito.any());
+        Mockito.verify(passRepository, Mockito.never()).findEventsByUser(Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -63,7 +63,7 @@ class PassInOutViewServiceImplTest {
 
         passInOutViewService.findEventsByTerritory(TestUtils.TERR_ID, pagingParams);
 
-        Mockito.verify(passInOutViewRepository, Mockito.times(1))
+        Mockito.verify(passRepository, Mockito.times(1))
                 .findEventsByTerritory(TestUtils.TERR_ID, PageRequest.of(pagingParams.getPage(), pagingParams.getSize()));
     }
 
@@ -76,7 +76,7 @@ class PassInOutViewServiceImplTest {
                 .isInstanceOf(EntityNotFoundException.class)
                 .withMessage(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(TestUtils.TERR_ID));
 
-        Mockito.verify(passInOutViewRepository, Mockito.never()).findEventsByTerritory(Mockito.any(), Mockito.any());
+        Mockito.verify(passRepository, Mockito.never()).findEventsByTerritory(Mockito.any(), Mockito.any());
     }
 
 }

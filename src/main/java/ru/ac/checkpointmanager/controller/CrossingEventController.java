@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.annotation.PagingParam;
 import ru.ac.checkpointmanager.dto.passes.PagingParams;
-import ru.ac.checkpointmanager.projection.PassInOutViewProjection;
+import ru.ac.checkpointmanager.projection.PassInOutView;
 import ru.ac.checkpointmanager.service.event.PassInOutViewService;
 
 import java.util.UUID;
@@ -48,12 +48,12 @@ public class CrossingEventController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "События найдены",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            array = @ArraySchema(schema = @Schema(implementation = PassInOutViewProjection.class)))),
+                            array = @ArraySchema(schema = @Schema(implementation = PassInOutView.class)))),
             @ApiResponse(responseCode = "404", description = "Пользователь не найден")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
     @GetMapping("/user/{userId}")
-    public Page<PassInOutViewProjection> getEventsByUserId(@PathVariable UUID userId,
-                                                           @Schema(hidden = true)
+    public Page<PassInOutView> getEventsByUserId(@PathVariable UUID userId,
+                                                 @Schema(hidden = true)
                                                            @Valid @PagingParam PagingParams pagingParams) {
         return passInOutViewService.findEventsByUser(userId, pagingParams);
     }
@@ -67,12 +67,12 @@ public class CrossingEventController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "События найдены",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            array = @ArraySchema(schema = @Schema(implementation = PassInOutViewProjection.class)))),
+                            array = @ArraySchema(schema = @Schema(implementation = PassInOutView.class)))),
             @ApiResponse(responseCode = "404", description = "Территория не найдена")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/territory/{territoryId}")
-    public Page<PassInOutViewProjection> getEventsByTerritoryId(@PathVariable UUID territoryId,
-                                                                @Schema(hidden = true)
+    public Page<PassInOutView> getEventsByTerritoryId(@PathVariable UUID territoryId,
+                                                      @Schema(hidden = true)
                                                                 @Valid
                                                                 @PagingParam PagingParams pagingParams) {
         return passInOutViewService.findEventsByTerritory(territoryId, pagingParams);
