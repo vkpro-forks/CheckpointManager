@@ -74,6 +74,8 @@ public class UrlConstants {
 
     public static final String EVENT_TERRITORY_URL = EVENT_URL + "/territory/{territoryId}";
 
+    public static final String EVENT_ALL_URL = EVENT_URL + "/all";
+
 
     private UrlConstants() {
 

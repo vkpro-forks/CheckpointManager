@@ -29,6 +29,14 @@ public class PassInOutViewServiceImpl implements PassInOutViewService {
 
     private final TerritoryRepository territoryRepository;
 
+    /**
+     * Получение событий по идентификатору пользователя
+     *
+     * @param userId       идентификатор
+     * @param pagingParams параметры для постраничной выгрузки
+     * @return {@link Page<PassInOutView>} страница с дто событий
+     * @throws UserNotFoundException если пользователь не найдет
+     */
     @Override
     public Page<PassInOutView> findEventsByUser(UUID userId, PagingParams pagingParams) {
         if (!userRepository.existsById(userId)) {
@@ -39,6 +47,14 @@ public class PassInOutViewServiceImpl implements PassInOutViewService {
         return passRepository.findEventsByUser(userId, pageable);
     }
 
+    /**
+     * Получение событий по идентификатору территории
+     *
+     * @param terId        идентификатор территории
+     * @param pagingParams параметры для постраничной выгрузки
+     * @return {@link Page<PassInOutView>} страница с дто событий
+     * @throws TerritoryNotFoundException если территория не найдет
+     */
     @Override
     public Page<PassInOutView> findEventsByTerritory(UUID terId, PagingParams pagingParams) {
         if (!territoryRepository.existsById(terId)) {
@@ -49,4 +65,17 @@ public class PassInOutViewServiceImpl implements PassInOutViewService {
 
         return passRepository.findEventsByTerritory(terId, pageable);
     }
+
+    /**
+     * Получение всех событий
+     *
+     * @param pagingParams параметры для постраничной выгрузки
+     * @return {@link Page<PassInOutView>} страница с дто событий
+     */
+    @Override
+    public Page<PassInOutView> findAll(PagingParams pagingParams) {
+        Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
+        return passRepository.findAllEvents(pageable);
+    }
+
 }
