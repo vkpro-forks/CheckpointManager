@@ -28,7 +28,7 @@ import ru.ac.checkpointmanager.service.event.PassInOutViewService;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("api/v1/event")
+@RequestMapping("api/v1/events")
 @RequiredArgsConstructor
 @Validated
 @Tag(name = "Event (события въезд-выезд (пары))", description = "Получение событий по пропуску (пары въезд-выезд")
@@ -54,7 +54,7 @@ public class CrossingEventController {
     @GetMapping("/user/{userId}")
     public Page<PassInOutView> getEventsByUserId(@PathVariable UUID userId,
                                                  @Schema(hidden = true)
-                                                           @Valid @PagingParam PagingParams pagingParams) {
+                                                 @Valid @PagingParam PagingParams pagingParams) {
         return passInOutViewService.findEventsByUser(userId, pagingParams);
     }
 
@@ -73,8 +73,8 @@ public class CrossingEventController {
     @GetMapping("/territory/{territoryId}")
     public Page<PassInOutView> getEventsByTerritoryId(@PathVariable UUID territoryId,
                                                       @Schema(hidden = true)
-                                                                @Valid
-                                                                @PagingParam PagingParams pagingParams) {
+                                                      @Valid
+                                                      @PagingParam PagingParams pagingParams) {
         return passInOutViewService.findEventsByTerritory(territoryId, pagingParams);
     }
 

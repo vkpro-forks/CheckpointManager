@@ -68,7 +68,7 @@ public class UrlConstants {
 
     public static final String VISITOR_USER_URL = VISITOR_URL + "/user/{userId}";
 
-    public static final String EVENT_URL = "/api/v1/event";
+    public static final String EVENT_URL = "/api/v1/events";
 
     public static final String EVENT_USER_URL = EVENT_URL + "/user/{userId}";
 
