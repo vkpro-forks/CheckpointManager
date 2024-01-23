@@ -9,6 +9,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import ru.ac.checkpointmanager.config.RedisAndPostgresTestContainersConfiguration;
 import ru.ac.checkpointmanager.model.Territory;
@@ -44,10 +47,12 @@ class TerritoryRepositoryIntegrationTest extends RedisAndPostgresTestContainersC
         List<User> savedUsers = userRepository.saveAllAndFlush(users);
         territory.setUsers(savedUsers);
         Territory savedTerritory = territoryRepository.saveAndFlush(territory);
-        log.warn("!!!!!!!!!!!!BEFORE METHOD findUsersByTerritoryId!!!!!!!!!!!");
-        List<User> usersByTerritoryId = territoryRepository.findUsersByTerritoryId(savedTerritory.getId());
-        log.warn("!!!!!!!!!!!!AFTER METHOD findUsersByTerritoryId!!!!!!!!!!!");
-        Assertions.assertThat(usersByTerritoryId).hasSize(10);
-    }
+        Pageable pageable = PageRequest.of(0, 10);
 
+        Page<User> userPage = territoryRepository.findUsersByTerritoryId(savedTerritory.getId(), pageable);
+        Assertions.assertThat(userPage.getContent()).hasSize(10);
+        Assertions.assertThat(userPage.getTotalElements()).isEqualTo(10);
+        Assertions.assertThat(userPage.getNumber()).isZero();
+        Assertions.assertThat(userPage.getSize()).isEqualTo(10);
+    }
 }
