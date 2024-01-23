@@ -12,6 +12,10 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,11 +31,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
+import ru.ac.checkpointmanager.dto.user.EmailConfirmationDTO;
 import ru.ac.checkpointmanager.dto.user.NewEmailDTO;
 import ru.ac.checkpointmanager.dto.user.NewPasswordDTO;
-import ru.ac.checkpointmanager.dto.user.EmailConfirmationDTO;
-import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
+import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
 import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.service.user.UserService;
 
@@ -122,15 +126,15 @@ public class UserController {
         return userService.findByName(name);
     }
 
-    @Operation(summary = "Получить список всех пользователей",
-            description = "Доступ: ADMIN, MANAGER, SECURITY."
-    )
+    @Operation(summary = "Получить список всех пользователей с пагинацией",
+            description = "Доступ: ADMIN, MANAGER, SECURITY.")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "OK: возвращает список пользователей",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            array = @ArraySchema(schema = @Schema(implementation = UserResponseDTO.class)))
+                    description = "OK: возвращает страницу пользователей, содержащую объекты UserResponseDTO",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = Page.class))
             ),
             @ApiResponse(
                     responseCode = "403",
@@ -139,8 +143,11 @@ public class UserController {
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping()
-    public Collection<UserResponseDTO> getAll() {
-        return userService.getAll();
+    public Page<UserResponseDTO> getAll(@RequestParam(defaultValue = "0") int page,
+                                        @RequestParam(defaultValue = "20") int size,
+                                        @RequestParam(defaultValue = "id") String sortBy) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
+        return userService.getAll(pageable);
     }
 
     @Operation(summary = "Поиск пользователя по почте",

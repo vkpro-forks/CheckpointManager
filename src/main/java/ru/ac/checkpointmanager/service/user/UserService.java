@@ -1,5 +1,7 @@
 package ru.ac.checkpointmanager.service.user;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import ru.ac.checkpointmanager.dto.user.AuthResponseDTO;
 import ru.ac.checkpointmanager.dto.user.NewEmailDTO;
 import ru.ac.checkpointmanager.dto.user.NewPasswordDTO;
@@ -45,7 +47,7 @@ public interface UserService {
 
     void deleteUser(UUID id);
 
-    Collection<UserResponseDTO> getAll();
+    Page<UserResponseDTO> getAll(Pageable pageable);
 
     Collection<String> findUsersPhoneNumbers(UUID userId);
 

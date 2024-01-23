@@ -10,6 +10,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.cache.Cache;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.mail.MailSendException;
 import org.springframework.security.access.AccessDeniedException;
@@ -601,19 +605,22 @@ class UserServiceImplTest {
 
     @Test
     void getAllUsersExistReturnsUserList() {
-        List<User> users = List.of(TestUtils.getUser());
+        User user = TestUtils.getUser();
         UserResponseDTO userResponseDTO = TestUtils.getUserResponseDTO();
-        List<UserResponseDTO> userResponseDTOS = List.of(userResponseDTO);
+        List<User> users = List.of(user);
+        Page<User> userPage = new PageImpl<>(users);
+        Pageable pageable = PageRequest.of(0, 20);
 
-        Mockito.when(userRepository.findAll()).thenReturn(users);
-        Mockito.when(userMapper.toUserResponseDTOs(users)).thenReturn(userResponseDTOS);
+        Mockito.when(userRepository.findAll(pageable)).thenReturn(userPage);
+        Mockito.when(userMapper.toUserResponseDTO(user)).thenReturn(userResponseDTO);
 
-        Collection<UserResponseDTO> result = userService.getAll();
+        Page<UserResponseDTO> result = userService.getAll(pageable);
 
-        Assertions.assertThat(result).isNotEmpty().contains(userResponseDTO);
-        Mockito.verify(userRepository).findAll();
-        Mockito.verify(userMapper).toUserResponseDTOs(users);
+        Assertions.assertThat(result.getContent()).isNotEmpty().contains(userResponseDTO);
+        Mockito.verify(userRepository).findAll(pageable);
+        Mockito.verify(userMapper).toUserResponseDTO(user);
     }
+
 
     @Test
     void findUsersPhoneNumbersUserExistsReturnsPhoneNumbers() {

@@ -265,12 +265,17 @@ class UserControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
     @WithMockCustomUser
     void getAllIsOkWithAdminRole() {
         mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("page", "0")
+                        .param("size", "20")
+                        .param("sortBy", "id"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[*].id", Matchers.hasItem(savedUser.getId().toString())))
-                .andExpect(jsonPath("$[*].fullName", Matchers.hasItem(savedUser.getFullName())))
-                .andExpect(jsonPath("$[*].email", Matchers.hasItem(savedUser.getEmail())))
-                .andExpect(jsonPath("$[*].avatar").doesNotExist());
+                .andExpect(jsonPath("$.content[*].id", Matchers.hasItem(savedUser.getId().toString())))
+                .andExpect(jsonPath("$.content[*].fullName", Matchers.hasItem(savedUser.getFullName())))
+                .andExpect(jsonPath("$.content[*].email", Matchers.hasItem(savedUser.getEmail())))
+                .andExpect(jsonPath("$.content[*].avatar").doesNotExist())
+                .andExpect(jsonPath("$.size").value(20))
+                .andExpect(jsonPath("$.number").value(0));
     }
 
     @Test

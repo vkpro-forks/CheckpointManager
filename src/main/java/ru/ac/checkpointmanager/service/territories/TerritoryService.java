@@ -1,5 +1,7 @@
 package ru.ac.checkpointmanager.service.territories;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.model.Territory;
@@ -15,7 +17,7 @@ public interface TerritoryService {
 
     Territory findTerritoryById(UUID territoryId);
 
-    List<UserResponseDTO> findUsersByTerritoryId(UUID territoryId);
+    Page<UserResponseDTO> findUsersByTerritoryId(UUID territoryId, Pageable pageable);
 
     List<TerritoryDTO> findTerritoriesByName(String name);
 
