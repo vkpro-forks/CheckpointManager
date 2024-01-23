@@ -1,6 +1,8 @@
 package ru.ac.checkpointmanager.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -11,9 +13,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,7 +28,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import ru.ac.checkpointmanager.annotation.PagingParam;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
+import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.service.territories.TerritoryService;
 
@@ -78,7 +79,11 @@ public class TerritoryController {
     }
 
     @Operation(summary = "Найти список пользователей, привязанных к территории",
-            description = "Доступ: ADMIN, MANAGER.")
+            description = "Доступ: ADMIN, MANAGER.",
+            parameters = {
+                    @Parameter(in = ParameterIn.QUERY, name = "page", example = "0"),
+                    @Parameter(in = ParameterIn.QUERY, name = "size", example = "20")
+            })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пользователи найдены. Возвращает страницу с пользователями.",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -88,11 +93,8 @@ public class TerritoryController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @GetMapping("/{territoryId}/users")
     public Page<UserResponseDTO> getUsersByTerritory(@PathVariable UUID territoryId,
-                                                     @RequestParam(defaultValue = "0") int page,
-                                                     @RequestParam(defaultValue = "20") int size,
-                                                     @RequestParam(defaultValue = "id") String sortBy) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
-        return territoryService.findUsersByTerritoryId(territoryId, pageable);
+                                                     @Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams) {
+        return territoryService.findUsersByTerritoryId(territoryId, pagingParams);
     }
 
     @Operation(summary = "Найти список территорий по названию",

@@ -4,10 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
+import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
@@ -74,9 +76,10 @@ public class TerritoryServiceImpl implements TerritoryService {
     }
 
     @Override
-    public Page<UserResponseDTO> findUsersByTerritoryId(UUID territoryId, Pageable pageable) {
+    public Page<UserResponseDTO> findUsersByTerritoryId(UUID territoryId, PagingParams pagingParams) {
         log.debug(METHOD_CALLED_UUID_LOG, MethodLog.getMethodName(), territoryId);
         findById(territoryId);
+        Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
         Page<User> userPage = territoryRepository.findUsersByTerritoryId(territoryId, pageable);
         return userPage.map(userMapper::toUserResponseDTO);
     }

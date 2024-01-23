@@ -19,6 +19,7 @@ import org.springframework.mail.MailSendException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
+import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.dto.user.EmailConfirmationDTO;
 import ru.ac.checkpointmanager.dto.user.NewEmailDTO;
 import ru.ac.checkpointmanager.dto.user.NewPasswordDTO;
@@ -609,12 +610,13 @@ class UserServiceImplTest {
         UserResponseDTO userResponseDTO = TestUtils.getUserResponseDTO();
         List<User> users = List.of(user);
         Page<User> userPage = new PageImpl<>(users);
-        Pageable pageable = PageRequest.of(0, 20);
+        PagingParams pagingParams = new PagingParams(0, 20);
+        Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
 
         Mockito.when(userRepository.findAll(pageable)).thenReturn(userPage);
         Mockito.when(userMapper.toUserResponseDTO(user)).thenReturn(userResponseDTO);
 
-        Page<UserResponseDTO> result = userService.getAll(pageable);
+        Page<UserResponseDTO> result = userService.getAll(pagingParams);
 
         Assertions.assertThat(result.getContent()).isNotEmpty().contains(userResponseDTO);
         Mockito.verify(userRepository).findAll(pageable);

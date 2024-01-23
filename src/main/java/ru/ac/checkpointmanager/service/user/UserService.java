@@ -1,16 +1,16 @@
 package ru.ac.checkpointmanager.service.user;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import ru.ac.checkpointmanager.dto.TerritoryDTO;
+import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.dto.user.AuthResponseDTO;
+import ru.ac.checkpointmanager.dto.user.EmailConfirmationDTO;
 import ru.ac.checkpointmanager.dto.user.NewEmailDTO;
 import ru.ac.checkpointmanager.dto.user.NewPasswordDTO;
-import ru.ac.checkpointmanager.dto.TerritoryDTO;
-import ru.ac.checkpointmanager.dto.user.EmailConfirmationDTO;
-import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
-import ru.ac.checkpointmanager.model.avatar.Avatar;
+import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
 import ru.ac.checkpointmanager.model.User;
+import ru.ac.checkpointmanager.model.avatar.Avatar;
 import ru.ac.checkpointmanager.model.enums.Role;
 
 import java.util.Collection;
@@ -47,7 +47,7 @@ public interface UserService {
 
     void deleteUser(UUID id);
 
-    Page<UserResponseDTO> getAll(Pageable pageable);
+    Page<UserResponseDTO> getAll(PagingParams pagingParams);
 
     Collection<String> findUsersPhoneNumbers(UUID userId);
 

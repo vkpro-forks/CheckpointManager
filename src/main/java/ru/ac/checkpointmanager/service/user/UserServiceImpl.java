@@ -6,6 +6,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.mail.MailException;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
+import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.dto.user.AuthResponseDTO;
 import ru.ac.checkpointmanager.dto.user.EmailConfirmationDTO;
 import ru.ac.checkpointmanager.dto.user.NewEmailDTO;
@@ -544,12 +546,13 @@ public class UserServiceImpl implements UserService {
      * возвращается пустая страница, а не выбрасывается исключение.
      * <p>
      *
-     * @param pageable параметры пагинации и сортировки.
+     * @param pagingParams параметры пагинации и сортировки.
      * @return Страница {@link Page<UserResponseDTO>} с информацией о пользователях.
      */
     @Override
-    public Page<UserResponseDTO> getAll(Pageable pageable) {
+    public Page<UserResponseDTO> getAll(PagingParams pagingParams) {
         log.debug("Method {}", MethodLog.getMethodName());
+        Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
         Page<User> userPage = userRepository.findAll(pageable);
         return userPage.map(userMapper::toUserResponseDTO);
     }

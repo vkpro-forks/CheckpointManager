@@ -26,6 +26,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import ru.ac.checkpointmanager.config.RedisAndPostgresTestContainersConfiguration;
 import ru.ac.checkpointmanager.config.security.WithMockCustomUser;
+import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.dto.user.NewEmailDTO;
 import ru.ac.checkpointmanager.dto.user.NewPasswordDTO;
 import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
@@ -264,11 +265,11 @@ class UserControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
     @SneakyThrows
     @WithMockCustomUser
     void getAllIsOkWithAdminRole() {
+        PagingParams pagingParams = new PagingParams(0, 20);
+        String stringPagingParams = TestUtils.jsonStringFromObject(pagingParams);
         mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("page", "0")
-                        .param("size", "20")
-                        .param("sortBy", "id"))
+                        .content(stringPagingParams))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[*].id", Matchers.hasItem(savedUser.getId().toString())))
                 .andExpect(jsonPath("$.content[*].fullName", Matchers.hasItem(savedUser.getFullName())))
