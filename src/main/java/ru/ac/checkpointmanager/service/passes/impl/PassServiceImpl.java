@@ -18,14 +18,12 @@ import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.exception.pass.ModifyPassException;
 import ru.ac.checkpointmanager.exception.pass.OverlapPassException;
 import ru.ac.checkpointmanager.exception.pass.PassNotFoundException;
-import ru.ac.checkpointmanager.mapper.CrossingMapper;
 import ru.ac.checkpointmanager.mapper.PassMapper;
 import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
-import ru.ac.checkpointmanager.projection.PassInOutViewProjection;
 import ru.ac.checkpointmanager.repository.CrossingRepository;
 import ru.ac.checkpointmanager.repository.PassRepository;
 import ru.ac.checkpointmanager.service.passes.PassChecker;
@@ -66,7 +64,6 @@ public class PassServiceImpl implements PassService {
     private final UserService userService;
     private final TerritoryService territoryService;
     private final PassMapper mapper;
-    private final CrossingMapper crossingMapper;
     private final PassResolver passResolver;
     private final PassChecker passChecker;
 
@@ -164,24 +161,6 @@ public class PassServiceImpl implements PassService {
                     foundPasses.getTotalPages(), foundPasses.getTotalElements()));
         }
         return foundPasses.map(mapper::toPassDTO);
-    }
-
-    @Override
-    public Page<PassInOutViewProjection> findEventsByUser(UUID userId, PagingParams pagingParams) {
-        log.debug(METHOD_INVOKE, MethodLog.getMethodName(), userId);
-        userService.findById(userId);
-        Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
-
-        return passRepository.findEventsByUser(userId, pageable);
-    }
-
-    @Override
-    public Page<PassInOutViewProjection> findEventsByTerritory(UUID terId, PagingParams pagingParams) {
-        log.debug(METHOD_INVOKE, MethodLog.getMethodName(), terId);
-        territoryService.findById(terId);
-        Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
-
-        return passRepository.findEventsByTerritory(terId, pageable);
     }
 
     @Override

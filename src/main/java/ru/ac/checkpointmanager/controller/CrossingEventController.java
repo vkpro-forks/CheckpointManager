@@ -14,7 +14,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.annotation.PagingParam;
 import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.projection.PassInOutViewProjection;
-import ru.ac.checkpointmanager.service.passes.PassService;
+import ru.ac.checkpointmanager.service.event.PassInOutViewService;
 
 import java.util.UUID;
 
@@ -38,7 +37,7 @@ import java.util.UUID;
 @SecurityRequirement(name = "bearerAuth")
 public class CrossingEventController {
 
-    private final PassService passService;
+    private final PassInOutViewService passInOutViewService;
 
     @Operation(summary = "Получить список событий по пропускам пользователя",
             description = "Доступ: ADMIN, USER.",
@@ -53,11 +52,10 @@ public class CrossingEventController {
             @ApiResponse(responseCode = "404", description = "Пользователь не найден")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
     @GetMapping("/user/{userId}")
-    public ResponseEntity<Page<PassInOutViewProjection>> getEventsByUserId(@PathVariable UUID userId,
-                                                                           @Schema(hidden = true)
-                                                                           @Valid @PagingParam PagingParams pagingParams) {
-        Page<PassInOutViewProjection> events = passService.findEventsByUser(userId, pagingParams);
-        return ResponseEntity.ok(events);
+    public Page<PassInOutViewProjection> getEventsByUserId(@PathVariable UUID userId,
+                                                           @Schema(hidden = true)
+                                                           @Valid @PagingParam PagingParams pagingParams) {
+        return passInOutViewService.findEventsByUser(userId, pagingParams);
     }
 
     @Operation(summary = "Получить список событий по конкретной территории",
@@ -73,12 +71,11 @@ public class CrossingEventController {
             @ApiResponse(responseCode = "404", description = "Территория не найдена")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/territory/{territoryId}")
-    public ResponseEntity<Page<PassInOutViewProjection>> getEventsByTerritoryId(@PathVariable UUID territoryId,
-                                                                                @Schema(hidden = true)
-                                                                                @Valid
-                                                                                @PagingParam PagingParams pagingParams) {
-        Page<PassInOutViewProjection> events = passService.findEventsByTerritory(territoryId, pagingParams);
-        return ResponseEntity.ok(events);
+    public Page<PassInOutViewProjection> getEventsByTerritoryId(@PathVariable UUID territoryId,
+                                                                @Schema(hidden = true)
+                                                                @Valid
+                                                                @PagingParam PagingParams pagingParams) {
+        return passInOutViewService.findEventsByTerritory(territoryId, pagingParams);
     }
 
 }
