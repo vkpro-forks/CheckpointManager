@@ -58,7 +58,7 @@ public class PassController {
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = PassResponseDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей; пользователь не имеет права " +
-                                                             "создавать пропуск на эту территорию; у пользователя найден накладывающийся пропуск"),
+                    "создавать пропуск на эту территорию; у пользователя найден накладывающийся пропуск"),
             @ApiResponse(responseCode = "404", description = "Не найден пользователь или территория")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @PostMapping
@@ -85,10 +85,9 @@ public class PassController {
             @ApiResponse(responseCode = "404", description = "Пропуска не найдены")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @GetMapping
-    public ResponseEntity<Page<PassResponseDTO>> getPasses(@Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams,
-                                                           @Schema(hidden = true) FilterParams filterParams) {
-        Page<PassResponseDTO> passPage = service.findPasses(pagingParams, filterParams);
-        return ResponseEntity.ok(passPage);
+    public Page<PassResponseDTO> getPasses(@Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams,
+                                           @Schema(hidden = true) FilterParams filterParams) {
+        return service.findPasses(pagingParams, filterParams);
     }
 
     @Operation(summary = "Найти пропуск по id",
@@ -100,9 +99,8 @@ public class PassController {
             @ApiResponse(responseCode = "404", description = "Пропуск не найден")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @GetMapping("/{id}")
-    public ResponseEntity<PassResponseDTO> getPass(@PathVariable("id") UUID id) {
-        PassResponseDTO foundPass = service.findById(id);
-        return ResponseEntity.ok(foundPass);
+    public PassResponseDTO getPass(@PathVariable("id") UUID id) {
+        return service.findById(id);
     }
 
     @Operation(summary = "Получить список пропусков конкретного пользователя",
@@ -122,11 +120,10 @@ public class PassController {
             @ApiResponse(responseCode = "404", description = "Пользователь не найден")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
     @GetMapping("/user/{userId}")
-    public ResponseEntity<Page<PassResponseDTO>> getPassesByUserId(@PathVariable UUID userId,
-                                                                   @Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams,
-                                                                   @Schema(hidden = true) FilterParams filterParams) {
-        Page<PassResponseDTO> passPage = service.findPassesByUser(userId, pagingParams, filterParams);
-        return ResponseEntity.ok(passPage);
+    public Page<PassResponseDTO> getPassesByUserId(@PathVariable UUID userId,
+                                                   @Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams,
+                                                   @Schema(hidden = true) FilterParams filterParams) {
+        return service.findPassesByUser(userId, pagingParams, filterParams);
     }
 
     @Operation(summary = "Получить список пропусков на конкретную территорию",
@@ -146,12 +143,11 @@ public class PassController {
             @ApiResponse(responseCode = "404", description = "Территория не найдена")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/territory/{territoryId}")
-    public ResponseEntity<Page<PassResponseDTO>> getPassesByTerritoryId(@PathVariable UUID territoryId,
-                                                                        @Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams,
-                                                                        @Schema(hidden = true) FilterParams filterParams) {
-
-        Page<PassResponseDTO> passPage = service.findPassesByTerritory(territoryId, pagingParams, filterParams);
-        return ResponseEntity.ok(passPage);
+    public Page<PassResponseDTO> getPassesByTerritoryId(@PathVariable UUID territoryId,
+                                                        @Schema(hidden = true)
+                                                        @Valid @PagingParam PagingParams pagingParams,
+                                                        @Schema(hidden = true) FilterParams filterParams) {
+        return service.findPassesByTerritory(territoryId, pagingParams, filterParams);
     }
 
     /* UPDATE */
@@ -161,8 +157,8 @@ public class PassController {
             @ApiResponse(responseCode = "200", description = "Пропуск успешно изменен",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = PassResponseDTO.class))}),
-            @ApiResponse(responseCode = "400", description = "Неуспешная валидаци полей; пользователь не имеет права " +
-                                                             "создавать пропуск на эту территорию; у пользователя найден накладывающийся пропуск"),
+            @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей; пользователь не имеет права " +
+                    "создавать пропуск на эту территорию; у пользователя найден накладывающийся пропуск"),
             @ApiResponse(responseCode = "404", description = "Не найден пользователь или территория")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @PutMapping

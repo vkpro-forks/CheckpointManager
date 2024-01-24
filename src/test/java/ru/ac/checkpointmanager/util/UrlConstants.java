@@ -12,11 +12,18 @@ public class UrlConstants {
 
     public static final String AVATAR_URL = "/api/v1/avatars";
 
+    public static final String AVATAR_AVATARS_URL = "/api/v1/avatars/avatars/{avatarId}";
+
+    public static final String AVATAR_USER_URL = "/api/v1/avatars/user/{userId}";
+
+    public static final String AVATAR_TERRITORY_URL = "/api/v1/avatars/territory/{territoryId}";
     public static final String CROSSING_URL = "/api/v1/crossing";
 
     public static final String CHECKPOINT_URL = "/api/v1/checkpoint";
 
     public static final String PASS_URL = "/api/v1/pass";
+
+    public static final String PASS_USER_URL = "/api/v1/pass/user/{userId}";
 
     public static final String PASS_URL_CANCEL = PASS_URL + "/%s/cancel";
 
