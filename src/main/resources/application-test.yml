@@ -71,6 +71,15 @@ avatars:
   max-height: 400 # максимальная высота изображения
   content-type: "image/"
 
+cors:
+  allowed-origins:
+    - "*"
+  allowed-methods:
+    - "*"
+  allowed-headers:
+    - "*"
+  allow-credentials: false
+
 logging:
   config: classpath:logback-test.xml
 

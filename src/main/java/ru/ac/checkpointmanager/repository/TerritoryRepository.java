@@ -8,6 +8,7 @@ import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -23,4 +24,8 @@ public interface TerritoryRepository extends JpaRepository<Territory, UUID> {
 
     @Query(value = "SELECT t.* FROM territories t JOIN passes p on t.id = p.territory_id WHERE p.id = :passId", nativeQuery = true)
     Territory findByPassId(@Param("passId") UUID passId);
+
+    @Query(value = "SELECT t FROM Territory t LEFT JOIN FETCH t.avatar WHERE t.id = :territoryId")
+    Optional<Territory> findTerritoryByIdWithAvatar(@Param("territoryId") UUID territoryId);
+
 }

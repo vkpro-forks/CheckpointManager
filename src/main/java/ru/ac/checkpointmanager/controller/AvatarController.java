@@ -122,7 +122,6 @@ public class AvatarController {
         return createResponseEntity(avatarImageDTO);
     }
 
-
     private ResponseEntity<byte[]> createResponseEntity(AvatarImageDTO avatarImageDTO) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType(avatarImageDTO.getMediaType()));
@@ -170,7 +169,8 @@ public class AvatarController {
     })
     @GetMapping("/territory/{territoryId}")
     public ResponseEntity<byte[]> getAvatarByTerritory(@PathVariable UUID territoryId) {
-        AvatarImageDTO avatarImageDTO = avatarService.getAvatarImageByAvatarId(territoryId);
+        AvatarImageDTO avatarImageDTO = avatarService.getAvatarImageByTerritoryId(territoryId);
         return createResponseEntity(avatarImageDTO);
     }
+
 }
