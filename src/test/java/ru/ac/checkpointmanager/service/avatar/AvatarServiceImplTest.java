@@ -119,7 +119,7 @@ class AvatarServiceImplTest {
     @Test
     void whenValidIdThenReturnAvatarImageDTO() {
         AvatarImageDTO expectedDto = new AvatarImageDTO();
-        when(avatarRepository.findByTerritoryId(id)).thenReturn(Optional.of(avatar));
+        when(avatarRepository.findById(id)).thenReturn(Optional.of(avatar));
         when(avatarHelper.createAvatarImageDTO(avatar)).thenReturn(expectedDto);
 
         AvatarImageDTO result = avatarService.getAvatarImageByAvatarId(id);
@@ -128,14 +128,50 @@ class AvatarServiceImplTest {
     }
 
     @Test
-    void whenInvalidIdThenThrowAvatarNotFoundExceptionInGetAvatarImage() {
-        when(avatarRepository.findByTerritoryId(id)).thenReturn(Optional.empty());
+    void whenInvalidIdThenThrowAvatarNotFoundExceptionInGetAvatarImageById() {
+        when(avatarRepository.findById(id)).thenReturn(Optional.empty());
 
         AvatarNotFoundException thrown = assertThrows(AvatarNotFoundException.class,
                 () -> avatarService.getAvatarImageByAvatarId(id));
 
         assertEquals(ExceptionUtils.AVATAR_NOT_FOUND.formatted(id), thrown.getMessage());
-        verify(avatarRepository).findByTerritoryId(id);
+        verify(avatarRepository).findById(id);
+    }
+
+    @Test
+    void getAvatarImageByTerritoryId_AllOk_ReturnDto() {
+        AvatarImageDTO expectedDto = new AvatarImageDTO();
+        Territory territory = TestUtils.getTerritory();
+        territory.setAvatar(avatar);
+        when(territoryRepository.findTerritoryByIdWithAvatar(TestUtils.TERR_ID)).thenReturn(Optional.of(territory));
+        when(avatarHelper.createAvatarImageDTO(avatar)).thenReturn(expectedDto);
+
+        AvatarImageDTO result = avatarService.getAvatarImageByTerritoryId(TestUtils.TERR_ID);
+
+        assertEquals(expectedDto, result);
+    }
+
+    @Test
+    void getAvatarImageByTerritoryId_TerritoryNotFound_ThrowException() {
+        when(territoryRepository.findTerritoryByIdWithAvatar(TestUtils.TERR_ID)).thenReturn(Optional.empty());
+
+        TerritoryNotFoundException thrown = assertThrows(TerritoryNotFoundException.class,
+                () -> avatarService.getAvatarImageByTerritoryId(TestUtils.TERR_ID));
+
+        assertEquals(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(TestUtils.TERR_ID), thrown.getMessage());
+        verify(territoryRepository).findTerritoryByIdWithAvatar(TestUtils.TERR_ID);
+    }
+
+    @Test
+    void getAvatarImageByTerritoryId_AvatarNotFound_ThrowException() {
+        when(territoryRepository.findTerritoryByIdWithAvatar(TestUtils.TERR_ID))
+                .thenReturn(Optional.of(TestUtils.getTerritory()));
+
+        AvatarNotFoundException thrown = assertThrows(AvatarNotFoundException.class,
+                () -> avatarService.getAvatarImageByTerritoryId(TestUtils.TERR_ID));
+
+        assertEquals(ExceptionUtils.AVATAR_NOT_FOUND_FOR_TERRITORY.formatted(TestUtils.TERR_ID), thrown.getMessage());
+        verify(territoryRepository).findTerritoryByIdWithAvatar(TestUtils.TERR_ID);
     }
 
     @Test

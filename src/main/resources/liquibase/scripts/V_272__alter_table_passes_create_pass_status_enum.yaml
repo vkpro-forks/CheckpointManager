@@ -1,0 +1,28 @@
+databaseChangeLog:
+  - changeSet:
+      id: '272'
+      author: 'veselov.nikolay'
+      comment: 'tag before changing passes table for creating pass status enum type'
+      changes:
+        - tagDatabase:
+            tag: '272-tag-before'
+
+  - changeSet:
+      id: '272.1'
+      author: 'veselov.nikolay'
+      labels: 'passes, pass-status, feature-272'
+      comment: 'changing passes table for creating pass status enum type'
+      created: '2024-01-18'
+      changes:
+        - sqlFile:
+            dbms: postgresql
+            encoding: utf8
+            endDelimiter: GO
+            path: V_272__alter_table_passes_pass_status_enum.sql
+            relativeToChangelogFile: true
+            splitStatements: true
+            stripComments: true
+      rollback:
+        changesetId: '272'
+        changesetPath: liquibase/scripts/V_272__alter_table_passes_create_pass_status_enum.yaml
+        changesetAuthor: 'veselov.nikolay'

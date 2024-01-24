@@ -5,6 +5,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSendException;
@@ -15,6 +18,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
+import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.dto.user.AuthResponseDTO;
 import ru.ac.checkpointmanager.dto.user.EmailConfirmationDTO;
 import ru.ac.checkpointmanager.dto.user.NewEmailDTO;
@@ -535,19 +539,22 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * Получает список всех пользователей из базы данных.
+     * Получает список всех пользователей из базы данных с пагинацией.
      * <p>
-     * Этот метод возвращает коллекцию DTO всех пользователей. Если пользователи отсутствуют
-     * в базе данных, выбрасывается исключение {@link UserNotFoundException}.
+     * Этот метод возвращает страницу (Page) DTO всех пользователей с учетом пагинации и сортировки,
+     * предоставляемых параметром {@link Pageable}. Если пользователи отсутствуют в базе данных,
+     * возвращается пустая страница, а не выбрасывается исключение.
      * <p>
      *
-     * @return Коллекция {@link UserResponseDTO}, содержащая информацию о всех пользователях.
-     * @throws UserNotFoundException если в базе данных нет пользователей.
+     * @param pagingParams параметры пагинации и сортировки.
+     * @return Страница {@link Page<UserResponseDTO>} с информацией о пользователях.
      */
     @Override
-    public Collection<UserResponseDTO> getAll() {
+    public Page<UserResponseDTO> getAll(PagingParams pagingParams) {
         log.debug("Method {}", MethodLog.getMethodName());
-        return userMapper.toUserResponseDTOs(userRepository.findAll());
+        Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
+        Page<User> userPage = userRepository.findAll(pageable);
+        return userPage.map(userMapper::toUserResponseDTO);
     }
 
     /**
