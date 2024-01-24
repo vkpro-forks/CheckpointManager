@@ -165,6 +165,22 @@ class CrossingEventControllerIntegrationTest extends RedisAndPostgresTestContain
         checkEventFields(resultActions, savedPass);
     }
 
+    @Test
+    @SneakyThrows
+    @WithMockUser(roles = {"MANAGER"})
+    void findEventsByUsersTerritories_AllOk_ReturnPageWithObjects() {
+        Pass savedPass = setupAndSavePass();
+        Checkpoint checkpoint = TestUtils.getCheckpoint(CheckpointType.AUTO, savedPass.getTerritory());
+        Checkpoint savedCheckPoint = checkpointRepository.saveAndFlush(checkpoint);
+        crossingRepository.saveAndFlush(TestUtils.getCrossing(savedPass, savedCheckPoint, Direction.IN));
+        crossingRepository.saveAndFlush(TestUtils.getCrossing(savedPass, savedCheckPoint, Direction.OUT));
+
+        ResultActions resultActions = mockMvc.perform(
+                MockMvcRequestBuilders.get(UrlConstants.EVENT_USER_TERRITORIES_URL.formatted(savedUser.getId())));
+
+        checkEventFields(resultActions, savedPass);
+    }
+
     private Pass setupAndSavePass() {
         log.info("Saving Territory, User, Car, Brand, and Pass}");
         Territory territory = new Territory();
