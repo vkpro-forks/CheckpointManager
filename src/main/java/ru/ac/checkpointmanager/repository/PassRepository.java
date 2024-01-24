@@ -8,7 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import ru.ac.checkpointmanager.model.passes.Pass;
-import ru.ac.checkpointmanager.projection.PassInOutViewProjection;
+import ru.ac.checkpointmanager.model.passes.PassStatus;
+import ru.ac.checkpointmanager.projection.PassInOutView;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -85,7 +86,6 @@ public interface PassRepository extends JpaRepository<Pass, UUID>, JpaSpecificat
      * Ищет пропуски по статусу и достигнутому времени начала или окончания.
      *
      * @param status     {@link PassStatus} Статус, который мы хотим проверить
-     *
      * @param status     Предполагается передача значения PassStatus.?.toString().
      * @param timeColumn строковое значение имени столбца для сравнения времени.
      * @param time       дата и время для сравнения со столбцом timeColumn.
@@ -109,9 +109,6 @@ public interface PassRepository extends JpaRepository<Pass, UUID>, JpaSpecificat
             "< :time")
     List<Pass> findPassesByStatusAndTimeBefore(@Param("status") PassStatus status,
                                                @Param("column") String timeColumn, @Param("time") LocalDateTime time);
-            "END < :time", nativeQuery = true)
-    List<Pass> findPassesByStatusAndTimeBefore(@Param("status") String status
-            , @Param("column") String timeColumn, @Param("time") LocalDateTime time);
 
     /**
      * Проверяет связь между пользователем и территориями
