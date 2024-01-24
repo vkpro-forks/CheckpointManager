@@ -23,6 +23,7 @@ import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.passes.Pass;
+import ru.ac.checkpointmanager.model.passes.PassConstant;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.repository.CrossingRepository;
 import ru.ac.checkpointmanager.repository.PassRepository;
@@ -311,7 +312,7 @@ public class PassServiceImpl implements PassService {
         Optional<Pass> overlapPass = passesByUser.stream()
                 .filter(existPass -> existPass.getClass().equals(newPass.getClass()))
                 .filter(existPass -> existPass.getStatus().equals(PassStatus.ACTIVE) ||
-                                     existPass.getStatus().equals(PassStatus.DELAYED))
+                        existPass.getStatus().equals(PassStatus.DELAYED))
                 .filter(existPass -> existPass.compareByFields(newPass))
                 .findFirst();
 
@@ -352,8 +353,8 @@ public class PassServiceImpl implements PassService {
         PassStatus sourceStatus = PassStatus.DELAYED;
         PassStatus targetStatus = PassStatus.ACTIVE;
 
-        List<Pass> passes = passRepository.findPassesByStatusAndTimeBefore(sourceStatus.toString(),
-                "startTime", LocalDateTime.now().plusMinutes(1));
+        List<Pass> passes = passRepository.findPassesByStatusAndTimeBefore(sourceStatus,
+                PassConstant.START_TIME, LocalDateTime.now().plusMinutes(1));
         if (passes.isEmpty()) {
             return;
         }
@@ -380,8 +381,8 @@ public class PassServiceImpl implements PassService {
         PassStatus sourceStatus = PassStatus.ACTIVE;
         PassStatus targetStatus;
 
-        List<Pass> passes = passRepository.findPassesByStatusAndTimeBefore(sourceStatus.toString(),
-                "endTime", LocalDateTime.now());
+        List<Pass> passes = passRepository.findPassesByStatusAndTimeBefore(sourceStatus,
+                PassConstant.END_TIME, LocalDateTime.now());
         if (passes.isEmpty()) {
             return;
         }

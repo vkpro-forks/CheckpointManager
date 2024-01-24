@@ -10,11 +10,16 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.cache.Cache;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.mail.MailSendException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
+import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.dto.user.EmailConfirmationDTO;
 import ru.ac.checkpointmanager.dto.user.NewEmailDTO;
 import ru.ac.checkpointmanager.dto.user.NewPasswordDTO;
@@ -601,19 +606,23 @@ class UserServiceImplTest {
 
     @Test
     void getAllUsersExistReturnsUserList() {
-        List<User> users = List.of(TestUtils.getUser());
+        User user = TestUtils.getUser();
         UserResponseDTO userResponseDTO = TestUtils.getUserResponseDTO();
-        List<UserResponseDTO> userResponseDTOS = List.of(userResponseDTO);
+        List<User> users = List.of(user);
+        Page<User> userPage = new PageImpl<>(users);
+        PagingParams pagingParams = new PagingParams(0, 20);
+        Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
 
-        Mockito.when(userRepository.findAll()).thenReturn(users);
-        Mockito.when(userMapper.toUserResponseDTOs(users)).thenReturn(userResponseDTOS);
+        Mockito.when(userRepository.findAll(pageable)).thenReturn(userPage);
+        Mockito.when(userMapper.toUserResponseDTO(user)).thenReturn(userResponseDTO);
 
-        Collection<UserResponseDTO> result = userService.getAll();
+        Page<UserResponseDTO> result = userService.getAll(pagingParams);
 
-        Assertions.assertThat(result).isNotEmpty().contains(userResponseDTO);
-        Mockito.verify(userRepository).findAll();
-        Mockito.verify(userMapper).toUserResponseDTOs(users);
+        Assertions.assertThat(result.getContent()).isNotEmpty().contains(userResponseDTO);
+        Mockito.verify(userRepository).findAll(pageable);
+        Mockito.verify(userMapper).toUserResponseDTO(user);
     }
+
 
     @Test
     void findUsersPhoneNumbersUserExistsReturnsPhoneNumbers() {

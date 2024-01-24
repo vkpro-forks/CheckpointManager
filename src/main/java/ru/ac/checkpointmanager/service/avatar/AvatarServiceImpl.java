@@ -12,6 +12,7 @@ import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.mapper.avatar.AvatarMapper;
+import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.avatar.Avatar;
 import ru.ac.checkpointmanager.repository.AvatarRepository;
@@ -159,8 +160,33 @@ public class AvatarServiceImpl implements AvatarService {
     @Override
     public AvatarImageDTO getAvatarImageByAvatarId(UUID avatarId) {
         log.debug("Fetching avatar image for avatar ID: {}", avatarId);
-        Avatar avatar = avatarRepository.findByTerritoryId(avatarId)
+        Avatar avatar = avatarRepository.findById(avatarId)
                 .orElseThrow(() -> new AvatarNotFoundException(ExceptionUtils.AVATAR_NOT_FOUND.formatted(avatarId)));
+        return avatarHelper.createAvatarImageDTO(avatar);
+    }
+
+    /**
+     * Получает изображение аватара по его идентификатору территории.
+     *
+     * @param territoryId Уникальный идентификатор аватара.
+     * @return AvatarImageDTO, содержащий данные изображения аватара.
+     * @throws AvatarNotFoundException если аватар с указанным идентификатором не найден.
+     */
+    @Override
+    public AvatarImageDTO getAvatarImageByTerritoryId(UUID territoryId) {
+        log.debug("Fetching avatar image for territory id: {}", territoryId);
+        Territory territory = territoryRepository.findTerritoryByIdWithAvatar(territoryId)
+                .orElseThrow(() -> {
+                            log.warn(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
+                            return new TerritoryNotFoundException(
+                                    ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
+                        }
+                );
+        Avatar avatar = territory.getAvatar();
+        if (avatar == null) {
+            log.warn(ExceptionUtils.AVATAR_NOT_FOUND_FOR_TERRITORY.formatted(territoryId));
+            throw new AvatarNotFoundException(ExceptionUtils.AVATAR_NOT_FOUND_FOR_TERRITORY.formatted(territoryId));
+        }
         return avatarHelper.createAvatarImageDTO(avatar);
     }
 
