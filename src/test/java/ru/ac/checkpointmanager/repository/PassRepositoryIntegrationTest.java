@@ -1,5 +1,6 @@
 package ru.ac.checkpointmanager.repository;
 
+import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +22,6 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import ru.ac.checkpointmanager.dto.passes.FilterParams;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.Visitor;
@@ -46,6 +46,7 @@ import java.util.List;
 @ActiveProfiles("test")
 @DirtiesContext
 @Testcontainers
+@Slf4j
 class PassRepositoryIntegrationTest {
 
     @Container
@@ -171,10 +172,39 @@ class PassRepositoryIntegrationTest {
         passWalk.setTimeType(PassTimeType.ONETIME);
         PassWalk savedPassWalk = passRepository.saveAndFlush(passWalk);
         Pageable pageable = PageRequest.of(0, 100);
-        Specification<Pass> spec = PassSpecification.byCarNumberOrVisitorNamePart("U");
+        Specification<Pass> spec = PassSpecification.byCarNumberPart("U");
+        log.info("All saved, go to check");
+        List<Pass> all = passRepository.findAll();
+        log.info("All passes {}", all);
         Page<Pass> foundPasses = passRepository.findAll(spec, pageable);
-        Assertions.assertThat(foundPasses).hasSize(2)
+        log.info("Found page: {}", foundPasses.getContent());
+        Assertions.assertThat(foundPasses.getContent()).hasSize(2)
                 .flatExtracting(Pass::getId).contains(savedPassAuto.getId(), savedPassWalk.getId());
+    }
+
+    @Test
+    void findAllContainingInVisitorNameAndCarNumber_PassWalkOnlyInDB_ReturnPageWithPasses() {
+        saveUserTerritoryVisitor(TestUtils.FULL_NAME);
+        saveCar("H123QA799");
+        PassAuto passAuto = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
+        passRepository.saveAndFlush(passAuto);
+        PassWalk passWalk = new PassWalk();
+        passWalk.setStatus(PassStatus.ACTIVE);
+        passWalk.setStartTime(LocalDateTime.now().minusDays(1));
+        passWalk.setEndTime(LocalDateTime.now().plusDays(1));
+        passWalk.setUser(savedUser);
+        passWalk.setTerritory(savedTerritory);
+        passWalk.setVisitor(savedVisitor);//name USERNAME
+        passWalk.setTimeType(PassTimeType.ONETIME);
+        PassWalk savedPassWalk = passRepository.saveAndFlush(passWalk);
+        Pageable pageable = PageRequest.of(0, 100);
+        Specification<Pass> spec = PassSpecification.byCarNumberPart("U");
+        log.info("All saved, go to check");
+        List<Pass> all = passRepository.findAll();
+        log.info("All passes {}", all);
+        Page<Pass> foundPasses = passRepository.findAll(spec, pageable);
+        log.info("Found page: {}", foundPasses.getContent());
+        Assertions.assertThat(foundPasses.getContent()).hasSize(1).flatExtracting(Pass::getId).contains(savedPassWalk.getId());
     }
 
     /*@Test
@@ -217,8 +247,8 @@ class PassRepositoryIntegrationTest {
         savedCarBrand = carBrandRepository.saveAndFlush(carBrand);
         Car car = new Car();
         car.setLicensePlate(licensePlate);
-        car.setBrand(carBrand);
-        car.setId(TestUtils.getCarDto().getId());
+        car.setId(TestUtils.CAR_ID);
+        car.setBrand(savedCarBrand);
         savedCar = carRepository.saveAndFlush(car);//save car and repo change its id
     }
 

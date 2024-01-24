@@ -137,7 +137,7 @@ public class PassServiceImpl implements PassService {
                                                                            FilterParams filterParams) {
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
         Specification<Pass> spec = Specification.where(PassSpecification.byFilterParams(filterParams))
-                .and(PassSpecification.byCarNumberOrVisitorNamePart(""));
+                .and(PassSpecification.byCarNumberPart(""));
 
 
 
