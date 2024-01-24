@@ -91,6 +91,32 @@ public class PassController {
         return service.findPasses(pagingParams, filterParams);
     }
 
+    @Operation(summary = "Получить список всех пропусков",
+            description = "Доступ: ADMIN.",
+            parameters = {
+                    @Parameter(in = ParameterIn.QUERY, name = "page"),
+                    @Parameter(in = ParameterIn.QUERY, name = "size"),
+                    @Parameter(in = ParameterIn.QUERY, name = "dtype"),
+                    @Parameter(in = ParameterIn.QUERY, name = "territory"),
+                    @Parameter(in = ParameterIn.QUERY, name = "status"),
+                    @Parameter(in = ParameterIn.QUERY, name = "favorite")
+            })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Пропуска найдены",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            array = @ArraySchema(schema = @Schema(implementation = PassResponseDTO.class)))),
+            @ApiResponse(responseCode = "404", description = "Пропуска не найдены")})
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @GetMapping
+    public Page<PassResponseDTO> getPassesByPartOfVisitorNameAndCarNumber(@Schema(hidden = true)
+                                                                          @Valid
+                                                                          @PagingParam PagingParams pagingParams,
+                                                                          @Schema(hidden = true)
+                                                                          FilterParams filterParams) {
+        return service.findPasses(pagingParams, filterParams);
+    }
+
+
     @Operation(summary = "Найти пропуск по id",
             description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {

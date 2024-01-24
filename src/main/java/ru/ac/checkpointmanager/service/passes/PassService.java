@@ -17,6 +17,8 @@ public interface PassService {
 
     Page<PassResponseDTO> findPasses(PagingParams pagingParams, FilterParams filterParams);
 
+    Page<PassResponseDTO> findPassesByPartOfVisitorNameAndCarNumber(PagingParams pagingParams, FilterParams filterParams);
+
     PassResponseDTO findById(UUID id);
 
     Pass findPassById(UUID passId);

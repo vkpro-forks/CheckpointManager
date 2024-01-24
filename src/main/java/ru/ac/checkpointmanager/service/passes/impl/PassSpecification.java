@@ -83,4 +83,17 @@ public final class PassSpecification {
     public static Specification<Pass> byTerritoryId(UUID territoryId) {
         return (root, query, cb) -> cb.equal(root.get("territory").get("id"), territoryId);
     }
+
+    public static Specification<Pass> byCarNumberOrVisitorNamePart(String part) {
+        return (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (root.get("car") != null) {
+                predicates.add(criteriaBuilder.like(root.get("car").get("licencePlate"), "%" + part));
+            }
+            if (root.get("visitor") != null) {
+                predicates.add(criteriaBuilder.like(root.get("visitor").get("name"), "%" + part));
+            }
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+    }
 }
