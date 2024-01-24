@@ -93,7 +93,7 @@ public class VisitorServiceImpl implements VisitorService {
     }
 
     @Override
-    public List<VisitorDTO> findByUserId(UUID userId) { //TODO придумать как проверять есть ли юзер, и доставать его визиторов за один запрос
+    public List<VisitorDTO> findByUserId(UUID userId) {
         List<Visitor> foundVisitors = visitorRepository.findVisitorsByUserId(userId);
         log.debug("Find {} Visitors for user [UUID - {}]", foundVisitors.size(), userId);
         return visitorMapper.toVisitorDTOS(foundVisitors);
