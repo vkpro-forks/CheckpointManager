@@ -78,9 +78,9 @@ public class PassInOutViewServiceImpl implements PassInOutViewService {
      * Наконец, поиск событий осуществляется по идентификаторам территорий пользователя с учетом параметров пагинации.
      * </p>
      *
-     * @param userId        Идентификатор пользователя, события по территориям которого необходимо найти.
-     * @param pagingParams  Параметры пагинации для управления выводом результатов.
-     * @return              Страница {@link Page<PassInOutView>} с событиями, соответствующими критериям поиска.
+     * @param userId       Идентификатор пользователя, события по территориям которого необходимо найти.
+     * @param pagingParams Параметры пагинации для управления выводом результатов.
+     * @return Страница {@link Page<PassInOutView>} с событиями, соответствующими критериям поиска.
      * @throws UserNotFoundException      Если пользователь с указанным идентификатором не найден.
      * @throws TerritoryNotFoundException Если у пользователя нет связанных территорий.
      */
@@ -94,8 +94,8 @@ public class PassInOutViewServiceImpl implements PassInOutViewService {
         );
         List<Territory> territories = user.getTerritories();
         if (territories.isEmpty()) {
-            log.warn("User [id: {}] has no territories", userId);
-            throw new TerritoryNotFoundException(String.format("User [id: %s] has no territories",userId));
+            log.warn(ExceptionUtils.USER_TERRITORY_NOT_FOUND_MSG.formatted(userId));
+            throw new TerritoryNotFoundException(ExceptionUtils.USER_TERRITORY_NOT_FOUND_MSG.formatted(userId));
         }
         List<UUID> terIds = territories.stream()
                 .map(Territory::getId)
