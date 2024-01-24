@@ -81,9 +81,11 @@ databaseChangeLog:
       file: liquibase/scripts/V_111__add avatar_for_territory.sql
   - include:
       file: liquibase/scripts/V_255__alter_territories.sql
-
+  - include:
+      file: liquibase/scripts/V_272__alter_table_passes_create_pass_status_enum.yaml
 
   ## ВНЕСЕНИЕ ДЕМО-ДАННЫХ, ОСТАВЛЯЙТЕ ВСЕГДА В КОНЦЕ ФАЙЛА
   - include:
       file: liquibase/insert_demo_data.sql
       labels: demo-data
+

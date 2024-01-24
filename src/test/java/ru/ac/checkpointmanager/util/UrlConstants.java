@@ -18,6 +18,8 @@ public class UrlConstants {
 
     public static final String PASS_URL = "/api/v1/pass";
 
+    public static final String PASS_USER_URL = "/api/v1/pass/user/{userId}";
+
     public static final String PASS_URL_CANCEL = PASS_URL + "/%s/cancel";
 
     public static final String PASS_URL_ACTIVATE = PASS_URL + "/%s/activate";
