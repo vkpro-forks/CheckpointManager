@@ -164,7 +164,7 @@
 - **`completed` (зеленый)**: Пропуск полностью использован, по нему были и въезд/вход, и выезд/выход.
 
 <div align="center">
-<img alt="Жизненный цикл пропуска" height="500" src="https://github.com/AnvilCoder/CheckpointManager/assets/124284597/c0850916-ad1f-4491-a062-660dcc77a5ea" width="800"/>
+<img alt="Жизненный цикл пропуска" height="600" src="https://github.com/AnvilCoder/CheckpointManager/assets/124284597/c0850916-ad1f-4491-a062-660dcc77a5ea" width="800"/>
 </div>
 
 ## 🚀 Технологии проекта
