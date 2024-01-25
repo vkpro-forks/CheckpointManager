@@ -280,6 +280,27 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
                 .andExpect(MockMvcResultMatchers.jsonPath("$.content.size()").value(5));
     }
 
+    @ParameterizedTest
+    @EnumSource(PassStatus.class)
+    @SneakyThrows
+    void getPassesByUsersTerritories_FivePassesForUser_ReturnPassDTOs(PassStatus passStatus) {
+        saveTerritoryUserCarBrand();
+        saveCar();
+        List<Pass> passes = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            PassAuto pass = createPassWithStatusAndTime(passStatus, i);
+            passes.add(pass);
+        }
+        passRepository.saveAllAndFlush(passes);
+        List<Pass> allPasses = passRepository.findAll();
+        Assertions.assertThat(allPasses).hasSize(5);
+
+        ResultActions resultActions = mockMvc
+                .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_USER_TERRITORIES_URL, savedUser.getId()));
+        resultActions.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content.size()").value(5));
+    }
+
     @Test
     @SneakyThrows
     void getPasses_FilteredByActive_ReturnPassDTOs() {
@@ -301,6 +322,32 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
 
         ResultActions resultActions = mockMvc
                 .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_USER_URL, savedUser.getId())
+                        .param("status", PassStatus.ACTIVE.name()));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content.size()").value(3));
+    }
+
+    @Test
+    @SneakyThrows
+    void getPassesByUsersTerritories_FilteredByActive_ReturnPassDTOs() {
+        saveTerritoryUserCarBrand();
+        saveCar();
+        List<Pass> passes = new ArrayList<>();
+        PassStatus passStatus;
+        for (int i = 0; i < 5; i++) {
+            if (i < 3) {
+                passStatus = PassStatus.ACTIVE;
+            } else {
+                passStatus = PassStatus.DELAYED;
+            }
+            PassAuto pass = createPassWithStatusAndTime(passStatus, i);
+            passes.add(pass);
+        }
+        passRepository.saveAllAndFlush(passes);
+
+        ResultActions resultActions = mockMvc
+                .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_USER_TERRITORIES_URL, savedUser.getId())
                         .param("status", PassStatus.ACTIVE.name()));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isOk())
@@ -331,6 +378,35 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
 
         ResultActions resultActions = mockMvc
                 .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_USER_URL, savedUser.getId())
+                        .param("status", filterParams));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content.size()").value(totalFound));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getPassesForFilterByStatus")
+    @SneakyThrows
+    void getPassesByUsersTerritories_FilteredByActiveAndDelayed_ReturnPassDTOs(int total, int numIf, PassStatus statusIf,
+                                                                               PassStatus statusElse, String filterParams,
+                                                                               int totalFound) {
+        saveTerritoryUserCarBrand();
+        saveCar();
+        List<Pass> passes = new ArrayList<>();
+        PassStatus passStatus;
+        for (int i = 0; i < total; i++) {
+            if (i < numIf) {
+                passStatus = statusIf;
+            } else {
+                passStatus = statusElse;
+            }
+            PassAuto pass = createPassWithStatusAndTime(passStatus, i);
+            passes.add(pass);
+        }
+        passRepository.saveAllAndFlush(passes);
+
+        ResultActions resultActions = mockMvc
+                .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_USER_TERRITORIES_URL, savedUser.getId())
                         .param("status", filterParams));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isOk())
