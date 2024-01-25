@@ -2,17 +2,23 @@ package ru.ac.checkpointmanager.specification;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
 import ru.ac.checkpointmanager.dto.passes.FilterParams;
 import ru.ac.checkpointmanager.exception.pass.InvalidPassStatusException;
+import ru.ac.checkpointmanager.model.Visitor;
+import ru.ac.checkpointmanager.model.car.Car;
 import ru.ac.checkpointmanager.model.passes.Pass;
+import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
+import ru.ac.checkpointmanager.model.passes.PassWalk;
 import ru.ac.checkpointmanager.specification.model.Car_;
 import ru.ac.checkpointmanager.specification.model.PassAuto_;
 import ru.ac.checkpointmanager.specification.model.PassWalk_;
-import ru.ac.checkpointmanager.specification.model.Pass_;
 import ru.ac.checkpointmanager.specification.model.Visitor_;
 
 import java.util.ArrayList;
@@ -92,18 +98,18 @@ public final class PassSpecification {
     public static Specification<Pass> byCarNumberPart(String part) {
         log.debug("Setting specification for Car for LIKE query with part {}", part);
         return (root, query, criteriaBuilder) -> {
-            Predicate carNumberLike = criteriaBuilder.like(root.get(PassAuto_.CAR).get(Car_.LICENSE_PLATE), part + "%");
-            Predicate auto = criteriaBuilder.equal(root.get(Pass_.DTYPE), Pass_.DTYPE_AUTO);
-            return criteriaBuilder.and(carNumberLike, auto);
+            Root<PassAuto> paRoot = criteriaBuilder.treat(root, PassAuto.class);
+            Join<Car, PassAuto> carJoin = paRoot.join(PassAuto_.CAR, JoinType.LEFT);
+            return criteriaBuilder.like(carJoin.get(Car_.LICENSE_PLATE), part + "%");
         };
     }
 
-    public static Specification<Pass> byVisitorNamePart(String part) {
-        log.debug("Setting specification for Visitor for LIKE query with part {}", part);
+    public static Specification<Pass> byVisitorPart(String part) {
+        log.debug("Setting specification for Car for LIKE query with part {}", part);
         return (root, query, criteriaBuilder) -> {
-            Predicate visitorNameLike = criteriaBuilder.like(root.get(PassWalk_.VISITOR).get(Visitor_.NAME), part + "%");
-            Predicate walk = criteriaBuilder.equal(root.get(Pass_.DTYPE), Pass_.DTYPE_WALK);
-            return criteriaBuilder.and(walk, visitorNameLike);
+            Root<PassWalk> paRoot = criteriaBuilder.treat(root, PassWalk.class);
+            Join<Visitor, PassWalk> visitorJoin = paRoot.join(PassWalk_.VISITOR, JoinType.LEFT);
+            return criteriaBuilder.like(visitorJoin.get(Visitor_.NAME), part + "%");
         };
     }
 

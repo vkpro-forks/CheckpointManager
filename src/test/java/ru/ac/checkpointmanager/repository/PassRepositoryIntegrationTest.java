@@ -151,6 +151,7 @@ class PassRepositoryIntegrationTest {
         log.info("All saved, go to check");
 
         Page<Pass> foundPasses = passRepository.findAll(spec, pageable);
+
         log.info("Found page: {}", foundPasses.getContent());
         Assertions.assertThat(foundPasses.getContent()).hasSize(1)
                 .flatExtracting(Pass::getId).contains(savedPassAuto.getId());
@@ -168,11 +169,12 @@ class PassRepositoryIntegrationTest {
         PassWalk savedPassWalk = passRepository.saveAndFlush(passWalk);
         passRepository.saveAndFlush(passWalk);
         Pageable pageable = PageRequest.of(0, 100);
-        Specification<Pass> visitorSpec = PassSpecification.byVisitorNamePart("U");
+        Specification<Pass> visitorSpec = PassSpecification.byVisitorPart("U");
         Specification<Pass> spec = Specification.where(visitorSpec);
         log.info("All saved, go to check");
 
         Page<Pass> foundPasses = passRepository.findAll(spec, pageable);
+
         log.info("Found page: {}", foundPasses.getContent());
         Assertions.assertThat(foundPasses.getContent()).hasSize(1)
                 .flatExtracting(Pass::getId).contains(savedPassWalk.getId());
@@ -183,7 +185,7 @@ class PassRepositoryIntegrationTest {
         saveUserTerritoryVisitor(TestUtils.FULL_NAME);
         saveCar("H123QA799");
         PassAuto passAuto = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
-        PassAuto savedPassAuto = passRepository.saveAndFlush(passAuto);
+        passRepository.saveAndFlush(passAuto);
         PassWalk passWalk = setUpPassWalk(PassStatus.ACTIVE, LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(1),
                 savedUser, savedTerritory, savedVisitor, PassTimeType.ONETIME);
@@ -194,6 +196,7 @@ class PassRepositoryIntegrationTest {
         log.info("All saved, go to check");
 
         Page<Pass> foundPasses = passRepository.findAll(spec, pageable);
+
         log.info("Found page: {}", foundPasses.getContent());
         Assertions.assertThat(foundPasses.getContent()).isEmpty();
     }
@@ -208,15 +211,84 @@ class PassRepositoryIntegrationTest {
                 LocalDateTime.now().plusDays(1),
                 savedUser, savedTerritory, savedVisitor, PassTimeType.ONETIME);
         passRepository.saveAndFlush(passWalk);
-        passRepository.saveAndFlush(passWalk);
         Pageable pageable = PageRequest.of(0, 100);
-        Specification<Pass> visitorSpec = PassSpecification.byVisitorNamePart("U");
+        Specification<Pass> visitorSpec = PassSpecification.byVisitorPart("U");
         Specification<Pass> spec = Specification.where(visitorSpec);
         log.info("All saved, go to check");
 
         Page<Pass> foundPasses = passRepository.findAll(spec, pageable);
+
         log.info("Found page: {}", foundPasses.getContent());
         Assertions.assertThat(foundPasses.getContent()).isEmpty();
+    }
+
+    @Test
+    void findAllWithVisitorAndCarSpec_PassAutoAndPassWalkInDB_ReturnPageWithPasses() {
+        saveUserTerritoryVisitor(TestUtils.FULL_NAME);
+        saveCar("U123QA799");
+        PassAuto passAuto = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
+        PassAuto savedPassAuto = passRepository.saveAndFlush(passAuto);
+        PassWalk passWalk = setUpPassWalk(PassStatus.DELAYED, LocalDateTime.now().minusDays(1),
+                LocalDateTime.now().plusDays(1),
+                savedUser, savedTerritory, savedVisitor, PassTimeType.ONETIME);
+        PassWalk savedPassWalk = passRepository.saveAndFlush(passWalk);
+        Pageable pageable = PageRequest.of(0, 100);
+        Specification<Pass> visitorSpec = PassSpecification.byVisitorPart("U");
+        Specification<Pass> carSpec = PassSpecification.byCarNumberPart("U");
+        Specification<Pass> spec = Specification.where(visitorSpec).or(carSpec);
+        log.info("All saved, go to check");
+
+        Page<Pass> foundPasses = passRepository.findAll(spec, pageable);
+
+        log.info("Found page: {}", foundPasses.getContent());
+        Assertions.assertThat(foundPasses.getContent()).hasSize(2)
+                .flatExtracting(Pass::getId).contains(savedPassAuto.getId(), savedPassWalk.getId());
+    }
+
+    @Test
+    void findAllWithVisitorAndCarSpec_PassAutoAndPassWalkInDB_ReturnPageWithOnlyCarPass() {
+        saveUserTerritoryVisitor("Noname");
+        saveCar("U123QA799");
+        PassAuto passAuto = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
+        PassAuto savedPassAuto = passRepository.saveAndFlush(passAuto);
+        PassWalk passWalk = setUpPassWalk(PassStatus.DELAYED, LocalDateTime.now().minusDays(1),
+                LocalDateTime.now().plusDays(1),
+                savedUser, savedTerritory, savedVisitor, PassTimeType.ONETIME);
+        passRepository.saveAndFlush(passWalk);
+        Pageable pageable = PageRequest.of(0, 100);
+        Specification<Pass> visitorSpec = PassSpecification.byVisitorPart("U");
+        Specification<Pass> carSpec = PassSpecification.byCarNumberPart("U");
+        Specification<Pass> spec = Specification.where(visitorSpec).or(carSpec);
+        log.info("All saved, go to check");
+
+        Page<Pass> foundPasses = passRepository.findAll(spec, pageable);
+
+        log.info("Found page: {}", foundPasses.getContent());
+        Assertions.assertThat(foundPasses.getContent()).hasSize(1)
+                .flatExtracting(Pass::getId).contains(savedPassAuto.getId());
+    }
+
+    @Test
+    void findAllWithVisitorAndCarSpec_PassAutoAndPassWalkInDB_ReturnPageWithOnlyVisitorPass() {
+        saveUserTerritoryVisitor(TestUtils.FULL_NAME);
+        saveCar("H123QA799");
+        PassAuto passAuto = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
+        PassAuto savedPassAuto = passRepository.saveAndFlush(passAuto);
+        PassWalk passWalk = setUpPassWalk(PassStatus.DELAYED, LocalDateTime.now().minusDays(1),
+                LocalDateTime.now().plusDays(1),
+                savedUser, savedTerritory, savedVisitor, PassTimeType.ONETIME);
+        PassWalk savedPassWalk = passRepository.saveAndFlush(passWalk);
+        Pageable pageable = PageRequest.of(0, 100);
+        Specification<Pass> visitorSpec = PassSpecification.byVisitorPart("U");
+        Specification<Pass> carSpec = PassSpecification.byCarNumberPart("U");
+        Specification<Pass> spec = Specification.where(visitorSpec).or(carSpec);
+        log.info("All saved, go to check");
+
+        Page<Pass> foundPasses = passRepository.findAll(spec, pageable);
+
+        log.info("Found page: {}", foundPasses.getContent());
+        Assertions.assertThat(foundPasses.getContent()).hasSize(1)
+                .flatExtracting(Pass::getId).contains(savedPassWalk.getId());
     }
 
     /*@Test
