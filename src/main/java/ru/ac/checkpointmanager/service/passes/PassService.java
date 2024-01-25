@@ -7,7 +7,6 @@ import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassResponseDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.model.passes.Pass;
-import ru.ac.checkpointmanager.projection.PassInOutViewProjection;
 
 import java.util.UUID;
 
@@ -28,10 +27,6 @@ public interface PassService {
     Page<PassResponseDTO> findPassesByUser(UUID userId, PagingParams pagingParams, FilterParams filterParams);
 
     Page<PassResponseDTO> findPassesByTerritory(UUID terId, PagingParams pagingParams, FilterParams filterParams);
-
-    Page<PassInOutViewProjection> findEventsByUser(UUID userId, PagingParams pagingParams);
-
-    Page<PassInOutViewProjection> findEventsByTerritory(UUID terId, PagingParams pagingParams);
 
     PassResponseDTO updatePass(PassUpdateDTO passUpdateDTO);
 

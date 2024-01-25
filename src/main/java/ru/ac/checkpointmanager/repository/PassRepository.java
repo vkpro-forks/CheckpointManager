@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
-import ru.ac.checkpointmanager.projection.PassInOutViewProjection;
+import ru.ac.checkpointmanager.projection.PassInOutView;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -135,4 +135,59 @@ public interface PassRepository extends JpaRepository<Pass, UUID>, JpaSpecificat
     @Deprecated(since = "0.1.14", forRemoval = true)
     @Query(value = "SELECT * FROM passes p WHERE p.territory_id = :territoryId " + SORT_LOGIC, nativeQuery = true)
     Page<Pass> findPassesByTerritoryId(UUID territoryId, Pageable pageable);
+
+    /**
+     * Ищет пропуски по статусу и достигнутому времени начала или окончания.
+     *
+     * @param status     Предполагается передача значения PassStatus.?.toString().
+     * @param timeColumn строковое значение имени столбца для сравнения времени.
+     * @param time       дата и время для сравнения со столбцом timeColumn.
+     * @return список найденных пропусков.
+     */
+            /*@Query(value = "SELECT * FROM passes WHERE status = " +
+            "CAST(:#{#status.name()} as pass_status_enum) AND " +
+            "CASE " +
+            "WHEN :column = 'startTime' THEN start_time " +
+            "WHEN :column = 'endTime' THEN end_time " +
+            "END < :time", nativeQuery = true)*/
+    //native query работают немного по другому, спринг пытается получить статус как строку, что выдает ошибку
+    //для того чтобы всё было ок, нужно скастить к нашему кастомному типу эту строку
+    //с JPQL получается попроще.
+    //просто оставлю этот пример, если вдруг понадобится написать native query
+    @Query(value = "SELECT p FROM Pass p WHERE p.status = :status AND " +
+            "(CASE " +
+            "WHEN :column =  ?#{T(ru.ac.checkpointmanager.model.passes.PassConstant).START_TIME} THEN p.startTime " +
+            "WHEN :column = ?#{T(ru.ac.checkpointmanager.model.passes.PassConstant).END_TIME} THEN p.endTime " +
+            "END) " +
+            "< :time")
+    List<Pass> findPassesByStatusAndTimeBefore(@Param("status") PassStatus status,
+                                               @Param("column") String timeColumn, @Param("time") LocalDateTime time);
+
+    /**
+     * Проверяет связь между пользователем и территориями
+     * (разрешение пользователя на создание пропуска на эту территорию).
+     *
+     * @param userId      ID проверяемого пользователя
+     * @param territoryId ID проверяемой территории
+     * @return boolean результат проверки
+     */
+    @Query(value = "SELECT EXISTS (SELECT FROM user_territory WHERE user_id = :uId AND territory_id = :tId)"
+            , nativeQuery = true)
+    boolean checkUserTerritoryRelation(@Param("uId") UUID userId, @Param("tId") UUID territoryId);
+
+    @Query(value = "SELECT * FROM pass_in_out_view p WHERE p.user_id = :userId ORDER BY in_time DESC"
+            , nativeQuery = true)
+    Page<PassInOutView> findEventsByUser(UUID userId, Pageable pageable);
+
+    @Query(value = "SELECT * FROM pass_in_out_view p WHERE p.territory_id = :terId ORDER BY in_time DESC"
+            , nativeQuery = true)
+    Page<PassInOutView> findEventsByTerritory(UUID terId, Pageable pageable);
+
+    @Query(value = "SELECT * FROM pass_in_out_view p ORDER BY in_time DESC"
+            , nativeQuery = true)
+    Page<PassInOutView> findAllEvents(Pageable pageable);
+
+    @Query(value = "SELECT * FROM pass_in_out_view p WHERE p.territory_id IN :terIds ORDER BY in_time DESC"
+            , nativeQuery = true)
+    Page<PassInOutView> findEventsByTerritories(@Param("terIds") List<UUID> terIds, Pageable pageable);
 }
