@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
-import ru.ac.checkpointmanager.projection.PassInOutViewProjection;
+import ru.ac.checkpointmanager.projection.PassInOutView;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -86,6 +86,7 @@ public interface PassRepository extends JpaRepository<Pass, UUID>, JpaSpecificat
      * Ищет пропуски по статусу и достигнутому времени начала или окончания.
      *
      * @param status     {@link PassStatus} Статус, который мы хотим проверить
+     * @param status     Предполагается передача значения PassStatus.?.toString().
      * @param timeColumn строковое значение имени столбца для сравнения времени.
      * @param time       дата и время для сравнения со столбцом timeColumn.
      * @return список найденных пропусков.
@@ -123,9 +124,11 @@ public interface PassRepository extends JpaRepository<Pass, UUID>, JpaSpecificat
 
     @Query(value = "SELECT * FROM pass_in_out_view p WHERE p.user_id = :userId ORDER BY in_time DESC"
             , nativeQuery = true)
-    Page<PassInOutViewProjection> findEventsByUser(UUID userId, Pageable pageable);
+    Page<PassInOutView> findEventsByUser(UUID userId, Pageable pageable);
 
     @Query(value = "SELECT * FROM pass_in_out_view p WHERE p.territory_id = :terId ORDER BY in_time DESC"
             , nativeQuery = true)
-    Page<PassInOutViewProjection> findEventsByTerritory(UUID terId, Pageable pageable);
+    Page<PassInOutView> findEventsByTerritory(UUID terId, Pageable pageable);
+
+
 }
