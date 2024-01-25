@@ -133,6 +133,14 @@ public class PassServiceImpl implements PassService {
                 });
     }
 
+    /**
+     * Поиск пропусков по частичному совпадению номера авто или имени посетителя
+     *
+     * @param pagingParams Параметры страницы
+     * @param filterParams Параметры фильтрации
+     * @param part         часть текста по которому будет сравнение
+     * @return {@link Page<PassResponseDTO>} страница с дто пропусков
+     */
     @Override
     public Page<PassResponseDTO> findPassesByPartOfVisitorNameAndCarNumber(PagingParams pagingParams,
                                                                            FilterParams filterParams, String part) {

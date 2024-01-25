@@ -102,10 +102,10 @@ class PassRepositoryIntegrationTest {
     @EnumSource(PassStatus.class)
     void findPassesByStatusAndTimeBefore_StatusBeforeEndTime_ReturnListOfPasses(PassStatus status) {
         saveUserTerritoryVisitor(TestUtils.FULL_NAME);
-        PassWalk passWalk = setUpPassWalk(status, LocalDateTime.now().minusDays(1),
+        PassWalk passWalk = TestUtils.getPassWalk(status, LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(1),
                 savedUser, savedTerritory, savedVisitor, PassTimeType.ONETIME);
-        PassWalk passWalk2 = setUpPassWalk(status, LocalDateTime.now().minusDays(1),
+        PassWalk passWalk2 = TestUtils.getPassWalk(status, LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(3),
                 savedUser, savedTerritory, savedVisitor, PassTimeType.ONETIME);
         passRepository.saveAllAndFlush(List.of(passWalk, passWalk2));
@@ -120,10 +120,10 @@ class PassRepositoryIntegrationTest {
     @EnumSource(PassStatus.class)
     void findPassesByStatusAndTimeBefore_StatusBeforeStart_ReturnListOfPasses(PassStatus status) {
         saveUserTerritoryVisitor(TestUtils.FULL_NAME);
-        PassWalk passWalk = setUpPassWalk(status, LocalDateTime.now().minusDays(1),
+        PassWalk passWalk = TestUtils.getPassWalk(status, LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(1),
                 savedUser, savedTerritory, savedVisitor, PassTimeType.ONETIME);
-        PassWalk passWalk2 = setUpPassWalk(status, LocalDateTime.now().plusDays(3),
+        PassWalk passWalk2 = TestUtils.getPassWalk(status, LocalDateTime.now().plusDays(3),
                 LocalDateTime.now().plusDays(4),
                 savedUser, savedTerritory, savedVisitor, PassTimeType.ONETIME);
 
@@ -141,7 +141,7 @@ class PassRepositoryIntegrationTest {
         saveCar("U123QA799");
         PassAuto passAuto = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
         PassAuto savedPassAuto = passRepository.saveAndFlush(passAuto);
-        PassWalk passWalk = setUpPassWalk(PassStatus.ACTIVE, LocalDateTime.now().minusDays(1),
+        PassWalk passWalk = TestUtils.getPassWalk(PassStatus.ACTIVE, LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(1),
                 savedUser, savedTerritory, savedVisitor, PassTimeType.ONETIME);
         passRepository.saveAndFlush(passWalk);
@@ -163,7 +163,7 @@ class PassRepositoryIntegrationTest {
         saveCar("U123QA799");
         PassAuto passAuto = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
         passRepository.saveAndFlush(passAuto);
-        PassWalk passWalk = setUpPassWalk(PassStatus.DELAYED, LocalDateTime.now().minusDays(1),
+        PassWalk passWalk = TestUtils.getPassWalk(PassStatus.DELAYED, LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(1),
                 savedUser, savedTerritory, savedVisitor, PassTimeType.ONETIME);
         PassWalk savedPassWalk = passRepository.saveAndFlush(passWalk);
@@ -186,7 +186,7 @@ class PassRepositoryIntegrationTest {
         saveCar("H123QA799");
         PassAuto passAuto = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
         passRepository.saveAndFlush(passAuto);
-        PassWalk passWalk = setUpPassWalk(PassStatus.ACTIVE, LocalDateTime.now().minusDays(1),
+        PassWalk passWalk = TestUtils.getPassWalk(PassStatus.ACTIVE, LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(1),
                 savedUser, savedTerritory, savedVisitor, PassTimeType.ONETIME);
         passRepository.saveAndFlush(passWalk);
@@ -207,7 +207,7 @@ class PassRepositoryIntegrationTest {
         saveCar("U123QA799");
         PassAuto passAuto = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
         passRepository.saveAndFlush(passAuto);
-        PassWalk passWalk = setUpPassWalk(PassStatus.DELAYED, LocalDateTime.now().minusDays(1),
+        PassWalk passWalk = TestUtils.getPassWalk(PassStatus.DELAYED, LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(1),
                 savedUser, savedTerritory, savedVisitor, PassTimeType.ONETIME);
         passRepository.saveAndFlush(passWalk);
@@ -228,7 +228,7 @@ class PassRepositoryIntegrationTest {
         saveCar("U123QA799");
         PassAuto passAuto = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
         PassAuto savedPassAuto = passRepository.saveAndFlush(passAuto);
-        PassWalk passWalk = setUpPassWalk(PassStatus.DELAYED, LocalDateTime.now().minusDays(1),
+        PassWalk passWalk = TestUtils.getPassWalk(PassStatus.DELAYED, LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(1),
                 savedUser, savedTerritory, savedVisitor, PassTimeType.ONETIME);
         PassWalk savedPassWalk = passRepository.saveAndFlush(passWalk);
@@ -251,7 +251,7 @@ class PassRepositoryIntegrationTest {
         saveCar("U123QA799");
         PassAuto passAuto = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
         PassAuto savedPassAuto = passRepository.saveAndFlush(passAuto);
-        PassWalk passWalk = setUpPassWalk(PassStatus.DELAYED, LocalDateTime.now().minusDays(1),
+        PassWalk passWalk = TestUtils.getPassWalk(PassStatus.DELAYED, LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(1),
                 savedUser, savedTerritory, savedVisitor, PassTimeType.ONETIME);
         passRepository.saveAndFlush(passWalk);
@@ -274,7 +274,7 @@ class PassRepositoryIntegrationTest {
         saveCar("H123QA799");
         PassAuto passAuto = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
         PassAuto savedPassAuto = passRepository.saveAndFlush(passAuto);
-        PassWalk passWalk = setUpPassWalk(PassStatus.DELAYED, LocalDateTime.now().minusDays(1),
+        PassWalk passWalk = TestUtils.getPassWalk(PassStatus.DELAYED, LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(1),
                 savedUser, savedTerritory, savedVisitor, PassTimeType.ONETIME);
         PassWalk savedPassWalk = passRepository.saveAndFlush(passWalk);
@@ -334,21 +334,6 @@ class PassRepositoryIntegrationTest {
         car.setId(TestUtils.CAR_ID);
         car.setBrand(savedCarBrand);
         savedCar = carRepository.saveAndFlush(car);//save car and repo change its id
-    }
-
-    private PassWalk setUpPassWalk(PassStatus passStatus, LocalDateTime startTime, LocalDateTime endTime, User savedUser,
-                                   Territory savedTerritory, Visitor savedVisitor, PassTimeType passTimeType
-    ) {
-        PassWalk passWalk = new PassWalk();
-        passWalk.setStatus(passStatus);
-        passWalk.setStartTime(startTime);
-        passWalk.setEndTime(endTime);
-        passWalk.setUser(savedUser);
-        passWalk.setDtype("WALK");
-        passWalk.setTerritory(savedTerritory);
-        passWalk.setVisitor(savedVisitor);//name USERNAME
-        passWalk.setTimeType(passTimeType);
-        return passWalk;
     }
 
 }
