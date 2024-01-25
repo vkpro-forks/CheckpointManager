@@ -189,19 +189,17 @@ class PassRepositoryIntegrationTest {
         PassAuto passAuto = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
         passRepository.saveAndFlush(passAuto);
         PassWalk passWalk = new PassWalk();
-        passWalk.setStatus(PassStatus.ACTIVE);
+        passWalk.setStatus(PassStatus.DELAYED);
         passWalk.setStartTime(LocalDateTime.now().minusDays(1));
         passWalk.setEndTime(LocalDateTime.now().plusDays(1));
         passWalk.setUser(savedUser);
+        passWalk.setDtype("WALK");
         passWalk.setTerritory(savedTerritory);
         passWalk.setVisitor(savedVisitor);//name USERNAME
         passWalk.setTimeType(PassTimeType.ONETIME);
         PassWalk savedPassWalk = passRepository.saveAndFlush(passWalk);
         Pageable pageable = PageRequest.of(0, 100);
         Specification<Pass> spec = PassSpecification.byCarNumberPart("U");
-        log.info("All saved, go to check");
-        List<Pass> all = passRepository.findAll();
-        log.info("All passes {}", all);
         Page<Pass> foundPasses = passRepository.findAll(spec, pageable);
         log.info("Found page: {}", foundPasses.getContent());
         Assertions.assertThat(foundPasses.getContent()).hasSize(1).flatExtracting(Pass::getId).contains(savedPassWalk.getId());

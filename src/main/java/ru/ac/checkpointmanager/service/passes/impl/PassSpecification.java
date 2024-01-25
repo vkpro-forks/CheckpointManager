@@ -2,17 +2,13 @@ package ru.ac.checkpointmanager.service.passes.impl;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Expression;
-import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
 import ru.ac.checkpointmanager.dto.passes.FilterParams;
 import ru.ac.checkpointmanager.exception.pass.InvalidPassStatusException;
 import ru.ac.checkpointmanager.model.passes.Pass;
-import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
-import ru.ac.checkpointmanager.model.passes.PassWalk;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -91,14 +87,21 @@ public final class PassSpecification {
     public static Specification<Pass> byCarNumberPart(String part) {
         log.debug("Setting specification for LIKE query with part {}", part);
         return (root, query, criteriaBuilder) -> {
-            Root<PassAuto> passAutoRoot = query.from(PassAuto.class);
-            Root<PassWalk> passWalkRoot = query.from(PassWalk.class);
+            //Root<PassWalk> passWalkRoot = query.from(PassWalk.class);
             //criteriaBuilder.createTupleQuery();
-            passAutoRoot.join("id", JoinType.LEFT);
             //query.multiselect(passAutoRoot, passWalkRoot);
-            Predicate licensePlateLike = criteriaBuilder.like(passAutoRoot.get("car").get("licensePlate"), "%" + part + "%");
-            Predicate visitorNameLike = criteriaBuilder.like(passWalkRoot.get("visitor").get("name"), "%" + part + "%");
-            return criteriaBuilder.and(licensePlateLike, visitorNameLike);
+            Predicate carNumberLike = criteriaBuilder.like(root.get("car").get("licensePlate"), "H%");
+
+            Predicate visitorNameLike = criteriaBuilder.like(root.get("visitor").get("name"), part + "%");
+            Predicate walk = criteriaBuilder.equal(root.get("dtype"), "WALK");
+            Predicate visitorPred = criteriaBuilder.and(walk, visitorNameLike);
+
+            Predicate auto = criteriaBuilder.equal(root.get("dtype"), "AUTO");
+            Predicate autoPred = criteriaBuilder.and(carNumberLike, auto);
+
+            return visitorPred;
+            // return criteriaBuilder.and(visitorNameLike);
+            //return criteriaBuilder.and(licensePlateLike);
         };
     }
 
