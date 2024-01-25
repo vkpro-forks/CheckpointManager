@@ -130,5 +130,9 @@ public interface PassRepository extends JpaRepository<Pass, UUID>, JpaSpecificat
             , nativeQuery = true)
     Page<PassInOutView> findEventsByTerritory(UUID terId, Pageable pageable);
 
+    @Query(value = "SELECT * FROM pass_in_out_view p ORDER BY in_time DESC"
+            , nativeQuery = true)
+    Page<PassInOutView> findAllEvents(Pageable pageable);
+
 
 }

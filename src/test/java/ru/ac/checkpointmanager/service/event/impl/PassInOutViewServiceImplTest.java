@@ -79,4 +79,12 @@ class PassInOutViewServiceImplTest {
         Mockito.verify(passRepository, Mockito.never()).findEventsByTerritory(Mockito.any(), Mockito.any());
     }
 
+    @Test
+    void findAll_AllOk_ReturnPageWithEvents() {
+        passInOutViewService.findAll(pagingParams);
+
+        Mockito.verify(passRepository, Mockito.times(1))
+                .findAllEvents(PageRequest.of(pagingParams.getPage(), pagingParams.getSize()));
+    }
+
 }
