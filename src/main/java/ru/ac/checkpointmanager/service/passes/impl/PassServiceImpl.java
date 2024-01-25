@@ -34,6 +34,7 @@ import ru.ac.checkpointmanager.service.passes.PassResolver;
 import ru.ac.checkpointmanager.service.passes.PassService;
 import ru.ac.checkpointmanager.service.territories.TerritoryService;
 import ru.ac.checkpointmanager.service.user.UserService;
+import ru.ac.checkpointmanager.specification.PassSpecification;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.time.LocalDateTime;

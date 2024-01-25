@@ -35,7 +35,7 @@ import ru.ac.checkpointmanager.model.passes.PassTimeType;
 import ru.ac.checkpointmanager.model.passes.PassWalk;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
 import ru.ac.checkpointmanager.repository.car.CarRepository;
-import ru.ac.checkpointmanager.service.passes.impl.PassSpecification;
+import ru.ac.checkpointmanager.specification.PassSpecification;
 import ru.ac.checkpointmanager.util.TestUtils;
 
 import java.time.LocalDateTime;
@@ -100,109 +100,123 @@ class PassRepositoryIntegrationTest {
 
     @ParameterizedTest
     @EnumSource(PassStatus.class)
-    void findPassesByStatusAndTimeBefore_ActiveBeforeEndTime_ReturnListOfPasses(PassStatus status) {
+    void findPassesByStatusAndTimeBefore_StatusBeforeEndTime_ReturnListOfPasses(PassStatus status) {
         saveUserTerritoryVisitor(TestUtils.FULL_NAME);
-        PassWalk passWalk = new PassWalk();
-        passWalk.setStatus(status);
-        passWalk.setStartTime(LocalDateTime.now().minusDays(1));
-        passWalk.setEndTime(LocalDateTime.now().plusDays(1));
-        passWalk.setUser(savedUser);
-        passWalk.setTerritory(savedTerritory);
-        passWalk.setVisitor(savedVisitor);
-        passWalk.setTimeType(PassTimeType.ONETIME);
-        passRepository.saveAndFlush(passWalk);
+        PassWalk passWalk = setUpPassWalk(status, LocalDateTime.now().minusDays(1),
+                LocalDateTime.now().plusDays(1),
+                savedUser, savedTerritory, savedVisitor, PassTimeType.ONETIME);
+        PassWalk passWalk2 = setUpPassWalk(status, LocalDateTime.now().minusDays(1),
+                LocalDateTime.now().plusDays(3),
+                savedUser, savedTerritory, savedVisitor, PassTimeType.ONETIME);
+        passRepository.saveAllAndFlush(List.of(passWalk, passWalk2));
 
-        PassWalk passWalk2 = new PassWalk();
-        passWalk2.setStatus(status);
-        passWalk2.setStartTime(LocalDateTime.now().minusDays(1));
-        passWalk2.setEndTime(LocalDateTime.now().plusDays(3));
-        passWalk2.setUser(savedUser);
-        passWalk2.setTerritory(savedTerritory);
-        passWalk2.setVisitor(savedVisitor);
-        passWalk2.setTimeType(PassTimeType.ONETIME);
+        List<Pass> passes = passRepository.findPassesByStatusAndTimeBefore(status, PassConstant.END_TIME,
+                LocalDateTime.now().plusDays(2));
 
-        List<Pass> passes = passRepository.findPassesByStatusAndTimeBefore(status, PassConstant.END_TIME, LocalDateTime.now().plusDays(2));
-
-        Assertions.assertThat(passes).isNotEmpty();
-        Assertions.assertThat(passes.get(0).getStatus()).isEqualTo(status);
+        Assertions.assertThat(passes).hasSize(1).flatExtracting(Pass::getId).containsOnly(passWalk.getId());
     }
 
     @ParameterizedTest
     @EnumSource(PassStatus.class)
-    void findPassesByStatusAndTimeBefore_CompletedBeforeStart_ReturnListOfPasses(PassStatus status) {
+    void findPassesByStatusAndTimeBefore_StatusBeforeStart_ReturnListOfPasses(PassStatus status) {
         saveUserTerritoryVisitor(TestUtils.FULL_NAME);
-        PassWalk passWalk = new PassWalk();
-        passWalk.setStatus(status);
-        passWalk.setStartTime(LocalDateTime.now().minusDays(1));
-        passWalk.setEndTime(LocalDateTime.now().plusDays(1));
-        passWalk.setUser(savedUser);
-        passWalk.setTerritory(savedTerritory);
-        passWalk.setVisitor(savedVisitor);
-        passWalk.setTimeType(PassTimeType.ONETIME);
-        passRepository.saveAndFlush(passWalk);
+        PassWalk passWalk = setUpPassWalk(status, LocalDateTime.now().minusDays(1),
+                LocalDateTime.now().plusDays(1),
+                savedUser, savedTerritory, savedVisitor, PassTimeType.ONETIME);
+        PassWalk passWalk2 = setUpPassWalk(status, LocalDateTime.now().plusDays(3),
+                LocalDateTime.now().plusDays(4),
+                savedUser, savedTerritory, savedVisitor, PassTimeType.ONETIME);
 
-        PassWalk passWalk2 = new PassWalk();
-        passWalk2.setStatus(status);
-        passWalk2.setStartTime(LocalDateTime.now().minusDays(1));
-        passWalk2.setEndTime(LocalDateTime.now().plusDays(3));
-        passWalk2.setUser(savedUser);
-        passWalk2.setTerritory(savedTerritory);
-        passWalk2.setVisitor(savedVisitor);
-        passWalk2.setTimeType(PassTimeType.ONETIME);
+        passRepository.saveAllAndFlush(List.of(passWalk, passWalk2));
 
-        List<Pass> passes = passRepository.findPassesByStatusAndTimeBefore(status, PassConstant.START_TIME, LocalDateTime.now().plusDays(2));
+        List<Pass> passes = passRepository.findPassesByStatusAndTimeBefore(status, PassConstant.START_TIME,
+                LocalDateTime.now().plusDays(2));
 
-        Assertions.assertThat(passes).isNotEmpty();
-        Assertions.assertThat(passes.get(0).getStatus()).isEqualTo(status);
+        Assertions.assertThat(passes).hasSize(1).flatExtracting(Pass::getId).containsOnly(passWalk.getId());
     }
 
     @Test
-    void findAllContainingInVisitorNameAndCarNumber_PassAutoAndPassWalkInDB_ReturnPageWithPasses() {
+    void findAllWithCarSpec_PassAutoAndPassWalkInDB_ReturnPageWithPass() {
         saveUserTerritoryVisitor(TestUtils.FULL_NAME);
         saveCar("U123QA799");
         PassAuto passAuto = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
         PassAuto savedPassAuto = passRepository.saveAndFlush(passAuto);
-        PassWalk passWalk = new PassWalk();
-        passWalk.setStatus(PassStatus.ACTIVE);
-        passWalk.setStartTime(LocalDateTime.now().minusDays(1));
-        passWalk.setEndTime(LocalDateTime.now().plusDays(1));
-        passWalk.setUser(savedUser);
-        passWalk.setTerritory(savedTerritory);
-        passWalk.setVisitor(savedVisitor);//name USERNAME
-        passWalk.setTimeType(PassTimeType.ONETIME);
-        PassWalk savedPassWalk = passRepository.saveAndFlush(passWalk);
+        PassWalk passWalk = setUpPassWalk(PassStatus.ACTIVE, LocalDateTime.now().minusDays(1),
+                LocalDateTime.now().plusDays(1),
+                savedUser, savedTerritory, savedVisitor, PassTimeType.ONETIME);
+        passRepository.saveAndFlush(passWalk);
         Pageable pageable = PageRequest.of(0, 100);
-        Specification<Pass> spec = PassSpecification.byCarNumberPart("U");
+        Specification<Pass> carSpec = PassSpecification.byCarNumberPart("U");
+        Specification<Pass> spec = Specification.where(carSpec);
         log.info("All saved, go to check");
-        List<Pass> all = passRepository.findAll();
-        log.info("All passes {}", all);
+
         Page<Pass> foundPasses = passRepository.findAll(spec, pageable);
         log.info("Found page: {}", foundPasses.getContent());
-        Assertions.assertThat(foundPasses.getContent()).hasSize(2)
-                .flatExtracting(Pass::getId).contains(savedPassAuto.getId(), savedPassWalk.getId());
+        Assertions.assertThat(foundPasses.getContent()).hasSize(1)
+                .flatExtracting(Pass::getId).contains(savedPassAuto.getId());
     }
 
     @Test
-    void findAllContainingInVisitorNameAndCarNumber_PassWalkOnlyInDB_ReturnPageWithPasses() {
+    void findAllWithVisitorSpec_PassAutoAndPassWalkInDB_ReturnPageWithPasses() {
+        saveUserTerritoryVisitor(TestUtils.FULL_NAME);
+        saveCar("U123QA799");
+        PassAuto passAuto = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
+        passRepository.saveAndFlush(passAuto);
+        PassWalk passWalk = setUpPassWalk(PassStatus.DELAYED, LocalDateTime.now().minusDays(1),
+                LocalDateTime.now().plusDays(1),
+                savedUser, savedTerritory, savedVisitor, PassTimeType.ONETIME);
+        PassWalk savedPassWalk = passRepository.saveAndFlush(passWalk);
+        passRepository.saveAndFlush(passWalk);
+        Pageable pageable = PageRequest.of(0, 100);
+        Specification<Pass> visitorSpec = PassSpecification.byVisitorNamePart("U");
+        Specification<Pass> spec = Specification.where(visitorSpec);
+        log.info("All saved, go to check");
+
+        Page<Pass> foundPasses = passRepository.findAll(spec, pageable);
+        log.info("Found page: {}", foundPasses.getContent());
+        Assertions.assertThat(foundPasses.getContent()).hasSize(1)
+                .flatExtracting(Pass::getId).contains(savedPassWalk.getId());
+    }
+
+    @Test
+    void findAllWithCarSpec_PassAutoAndPassWalkInDB_ReturnEmptyPage() {
         saveUserTerritoryVisitor(TestUtils.FULL_NAME);
         saveCar("H123QA799");
         PassAuto passAuto = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
-        passRepository.saveAndFlush(passAuto);
-        PassWalk passWalk = new PassWalk();
-        passWalk.setStatus(PassStatus.DELAYED);
-        passWalk.setStartTime(LocalDateTime.now().minusDays(1));
-        passWalk.setEndTime(LocalDateTime.now().plusDays(1));
-        passWalk.setUser(savedUser);
-        passWalk.setDtype("WALK");
-        passWalk.setTerritory(savedTerritory);
-        passWalk.setVisitor(savedVisitor);//name USERNAME
-        passWalk.setTimeType(PassTimeType.ONETIME);
-        PassWalk savedPassWalk = passRepository.saveAndFlush(passWalk);
+        PassAuto savedPassAuto = passRepository.saveAndFlush(passAuto);
+        PassWalk passWalk = setUpPassWalk(PassStatus.ACTIVE, LocalDateTime.now().minusDays(1),
+                LocalDateTime.now().plusDays(1),
+                savedUser, savedTerritory, savedVisitor, PassTimeType.ONETIME);
+        passRepository.saveAndFlush(passWalk);
         Pageable pageable = PageRequest.of(0, 100);
-        Specification<Pass> spec = PassSpecification.byCarNumberPart("U");
+        Specification<Pass> carSpec = PassSpecification.byCarNumberPart("U");
+        Specification<Pass> spec = Specification.where(carSpec);
+        log.info("All saved, go to check");
+
         Page<Pass> foundPasses = passRepository.findAll(spec, pageable);
         log.info("Found page: {}", foundPasses.getContent());
-        Assertions.assertThat(foundPasses.getContent()).hasSize(1).flatExtracting(Pass::getId).contains(savedPassWalk.getId());
+        Assertions.assertThat(foundPasses.getContent()).isEmpty();
+    }
+
+    @Test
+    void findAllWithVisitorSpec_PassAutoAndPassWalkInDB_ReturnEmpty() {
+        saveUserTerritoryVisitor("NONAME");
+        saveCar("U123QA799");
+        PassAuto passAuto = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
+        passRepository.saveAndFlush(passAuto);
+        PassWalk passWalk = setUpPassWalk(PassStatus.DELAYED, LocalDateTime.now().minusDays(1),
+                LocalDateTime.now().plusDays(1),
+                savedUser, savedTerritory, savedVisitor, PassTimeType.ONETIME);
+        passRepository.saveAndFlush(passWalk);
+        passRepository.saveAndFlush(passWalk);
+        Pageable pageable = PageRequest.of(0, 100);
+        Specification<Pass> visitorSpec = PassSpecification.byVisitorNamePart("U");
+        Specification<Pass> spec = Specification.where(visitorSpec);
+        log.info("All saved, go to check");
+
+        Page<Pass> foundPasses = passRepository.findAll(spec, pageable);
+        log.info("Found page: {}", foundPasses.getContent());
+        Assertions.assertThat(foundPasses.getContent()).isEmpty();
     }
 
     /*@Test
@@ -250,8 +264,19 @@ class PassRepositoryIntegrationTest {
         savedCar = carRepository.saveAndFlush(car);//save car and repo change its id
     }
 
-    private void saveCarBrand() {
-
+    private PassWalk setUpPassWalk(PassStatus passStatus, LocalDateTime startTime, LocalDateTime endTime, User savedUser,
+                                   Territory savedTerritory, Visitor savedVisitor, PassTimeType passTimeType
+    ) {
+        PassWalk passWalk = new PassWalk();
+        passWalk.setStatus(passStatus);
+        passWalk.setStartTime(startTime);
+        passWalk.setEndTime(endTime);
+        passWalk.setUser(savedUser);
+        passWalk.setDtype("WALK");
+        passWalk.setTerritory(savedTerritory);
+        passWalk.setVisitor(savedVisitor);//name USERNAME
+        passWalk.setTimeType(passTimeType);
+        return passWalk;
     }
 
 }
