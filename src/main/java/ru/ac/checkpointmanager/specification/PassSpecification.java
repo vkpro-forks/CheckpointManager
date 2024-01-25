@@ -19,6 +19,9 @@ import ru.ac.checkpointmanager.model.passes.PassWalk;
 import ru.ac.checkpointmanager.specification.model.Car_;
 import ru.ac.checkpointmanager.specification.model.PassAuto_;
 import ru.ac.checkpointmanager.specification.model.PassWalk_;
+import ru.ac.checkpointmanager.specification.model.Pass_;
+import ru.ac.checkpointmanager.specification.model.Territory_;
+import ru.ac.checkpointmanager.specification.model.User_;
 import ru.ac.checkpointmanager.specification.model.Visitor_;
 
 import java.util.ArrayList;
@@ -27,6 +30,7 @@ import java.util.UUID;
 
 @Slf4j
 public final class PassSpecification {
+
     private PassSpecification() {
         throw new AssertionError("No PassSpecification instances for you!");
     }
@@ -34,24 +38,19 @@ public final class PassSpecification {
     public static Specification<Pass> byFilterParams(FilterParams filterParams) {
         log.debug("Filtering parameters are taken: %s".formatted(filterParams));
 
-        String dtype = filterParams.getDtype();
-        String territory = filterParams.getTerritory();
-        String status = filterParams.getStatus();
-        Boolean favorite = filterParams.getFavorite();
-
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-
+            String dtype = filterParams.getDtype();
             if (dtype != null && !dtype.isEmpty()) {
                 String[] dtypes = filterParams.getDtype().split(",");
-                predicates.add(root.get("dtype").in((Object[]) dtypes));
+                predicates.add(root.get(Pass_.DTYPE).in((Object[]) dtypes));
             }
-
+            String territory = filterParams.getTerritory();
             if (territory != null && !territory.isEmpty()) {
                 String[] territories = filterParams.getTerritory().split(",");
-                predicates.add(root.get("territory").get("name").in((Object[]) territories));
+                predicates.add(root.get(Pass_.TERRITORY).get(Territory_.NAME).in((Object[]) territories));
             }
-
+            String status = filterParams.getStatus();
             if (status != null && !status.isEmpty()) {
                 String[] statusStrings = filterParams.getStatus().split(",");
                 List<PassStatus> validStatuses = new ArrayList<>();
@@ -64,23 +63,23 @@ public final class PassSpecification {
                     }
                 }
                 if (!validStatuses.isEmpty()) {
-                    predicates.add(root.get("status").in(validStatuses));
+                    predicates.add(root.get(Pass_.STATUS).in(validStatuses));
                 }
             }
-
+            Boolean favorite = filterParams.getFavorite();
             if (favorite != null) {
-                predicates.add(cb.equal(root.get("favorite"), favorite));
+                predicates.add(cb.equal(root.get(Pass_.FAVORITE), favorite));
             }
 
             if (!query.getResultType().equals(Long.class)) {
                 CriteriaBuilder.Case<Integer> statusCase = cb.selectCase();
                 Expression<Integer> orderExpression = statusCase
-                        .when(cb.equal(root.get("status"), PassStatus.WARNING), 1)
-                        .when(cb.equal(root.get("status"), PassStatus.ACTIVE), 2)
-                        .when(cb.equal(root.get("status"), PassStatus.DELAYED), 3)
+                        .when(cb.equal(root.get(Pass_.STATUS), PassStatus.WARNING), 1)
+                        .when(cb.equal(root.get(Pass_.STATUS), PassStatus.ACTIVE), 2)
+                        .when(cb.equal(root.get(Pass_.STATUS), PassStatus.DELAYED), 3)
                         .otherwise(4);
 
-                query.orderBy(cb.asc(orderExpression), cb.desc(root.get("startTime")));
+                query.orderBy(cb.asc(orderExpression), cb.desc(root.get(Pass_.START_TIME)));
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));
@@ -88,13 +87,21 @@ public final class PassSpecification {
     }
 
     public static Specification<Pass> byUserId(UUID userId) {
-        return (root, query, cb) -> cb.equal(root.get("user").get("id"), userId);
+        return (root, query, cb) -> cb.equal(root.get(Pass_.USER).get(User_.ID), userId);
     }
 
     public static Specification<Pass> byTerritoryId(UUID territoryId) {
-        return (root, query, cb) -> cb.equal(root.get("territory").get("id"), territoryId);
+        return (root, query, cb) -> cb.equal(root.get(Pass_.TERRITORY).get(Territory_.ID), territoryId);
     }
 
+    /**
+     * Спецификация для создания критерия для поиска пропуска по совпадению номера вложенного автомобиля.
+     * Генерирует запрос с LEFT JOIN если в cars поле license_plate строка начинаются с переданного
+     * фрагмента строки
+     *
+     * @param part фрагмент строки для поиска
+     * @return {@link Specification<Pass>} спецификация для генерации SQL
+     */
     public static Specification<Pass> byCarNumberPart(String part) {
         log.debug("Setting specification for Car for LIKE query with part {}", part);
         return (root, query, criteriaBuilder) -> {
@@ -104,6 +111,14 @@ public final class PassSpecification {
         };
     }
 
+    /**
+     * Спецификация для создания критерия для поиска пропуска по совпадению имени вложенного посетителя.
+     * Генерирует запрос с LEFT JOIN если в visitors поле full_name строка начинаются с переданного
+     * фрагмента строки
+     *
+     * @param part фрагмент строки для поиска
+     * @return {@link Specification<Pass>} спецификация для генерации SQL
+     */
     public static Specification<Pass> byVisitorPart(String part) {
         log.debug("Setting specification for Car for LIKE query with part {}", part);
         return (root, query, criteriaBuilder) -> {
