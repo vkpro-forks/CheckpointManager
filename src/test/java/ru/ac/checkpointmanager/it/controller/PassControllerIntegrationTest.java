@@ -2,6 +2,7 @@ package ru.ac.checkpointmanager.it.controller;
 
 import lombok.SneakyThrows;
 import org.assertj.core.api.Assertions;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -81,8 +82,6 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
     CarBrand savedCarBrand;
 
     Car savedCar;
-
-    Visitor savedVisitor;
 
     @AfterEach
     void clear() {
@@ -357,7 +356,7 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
                 LocalDateTime.now().plusDays(1), savedUser,
                 savedTerritory, visitor, PassTimeType.PERMANENT);
         PassAuto savedPassAuto = passRepository.saveAndFlush(passAuto);
-        PassWalk savedPassWalk = passRepository.saveAndFlush(passWalk);
+        passRepository.saveAndFlush(passWalk);
         String filterParams = String.join(",", PassStatus.ACTIVE.name(), PassStatus.DELAYED.name());
 
         ResultActions resultActions = mockMvc
@@ -368,6 +367,89 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         resultActions.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.content.size()").value(1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].id").value(savedPassAuto.getId().toString()));
+    }
+
+    @Test
+    @SneakyThrows
+    void getPassesByPartOfVisitorNameAndCarNumber_AllOk_ReturnListWithPassesBothAutoAndWalk() {
+        saveTerritoryUserCarBrand();
+        saveCar(); //LICENSE_PLATE = "А420ВХ799";
+        PassAuto passAuto = createPassWithStatusAndTime(PassStatus.ACTIVE, 5);
+        Visitor visitor = new Visitor();
+        visitor.setName("А420");
+        visitor.setPhone(TestUtils.PHONE_NUM);
+        PassWalk passWalk = TestUtils.getPassWalk(PassStatus.ACTIVE, LocalDateTime.now(),
+                LocalDateTime.now().plusDays(1), savedUser,
+                savedTerritory, visitor, PassTimeType.PERMANENT);
+        PassAuto savedPassAuto = passRepository.saveAndFlush(passAuto);
+        PassWalk savedPassWalk = passRepository.saveAndFlush(passWalk);
+        String filterParams = String.join(",", PassStatus.ACTIVE.name(), PassStatus.DELAYED.name());
+
+        ResultActions resultActions = mockMvc
+                .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_URL_SEARCH)
+                        .param("status", filterParams)
+                        .param("part", "А"));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content.size()").value(2))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content[*].id", Matchers.hasItems(
+                        savedPassAuto.getId().toString(),
+                        savedPassWalk.getId().toString()
+                )));
+    }
+
+    @Test
+    @SneakyThrows
+    void getPassesByPartOfVisitorNameAndCarNumber_AllOk_ReturnListWithPassesWalkOnly() {
+        saveTerritoryUserCarBrand();
+        saveCar(); //LICENSE_PLATE = "А420ВХ799";
+        PassAuto passAuto = createPassWithStatusAndTime(PassStatus.ACTIVE, 5);
+        Visitor visitor = new Visitor();
+        visitor.setName("Petya");
+        visitor.setPhone(TestUtils.PHONE_NUM);
+        PassWalk passWalk = TestUtils.getPassWalk(PassStatus.ACTIVE, LocalDateTime.now(),
+                LocalDateTime.now().plusDays(1), savedUser,
+                savedTerritory, visitor, PassTimeType.PERMANENT);
+        PassAuto savedPassAuto = passRepository.saveAndFlush(passAuto);
+        PassWalk savedPassWalk = passRepository.saveAndFlush(passWalk);
+        String filterParams = String.join(",", PassStatus.ACTIVE.name(), PassStatus.DELAYED.name());
+
+        ResultActions resultActions = mockMvc
+                .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_URL_SEARCH)
+                        .param("status", filterParams)
+                        .param("part", "Pet"));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content.size()").value(1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].id", Matchers.is(
+                        savedPassWalk.getId().toString())));
+    }
+
+    @Test
+    @SneakyThrows
+    void getPassesByPartOfVisitorNameAndCarNumber_WithFilterActive_ReturnListWithPassesWalkOnly() {
+        saveTerritoryUserCarBrand();
+        saveCar(); //LICENSE_PLATE = "А420ВХ799";
+        PassAuto passAuto = createPassWithStatusAndTime(PassStatus.DELAYED, 5);
+        Visitor visitor = new Visitor();
+        visitor.setName("A420");
+        visitor.setPhone(TestUtils.PHONE_NUM);
+        PassWalk passWalk = TestUtils.getPassWalk(PassStatus.ACTIVE, LocalDateTime.now(),
+                LocalDateTime.now().plusDays(1), savedUser,
+                savedTerritory, visitor, PassTimeType.PERMANENT);
+        PassAuto savedPassAuto = passRepository.saveAndFlush(passAuto);
+        PassWalk savedPassWalk = passRepository.saveAndFlush(passWalk);
+        String filterParams = String.join(",", PassStatus.ACTIVE.name());
+
+        ResultActions resultActions = mockMvc
+                .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_URL_SEARCH)
+                        .param("status", filterParams)
+                        .param("part", "A"));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content.size()").value(1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].id", Matchers.is(
+                        savedPassWalk.getId().toString())));
     }
 
     private PassAuto createPassWithStatusAndTime(PassStatus passStatus, int i) {
