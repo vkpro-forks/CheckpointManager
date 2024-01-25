@@ -50,6 +50,8 @@ class PassControllerValidationIntegrationTest {
     private static final String START_TIME = "startTime";
 
     private static final String END_TIME = "endTime";
+    public static final String NAME = "name";
+    public static final String PHONE = "phone";
 
     @Autowired
     MockMvc mockMvc;
@@ -174,6 +176,22 @@ class PassControllerValidationIntegrationTest {
         ResultCheckUtils.checkCommonValidationFields(resultActions);
     }
 
+    @ParameterizedTest
+    @MethodSource("getBadVisitorDto")
+    @SneakyThrows
+    void addPass_VisitorHasBadField_HandleExceptionAndReturnValidationError() {
+        log.info("Creating dto with one good date and one null");
+        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithVisitor();
+        passCreateDTO.getVisitor().setName("");
+
+        String passDtoCreateString = TestUtils.jsonStringFromObject(passCreateDTO);
+        log.info(TestMessage.PERFORM_HTTP, HttpMethod.POST, UrlConstants.PASS_URL);
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(passDtoCreateString));
+        ResultCheckUtils.checkCommonValidationFields(resultActions);
+    }
+
     private static void checkCarOrVisitorFields(ResultActions resultActions) throws Exception {
         ResultCheckUtils.checkCommonValidationFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0))
@@ -194,6 +212,15 @@ class PassControllerValidationIntegrationTest {
         return Stream.of(
                 Arguments.of(LocalDateTime.now().plusHours(1), null),
                 Arguments.of(null, LocalDateTime.now().plusHours(1))
+        );
+    }
+
+    private static Stream<Arguments> getBadVisitorDto() {
+        return Stream.of(Arguments.of("", NAME),
+                Arguments.of(null, NAME),
+                Arguments.of("", PHONE),
+                Arguments.of("a".repeat(10), PHONE),
+                Arguments.of("a".repeat(22), PHONE)
         );
     }
 
