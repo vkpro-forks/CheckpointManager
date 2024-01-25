@@ -80,8 +80,6 @@ public class UrlConstants {
 
     public static final String EVENT_USER_URL = EVENT_URL + "/user/{userId}";
 
-    public static final String EVENT_USER_TERRITORIES_URL = EVENT_USER_URL + "/territories";
-
     public static final String EVENT_TERRITORY_URL = EVENT_URL + "/territory/{territoryId}";
 
     public static final String EVENT_ALL_URL = EVENT_URL + "/all";
