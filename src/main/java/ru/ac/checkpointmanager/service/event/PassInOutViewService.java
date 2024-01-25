@@ -12,6 +12,8 @@ public interface PassInOutViewService {
 
     Page<PassInOutView> findEventsByTerritory(UUID terId, PagingParams pagingParams);
 
+    Page<PassInOutView> findEventsByUsersTerritories(UUID userId, PagingParams pagingParams);
+
     Page<PassInOutView> findAll(PagingParams pagingParams);
 
 }

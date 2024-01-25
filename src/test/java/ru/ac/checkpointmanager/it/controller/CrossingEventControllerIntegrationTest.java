@@ -165,6 +165,48 @@ class CrossingEventControllerIntegrationTest extends RedisAndPostgresTestContain
         checkEventFields(resultActions, savedPass);
     }
 
+    @Test
+    @SneakyThrows
+    @WithMockUser(roles = {"MANAGER"})
+    void findEventsByUsersTerritories_AllOk_ReturnPageWithObjects() {
+        Pass savedPass = setupAndSavePass();
+        Checkpoint checkpoint = TestUtils.getCheckpoint(CheckpointType.AUTO, savedPass.getTerritory());
+        Checkpoint savedCheckPoint = checkpointRepository.saveAndFlush(checkpoint);
+        crossingRepository.saveAndFlush(TestUtils.getCrossing(savedPass, savedCheckPoint, Direction.IN));
+        crossingRepository.saveAndFlush(TestUtils.getCrossing(savedPass, savedCheckPoint, Direction.OUT));
+
+        ResultActions resultActions = mockMvc.perform(
+                MockMvcRequestBuilders.get(UrlConstants.EVENT_URL + "/user/{userId}/territories", savedUser.getId()));
+
+        checkEventFields(resultActions, savedPass);
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockUser(roles = {"MANAGER"})
+    void findEventsByUsersTerritories_UserNotFound_ReturnPageWithObjects() {
+        ResultActions resultActions = mockMvc.perform(
+                MockMvcRequestBuilders.get(UrlConstants.EVENT_URL + "/user/{userId}/territories", TestUtils.USER_ID));
+
+        resultActions.andExpect(status().isNotFound())
+                .andExpectAll(jsonPath(TestUtils.JSON_DETAIL)
+                        .value(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(TestUtils.USER_ID)));
+        ResultCheckUtils.checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockUser(roles = {"MANAGER"})
+    void findEventsByUsersTerritories_TerritoryNotFound_ReturnPageWithObjects() {
+        User user = TestUtils.getUser();
+        User anotherSavedUser = userRepository.saveAndFlush(user);
+        ResultActions resultActions = mockMvc.perform(
+                MockMvcRequestBuilders.get(UrlConstants.EVENT_URL + "/user/{userId}/territories", anotherSavedUser.getId()));
+
+        resultActions.andExpect(status().isNotFound());
+        ResultCheckUtils.checkNotFoundFields(resultActions);
+    }
+
     private Pass setupAndSavePass() {
         log.info("Saving Territory, User, Car, Brand, and Pass}");
         Territory territory = new Territory();

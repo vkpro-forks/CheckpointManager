@@ -10,13 +10,17 @@ import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
+import ru.ac.checkpointmanager.model.Territory;
+import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.projection.PassInOutView;
 import ru.ac.checkpointmanager.repository.PassRepository;
 import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.service.event.PassInOutViewService;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -64,6 +68,40 @@ public class PassInOutViewServiceImpl implements PassInOutViewService {
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
 
         return passRepository.findEventsByTerritory(terId, pageable);
+    }
+
+    /**
+     * Получение событий по всем привязанным к пользователю территориям.
+     * <p>
+     * Если пользователь не найден, генерируется исключение {@link UserNotFoundException}.
+     * Затем проверяется, имеет ли пользователь связанные территории. Если нет, выбрасывается {@link TerritoryNotFoundException}.
+     * Наконец, поиск событий осуществляется по идентификаторам территорий пользователя с учетом параметров пагинации.
+     * </p>
+     *
+     * @param userId       Идентификатор пользователя, события по территориям которого необходимо найти.
+     * @param pagingParams Параметры пагинации для управления выводом результатов.
+     * @return Страница {@link Page<PassInOutView>} с событиями, соответствующими критериям поиска.
+     * @throws UserNotFoundException      Если пользователь с указанным идентификатором не найден.
+     * @throws TerritoryNotFoundException Если у пользователя нет связанных территорий.
+     */
+    @Override
+    public Page<PassInOutView> findEventsByUsersTerritories(UUID userId, PagingParams pagingParams) {
+        User user = userRepository.findUserWithTerritoriesById(userId).orElseThrow(
+                () -> {
+                    log.warn(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(userId));
+                    return new UserNotFoundException(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(userId));
+                }
+        );
+        List<Territory> territories = user.getTerritories();
+        if (territories.isEmpty()) {
+            log.warn(ExceptionUtils.USER_TERRITORY_NOT_FOUND_MSG.formatted(userId));
+            throw new TerritoryNotFoundException(ExceptionUtils.USER_TERRITORY_NOT_FOUND_MSG.formatted(userId));
+        }
+        List<UUID> terIds = territories.stream()
+                .map(Territory::getId)
+                .collect(Collectors.toList());
+        Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
+        return passRepository.findEventsByTerritories(terIds, pageable);
     }
 
     /**

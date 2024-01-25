@@ -78,6 +78,26 @@ public class CrossingEventController {
         return passInOutViewService.findEventsByTerritory(territoryId, pagingParams);
     }
 
+    @Operation(summary = "Получить список событий по всем привязанным к пользователю территориям",
+            description = "Доступ: ADMIN, MANAGER.",
+            parameters = {
+                    @Parameter(in = ParameterIn.QUERY, name = "page", example = "0"),
+                    @Parameter(in = ParameterIn.QUERY, name = "size", example = "20")
+            })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "События найдены",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            array = @ArraySchema(schema = @Schema(implementation = PassInOutView.class)))),
+            @ApiResponse(responseCode = "404", description = "Пользователь или территории не найдены")})
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    @GetMapping("/user/{userId}/territories")
+    public Page<PassInOutView> findEventsByUsersTerritories(@PathVariable UUID userId,
+                                                            @Schema(hidden = true)
+                                                            @Valid
+                                                            @PagingParam PagingParams pagingParams) {
+        return passInOutViewService.findEventsByUsersTerritories(userId, pagingParams);
+    }
+
     @Operation(summary = "Получить список событий для Админа",
             description = "Доступ: ADMIN.",
             parameters = {

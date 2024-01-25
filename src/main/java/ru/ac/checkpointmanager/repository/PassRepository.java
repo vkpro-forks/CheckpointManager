@@ -33,8 +33,8 @@ public interface PassRepository extends JpaRepository<Pass, UUID>, JpaSpecificat
      */
     @Deprecated(since = "0.1.14", forRemoval = true)
     String SORT_LOGIC = "ORDER BY CASE " +
-            "p.status WHEN 'WARNING' THEN 1 WHEN 'ACTIVE' THEN 2 WHEN 'DELAYED' THEN 3 ELSE 4 END, " +
-            "p.start_time DESC";
+                        "p.status WHEN 'WARNING' THEN 1 WHEN 'ACTIVE' THEN 2 WHEN 'DELAYED' THEN 3 ELSE 4 END, " +
+                        "p.start_time DESC";
 
     /**
      * Получает страницу объектов Pass, отсортированных по заданной логике.
@@ -85,7 +85,6 @@ public interface PassRepository extends JpaRepository<Pass, UUID>, JpaSpecificat
     /**
      * Ищет пропуски по статусу и достигнутому времени начала или окончания.
      *
-     * @param status     {@link PassStatus} Статус, который мы хотим проверить
      * @param status     Предполагается передача значения PassStatus.?.toString().
      * @param timeColumn строковое значение имени столбца для сравнения времени.
      * @param time       дата и время для сравнения со столбцом timeColumn.
@@ -134,5 +133,7 @@ public interface PassRepository extends JpaRepository<Pass, UUID>, JpaSpecificat
             , nativeQuery = true)
     Page<PassInOutView> findAllEvents(Pageable pageable);
 
-
+    @Query(value = "SELECT * FROM pass_in_out_view p WHERE p.territory_id IN :terIds ORDER BY in_time DESC"
+            , nativeQuery = true)
+    Page<PassInOutView> findEventsByTerritories(@Param("terIds") List<UUID> terIds, Pageable pageable);
 }
