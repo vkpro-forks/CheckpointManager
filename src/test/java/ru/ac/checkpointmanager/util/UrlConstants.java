@@ -37,6 +37,8 @@ public class UrlConstants {
 
     public static final String PASS_URL_TERRITORY = PASS_URL + "/territory/%s";
 
+    public static final String PASS_URL_SEARCH = PASS_URL + "/search";
+
     public static final String TERR_URL = "/api/v1/territory";
 
     public static final String TERR_USERS_URL = TERR_URL + "/%s/users";
