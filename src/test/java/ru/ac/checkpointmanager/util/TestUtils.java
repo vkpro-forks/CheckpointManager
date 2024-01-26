@@ -242,6 +242,18 @@ public class TestUtils {
         );
     }
 
+    public static PassUpdateDTO getPassUpdateDTOVisitor() {
+        return new PassUpdateDTO(
+                "comment",
+                PassTimeType.ONETIME,
+                LocalDateTime.now().plusHours(1),
+                LocalDateTime.now().plusHours(7),
+                getVisitorDTO(),
+                null,
+                PASS_ID
+        );
+    }
+
     public static PassCreateDTO getPassCreateDTOWithCar() {
         return new PassCreateDTO(
                 "comment",

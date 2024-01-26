@@ -41,6 +41,7 @@ public abstract class PassBaseDTO {
     @Valid
     private VisitorDTO visitor;
 
+    @Valid
     private CarDTO car;
 
 }

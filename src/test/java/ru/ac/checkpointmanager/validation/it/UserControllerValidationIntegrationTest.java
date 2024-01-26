@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 @Import({ValidationTestConfiguration.class, OpenAllEndpointsTestConfiguration.class})
 @WithMockUser(roles = {"ADMIN"})
 @ActiveProfiles("test")
-public class UserControllerValidationIntegrationTest {
+class UserControllerValidationIntegrationTest {
 
     @Autowired
     MockMvc mockMvc;
@@ -41,7 +41,6 @@ public class UserControllerValidationIntegrationTest {
     @MethodSource("getBadPhones")
     @SneakyThrows
     void updateUser_WrongPhone_handleAndReturnValidationError(String phone) {
-
         UserUpdateDTO userUpdateDTO = TestUtils.getUserUpdateDTO();
         userUpdateDTO.setMainNumber(phone);
         String userPutDTOString = TestUtils.jsonStringFromObject(userUpdateDTO);

@@ -11,13 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.ac.checkpointmanager.config.OpenAllEndpointsTestConfiguration;
 import ru.ac.checkpointmanager.config.ValidationTestConfiguration;
@@ -28,12 +25,12 @@ import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.mapper.PassMapper;
 import ru.ac.checkpointmanager.service.passes.PassService;
+import ru.ac.checkpointmanager.util.MockMvcUtils;
 import ru.ac.checkpointmanager.util.ResultCheckUtils;
-import ru.ac.checkpointmanager.util.TestMessage;
 import ru.ac.checkpointmanager.util.TestUtils;
-import ru.ac.checkpointmanager.util.UrlConstants;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 @WebMvcTest(PassController.class)
@@ -50,8 +47,10 @@ class PassControllerValidationIntegrationTest {
     private static final String START_TIME = "startTime";
 
     private static final String END_TIME = "endTime";
-    public static final String NAME = "visitor.name";
-    public static final String PHONE = "visitor.phone";
+
+    private static final String NAME = "visitor.name";
+
+    private static final String PHONE = "visitor.phone";
 
     @Autowired
     MockMvc mockMvc;
@@ -64,117 +63,146 @@ class PassControllerValidationIntegrationTest {
 
     @Test
     @SneakyThrows
-    void shouldReturnValidationErrorForNullCarAndVisitorFieldsForAddPass() {
+    void addPass_NullCarAndVisitorFields_HandleExceptionAndReturnValidationError() { // testing CarOrVisitorFieldsCheck
         PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
         passCreateDTO.setCar(null);
         passCreateDTO.setVisitor(null);
         String passDtoCreateString = TestUtils.jsonStringFromObject(passCreateDTO);
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(passDtoCreateString));
+
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passDtoCreateString));
+
         checkCarOrVisitorFields(resultActions);
     }
 
     @Test
     @SneakyThrows
-    void shouldReturnValidationErrorForBothCarAndVisitorFieldsForAddPass() {
+    void addPass_BothCarAndVisitorFieldsForAddPass_HandleExceptionAndReturnValidationError() { // testing CarOrVisitorFieldsCheck
         PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
         passCreateDTO.setCar(new CarDTO());
         passCreateDTO.setVisitor(new VisitorDTO());
         String passDtoCreateString = TestUtils.jsonStringFromObject(passCreateDTO);
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(passDtoCreateString));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passDtoCreateString));
         checkCarOrVisitorFields(resultActions);
     }
 
     @Test
     @SneakyThrows
-    void shouldReturnValidationErrorForNullCarAndVisitorFieldsForUpdatePass() {
+    void updatePass_NullCarAndVisitorFields_HandleExceptionAndReturnValidationError() { // testing CarOrVisitorFieldsCheck
         PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTO();
         passUpdateDTO.setCar(null);
         passUpdateDTO.setVisitor(null);
         String passDtoCreateString = TestUtils.jsonStringFromObject(passUpdateDTO);
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.put(UrlConstants.PASS_URL)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(passDtoCreateString));
+
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.updatePass(passDtoCreateString));
+
         checkCarOrVisitorFields(resultActions);
     }
 
     @Test
     @SneakyThrows
-    void shouldReturnValidationErrorForBothCarAndVisitorFieldsForUpdatePass() {
+    void updatePass_BothCarAndVisitorFields_HandleExceptionAndReturnValidationError() { // testing CarOrVisitorFieldsCheck
         PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTO();
         passUpdateDTO.setCar(new CarDTO());
         passUpdateDTO.setVisitor(new VisitorDTO());
         String passDtoCreateString = TestUtils.jsonStringFromObject(passUpdateDTO);
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.put(UrlConstants.PASS_URL)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(passDtoCreateString));
+
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.updatePass(passDtoCreateString));
+
         checkCarOrVisitorFields(resultActions);
     }
 
     @Test
     @SneakyThrows
-    void shouldReturnValidationErrorIncorrectStartAndEndTimeFieldsForAddPass() {
+    void addPass_IncorrectStartAndEndTimeFields_HandleExceptionAndReturnValidationError() { // testing PassTimeCheck
         PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
         passCreateDTO.setCar(new CarDTO());
         passCreateDTO.setEndTime(LocalDateTime.now().plusHours(1));
         passCreateDTO.setStartTime(LocalDateTime.now().plusHours(3));
         String passDtoCreateString = TestUtils.jsonStringFromObject(passCreateDTO);
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(passDtoCreateString));
+
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passDtoCreateString));
+
         checkStartEndTimeFields(resultActions);
     }
 
     @Test
     @SneakyThrows
-    void shouldReturnValidationErrorIncorrectStartAndEndTimeFieldsForUpdatePass() {
+    void updatePass_IncorrectStartAndEndTimeFields_HandleExceptionAndReturnValidationError() { // testing PassTimeCheck
         PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTO();
         passUpdateDTO.setCar(new CarDTO());
         passUpdateDTO.setEndTime(LocalDateTime.now().plusHours(1));
         passUpdateDTO.setStartTime(LocalDateTime.now().plusHours(3));
         String passDtoUpdateString = TestUtils.jsonStringFromObject(passUpdateDTO);
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.put(UrlConstants.PASS_URL)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(passDtoUpdateString));
+
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.updatePass(passDtoUpdateString));
+
         checkStartEndTimeFields(resultActions);
     }
 
     @ParameterizedTest
     @MethodSource("getGoodPassTimeAndNull")
     @SneakyThrows
-    void shouldReturnValidationErrorIfStartOrEndTimeOfPassIsNullInPassCreateDTO(LocalDateTime startTime, LocalDateTime endTime) {
+    void addPass_StartOrEndTimeOfPassIsNull_HandleExceptionAndReturnValidationError(
+            LocalDateTime startTime, LocalDateTime endTime) { // testing NotNull
         log.info("Creating dto with one good date and one null");
         PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
         passCreateDTO.setCar(new CarDTO());
         passCreateDTO.setEndTime(startTime);
         passCreateDTO.setStartTime(endTime);
         String passDtoCreateString = TestUtils.jsonStringFromObject(passCreateDTO);
-        log.info(TestMessage.PERFORM_HTTP, HttpMethod.POST, UrlConstants.PASS_URL);
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(passDtoCreateString));
+
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passDtoCreateString));
+
         ResultCheckUtils.checkCommonValidationFields(resultActions);
     }
 
     @ParameterizedTest
     @MethodSource("getGoodPassTimeAndNull")
     @SneakyThrows
-    void shouldReturnValidationErrorIfStartOrEndTimeOfPassIsNullInPassUpdateDTO(LocalDateTime startTime, LocalDateTime endTime) {
+    void updatePass_IfStartOrEndTimeOfPassIsNullInPassUpdateDTO_HandleExceptionAndReturnValidationError(
+            LocalDateTime startTime, LocalDateTime endTime) { // testing NotNull
         log.info("Creating dto with one good date and one null");
         PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTO();
         passUpdateDTO.setCar(new CarDTO());
         passUpdateDTO.setEndTime(startTime);
         passUpdateDTO.setStartTime(endTime);
-        log.info(TestMessage.PERFORM_HTTP, HttpMethod.PUT, UrlConstants.PASS_URL);
         String passDtoUpdateString = TestUtils.jsonStringFromObject(passUpdateDTO);
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.put(UrlConstants.PASS_URL)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(passDtoUpdateString));
+
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.updatePass(passDtoUpdateString));
+
         ResultCheckUtils.checkCommonValidationFields(resultActions);
     }
+
+    @Test
+    @SneakyThrows
+    void addPass_EndTimeNotInFuture_HandleExceptionAndReturnValidationError() { // testing Future
+        log.info("Creating dto with one good date and one null");
+        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
+        passCreateDTO.setCar(new CarDTO());
+        passCreateDTO.setEndTime(LocalDateTime.now().minusDays(1));
+        String passDtoCreateString = TestUtils.jsonStringFromObject(passCreateDTO);
+
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passDtoCreateString));
+
+        ResultCheckUtils.checkCommonValidationFields(resultActions);
+        ResultCheckUtils.checkValidationField(resultActions, 0, END_TIME);
+    }
+
+    @Test
+    @SneakyThrows
+    void updatePass_EndTimeNotInFuture_HandleExceptionAndReturnValidationError() { // testing Future
+        log.info("Creating dto with one good date and one null");
+        PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTO();
+        passUpdateDTO.setCar(new CarDTO());
+        passUpdateDTO.setEndTime(LocalDateTime.now().minusDays(1));
+        String passDtoUpdateString = TestUtils.jsonStringFromObject(passUpdateDTO);
+
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.updatePass(passDtoUpdateString));
+
+        ResultCheckUtils.checkCommonValidationFields(resultActions);
+        ResultCheckUtils.checkValidationField(resultActions, 0, END_TIME);
+    }
+
 
     @ParameterizedTest
     @MethodSource("getBadVisitorDto")
@@ -185,15 +213,57 @@ class PassControllerValidationIntegrationTest {
         passCreateDTO.getVisitor().setName(name);
         passCreateDTO.getVisitor().setPhone(phone);
         String passDtoCreateString = TestUtils.jsonStringFromObject(passCreateDTO);
-        log.info(TestMessage.PERFORM_HTTP, HttpMethod.POST, UrlConstants.PASS_URL);
 
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(passDtoCreateString));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passDtoCreateString));
 
         ResultCheckUtils.checkCommonValidationFields(resultActions);
-        resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0))
-                .value(field));
+        ResultCheckUtils.checkValidationField(resultActions, 0, field);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getNullIds")
+    @SneakyThrows
+    void addPass_NullUserIdOrTerritoryId_HandleExceptionAndReturnValidationError(UUID userId, UUID terrId, String field) {
+        log.info("Creating dto with one good date and one null");
+        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithVisitor();
+        passCreateDTO.setTerritoryId(terrId);
+        passCreateDTO.setUserId(userId);
+        String passDtoCreateString = TestUtils.jsonStringFromObject(passCreateDTO);
+
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passDtoCreateString));
+
+        ResultCheckUtils.checkCommonValidationFields(resultActions);
+        ResultCheckUtils.checkValidationField(resultActions, 0, field);
+    }
+
+    @Test
+    @SneakyThrows
+    void addPass_TooLongComment_HandleExceptionAndReturnValidationError() {
+        log.info("Creating dto with one good date and one null");
+        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithVisitor();
+        passCreateDTO.setComment("a".repeat(31));
+        String passDtoCreateString = TestUtils.jsonStringFromObject(passCreateDTO);
+
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passDtoCreateString));
+
+        ResultCheckUtils.checkCommonValidationFields(resultActions);
+        ResultCheckUtils.checkValidationField(resultActions, 0, "comment");
+    }
+
+    @ParameterizedTest
+    @MethodSource("getBadVisitorDto")
+    @SneakyThrows
+    void updatePass_VisitorHasBadField_HandleExceptionAndReturnValidationError(String name, String phone, String field) {
+        log.info("Creating dto with one good date and one null");
+        PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTOVisitor();
+        passUpdateDTO.getVisitor().setName(name);
+        passUpdateDTO.getVisitor().setPhone(phone);
+        String passUpdateDtoContent = TestUtils.jsonStringFromObject(passUpdateDTO);
+
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.updatePass(passUpdateDtoContent));
+
+        ResultCheckUtils.checkCommonValidationFields(resultActions);
+        ResultCheckUtils.checkValidationField(resultActions, 0, field);
     }
 
     private static void checkCarOrVisitorFields(ResultActions resultActions) throws Exception {
@@ -225,6 +295,13 @@ class PassControllerValidationIntegrationTest {
                 Arguments.of(TestUtils.FULL_NAME, "", PHONE),
                 Arguments.of(TestUtils.FULL_NAME, "a".repeat(10), PHONE),
                 Arguments.of(TestUtils.FULL_NAME, "a".repeat(22), PHONE)
+        );
+    }
+
+    private static Stream<Arguments> getNullIds() {
+        return Stream.of(
+                Arguments.of(null, TestUtils.TERR_ID, "userId"),
+                Arguments.of(TestUtils.USER_ID, null, "territoryId")
         );
     }
 
