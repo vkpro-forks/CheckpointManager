@@ -9,6 +9,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import ru.ac.checkpointmanager.dto.passes.FilterParams;
+import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.mapper.PassMapper;
 import ru.ac.checkpointmanager.model.User;
@@ -55,7 +60,6 @@ class PassServiceImplTest {
     @Captor
     ArgumentCaptor<Pass> passArgumentCaptor;
 
-
     @Test
     void shouldAddPass() {
         PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
@@ -85,6 +89,20 @@ class PassServiceImplTest {
         Assertions.assertThat(captured.getStatus()).isEqualTo(PassStatus.DELAYED);
         Assertions.assertThat(captured.getDtype()).isEqualTo(pass.getDtype());//проверка типа пропуска
         Assertions.assertThat(captured.getId()).isNotNull();
+    }
+
+    @Test
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    void findPassesByPartOfVisitorNameAndCarNumber_AllOk_ReturnPageWithPasses() {
+        PagingParams pagingParams = new PagingParams(0, 100);
+        FilterParams filterParams = new FilterParams(null, null, null, null);
+        Page mockPage = Mockito.mock(Page.class);
+        Mockito.when(passRepository.findAll(Mockito.any(Specification.class), Mockito.any(Pageable.class)))
+                .thenReturn(mockPage);
+
+        passService.findPassesByPartOfVisitorNameAndCarNumber(pagingParams, filterParams, "part");
+
+        Mockito.verify(passRepository, Mockito.times(1)).findAll(Mockito.any(Specification.class), Mockito.any(Pageable.class));
     }
 
 }

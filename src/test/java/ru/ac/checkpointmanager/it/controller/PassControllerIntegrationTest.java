@@ -2,7 +2,7 @@ package ru.ac.checkpointmanager.it.controller;
 
 import lombok.SneakyThrows;
 import org.assertj.core.api.Assertions;
-import org.jetbrains.annotations.NotNull;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -24,15 +24,18 @@ import ru.ac.checkpointmanager.config.RedisAndPostgresTestContainersConfiguratio
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
+import ru.ac.checkpointmanager.model.Visitor;
 import ru.ac.checkpointmanager.model.car.Car;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.model.passes.PassTimeType;
+import ru.ac.checkpointmanager.model.passes.PassWalk;
 import ru.ac.checkpointmanager.repository.PassRepository;
 import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
+import ru.ac.checkpointmanager.repository.VisitorRepository;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
 import ru.ac.checkpointmanager.repository.car.CarRepository;
 import ru.ac.checkpointmanager.util.TestUtils;
@@ -69,6 +72,9 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
     @Autowired
     CarBrandRepository carBrandRepository;
 
+    @Autowired
+    VisitorRepository visitorRepository;
+
     Territory savedTerritory;
 
     User savedUser;
@@ -77,12 +83,12 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
 
     Car savedCar;
 
-
     @AfterEach
     void clear() {
         passRepository.deleteAll();
         carRepository.deleteAll();
         carBrandRepository.deleteAll();
+        visitorRepository.deleteAll();
         territoryRepository.deleteAll();
         userRepository.deleteAll();
     }
@@ -414,6 +420,115 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
     }
 
     @NotNull
+    @Test
+    @SneakyThrows
+    void getPassesByPartOfVisitorNameAndCarNumber_AllOk_ReturnListWithPassesWithCarPass() {
+        saveTerritoryUserCarBrand();
+        saveCar(); //LICENSE_PLATE = "А420ВХ799";
+        PassAuto passAuto = createPassWithStatusAndTime(PassStatus.ACTIVE, 5);
+        Visitor visitor = new Visitor();
+        visitor.setName("Vasya");
+        visitor.setPhone(TestUtils.PHONE_NUM);
+        PassWalk passWalk = TestUtils.getPassWalk(PassStatus.ACTIVE, LocalDateTime.now(),
+                LocalDateTime.now().plusDays(1), savedUser,
+                savedTerritory, visitor, PassTimeType.PERMANENT);
+        PassAuto savedPassAuto = passRepository.saveAndFlush(passAuto);
+        passRepository.saveAndFlush(passWalk);
+        String filterParams = String.join(",", PassStatus.ACTIVE.name(), PassStatus.DELAYED.name());
+
+        ResultActions resultActions = mockMvc
+                .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_URL_SEARCH)
+                        .param("status", filterParams)
+                        .param("part", "А"));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content.size()").value(1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].id").value(savedPassAuto.getId().toString()));
+    }
+
+    @Test
+    @SneakyThrows
+    void getPassesByPartOfVisitorNameAndCarNumber_AllOk_ReturnListWithPassesBothAutoAndWalk() {
+        saveTerritoryUserCarBrand();
+        saveCar(); //LICENSE_PLATE = "А420ВХ799";
+        PassAuto passAuto = createPassWithStatusAndTime(PassStatus.ACTIVE, 5);
+        Visitor visitor = new Visitor();
+        visitor.setName("А420");
+        visitor.setPhone(TestUtils.PHONE_NUM);
+        PassWalk passWalk = TestUtils.getPassWalk(PassStatus.ACTIVE, LocalDateTime.now(),
+                LocalDateTime.now().plusDays(1), savedUser,
+                savedTerritory, visitor, PassTimeType.PERMANENT);
+        PassAuto savedPassAuto = passRepository.saveAndFlush(passAuto);
+        PassWalk savedPassWalk = passRepository.saveAndFlush(passWalk);
+        String filterParams = String.join(",", PassStatus.ACTIVE.name(), PassStatus.DELAYED.name());
+
+        ResultActions resultActions = mockMvc
+                .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_URL_SEARCH)
+                        .param("status", filterParams)
+                        .param("part", "А"));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content.size()").value(2))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content[*].id", Matchers.hasItems(
+                        savedPassAuto.getId().toString(),
+                        savedPassWalk.getId().toString()
+                )));
+    }
+
+    @Test
+    @SneakyThrows
+    void getPassesByPartOfVisitorNameAndCarNumber_AllOk_ReturnListWithPassesWalkOnly() {
+        saveTerritoryUserCarBrand();
+        saveCar(); //LICENSE_PLATE = "А420ВХ799";
+        PassAuto passAuto = createPassWithStatusAndTime(PassStatus.ACTIVE, 5);
+        Visitor visitor = new Visitor();
+        visitor.setName("Petya");
+        visitor.setPhone(TestUtils.PHONE_NUM);
+        PassWalk passWalk = TestUtils.getPassWalk(PassStatus.ACTIVE, LocalDateTime.now(),
+                LocalDateTime.now().plusDays(1), savedUser,
+                savedTerritory, visitor, PassTimeType.PERMANENT);
+        PassAuto savedPassAuto = passRepository.saveAndFlush(passAuto);
+        PassWalk savedPassWalk = passRepository.saveAndFlush(passWalk);
+        String filterParams = String.join(",", PassStatus.ACTIVE.name(), PassStatus.DELAYED.name());
+
+        ResultActions resultActions = mockMvc
+                .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_URL_SEARCH)
+                        .param("status", filterParams)
+                        .param("part", "Pet"));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content.size()").value(1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].id", Matchers.is(
+                        savedPassWalk.getId().toString())));
+    }
+
+    @Test
+    @SneakyThrows
+    void getPassesByPartOfVisitorNameAndCarNumber_WithFilterActive_ReturnListWithPassesWalkOnly() {
+        saveTerritoryUserCarBrand();
+        saveCar(); //LICENSE_PLATE = "А420ВХ799";
+        PassAuto passAuto = createPassWithStatusAndTime(PassStatus.DELAYED, 5);
+        Visitor visitor = new Visitor();
+        visitor.setName("A420");
+        visitor.setPhone(TestUtils.PHONE_NUM);
+        PassWalk passWalk = TestUtils.getPassWalk(PassStatus.ACTIVE, LocalDateTime.now(),
+                LocalDateTime.now().plusDays(1), savedUser,
+                savedTerritory, visitor, PassTimeType.PERMANENT);
+        PassAuto savedPassAuto = passRepository.saveAndFlush(passAuto);
+        PassWalk savedPassWalk = passRepository.saveAndFlush(passWalk);
+        String filterParams = String.join(",", PassStatus.ACTIVE.name());
+
+        ResultActions resultActions = mockMvc
+                .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_URL_SEARCH)
+                        .param("status", filterParams)
+                        .param("part", "A"));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content.size()").value(1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].id", Matchers.is(
+                        savedPassWalk.getId().toString())));
+    }
+
     private PassAuto createPassWithStatusAndTime(PassStatus passStatus, int i) {
         PassAuto pass = new PassAuto();
         pass.setId(UUID.randomUUID());

@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.annotation.PagingParam;
@@ -88,6 +89,32 @@ public class PassController {
     public Page<PassResponseDTO> getPasses(@Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams,
                                            @Schema(hidden = true) FilterParams filterParams) {
         return service.findPasses(pagingParams, filterParams);
+    }
+
+    @Operation(summary = "Получить список всех пропусков по частичному совпадению номера авто и/или имени посетителя",
+            description = "Доступ: ADMIN.",
+            parameters = {
+                    @Parameter(in = ParameterIn.QUERY, name = "page"),
+                    @Parameter(in = ParameterIn.QUERY, name = "size"),
+                    @Parameter(in = ParameterIn.QUERY, name = "dtype"),
+                    @Parameter(in = ParameterIn.QUERY, name = "territory"),
+                    @Parameter(in = ParameterIn.QUERY, name = "status"),
+                    @Parameter(in = ParameterIn.QUERY, name = "favorite"),
+                    @Parameter(in = ParameterIn.QUERY, name = "part")
+            })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Пропуска найдены",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            array = @ArraySchema(schema = @Schema(implementation = PassResponseDTO.class))))})
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @GetMapping("/search")
+    public Page<PassResponseDTO> getPassesByPartOfVisitorNameAndCarNumber(@Schema(hidden = true)
+                                                                          @Valid
+                                                                          @PagingParam PagingParams pagingParams,
+                                                                          @Schema(hidden = true)
+                                                                          FilterParams filterParams,
+                                                                          @RequestParam("part") String part) {
+        return service.findPassesByPartOfVisitorNameAndCarNumber(pagingParams, filterParams, part);
     }
 
     @Operation(summary = "Найти пропуск по id",
