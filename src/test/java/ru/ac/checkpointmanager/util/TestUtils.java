@@ -230,7 +230,7 @@ public class TestUtils {
         );
     }
 
-    public static PassUpdateDTO getPassUpdateDTO() {
+    public static PassUpdateDTO getPassUpdateDTOWithCar() {
         return new PassUpdateDTO(
                 "comment",
                 PassTimeType.ONETIME,
