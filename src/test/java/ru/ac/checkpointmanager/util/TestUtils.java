@@ -449,13 +449,28 @@ public class TestUtils {
         passWalk.setEndTime(LocalDateTime.now().plusHours(3));
         passWalk.setId(UUID.randomUUID());
         passWalk.setTimeType(PassTimeType.ONETIME);
-        passWalk.setDtype("AUTO");
+        passWalk.setDtype("WALK");
         passWalk.setStatus(PassStatus.ACTIVE);
         passWalk.setVisitor(visitor);
         passWalk.setUser(user);
         passWalk.setTerritory(territory);
         return passWalk;
     }
+
+    public static PassWalk getPassWalk(PassStatus passStatus, LocalDateTime startTime, LocalDateTime endTime, User savedUser,
+                                Territory savedTerritory, Visitor savedVisitor, PassTimeType passTimeType) {
+        PassWalk passWalk = new PassWalk();
+        passWalk.setStatus(passStatus);
+        passWalk.setStartTime(startTime);
+        passWalk.setEndTime(endTime);
+        passWalk.setUser(savedUser);
+        passWalk.setDtype("WALK");
+        passWalk.setTerritory(savedTerritory);
+        passWalk.setVisitor(savedVisitor);//name USERNAME
+        passWalk.setTimeType(passTimeType);
+        return passWalk;
+    }
+
 
     public static Checkpoint getCheckpoint(CheckpointType type, Territory territory) {
         Checkpoint checkpoint = new Checkpoint();

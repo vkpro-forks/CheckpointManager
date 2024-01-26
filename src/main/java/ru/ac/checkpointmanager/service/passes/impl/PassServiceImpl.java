@@ -32,6 +32,7 @@ import ru.ac.checkpointmanager.service.passes.PassResolver;
 import ru.ac.checkpointmanager.service.passes.PassService;
 import ru.ac.checkpointmanager.service.territories.TerritoryService;
 import ru.ac.checkpointmanager.service.user.UserService;
+import ru.ac.checkpointmanager.specification.PassSpecification;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.time.LocalDateTime;
@@ -49,6 +50,7 @@ import static ru.ac.checkpointmanager.utils.StringTrimmer.trimThemAll;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class PassServiceImpl implements PassService {
 
     private static final String PAGE_NO_CONTENT = "Page %d, size - %d, has no content (total pages - %d, total elements - %d)";
@@ -120,13 +122,33 @@ public class PassServiceImpl implements PassService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Pass findPassById(UUID passId) {
         return passRepository.findById(passId).orElseThrow(
                 () -> {
                     log.warn(ExceptionUtils.PASS_NOT_FOUND.formatted(passId));
                     return new PassNotFoundException(ExceptionUtils.PASS_NOT_FOUND.formatted(passId));
                 });
+    }
+
+    /**
+     * Поиск пропусков по частичному совпадению номера авто и/или имени посетителя
+     *
+     * @param pagingParams Параметры страницы
+     * @param filterParams Параметры фильтрации
+     * @param part         часть текста по которому будет сравнение
+     * @return {@link Page<PassResponseDTO>} страница с дто пропусков
+     */
+    @Override
+    public Page<PassResponseDTO> findPassesByPartOfVisitorNameAndCarNumber(PagingParams pagingParams,
+                                                                           FilterParams filterParams, String part) {
+        Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
+        Specification<Pass> spec = Specification
+                .where(PassSpecification.byVisitorPart(part)
+                        .or(PassSpecification.byCarNumberPart(part)))
+                .and(PassSpecification.byFilterParams(filterParams));
+        Page<Pass> foundPasses = passRepository.findAll(spec, pageable);
+
+        return foundPasses.map(mapper::toPassDTO);
     }
 
     @Override
@@ -165,6 +187,7 @@ public class PassServiceImpl implements PassService {
     }
 
     @Override
+    @Transactional
     public PassResponseDTO updatePass(PassUpdateDTO passUpdateDTO) {
         log.debug(METHOD_INVOKE, MethodLog.getMethodName(), passUpdateDTO);
 
@@ -303,8 +326,8 @@ public class PassServiceImpl implements PassService {
     /**
      * @param newPass добавляемый или изменяемый пропуск
      * @throws OverlapPassException, если в системе существует другой активный пропуск,
-     *                                   созданный тем же юзером, в котором совпадает территория, данные машины/человека
-     *                                   и пересекается (накладывается) время действия
+     *                               созданный тем же юзером, в котором совпадает территория, данные машины/человека
+     *                               и пересекается (накладывается) время действия
      */
     void checkOverlapTime(Pass newPass) {
         List<Pass> passesByUser = passRepository.findAllPassesByUserId(newPass.getUser().getId());
@@ -329,6 +352,7 @@ public class PassServiceImpl implements PassService {
      * @see PassServiceImpl#updateActivePassesOnEndTimeReached
      */
     @Scheduled(cron = "0 * * * * ?")
+    @Transactional
     public void updatePassStatusByScheduler() {
         if (LocalDateTime.now().getHour() != hourForLogInScheduledCheck) {
             //TODO надо менять на ZonedDateTime потому что от клиентов нам будут приходить даты с местным временем
