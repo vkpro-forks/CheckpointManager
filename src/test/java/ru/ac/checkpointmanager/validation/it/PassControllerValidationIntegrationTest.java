@@ -50,8 +50,8 @@ class PassControllerValidationIntegrationTest {
     private static final String START_TIME = "startTime";
 
     private static final String END_TIME = "endTime";
-    public static final String NAME = "name";
-    public static final String PHONE = "phone";
+    public static final String NAME = "visitor.name";
+    public static final String PHONE = "visitor.phone";
 
     @Autowired
     MockMvc mockMvc;
@@ -179,17 +179,21 @@ class PassControllerValidationIntegrationTest {
     @ParameterizedTest
     @MethodSource("getBadVisitorDto")
     @SneakyThrows
-    void addPass_VisitorHasBadField_HandleExceptionAndReturnValidationError() {
+    void addPass_VisitorHasBadField_HandleExceptionAndReturnValidationError(String name, String phone, String field) {
         log.info("Creating dto with one good date and one null");
         PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithVisitor();
-        passCreateDTO.getVisitor().setName("");
-
+        passCreateDTO.getVisitor().setName(name);
+        passCreateDTO.getVisitor().setPhone(phone);
         String passDtoCreateString = TestUtils.jsonStringFromObject(passCreateDTO);
         log.info(TestMessage.PERFORM_HTTP, HttpMethod.POST, UrlConstants.PASS_URL);
+
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(passDtoCreateString));
+
         ResultCheckUtils.checkCommonValidationFields(resultActions);
+        resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0))
+                .value(field));
     }
 
     private static void checkCarOrVisitorFields(ResultActions resultActions) throws Exception {
@@ -216,11 +220,11 @@ class PassControllerValidationIntegrationTest {
     }
 
     private static Stream<Arguments> getBadVisitorDto() {
-        return Stream.of(Arguments.of("", NAME),
-                Arguments.of(null, NAME),
-                Arguments.of("", PHONE),
-                Arguments.of("a".repeat(10), PHONE),
-                Arguments.of("a".repeat(22), PHONE)
+        return Stream.of(Arguments.of("", TestUtils.PHONE_NUM, NAME),
+                Arguments.of(null, TestUtils.PHONE_NUM, NAME),
+                Arguments.of(TestUtils.FULL_NAME, "", PHONE),
+                Arguments.of(TestUtils.FULL_NAME, "a".repeat(10), PHONE),
+                Arguments.of(TestUtils.FULL_NAME, "a".repeat(22), PHONE)
         );
     }
 
