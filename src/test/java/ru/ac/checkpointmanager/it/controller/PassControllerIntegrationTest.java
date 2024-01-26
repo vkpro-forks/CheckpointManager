@@ -1,5 +1,6 @@
 package ru.ac.checkpointmanager.it.controller;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.SneakyThrows;
 import org.assertj.core.api.Assertions;
 import org.hamcrest.Matchers;
@@ -419,7 +420,6 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
                 .andExpect(MockMvcResultMatchers.jsonPath("$.content.size()").value(totalFound));
     }
 
-    @NotNull
     @Test
     @SneakyThrows
     void getPassesByPartOfVisitorNameAndCarNumber_AllOk_ReturnListWithPassesWithCarPass() {
