@@ -18,6 +18,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.ac.checkpointmanager.config.RedisAndPostgresTestContainersConfiguration;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.model.Territory;
@@ -45,9 +46,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
-
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
@@ -107,13 +105,13 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         passCreateDTO.getCar().setBrand(TestUtils.getCarBrandDTO());//set saved car brand, if no car brand in DB, 404 will be thrown
 
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(TestUtils.jsonStringFromObject(passCreateDTO)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.user.id").value(savedUser.getId().toString()))
-                .andExpect(jsonPath("$.territory.id").value(savedTerritory.getId().toString()));
+                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.user.id").value(savedUser.getId().toString()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.territory.id").value(savedTerritory.getId().toString()));
         List<Car> allCars = carRepository.findAll();
         Assertions.assertThat(allCars).hasSize(1);
         Car car = allCars.get(0);
-        resultActions.andExpect(jsonPath("$.car.id").value(car.getId().toString()));
+        resultActions.andExpect(MockMvcResultMatchers.jsonPath("$.car.id").value(car.getId().toString()));
         List<Pass> allPasses = passRepository.findAll();
         Assertions.assertThat(allPasses).hasSize(1);
     }
@@ -131,10 +129,10 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         passCreateDTO.getCar().setLicensePlate(savedCar.getLicensePlate());
 
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(TestUtils.jsonStringFromObject(passCreateDTO)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.user.id").value(savedUser.getId().toString()))
-                .andExpect(jsonPath("$.territory.id").value(savedTerritory.getId().toString()));
-        resultActions.andExpect(jsonPath("$.car.id").value(savedCar.getId().toString()));
+                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.user.id").value(savedUser.getId().toString()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.territory.id").value(savedTerritory.getId().toString()));
+        resultActions.andExpect(MockMvcResultMatchers.jsonPath("$.car.id").value(savedCar.getId().toString()));
 
         List<Car> allCars = carRepository.findAll();
         Assertions.assertThat(allCars).hasSize(1);//check if no added cars
@@ -156,16 +154,16 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
 
         ResultActions resultActions = mockMvc.perform(
                         MockMvcUtils.createPass(TestUtils.jsonStringFromObject(passCreateDTO)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.user.id").value(savedUser.getId().toString()))
-                .andExpect(jsonPath("$.territory.id").value(savedTerritory.getId().toString()));
+                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.user.id").value(savedUser.getId().toString()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.territory.id").value(savedTerritory.getId().toString()));
 
         org.junit.jupiter.api.Assertions.assertAll(
                 () -> {
                     List<Car> carsByUserId = carRepository.findCarsByUserId(savedUser.getId());
                     Assertions.assertThat(carsByUserId).hasSize(1);
                     Car carInPass = carsByUserId.get(0);
-                    resultActions.andExpect(jsonPath("$.car.id")
+                    resultActions.andExpect(MockMvcResultMatchers.jsonPath("$.car.id")
                             .value(carInPass.getId().toString()));
                 },
                 () -> {
@@ -191,10 +189,10 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         passCreateDTO.getCar().setLicensePlate(TestUtils.LICENSE_PLATE);
 
         mockMvc.perform(MockMvcUtils.createPass(TestUtils.jsonStringFromObject(passCreateDTO)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.user.id").value(savedUser.getId().toString()))
-                .andExpect(jsonPath("$.territory.id").value(savedTerritory.getId().toString()))
-                .andExpect(jsonPath("$.car.id").value(passCreateDTO.getCar().getId().toString()));
+                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.user.id").value(savedUser.getId().toString()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.territory.id").value(savedTerritory.getId().toString()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.car.id").value(passCreateDTO.getCar().getId().toString()));
 
         org.junit.jupiter.api.Assertions.assertAll(
                 () -> {
@@ -219,9 +217,9 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
 
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(TestUtils.jsonStringFromObject(passCreateDto)));
 
-        resultActions.andExpect(status().isCreated()).andExpectAll(
-                jsonPath("$.id").isNotEmpty(),
-                jsonPath("$.visitor.id").isNotEmpty());
+        resultActions.andExpect(MockMvcResultMatchers.status().isCreated()).andExpectAll(
+                MockMvcResultMatchers.jsonPath("$.id").isNotEmpty(),
+                MockMvcResultMatchers.jsonPath("$.visitor.id").isNotEmpty());
         Assertions.assertThat(visitorRepository.findAll()).isNotEmpty().flatExtracting(Visitor::getName)
                 .containsOnly(passCreateDto.getVisitor().getName());
         Assertions.assertThat(passRepository.findAll()).hasSize(1);
@@ -238,9 +236,9 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
 
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(TestUtils.jsonStringFromObject(passCreateDto)));
 
-        resultActions.andExpect(status().isCreated()).andExpectAll(
-                jsonPath("$.id").isNotEmpty(),
-                jsonPath("$.visitor.id").value(TestUtils.VISITOR_ID.toString()));
+        resultActions.andExpect(MockMvcResultMatchers.status().isCreated()).andExpectAll(
+                MockMvcResultMatchers.jsonPath("$.id").isNotEmpty(),
+                MockMvcResultMatchers.jsonPath("$.visitor.id").value(TestUtils.VISITOR_ID.toString()));
         Assertions.assertThat(visitorRepository.findAll()).isNotEmpty().flatExtracting(Visitor::getName)
                 .containsOnly(passCreateDto.getVisitor().getName());
         Assertions.assertThat(passRepository.findAll()).hasSize(1);
@@ -261,9 +259,9 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
 
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(TestUtils.jsonStringFromObject(passCreateDto)));
 
-        resultActions.andExpect(status().isCreated()).andExpectAll(
-                jsonPath("$.id").isNotEmpty(),
-                jsonPath("$.visitor.id").value(savedVisitor.getId().toString()));
+        resultActions.andExpect(MockMvcResultMatchers.status().isCreated()).andExpectAll(
+                MockMvcResultMatchers.jsonPath("$.id").isNotEmpty(),
+                MockMvcResultMatchers.jsonPath("$.visitor.id").value(savedVisitor.getId().toString()));
         Assertions.assertThat(visitorRepository.findAll()).isNotEmpty().flatExtracting(Visitor::getName)
                 .containsOnly(updatedName);
         Assertions.assertThat(passRepository.findAll()).hasSize(1);
@@ -283,7 +281,7 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         Assertions.assertThat(allPasses).as("Check if only one pass here").hasSize(1);
 
         mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.PASS_URL + "/" + savedPass.getId()))
-                .andExpect(status().isNoContent());
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
 
         List<Pass> passesAfterDelete = passRepository.findAll();
         Assertions.assertThat(passesAfterDelete).isEmpty();
@@ -307,7 +305,7 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         Assertions.assertThat(allPasses).hasSize(5);
 
         mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.PASS_URL + "/" + allPasses.get(0).getId()))
-                .andExpect(status().isNoContent());
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
 
         List<Pass> passesAfterDelete = passRepository.findAll();
         Assertions.assertThat(passesAfterDelete).hasSize(4);
@@ -333,8 +331,8 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
 
         ResultActions resultActions = mockMvc
                 .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_USER_URL, savedUser.getId()));
-        resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.size()").value(5));
+        resultActions.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content.size()").value(5));
     }
 
     @Test
@@ -360,8 +358,8 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
                 .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_USER_URL, savedUser.getId())
                         .param("status", PassStatus.ACTIVE.name()));
 
-        resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.size()").value(3));
+        resultActions.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content.size()").value(3));
     }
 
     @ParameterizedTest
@@ -390,8 +388,8 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
                 .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_USER_URL, savedUser.getId())
                         .param("status", filterParams));
 
-        resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.size()").value(totalFound));
+        resultActions.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content.size()").value(totalFound));
     }
 
     @Test
@@ -416,9 +414,9 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
                         .param("status", filterParams)
                         .param("part", "А"));
 
-        resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.size()").value(1))
-                .andExpect(jsonPath("$.content[0].id").value(savedPassAuto.getId().toString()));
+        resultActions.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content.size()").value(1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].id").value(savedPassAuto.getId().toString()));
     }
 
     @Test
@@ -443,9 +441,9 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
                         .param("status", filterParams)
                         .param("part", "А"));
 
-        resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.size()").value(2))
-                .andExpect(jsonPath("$.content[*].id", Matchers.hasItems(
+        resultActions.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content.size()").value(2))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content[*].id", Matchers.hasItems(
                         savedPassAuto.getId().toString(),
                         savedPassWalk.getId().toString()
                 )));
@@ -473,9 +471,9 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
                         .param("status", filterParams)
                         .param("part", "Pet"));
 
-        resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.size()").value(1))
-                .andExpect(jsonPath("$.content[0].id", Matchers.is(
+        resultActions.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content.size()").value(1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].id", Matchers.is(
                         savedPassWalk.getId().toString())));
     }
 
@@ -501,9 +499,9 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
                         .param("status", filterParams)
                         .param("part", "A"));
 
-        resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.size()").value(1))
-                .andExpect(jsonPath("$.content[0].id", Matchers.is(
+        resultActions.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content.size()").value(1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].id", Matchers.is(
                         savedPassWalk.getId().toString())));
     }
 
