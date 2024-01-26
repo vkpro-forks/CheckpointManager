@@ -10,17 +10,16 @@ import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
-import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.projection.PassInOutView;
 import ru.ac.checkpointmanager.repository.PassRepository;
 import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.service.event.PassInOutViewService;
+import ru.ac.checkpointmanager.utils.TerritoryUtils;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -92,14 +91,7 @@ public class PassInOutViewServiceImpl implements PassInOutViewService {
                     return new UserNotFoundException(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(userId));
                 }
         );
-        List<Territory> territories = user.getTerritories();
-        if (territories.isEmpty()) {
-            log.warn(ExceptionUtils.USER_TERRITORY_NOT_FOUND_MSG.formatted(userId));
-            throw new TerritoryNotFoundException(ExceptionUtils.USER_TERRITORY_NOT_FOUND_MSG.formatted(userId));
-        }
-        List<UUID> terIds = territories.stream()
-                .map(Territory::getId)
-                .collect(Collectors.toList());
+        List<UUID> terIds = TerritoryUtils.getTerritoryIdsOrThrow(user, userId);
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
         return passRepository.findEventsByTerritories(terIds, pageable);
     }

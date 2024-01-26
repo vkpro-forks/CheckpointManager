@@ -28,6 +28,8 @@ public interface PassService {
 
     Page<PassResponseDTO> findPassesByTerritory(UUID terId, PagingParams pagingParams, FilterParams filterParams);
 
+    Page<PassResponseDTO> findPassesByUsersTerritories(UUID userId, PagingParams pagingParams, FilterParams filterParams);
+
     PassResponseDTO updatePass(PassUpdateDTO passUpdateDTO);
 
     PassResponseDTO cancelPass(UUID id);

@@ -24,6 +24,7 @@ public class UrlConstants {
     public static final String PASS_URL = "/api/v1/pass";
 
     public static final String PASS_USER_URL = "/api/v1/pass/user/{userId}";
+    public static final String PASS_USER_TERRITORIES_URL = "/api/v1/pass/user/{userId}/territories";
 
     public static final String PASS_URL_CANCEL = PASS_URL + "/%s/cancel";
 
@@ -80,8 +81,6 @@ public class UrlConstants {
     public static final String EVENT_URL = "/api/v1/events";
 
     public static final String EVENT_USER_URL = EVENT_URL + "/user/{userId}";
-
-    public static final String EVENT_USER_TERRITORIES_URL = EVENT_USER_URL + "/territories";
 
     public static final String EVENT_TERRITORY_URL = EVENT_URL + "/territory/{territoryId}";
 

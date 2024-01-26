@@ -15,6 +15,8 @@ import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassResponseDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.exception.ExceptionUtils;
+import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
+import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.exception.pass.ModifyPassException;
 import ru.ac.checkpointmanager.exception.pass.OverlapPassException;
 import ru.ac.checkpointmanager.exception.pass.PassNotFoundException;
@@ -34,6 +36,7 @@ import ru.ac.checkpointmanager.service.territories.TerritoryService;
 import ru.ac.checkpointmanager.service.user.UserService;
 import ru.ac.checkpointmanager.specification.PassSpecification;
 import ru.ac.checkpointmanager.utils.MethodLog;
+import ru.ac.checkpointmanager.utils.TerritoryUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -179,6 +182,39 @@ public class PassServiceImpl implements PassService {
                 .and(PassSpecification.byFilterParams(filterParams));
 
         Page<Pass> foundPasses = passRepository.findAll(spec, pageable);
+        if (!foundPasses.hasContent()) {
+            log.info(PAGE_NO_CONTENT.formatted(pageable.getPageNumber(), pageable.getPageSize(),
+                    foundPasses.getTotalPages(), foundPasses.getTotalElements()));
+        }
+        return foundPasses.map(mapper::toPassDTO);
+    }
+
+    /**
+     * Поиск пропусков по территориям пользователя.
+     *
+     * @param userId идентификатор пользователя, для которого нужно найти пропуска.
+     * @param pagingParams параметры пагинации, управляющие размером и номером страницы в результатах.
+     * @param filterParams параметры фильтрации для поиска пропусков.
+     * @return страница с объектами PassResponseDTO, содержащая найденные пропуска.
+     * @throws UserNotFoundException если пользователь с указанным идентификатором не найден.
+     * @throws TerritoryNotFoundException если пользователь не привязан к территории.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Page<PassResponseDTO> findPassesByUsersTerritories(UUID userId, PagingParams pagingParams, FilterParams filterParams) {
+        User user = userService.findUserById(userId);
+        List<UUID> terIds = TerritoryUtils.getTerritoryIdsOrThrow(user, userId);
+
+        Specification<Pass> spec = terIds.stream()
+                .map(PassSpecification::byTerritoryId)
+                .reduce(Specification::or)
+                .get();
+
+        spec = spec.and(PassSpecification.byFilterParams(filterParams));
+
+        Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
+        Page<Pass> foundPasses = passRepository.findAll(spec, pageable);
+
         if (!foundPasses.hasContent()) {
             log.info(PAGE_NO_CONTENT.formatted(pageable.getPageNumber(), pageable.getPageSize(),
                     foundPasses.getTotalPages(), foundPasses.getTotalElements()));
@@ -335,7 +371,7 @@ public class PassServiceImpl implements PassService {
         Optional<Pass> overlapPass = passesByUser.stream()
                 .filter(existPass -> existPass.getClass().equals(newPass.getClass()))
                 .filter(existPass -> existPass.getStatus().equals(PassStatus.ACTIVE) ||
-                        existPass.getStatus().equals(PassStatus.DELAYED))
+                                     existPass.getStatus().equals(PassStatus.DELAYED))
                 .filter(existPass -> existPass.compareByFields(newPass))
                 .findFirst();
 
