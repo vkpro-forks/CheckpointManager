@@ -307,21 +307,6 @@ class PassRepositoryIntegrationTest {
         Assertions.assertThat(savedPassWalk.getVisitor().getName()).isEqualTo(visitor.getName());
     }
 
-    @Test
-    void savePassWithVisitor_VisitorNotInDB_SaveAndReturn() {
-        saveUserTerritory();
-        Visitor visitor = new Visitor();
-        visitor.setId(TestUtils.VISITOR_ID);
-        visitor.setName(TestUtils.FULL_NAME);
-        visitor.setPhone(TestUtils.PHONE_NUM);
-        Pass passWalk = TestUtils.getPassWalk(PassStatus.DELAYED, LocalDateTime.now().minusDays(1),
-                LocalDateTime.now().plusDays(1),
-                savedUser, savedTerritory, visitor, PassTimeType.ONETIME);
-        passWalk.setDtype(null);
-        Pass savedPassWalk = passRepository.saveAndFlush(passWalk);
-        log.info("{}", savedPassWalk);
-    }
-
     /*@Test
     void findPassesByStatusAndTimeBefore_ExperimentalEnumAndPgTypesDoesntMatch_ReturnListOfPasses() {
         saveUserTerritoryVisitor();

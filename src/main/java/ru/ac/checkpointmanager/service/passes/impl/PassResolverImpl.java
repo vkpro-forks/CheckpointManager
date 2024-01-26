@@ -77,6 +77,7 @@ public class PassResolverImpl implements PassResolver {
                 car.setId(UUID.randomUUID());
             }
             pass = passAuto;
+            log.debug("Setting up passAuto for auto: {}", car.getId());
         } else {
             if (passCreateDTO.getVisitor() != null) {
                 PassWalk passWalk = passMapper.toPassWalk(passCreateDTO);
@@ -85,8 +86,10 @@ public class PassResolverImpl implements PassResolver {
                     visitor.setId(UUID.randomUUID());
                 }
                 pass = passWalk;
+                log.debug("Setting up passWalk for visitor: {}", visitor.getId());
             } else {
-                throw new CriticalServerException("Pass cannot be create because no car or visitor");
+                log.error(ExceptionUtils.PASS_RESOLVING_ERROR);
+                throw new CriticalServerException(ExceptionUtils.PASS_RESOLVING_ERROR);
             }
         }
         pass.setUser(user);
