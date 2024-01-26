@@ -6,16 +6,19 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.CarBrandDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
+import ru.ac.checkpointmanager.exception.CriticalServerException;
 import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.mapper.PassMapper;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
+import ru.ac.checkpointmanager.model.Visitor;
 import ru.ac.checkpointmanager.model.car.Car;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
+import ru.ac.checkpointmanager.model.passes.PassWalk;
 import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
@@ -75,7 +78,16 @@ public class PassResolverImpl implements PassResolver {
             }
             pass = passAuto;
         } else {
-            pass = passMapper.toPassWalk(passCreateDTO);
+            if (passCreateDTO.getVisitor() != null) {
+                PassWalk passWalk = passMapper.toPassWalk(passCreateDTO);
+                Visitor visitor = passWalk.getVisitor();
+                if (visitor.getId() == null) {
+                    visitor.setId(UUID.randomUUID());
+                }
+                pass = passWalk;
+            } else {
+                throw new CriticalServerException("Pass cannot be create because no car or visitor");
+            }
         }
         pass.setUser(user);
         pass.setTerritory(territory);

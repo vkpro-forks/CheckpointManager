@@ -93,7 +93,7 @@ public class PassServiceImpl implements PassService {
         if (pass.getComment() == null || pass.getComment().isBlank()) {
             pass.setComment("Пропуск-" + pass.getId().toString().substring(32));
         }
-        Pass savedPass = passRepository.save(pass);
+        Pass savedPass = passRepository.saveAndFlush(pass);
         log.info("Pass saved [{}]", savedPass);
 
         return mapper.toPassDTO(savedPass);
