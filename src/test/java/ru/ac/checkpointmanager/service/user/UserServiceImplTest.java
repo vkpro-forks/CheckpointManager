@@ -343,26 +343,6 @@ class UserServiceImplTest {
     }
 
     @Test
-    void updateUser_IfPhoneExists_ThrowException() {
-        User user = TestUtils.getUser();
-        UUID userId = user.getId();
-        UserResponseDTO userResponseDTO = TestUtils.getUserResponseDTO();
-        userResponseDTO.setId(userId);
-        UserUpdateDTO userUpdateDTO = TestUtils.getUserUpdateDTO();
-        userUpdateDTO.setId(userId);
-
-        Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        Mockito.when(phoneRepository.existsByNumber(Mockito.any()))
-                .thenReturn(true);
-
-        Assertions.assertThatExceptionOfType(PhoneAlreadyExistException.class)
-                .isThrownBy(() -> userService.updateUser(userUpdateDTO)
-                ).isInstanceOf(ObjectAlreadyExistsException.class);
-
-        Mockito.verify(userRepository, Mockito.never()).save(Mockito.any());
-    }
-
-    @Test
     void shouldChangePassword() {
         NewPasswordDTO request = TestUtils.getNewPasswordDTO();
         String newPassword = request.getNewPassword();

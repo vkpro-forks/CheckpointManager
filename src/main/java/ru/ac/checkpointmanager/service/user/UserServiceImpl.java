@@ -255,23 +255,6 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * Создает DTO телефона на основе данных пользователя.
-     * <p>
-     * Этот вспомогательный метод используется для создания DTO телефона из данных пользователя.
-     * </p>
-     *
-     * @param user Объект пользователя, для которого создается DTO телефона.
-     * @return PhoneDTO, содержащий данные телефона пользователя.
-     */
-    private PhoneDTO createPhoneDTO(User user) {
-        PhoneDTO phoneDTO = new PhoneDTO();
-        phoneDTO.setNumber(user.getMainNumber());
-        phoneDTO.setType(PhoneNumberType.MOBILE);
-        phoneDTO.setUserId(user.getId());
-        return phoneDTO;
-    }
-
-    /**
      * Изменяет пароль текущего аутентифицированного пользователя.
      * <p>
      * Этот метод позволяет пользователю изменить свой пароль. Сначала проверяется, соответствует ли текущий пароль
