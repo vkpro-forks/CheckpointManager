@@ -27,13 +27,16 @@ import ru.ac.checkpointmanager.service.event.PassInOutViewService;
 
 import java.util.UUID;
 
+import static ru.ac.checkpointmanager.utils.Constants.INTERNAL_SERVER_ERROR;
+import static ru.ac.checkpointmanager.utils.Constants.UNAUTHORIZED_MESSAGE;
+
 @RestController
 @RequestMapping("api/v1/events")
 @RequiredArgsConstructor
 @Validated
 @Tag(name = "Event (события въезд-выезд (пары))", description = "Получение событий по пропуску (пары въезд-выезд")
-@ApiResponses(value = {@ApiResponse(responseCode = "401", description = "UNAUTHORIZED: пользователь не авторизован"),
-        @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса")})
+@ApiResponses(value = {@ApiResponse(responseCode = "401", description = UNAUTHORIZED_MESSAGE),
+        @ApiResponse(responseCode = "500", description = INTERNAL_SERVER_ERROR)})
 @SecurityRequirement(name = "bearerAuth")
 public class CrossingEventController {
 

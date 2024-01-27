@@ -34,6 +34,8 @@ import ru.ac.checkpointmanager.service.car.CarService;
 import java.util.List;
 import java.util.UUID;
 
+import static ru.ac.checkpointmanager.utils.Constants.*;
+
 @Slf4j
 @RestController
 @RequestMapping("api/v1/car")
@@ -41,9 +43,9 @@ import java.util.UUID;
 @Validated
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Car (Машина)", description = "Для обработки списка машин")
-@ApiResponses(value = {@ApiResponse(responseCode = "401", description = "UNAUTHORIZED: пользователь не авторизован",
+@ApiResponses(value = {@ApiResponse(responseCode = "401", description = UNAUTHORIZED_MESSAGE,
         content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
-        @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса",
+        @ApiResponse(responseCode = "500", description = INTERNAL_SERVER_ERROR,
                 content = @Content(schema = @Schema(implementation = ProblemDetail.class)))})
 
 public class CarController {
@@ -57,7 +59,7 @@ public class CarController {
             @ApiResponse(responseCode = "201", description = "Машина успешно добавлен",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CarDTO.class))}),
-            @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей.",
+            @ApiResponse(responseCode = "400", description = FAILED_FIELD_VALIDATION_MESSAGE,
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
@@ -75,7 +77,7 @@ public class CarController {
             @ApiResponse(responseCode = "200", description = "Машина успешно обновлена",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CarDTO.class))}),
-            @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей.",
+            @ApiResponse(responseCode = "400", description = FAILED_FIELD_VALIDATION_MESSAGE,
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")

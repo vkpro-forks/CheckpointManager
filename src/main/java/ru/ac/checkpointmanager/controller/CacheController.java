@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.service.cache.CacheService;
 
+import static ru.ac.checkpointmanager.utils.Constants.INTERNAL_SERVER_ERROR;
+import static ru.ac.checkpointmanager.utils.Constants.UNAUTHORIZED_MESSAGE;
+
 @RestController
 @RequestMapping("api/v1/cache")
 @RequiredArgsConstructor
@@ -21,9 +24,9 @@ import ru.ac.checkpointmanager.service.cache.CacheService;
 @Tag(name = "Управление кэшем", description = "Управление кэшем пока что ВСЕГО приложения")
 @ApiResponses(value = {
         @ApiResponse(responseCode = "401",
-                description = "UNAUTHORIZED: пользователь не авторизован"),
+                description = UNAUTHORIZED_MESSAGE),
         @ApiResponse(responseCode = "500",
-                description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса")})
+                description = INTERNAL_SERVER_ERROR)})
 public class CacheController {
 
     private final CacheService cacheService;

@@ -37,13 +37,16 @@ import ru.ac.checkpointmanager.service.territories.TerritoryService;
 import java.util.List;
 import java.util.UUID;
 
+import static ru.ac.checkpointmanager.utils.Constants.INTERNAL_SERVER_ERROR;
+import static ru.ac.checkpointmanager.utils.Constants.UNAUTHORIZED_MESSAGE;
+
 @RestController
 @RequestMapping("api/v1/territory")
 @Validated
 @RequiredArgsConstructor
 @Tag(name = "Territory (территория)", description = "Администрирование списка территорий")
-@ApiResponses(value = {@ApiResponse(responseCode = "401", description = "UNAUTHORIZED: пользователь не авторизован"),
-        @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса")})
+@ApiResponses(value = {@ApiResponse(responseCode = "401", description = UNAUTHORIZED_MESSAGE),
+        @ApiResponse(responseCode = "500", description = INTERNAL_SERVER_ERROR)})
 @SecurityRequirement(name = "bearerAuth")
 public class TerritoryController {
 

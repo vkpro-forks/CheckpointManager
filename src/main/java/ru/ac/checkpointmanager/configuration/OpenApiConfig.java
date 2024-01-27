@@ -9,15 +9,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
+import static ru.ac.checkpointmanager.utils.Constants.SWAGGER_DESCRIPTION_MESSAGE;
+
 
 @Configuration
 public class OpenApiConfig {
 
     @Value("${app.version}")
     private String appVersion;
-    private static final String SWAGGER_DESCRIPTION_MESSAGE = "Аккаунты по умолчанию: " +
-            "security@chp.com, user@chp.com, " +
-            "admin@chp.com, manager@chp.com. Пароли те же.";
 
     @Bean
     @Profile("dev")

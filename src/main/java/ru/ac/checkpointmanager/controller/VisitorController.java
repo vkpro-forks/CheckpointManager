@@ -31,6 +31,9 @@ import ru.ac.checkpointmanager.service.visitor.VisitorService;
 import java.util.List;
 import java.util.UUID;
 
+import static ru.ac.checkpointmanager.utils.Constants.INTERNAL_SERVER_ERROR;
+import static ru.ac.checkpointmanager.utils.Constants.UNAUTHORIZED_MESSAGE;
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -38,8 +41,8 @@ import java.util.UUID;
 @Validated
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Visitor (Посетитель)", description = "Работа со списком посетителей.")
-@ApiResponses(value = {@ApiResponse(responseCode = "401", description = "Не авторизован."),
-        @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса.")})
+@ApiResponses(value = {@ApiResponse(responseCode = "401", description = UNAUTHORIZED_MESSAGE),
+        @ApiResponse(responseCode = "500", description = INTERNAL_SERVER_ERROR)})
 public class VisitorController {
 
     private final VisitorService visitorService;

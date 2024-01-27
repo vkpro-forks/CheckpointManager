@@ -34,6 +34,8 @@ import ru.ac.checkpointmanager.service.crossing.CrossingService;
 import java.util.List;
 import java.util.UUID;
 
+import static ru.ac.checkpointmanager.utils.Constants.*;
+
 @Slf4j
 @RestController
 @RequestMapping("api/v1/crossing")
@@ -42,9 +44,9 @@ import java.util.UUID;
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Crossing (Пересечение)", description = "Работа с пересечениями машин и посетителей через КПП")
 @ApiResponses(value = {
-        @ApiResponse(responseCode = "401", description = "UNAUTHORIZED: пользователь не авторизован",
+        @ApiResponse(responseCode = "401", description = UNAUTHORIZED_MESSAGE,
                 content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
-        @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса",
+        @ApiResponse(responseCode = "500", description = INTERNAL_SERVER_ERROR,
                 content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
 })
 public class CrossingController {
@@ -57,7 +59,7 @@ public class CrossingController {
             @ApiResponse(responseCode = "200", description = "Пересечение успешно добавлено.",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CrossingDTO.class))}),
-            @ApiResponse(responseCode = "400", description = "BAD_REQUEST: Неверные данные запроса",
+            @ApiResponse(responseCode = "400", description = BAD_REQUEST_MESSAGE,
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SECURITY')")
@@ -72,7 +74,7 @@ public class CrossingController {
             @ApiResponse(responseCode = "200", description = "Пересечение успешно добавлено.",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CrossingDTO.class))}),
-            @ApiResponse(responseCode = "400", description = "BAD_REQUEST: Неверные данные запроса",
+            @ApiResponse(responseCode = "400", description = BAD_REQUEST_MESSAGE,
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SECURITY')")
@@ -93,7 +95,7 @@ public class CrossingController {
             @ApiResponse(responseCode = "200", description = "Пересечение успешно добавлено",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CrossingDTO.class))}),
-            @ApiResponse(responseCode = "400", description = "BAD_REQUEST: Неверные данные запроса",
+            @ApiResponse(responseCode = "400", description = BAD_REQUEST_MESSAGE,
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
     })
     @Deprecated(forRemoval = true, since = "17.12.2023")
@@ -110,7 +112,7 @@ public class CrossingController {
             @ApiResponse(responseCode = "200", description = "Пересечение успешно получено",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = Crossing.class))}),
-            @ApiResponse(responseCode = "400", description = "BAD_REQUEST: Неверные данные запроса",
+            @ApiResponse(responseCode = "400", description = BAD_REQUEST_MESSAGE,
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SECURITY')")

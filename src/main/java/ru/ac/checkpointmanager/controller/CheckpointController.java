@@ -32,18 +32,17 @@ import ru.ac.checkpointmanager.service.checkpoints.CheckpointService;
 import java.util.List;
 import java.util.UUID;
 
+import static ru.ac.checkpointmanager.utils.Constants.*;
+
 @RestController
 @RequestMapping("api/v1/checkpoint")
 @Validated
 @RequiredArgsConstructor
 @Tag(name = "Checkpoint (КПП)", description = "Администрирование списка КПП для обслуживаемых территорий")
-@ApiResponses(value = {@ApiResponse(responseCode = "401", description = "UNAUTHORIZED: пользователь не авторизован"),
-        @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса")})
+@ApiResponses(value = {@ApiResponse(responseCode = "401", description = UNAUTHORIZED_MESSAGE),
+        @ApiResponse(responseCode = "500", description = INTERNAL_SERVER_ERROR)})
 @SecurityRequirement(name = "bearerAuth")
 public class CheckpointController {
-
-    public static final String KPP_NOT_FOUND_SINGULAR = "КПП не найден";
-    public static final String KPP_NOT_FOUND_PLURAL = "КПП не найдены";
 
     private final CheckpointService checkpointService;
 
@@ -54,7 +53,7 @@ public class CheckpointController {
             @ApiResponse(responseCode = "201", description = "КПП успешно добавлен",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CheckpointDTO.class))}),
-            @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей; не найдена указанная территория")})
+            @ApiResponse(responseCode = "400", description = FAILED_FIELD_VALIDATION_MESSAGE)})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -126,7 +125,7 @@ public class CheckpointController {
             @ApiResponse(responseCode = "200", description = "КПП успешно изменен",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CheckpointDTO.class))}),
-            @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей; не найдена указанная территория"),
+            @ApiResponse(responseCode = "400", description = FAILED_FIELD_VALIDATION_MESSAGE),
             @ApiResponse(responseCode = "404", description = KPP_NOT_FOUND_SINGULAR)})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @PutMapping

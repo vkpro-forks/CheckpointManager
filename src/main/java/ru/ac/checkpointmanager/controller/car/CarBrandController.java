@@ -31,6 +31,8 @@ import ru.ac.checkpointmanager.service.car.CarBrandService;
 
 import java.util.List;
 
+import static ru.ac.checkpointmanager.utils.Constants.*;
+
 @Slf4j
 @RestController
 @RequestMapping("api/v1/car")
@@ -38,8 +40,8 @@ import java.util.List;
 @Validated
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "CarBrand (Бренд Машины)", description = "Для обработки Брендов Авто")
-@ApiResponses(value = {@ApiResponse(responseCode = "401", description = "Произошла ошибка, Нужно авторизоваться"),
-        @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса")})
+@ApiResponses(value = {@ApiResponse(responseCode = "401", description = UNAUTHORIZED_MESSAGE),
+        @ApiResponse(responseCode = "500", description = INTERNAL_SERVER_ERROR)})
 public class CarBrandController {
 
     private final CarBrandService carBrandService;
@@ -50,7 +52,7 @@ public class CarBrandController {
             @ApiResponse(responseCode = "201", description = "Бренд Машины успешно добавлен",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CarBrand.class))}),
-            @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей.")
+            @ApiResponse(responseCode = "400", description = FAILED_FIELD_VALIDATION_MESSAGE)
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @PostMapping("/brands")
@@ -97,7 +99,7 @@ public class CarBrandController {
             @ApiResponse(responseCode = "200", description = "Бренд Машины успешно обновлен",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CarBrand.class))}),
-            @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей.")
+            @ApiResponse(responseCode = "400", description = FAILED_FIELD_VALIDATION_MESSAGE)
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @PutMapping("/brands/{id}")
