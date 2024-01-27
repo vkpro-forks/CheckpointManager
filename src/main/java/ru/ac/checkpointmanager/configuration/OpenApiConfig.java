@@ -15,6 +15,9 @@ public class OpenApiConfig {
 
     @Value("${app.version}")
     private String appVersion;
+    private static final String SWAGGER_DESCRIPTION_MESSAGE = "Аккаунты по умолчанию: " +
+            "security@chp.com, user@chp.com, " +
+            "admin@chp.com, manager@chp.com. Пароли те же.";
 
     @Bean
     @Profile("dev")
@@ -22,7 +25,7 @@ public class OpenApiConfig {
         return new OpenAPI()
                 .addServersItem(new Server().url("http://localhost:8080"))
                 .info(new Info().title("Checkpoint Manager")
-                        .description("Аккаунты по умолчанию: security@chp.com, user@chp.com, admin@chp.com, manager@chp.com. Пароли те же.")
+                        .description(SWAGGER_DESCRIPTION_MESSAGE)
                         .version(appVersion));
     }
 
@@ -32,7 +35,7 @@ public class OpenApiConfig {
         return new OpenAPI()
                 .addServersItem(new Server().url("https://checkpoint-manager.ru"))
                 .info(new Info().title("Checkpoint Manager")
-                        .description("Аккаунты по умолчанию: security@chp.com, user@chp.com, admin@chp.com, manager@chp.com. Пароли те же.")
+                        .description(SWAGGER_DESCRIPTION_MESSAGE)
                         .version(appVersion));
     }
 

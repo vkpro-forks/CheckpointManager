@@ -15,7 +15,7 @@ import ru.ac.checkpointmanager.service.car.CarDataUpdater;
 @RequestMapping("api/v1/car")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
-@PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
+@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 public class NoAutoCarUpdateDbController {
 
     private final CarDataUpdater carDataUpdater;

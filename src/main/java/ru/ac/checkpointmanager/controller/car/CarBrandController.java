@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -47,7 +48,7 @@ public class CarBrandController {
             description = "Доступ: ADMIN.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Бренд Машины успешно добавлен",
-                    content = {@Content(mediaType = "application/json",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CarBrand.class))}),
             @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей.")
     })
@@ -62,7 +63,7 @@ public class CarBrandController {
             description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Бренд Машины получен.",
-                    content = {@Content(mediaType = "application/json",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CarBrand.class))}),
             @ApiResponse(responseCode = "404", description = "Такого Бренд Машины не существует.")
     })
@@ -79,7 +80,7 @@ public class CarBrandController {
             description = "Доступ: ADMIN.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Бренд Машины успешно удален",
-                    content = {@Content(mediaType = "application/json",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CarBrand.class))}),
             @ApiResponse(responseCode = "404", description = "Такого Бренд Машины не существует.")
     })
@@ -94,7 +95,7 @@ public class CarBrandController {
             description = "Доступ: ADMIN.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Бренд Машины успешно обновлен",
-                    content = {@Content(mediaType = "application/json",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CarBrand.class))}),
             @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей.")
     })
@@ -109,7 +110,7 @@ public class CarBrandController {
             description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Список Бренд Машины получен",
-                    content = {@Content(mediaType = "application/json",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CarBrand.class))}),
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
@@ -124,7 +125,7 @@ public class CarBrandController {
             description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Список Бренд Машины получен",
-                    content = {@Content(mediaType = "application/json",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CarBrand.class))}),
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
