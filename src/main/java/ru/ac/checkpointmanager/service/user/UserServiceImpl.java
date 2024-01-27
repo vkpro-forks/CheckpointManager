@@ -36,6 +36,7 @@ import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.mapper.TerritoryMapper;
 import ru.ac.checkpointmanager.mapper.UserMapper;
+import ru.ac.checkpointmanager.model.Phone;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.avatar.Avatar;
@@ -225,20 +226,32 @@ public class UserServiceImpl implements UserService {
         foundUser.setFullName(userUpdateDTO.getFullName());
 
         if (userUpdateDTO.getMainNumber() != null) {
-            String newMainNumber = userUpdateDTO.getMainNumber();
-            if (!foundUser.getMainNumber().equals(FieldsValidation.cleanPhone(newMainNumber))) {
-                if (phoneRepository.existsByNumber(FieldsValidation.cleanPhone(newMainNumber))) {
-                    log.warn(ExceptionUtils.PHONE_EXISTS.formatted(newMainNumber));
-                    throw new PhoneAlreadyExistException(ExceptionUtils.PHONE_EXISTS.formatted(newMainNumber));
+            String newMainNumber = FieldsValidation.cleanPhone(userUpdateDTO.getMainNumber());
+            if (!foundUser.getMainNumber().equals(newMainNumber)) {
+                Optional<Phone> optionalNumber = phoneRepository.findByNumber(newMainNumber);
+                Phone phone;
+                if (optionalNumber.isEmpty()) {
+                    Phone newPhone = new Phone();
+                    newPhone.setNumber(newMainNumber);
+                    newPhone.setType(PhoneNumberType.MOBILE);
+                    newPhone.setUser(foundUser);
+                    phone = phoneRepository.save(newPhone);
+                    log.info("New phone: {} saved", newMainNumber);
+                } else {
+                    phone = optionalNumber.get();
                 }
-                foundUser.setMainNumber(FieldsValidation.cleanPhone(newMainNumber));
+                foundUser.setMainNumber(phone.getNumber());
+                if (!phone.getUser().getId().equals(foundUser.getId())) {
+                    throw new PhoneAlreadyExistException(
+                            ExceptionUtils.PHONE_BELONGS_TO_ANOTHER_USER.formatted(newMainNumber));
+                }
             }
         }
-
         userRepository.save(foundUser);
         log.info("[User {}] updated", foundUser.getId());
 
         return userMapper.toUserResponseDTO(foundUser);
+
     }
 
     /**

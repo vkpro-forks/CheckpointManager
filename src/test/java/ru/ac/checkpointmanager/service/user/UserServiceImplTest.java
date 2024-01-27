@@ -4,7 +4,9 @@ import jakarta.persistence.EntityNotFoundException;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -35,6 +37,7 @@ import ru.ac.checkpointmanager.exception.PhoneAlreadyExistException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.mapper.TerritoryMapper;
 import ru.ac.checkpointmanager.mapper.UserMapper;
+import ru.ac.checkpointmanager.model.Phone;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.avatar.Avatar;
@@ -83,6 +86,9 @@ class UserServiceImplTest {
 
     @InjectMocks
     UserServiceImpl userService;
+
+    @Captor
+    ArgumentCaptor<User> userArgumentCaptor;
 
     @Test
     void shouldFindById() {
@@ -214,13 +220,14 @@ class UserServiceImplTest {
     }
 
     @Test
-    void shouldUpdateUser() {
+    void updateUser_NoMainNumberInDto_UpdateAndReturn() {
         User user = TestUtils.getUser();
         UUID userId = user.getId();
         UserResponseDTO userResponseDTO = TestUtils.getUserResponseDTO();
         userResponseDTO.setId(userId);
         UserUpdateDTO userUpdateDTO = TestUtils.getUserUpdateDTO();
         userUpdateDTO.setId(userId);
+        userUpdateDTO.setMainNumber(null);
 
         Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         Mockito.when(userMapper.toUserResponseDTO(user)).thenReturn(userResponseDTO);
@@ -250,7 +257,76 @@ class UserServiceImplTest {
         Assertions.assertThat(result).isNotNull().isEqualTo(userResponseDTO);
         Mockito.verify(userRepository).save(user);
         Mockito.verify(userMapper).toUserResponseDTO(user);
-        Mockito.verify(phoneRepository, Mockito.never()).existsByNumber(Mockito.any());
+        Mockito.verify(phoneRepository, Mockito.never()).findByNumber(Mockito.any());
+    }
+
+    @Test
+    void updateUser_IfNewPhoneBelongsToUserButNotMain_BindThisPhoneAndReturn() {
+        User user = TestUtils.getUser();
+        UUID userId = user.getId();
+        UserUpdateDTO userUpdateDTO = TestUtils.getUserUpdateDTO();
+        userUpdateDTO.setId(userId);
+        userUpdateDTO.setMainNumber(TestUtils.PHONE_NUM);
+        Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        Phone phone = TestUtils.getPhone();
+        String cleanedNewPhone = FieldsValidation.cleanPhone(userUpdateDTO.getMainNumber());
+        phone.setNumber(cleanedNewPhone);
+        phone.setUser(user);
+        Mockito.when(phoneRepository.findByNumber(Mockito.any())).thenReturn(Optional.of(phone));
+
+        userService.updateUser(userUpdateDTO);
+
+        Mockito.verify(userRepository).save(userArgumentCaptor.capture());
+        Assertions.assertThat(userArgumentCaptor.getValue().getMainNumber()).isEqualTo(cleanedNewPhone);
+        Mockito.verify(phoneRepository).findByNumber(cleanedNewPhone);
+        Mockito.verify(phoneRepository, Mockito.never()).save(Mockito.any());
+    }
+
+    @Test
+    void updateUser_IfNewPhoneNotInDb_UpdateWithSavingPhoneAndReturn() {
+        User user = TestUtils.getUser();
+        UUID userId = user.getId();
+        UserUpdateDTO userUpdateDTO = TestUtils.getUserUpdateDTO();
+        userUpdateDTO.setId(userId);
+        userUpdateDTO.setMainNumber(TestUtils.PHONE_NUM);
+        Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        String cleanedNewPhone = FieldsValidation.cleanPhone(userUpdateDTO.getMainNumber());
+        Phone phone = TestUtils.getPhone();
+        phone.setNumber(cleanedNewPhone);
+        phone.setUser(user);
+        Mockito.when(phoneRepository.findByNumber(Mockito.any())).thenReturn(Optional.empty());
+        Mockito.when(phoneRepository.save(Mockito.any())).thenReturn(phone);
+
+        userService.updateUser(userUpdateDTO);
+
+        Mockito.verify(userRepository).save(userArgumentCaptor.capture());
+        Assertions.assertThat(userArgumentCaptor.getValue().getMainNumber()).isEqualTo(cleanedNewPhone);
+        Mockito.verify(phoneRepository).findByNumber(cleanedNewPhone);
+        Mockito.verify(phoneRepository).save(Mockito.any());
+    }
+
+    @Test
+    void updateUser_FoundPhoneBelongsToAnotherUser_ThrowException() {
+        User user = TestUtils.getUser();
+        UUID userId = user.getId();
+        UserUpdateDTO userUpdateDTO = TestUtils.getUserUpdateDTO();
+        userUpdateDTO.setId(userId);
+        userUpdateDTO.setMainNumber(TestUtils.PHONE_NUM);
+        Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        String cleanedNewPhone = FieldsValidation.cleanPhone(userUpdateDTO.getMainNumber());
+        Phone phone = TestUtils.getPhone();
+        phone.setNumber(cleanedNewPhone);
+        User anotherUser = new User();
+        anotherUser.setId(UUID.randomUUID());
+        phone.setUser(anotherUser);
+        Mockito.when(phoneRepository.findByNumber(Mockito.any())).thenReturn(Optional.of(phone));
+
+        Assertions.assertThatExceptionOfType(PhoneAlreadyExistException.class)
+                .isThrownBy(() -> userService.updateUser(userUpdateDTO))
+                .isInstanceOf(ObjectAlreadyExistsException.class)
+                .withMessage(ExceptionUtils.PHONE_BELONGS_TO_ANOTHER_USER.formatted(cleanedNewPhone));
+        Mockito.verify(phoneRepository, Mockito.never()).save(Mockito.any());
+        Mockito.verify(userRepository, Mockito.never()).save(Mockito.any());
     }
 
     @Test
