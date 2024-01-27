@@ -16,7 +16,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.dto.user.AuthResponseDTO;
@@ -207,7 +206,8 @@ public class UserServiceImpl implements UserService {
      * @param userUpdateDTO DTO пользователя, содержащее обновленные данные. Должно включать идентификатор пользователя,
      *                      а также может включать новое полное имя и основной номер телефона.
      * @return UserResponseDTO, содержащий обновленные данные пользователя.
-     * @throws UserNotFoundException если пользователь с предоставленным идентификатором не найден.
+     * @throws UserNotFoundException      если пользователь с предоставленным идентификатором не найден.
+     * @throws PhoneAlreadyExistException если указанный номер телефона принадлежит другому пользователю
      * @see UserUpdateDTO
      * @see UserResponseDTO
      */
@@ -242,6 +242,7 @@ public class UserServiceImpl implements UserService {
                 }
                 foundUser.setMainNumber(phone.getNumber());
                 if (!phone.getUser().getId().equals(foundUser.getId())) {
+                    log.warn(ExceptionUtils.PHONE_BELONGS_TO_ANOTHER_USER.formatted(newMainNumber));
                     throw new PhoneAlreadyExistException(
                             ExceptionUtils.PHONE_BELONGS_TO_ANOTHER_USER.formatted(newMainNumber));
                 }
