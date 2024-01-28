@@ -31,8 +31,8 @@ import ru.ac.checkpointmanager.service.phone.PhoneService;
 import java.util.Collection;
 import java.util.UUID;
 
-import static ru.ac.checkpointmanager.utils.Constants.INTERNAL_SERVER_ERROR;
-import static ru.ac.checkpointmanager.utils.Constants.UNAUTHORIZED_MESSAGE;
+import static ru.ac.checkpointmanager.utils.SwaggerConstants.INTERNAL_SERVER_ERROR_MSG;
+import static ru.ac.checkpointmanager.utils.SwaggerConstants.UNAUTHORIZED_MSG;
 
 
 @RestController
@@ -43,9 +43,9 @@ import static ru.ac.checkpointmanager.utils.Constants.UNAUTHORIZED_MESSAGE;
 @Tag(name = "Телефоны пользователей", description = "API для управления телефонными номерами пользователей")
 @ApiResponses(value = {
         @ApiResponse(responseCode = "401",
-                description = UNAUTHORIZED_MESSAGE),
+                description = UNAUTHORIZED_MSG),
         @ApiResponse(responseCode = "500",
-                description = INTERNAL_SERVER_ERROR)})
+                description = INTERNAL_SERVER_ERROR_MSG)})
 public class PhoneController {
 
     private final PhoneService phoneService;

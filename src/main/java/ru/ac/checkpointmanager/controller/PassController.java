@@ -39,16 +39,16 @@ import ru.ac.checkpointmanager.service.passes.PassService;
 
 import java.util.UUID;
 
-import static ru.ac.checkpointmanager.utils.Constants.INTERNAL_SERVER_ERROR;
-import static ru.ac.checkpointmanager.utils.Constants.UNAUTHORIZED_MESSAGE;
+import static ru.ac.checkpointmanager.utils.SwaggerConstants.INTERNAL_SERVER_ERROR_MSG;
+import static ru.ac.checkpointmanager.utils.SwaggerConstants.UNAUTHORIZED_MSG;
 
 @RestController
 @RequestMapping("api/v1/pass")
 @RequiredArgsConstructor
 @Validated
 @Tag(name = "Pass (пропуска)", description = "Операции с пропусками для машин и людей")
-@ApiResponses(value = {@ApiResponse(responseCode = "401", description = UNAUTHORIZED_MESSAGE),
-        @ApiResponse(responseCode = "500", description = INTERNAL_SERVER_ERROR)})
+@ApiResponses(value = {@ApiResponse(responseCode = "401", description = UNAUTHORIZED_MSG),
+        @ApiResponse(responseCode = "500", description = INTERNAL_SERVER_ERROR_MSG)})
 @SecurityRequirement(name = "bearerAuth")
 public class PassController {
 

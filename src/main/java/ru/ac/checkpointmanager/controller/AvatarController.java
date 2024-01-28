@@ -33,7 +33,7 @@ import ru.ac.checkpointmanager.validation.annotation.AvatarImageCheck;
 
 import java.util.UUID;
 
-import static ru.ac.checkpointmanager.utils.Constants.*;
+import static ru.ac.checkpointmanager.utils.SwaggerConstants.*;
 
 @Slf4j
 @RestController
@@ -43,9 +43,9 @@ import static ru.ac.checkpointmanager.utils.Constants.*;
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Аватары для объектов", description = "User и Territory")
 @ApiResponses(value = {
-        @ApiResponse(responseCode = "401", description = UNAUTHORIZED_MESSAGE,
+        @ApiResponse(responseCode = "401", description = UNAUTHORIZED_MSG,
                 content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
-        @ApiResponse(responseCode = "500", description = INTERNAL_SERVER_ERROR,
+        @ApiResponse(responseCode = "500", description = INTERNAL_SERVER_ERROR_MSG,
                 content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
 })
 public class AvatarController {

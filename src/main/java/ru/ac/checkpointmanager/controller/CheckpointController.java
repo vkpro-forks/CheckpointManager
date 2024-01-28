@@ -32,15 +32,15 @@ import ru.ac.checkpointmanager.service.checkpoints.CheckpointService;
 import java.util.List;
 import java.util.UUID;
 
-import static ru.ac.checkpointmanager.utils.Constants.*;
+import static ru.ac.checkpointmanager.utils.SwaggerConstants.*;
 
 @RestController
 @RequestMapping("api/v1/checkpoint")
 @Validated
 @RequiredArgsConstructor
 @Tag(name = "Checkpoint (КПП)", description = "Администрирование списка КПП для обслуживаемых территорий")
-@ApiResponses(value = {@ApiResponse(responseCode = "401", description = UNAUTHORIZED_MESSAGE),
-        @ApiResponse(responseCode = "500", description = INTERNAL_SERVER_ERROR)})
+@ApiResponses(value = {@ApiResponse(responseCode = "401", description = UNAUTHORIZED_MSG),
+        @ApiResponse(responseCode = "500", description = INTERNAL_SERVER_ERROR_MSG)})
 @SecurityRequirement(name = "bearerAuth")
 public class CheckpointController {
 

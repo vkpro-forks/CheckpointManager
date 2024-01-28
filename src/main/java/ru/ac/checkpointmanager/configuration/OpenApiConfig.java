@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
-import static ru.ac.checkpointmanager.utils.Constants.SWAGGER_DESCRIPTION_MESSAGE;
+import static ru.ac.checkpointmanager.utils.SwaggerConstants.SWAGGER_DESCRIPTION_MESSAGE;
 
 
 @Configuration
