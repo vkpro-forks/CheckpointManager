@@ -34,7 +34,23 @@ import ru.ac.checkpointmanager.service.car.CarService;
 import java.util.List;
 import java.util.UUID;
 
-import static ru.ac.checkpointmanager.utils.Constants.*;
+import static ru.ac.checkpointmanager.utils.Constants.ACCESS_ADMIN_MESSAGE;
+import static ru.ac.checkpointmanager.utils.Constants.ACCESS_ALL_ROLES_MESSAGE;
+import static ru.ac.checkpointmanager.utils.Constants.ADD_CAR_MESSAGE;
+import static ru.ac.checkpointmanager.utils.Constants.CAR_ADDED_SUCCESS_MESSAGE;
+import static ru.ac.checkpointmanager.utils.Constants.CAR_DELETED_SUCCESS_MESSAGE;
+import static ru.ac.checkpointmanager.utils.Constants.CAR_FOUND_SUCCESS_MESSAGE;
+import static ru.ac.checkpointmanager.utils.Constants.CAR_LIST_RECEIVED_MESSAGE;
+import static ru.ac.checkpointmanager.utils.Constants.CAR_NOT_EXIST_MESSAGE;
+import static ru.ac.checkpointmanager.utils.Constants.CAR_UPDATED_SUCCESS_MESSAGE;
+import static ru.ac.checkpointmanager.utils.Constants.DELETE_CAR_MESSAGE;
+import static ru.ac.checkpointmanager.utils.Constants.FAILED_FIELD_VALIDATION_MESSAGE;
+import static ru.ac.checkpointmanager.utils.Constants.FIND_CAR_BY_PHONE_NUMBER_MESSAGE;
+import static ru.ac.checkpointmanager.utils.Constants.GET_ALL_CARS_MESSAGE;
+import static ru.ac.checkpointmanager.utils.Constants.GET_CARS_BY_USER_MESSAGE;
+import static ru.ac.checkpointmanager.utils.Constants.INTERNAL_SERVER_ERROR;
+import static ru.ac.checkpointmanager.utils.Constants.UNAUTHORIZED_MESSAGE;
+import static ru.ac.checkpointmanager.utils.Constants.UPDATE_CAR_MESSAGE;
 
 @Slf4j
 @RestController

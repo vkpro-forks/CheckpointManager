@@ -31,7 +31,24 @@ import ru.ac.checkpointmanager.service.car.CarBrandService;
 
 import java.util.List;
 
-import static ru.ac.checkpointmanager.utils.Constants.*;
+import static ru.ac.checkpointmanager.utils.Constants.ACCESS_ADMIN_MESSAGE;
+import static ru.ac.checkpointmanager.utils.Constants.ACCESS_ALL_ROLES_MESSAGE;
+import static ru.ac.checkpointmanager.utils.Constants.ADD_CAR_BRAND_MESSAGE;
+import static ru.ac.checkpointmanager.utils.Constants.BRAND_NOT_EXIST_MESSAGE;
+import static ru.ac.checkpointmanager.utils.Constants.BRAND_PROCESSING_MESSAGE;
+import static ru.ac.checkpointmanager.utils.Constants.CAR_BRANDS_LIST_RECEIVED_MESSAGE;
+import static ru.ac.checkpointmanager.utils.Constants.CAR_BRAND_ADDED_SUCCESS_MESSAGE;
+import static ru.ac.checkpointmanager.utils.Constants.CAR_BRAND_DELETED_SUCCESS_MESSAGE;
+import static ru.ac.checkpointmanager.utils.Constants.CAR_BRAND_RECEIVED_MESSAGE;
+import static ru.ac.checkpointmanager.utils.Constants.CAR_BRAND_UPDATED_SUCCESS_MESSAGE;
+import static ru.ac.checkpointmanager.utils.Constants.DELETE_CAR_BRAND_MESSAGE;
+import static ru.ac.checkpointmanager.utils.Constants.FAILED_FIELD_VALIDATION_MESSAGE;
+import static ru.ac.checkpointmanager.utils.Constants.GET_ALL_CAR_BRANDS_MESSAGE;
+import static ru.ac.checkpointmanager.utils.Constants.GET_CAR_BRAND_BY_ID_MESSAGE;
+import static ru.ac.checkpointmanager.utils.Constants.GET_CAR_BRAND_BY_NAME_PART_MESSAGE;
+import static ru.ac.checkpointmanager.utils.Constants.INTERNAL_SERVER_ERROR;
+import static ru.ac.checkpointmanager.utils.Constants.UNAUTHORIZED_MESSAGE;
+import static ru.ac.checkpointmanager.utils.Constants.UPDATE_CAR_BRAND_MESSAGE;
 
 @Slf4j
 @RestController
