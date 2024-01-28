@@ -42,7 +42,7 @@ import static ru.ac.checkpointmanager.utils.Constants.*;
 @RequiredArgsConstructor
 @Validated
 @SecurityRequirement(name = "bearerAuth")
-@Tag(name = "Car (Машина)", description = "Для обработки списка машин")
+@Tag(name = "Car (Машина)", description = ACCESS_ALL_ROLES_MESSAGE)
 @ApiResponses(value = {@ApiResponse(responseCode = "401", description = UNAUTHORIZED_MESSAGE,
         content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(responseCode = "500", description = INTERNAL_SERVER_ERROR,
@@ -53,10 +53,10 @@ public class CarController {
     private final CarMapper mapper;
     private final CarService carService;
 
-    @Operation(summary = "Добавить новую машину",
-            description = "Доступ: ADMIN.")
+    @Operation(summary = ADD_CAR_MESSAGE,
+            description = ACCESS_ALL_ROLES_MESSAGE)
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Машина успешно добавлен",
+            @ApiResponse(responseCode = "201", description = CAR_ADDED_SUCCESS_MESSAGE,
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CarDTO.class))}),
             @ApiResponse(responseCode = "400", description = FAILED_FIELD_VALIDATION_MESSAGE,
@@ -71,10 +71,10 @@ public class CarController {
         return mapper.toCarDTO(newCar);
     }
 
-    @Operation(summary = "Обновить новую машину",
-            description = "Доступ: ADMIN.")
+    @Operation(summary = UPDATE_CAR_MESSAGE,
+            description = ACCESS_ADMIN_MESSAGE)
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Машина успешно обновлена",
+            @ApiResponse(responseCode = "200", description = CAR_UPDATED_SUCCESS_MESSAGE,
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CarDTO.class))}),
             @ApiResponse(responseCode = "400", description = FAILED_FIELD_VALIDATION_MESSAGE,
@@ -87,11 +87,11 @@ public class CarController {
         return carService.updateCar(carId, updateCarDto);
     }
 
-    @Operation(summary = "Удалить машину",
-            description = "Доступ: ADMIN.")
+    @Operation(summary = DELETE_CAR_MESSAGE,
+            description = ACCESS_ADMIN_MESSAGE)
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Машина успешно удалена"),
-            @ApiResponse(responseCode = "404", description = "Такой машины не существует.",
+            @ApiResponse(responseCode = "204", description = CAR_DELETED_SUCCESS_MESSAGE),
+            @ApiResponse(responseCode = "404", description = CAR_NOT_EXIST_MESSAGE,
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
@@ -101,10 +101,10 @@ public class CarController {
         carService.deleteCar(carId);
     }
 
-    @Operation(summary = "Получение всех машин.",
-            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
+    @Operation(summary = GET_ALL_CARS_MESSAGE,
+            description = ACCESS_ALL_ROLES_MESSAGE)
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Список машин получен",
+            @ApiResponse(responseCode = "200", description = CAR_LIST_RECEIVED_MESSAGE,
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CarDTO.class))}),
     })
@@ -115,10 +115,10 @@ public class CarController {
         return mapper.toCarDTOs(carList);
     }
 
-    @Operation(summary = "Получение всех машин по user.",
-            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
+    @Operation(summary = GET_CARS_BY_USER_MESSAGE,
+            description = ACCESS_ALL_ROLES_MESSAGE)
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Список машин получен",
+            @ApiResponse(responseCode = "200", description = CAR_LIST_RECEIVED_MESSAGE,
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CarDTO.class))}),
     })
@@ -129,11 +129,10 @@ public class CarController {
         return mapper.toCarDTOs(cars);
     }
 
-    @Operation(summary = "Найти машину по номеру телефона.",
-            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
+    @Operation(summary = FIND_CAR_BY_PHONE_NUMBER_MESSAGE,
+            description = ACCESS_ALL_ROLES_MESSAGE)
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Машина успешно найдена. " +
-                    "Может вернуть пустой список если машины не найдены.",
+            @ApiResponse(responseCode = "200", description = CAR_FOUND_SUCCESS_MESSAGE,
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CarDTO.class))}),
     })

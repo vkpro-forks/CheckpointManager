@@ -39,17 +39,17 @@ import static ru.ac.checkpointmanager.utils.Constants.*;
 @RequiredArgsConstructor
 @Validated
 @SecurityRequirement(name = "bearerAuth")
-@Tag(name = "CarBrand (Бренд Машины)", description = "Для обработки Брендов Авто")
+@Tag(name = "CarBrand (Бренд Машины)", description = BRAND_PROCESSING_MESSAGE)
 @ApiResponses(value = {@ApiResponse(responseCode = "401", description = UNAUTHORIZED_MESSAGE),
         @ApiResponse(responseCode = "500", description = INTERNAL_SERVER_ERROR)})
 public class CarBrandController {
 
     private final CarBrandService carBrandService;
 
-    @Operation(summary = "Добавить новый Бренд Машины",
-            description = "Доступ: ADMIN.")
+    @Operation(summary = ADD_CAR_BRAND_MESSAGE,
+            description = ACCESS_ADMIN_MESSAGE)
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Бренд Машины успешно добавлен",
+            @ApiResponse(responseCode = "201", description = CAR_BRAND_ADDED_SUCCESS_MESSAGE,
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CarBrand.class))}),
             @ApiResponse(responseCode = "400", description = FAILED_FIELD_VALIDATION_MESSAGE)
@@ -61,13 +61,13 @@ public class CarBrandController {
         return carBrandService.addBrand(brand);
     }
 
-    @Operation(summary = "Получение Бренд Машины по id",
-            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
+    @Operation(summary = GET_CAR_BRAND_BY_ID_MESSAGE,
+            description = ACCESS_ALL_ROLES_MESSAGE)
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Бренд Машины получен.",
+            @ApiResponse(responseCode = "200", description = CAR_BRAND_RECEIVED_MESSAGE,
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CarBrand.class))}),
-            @ApiResponse(responseCode = "404", description = "Такого Бренд Машины не существует.")
+            @ApiResponse(responseCode = "404", description = BRAND_NOT_EXIST_MESSAGE)
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/brands/{id}")
@@ -78,13 +78,13 @@ public class CarBrandController {
     }
 
 
-    @Operation(summary = "Удалить Бренд Машины",
-            description = "Доступ: ADMIN.")
+    @Operation(summary = DELETE_CAR_BRAND_MESSAGE,
+            description = ACCESS_ADMIN_MESSAGE)
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Бренд Машины успешно удален",
+            @ApiResponse(responseCode = "204", description = CAR_BRAND_DELETED_SUCCESS_MESSAGE,
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CarBrand.class))}),
-            @ApiResponse(responseCode = "404", description = "Такого Бренд Машины не существует.")
+            @ApiResponse(responseCode = "404", description = BRAND_NOT_EXIST_MESSAGE)
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @DeleteMapping("/brands/{id}")
@@ -93,10 +93,10 @@ public class CarBrandController {
         carBrandService.deleteBrand(id);
     }
 
-    @Operation(summary = "Обновить новый Бренд Машины",
-            description = "Доступ: ADMIN.")
+    @Operation(summary = UPDATE_CAR_BRAND_MESSAGE,
+            description = ACCESS_ADMIN_MESSAGE)
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Бренд Машины успешно обновлен",
+            @ApiResponse(responseCode = "200", description = CAR_BRAND_UPDATED_SUCCESS_MESSAGE,
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CarBrand.class))}),
             @ApiResponse(responseCode = "400", description = FAILED_FIELD_VALIDATION_MESSAGE)
@@ -108,10 +108,10 @@ public class CarBrandController {
         return carBrandService.updateBrand(id, carBrandDetails);
     }
 
-    @Operation(summary = "Получение всех Бренд Машины.",
-            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
+    @Operation(summary = GET_ALL_CAR_BRANDS_MESSAGE,
+            description = ACCESS_ALL_ROLES_MESSAGE)
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Список Бренд Машины получен",
+            @ApiResponse(responseCode = "200", description = CAR_BRANDS_LIST_RECEIVED_MESSAGE,
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CarBrand.class))}),
     })
@@ -123,10 +123,10 @@ public class CarBrandController {
         return new ResponseEntity<>(allBrands, HttpStatus.OK);
     }
 
-    @Operation(summary = "Получение Бренд Машины по части имени.",
-            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
+    @Operation(summary = GET_CAR_BRAND_BY_NAME_PART_MESSAGE,
+            description = ACCESS_ALL_ROLES_MESSAGE)
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Список Бренд Машины получен",
+            @ApiResponse(responseCode = "200", description = CAR_BRANDS_LIST_RECEIVED_MESSAGE,
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CarBrand.class))}),
     })
