@@ -1,5 +1,7 @@
 package ru.ac.checkpointmanager.model.passes;
 
+import ru.ac.checkpointmanager.exception.pass.InvalidPassStatusException;
+
 /**
  * Возможные статусы пропусков
  * DELAYED - (дефолтное значение) созданный пропуск, который начнет действовать позже
@@ -24,8 +26,16 @@ public enum PassStatus {
         this.description = description;
     }
 
+    public static PassStatus fromString(String value) {
+        for (PassStatus s : PassStatus.values()) {
+            if (s.name().equalsIgnoreCase(value)) {
+                return s;
+            }
+        }
+        throw new InvalidPassStatusException("No PassStatus for string value: " + value);
+    }
+
     public String getDescription() {
         return description;
     }
-
 }
