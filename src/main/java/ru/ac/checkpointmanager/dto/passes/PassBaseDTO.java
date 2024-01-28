@@ -1,6 +1,7 @@
 package ru.ac.checkpointmanager.dto.passes;
 
 import jakarta.validation.GroupSequence;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -37,8 +38,10 @@ public abstract class PassBaseDTO {
     @Future
     private LocalDateTime endTime;
 
+    @Valid
     private VisitorDTO visitor;
 
+    @Valid
     private CarDTO car;
 
 }

@@ -30,7 +30,7 @@ import java.util.stream.Stream;
 @Import({ValidationTestConfiguration.class, OpenAllEndpointsTestConfiguration.class})
 @WithMockUser(roles = {"ADMIN"})
 @ActiveProfiles("test")
-public class PhoneControllerValidationIntegrationTest {
+class PhoneControllerValidationIntegrationTest {
 
     private static final String TYPE = "type";
 
@@ -49,6 +49,7 @@ public class PhoneControllerValidationIntegrationTest {
     @SneakyThrows
     void createPhone_WrongFormat_HandleAndReturnValidationError(PhoneDTO phoneDTO, String field) {
         String phoneDTOToPass = TestUtils.jsonStringFromObject(phoneDTO);
+
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PHONE_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(phoneDTOToPass));

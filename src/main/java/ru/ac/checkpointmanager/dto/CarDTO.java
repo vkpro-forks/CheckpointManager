@@ -1,12 +1,13 @@
 package ru.ac.checkpointmanager.dto;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.ac.checkpointmanager.model.car.CarBrand;
+import ru.ac.checkpointmanager.utils.ValidationUtils;
 
 import java.util.UUID;
 
@@ -23,8 +24,11 @@ public class CarDTO {
     private String licensePlate;
 
     @NotNull
+    @Valid
     private CarBrandDTO brand;
 
-    private String phone;//можно передать авто без телефона?
+    @Size(min = 11, max = 20)
+    @Pattern(regexp = ValidationUtils.PHONE_REGEXP)
+    private String phone;
 
 }

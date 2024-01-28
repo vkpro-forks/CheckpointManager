@@ -61,7 +61,7 @@ class PassServiceImplTest {
     ArgumentCaptor<Pass> passArgumentCaptor;
 
     @Test
-    void shouldAddPass() {
+    void addPass_AllOk_SaveAndReturn() {
         PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
         UUID userId = passCreateDTO.getUserId();
         User user = TestUtils.getUser();
@@ -69,6 +69,7 @@ class PassServiceImplTest {
         Mockito.when(passRepository.findAllPassesByUserId(userId)).thenReturn(Collections.emptyList());
         Pass pass = new PassAuto();
         pass.setTerritory(TestUtils.getTerritory());
+        pass.setId(TestUtils.PASS_ID);
         pass.setUser(user);
         pass.setStartTime(passCreateDTO.getStartTime());
         pass.setEndTime(passCreateDTO.getEndTime());

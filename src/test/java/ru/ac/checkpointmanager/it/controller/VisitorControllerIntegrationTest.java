@@ -99,7 +99,7 @@ class VisitorControllerIntegrationTest extends RedisAndPostgresTestContainersCon
     @Test
     @SneakyThrows
     void getVisitor_AllOk_ReturnVisitor() {
-        Visitor visitor = TestUtils.getVisitorUnsaved();
+        Visitor visitor = TestUtils.getVisitorRandomUUID();
         Visitor savedVisitor = visitorRepository.saveAndFlush(visitor);
         UUID visitorId = savedVisitor.getId();
 
@@ -126,10 +126,10 @@ class VisitorControllerIntegrationTest extends RedisAndPostgresTestContainersCon
     @Test
     @SneakyThrows
     void updateVisitor_AllOk_ReturnVisitor() {
-        Visitor visitor = TestUtils.getVisitorUnsaved();
+        Visitor visitor = TestUtils.getVisitorRandomUUID();
         Visitor savedVisitor = visitorRepository.saveAndFlush(visitor);
         UUID visitorId = savedVisitor.getId();
-        Visitor visitorForUpdate = TestUtils.getVisitorUnsaved();
+        Visitor visitorForUpdate = TestUtils.getVisitorRandomUUID();
         visitorForUpdate.setName("Huggy Wuggy");
         String visitorDTOToSend = TestUtils.jsonStringFromObject(visitorForUpdate);
 
@@ -162,7 +162,7 @@ class VisitorControllerIntegrationTest extends RedisAndPostgresTestContainersCon
     @Test
     @SneakyThrows
     void deleteVisitor_AllOk_DeleteAndReturnNoContent() {
-        Visitor visitor = TestUtils.getVisitorUnsaved();
+        Visitor visitor = TestUtils.getVisitorRandomUUID();
         Visitor savedVisitor = visitorRepository.saveAndFlush(visitor);
         UUID visitorId = savedVisitor.getId();
 
@@ -188,12 +188,12 @@ class VisitorControllerIntegrationTest extends RedisAndPostgresTestContainersCon
     @Test
     @SneakyThrows
     void searchByPhonePart_IfTwoMatches_ReturnListOfVisitors() {
-        Visitor visitorOneInList = TestUtils.getVisitorUnsaved();
+        Visitor visitorOneInList = TestUtils.getVisitorRandomUUID();
         visitorRepository.save(visitorOneInList);
-        Visitor visitorShouldNotBeInList = TestUtils.getVisitorUnsaved();
+        Visitor visitorShouldNotBeInList = TestUtils.getVisitorRandomUUID();
         visitorShouldNotBeInList.setPhone("+123 123 22 33");
         visitorRepository.save(visitorShouldNotBeInList);
-        Visitor visitorTwoInList = TestUtils.getVisitorUnsaved();
+        Visitor visitorTwoInList = TestUtils.getVisitorRandomUUID();
         visitorTwoInList.setPhone("+79167868122");
         visitorRepository.save(visitorTwoInList);
         visitorRepository.flush();
@@ -213,7 +213,7 @@ class VisitorControllerIntegrationTest extends RedisAndPostgresTestContainersCon
     @Test
     @SneakyThrows
     void searchByPhonePart_IfNoMatches_ReturnEmptyList() {
-        Visitor visitorShouldNotBeInList = TestUtils.getVisitorUnsaved();
+        Visitor visitorShouldNotBeInList = TestUtils.getVisitorRandomUUID();
         visitorShouldNotBeInList.setPhone("+123 123 22 33");
         visitorRepository.saveAndFlush(visitorShouldNotBeInList);
 
@@ -228,12 +228,12 @@ class VisitorControllerIntegrationTest extends RedisAndPostgresTestContainersCon
     @Test
     @SneakyThrows
     void searchByNamePart_IfTwoMatches_ReturnListOfVisitors() {
-        Visitor visitorOneInList = TestUtils.getVisitorUnsaved();
+        Visitor visitorOneInList = TestUtils.getVisitorRandomUUID();
         visitorRepository.save(visitorOneInList);
-        Visitor visitorShouldNotBeInList = TestUtils.getVisitorUnsaved();
+        Visitor visitorShouldNotBeInList = TestUtils.getVisitorRandomUUID();
         visitorShouldNotBeInList.setName("Bubuka");
         visitorRepository.save(visitorShouldNotBeInList);
-        Visitor visitorTwoInList = TestUtils.getVisitorUnsaved();
+        Visitor visitorTwoInList = TestUtils.getVisitorRandomUUID();
         visitorTwoInList.setName("UserPon");
         visitorRepository.save(visitorTwoInList);
         visitorRepository.flush();
@@ -253,7 +253,7 @@ class VisitorControllerIntegrationTest extends RedisAndPostgresTestContainersCon
     @Test
     @SneakyThrows
     void searchByNamePart_IfNoMatches_ReturnListEmptyList() {
-        Visitor visitorShouldNotBeInList = TestUtils.getVisitorUnsaved();
+        Visitor visitorShouldNotBeInList = TestUtils.getVisitorRandomUUID();
         visitorShouldNotBeInList.setName("Bubuka");
         visitorRepository.saveAndFlush(visitorShouldNotBeInList);
 
@@ -274,7 +274,7 @@ class VisitorControllerIntegrationTest extends RedisAndPostgresTestContainersCon
         User savedUser = userRepository.saveAndFlush(user);
         territory.setUsers(List.of(savedUser));
         Territory savedTerritory = territoryRepository.saveAndFlush(territory);
-        Visitor visitorUnsaved = TestUtils.getVisitorUnsaved();
+        Visitor visitorUnsaved = TestUtils.getVisitorRandomUUID();
         Visitor savedVisitor = visitorRepository.saveAndFlush(visitorUnsaved);
         PassWalk passWalk = TestUtils.getSimpleActiveOneTimePassWalkFor3Hours(savedUser, savedTerritory, savedVisitor);
         PassWalk savedPass = passRepository.saveAndFlush(passWalk);
@@ -318,7 +318,7 @@ class VisitorControllerIntegrationTest extends RedisAndPostgresTestContainersCon
     @Test
     @SneakyThrows
     void searchByPassId_IfPassNotExists_HandleAndReturnNotFound() {
-        Visitor visitorUnsaved = TestUtils.getVisitorUnsaved();
+        Visitor visitorUnsaved = TestUtils.getVisitorRandomUUID();
         visitorRepository.saveAndFlush(visitorUnsaved);
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
@@ -339,11 +339,11 @@ class VisitorControllerIntegrationTest extends RedisAndPostgresTestContainersCon
         User savedUser = userRepository.saveAndFlush(user);
         territory.setUsers(List.of(savedUser));
         Territory savedTerritory = territoryRepository.saveAndFlush(territory);
-        Visitor visitorUnsaved = TestUtils.getVisitorUnsaved();
+        Visitor visitorUnsaved = TestUtils.getVisitorRandomUUID();
         Visitor savedVisitor = visitorRepository.saveAndFlush(visitorUnsaved);
         PassWalk passWalk = TestUtils.getSimpleActiveOneTimePassWalkFor3Hours(savedUser, savedTerritory, savedVisitor);
         passRepository.saveAndFlush(passWalk);
-        Visitor anotherVisitor = TestUtils.getVisitorUnsaved();
+        Visitor anotherVisitor = TestUtils.getVisitorRandomUUID();
         anotherVisitor.setName("Huggy Wuggy");
         visitorRepository.saveAndFlush(visitorUnsaved);
 
@@ -374,7 +374,7 @@ class VisitorControllerIntegrationTest extends RedisAndPostgresTestContainersCon
         Car savedCar = carRepository.saveAndFlush(car);
         PassAuto pass = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
         passRepository.saveAndFlush(pass);
-        Visitor anotherVisitor = TestUtils.getVisitorUnsaved();
+        Visitor anotherVisitor = TestUtils.getVisitorRandomUUID();
         anotherVisitor.setName("Huggy Wuggy");
         visitorRepository.saveAndFlush(anotherVisitor);
 
@@ -390,7 +390,7 @@ class VisitorControllerIntegrationTest extends RedisAndPostgresTestContainersCon
     @Test
     @SneakyThrows
     void searchByUserId_NoUserWithThisId_ReturnEmptyList() {
-        Visitor anotherVisitor = TestUtils.getVisitorUnsaved();
+        Visitor anotherVisitor = TestUtils.getVisitorRandomUUID();
         anotherVisitor.setName("Huggy Wuggy");
         visitorRepository.saveAndFlush(anotherVisitor);
 

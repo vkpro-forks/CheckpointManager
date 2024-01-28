@@ -291,6 +291,22 @@ class PassRepositoryIntegrationTest {
                 .flatExtracting(Pass::getId).contains(savedPassWalk.getId());
     }
 
+    @Test
+    void savePassWalkWithVisitor_VisitorNotInDB_SaveAndReturn() {
+        saveUserTerritory();
+        Visitor visitor = new Visitor();
+        visitor.setId(TestUtils.VISITOR_ID);
+        visitor.setName(TestUtils.FULL_NAME);
+        visitor.setPhone(TestUtils.PHONE_NUM);
+        PassWalk passWalk = TestUtils.getPassWalk(PassStatus.DELAYED, LocalDateTime.now().minusDays(1),
+                LocalDateTime.now().plusDays(1),
+                savedUser, savedTerritory, visitor, PassTimeType.ONETIME);
+
+        PassWalk savedPassWalk = passRepository.saveAndFlush(passWalk);
+
+        Assertions.assertThat(savedPassWalk.getVisitor().getName()).isEqualTo(visitor.getName());
+    }
+
     /*@Test
     void findPassesByStatusAndTimeBefore_ExperimentalEnumAndPgTypesDoesntMatch_ReturnListOfPasses() {
         saveUserTerritoryVisitor();
@@ -314,16 +330,21 @@ class PassRepositoryIntegrationTest {
 */
 
     private void saveUserTerritoryVisitor(String name) {
+        saveUserTerritory();
+        Visitor visitor = new Visitor();
+        visitor.setId(TestUtils.VISITOR_ID);
+        visitor.setName(name);
+        visitor.setPhone(TestUtils.PHONE_NUM);
+        savedVisitor = visitorRepository.saveAndFlush(visitor);
+    }
+
+    private void saveUserTerritory() {
         Territory territory = new Territory();
         territory.setName(TestUtils.TERR_NAME);
         User user = TestUtils.getUser();
         savedUser = userRepository.saveAndFlush(user);
         territory.setUsers(List.of(savedUser));
         savedTerritory = territoryRepository.saveAndFlush(territory);
-        Visitor visitor = new Visitor();
-        visitor.setName(name);
-        visitor.setPhone(TestUtils.PHONE_NUM);
-        savedVisitor = visitorRepository.saveAndFlush(visitor);
     }
 
     private void saveCar(String licensePlate) {

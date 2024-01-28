@@ -44,6 +44,8 @@ public class ExceptionUtils {
 
     public static final String AVATAR_NOT_FOUND_FOR_TERRITORY = "Avatar for territory with [id: %s] not found";
 
+    public static final String PASS_RESOLVING_ERROR = "Pass cannot be resolved because no car or visitor in dto";
+
     private ExceptionUtils() {
         throw new AssertionError("No instances, please");
     }
