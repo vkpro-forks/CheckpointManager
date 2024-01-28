@@ -230,7 +230,7 @@ public class TestUtils {
         );
     }
 
-    public static PassUpdateDTO getPassUpdateDTO() {
+    public static PassUpdateDTO getPassUpdateDTOWithCar() {
         return new PassUpdateDTO(
                 "comment",
                 PassTimeType.ONETIME,
@@ -238,6 +238,18 @@ public class TestUtils {
                 LocalDateTime.now().plusHours(7),
                 null,
                 getCarDto(),
+                PASS_ID
+        );
+    }
+
+    public static PassUpdateDTO getPassUpdateDTOVisitor() {
+        return new PassUpdateDTO(
+                "comment",
+                PassTimeType.ONETIME,
+                LocalDateTime.now().plusHours(1),
+                LocalDateTime.now().plusHours(7),
+                getVisitorDTO(),
+                null,
                 PASS_ID
         );
     }
@@ -414,6 +426,7 @@ public class TestUtils {
         passAuto.setCar(car);
         passAuto.setUser(user);
         passAuto.setTerritory(territory);
+        passAuto.setId(UUID.randomUUID());
         return passAuto;
     }
 
@@ -428,6 +441,7 @@ public class TestUtils {
         passAuto.setCar(car);
         passAuto.setUser(user);
         passAuto.setTerritory(territory);
+        passAuto.setId(UUID.randomUUID());
         return passAuto;
     }
 
@@ -442,11 +456,12 @@ public class TestUtils {
         passWalk.setVisitor(visitor);
         passWalk.setUser(user);
         passWalk.setTerritory(territory);
+        passWalk.setId(UUID.randomUUID());
         return passWalk;
     }
 
     public static PassWalk getPassWalk(PassStatus passStatus, LocalDateTime startTime, LocalDateTime endTime, User savedUser,
-                                Territory savedTerritory, Visitor savedVisitor, PassTimeType passTimeType) {
+                                       Territory savedTerritory, Visitor savedVisitor, PassTimeType passTimeType) {
         PassWalk passWalk = new PassWalk();
         passWalk.setStatus(passStatus);
         passWalk.setStartTime(startTime);
@@ -456,6 +471,7 @@ public class TestUtils {
         passWalk.setTerritory(savedTerritory);
         passWalk.setVisitor(savedVisitor);//name USERNAME
         passWalk.setTimeType(passTimeType);
+        passWalk.setId(UUID.randomUUID());
         return passWalk;
     }
 
@@ -507,9 +523,9 @@ public class TestUtils {
         );
     }
 
-    public static Visitor getVisitorUnsaved() {
+    public static Visitor getVisitorRandomUUID() {
         return new Visitor(
-                null,
+                UUID.randomUUID(),
                 FULL_NAME,
                 PHONE_NUM,
                 null,

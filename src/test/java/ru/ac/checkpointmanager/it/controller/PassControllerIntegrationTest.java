@@ -13,7 +13,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -39,6 +38,7 @@ import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.repository.VisitorRepository;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
 import ru.ac.checkpointmanager.repository.car.CarRepository;
+import ru.ac.checkpointmanager.util.MockMvcUtils;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 
@@ -97,18 +97,15 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
     //ADDING PASSES
     @Test
     @SneakyThrows
-    void shouldAddPassWithNewCarWithoutIdWhenCarInRepoDoesntExists() {
+    void addPass_NewCarWithoutIdWhenCarInRepoDoesntExists_SaveAndReturn() {
         saveTerritoryUserCarBrand();
         PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
         passCreateDTO.setUserId(savedUser.getId());
         passCreateDTO.setTerritoryId(savedTerritory.getId());
         passCreateDTO.getCar().setId(null);
         passCreateDTO.getCar().setBrand(TestUtils.getCarBrandDTO());//set saved car brand, if no car brand in DB, 404 will be thrown
-        String passCreateDtoString = TestUtils.jsonStringFromObject(passCreateDTO);
 
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(passCreateDtoString))
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(TestUtils.jsonStringFromObject(passCreateDTO)))
                 .andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.user.id").value(savedUser.getId().toString()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.territory.id").value(savedTerritory.getId().toString()));
@@ -122,7 +119,7 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
 
     @Test
     @SneakyThrows
-    void shouldAddPassWithExistingCarsIdWhenCarInRepoExists() {
+    void addPass_ExistingCarIdWhenCarInRepoExists_SaveAndReturn() {
         saveTerritoryUserCarBrand();
         saveCar();
         PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
@@ -131,11 +128,8 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         passCreateDTO.getCar().setBrand(TestUtils.getCarBrandDTO());//set saved car brand, if no car brand in DB, 404 will be thrown
         passCreateDTO.getCar().setId(savedCar.getId());
         passCreateDTO.getCar().setLicensePlate(savedCar.getLicensePlate());
-        String passCreateDtoString = TestUtils.jsonStringFromObject(passCreateDTO);
 
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(passCreateDtoString))
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(TestUtils.jsonStringFromObject(passCreateDTO)))
                 .andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.user.id").value(savedUser.getId().toString()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.territory.id").value(savedTerritory.getId().toString()));
@@ -143,14 +137,13 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
 
         List<Car> allCars = carRepository.findAll();
         Assertions.assertThat(allCars).hasSize(1);//check if no added cars
-
         List<Pass> allPasses = passRepository.findAll();
         Assertions.assertThat(allPasses).hasSize(1);//check if only one pass here
     }
 
     @Test
     @SneakyThrows
-    void shouldAddPassWithExistingCarInRepoButCarInDtoWillBeWithoutId() {
+    void addPass_ExistingCarInRepoButCarInDtoWillBeWithoutId_SaveAndReturn() {
         saveTerritoryUserCarBrand();
         saveCar();
         PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
@@ -159,11 +152,9 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         passCreateDTO.getCar().setBrand(TestUtils.getCarBrandDTO());//set saved car brand, if no car brand in DB, 404 will be thrown
         passCreateDTO.getCar().setId(null);//don't pass ID of car, pass only license plate
         passCreateDTO.getCar().setLicensePlate(savedCar.getLicensePlate());
-        String passCreateDtoString = TestUtils.jsonStringFromObject(passCreateDTO);
 
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(passCreateDtoString))
+        ResultActions resultActions = mockMvc.perform(
+                        MockMvcUtils.createPass(TestUtils.jsonStringFromObject(passCreateDTO)))
                 .andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.user.id").value(savedUser.getId().toString()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.territory.id").value(savedTerritory.getId().toString()));
@@ -189,7 +180,7 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
 
     @Test
     @SneakyThrows
-    void shouldAddPassWithNoCarInRepoButCarInDtoWillBeWithId() {
+    void addPass_NoCarInRepoButCarInDtoWillBeWithId_SaveAndReturn() {
         saveTerritoryUserCarBrand();
         PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
         passCreateDTO.setUserId(savedUser.getId());
@@ -197,11 +188,8 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         passCreateDTO.getCar().setBrand(TestUtils.getCarBrandDTO());//set saved car brand, if no car brand in DB, 404 will be thrown
         passCreateDTO.getCar().setId(TestUtils.CAR_ID);
         passCreateDTO.getCar().setLicensePlate(TestUtils.LICENSE_PLATE);
-        String passCreateDtoString = TestUtils.jsonStringFromObject(passCreateDTO);
 
-        mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(passCreateDtoString))
+        mockMvc.perform(MockMvcUtils.createPass(TestUtils.jsonStringFromObject(passCreateDTO)))
                 .andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.user.id").value(savedUser.getId().toString()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.territory.id").value(savedTerritory.getId().toString()))
@@ -219,11 +207,72 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         );
     }
 
+    @Test
+    @SneakyThrows
+    void addPass_VisitorWithoutIdNotInDb_SaveAndReturn() {
+        saveTerritoryAndUser();
+        PassCreateDTO passCreateDto = TestUtils.getPassCreateDTOWithVisitor();
+        passCreateDto.getVisitor().setId(null);
+        passCreateDto.setTerritoryId(savedTerritory.getId());
+        passCreateDto.setUserId(savedUser.getId());
+
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(TestUtils.jsonStringFromObject(passCreateDto)));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isCreated()).andExpectAll(
+                MockMvcResultMatchers.jsonPath("$.id").isNotEmpty(),
+                MockMvcResultMatchers.jsonPath("$.visitor.id").isNotEmpty());
+        Assertions.assertThat(visitorRepository.findAll()).isNotEmpty().flatExtracting(Visitor::getName)
+                .containsOnly(passCreateDto.getVisitor().getName());
+        Assertions.assertThat(passRepository.findAll()).hasSize(1);
+    }
+
+    @Test
+    @SneakyThrows
+    void addPass_VisitorWithIdNotInDb_SaveAndReturn() {
+        saveTerritoryAndUser();
+        PassCreateDTO passCreateDto = TestUtils.getPassCreateDTOWithVisitor();
+        passCreateDto.getVisitor().setId(TestUtils.VISITOR_ID);
+        passCreateDto.setTerritoryId(savedTerritory.getId());
+        passCreateDto.setUserId(savedUser.getId());
+
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(TestUtils.jsonStringFromObject(passCreateDto)));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isCreated()).andExpectAll(
+                MockMvcResultMatchers.jsonPath("$.id").isNotEmpty(),
+                MockMvcResultMatchers.jsonPath("$.visitor.id").value(TestUtils.VISITOR_ID.toString()));
+        Assertions.assertThat(visitorRepository.findAll()).isNotEmpty().flatExtracting(Visitor::getName)
+                .containsOnly(passCreateDto.getVisitor().getName());
+        Assertions.assertThat(passRepository.findAll()).hasSize(1);
+    }
+
+    @Test
+    @SneakyThrows
+    void addPass_VisitorWithIdInDB_SaveAndReturn() {
+        saveTerritoryAndUser();
+        Visitor visitorUnsaved = TestUtils.getVisitorRandomUUID();
+        Visitor savedVisitor = visitorRepository.saveAndFlush(visitorUnsaved);
+        PassCreateDTO passCreateDto = TestUtils.getPassCreateDTOWithVisitor();
+        passCreateDto.getVisitor().setId(savedVisitor.getId());
+        String updatedName = "Huggy Wuggy";
+        passCreateDto.getVisitor().setName(updatedName);
+        passCreateDto.setTerritoryId(savedTerritory.getId());
+        passCreateDto.setUserId(savedUser.getId());
+
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(TestUtils.jsonStringFromObject(passCreateDto)));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isCreated()).andExpectAll(
+                MockMvcResultMatchers.jsonPath("$.id").isNotEmpty(),
+                MockMvcResultMatchers.jsonPath("$.visitor.id").value(savedVisitor.getId().toString()));
+        Assertions.assertThat(visitorRepository.findAll()).isNotEmpty().flatExtracting(Visitor::getName)
+                .containsOnly(updatedName);
+        Assertions.assertThat(passRepository.findAll()).hasSize(1);
+    }
+
     //DELETING PASSES
     @ParameterizedTest
     @EnumSource(PassStatus.class)
     @SneakyThrows
-    void shouldDeletePassWithAuto(PassStatus passStatus) {
+    void deletePass_PassWithAuto_ReturnNoContent(PassStatus passStatus) {
         saveTerritoryUserCarBrand();
         saveCar();
         PassAuto pass = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
@@ -242,7 +291,7 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
     @ParameterizedTest
     @EnumSource(PassStatus.class)
     @SneakyThrows
-    void shouldDeleteManyPassesWithOneAuto(PassStatus passStatus) {
+    void deletePass_ManyPassesWithOneAuto_ReturnNoContent(PassStatus passStatus) {
         //creating a passes for territory with one car
         saveTerritoryUserCarBrand();
         saveCar();
@@ -427,6 +476,7 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         saveCar(); //LICENSE_PLATE = "А420ВХ799";
         PassAuto passAuto = createPassWithStatusAndTime(PassStatus.ACTIVE, 5);
         Visitor visitor = new Visitor();
+        visitor.setId(TestUtils.VISITOR_ID);
         visitor.setName("Vasya");
         visitor.setPhone(TestUtils.PHONE_NUM);
         PassWalk passWalk = TestUtils.getPassWalk(PassStatus.ACTIVE, LocalDateTime.now(),
@@ -453,6 +503,7 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         saveCar(); //LICENSE_PLATE = "А420ВХ799";
         PassAuto passAuto = createPassWithStatusAndTime(PassStatus.ACTIVE, 5);
         Visitor visitor = new Visitor();
+        visitor.setId(TestUtils.VISITOR_ID);
         visitor.setName("А420");
         visitor.setPhone(TestUtils.PHONE_NUM);
         PassWalk passWalk = TestUtils.getPassWalk(PassStatus.ACTIVE, LocalDateTime.now(),
@@ -482,12 +533,13 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         saveCar(); //LICENSE_PLATE = "А420ВХ799";
         PassAuto passAuto = createPassWithStatusAndTime(PassStatus.ACTIVE, 5);
         Visitor visitor = new Visitor();
+        visitor.setId(TestUtils.VISITOR_ID);
         visitor.setName("Petya");
         visitor.setPhone(TestUtils.PHONE_NUM);
         PassWalk passWalk = TestUtils.getPassWalk(PassStatus.ACTIVE, LocalDateTime.now(),
                 LocalDateTime.now().plusDays(1), savedUser,
                 savedTerritory, visitor, PassTimeType.PERMANENT);
-        PassAuto savedPassAuto = passRepository.saveAndFlush(passAuto);
+        passRepository.saveAndFlush(passAuto);
         PassWalk savedPassWalk = passRepository.saveAndFlush(passWalk);
         String filterParams = String.join(",", PassStatus.ACTIVE.name(), PassStatus.DELAYED.name());
 
@@ -509,12 +561,13 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         saveCar(); //LICENSE_PLATE = "А420ВХ799";
         PassAuto passAuto = createPassWithStatusAndTime(PassStatus.DELAYED, 5);
         Visitor visitor = new Visitor();
+        visitor.setId(TestUtils.VISITOR_ID);
         visitor.setName("A420");
         visitor.setPhone(TestUtils.PHONE_NUM);
         PassWalk passWalk = TestUtils.getPassWalk(PassStatus.ACTIVE, LocalDateTime.now(),
                 LocalDateTime.now().plusDays(1), savedUser,
                 savedTerritory, visitor, PassTimeType.PERMANENT);
-        PassAuto savedPassAuto = passRepository.saveAndFlush(passAuto);
+        passRepository.saveAndFlush(passAuto);
         PassWalk savedPassWalk = passRepository.saveAndFlush(passWalk);
         String filterParams = String.join(",", PassStatus.ACTIVE.name());
 
@@ -543,14 +596,18 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
     }
 
     private void saveTerritoryUserCarBrand() {
+        saveTerritoryAndUser();
+        CarBrand carBrand = TestUtils.getCarBrand();
+        savedCarBrand = carBrandRepository.saveAndFlush(carBrand);
+    }
+
+    private void saveTerritoryAndUser() {
         Territory territory = new Territory();
         territory.setName(TestUtils.TERR_NAME);
         User user = TestUtils.getUser();
         savedUser = userRepository.saveAndFlush(user);
         territory.setUsers(List.of(savedUser));
         savedTerritory = territoryRepository.saveAndFlush(territory);
-        CarBrand carBrand = TestUtils.getCarBrand();
-        savedCarBrand = carBrandRepository.saveAndFlush(carBrand);
     }
 
     private void saveCar() {

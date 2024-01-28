@@ -31,9 +31,13 @@ public class ResultCheckUtils {
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_TITLE).isNotEmpty());
     }
 
+    public static void checkValidationField(ResultActions resultActions, int index, String field) throws Exception {
+        resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(index))
+                .value(field));
+    }
 
     private ResultCheckUtils() {
-        throw new AssertionError("not instances");
+        throw new AssertionError("no instances");
     }
 
 }

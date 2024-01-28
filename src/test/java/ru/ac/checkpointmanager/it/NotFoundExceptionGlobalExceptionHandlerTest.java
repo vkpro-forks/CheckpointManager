@@ -223,7 +223,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
     @Test
     @SneakyThrows
     void shouldHandlePassNotFoundExceptionForUpdatePass() {
-        String passUpdateDto = TestUtils.jsonStringFromObject(TestUtils.getPassUpdateDTO());
+        String passUpdateDto = TestUtils.jsonStringFromObject(TestUtils.getPassUpdateDTOWithCar());
         ResultActions resultActions = mockMvc
                 .perform(MockMvcRequestBuilders.put(UrlConstants.PASS_URL)
                         .contentType(MediaType.APPLICATION_JSON)

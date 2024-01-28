@@ -391,7 +391,6 @@ public class PassServiceImpl implements PassService {
     @Transactional
     public void updatePassStatusByScheduler() {
         if (LocalDateTime.now().getHour() != hourForLogInScheduledCheck) {
-            //TODO надо менять на ZonedDateTime потому что от клиентов нам будут приходить даты с местным временем
             hourForLogInScheduledCheck = LocalDateTime.now().getHour();
             log.debug("Method {} continues to work", MethodLog.getMethodName());
         }
