@@ -39,21 +39,9 @@ import java.util.List;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")
 @DirtiesContext
-//@Testcontainers
 @EnablePostgresAndRedisTestContainers
 @Slf4j
 class PassRepositoryIntegrationTest {
-
-   /* @Container
-    @ServiceConnection(type = JdbcConnectionDetails.class)
-    private static PostgreSQLContainer<?> postgresContainer = new PostgreSQLContainer<>("postgres:latest")
-            .withDatabaseName("chpmanDB");
-
-    @DynamicPropertySource
-    private static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.liquibase.enabled", () -> true);
-        registry.add("spring.liquibase.label-filter", () -> "!demo-data");
-    }*/
 
     @Autowired
     PassRepository passRepository;
