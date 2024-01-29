@@ -7,14 +7,15 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.ac.checkpointmanager.config.RedisAndPostgresTestContainersConfiguration;
+import ru.ac.checkpointmanager.config.EnablePostgresAndRedisTestContainers;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @WithMockUser(roles = {"ADMIN"})
-public class GlobalExceptionHandlerBasicTestConfig extends RedisAndPostgresTestContainersConfiguration {
+@EnablePostgresAndRedisTestContainers
+public class GlobalExceptionHandlerBasicTestConfig {
 
     @Autowired
     MockMvc mockMvc;

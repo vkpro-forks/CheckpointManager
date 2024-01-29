@@ -1,6 +1,5 @@
 package ru.ac.checkpointmanager.it.controller;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.SneakyThrows;
 import org.assertj.core.api.Assertions;
 import org.hamcrest.Matchers;
@@ -20,7 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import ru.ac.checkpointmanager.config.RedisAndPostgresTestContainersConfiguration;
+import ru.ac.checkpointmanager.config.EnablePostgresAndRedisTestContainers;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
@@ -53,7 +52,8 @@ import java.util.stream.Stream;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @WithMockUser(roles = {"ADMIN"})
-class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfiguration {
+@EnablePostgresAndRedisTestContainers
+class PassControllerIntegrationTest {
 
     @Autowired
     MockMvc mockMvc;
