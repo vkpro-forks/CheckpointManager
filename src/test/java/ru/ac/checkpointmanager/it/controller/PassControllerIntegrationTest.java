@@ -1,6 +1,5 @@
 package ru.ac.checkpointmanager.it.controller;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.SneakyThrows;
 import org.assertj.core.api.Assertions;
 import org.hamcrest.Matchers;
@@ -55,6 +54,8 @@ import java.util.stream.Stream;
 @WithMockUser(roles = {"ADMIN"})
 class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfiguration {
 
+    public static final String STATUS = "status";
+
     @Autowired
     MockMvc mockMvc;
 
@@ -105,8 +106,9 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         passCreateDTO.getCar().setId(null);
         passCreateDTO.getCar().setBrand(TestUtils.getCarBrandDTO());//set saved car brand, if no car brand in DB, 404 will be thrown
 
-        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(TestUtils.jsonStringFromObject(passCreateDTO)))
-                .andExpect(MockMvcResultMatchers.status().isCreated())
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passCreateDTO));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.user.id").value(savedUser.getId().toString()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.territory.id").value(savedTerritory.getId().toString()));
         List<Car> allCars = carRepository.findAll();
@@ -129,8 +131,9 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         passCreateDTO.getCar().setId(savedCar.getId());
         passCreateDTO.getCar().setLicensePlate(savedCar.getLicensePlate());
 
-        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(TestUtils.jsonStringFromObject(passCreateDTO)))
-                .andExpect(MockMvcResultMatchers.status().isCreated())
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passCreateDTO));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.user.id").value(savedUser.getId().toString()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.territory.id").value(savedTerritory.getId().toString()));
         resultActions.andExpect(MockMvcResultMatchers.jsonPath("$.car.id").value(savedCar.getId().toString()));
@@ -153,9 +156,9 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         passCreateDTO.getCar().setId(null);//don't pass ID of car, pass only license plate
         passCreateDTO.getCar().setLicensePlate(savedCar.getLicensePlate());
 
-        ResultActions resultActions = mockMvc.perform(
-                        MockMvcUtils.createPass(TestUtils.jsonStringFromObject(passCreateDTO)))
-                .andExpect(MockMvcResultMatchers.status().isCreated())
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passCreateDTO));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.user.id").value(savedUser.getId().toString()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.territory.id").value(savedTerritory.getId().toString()));
 
@@ -189,12 +192,12 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         passCreateDTO.getCar().setId(TestUtils.CAR_ID);
         passCreateDTO.getCar().setLicensePlate(TestUtils.LICENSE_PLATE);
 
-        mockMvc.perform(MockMvcUtils.createPass(TestUtils.jsonStringFromObject(passCreateDTO)))
-                .andExpect(MockMvcResultMatchers.status().isCreated())
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passCreateDTO));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.user.id").value(savedUser.getId().toString()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.territory.id").value(savedTerritory.getId().toString()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.car.id").value(passCreateDTO.getCar().getId().toString()));
-
         org.junit.jupiter.api.Assertions.assertAll(
                 () -> {
                     List<Car> allCars = carRepository.findAll();
@@ -216,7 +219,7 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         passCreateDto.setTerritoryId(savedTerritory.getId());
         passCreateDto.setUserId(savedUser.getId());
 
-        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(TestUtils.jsonStringFromObject(passCreateDto)));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passCreateDto));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isCreated()).andExpectAll(
                 MockMvcResultMatchers.jsonPath("$.id").isNotEmpty(),
@@ -235,7 +238,7 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         passCreateDto.setTerritoryId(savedTerritory.getId());
         passCreateDto.setUserId(savedUser.getId());
 
-        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(TestUtils.jsonStringFromObject(passCreateDto)));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passCreateDto));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isCreated()).andExpectAll(
                 MockMvcResultMatchers.jsonPath("$.id").isNotEmpty(),
@@ -258,7 +261,7 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         passCreateDto.setTerritoryId(savedTerritory.getId());
         passCreateDto.setUserId(savedUser.getId());
 
-        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(TestUtils.jsonStringFromObject(passCreateDto)));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passCreateDto));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isCreated()).andExpectAll(
                 MockMvcResultMatchers.jsonPath("$.id").isNotEmpty(),
@@ -281,8 +284,9 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         List<Pass> allPasses = passRepository.findAll();
         Assertions.assertThat(allPasses).as("Check if only one pass here").hasSize(1);
 
-        mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.PASS_URL + "/" + savedPass.getId()))
-                .andExpect(MockMvcResultMatchers.status().isNoContent());
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.deletePass(savedPass.getId()));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isNoContent());
 
         List<Pass> passesAfterDelete = passRepository.findAll();
         Assertions.assertThat(passesAfterDelete).isEmpty();
@@ -305,8 +309,9 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         List<Pass> allPasses = passRepository.findAll();
         Assertions.assertThat(allPasses).hasSize(5);
 
-        mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.PASS_URL + "/" + allPasses.get(0).getId()))
-                .andExpect(MockMvcResultMatchers.status().isNoContent());
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.deletePass(allPasses.get(0).getId()));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isNoContent());
 
         List<Pass> passesAfterDelete = passRepository.findAll();
         Assertions.assertThat(passesAfterDelete).hasSize(4);
@@ -378,7 +383,7 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
 
         ResultActions resultActions = mockMvc
                 .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_USER_URL, savedUser.getId())
-                        .param("status", PassStatus.ACTIVE.name()));
+                        .param(STATUS, PassStatus.ACTIVE.name()));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.content.size()").value(3));
@@ -403,8 +408,8 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         passRepository.saveAllAndFlush(passes);
 
         ResultActions resultActions = mockMvc
-                .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_USER_TERRITORIES_URL, savedUser.getId())
-                        .param("status", PassStatus.ACTIVE.name()));
+                .perform(MockMvcUtils.getPassesByUserId(savedUser.getId())
+                        .param(STATUS, PassStatus.ACTIVE.name()));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.content.size()").value(3));
@@ -433,8 +438,7 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         passRepository.saveAllAndFlush(passes);
 
         ResultActions resultActions = mockMvc
-                .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_USER_URL, savedUser.getId())
-                        .param("status", filterParams));
+                .perform(MockMvcUtils.getPassesByUserId(savedUser.getId()).param(STATUS, filterParams));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.content.size()").value(totalFound));
@@ -462,8 +466,7 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         passRepository.saveAllAndFlush(passes);
 
         ResultActions resultActions = mockMvc
-                .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_USER_TERRITORIES_URL, savedUser.getId())
-                        .param("status", filterParams));
+                .perform(MockMvcUtils.getPassesByUsersTerritories(savedUser.getId()).param(STATUS, filterParams));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.content.size()").value(totalFound));
@@ -487,8 +490,8 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         String filterParams = String.join(",", PassStatus.ACTIVE.name(), PassStatus.DELAYED.name());
 
         ResultActions resultActions = mockMvc
-                .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_URL_SEARCH)
-                        .param("status", filterParams)
+                .perform(MockMvcUtils.getPassesByPartOfVisitorNameAndCarNumber()
+                        .param(STATUS, filterParams)
                         .param("part", "А"));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isOk())
@@ -514,8 +517,8 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         String filterParams = String.join(",", PassStatus.ACTIVE.name(), PassStatus.DELAYED.name());
 
         ResultActions resultActions = mockMvc
-                .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_URL_SEARCH)
-                        .param("status", filterParams)
+                .perform(MockMvcUtils.getPassesByPartOfVisitorNameAndCarNumber()
+                        .param(STATUS, filterParams)
                         .param("part", "А"));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isOk())
@@ -544,8 +547,8 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         String filterParams = String.join(",", PassStatus.ACTIVE.name(), PassStatus.DELAYED.name());
 
         ResultActions resultActions = mockMvc
-                .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_URL_SEARCH)
-                        .param("status", filterParams)
+                .perform(MockMvcUtils.getPassesByPartOfVisitorNameAndCarNumber()
+                        .param(STATUS, filterParams)
                         .param("part", "Pet"));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isOk())
@@ -572,8 +575,8 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         String filterParams = String.join(",", PassStatus.ACTIVE.name());
 
         ResultActions resultActions = mockMvc
-                .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_URL_SEARCH)
-                        .param("status", filterParams)
+                .perform(MockMvcUtils.getPassesByPartOfVisitorNameAndCarNumber()
+                        .param(STATUS, filterParams)
                         .param("part", "A"));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isOk())
