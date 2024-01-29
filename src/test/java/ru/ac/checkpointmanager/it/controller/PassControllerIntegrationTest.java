@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.ac.checkpointmanager.config.RedisAndPostgresTestContainersConfiguration;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
+import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.Visitor;
@@ -38,6 +39,7 @@ import ru.ac.checkpointmanager.repository.VisitorRepository;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
 import ru.ac.checkpointmanager.repository.car.CarRepository;
 import ru.ac.checkpointmanager.util.MockMvcUtils;
+import ru.ac.checkpointmanager.util.ResultCheckUtils;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 
@@ -271,6 +273,18 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         Assertions.assertThat(passRepository.findAll()).hasSize(1);
     }
 
+    @Test
+    @SneakyThrows
+    void addPass_NoUser_HandleUserNotFoundExceptionForAddPass() {
+        PassCreateDTO passCreateDTOWithCar = TestUtils.getPassCreateDTOWithCar();
+
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passCreateDTOWithCar));
+
+        resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                .value(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(passCreateDTOWithCar.getUserId())));
+        ResultCheckUtils.checkNotFoundFields(resultActions);
+    }
+
     //DELETING PASSES
     @ParameterizedTest
     @EnumSource(PassStatus.class)
@@ -339,6 +353,16 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
                 .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_USER_URL, savedUser.getId()));
         resultActions.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.content.size()").value(5));
+    }
+
+    @Test
+    @SneakyThrows
+    void getPassesByUser_NoUser_HandleUserNotFoundExceptionAndReturnError() {
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.getPassesByUserId(TestUtils.USER_ID));
+
+        resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                .value(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(TestUtils.USER_ID)));
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @ParameterizedTest

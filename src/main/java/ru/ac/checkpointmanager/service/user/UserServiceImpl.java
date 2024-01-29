@@ -135,8 +135,8 @@ public class UserServiceImpl implements UserService {
     public User findUserById(UUID id) {
         return userRepository.findById(id).orElseThrow(
                 () -> {
-                    log.warn(USER_NOT_FOUND_MSG.formatted(id));
-                    return new UserNotFoundException(String.format(USER_NOT_FOUND_MSG.formatted(id)));
+                    log.warn(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(id));
+                    return new UserNotFoundException(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(id));
                 });
     }
 
