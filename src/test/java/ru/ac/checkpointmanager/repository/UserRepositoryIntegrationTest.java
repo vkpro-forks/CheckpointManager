@@ -1,21 +1,14 @@
 package ru.ac.checkpointmanager.repository;
 
-import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.jdbc.JdbcConnectionDetails;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import ru.ac.checkpointmanager.config.EnablePostgresAndRedisTestContainers;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.avatar.Avatar;
 import ru.ac.checkpointmanager.model.enums.Role;
@@ -27,19 +20,8 @@ import java.util.Optional;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")
 @DirtiesContext
-@Testcontainers
+@EnablePostgresAndRedisTestContainers
 class UserRepositoryIntegrationTest {
-
-    @Container
-    @ServiceConnection(type = JdbcConnectionDetails.class)
-    private static PostgreSQLContainer<?> postgresContainer = new PostgreSQLContainer<>("postgres:latest")
-            .withDatabaseName("chpmanDB");
-
-    @DynamicPropertySource
-    private static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.liquibase.enabled", () -> true);
-        registry.add("spring.liquibase.label-filter", () -> "!demo-data");
-    }
 
     @Autowired
     UserRepository userRepository;
