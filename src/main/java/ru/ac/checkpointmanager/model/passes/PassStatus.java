@@ -1,6 +1,9 @@
 package ru.ac.checkpointmanager.model.passes;
 
+import lombok.extern.slf4j.Slf4j;
 import ru.ac.checkpointmanager.exception.pass.InvalidPassStatusException;
+
+import static ru.ac.checkpointmanager.exception.ExceptionUtils.PASS_STATUS_NOOOOOO;
 
 /**
  * Возможные статусы пропусков
@@ -12,6 +15,7 @@ import ru.ac.checkpointmanager.exception.pass.InvalidPassStatusException;
  * OUTDATED - устаревший (если время истекло, а пересечений не было)
  * WARNING - предупреждение (если время истекло или он отменен, а последнее пересечение по пропуску было на въезд)
  */
+@Slf4j
 public enum PassStatus {
     DELAYED("Ожидает"),
     ACTIVE("Активный"),
@@ -27,12 +31,12 @@ public enum PassStatus {
     }
 
     public static PassStatus fromString(String value) {
-        for (PassStatus s : PassStatus.values()) {
-            if (s.name().equalsIgnoreCase(value)) {
-                return s;
-            }
+        try {
+            return PassStatus.valueOf(value);
+        } catch (IllegalArgumentException e) {
+            log.error(PASS_STATUS_NOOOOOO.formatted(value));
+            throw new InvalidPassStatusException(PASS_STATUS_NOOOOOO.formatted(value));
         }
-        throw new InvalidPassStatusException("No PassStatus for string value: " + value);
     }
 
     public String getDescription() {

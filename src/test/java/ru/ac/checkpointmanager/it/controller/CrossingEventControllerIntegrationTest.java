@@ -229,10 +229,12 @@ class CrossingEventControllerIntegrationTest extends RedisAndPostgresTestContain
     private void checkEventFields(ResultActions resultActions, Pass savedPass) throws Exception {
         resultActions.andExpect(status().isOk())
                 .andExpectAll(jsonPath("$.content[0].terr_name").value(savedTerritory.getName()),
-                        jsonPath("$.content[0].pass_status").value(savedPass.getStatus().name()),
+                        jsonPath("$.content[0].status").value(savedPass.getStatus().name()),
+                        jsonPath("$.content[0].statusDescription").value(savedPass.getStatus().getDescription()),
                         jsonPath("$.content[0].pass_id").value(savedPass.getId().toString()),
                         jsonPath("$.content[0].car_number").value(savedCar.getLicensePlate()),
-                        jsonPath("$.content[0].pass_time_type").value(savedPass.getTimeType().name()),
+                        jsonPath("$.content[0].timeType").value(savedPass.getTimeType().name()),
+                        jsonPath("$.content[0].timeTypeDescription").value(savedPass.getTimeType().getDescription()),
                         jsonPath("$.content[0].dtype").value("AUTO"),
                         jsonPath("$.content[0].in_time").isNotEmpty(),
                         jsonPath("$.content[0].out_time").isNotEmpty());

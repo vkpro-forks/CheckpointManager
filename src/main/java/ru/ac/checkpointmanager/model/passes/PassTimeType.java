@@ -1,7 +1,11 @@
 package ru.ac.checkpointmanager.model.passes;
 
+import lombok.extern.slf4j.Slf4j;
 import ru.ac.checkpointmanager.exception.pass.InvalidPassTimeTypeException;
 
+import static ru.ac.checkpointmanager.exception.ExceptionUtils.PASS_TIME_TYPE_NOOOOOO;
+
+@Slf4j
 public enum PassTimeType {
     ONETIME("Разовый"),
     PERMANENT("Постоянный");
@@ -13,12 +17,12 @@ public enum PassTimeType {
     }
 
     public static PassTimeType fromString(String value) {
-        for (PassTimeType t : PassTimeType.values()) {
-            if (t.name().equalsIgnoreCase(value)) {
-                return t;
-            }
+        try {
+            return PassTimeType.valueOf(value);
+        } catch (IllegalArgumentException e) {
+            log.error(PASS_TIME_TYPE_NOOOOOO.formatted(value));
+            throw new InvalidPassTimeTypeException(PASS_TIME_TYPE_NOOOOOO.formatted(value));
         }
-        throw new InvalidPassTimeTypeException("No PassTimeType for string value: " + value);
     }
 
     public String getDescription() {

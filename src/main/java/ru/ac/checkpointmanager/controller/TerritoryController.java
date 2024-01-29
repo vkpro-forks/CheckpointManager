@@ -41,7 +41,7 @@ import java.util.UUID;
 @RequestMapping("api/v1/territory")
 @Validated
 @RequiredArgsConstructor
-@Tag(name = "Territory (территория)", description = "Администрирование списка территорий")
+@Tag(name = "Territory (территории)", description = "Администрирование списка территорий")
 @ApiResponses(value = {@ApiResponse(responseCode = "401", description = "UNAUTHORIZED: пользователь не авторизован"),
         @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса")})
 @SecurityRequirement(name = "bearerAuth")
