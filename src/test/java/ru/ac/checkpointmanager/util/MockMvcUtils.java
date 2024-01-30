@@ -36,6 +36,11 @@ public class MockMvcUtils {
         return MockMvcRequestBuilders.delete(UrlConstants.PASS_URL + "/" + passId);
     }
 
+    public static MockHttpServletRequestBuilder getPass(UUID passId) {
+        log.info(TestMessage.PERFORM_HTTP, HttpMethod.GET, UrlConstants.PASS_URL + "/" + passId);
+        return MockMvcRequestBuilders.get(UrlConstants.PASS_URL + "/" + passId);
+    }
+
     public static MockHttpServletRequestBuilder getPassesByUserId(UUID userId) {
         log.info(TestMessage.PERFORM_HTTP, HttpMethod.GET, UrlConstants.PASS_USER_URL, userId);
         return MockMvcRequestBuilders.get(UrlConstants.PASS_USER_URL, userId);

@@ -14,6 +14,8 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.ac.checkpointmanager.config.OpenAllEndpointsTestConfiguration;
 import ru.ac.checkpointmanager.config.ValidationTestConfiguration;
@@ -27,6 +29,7 @@ import ru.ac.checkpointmanager.service.passes.PassService;
 import ru.ac.checkpointmanager.util.MockMvcUtils;
 import ru.ac.checkpointmanager.util.ResultCheckUtils;
 import ru.ac.checkpointmanager.util.TestUtils;
+import ru.ac.checkpointmanager.util.UrlConstants;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -275,6 +278,15 @@ class PassControllerValidationIntegrationTest {
         ResultCheckUtils.checkValidationField(resultActions, 0, "comment");
     }
 
+    @ParameterizedTest
+    @MethodSource("getMethodsWithBadUids")
+    @SneakyThrows
+    void allEndpoints_BadUUIDPassed_ReturnBadRequest(MockHttpServletRequestBuilder requestBuilder) {
+        ResultActions resultActions = mockMvc.perform(requestBuilder);
+
+        ResultCheckUtils.checkWrongTypeFields(resultActions);
+    }
+
 
     private static void checkCarOrVisitorFields(ResultActions resultActions) throws Exception {
         ResultCheckUtils.checkCommonValidationFields(resultActions);
@@ -335,6 +347,22 @@ class PassControllerValidationIntegrationTest {
                 Arguments.of(TestUtils.LICENSE_PLATE, carBrandDTO, "a".repeat(22), CAR_PHONE),
                 Arguments.of(TestUtils.LICENSE_PLATE, carBrandDTO, "asdfasdfasdfasdf", CAR_PHONE)
         );
+    }
+
+    private static Stream<MockHttpServletRequestBuilder> getMethodsWithBadUids() {
+        return Stream.of(
+                MockMvcRequestBuilders.get(UrlConstants.PASS_URL + "/{passId}", "notUUD"),
+                MockMvcRequestBuilders.get(UrlConstants.PASS_USER_URL, "notUUD"),
+                MockMvcRequestBuilders.get(UrlConstants.PASS_URL_TERRITORY, "not UUID"),
+                MockMvcRequestBuilders.get(UrlConstants.PASS_USER_TERRITORIES_URL, "notUUD"),
+                MockMvcRequestBuilders.patch(UrlConstants.PASS_URL_CANCEL, "notUUID"),
+                MockMvcRequestBuilders.patch(UrlConstants.PASS_URL_ACTIVATE, "notUUID"),
+                MockMvcRequestBuilders.patch(UrlConstants.PASS_URL_UNWARNING, "notUUID"),
+                MockMvcRequestBuilders.patch(UrlConstants.PASS_URL_FAVORITE, "notUUID"),
+                MockMvcRequestBuilders.patch(UrlConstants.PASS_URL_NOT_FAVORITE, "notUUID"),
+                MockMvcRequestBuilders.delete(UrlConstants.PASS_URL + "/{passId}", "notUUD")
+        );
+
     }
 
 }

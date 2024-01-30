@@ -609,6 +609,45 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
                         savedPassWalk.getId().toString())));
     }
 
+    @Test
+    @SneakyThrows
+    void getPass_NotFound_ReturnNotFound() {
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.getPass(TestUtils.PASS_ID));
+
+        ResultCheckUtils.checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    void updatePass_NotFound_ReturnNotFound() {
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.updatePass(TestUtils.getPassUpdateDTOWithCar()));
+
+        resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                .value(ExceptionUtils.PASS_NOT_FOUND.formatted(TestUtils.PASS_ID)));
+        ResultCheckUtils.checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    void deletePass_NotFound_ReturnNotFound() {
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.deletePass(TestUtils.PASS_ID));
+
+        resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                .value(ExceptionUtils.PASS_NOT_FOUND.formatted(TestUtils.PASS_ID)));
+        ResultCheckUtils.checkNotFoundFields(resultActions);
+    }
+
+    @ParameterizedTest
+    @MethodSource("passUrlsForPatchMethodsArguments")
+    @SneakyThrows
+    void patchMethods_NotFound_ReturnNotFound(String url) {
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.patch(url, TestUtils.PASS_ID));
+
+        resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                .value(ExceptionUtils.PASS_NOT_FOUND.formatted(TestUtils.PASS_ID)));
+        ResultCheckUtils.checkNotFoundFields(resultActions);
+    }
+
     private PassAuto createPassWithStatusAndTime(PassStatus passStatus, int i) {
         PassAuto pass = new PassAuto();
         pass.setId(UUID.randomUUID());
@@ -671,6 +710,16 @@ class PassControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
                         String.join(",", PassStatus.ACTIVE.name(), PassStatus.DELAYED.name(),
                                 PassStatus.COMPLETED.name(), PassStatus.WARNING.name()), 3
                 )
+        );
+    }
+
+    private static Stream<String> passUrlsForPatchMethodsArguments() {
+        return Stream.of(
+                UrlConstants.PASS_URL_FAVORITE,
+                UrlConstants.PASS_URL_UNWARNING,
+                UrlConstants.PASS_URL_ACTIVATE,
+                UrlConstants.PASS_URL_CANCEL,
+                UrlConstants.PASS_URL_NOT_FAVORITE
         );
     }
 
