@@ -13,11 +13,13 @@ import org.testcontainers.lifecycle.Startables;
  * Не требует применения {@link org.testcontainers.junit.jupiter.Testcontainers } и
  * {@link org.testcontainers.junit.jupiter.Container} аннотаций, которые управляют запуском и остановкой контейнеров автоматически.
  * Этот класс запускает одновременно два контейнера: Postgres и Redis, которые будут переиспользоваться для всех тестов
+ *
+ * @see EnablePostgresAndRedisTestContainers
  */
 public class PostgresAndRedisTestContainersInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-    static PostgreSQLContainer<?> postgresContainer = new PostgreSQLContainer<>("postgres:16")
-            .withDatabaseName("cbotDB");
+    static PostgreSQLContainer<?> postgresContainer = new PostgreSQLContainer<>("postgres:latest")
+            .withDatabaseName("chpmanDB");
 
     static RedisContainer redisContainer = new RedisContainer(
             RedisContainer.DEFAULT_IMAGE_NAME.withTag(RedisContainer.DEFAULT_TAG));

@@ -9,6 +9,8 @@ import java.lang.annotation.Target;
 
 /**
  * Аннотация для включения тест контейнеров, помечается класс интеграционных тестов для работы с общими контейнерами
+ *
+ * @see PostgresAndRedisTestContainersInitializer
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
