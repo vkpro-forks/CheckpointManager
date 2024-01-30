@@ -1,9 +1,8 @@
 package ru.ac.checkpointmanager.model.passes;
 
 import lombok.extern.slf4j.Slf4j;
+import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.exception.pass.InvalidPassStatusException;
-
-import static ru.ac.checkpointmanager.exception.ExceptionUtils.PASS_STATUS_NOOOOOO;
 
 /**
  * Возможные статусы пропусков
@@ -34,8 +33,8 @@ public enum PassStatus {
         try {
             return PassStatus.valueOf(value);
         } catch (IllegalArgumentException e) {
-            log.error(PASS_STATUS_NOOOOOO.formatted(value));
-            throw new InvalidPassStatusException(PASS_STATUS_NOOOOOO.formatted(value));
+            log.error(ExceptionUtils.PASS_STATUS_NOOOOOO.formatted(value));
+            throw new InvalidPassStatusException(ExceptionUtils.PASS_STATUS_NOOOOOO.formatted(value));
         }
     }
 
