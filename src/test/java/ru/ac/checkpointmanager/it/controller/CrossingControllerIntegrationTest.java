@@ -20,7 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import ru.ac.checkpointmanager.config.RedisAndPostgresTestContainersConfiguration;
+import ru.ac.checkpointmanager.config.EnablePostgresAndRedisTestContainers;
 import ru.ac.checkpointmanager.dto.CrossingRequestDTO;
 import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.exception.handler.ErrorCode;
@@ -63,7 +63,8 @@ import java.util.Optional;
 @ActiveProfiles("test")
 @WithMockUser(roles = {"ADMIN"})
 @Slf4j
-class CrossingControllerIntegrationTest extends RedisAndPostgresTestContainersConfiguration {
+@EnablePostgresAndRedisTestContainers
+class CrossingControllerIntegrationTest {
 
     @Autowired
     MockMvc mockMvc;

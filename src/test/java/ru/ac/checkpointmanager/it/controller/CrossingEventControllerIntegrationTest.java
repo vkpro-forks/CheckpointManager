@@ -13,7 +13,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import ru.ac.checkpointmanager.config.RedisAndPostgresTestContainersConfiguration;
+import ru.ac.checkpointmanager.config.EnablePostgresAndRedisTestContainers;
 import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
@@ -46,7 +46,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Slf4j
-class CrossingEventControllerIntegrationTest extends RedisAndPostgresTestContainersConfiguration {
+@EnablePostgresAndRedisTestContainers
+class CrossingEventControllerIntegrationTest {
 
     @Autowired
     MockMvc mockMvc;

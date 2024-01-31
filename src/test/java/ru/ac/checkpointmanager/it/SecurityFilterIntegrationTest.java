@@ -12,7 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import ru.ac.checkpointmanager.config.RedisAndPostgresTestContainersConfiguration;
+import ru.ac.checkpointmanager.config.EnablePostgresAndRedisTestContainers;
 import ru.ac.checkpointmanager.exception.handler.ErrorCode;
 import ru.ac.checkpointmanager.service.user.UserService;
 import ru.ac.checkpointmanager.util.TestUtils;
@@ -24,7 +24,8 @@ import java.util.List;
 @AutoConfigureMockMvc
 @DirtiesContext
 @ActiveProfiles("test")
-class SecurityFilterIntegrationTest extends RedisAndPostgresTestContainersConfiguration {
+@EnablePostgresAndRedisTestContainers
+class SecurityFilterIntegrationTest {
 
     @MockBean
     UserService userService;
