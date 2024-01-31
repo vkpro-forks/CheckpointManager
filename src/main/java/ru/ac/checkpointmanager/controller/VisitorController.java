@@ -37,7 +37,7 @@ import java.util.UUID;
 @RequestMapping("api/v1/visitor")
 @Validated
 @SecurityRequirement(name = "bearerAuth")
-@Tag(name = "Visitor (Посетитель)", description = "Работа со списком посетителей.")
+@Tag(name = "Visitor (посетители)", description = "Работа со списком посетителей.")
 @ApiResponses(value = {@ApiResponse(responseCode = "401", description = "Не авторизован."),
         @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса.")})
 public class VisitorController {

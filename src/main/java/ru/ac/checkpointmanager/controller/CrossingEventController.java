@@ -31,7 +31,7 @@ import java.util.UUID;
 @RequestMapping("api/v1/events")
 @RequiredArgsConstructor
 @Validated
-@Tag(name = "Event (события въезд-выезд (пары))", description = "Получение событий по пропуску (пары въезд-выезд")
+@Tag(name = "Event (события)", description = "Получение сгруппированных по парам \"въезд-выезд\" пересечений")
 @ApiResponses(value = {@ApiResponse(responseCode = "401", description = "UNAUTHORIZED: пользователь не авторизован"),
         @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса")})
 @SecurityRequirement(name = "bearerAuth")
@@ -39,7 +39,7 @@ public class CrossingEventController {
 
     private final PassInOutViewService passInOutViewService;
 
-    @Operation(summary = "Получить список событий по пропускам пользователя",
+    @Operation(summary = "Получить список событий по пропускам пользователя (для User)",
             description = "Доступ: ADMIN, USER.",
             parameters = {
                     @Parameter(in = ParameterIn.QUERY, name = "page", example = "0"),
@@ -58,7 +58,7 @@ public class CrossingEventController {
         return passInOutViewService.findEventsByUser(userId, pagingParams);
     }
 
-    @Operation(summary = "Получить список событий по конкретной территории",
+    @Operation(summary = "Получить список событий по конкретной территории (для Security)",
             description = "Доступ: ADMIN, MANAGER, SECURITY.",
             parameters = {
                     @Parameter(in = ParameterIn.QUERY, name = "page", example = "0"),
@@ -78,7 +78,7 @@ public class CrossingEventController {
         return passInOutViewService.findEventsByTerritory(territoryId, pagingParams);
     }
 
-    @Operation(summary = "Получить список событий по всем привязанным к пользователю территориям",
+    @Operation(summary = "Получить список событий по всем привязанным к пользователю территориям (для Manager)",
             description = "Доступ: ADMIN, MANAGER.",
             parameters = {
                     @Parameter(in = ParameterIn.QUERY, name = "page", example = "0"),
@@ -98,7 +98,7 @@ public class CrossingEventController {
         return passInOutViewService.findEventsByUsersTerritories(userId, pagingParams);
     }
 
-    @Operation(summary = "Получить список событий для Админа",
+    @Operation(summary = "Получить весь список событий (для Admin)",
             description = "Доступ: ADMIN.",
             parameters = {
                     @Parameter(in = ParameterIn.QUERY, name = "page", example = "0"),

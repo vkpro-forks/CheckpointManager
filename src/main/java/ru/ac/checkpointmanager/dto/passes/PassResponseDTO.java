@@ -21,9 +21,13 @@ public class PassResponseDTO {
 
     private String comment;
 
+    private String status;
+
     private String statusDescription;
 
-    private String typeTimeDescription;
+    private String timeType;
+
+    private String timeTypeDescription;
 
     private TerritoryDTO territory;
 

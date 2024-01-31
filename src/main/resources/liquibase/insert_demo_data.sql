@@ -29,6 +29,7 @@ DO $$
         user4_id UUID := uuid_generate_v4();
         car1_id UUID := uuid_generate_v4();
         car2_id UUID := uuid_generate_v4();
+        car3_id UUID := uuid_generate_v4();
         visitor1_id UUID := uuid_generate_v4();
         visitor2_id UUID := uuid_generate_v4();
         pass1_id UUID := uuid_generate_v4();
@@ -78,7 +79,8 @@ DO $$
 
         INSERT INTO cars (id, license_plate, brand_id)
         VALUES (car1_id, 'А777АА77', (select id from car_brand where brand = 'Toyota')),
-               (car2_id, 'В666ВВ66', (select id from car_brand where brand = 'Ford'));
+               (car2_id, 'В666ВВ66', (select id from car_brand where brand = 'Ford')),
+               (car3_id, 'C555CC55', (select id from car_brand where brand = 'Chevrolet'));
 
         INSERT INTO visitors (id, full_name, visitor_phone, note)
         VALUES (visitor1_id, 'Петрович', '+79991234567', 'электрик'),
@@ -101,7 +103,7 @@ DO $$
                , nowDT, nowDT + interval '7 day', 'ACTIVE FOR WEEK 3', null, visitor1_id, 'WALK', true, 'IN'),
 
                -- пешеходный постоянный
-               (pass4_id, user1_id, 'ACTIVE', 'PERMANENT', ter2_id, nowDT
+               (pass4_id, user1_id, 'ACTIVE', 'PERMANENT', ter1_id, nowDT
                , nowDT, nowDT + interval '7 day', 'ACTIVE FOR WEEK 4', null, visitor2_id, 'WALK', false, 'IN'),
 
 
@@ -112,7 +114,7 @@ DO $$
 
                -- активный автомобильный разовый, одно пересечение на въезд - должен стать ВАРНИНГ
                (pass6_id, user2_id, 'ACTIVE', 'ONETIME', ter1_id, nowDT
-               , nowDT - interval '1 hour', nowDT, 'should be WARNING', car2_id, null, 'AUTO', false, 'OUT'),
+               , nowDT - interval '1 hour', nowDT, 'should be WARNING', car3_id, null, 'AUTO', false, 'OUT'),
 
                -- активный пешеходный постоянный, пересечения на въезд и на выезд - должен стать ВЫПОЛНЕН
                (pass7_id, user2_id, 'ACTIVE', 'ONETIME', ter1_id, nowDT
@@ -123,16 +125,19 @@ DO $$
                , nowDT + interval '1 day', 'should be ACTIVE', null, visitor2_id, 'WALK', false, 'IN');
 
         INSERT INTO crossings (pass_id, checkpoint_id, performed_at, local_date_time, direction)
-        VALUES (pass1_id, chp1_id, now() - interval '5 second', nowDT, 'IN'),
+        VALUES (pass1_id, chp1_id, now() + interval '1 hour', nowDT + interval '1 hour', 'IN'),
 
-               (pass2_id, chp2_id, now() + interval '1 second', nowDT + interval '1 second', 'IN'),
-               (pass2_id, chp2_id, now() + interval '2 second', nowDT + interval '2 second', 'OUT'),
-               (pass2_id, chp2_id, now() + interval '3 second', nowDT + interval '3 second', 'IN'),
-               (pass2_id, chp2_id, now() + interval '4 second', nowDT + interval '4 second', 'OUT'),
-               (pass2_id, chp2_id, now() + interval '5 second', nowDT + interval '5 second', 'IN'),
+               (pass2_id, chp2_id, now() + interval '2 hour', nowDT + interval '2 hour', 'IN'),
+               (pass2_id, chp2_id, now() + interval '3 hour', nowDT + interval '3 hour', 'OUT'),
+               (pass2_id, chp2_id, now() + interval '4 hour', nowDT + interval '4 hour', 'IN'),
+               (pass2_id, chp2_id, now() + interval '5 hour', nowDT + interval '5 hour', 'OUT'),
+               (pass2_id, chp2_id, now() + interval '6 hour', nowDT + interval '6 hour', 'IN'),
 
-               (pass6_id, chp1_id, now() - interval '5 second', nowDT, 'IN'),
+               (pass4_id, chp3_id, now() + interval '7 hour', nowDT + interval '7 hour', 'IN'),
+               (pass4_id, chp3_id, now() + interval '8 hour', nowDT + interval '8 hour', 'OUT'),
 
-               (pass7_id, chp1_id, now() - interval '3 second', nowDT, 'IN'),
-               (pass7_id, chp1_id, now() - interval '4 second', nowDT + interval '1 second', 'OUT');
+               (pass6_id, chp1_id, now() + interval '9 hour', nowDT + interval '9 hour', 'IN'),
+
+               (pass7_id, chp1_id, now() + interval '10 hour', nowDT + interval '10 hour', 'IN'),
+               (pass7_id, chp1_id, now() + interval '11 hour', nowDT + interval '11 hour', 'OUT');
 END $$;

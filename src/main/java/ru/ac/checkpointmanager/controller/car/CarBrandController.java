@@ -36,7 +36,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Validated
 @SecurityRequirement(name = "bearerAuth")
-@Tag(name = "CarBrand (Бренд Машины)", description = "Для обработки Брендов Авто")
+@Tag(name = "CarBrand (марки машин)", description = "Для обработки Брендов Авто")
 @ApiResponses(value = {@ApiResponse(responseCode = "401", description = "Произошла ошибка, Нужно авторизоваться"),
         @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса")})
 public class CarBrandController {
