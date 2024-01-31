@@ -14,6 +14,8 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.ac.checkpointmanager.config.OpenAllEndpointsTestConfiguration;
 import ru.ac.checkpointmanager.config.ValidationTestConfiguration;
@@ -27,6 +29,7 @@ import ru.ac.checkpointmanager.service.passes.PassService;
 import ru.ac.checkpointmanager.util.MockMvcUtils;
 import ru.ac.checkpointmanager.util.ResultCheckUtils;
 import ru.ac.checkpointmanager.util.TestUtils;
+import ru.ac.checkpointmanager.util.UrlConstants;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -70,9 +73,8 @@ class PassControllerValidationIntegrationTest {
         PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
         passCreateDTO.setCar(null);
         passCreateDTO.setVisitor(null);
-        String passDtoCreateString = TestUtils.jsonStringFromObject(passCreateDTO);
 
-        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passDtoCreateString));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passCreateDTO));
 
         checkCarOrVisitorFields(resultActions);
     }
@@ -82,8 +84,9 @@ class PassControllerValidationIntegrationTest {
     void addPass_BothCarAndVisitorFieldsForAddPass_HandleExceptionAndReturnValidationError() { // testing CarOrVisitorFieldsCheck
         PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
         passCreateDTO.setVisitor(TestUtils.getVisitorDTO());
-        String passDtoCreateString = TestUtils.jsonStringFromObject(passCreateDTO);
-        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passDtoCreateString));
+
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passCreateDTO));
+
         checkCarOrVisitorFields(resultActions);
     }
 
@@ -93,9 +96,8 @@ class PassControllerValidationIntegrationTest {
         PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTOWithCar();
         passUpdateDTO.setCar(null);
         passUpdateDTO.setVisitor(null);
-        String passDtoCreateString = TestUtils.jsonStringFromObject(passUpdateDTO);
 
-        ResultActions resultActions = mockMvc.perform(MockMvcUtils.updatePass(passDtoCreateString));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.updatePass(passUpdateDTO));
 
         checkCarOrVisitorFields(resultActions);
     }
@@ -105,9 +107,8 @@ class PassControllerValidationIntegrationTest {
     void updatePass_BothCarAndVisitorFields_HandleExceptionAndReturnValidationError() { // testing CarOrVisitorFieldsCheck
         PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTOWithCar();
         passUpdateDTO.setVisitor(TestUtils.getVisitorDTO());
-        String passDtoCreateString = TestUtils.jsonStringFromObject(passUpdateDTO);
 
-        ResultActions resultActions = mockMvc.perform(MockMvcUtils.updatePass(passDtoCreateString));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.updatePass(passUpdateDTO));
 
         checkCarOrVisitorFields(resultActions);
     }
@@ -118,9 +119,8 @@ class PassControllerValidationIntegrationTest {
         PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
         passCreateDTO.setEndTime(LocalDateTime.now().plusHours(1));
         passCreateDTO.setStartTime(LocalDateTime.now().plusHours(3));
-        String passDtoCreateString = TestUtils.jsonStringFromObject(passCreateDTO);
 
-        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passDtoCreateString));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passCreateDTO));
 
         checkStartEndTimeFields(resultActions);
     }
@@ -131,9 +131,8 @@ class PassControllerValidationIntegrationTest {
         PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTOWithCar();
         passUpdateDTO.setEndTime(LocalDateTime.now().plusHours(1));
         passUpdateDTO.setStartTime(LocalDateTime.now().plusHours(3));
-        String passDtoUpdateString = TestUtils.jsonStringFromObject(passUpdateDTO);
 
-        ResultActions resultActions = mockMvc.perform(MockMvcUtils.updatePass(passDtoUpdateString));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.updatePass(passUpdateDTO));
 
         checkStartEndTimeFields(resultActions);
     }
@@ -146,9 +145,8 @@ class PassControllerValidationIntegrationTest {
         PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
         passCreateDTO.setEndTime(startTime);
         passCreateDTO.setStartTime(endTime);
-        String passDtoCreateString = TestUtils.jsonStringFromObject(passCreateDTO);
 
-        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passDtoCreateString));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passCreateDTO));
 
         ResultCheckUtils.checkCommonValidationFields(resultActions);
     }
@@ -161,9 +159,8 @@ class PassControllerValidationIntegrationTest {
         PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTOWithCar();
         passUpdateDTO.setEndTime(startTime);
         passUpdateDTO.setStartTime(endTime);
-        String passDtoUpdateString = TestUtils.jsonStringFromObject(passUpdateDTO);
 
-        ResultActions resultActions = mockMvc.perform(MockMvcUtils.updatePass(passDtoUpdateString));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.updatePass(passUpdateDTO));
 
         ResultCheckUtils.checkCommonValidationFields(resultActions);
     }
@@ -173,9 +170,8 @@ class PassControllerValidationIntegrationTest {
     void addPass_EndTimeNotInFuture_HandleExceptionAndReturnValidationError() { // testing Future
         PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
         passCreateDTO.setEndTime(LocalDateTime.now().minusDays(1));
-        String passDtoCreateString = TestUtils.jsonStringFromObject(passCreateDTO);
 
-        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passDtoCreateString));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passCreateDTO));
 
         ResultCheckUtils.checkCommonValidationFields(resultActions);
         ResultCheckUtils.checkValidationField(resultActions, 0, END_TIME);
@@ -186,9 +182,8 @@ class PassControllerValidationIntegrationTest {
     void updatePass_EndTimeNotInFuture_HandleExceptionAndReturnValidationError() { // testing Future
         PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTOWithCar();
         passUpdateDTO.setEndTime(LocalDateTime.now().minusDays(1));
-        String passDtoUpdateString = TestUtils.jsonStringFromObject(passUpdateDTO);
 
-        ResultActions resultActions = mockMvc.perform(MockMvcUtils.updatePass(passDtoUpdateString));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.updatePass(passUpdateDTO));
 
         ResultCheckUtils.checkCommonValidationFields(resultActions);
         ResultCheckUtils.checkValidationField(resultActions, 0, END_TIME);
@@ -202,9 +197,8 @@ class PassControllerValidationIntegrationTest {
         PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithVisitor();
         passCreateDTO.getVisitor().setName(name);
         passCreateDTO.getVisitor().setPhone(phone);
-        String passDtoCreateString = TestUtils.jsonStringFromObject(passCreateDTO);
 
-        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passDtoCreateString));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passCreateDTO));
 
         ResultCheckUtils.checkCommonValidationFields(resultActions);
         ResultCheckUtils.checkValidationField(resultActions, 0, field);
@@ -217,9 +211,8 @@ class PassControllerValidationIntegrationTest {
         PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTOVisitor();
         passUpdateDTO.getVisitor().setName(name);
         passUpdateDTO.getVisitor().setPhone(phone);
-        String passUpdateDtoContent = TestUtils.jsonStringFromObject(passUpdateDTO);
 
-        ResultActions resultActions = mockMvc.perform(MockMvcUtils.updatePass(passUpdateDtoContent));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.updatePass(passUpdateDTO));
 
         ResultCheckUtils.checkCommonValidationFields(resultActions);
         ResultCheckUtils.checkValidationField(resultActions, 0, field);
@@ -235,9 +228,8 @@ class PassControllerValidationIntegrationTest {
         car.setLicensePlate(licensePlate);
         car.setPhone(phone);
         car.setBrand(carBrandDTO);
-        String passDtoCreateString = TestUtils.jsonStringFromObject(passCreateDTO);
 
-        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passDtoCreateString));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passCreateDTO));
 
         ResultCheckUtils.checkCommonValidationFields(resultActions);
         ResultCheckUtils.checkValidationField(resultActions, 0, field);
@@ -253,9 +245,8 @@ class PassControllerValidationIntegrationTest {
         car.setLicensePlate(licensePlate);
         car.setPhone(phone);
         car.setBrand(carBrandDTO);
-        String passUpdateDtoString = TestUtils.jsonStringFromObject(passUpdateDTO);
 
-        ResultActions resultActions = mockMvc.perform(MockMvcUtils.updatePass(passUpdateDtoString));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.updatePass(passUpdateDTO));
 
         ResultCheckUtils.checkCommonValidationFields(resultActions);
         ResultCheckUtils.checkValidationField(resultActions, 0, field);
@@ -268,9 +259,8 @@ class PassControllerValidationIntegrationTest {
         PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithVisitor();
         passCreateDTO.setTerritoryId(terrId);
         passCreateDTO.setUserId(userId);
-        String passDtoCreateString = TestUtils.jsonStringFromObject(passCreateDTO);
 
-        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passDtoCreateString));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passCreateDTO));
 
         ResultCheckUtils.checkCommonValidationFields(resultActions);
         ResultCheckUtils.checkValidationField(resultActions, 0, field);
@@ -281,12 +271,20 @@ class PassControllerValidationIntegrationTest {
     void addPass_TooLongComment_HandleExceptionAndReturnValidationError() {
         PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithVisitor();
         passCreateDTO.setComment("a".repeat(31));
-        String passDtoCreateString = TestUtils.jsonStringFromObject(passCreateDTO);
 
-        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passDtoCreateString));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passCreateDTO));
 
         ResultCheckUtils.checkCommonValidationFields(resultActions);
         ResultCheckUtils.checkValidationField(resultActions, 0, "comment");
+    }
+
+    @ParameterizedTest
+    @MethodSource("getMethodsWithBadUids")
+    @SneakyThrows
+    void allEndpoints_BadUUIDPassed_ReturnBadRequest(MockHttpServletRequestBuilder requestBuilder) {
+        ResultActions resultActions = mockMvc.perform(requestBuilder);
+
+        ResultCheckUtils.checkWrongTypeFields(resultActions);
     }
 
 
@@ -349,6 +347,22 @@ class PassControllerValidationIntegrationTest {
                 Arguments.of(TestUtils.LICENSE_PLATE, carBrandDTO, "a".repeat(22), CAR_PHONE),
                 Arguments.of(TestUtils.LICENSE_PLATE, carBrandDTO, "asdfasdfasdfasdf", CAR_PHONE)
         );
+    }
+
+    private static Stream<MockHttpServletRequestBuilder> getMethodsWithBadUids() {
+        return Stream.of(
+                MockMvcRequestBuilders.get(UrlConstants.PASS_URL + "/{passId}", "notUUD"),
+                MockMvcRequestBuilders.get(UrlConstants.PASS_USER_URL, "notUUD"),
+                MockMvcRequestBuilders.get(UrlConstants.PASS_URL_TERRITORY, "not UUID"),
+                MockMvcRequestBuilders.get(UrlConstants.PASS_USER_TERRITORIES_URL, "notUUD"),
+                MockMvcRequestBuilders.patch(UrlConstants.PASS_URL_CANCEL, "notUUID"),
+                MockMvcRequestBuilders.patch(UrlConstants.PASS_URL_ACTIVATE, "notUUID"),
+                MockMvcRequestBuilders.patch(UrlConstants.PASS_URL_UNWARNING, "notUUID"),
+                MockMvcRequestBuilders.patch(UrlConstants.PASS_URL_FAVORITE, "notUUID"),
+                MockMvcRequestBuilders.patch(UrlConstants.PASS_URL_NOT_FAVORITE, "notUUID"),
+                MockMvcRequestBuilders.delete(UrlConstants.PASS_URL + "/{passId}", "notUUD")
+        );
+
     }
 
 }

@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.ac.checkpointmanager.config.EnablePostgresAndRedisTestContainers;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
+import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.Visitor;
@@ -38,6 +39,7 @@ import ru.ac.checkpointmanager.repository.VisitorRepository;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
 import ru.ac.checkpointmanager.repository.car.CarRepository;
 import ru.ac.checkpointmanager.util.MockMvcUtils;
+import ru.ac.checkpointmanager.util.ResultCheckUtils;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 
@@ -54,6 +56,8 @@ import java.util.stream.Stream;
 @WithMockUser(roles = {"ADMIN"})
 @EnablePostgresAndRedisTestContainers
 class PassControllerIntegrationTest {
+
+    public static final String STATUS = "status";
 
     @Autowired
     MockMvc mockMvc;
@@ -105,8 +109,9 @@ class PassControllerIntegrationTest {
         passCreateDTO.getCar().setId(null);
         passCreateDTO.getCar().setBrand(TestUtils.getCarBrandDTO());//set saved car brand, if no car brand in DB, 404 will be thrown
 
-        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(TestUtils.jsonStringFromObject(passCreateDTO)))
-                .andExpect(MockMvcResultMatchers.status().isCreated())
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passCreateDTO));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.user.id").value(savedUser.getId().toString()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.territory.id").value(savedTerritory.getId().toString()));
         List<Car> allCars = carRepository.findAll();
@@ -129,8 +134,9 @@ class PassControllerIntegrationTest {
         passCreateDTO.getCar().setId(savedCar.getId());
         passCreateDTO.getCar().setLicensePlate(savedCar.getLicensePlate());
 
-        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(TestUtils.jsonStringFromObject(passCreateDTO)))
-                .andExpect(MockMvcResultMatchers.status().isCreated())
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passCreateDTO));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.user.id").value(savedUser.getId().toString()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.territory.id").value(savedTerritory.getId().toString()));
         resultActions.andExpect(MockMvcResultMatchers.jsonPath("$.car.id").value(savedCar.getId().toString()));
@@ -153,9 +159,9 @@ class PassControllerIntegrationTest {
         passCreateDTO.getCar().setId(null);//don't pass ID of car, pass only license plate
         passCreateDTO.getCar().setLicensePlate(savedCar.getLicensePlate());
 
-        ResultActions resultActions = mockMvc.perform(
-                        MockMvcUtils.createPass(TestUtils.jsonStringFromObject(passCreateDTO)))
-                .andExpect(MockMvcResultMatchers.status().isCreated())
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passCreateDTO));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.user.id").value(savedUser.getId().toString()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.territory.id").value(savedTerritory.getId().toString()));
 
@@ -189,12 +195,12 @@ class PassControllerIntegrationTest {
         passCreateDTO.getCar().setId(TestUtils.CAR_ID);
         passCreateDTO.getCar().setLicensePlate(TestUtils.LICENSE_PLATE);
 
-        mockMvc.perform(MockMvcUtils.createPass(TestUtils.jsonStringFromObject(passCreateDTO)))
-                .andExpect(MockMvcResultMatchers.status().isCreated())
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passCreateDTO));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.user.id").value(savedUser.getId().toString()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.territory.id").value(savedTerritory.getId().toString()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.car.id").value(passCreateDTO.getCar().getId().toString()));
-
         org.junit.jupiter.api.Assertions.assertAll(
                 () -> {
                     List<Car> allCars = carRepository.findAll();
@@ -216,7 +222,7 @@ class PassControllerIntegrationTest {
         passCreateDto.setTerritoryId(savedTerritory.getId());
         passCreateDto.setUserId(savedUser.getId());
 
-        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(TestUtils.jsonStringFromObject(passCreateDto)));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passCreateDto));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isCreated()).andExpectAll(
                 MockMvcResultMatchers.jsonPath("$.id").isNotEmpty(),
@@ -235,7 +241,7 @@ class PassControllerIntegrationTest {
         passCreateDto.setTerritoryId(savedTerritory.getId());
         passCreateDto.setUserId(savedUser.getId());
 
-        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(TestUtils.jsonStringFromObject(passCreateDto)));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passCreateDto));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isCreated()).andExpectAll(
                 MockMvcResultMatchers.jsonPath("$.id").isNotEmpty(),
@@ -258,7 +264,7 @@ class PassControllerIntegrationTest {
         passCreateDto.setTerritoryId(savedTerritory.getId());
         passCreateDto.setUserId(savedUser.getId());
 
-        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(TestUtils.jsonStringFromObject(passCreateDto)));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passCreateDto));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isCreated()).andExpectAll(
                 MockMvcResultMatchers.jsonPath("$.id").isNotEmpty(),
@@ -266,6 +272,18 @@ class PassControllerIntegrationTest {
         Assertions.assertThat(visitorRepository.findAll()).isNotEmpty().flatExtracting(Visitor::getName)
                 .containsOnly(updatedName);
         Assertions.assertThat(passRepository.findAll()).hasSize(1);
+    }
+
+    @Test
+    @SneakyThrows
+    void addPass_NoUser_HandleUserNotFoundExceptionForAddPass() {
+        PassCreateDTO passCreateDTOWithCar = TestUtils.getPassCreateDTOWithCar();
+
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passCreateDTOWithCar));
+
+        resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                .value(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(passCreateDTOWithCar.getUserId())));
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     //DELETING PASSES
@@ -281,8 +299,9 @@ class PassControllerIntegrationTest {
         List<Pass> allPasses = passRepository.findAll();
         Assertions.assertThat(allPasses).as("Check if only one pass here").hasSize(1);
 
-        mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.PASS_URL + "/" + savedPass.getId()))
-                .andExpect(MockMvcResultMatchers.status().isNoContent());
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.deletePass(savedPass.getId()));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isNoContent());
 
         List<Pass> passesAfterDelete = passRepository.findAll();
         Assertions.assertThat(passesAfterDelete).isEmpty();
@@ -305,8 +324,9 @@ class PassControllerIntegrationTest {
         List<Pass> allPasses = passRepository.findAll();
         Assertions.assertThat(allPasses).hasSize(5);
 
-        mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.PASS_URL + "/" + allPasses.get(0).getId()))
-                .andExpect(MockMvcResultMatchers.status().isNoContent());
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.deletePass(allPasses.get(0).getId()));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isNoContent());
 
         List<Pass> passesAfterDelete = passRepository.findAll();
         Assertions.assertThat(passesAfterDelete).hasSize(4);
@@ -334,6 +354,16 @@ class PassControllerIntegrationTest {
                 .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_USER_URL, savedUser.getId()));
         resultActions.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.content.size()").value(5));
+    }
+
+    @Test
+    @SneakyThrows
+    void getPassesByUser_NoUser_HandleUserNotFoundExceptionAndReturnError() {
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.getPassesByUserId(TestUtils.USER_ID));
+
+        resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                .value(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(TestUtils.USER_ID)));
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @ParameterizedTest
@@ -378,7 +408,7 @@ class PassControllerIntegrationTest {
 
         ResultActions resultActions = mockMvc
                 .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_USER_URL, savedUser.getId())
-                        .param("status", PassStatus.ACTIVE.name()));
+                        .param(STATUS, PassStatus.ACTIVE.name()));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.content.size()").value(3));
@@ -403,8 +433,8 @@ class PassControllerIntegrationTest {
         passRepository.saveAllAndFlush(passes);
 
         ResultActions resultActions = mockMvc
-                .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_USER_TERRITORIES_URL, savedUser.getId())
-                        .param("status", PassStatus.ACTIVE.name()));
+                .perform(MockMvcUtils.getPassesByUserId(savedUser.getId())
+                        .param(STATUS, PassStatus.ACTIVE.name()));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.content.size()").value(3));
@@ -433,8 +463,7 @@ class PassControllerIntegrationTest {
         passRepository.saveAllAndFlush(passes);
 
         ResultActions resultActions = mockMvc
-                .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_USER_URL, savedUser.getId())
-                        .param("status", filterParams));
+                .perform(MockMvcUtils.getPassesByUserId(savedUser.getId()).param(STATUS, filterParams));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.content.size()").value(totalFound));
@@ -462,8 +491,7 @@ class PassControllerIntegrationTest {
         passRepository.saveAllAndFlush(passes);
 
         ResultActions resultActions = mockMvc
-                .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_USER_TERRITORIES_URL, savedUser.getId())
-                        .param("status", filterParams));
+                .perform(MockMvcUtils.getPassesByUsersTerritories(savedUser.getId()).param(STATUS, filterParams));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.content.size()").value(totalFound));
@@ -487,8 +515,8 @@ class PassControllerIntegrationTest {
         String filterParams = String.join(",", PassStatus.ACTIVE.name(), PassStatus.DELAYED.name());
 
         ResultActions resultActions = mockMvc
-                .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_URL_SEARCH)
-                        .param("status", filterParams)
+                .perform(MockMvcUtils.getPassesByPartOfVisitorNameAndCarNumber()
+                        .param(STATUS, filterParams)
                         .param("part", "А"));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isOk())
@@ -514,8 +542,8 @@ class PassControllerIntegrationTest {
         String filterParams = String.join(",", PassStatus.ACTIVE.name(), PassStatus.DELAYED.name());
 
         ResultActions resultActions = mockMvc
-                .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_URL_SEARCH)
-                        .param("status", filterParams)
+                .perform(MockMvcUtils.getPassesByPartOfVisitorNameAndCarNumber()
+                        .param(STATUS, filterParams)
                         .param("part", "А"));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isOk())
@@ -544,8 +572,8 @@ class PassControllerIntegrationTest {
         String filterParams = String.join(",", PassStatus.ACTIVE.name(), PassStatus.DELAYED.name());
 
         ResultActions resultActions = mockMvc
-                .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_URL_SEARCH)
-                        .param("status", filterParams)
+                .perform(MockMvcUtils.getPassesByPartOfVisitorNameAndCarNumber()
+                        .param(STATUS, filterParams)
                         .param("part", "Pet"));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isOk())
@@ -572,14 +600,53 @@ class PassControllerIntegrationTest {
         String filterParams = String.join(",", PassStatus.ACTIVE.name());
 
         ResultActions resultActions = mockMvc
-                .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_URL_SEARCH)
-                        .param("status", filterParams)
+                .perform(MockMvcUtils.getPassesByPartOfVisitorNameAndCarNumber()
+                        .param(STATUS, filterParams)
                         .param("part", "A"));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.content.size()").value(1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].id", Matchers.is(
                         savedPassWalk.getId().toString())));
+    }
+
+    @Test
+    @SneakyThrows
+    void getPass_NotFound_ReturnNotFound() {
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.getPass(TestUtils.PASS_ID));
+
+        ResultCheckUtils.checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    void updatePass_NotFound_ReturnNotFound() {
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.updatePass(TestUtils.getPassUpdateDTOWithCar()));
+
+        resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                .value(ExceptionUtils.PASS_NOT_FOUND.formatted(TestUtils.PASS_ID)));
+        ResultCheckUtils.checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    void deletePass_NotFound_ReturnNotFound() {
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.deletePass(TestUtils.PASS_ID));
+
+        resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                .value(ExceptionUtils.PASS_NOT_FOUND.formatted(TestUtils.PASS_ID)));
+        ResultCheckUtils.checkNotFoundFields(resultActions);
+    }
+
+    @ParameterizedTest
+    @MethodSource("passUrlsForPatchMethodsArguments")
+    @SneakyThrows
+    void patchMethods_NotFound_ReturnNotFound(String url) {
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.patch(url, TestUtils.PASS_ID));
+
+        resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                .value(ExceptionUtils.PASS_NOT_FOUND.formatted(TestUtils.PASS_ID)));
+        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     private PassAuto createPassWithStatusAndTime(PassStatus passStatus, int i) {
@@ -644,6 +711,16 @@ class PassControllerIntegrationTest {
                         String.join(",", PassStatus.ACTIVE.name(), PassStatus.DELAYED.name(),
                                 PassStatus.COMPLETED.name(), PassStatus.WARNING.name()), 3
                 )
+        );
+    }
+
+    private static Stream<String> passUrlsForPatchMethodsArguments() {
+        return Stream.of(
+                UrlConstants.PASS_URL_FAVORITE,
+                UrlConstants.PASS_URL_UNWARNING,
+                UrlConstants.PASS_URL_ACTIVATE,
+                UrlConstants.PASS_URL_CANCEL,
+                UrlConstants.PASS_URL_NOT_FAVORITE
         );
     }
 
