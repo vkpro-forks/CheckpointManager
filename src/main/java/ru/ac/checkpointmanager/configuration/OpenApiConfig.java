@@ -9,6 +9,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
+import static ru.ac.checkpointmanager.utils.SwaggerConstants.SWAGGER_DESCRIPTION_MESSAGE;
+
 
 @Configuration
 public class OpenApiConfig {
@@ -22,7 +24,7 @@ public class OpenApiConfig {
         return new OpenAPI()
                 .addServersItem(new Server().url("http://localhost:8080"))
                 .info(new Info().title("Checkpoint Manager")
-                        .description("Аккаунты по умолчанию: security@chp.com, user@chp.com, admin@chp.com, manager@chp.com. Пароли те же.")
+                        .description(SWAGGER_DESCRIPTION_MESSAGE)
                         .version(appVersion));
     }
 
@@ -32,7 +34,7 @@ public class OpenApiConfig {
         return new OpenAPI()
                 .addServersItem(new Server().url("https://checkpoint-manager.ru"))
                 .info(new Info().title("Checkpoint Manager")
-                        .description("Аккаунты по умолчанию: security@chp.com, user@chp.com, admin@chp.com, manager@chp.com. Пароли те же.")
+                        .description(SWAGGER_DESCRIPTION_MESSAGE)
                         .version(appVersion));
     }
 

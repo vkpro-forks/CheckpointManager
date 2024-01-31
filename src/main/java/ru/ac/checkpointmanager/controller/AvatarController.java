@@ -33,6 +33,8 @@ import ru.ac.checkpointmanager.validation.annotation.AvatarImageCheck;
 
 import java.util.UUID;
 
+import static ru.ac.checkpointmanager.utils.SwaggerConstants.*;
+
 @Slf4j
 @RestController
 @Validated
@@ -41,9 +43,9 @@ import java.util.UUID;
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Аватары для объектов", description = "User и Territory")
 @ApiResponses(value = {
-        @ApiResponse(responseCode = "401", description = "UNAUTHORIZED: пользователь не авторизован",
+        @ApiResponse(responseCode = "401", description = UNAUTHORIZED_MSG,
                 content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
-        @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса",
+        @ApiResponse(responseCode = "500", description = INTERNAL_SERVER_ERROR_MSG,
                 content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
 })
 public class AvatarController {
@@ -55,7 +57,7 @@ public class AvatarController {
             @ApiResponse(responseCode = "201", description = "Аватар успешно добавлен",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = AvatarDTO.class))),
-            @ApiResponse(responseCode = "400", description = "BAD_REQUEST: Неверные данные запроса",
+            @ApiResponse(responseCode = "400", description = BAD_REQUEST_MESSAGE,
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY') or @userAuthFacade.isIdMatch(#userId)")
@@ -71,7 +73,7 @@ public class AvatarController {
             @ApiResponse(responseCode = "200", description = "Аватар получен. Контент содержит изображение в формате JPEG.",
                     content = @Content(mediaType = MediaType.IMAGE_JPEG_VALUE,
                             schema = @Schema(implementation = byte[].class))),
-            @ApiResponse(responseCode = "404", description = "NOT_FOUND: Аватар не найден",
+            @ApiResponse(responseCode = "404", description = AVATAR_NOT_FOUND_MESSAGE,
                     content = @Content(schema = @Schema(implementation = AvatarNotFoundException.class))),
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
@@ -84,7 +86,7 @@ public class AvatarController {
     @Operation(summary = "Удалить аватар по Id пользователя")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Аватар удален."),
-            @ApiResponse(responseCode = "404", description = "NOT_FOUND: Аватар не найден",
+            @ApiResponse(responseCode = "404", description = AVATAR_NOT_FOUND_MESSAGE,
                     content = @Content(schema = @Schema(implementation = AvatarNotFoundException.class))),
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY') or @userAuthFacade.isIdMatch(#userId)")
@@ -97,7 +99,7 @@ public class AvatarController {
     @Operation(summary = "Удалить аватара по Id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Аватар удален."),
-            @ApiResponse(responseCode = "404", description = "NOT_FOUND: Аватар не найден",
+            @ApiResponse(responseCode = "404", description = AVATAR_NOT_FOUND_MESSAGE,
                     content = @Content(schema = @Schema(implementation = AvatarNotFoundException.class))),
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY') or @avatarAuthFacade.isIdMatch(#avatarId)")
@@ -112,7 +114,7 @@ public class AvatarController {
             @ApiResponse(responseCode = "200", description = "Аватар получен. Контент содержит изображение в формате JPEG.",
                     content = @Content(mediaType = MediaType.IMAGE_JPEG_VALUE,
                             schema = @Schema(implementation = byte[].class))),
-            @ApiResponse(responseCode = "404", description = "NOT_FOUND: Аватар не найден",
+            @ApiResponse(responseCode = "404", description = AVATAR_NOT_FOUND_MESSAGE,
                     content = @Content(schema = @Schema(implementation = AvatarNotFoundException.class))),
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
@@ -134,7 +136,7 @@ public class AvatarController {
             @ApiResponse(responseCode = "200", description = "Аватар получен. Контент содержит изображение в формате JPEG.",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = AvatarImageDTO.class))),
-            @ApiResponse(responseCode = "404", description = "NOT_FOUND: Аватар не найден",
+            @ApiResponse(responseCode = "404", description = AVATAR_NOT_FOUND_MESSAGE,
                     content = @Content(schema = @Schema(implementation = AvatarNotFoundException.class))),
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
@@ -149,7 +151,7 @@ public class AvatarController {
             @ApiResponse(responseCode = "201", description = "Аватар успешно добавлен",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = AvatarDTO.class))),
-            @ApiResponse(responseCode = "400", description = "BAD_REQUEST: Неверные данные запроса",
+            @ApiResponse(responseCode = "400", description = BAD_REQUEST_MESSAGE,
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
     })
     @PostMapping(value = "/territory/{territoryId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -164,7 +166,7 @@ public class AvatarController {
             @ApiResponse(responseCode = "200", description = "Аватар получен. Контент содержит изображение в формате JPEG.",
                     content = @Content(mediaType = MediaType.IMAGE_JPEG_VALUE,
                             schema = @Schema(implementation = byte[].class))),
-            @ApiResponse(responseCode = "404", description = "NOT_FOUND: Аватар не найден",
+            @ApiResponse(responseCode = "404", description = AVATAR_NOT_FOUND_MESSAGE,
                     content = @Content(schema = @Schema(implementation = AvatarNotFoundException.class))),
     })
     @GetMapping("/territory/{territoryId}")

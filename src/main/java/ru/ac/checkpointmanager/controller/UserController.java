@@ -43,6 +43,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
+import static ru.ac.checkpointmanager.utils.SwaggerConstants.INTERNAL_SERVER_ERROR_MSG;
+import static ru.ac.checkpointmanager.utils.SwaggerConstants.UNAUTHORIZED_MSG;
+
 @RestController
 @RequestMapping("api/v1/user")
 @Validated
@@ -52,9 +55,9 @@ import java.util.UUID;
                                                         "пользовательских учетных записей, включая создание, модификацию, просмотр и удаление аккаунтов")
 @ApiResponses(value = {
         @ApiResponse(responseCode = "401",
-                description = "UNAUTHORIZED: пользователь не авторизован"),
+                description = UNAUTHORIZED_MSG),
         @ApiResponse(responseCode = "500",
-                description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса")})
+                description = INTERNAL_SERVER_ERROR_MSG)})
 public class UserController {
 
     private final UserService userService;

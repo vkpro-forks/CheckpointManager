@@ -31,15 +31,18 @@ import ru.ac.checkpointmanager.service.visitor.VisitorService;
 import java.util.List;
 import java.util.UUID;
 
+import static ru.ac.checkpointmanager.utils.SwaggerConstants.INTERNAL_SERVER_ERROR_MSG;
+import static ru.ac.checkpointmanager.utils.SwaggerConstants.UNAUTHORIZED_MSG;
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("api/v1/visitor")
 @Validated
 @SecurityRequirement(name = "bearerAuth")
-@Tag(name = "Visitor (посетители)", description = "Работа со списком посетителей.")
-@ApiResponses(value = {@ApiResponse(responseCode = "401", description = "Не авторизован."),
-        @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR: Ошибка сервера при обработке запроса.")})
+@Tag(name = "Visitor (Посетитель)", description = "Работа со списком посетителей.")
+@ApiResponses(value = {@ApiResponse(responseCode = "401", description = UNAUTHORIZED_MSG),
+        @ApiResponse(responseCode = "500", description = INTERNAL_SERVER_ERROR_MSG)})
 public class VisitorController {
 
     private final VisitorService visitorService;
