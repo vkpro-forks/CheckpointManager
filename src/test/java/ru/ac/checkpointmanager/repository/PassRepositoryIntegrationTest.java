@@ -7,21 +7,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.jdbc.JdbcConnectionDetails;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import ru.ac.checkpointmanager.config.EnablePostgresAndRedisTestContainers;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.Visitor;
@@ -45,20 +39,9 @@ import java.util.List;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")
 @DirtiesContext
-@Testcontainers
+@EnablePostgresAndRedisTestContainers
 @Slf4j
 class PassRepositoryIntegrationTest {
-
-    @Container
-    @ServiceConnection(type = JdbcConnectionDetails.class)
-    private static PostgreSQLContainer<?> postgresContainer = new PostgreSQLContainer<>("postgres:latest")
-            .withDatabaseName("chpmanDB");
-
-    @DynamicPropertySource
-    private static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.liquibase.enabled", () -> true);
-        registry.add("spring.liquibase.label-filter", () -> "!demo-data");
-    }
 
     @Autowired
     PassRepository passRepository;
@@ -273,7 +256,7 @@ class PassRepositoryIntegrationTest {
         saveUserTerritoryVisitor(TestUtils.FULL_NAME);
         saveCar("H123QA799");
         PassAuto passAuto = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
-        PassAuto savedPassAuto = passRepository.saveAndFlush(passAuto);
+        passRepository.saveAndFlush(passAuto);
         PassWalk passWalk = TestUtils.getPassWalk(PassStatus.DELAYED, LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(1),
                 savedUser, savedTerritory, savedVisitor, PassTimeType.ONETIME);
@@ -289,6 +272,22 @@ class PassRepositoryIntegrationTest {
         log.info("Found page: {}", foundPasses.getContent());
         Assertions.assertThat(foundPasses.getContent()).hasSize(1)
                 .flatExtracting(Pass::getId).contains(savedPassWalk.getId());
+    }
+
+    @Test
+    void savePassWalkWithVisitor_VisitorNotInDB_SaveAndReturn() {
+        saveUserTerritory();
+        Visitor visitor = new Visitor();
+        visitor.setId(TestUtils.VISITOR_ID);
+        visitor.setName(TestUtils.FULL_NAME);
+        visitor.setPhone(TestUtils.PHONE_NUM);
+        PassWalk passWalk = TestUtils.getPassWalk(PassStatus.DELAYED, LocalDateTime.now().minusDays(1),
+                LocalDateTime.now().plusDays(1),
+                savedUser, savedTerritory, visitor, PassTimeType.ONETIME);
+
+        PassWalk savedPassWalk = passRepository.saveAndFlush(passWalk);
+
+        Assertions.assertThat(savedPassWalk.getVisitor().getName()).isEqualTo(visitor.getName());
     }
 
     /*@Test
@@ -314,16 +313,21 @@ class PassRepositoryIntegrationTest {
 */
 
     private void saveUserTerritoryVisitor(String name) {
+        saveUserTerritory();
+        Visitor visitor = new Visitor();
+        visitor.setId(TestUtils.VISITOR_ID);
+        visitor.setName(name);
+        visitor.setPhone(TestUtils.PHONE_NUM);
+        savedVisitor = visitorRepository.saveAndFlush(visitor);
+    }
+
+    private void saveUserTerritory() {
         Territory territory = new Territory();
         territory.setName(TestUtils.TERR_NAME);
         User user = TestUtils.getUser();
         savedUser = userRepository.saveAndFlush(user);
         territory.setUsers(List.of(savedUser));
         savedTerritory = territoryRepository.saveAndFlush(territory);
-        Visitor visitor = new Visitor();
-        visitor.setName(name);
-        visitor.setPhone(TestUtils.PHONE_NUM);
-        savedVisitor = visitorRepository.saveAndFlush(visitor);
     }
 
     private void saveCar(String licensePlate) {

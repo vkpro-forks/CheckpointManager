@@ -26,17 +26,17 @@ public class UrlConstants {
     public static final String PASS_USER_URL = "/api/v1/pass/user/{userId}";
     public static final String PASS_USER_TERRITORIES_URL = "/api/v1/pass/user/{userId}/territories";
 
-    public static final String PASS_URL_CANCEL = PASS_URL + "/%s/cancel";
+    public static final String PASS_URL_CANCEL = PASS_URL + "/{passId}/cancel";
 
-    public static final String PASS_URL_ACTIVATE = PASS_URL + "/%s/activate";
+    public static final String PASS_URL_ACTIVATE = PASS_URL + "/{passId}/activate";
 
-    public static final String PASS_URL_UNWARNING = PASS_URL + "/%s/unwarning";
+    public static final String PASS_URL_UNWARNING = PASS_URL + "/{passId}/unwarning";
 
-    public static final String PASS_URL_FAVORITE = PASS_URL + "/%s/favorite";
+    public static final String PASS_URL_FAVORITE = PASS_URL + "/{passId}/favorite";
 
-    public static final String PASS_URL_NOT_FAVORITE = PASS_URL + "/%s/not_favorite";
+    public static final String PASS_URL_NOT_FAVORITE = PASS_URL + "/{passId}/not_favorite";
 
-    public static final String PASS_URL_TERRITORY = PASS_URL + "/territory/%s";
+    public static final String PASS_URL_TERRITORY = PASS_URL + "/territory/{terrId}";
 
     public static final String PASS_URL_SEARCH = PASS_URL + "/search";
 

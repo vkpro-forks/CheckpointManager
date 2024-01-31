@@ -47,30 +47,6 @@ class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestCo
 
     @Test
     @SneakyThrows
-    void shouldHandleUserNotFoundExceptionForAddPass() {
-        String passDtoCreate = TestUtils.jsonStringFromObject(TestUtils.getPassCreateDTOWithCar());
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(passDtoCreate))
-                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
-                        .value(Matchers.startsWith(USER)));
-        ResultCheckUtils.checkNotFoundFields(resultActions);
-    }
-
-    @Test
-    @SneakyThrows
-    void shouldHandleUserNotFoundExceptionForGetPassesByUser() {
-        String passDtoCreate = TestUtils.jsonStringFromObject(TestUtils.getPassCreateDTOWithCar());
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(passDtoCreate))
-                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
-                        .value(Matchers.startsWith(USER)));
-        ResultCheckUtils.checkNotFoundFields(resultActions);
-    }
-
-    @Test
-    @SneakyThrows
     @WithMockCustomUser
     void shouldHandleUserNotFoundExceptionForUploadAvatar() {
         MockMultipartFile file
@@ -109,7 +85,6 @@ class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestCo
                         .value(Matchers.startsWith(USER)));
         ResultCheckUtils.checkNotFoundFields(resultActions);
     }
-
 
     @Test
     @SneakyThrows

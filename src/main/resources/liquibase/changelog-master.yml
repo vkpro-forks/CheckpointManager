@@ -83,6 +83,8 @@ databaseChangeLog:
       file: liquibase/scripts/V_255__alter_territories.sql
   - include:
       file: liquibase/scripts/V_272__alter_table_passes_create_pass_status_enum.yaml
+  - include:
+      file: liquibase/scripts/V_291__alter_events_view.sql
 
   ## ВНЕСЕНИЕ ДЕМО-ДАННЫХ, ОСТАВЛЯЙТЕ ВСЕГДА В КОНЦЕ ФАЙЛА
   - include:

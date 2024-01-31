@@ -16,7 +16,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.dto.user.AuthResponseDTO;
@@ -36,6 +35,7 @@ import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.mapper.TerritoryMapper;
 import ru.ac.checkpointmanager.mapper.UserMapper;
+import ru.ac.checkpointmanager.model.Phone;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.avatar.Avatar;
@@ -135,8 +135,8 @@ public class UserServiceImpl implements UserService {
     public User findUserById(UUID id) {
         return userRepository.findById(id).orElseThrow(
                 () -> {
-                    log.warn(USER_NOT_FOUND_MSG.formatted(id));
-                    return new UserNotFoundException(String.format(USER_NOT_FOUND_MSG.formatted(id)));
+                    log.warn(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(id));
+                    return new UserNotFoundException(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(id));
                 });
     }
 
@@ -206,7 +206,8 @@ public class UserServiceImpl implements UserService {
      * @param userUpdateDTO DTO пользователя, содержащее обновленные данные. Должно включать идентификатор пользователя,
      *                      а также может включать новое полное имя и основной номер телефона.
      * @return UserResponseDTO, содержащий обновленные данные пользователя.
-     * @throws UserNotFoundException если пользователь с предоставленным идентификатором не найден.
+     * @throws UserNotFoundException      если пользователь с предоставленным идентификатором не найден.
+     * @throws PhoneAlreadyExistException если указанный номер телефона принадлежит другому пользователю
      * @see UserUpdateDTO
      * @see UserResponseDTO
      */
@@ -225,37 +226,33 @@ public class UserServiceImpl implements UserService {
         foundUser.setFullName(userUpdateDTO.getFullName());
 
         if (userUpdateDTO.getMainNumber() != null) {
-            String newMainNumber = userUpdateDTO.getMainNumber();
-            if (!foundUser.getMainNumber().equals(FieldsValidation.cleanPhone(newMainNumber))) {
-                if (phoneRepository.existsByNumber(FieldsValidation.cleanPhone(newMainNumber))) {
-                    log.warn(ExceptionUtils.PHONE_EXISTS.formatted(newMainNumber));
-                    throw new PhoneAlreadyExistException(ExceptionUtils.PHONE_EXISTS.formatted(newMainNumber));
+            String newMainNumber = FieldsValidation.cleanPhone(userUpdateDTO.getMainNumber());
+            if (!foundUser.getMainNumber().equals(newMainNumber)) {
+                Optional<Phone> optionalNumber = phoneRepository.findByNumber(newMainNumber);
+                Phone phone;
+                if (optionalNumber.isEmpty()) {
+                    Phone newPhone = new Phone();
+                    newPhone.setNumber(newMainNumber);
+                    newPhone.setType(PhoneNumberType.MOBILE);
+                    newPhone.setUser(foundUser);
+                    phone = phoneRepository.save(newPhone);
+                    log.info("New phone: {} saved", newMainNumber);
+                } else {
+                    phone = optionalNumber.get();
                 }
-                foundUser.setMainNumber(FieldsValidation.cleanPhone(newMainNumber));
+                foundUser.setMainNumber(phone.getNumber());
+                if (!phone.getUser().getId().equals(foundUser.getId())) {
+                    log.warn(ExceptionUtils.PHONE_BELONGS_TO_ANOTHER_USER.formatted(newMainNumber));
+                    throw new PhoneAlreadyExistException(
+                            ExceptionUtils.PHONE_BELONGS_TO_ANOTHER_USER.formatted(newMainNumber));
+                }
             }
         }
-
         userRepository.save(foundUser);
         log.info("[User {}] updated", foundUser.getId());
 
         return userMapper.toUserResponseDTO(foundUser);
-    }
 
-    /**
-     * Создает DTO телефона на основе данных пользователя.
-     * <p>
-     * Этот вспомогательный метод используется для создания DTO телефона из данных пользователя.
-     * </p>
-     *
-     * @param user Объект пользователя, для которого создается DTO телефона.
-     * @return PhoneDTO, содержащий данные телефона пользователя.
-     */
-    private PhoneDTO createPhoneDTO(User user) {
-        PhoneDTO phoneDTO = new PhoneDTO();
-        phoneDTO.setNumber(user.getMainNumber());
-        phoneDTO.setType(PhoneNumberType.MOBILE);
-        phoneDTO.setUserId(user.getId());
-        return phoneDTO;
     }
 
     /**

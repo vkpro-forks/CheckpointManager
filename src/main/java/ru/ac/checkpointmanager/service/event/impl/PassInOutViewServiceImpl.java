@@ -65,7 +65,6 @@ public class PassInOutViewServiceImpl implements PassInOutViewService {
             throw new TerritoryNotFoundException(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(terId));
         }
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
-
         return passRepository.findEventsByTerritory(terId, pageable);
     }
 
@@ -107,5 +106,4 @@ public class PassInOutViewServiceImpl implements PassInOutViewService {
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
         return passRepository.findAllEvents(pageable);
     }
-
 }

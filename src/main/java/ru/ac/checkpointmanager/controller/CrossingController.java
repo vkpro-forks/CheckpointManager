@@ -45,7 +45,7 @@ import static ru.ac.checkpointmanager.utils.SwaggerConstants.UNAUTHORIZED_MSG;
 @Validated
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
-@Tag(name = "Crossing (Пересечение)", description = "Работа с пересечениями машин и посетителей через КПП")
+@Tag(name = "Crossing (пересечения)", description = "Работа с пересечениями машин и посетителей КПП")
 @ApiResponses(value = {
         @ApiResponse(responseCode = "401", description = UNAUTHORIZED_MSG,
                 content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
@@ -59,7 +59,7 @@ public class CrossingController {
     @Operation(summary = "Создание события: въезд/вход на территорию",
             description = "Доступ: ADMIN, SECURITY.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Пересечение успешно добавлено.",
+            @ApiResponse(responseCode = "200", description = "Пересечение успешно добавлено",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CrossingDTO.class))}),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST_MESSAGE,
@@ -74,7 +74,7 @@ public class CrossingController {
     @Operation(summary = "Создание события: выезд/выход с территории",
             description = "Доступ: ADMIN, SECURITY.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Пересечение успешно добавлено.",
+            @ApiResponse(responseCode = "200", description = "Пересечение успешно добавлено",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CrossingDTO.class))}),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST_MESSAGE,

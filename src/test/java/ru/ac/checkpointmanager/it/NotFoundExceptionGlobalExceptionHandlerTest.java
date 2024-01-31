@@ -4,8 +4,6 @@ import lombok.SneakyThrows;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -33,8 +31,6 @@ import ru.ac.checkpointmanager.repository.car.CarRepository;
 import ru.ac.checkpointmanager.util.ResultCheckUtils;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
-
-import java.util.stream.Stream;
 
 class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandlerBasicTestConfig {
 
@@ -211,45 +207,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
         ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
-    //PASS NOT FOUND EXCEPTION HANDLING
-    @Test
-    @SneakyThrows
-    void shouldHandlePassNotFoundExceptionForGetPass() {
-        ResultActions resultActions = mockMvc
-                .perform(MockMvcRequestBuilders.get(UrlConstants.PASS_URL + "/" + TestUtils.PASS_ID));
-        ResultCheckUtils.checkNotFoundFields(resultActions);
-    }
-
-    @Test
-    @SneakyThrows
-    void shouldHandlePassNotFoundExceptionForUpdatePass() {
-        String passUpdateDto = TestUtils.jsonStringFromObject(TestUtils.getPassUpdateDTO());
-        ResultActions resultActions = mockMvc
-                .perform(MockMvcRequestBuilders.put(UrlConstants.PASS_URL)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(passUpdateDto));
-        ResultCheckUtils.checkNotFoundFields(resultActions);
-    }
-
-    @Test
-    @SneakyThrows
-    void shouldHandlePassNotFoundExceptionForDeletePass() {
-        ResultActions resultActions = mockMvc
-                .perform(MockMvcRequestBuilders.delete(UrlConstants.PASS_URL + "/" + TestUtils.PASS_ID));
-        ResultCheckUtils.checkNotFoundFields(resultActions);
-    }
-
-    @ParameterizedTest
-    @MethodSource("passUrlsForPatchMethodsArguments")
-    @SneakyThrows
-    void shouldHandlePassNotFoundExceptionsForPatchPassMethods(String url) {
-        ResultActions resultActions = mockMvc
-                .perform(MockMvcRequestBuilders.patch(url.formatted(TestUtils.PASS_ID)));
-        ResultCheckUtils.checkNotFoundFields(resultActions);
-    }
-
 //TERRITORY NOT FOUND EXCEPTION HANDLING
-
     @Test
     @SneakyThrows
     void shouldHandleTerritoryNotFoundExceptionForAddPass() {
@@ -269,7 +227,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
     @SneakyThrows
     void shouldHandleTerritoryNotFoundExceptionForGetPassesByTerritory() {
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
-                .get(UrlConstants.PASS_URL_TERRITORY.formatted(TestUtils.TERR_ID)));
+                .get(UrlConstants.PASS_URL_TERRITORY, TestUtils.TERR_ID));
         ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
@@ -412,16 +370,6 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith(PHONE)));
         ResultCheckUtils.checkNotFoundFields(resultActions);
-    }
-
-    private static Stream<String> passUrlsForPatchMethodsArguments() {
-        return Stream.of(
-                UrlConstants.PASS_URL_FAVORITE,
-                UrlConstants.PASS_URL_UNWARNING,
-                UrlConstants.PASS_URL_ACTIVATE,
-                UrlConstants.PASS_URL_CANCEL,
-                UrlConstants.PASS_URL_NOT_FAVORITE
-        );
     }
 
 }

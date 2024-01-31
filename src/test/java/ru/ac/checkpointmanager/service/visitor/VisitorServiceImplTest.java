@@ -47,7 +47,7 @@ class VisitorServiceImplTest {
     @Test
     void addVisitor_AllOk_SaveAndReturnDTO() {
         VisitorDTO visitorDTO = TestUtils.getVisitorDTO();
-        Mockito.when(visitorRepository.save(Mockito.any())).thenReturn(TestUtils.getVisitorUnsaved());
+        Mockito.when(visitorRepository.save(Mockito.any())).thenReturn(TestUtils.getVisitorRandomUUID());
 
         VisitorDTO returnedDto = visitorService.addVisitor(visitorDTO);
 
@@ -59,7 +59,7 @@ class VisitorServiceImplTest {
 
     @Test
     void getVisitor_AllOk_ReturnVisitorDto() {
-        Visitor visitor = TestUtils.getVisitorUnsaved();
+        Visitor visitor = TestUtils.getVisitorRandomUUID();
         visitor.setId(TestUtils.VISITOR_ID);
         Mockito.when(visitorRepository.findById(TestUtils.VISITOR_ID)).thenReturn(Optional.of(visitor));
 
@@ -85,7 +85,7 @@ class VisitorServiceImplTest {
     void updateVisitor_AllOk_UpdateVisitorAndReturnDto() {
         VisitorDTO visitorDTO = TestUtils.getVisitorDTO();
         visitorDTO.setName("Huggy Wuggy");
-        Visitor visitor = TestUtils.getVisitorUnsaved();
+        Visitor visitor = TestUtils.getVisitorRandomUUID();
         Mockito.when(visitorRepository.findById(TestUtils.VISITOR_ID)).thenReturn(Optional.of(visitor));
         Mockito.when(visitorRepository.save(Mockito.any())).thenReturn(visitor);
         VisitorDTO returnedDto = visitorService.updateVisitor(TestUtils.VISITOR_ID, visitorDTO);
@@ -132,7 +132,7 @@ class VisitorServiceImplTest {
 
     @Test
     void findByNamePart_AllOk_ReturnListOfDto() {
-        Visitor visitorUnsaved = TestUtils.getVisitorUnsaved();
+        Visitor visitorUnsaved = TestUtils.getVisitorRandomUUID();
         Mockito.when(visitorRepository.findByNameContainingIgnoreCase(Mockito.any()))
                 .thenReturn(List.of(visitorUnsaved));
 
@@ -153,7 +153,7 @@ class VisitorServiceImplTest {
 
     @Test
     void findByPhonePart_AllOk_ReturnListOfDto() {
-        Visitor visitorUnsaved = TestUtils.getVisitorUnsaved();
+        Visitor visitorUnsaved = TestUtils.getVisitorRandomUUID();
         Mockito.when(visitorRepository.findByPhoneContaining(Mockito.any()))
                 .thenReturn(List.of(visitorUnsaved));
 
@@ -174,7 +174,7 @@ class VisitorServiceImplTest {
 
     @Test
     void findByPassId_AllOk_ReturnVisitorDto() {
-        Visitor visitor = TestUtils.getVisitorUnsaved();
+        Visitor visitor = TestUtils.getVisitorRandomUUID();
         Mockito.when(visitorRepository.findVisitorByPasses_Id(TestUtils.PASS_ID)).thenReturn(Optional.of(visitor));
 
         VisitorDTO foundDto = visitorService.findByPassId(TestUtils.PASS_ID);
@@ -195,7 +195,7 @@ class VisitorServiceImplTest {
 
     @Test
     void findByUserId_AllOk_ReturnVisitorDto() {
-        Visitor visitor = TestUtils.getVisitorUnsaved();
+        Visitor visitor = TestUtils.getVisitorRandomUUID();
         Mockito.when(visitorRepository.findVisitorsByUserId(TestUtils.USER_ID)).thenReturn(List.of(visitor));
 
         List<VisitorDTO> found = visitorService.findByUserId(TestUtils.USER_ID);

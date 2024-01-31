@@ -62,7 +62,7 @@ public class PassController {
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = PassResponseDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей; пользователь не имеет права " +
-                                                             "создавать пропуск на эту территорию; у пользователя найден накладывающийся пропуск"),
+                    "создавать пропуск на эту территорию; у пользователя найден накладывающийся пропуск"),
             @ApiResponse(responseCode = "404", description = "Не найден пользователь или территория")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @PostMapping
@@ -212,7 +212,7 @@ public class PassController {
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = PassResponseDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей; пользователь не имеет права " +
-                                                             "создавать пропуск на эту территорию; у пользователя найден накладывающийся пропуск"),
+                    "создавать пропуск на эту территорию; у пользователя найден накладывающийся пропуск"),
             @ApiResponse(responseCode = "404", description = "Не найден пользователь или территория")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @PutMapping
@@ -271,25 +271,25 @@ public class PassController {
     @Operation(summary = "Отметить пропуск как избранный",
             description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Отмечен"),
+            @ApiResponse(responseCode = "204", description = "Отмечен"),
             @ApiResponse(responseCode = "404", description = "Не найден")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
-    @PatchMapping("{id}/favorite")
-    public ResponseEntity<Void> markFavorite(@PathVariable UUID id) {
+    @PatchMapping("/{id}/favorite")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void markFavorite(@PathVariable UUID id) {
         service.markFavorite(id);
-        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "Отметить пропуск как НЕизбранный",
             description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Отмечен"),
+            @ApiResponse(responseCode = "204", description = "Отмечен"),
             @ApiResponse(responseCode = "404", description = "Не найден")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
-    @PatchMapping("{id}/not_favorite")
-    public ResponseEntity<Void> unmarkFavorite(@PathVariable UUID id) {
+    @PatchMapping("/{id}/not_favorite")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void unmarkFavorite(@PathVariable UUID id) {
         service.unmarkFavorite(id);
-        return ResponseEntity.ok().build();
     }
 
     /* DELETE */
@@ -299,7 +299,7 @@ public class PassController {
             @ApiResponse(responseCode = "204", description = "Пропуск успешно удален"),
             @ApiResponse(responseCode = "404", description = "Пропуск не найден")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deletePass(@PathVariable UUID id) {
         service.deletePass(id);

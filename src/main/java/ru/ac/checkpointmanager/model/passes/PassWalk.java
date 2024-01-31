@@ -1,6 +1,10 @@
 package ru.ac.checkpointmanager.model.passes;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.Setter;
 import ru.ac.checkpointmanager.model.Visitor;
@@ -13,7 +17,7 @@ import java.util.Objects;
 @DiscriminatorValue("WALK")
 public class PassWalk extends Pass {
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "visitor_id")
     private Visitor visitor;
 

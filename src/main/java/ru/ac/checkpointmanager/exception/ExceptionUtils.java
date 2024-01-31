@@ -1,6 +1,10 @@
 package ru.ac.checkpointmanager.exception;
 
-public class ExceptionUtils {
+public final class ExceptionUtils {
+
+    private ExceptionUtils() {
+        throw new AssertionError("No instances, please");
+    }
 
     public static final String USER_NOT_FOUND_MSG = "User with [id: %s] not found";
 
@@ -15,6 +19,8 @@ public class ExceptionUtils {
     public static final String EMAIL_EXISTS = "[Email: %s] already exists";
 
     public static final String PHONE_EXISTS = "Phone number %s already exist";
+
+    public static final String PHONE_BELONGS_TO_ANOTHER_USER = "Phone number %s already belongs to another user";
 
     public static final String CACHING_FAILED = "Caching failed: {}";
 
@@ -42,8 +48,9 @@ public class ExceptionUtils {
 
     public static final String AVATAR_NOT_FOUND_FOR_TERRITORY = "Avatar for territory with [id: %s] not found";
 
-    private ExceptionUtils() {
-        throw new AssertionError("No instances, please");
-    }
+    public static final String PASS_RESOLVING_ERROR = "Pass cannot be resolved because no car or visitor in dto";
 
+    public static final String PASS_STATUS_NOOOOOO = "No PassStatus for string value: %s";
+
+    public static final String PASS_TIME_TYPE_NOOOOOO = "No PassTimeType for string value: %s";
 }

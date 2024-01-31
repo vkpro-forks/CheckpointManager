@@ -6,7 +6,6 @@ import jakarta.persistence.DiscriminatorType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
@@ -20,10 +19,10 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SourceType;
 import org.hibernate.annotations.Type;
-import ru.ac.checkpointmanager.model.usertype.PassStatusType;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.enums.Direction;
+import ru.ac.checkpointmanager.model.usertype.PassStatusType;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -40,7 +39,6 @@ import java.util.UUID;
 public abstract class Pass {
 
     @Id
-    @GeneratedValue
     @EqualsAndHashCode.Include
     private UUID id;
 

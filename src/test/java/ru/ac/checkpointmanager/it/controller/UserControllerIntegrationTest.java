@@ -2,6 +2,7 @@ package ru.ac.checkpointmanager.it.controller;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.api.Assertions;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +25,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import ru.ac.checkpointmanager.config.RedisAndPostgresTestContainersConfiguration;
+import ru.ac.checkpointmanager.config.EnablePostgresAndRedisTestContainers;
 import ru.ac.checkpointmanager.config.security.WithMockCustomUser;
 import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.dto.user.NewEmailDTO;
@@ -41,6 +42,7 @@ import ru.ac.checkpointmanager.repository.PhoneRepository;
 import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.security.CustomAuthenticationToken;
+import ru.ac.checkpointmanager.util.MockMvcUtils;
 import ru.ac.checkpointmanager.util.ResultCheckUtils;
 import ru.ac.checkpointmanager.util.TestMessage;
 import ru.ac.checkpointmanager.util.TestUtils;
@@ -59,7 +61,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DirtiesContext
 @ActiveProfiles("test")
 @Slf4j
-class UserControllerIntegrationTest extends RedisAndPostgresTestContainersConfiguration {
+@EnablePostgresAndRedisTestContainers
+class UserControllerIntegrationTest {
 
     MockMvc mockMvc;
 
@@ -385,12 +388,10 @@ class UserControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         UserUpdateDTO userUpdateDTO = TestUtils.getUserUpdateDTO();
         userUpdateDTO.setId(userId);
         userUpdateDTO.setMainNumber(FieldsValidation.cleanPhone(userUpdateDTO.getMainNumber()));
-        String userPutDTOString = TestUtils.jsonStringFromObject(userUpdateDTO);
 
-        mockMvc.perform(MockMvcRequestBuilders.put(UrlConstants.USER_URL)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(userPutDTOString))
-                .andExpect(status().isOk())
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.updateUser(userUpdateDTO));
+
+        resultActions.andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", Matchers.is(userUpdateDTO.getId().toString())))
                 .andExpect(jsonPath("$.fullName", Matchers.is(userUpdateDTO.getFullName())))
                 .andExpect(jsonPath("$.mainNumber", Matchers.is(userUpdateDTO.getMainNumber())));
@@ -399,7 +400,33 @@ class UserControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
     @Test
     @SneakyThrows
     @WithMockCustomUser
-    void updateUser_IfPhoneNumberExists_HandleAndReturnConflictError() {
+    void updateUser_IfPhoneNumberExistsAndBelongsAnotherUser_HandleAndReturnConflictError() {
+        //given
+        UUID userId = savedUser.getId();
+        UserUpdateDTO userUpdateDTO = TestUtils.getUserUpdateDTO();
+        userUpdateDTO.setId(userId);
+        String cleanedPhone = FieldsValidation.cleanPhone(userUpdateDTO.getMainNumber());
+        userUpdateDTO.setMainNumber(cleanedPhone);
+        User anotherUser = TestUtils.getUser();
+        User savedAnotherUser = userRepository.saveAndFlush(anotherUser);
+        Phone phone = new Phone();
+        phone.setNumber(cleanedPhone);
+        phone.setType(PhoneNumberType.MOBILE);
+        phone.setUser(savedAnotherUser);
+        phoneRepository.saveAndFlush(phone);
+        //when
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.updateUser(userUpdateDTO));
+        //then
+        resultActions.andExpect(status().isConflict())
+                .andExpect(jsonPath(TestUtils.JSON_ERROR_CODE)
+                        .value(ErrorCode.CONFLICT.toString()))
+                .andExpect(jsonPath(TestUtils.JSON_DETAIL).value(ExceptionUtils.PHONE_BELONGS_TO_ANOTHER_USER.formatted(cleanedPhone)));
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockCustomUser
+    void updateUser_IfNewPhoneBelongsToUserButNotMain_UpdateAndReturnDto() {
         //given
         UUID userId = savedUser.getId();
         UserUpdateDTO userUpdateDTO = TestUtils.getUserUpdateDTO();
@@ -407,20 +434,39 @@ class UserControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         String cleanedPhone = FieldsValidation.cleanPhone(userUpdateDTO.getMainNumber());
         userUpdateDTO.setMainNumber(cleanedPhone);
         Phone phone = new Phone();
-        phone.setNumber(cleanedPhone);
+        phone.setNumber("79167868125");
         phone.setType(PhoneNumberType.MOBILE);
         phone.setUser(savedUser);
         phoneRepository.saveAndFlush(phone);
-        String userPutDTOString = TestUtils.jsonStringFromObject(userUpdateDTO);
         //when
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.put(UrlConstants.USER_URL)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(userPutDTOString));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.updateUser(userUpdateDTO));
         //then
-        resultActions.andExpect(status().isConflict())
-                .andExpect(jsonPath(TestUtils.JSON_ERROR_CODE)
-                        .value(ErrorCode.CONFLICT.toString()))
-                .andExpect(jsonPath(TestUtils.JSON_DETAIL).value(ExceptionUtils.PHONE_EXISTS.formatted(cleanedPhone)));
+        resultActions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", Matchers.is(userUpdateDTO.getId().toString())))
+                .andExpect(jsonPath("$.fullName", Matchers.is(userUpdateDTO.getFullName())))
+                .andExpect(jsonPath("$.mainNumber", Matchers.is(userUpdateDTO.getMainNumber())));
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockCustomUser
+    void updateUser_IfPhoneNotIdDB_UpdateAndReturnDto() {
+        //given
+        UUID userId = savedUser.getId();
+        UserUpdateDTO userUpdateDTO = TestUtils.getUserUpdateDTO();
+        userUpdateDTO.setId(userId);
+        String cleanedPhone = FieldsValidation.cleanPhone(userUpdateDTO.getMainNumber());
+        userUpdateDTO.setMainNumber(cleanedPhone);
+        //when
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.updateUser(userUpdateDTO));
+        //then
+        resultActions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", Matchers.is(userUpdateDTO.getId().toString())))
+                .andExpect(jsonPath("$.fullName", Matchers.is(userUpdateDTO.getFullName())))
+                .andExpect(jsonPath("$.mainNumber", Matchers.is(userUpdateDTO.getMainNumber())));
+
+        Assertions.assertThat(phoneRepository.findAll()).hasSize(1).flatExtracting(Phone::getNumber)
+                .containsOnly(cleanedPhone);
     }
 
     @Test
@@ -430,12 +476,9 @@ class UserControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         UUID userId = UUID.randomUUID();
         UserUpdateDTO userUpdateDTO = TestUtils.getUserUpdateDTO();
         userUpdateDTO.setId(userId);
-        String userPutDTOString = TestUtils.jsonStringFromObject(userUpdateDTO);
 
-        mockMvc.perform(MockMvcRequestBuilders.put(UrlConstants.USER_URL)
-                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(userPutDTOString))
+        mockMvc.perform(MockMvcUtils.updateUser(userUpdateDTO)
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken)))
                 .andExpect(status().isForbidden());
     }
 
@@ -446,13 +489,10 @@ class UserControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
         UUID userId = savedUser.getId();
         UserUpdateDTO userUpdateDTO = TestUtils.getUserUpdateDTO();
         userUpdateDTO.setId(userId);
-        userUpdateDTO.setMainNumber("integration tests sucks");
+        userUpdateDTO.setMainNumber("integration tests the best");
         userUpdateDTO.setFullName("have u seen capital letter?");
-        String userPutDTOString = TestUtils.jsonStringFromObject(userUpdateDTO);
 
-        mockMvc.perform(MockMvcRequestBuilders.put(UrlConstants.USER_URL)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(userPutDTOString))
+        mockMvc.perform(MockMvcUtils.updateUser(userUpdateDTO))
                 .andExpect(status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE))
                 .andExpect(jsonPath("$.title").isNotEmpty());
@@ -463,11 +503,8 @@ class UserControllerIntegrationTest extends RedisAndPostgresTestContainersConfig
     @WithMockCustomUser
     void updateUserIsNotFound() {
         UserUpdateDTO userUpdateDTO = TestUtils.getUserUpdateDTO();
-        String userPutDTOString = TestUtils.jsonStringFromObject(userUpdateDTO);
 
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.put(UrlConstants.USER_URL)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(userPutDTOString));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.updateUser(userUpdateDTO));
         ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
