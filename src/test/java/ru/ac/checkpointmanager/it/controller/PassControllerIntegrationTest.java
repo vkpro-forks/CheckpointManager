@@ -102,6 +102,29 @@ class PassControllerIntegrationTest {
     @Test
     @SneakyThrows
     void addPass_NewCarWithoutIdWhenCarInRepoDoesntExists_SaveAndReturn() {
+        saveTerritoryAndUser();
+        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
+        passCreateDTO.setUserId(savedUser.getId());
+        passCreateDTO.setTerritoryId(savedTerritory.getId());
+        passCreateDTO.getCar().setId(null);
+        passCreateDTO.getCar().setBrand(TestUtils.getCarBrandDTO());//set saved car brand, if no car brand in DB, 404 will be thrown
+
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passCreateDTO));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.user.id").value(savedUser.getId().toString()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.territory.id").value(savedTerritory.getId().toString()));
+        List<Car> allCars = carRepository.findAll();
+        Assertions.assertThat(allCars).hasSize(1);
+        Car car = allCars.get(0);
+        resultActions.andExpect(MockMvcResultMatchers.jsonPath("$.car.id").value(car.getId().toString()));
+        List<Pass> allPasses = passRepository.findAll();
+        Assertions.assertThat(allPasses).hasSize(1);
+    }
+
+    @Test
+    @SneakyThrows
+    void addPass_NewCarWithoutIdWhenCarInRepoDoesntExistsAndBrandDoesntExists_SaveAndReturn() {
         saveTerritoryUserCarBrand();
         PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
         passCreateDTO.setUserId(savedUser.getId());

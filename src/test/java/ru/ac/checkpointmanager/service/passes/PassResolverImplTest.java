@@ -18,6 +18,7 @@ import ru.ac.checkpointmanager.mapper.PassMapper;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.car.Car;
+import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.model.passes.PassWalk;
@@ -79,8 +80,10 @@ class PassResolverImplTest {
         Mockito.when(userRepository.findById(TestUtils.USER_ID)).thenReturn(Optional.of(user));
         Mockito.when(territoryRepository.findById(TestUtils.TERR_ID)).thenReturn(Optional.of(territory));
         Mockito.when(carBrandRepository.findByBrand(Mockito.any())).thenReturn(Optional.empty());
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
         String notExistedCarBrand = "HateMobile";
+        CarBrand createdCarBrand = new CarBrand(notExistedCarBrand);
+        Mockito.when(carBrandRepository.save(Mockito.any())).thenReturn(createdCarBrand);
+        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
         passCreateDTO.getCar().setBrand(new CarBrandDTO(notExistedCarBrand));
 
         Pass pass = passResolver.createPass(passCreateDTO);
@@ -95,6 +98,7 @@ class PassResolverImplTest {
         Mockito.verify(userRepository).findById(TestUtils.USER_ID);
         Mockito.verify(territoryRepository).findById(TestUtils.TERR_ID);
         Mockito.verify(carBrandRepository).findByBrand(car.getBrand().getBrand());
+        Mockito.verify(carBrandRepository).save(Mockito.any());
     }
 
     @Test
