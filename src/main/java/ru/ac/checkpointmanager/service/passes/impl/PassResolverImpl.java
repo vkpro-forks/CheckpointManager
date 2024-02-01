@@ -3,7 +3,6 @@ package ru.ac.checkpointmanager.service.passes.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.CarBrandDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.exception.CriticalServerException;
@@ -27,7 +26,6 @@ import ru.ac.checkpointmanager.service.passes.PassResolver;
 import java.util.UUID;
 
 @Component
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Slf4j
 public class PassResolverImpl implements PassResolver {
