@@ -3,6 +3,7 @@ package ru.ac.checkpointmanager.service.passes.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.CarBrandDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.exception.CriticalServerException;
@@ -49,6 +50,7 @@ public class PassResolverImpl implements PassResolver {
      * @throws TerritoryNotFoundException если нет территории по указанному id
      */
     @Override
+    @Transactional
     public Pass createPass(PassCreateDTO passCreateDTO) {
         UUID userId = passCreateDTO.getUserId();
         UUID territoryId = passCreateDTO.getTerritoryId();
