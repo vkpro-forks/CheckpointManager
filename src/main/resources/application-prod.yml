@@ -36,6 +36,7 @@ cors:
     - "https://checkpoint-manager.ru"
     - "https://www.checkpoint-manager.ru"
     - "https://55ef-95-82-241-230.ngrok-free.app" #Наставник Сони
+    - "http://84.252.74.180:8080" #если отваливается checkpoint
   allowed-methods:
     - GET
     - POST
