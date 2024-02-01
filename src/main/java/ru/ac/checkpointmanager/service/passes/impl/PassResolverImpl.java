@@ -27,7 +27,6 @@ import ru.ac.checkpointmanager.service.passes.PassResolver;
 import java.util.UUID;
 
 @Component
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Slf4j
 public class PassResolverImpl implements PassResolver {
@@ -51,6 +50,7 @@ public class PassResolverImpl implements PassResolver {
      * @throws TerritoryNotFoundException если нет территории по указанному id
      */
     @Override
+    @Transactional
     public Pass createPass(PassCreateDTO passCreateDTO) {
         UUID userId = passCreateDTO.getUserId();
         UUID territoryId = passCreateDTO.getTerritoryId();
@@ -69,7 +69,10 @@ public class PassResolverImpl implements PassResolver {
         Pass pass;
         if (passCreateDTO.getCar() != null) {
             CarBrandDTO brand = passCreateDTO.getCar().getBrand();
-            CarBrand carBrand = carBrandRepository.findByBrand(brand.getBrand()).orElse(new CarBrand(brand.getBrand()));
+            CarBrand carBrand = carBrandRepository.findByBrand(brand.getBrand()).orElseGet(() -> {
+                log.info("CarBrand saved to DB");
+                return carBrandRepository.save(new CarBrand(brand.getBrand()));
+            });
             PassAuto passAuto = passMapper.toPassAuto(passCreateDTO);
             Car car = passAuto.getCar();
             car.setBrand(carBrand);
