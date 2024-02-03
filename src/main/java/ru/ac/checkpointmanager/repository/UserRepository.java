@@ -1,5 +1,7 @@
 package ru.ac.checkpointmanager.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -45,4 +47,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     @Query(value = "SELECT u.* FROM users u JOIN passes p on u.id = p.user_id WHERE p.id = :passId", nativeQuery = true)
     User findByPassId(@Param("passId") UUID passId);
 
+    @Query("SELECT u FROM User u JOIN FETCH u.territories t WHERE t.id= :territoryId")
+    Page<User> findUsersByTerritoryId(@Param("territoryId") UUID territoryId, Pageable pageable);
 }
