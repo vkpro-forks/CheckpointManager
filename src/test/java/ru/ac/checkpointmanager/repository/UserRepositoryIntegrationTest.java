@@ -62,6 +62,7 @@ class UserRepositoryIntegrationTest {
         Assertions.assertThat(userAvatar.getId()).isEqualTo(savedAvatar.getId());
         Assertions.assertThat(userAvatar.getPreview()).isNull();
     }
+
     @Test
     void shouldReturnUsersByTerritoryId() {
         Territory territory = new Territory();
