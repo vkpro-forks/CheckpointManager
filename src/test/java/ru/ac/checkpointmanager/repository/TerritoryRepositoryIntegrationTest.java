@@ -48,12 +48,14 @@ class TerritoryRepositoryIntegrationTest {
         List<User> savedUsers = userRepository.saveAllAndFlush(users);
         territory.setUsers(savedUsers);
         Territory savedTerritory = territoryRepository.saveAndFlush(territory);
-        Pageable pageable = PageRequest.of(0, 10);
+        Pageable pageable = PageRequest.of(0, 6);
 
         Page<User> userPage = territoryRepository.findUsersByTerritoryId(savedTerritory.getId(), pageable);
-        Assertions.assertThat(userPage.getContent()).hasSize(10);
+        Assertions.assertThat(userPage.getContent()).hasSize(6);
         Assertions.assertThat(userPage.getTotalElements()).isEqualTo(10);
+        Assertions.assertThat(userPage.getTotalPages()).isEqualTo(2);
+        Assertions.assertThat(userPage.getNumberOfElements()).isEqualTo(6);
         Assertions.assertThat(userPage.getNumber()).isZero();
-        Assertions.assertThat(userPage.getSize()).isEqualTo(10);
+        Assertions.assertThat(userPage.getSize()).isEqualTo(6);
     }
 }

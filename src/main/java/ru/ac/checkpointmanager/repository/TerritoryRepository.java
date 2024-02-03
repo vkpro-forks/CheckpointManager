@@ -17,7 +17,7 @@ import java.util.UUID;
 public interface TerritoryRepository extends JpaRepository<Territory, UUID> {
     List<Territory> findTerritoriesByNameContainingIgnoreCase(String name);
 
-    @Query("SELECT t.users FROM Territory t WHERE t.id = :territoryId")
+    @Query("SELECT u FROM User u JOIN FETCH u.territories t WHERE t.id= :territoryId")
     Page<User> findUsersByTerritoryId(@Param("territoryId") UUID territoryId, Pageable pageable);
 
     @Query(value = "SELECT EXISTS (SELECT FROM user_territory WHERE user_id = :uId AND territory_id = :tId)"
