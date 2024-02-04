@@ -1,24 +1,12 @@
 package ru.ac.checkpointmanager.repository;
 
 import lombok.extern.slf4j.Slf4j;
-import org.assertj.core.api.Assertions;
-import org.instancio.Instancio;
-import org.instancio.Model;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import ru.ac.checkpointmanager.config.EnablePostgresAndRedisTestContainers;
-import ru.ac.checkpointmanager.model.Territory;
-import ru.ac.checkpointmanager.model.User;
-import ru.ac.checkpointmanager.util.TestUtils;
-
-import java.util.List;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -38,22 +26,5 @@ class TerritoryRepositoryIntegrationTest {
         userRepository.deleteAll();
         territoryRepository.deleteAll();
     }
-
-    @Test
-    void shouldReturnUsersByTerritoryId() {
-        Territory territory = new Territory();
-        territory.setName(TestUtils.TERR_NAME);
-        Model<User> userModel = TestUtils.getInstancioUserModel();
-        List<User> users = Instancio.ofList(userModel).size(10).create();
-        List<User> savedUsers = userRepository.saveAllAndFlush(users);
-        territory.setUsers(savedUsers);
-        Territory savedTerritory = territoryRepository.saveAndFlush(territory);
-        Pageable pageable = PageRequest.of(0, 10);
-
-        Page<User> userPage = territoryRepository.findUsersByTerritoryId(savedTerritory.getId(), pageable);
-        Assertions.assertThat(userPage.getContent()).hasSize(10);
-        Assertions.assertThat(userPage.getTotalElements()).isEqualTo(10);
-        Assertions.assertThat(userPage.getNumber()).isZero();
-        Assertions.assertThat(userPage.getSize()).isEqualTo(10);
-    }
+    //здесь что-то было, но уехало в другой класс
 }

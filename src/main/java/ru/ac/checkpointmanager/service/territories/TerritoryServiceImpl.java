@@ -80,7 +80,7 @@ public class TerritoryServiceImpl implements TerritoryService {
         log.debug(METHOD_CALLED_UUID_LOG, MethodLog.getMethodName(), territoryId);
         findById(territoryId);
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
-        Page<User> userPage = territoryRepository.findUsersByTerritoryId(territoryId, pageable);
+        Page<User> userPage = userRepository.findUsersByTerritoryId(territoryId, pageable);
         return userPage.map(userMapper::toUserResponseDTO);
     }
 
