@@ -47,6 +47,8 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     @Query(value = "SELECT u.* FROM users u JOIN passes p on u.id = p.user_id WHERE p.id = :passId", nativeQuery = true)
     User findByPassId(@Param("passId") UUID passId);
 
-    @Query("SELECT u FROM User u JOIN FETCH u.territories t WHERE t.id= :territoryId")
+    @Query("SELECT u FROM User u JOIN FETCH u.territories t WHERE t.id= :territoryId " +
+            "ORDER BY CASE WHEN u.role = 'ADMIN' THEN 1 WHEN u.role = 'MANAGER' THEN 2 " +
+            "WHEN u.role = 'SECURITY' THEN 3 ELSE 4 END, u.fullName")
     Page<User> findUsersByTerritoryId(@Param("territoryId") UUID territoryId, Pageable pageable);
 }
