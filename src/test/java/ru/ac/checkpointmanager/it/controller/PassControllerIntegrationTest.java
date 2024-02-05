@@ -538,7 +538,7 @@ class PassControllerIntegrationTest {
         String filterParams = String.join(",", PassStatus.ACTIVE.name(), PassStatus.DELAYED.name());
 
         ResultActions resultActions = mockMvc
-                .perform(MockMvcUtils.getPassesByPartOfVisitorNameAndCarNumber()
+                .perform(MockMvcUtils.getPasses()
                         .param(STATUS, filterParams)
                         .param("part", "А"));
 
@@ -565,7 +565,7 @@ class PassControllerIntegrationTest {
         String filterParams = String.join(",", PassStatus.ACTIVE.name(), PassStatus.DELAYED.name());
 
         ResultActions resultActions = mockMvc
-                .perform(MockMvcUtils.getPassesByPartOfVisitorNameAndCarNumber()
+                .perform(MockMvcUtils.getPasses()
                         .param(STATUS, filterParams)
                         .param("part", "А"));
 
@@ -595,7 +595,7 @@ class PassControllerIntegrationTest {
         String filterParams = String.join(",", PassStatus.ACTIVE.name(), PassStatus.DELAYED.name());
 
         ResultActions resultActions = mockMvc
-                .perform(MockMvcUtils.getPassesByPartOfVisitorNameAndCarNumber()
+                .perform(MockMvcUtils.getPasses()
                         .param(STATUS, filterParams)
                         .param("part", "Pet"));
 
@@ -623,7 +623,7 @@ class PassControllerIntegrationTest {
         String filterParams = String.join(",", PassStatus.ACTIVE.name());
 
         ResultActions resultActions = mockMvc
-                .perform(MockMvcUtils.getPassesByPartOfVisitorNameAndCarNumber()
+                .perform(MockMvcUtils.getPasses()
                         .param(STATUS, filterParams)
                         .param("part", "A"));
 
@@ -651,7 +651,7 @@ class PassControllerIntegrationTest {
         String filterParams = String.join(",", PassStatus.ACTIVE.name());
 
         ResultActions resultActions = mockMvc
-                .perform(MockMvcUtils.getPassesByPartOfVisitorNameAndCarNumber()
+                .perform(MockMvcUtils.getPasses()
                         .param(STATUS, filterParams)
                         .param("part", ""));
 

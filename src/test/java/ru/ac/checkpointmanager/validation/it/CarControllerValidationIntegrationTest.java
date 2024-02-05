@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.NullSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -131,6 +132,16 @@ class CarControllerValidationIntegrationTest {
         ResultCheckUtils.checkCommonValidationFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0))
                 .value(PHONE));
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @SneakyThrows
+    void searchByPhone_NullPhoneParam_ReturnValidationError(String phone) {
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.CAR_PHONE_URL)
+                .param(PHONE, phone));
+
+        ResultCheckUtils.checkMissingRequestParamFields(resultActions);
     }
 
     private static Stream<CarDTO> getBadCarDto() {

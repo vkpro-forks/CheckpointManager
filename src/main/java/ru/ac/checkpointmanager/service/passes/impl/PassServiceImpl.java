@@ -102,12 +102,25 @@ public class PassServiceImpl implements PassService {
         return mapper.toPassDTO(savedPass);
     }
 
+    /**
+     * Выдача пропусков с учетом фильтрации,
+     * и (опционально) по частичному совпадению номера авто и/или имени посетителя
+     *
+     * @param pagingParams Параметры страницы
+     * @param filterParams Параметры фильтрации
+     * @param part         часть текста по которому будет сравнение
+     * @return {@link Page<PassResponseDTO>} страница с дто пропусков
+     */
     @Override
-    public Page<PassResponseDTO> findPasses(PagingParams pagingParams, FilterParams filterParams) {
+    public Page<PassResponseDTO> findPasses(PagingParams pagingParams, FilterParams filterParams, String part) {
         log.debug(METHOD_INVOKE, MethodLog.getMethodName(), "all");
 
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
         Specification<Pass> spec = PassSpecification.byFilterParams(filterParams);
+        if (!part.isBlank()) {
+            spec = Specification.where(PassSpecification.byVisitorPart(part)
+                    .or(PassSpecification.byCarNumberPart(part))).and(PassSpecification.byFilterParams(filterParams));
+        }
 
         Page<Pass> foundPasses = passRepository.findAll(spec, pageable);
         if (!foundPasses.hasContent()) {
@@ -131,27 +144,6 @@ public class PassServiceImpl implements PassService {
                     log.warn(ExceptionUtils.PASS_NOT_FOUND.formatted(passId));
                     return new PassNotFoundException(ExceptionUtils.PASS_NOT_FOUND.formatted(passId));
                 });
-    }
-
-    /**
-     * Поиск пропусков по частичному совпадению номера авто и/или имени посетителя
-     *
-     * @param pagingParams Параметры страницы
-     * @param filterParams Параметры фильтрации
-     * @param part         часть текста по которому будет сравнение
-     * @return {@link Page<PassResponseDTO>} страница с дто пропусков
-     */
-    @Override
-    public Page<PassResponseDTO> findPassesByPartOfVisitorNameAndCarNumber(PagingParams pagingParams,
-                                                                           FilterParams filterParams, String part) {
-        Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
-        Specification<Pass> spec = Specification
-                .where(PassSpecification.byVisitorPart(part)
-                        .or(PassSpecification.byCarNumberPart(part)))
-                .and(PassSpecification.byFilterParams(filterParams));
-        Page<Pass> foundPasses = passRepository.findAll(spec, pageable);
-
-        return foundPasses.map(mapper::toPassDTO);
     }
 
     @Override
@@ -192,11 +184,11 @@ public class PassServiceImpl implements PassService {
     /**
      * Поиск пропусков по территориям пользователя.
      *
-     * @param userId идентификатор пользователя, для которого нужно найти пропуска.
+     * @param userId       идентификатор пользователя, для которого нужно найти пропуска.
      * @param pagingParams параметры пагинации, управляющие размером и номером страницы в результатах.
      * @param filterParams параметры фильтрации для поиска пропусков.
      * @return страница с объектами PassResponseDTO, содержащая найденные пропуска.
-     * @throws UserNotFoundException если пользователь с указанным идентификатором не найден.
+     * @throws UserNotFoundException      если пользователь с указанным идентификатором не найден.
      * @throws TerritoryNotFoundException если пользователь не привязан к территории.
      */
     @Override
@@ -371,7 +363,7 @@ public class PassServiceImpl implements PassService {
         Optional<Pass> overlapPass = passesByUser.stream()
                 .filter(existPass -> existPass.getClass().equals(newPass.getClass()))
                 .filter(existPass -> existPass.getStatus().equals(PassStatus.ACTIVE) ||
-                                     existPass.getStatus().equals(PassStatus.DELAYED))
+                        existPass.getStatus().equals(PassStatus.DELAYED))
                 .filter(existPass -> existPass.compareByFields(newPass))
                 .findFirst();
 
