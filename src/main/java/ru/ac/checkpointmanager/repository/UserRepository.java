@@ -49,4 +49,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     @Query("SELECT u FROM User u JOIN FETCH u.territories t WHERE t.id= :territoryId")
     Page<User> findUsersByTerritoryId(@Param("territoryId") UUID territoryId, Pageable pageable);
+
+    boolean existsByEmail(String email);
+
 }
