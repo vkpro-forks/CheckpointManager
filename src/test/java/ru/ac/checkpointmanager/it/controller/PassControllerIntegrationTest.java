@@ -635,6 +635,34 @@ class PassControllerIntegrationTest {
 
     @Test
     @SneakyThrows
+    void getPassesByPartOfVisitorNameAndCarNumberWithEmptyParameter_WithFilterActive_ReturnBothPasses() {
+        saveTerritoryUserCarBrand();
+        saveCar(); //LICENSE_PLATE = "А420ВХ799";
+        PassAuto passAuto = createPassWithStatusAndTime(PassStatus.ACTIVE, 5);
+        Visitor visitor = new Visitor();
+        visitor.setId(TestUtils.VISITOR_ID);
+        visitor.setName("A420");
+        visitor.setPhone(TestUtils.PHONE_NUM);
+        PassWalk passWalk = TestUtils.getPassWalk(PassStatus.ACTIVE, LocalDateTime.now(),
+                LocalDateTime.now().plusDays(1), savedUser,
+                savedTerritory, visitor, PassTimeType.PERMANENT);
+        PassAuto savedPassAuto = passRepository.saveAndFlush(passAuto);
+        PassWalk savedPassWalk = passRepository.saveAndFlush(passWalk);
+        String filterParams = String.join(",", PassStatus.ACTIVE.name());
+
+        ResultActions resultActions = mockMvc
+                .perform(MockMvcUtils.getPassesByPartOfVisitorNameAndCarNumber()
+                        .param(STATUS, filterParams)
+                        .param("part", ""));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content.size()").value(2))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content[*].id", Matchers.containsInAnyOrder(
+                        savedPassWalk.getId().toString(), savedPassAuto.getId().toString())));
+    }
+
+    @Test
+    @SneakyThrows
     void getPass_NotFound_ReturnNotFound() {
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.getPass(TestUtils.PASS_ID));
 

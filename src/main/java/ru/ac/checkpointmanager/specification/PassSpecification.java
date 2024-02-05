@@ -120,7 +120,7 @@ public final class PassSpecification {
      * @return {@link Specification<Pass>} спецификация для генерации SQL
      */
     public static Specification<Pass> byVisitorPart(String part) {
-        log.debug("Setting specification for Car for LIKE query with part {}", part);
+        log.debug("Setting specification for Visitor for LIKE query with part {}", part);
         return (root, query, criteriaBuilder) -> {
             Root<PassWalk> paRoot = criteriaBuilder.treat(root, PassWalk.class);
             Join<Visitor, PassWalk> visitorJoin = paRoot.join(PassWalk_.VISITOR, JoinType.LEFT);

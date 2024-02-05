@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.ac.checkpointmanager.config.OpenAllEndpointsTestConfiguration;
 import ru.ac.checkpointmanager.config.ValidationTestConfiguration;
@@ -285,6 +286,15 @@ class PassControllerValidationIntegrationTest {
         ResultActions resultActions = mockMvc.perform(requestBuilder);
 
         ResultCheckUtils.checkWrongTypeFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    void getPassesByPartOfVisitorNameAndCarNumber_NullPartForSearchPassed_ReturnBadRequest() {
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.getPassesByPartOfVisitorNameAndCarNumber());
+
+        resultActions.andDo(MockMvcResultHandlers.print());
+        ResultCheckUtils.checkMissingRequestParamFields(resultActions);
     }
 
 

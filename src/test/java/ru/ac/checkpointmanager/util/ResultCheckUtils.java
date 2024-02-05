@@ -16,6 +16,14 @@ public class ResultCheckUtils {
                         .value(ErrorCode.BAD_REQUEST.toString()));
     }
 
+    public static void checkMissingRequestParamFields(ResultActions resultActions) throws Exception {
+        resultActions.andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_TITLE)
+                        .value(ErrorMessage.MISSING_REQUEST_PARAM))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_ERROR_CODE)
+                        .value(ErrorCode.BAD_REQUEST.toString()));
+    }
+
     public static void checkCommonValidationFields(ResultActions resultActions) throws Exception {
         resultActions.andExpect(MockMvcResultMatchers.status().is4xxClientError())
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_ERROR_CODE)
