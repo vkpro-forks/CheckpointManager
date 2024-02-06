@@ -173,6 +173,20 @@ class AvatarControllerIntegrationTest {
 
     @Test
     @SneakyThrows
+    @WithMockCustomUser
+    void uploadAvatarByTerritory_TerritoryNotFound_HandleExceptionAndReturnNotFound() {
+        MockMultipartFile file
+                = new MockMultipartFile("avatarFile", "avatar.png", MediaType.IMAGE_PNG_VALUE, new byte[]{1, 2, 3});
+
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.uploadAvatarForTerritory(TestUtils.TERR_ID, file));
+
+        resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                .value(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(TestUtils.TERR_ID)));
+        ResultCheckUtils.checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
     void deleteAvatarByUserId_AllOk_DeleteAvatarAndReturnNoContent() {
         Avatar avatar = TestUtils.getAvatar();
         Avatar savedAvatar = avatarRepository.saveAndFlush(avatar);
