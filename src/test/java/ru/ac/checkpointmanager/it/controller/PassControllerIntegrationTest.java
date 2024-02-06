@@ -522,7 +522,7 @@ class PassControllerIntegrationTest {
 
     @Test
     @SneakyThrows
-    void getPassesByUsersTerritories_WithPartOfVisitorNameAndCarNumber_ReturnListWithPassesWithCarPass() {
+    void getPassesByUserId_WithPartOfVisitorNameAndCarNumber_ReturnListWithPassesWithCarPass() {
         saveTerritoryUserCarBrand();
         saveCar(); //LICENSE_PLATE = "А420ВХ799";
         PassAuto passAuto = createPassWithStatusAndTime(PassStatus.ACTIVE, 5);
