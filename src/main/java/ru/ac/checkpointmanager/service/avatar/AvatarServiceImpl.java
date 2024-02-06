@@ -45,7 +45,6 @@ public class AvatarServiceImpl implements AvatarService {
      */
     @Override
     public AvatarDTO uploadAvatar(UUID userId, MultipartFile avatarFile) {
-        //select count(*) from users u1_0 where u1_0.id=? //TODO remove before merge
         if (!userRepository.existsById(userId)) {
             log.warn(ExceptionUtils.USER_NOT_FOUND_MSG, userId);
             throw new UserNotFoundException(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(userId));
