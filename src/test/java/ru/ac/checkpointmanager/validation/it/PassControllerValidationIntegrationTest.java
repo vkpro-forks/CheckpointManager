@@ -287,7 +287,6 @@ class PassControllerValidationIntegrationTest {
         ResultCheckUtils.checkWrongTypeFields(resultActions);
     }
 
-
     private static void checkCarOrVisitorFields(ResultActions resultActions) throws Exception {
         ResultCheckUtils.checkCommonValidationFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0))

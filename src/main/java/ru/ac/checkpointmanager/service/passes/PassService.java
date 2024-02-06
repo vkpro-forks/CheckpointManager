@@ -14,21 +14,18 @@ public interface PassService {
 
     PassResponseDTO addPass(PassCreateDTO passCreateDTO);
 
-    Page<PassResponseDTO> findPasses(PagingParams pagingParams, FilterParams filterParams);
-
-    Page<PassResponseDTO> findPassesByPartOfVisitorNameAndCarNumber(PagingParams pagingParams,
-                                                                    FilterParams filterParams,
-                                                                    String part);
+    Page<PassResponseDTO> findPasses(PagingParams pagingParams, FilterParams filterParams, String part);
 
     PassResponseDTO findById(UUID id);
 
     Pass findPassById(UUID passId);
 
-    Page<PassResponseDTO> findPassesByUser(UUID userId, PagingParams pagingParams, FilterParams filterParams);
+    Page<PassResponseDTO> findPassesByUser(UUID userId, PagingParams pagingParams, FilterParams filterParams, String part);
 
-    Page<PassResponseDTO> findPassesByTerritory(UUID terId, PagingParams pagingParams, FilterParams filterParams);
+    Page<PassResponseDTO> findPassesByTerritory(UUID terId, PagingParams pagingParams, FilterParams filterParams, String part);
 
-    Page<PassResponseDTO> findPassesByUsersTerritories(UUID userId, PagingParams pagingParams, FilterParams filterParams);
+    Page<PassResponseDTO> findPassesByUsersTerritories(UUID userId, PagingParams pagingParams, FilterParams filterParams,
+                                                       String part);
 
     PassResponseDTO updatePass(PassUpdateDTO passUpdateDTO);
 

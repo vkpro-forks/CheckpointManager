@@ -94,14 +94,14 @@ class PassServiceImplTest {
 
     @Test
     @SuppressWarnings({"rawtypes", "unchecked"})
-    void findPassesByPartOfVisitorNameAndCarNumber_AllOk_ReturnPageWithPasses() {
+    void findPasses_AllOk_ReturnPageWithPasses() {
         PagingParams pagingParams = new PagingParams(0, 100);
         FilterParams filterParams = new FilterParams(null, null, null, null);
         Page mockPage = Mockito.mock(Page.class);
         Mockito.when(passRepository.findAll(Mockito.any(Specification.class), Mockito.any(Pageable.class)))
                 .thenReturn(mockPage);
 
-        passService.findPassesByPartOfVisitorNameAndCarNumber(pagingParams, filterParams, "part");
+        passService.findPasses(pagingParams, filterParams, "part");
 
         Mockito.verify(passRepository, Mockito.times(1)).findAll(Mockito.any(Specification.class), Mockito.any(Pageable.class));
     }

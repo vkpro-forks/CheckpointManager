@@ -13,6 +13,8 @@ public class ErrorMessage {
 
     public static final String WRONG_ARGUMENT_PASSED = "Wrong type of argument passed";
 
+    public static final String MISSING_REQUEST_PARAM = "No required request param passed";
+
     private ErrorMessage() {
         throw new AssertionError("No instance, please");
     }

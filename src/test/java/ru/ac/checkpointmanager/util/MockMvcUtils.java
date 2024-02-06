@@ -51,9 +51,14 @@ public class MockMvcUtils {
         return MockMvcRequestBuilders.get(UrlConstants.PASS_USER_TERRITORIES_URL, userId);
     }
 
-    public static MockHttpServletRequestBuilder getPassesByPartOfVisitorNameAndCarNumber() {
-        log.info(TestMessage.PERFORM_HTTP, HttpMethod.GET, UrlConstants.PASS_URL_SEARCH);
-        return MockMvcRequestBuilders.get(UrlConstants.PASS_URL_SEARCH);
+    public static MockHttpServletRequestBuilder getPassesByTerritoryId(UUID territoryId) {
+        log.info(TestMessage.PERFORM_HTTP, HttpMethod.GET, UrlConstants.PASS_URL_TERRITORY, territoryId);
+        return MockMvcRequestBuilders.get(UrlConstants.PASS_URL_TERRITORY, territoryId);
+    }
+
+    public static MockHttpServletRequestBuilder getPasses() {
+        log.info(TestMessage.PERFORM_HTTP, HttpMethod.GET, UrlConstants.PASS_URL);
+        return MockMvcRequestBuilders.get(UrlConstants.PASS_URL);
     }
 
     public static MockHttpServletRequestBuilder updateUser(UserUpdateDTO userUpdateDTO) throws JsonProcessingException {

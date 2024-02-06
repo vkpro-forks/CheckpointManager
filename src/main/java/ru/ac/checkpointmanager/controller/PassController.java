@@ -36,6 +36,8 @@ import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassResponseDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.service.passes.PassService;
+import ru.ac.checkpointmanager.specification.model.Pass_;
+import ru.ac.checkpointmanager.utils.SwaggerConstants;
 
 import java.util.UUID;
 
@@ -72,15 +74,17 @@ public class PassController {
     }
 
     /* READ */
-    @Operation(summary = "Получить список всех пропусков",
-            description = "Доступ: ADMIN.",
+    @Operation(summary = "Получить список всех пропусков, с учетом фильтрации и совпадения" +
+            " по первым буквам посетителя или номера авто",
+            description = SwaggerConstants.ACCESS_ADMIN_MESSAGE,
             parameters = {
                     @Parameter(in = ParameterIn.QUERY, name = "page"),
                     @Parameter(in = ParameterIn.QUERY, name = "size"),
-                    @Parameter(in = ParameterIn.QUERY, name = "dtype"),
-                    @Parameter(in = ParameterIn.QUERY, name = "territory"),
-                    @Parameter(in = ParameterIn.QUERY, name = "status"),
-                    @Parameter(in = ParameterIn.QUERY, name = "favorite")
+                    @Parameter(in = ParameterIn.QUERY, name = Pass_.DTYPE),
+                    @Parameter(in = ParameterIn.QUERY, name = Pass_.TERRITORY),
+                    @Parameter(in = ParameterIn.QUERY, name = Pass_.STATUS),
+                    @Parameter(in = ParameterIn.QUERY, name = Pass_.FAVORITE),
+                    @Parameter(in = ParameterIn.QUERY, name = "part")
             })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуска найдены",
@@ -90,34 +94,10 @@ public class PassController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @GetMapping
     public Page<PassResponseDTO> getPasses(@Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams,
-                                           @Schema(hidden = true) FilterParams filterParams) {
-        return service.findPasses(pagingParams, filterParams);
-    }
-
-    @Operation(summary = "Получить список всех пропусков по частичному совпадению номера авто и/или имени посетителя",
-            description = "Доступ: ADMIN.",
-            parameters = {
-                    @Parameter(in = ParameterIn.QUERY, name = "page"),
-                    @Parameter(in = ParameterIn.QUERY, name = "size"),
-                    @Parameter(in = ParameterIn.QUERY, name = "dtype"),
-                    @Parameter(in = ParameterIn.QUERY, name = "territory"),
-                    @Parameter(in = ParameterIn.QUERY, name = "status"),
-                    @Parameter(in = ParameterIn.QUERY, name = "favorite"),
-                    @Parameter(in = ParameterIn.QUERY, name = "part")
-            })
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Пропуска найдены",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            array = @ArraySchema(schema = @Schema(implementation = PassResponseDTO.class))))})
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    @GetMapping("/search")
-    public Page<PassResponseDTO> getPassesByPartOfVisitorNameAndCarNumber(@Schema(hidden = true)
-                                                                          @Valid
-                                                                          @PagingParam PagingParams pagingParams,
-                                                                          @Schema(hidden = true)
-                                                                          FilterParams filterParams,
-                                                                          @RequestParam("part") String part) {
-        return service.findPassesByPartOfVisitorNameAndCarNumber(pagingParams, filterParams, part);
+                                           @Schema(hidden = true) FilterParams filterParams,
+                                           @Schema(hidden = true)
+                                           @RequestParam(value = "part", required = false) String part) {
+        return service.findPasses(pagingParams, filterParams, part);
     }
 
     @Operation(summary = "Найти пропуск по id",
@@ -133,15 +113,17 @@ public class PassController {
         return service.findById(id);
     }
 
-    @Operation(summary = "Получить список пропусков конкретного пользователя",
+    @Operation(summary = "Получить список пропусков конкретного пользователя, с учетом фильтрации и совпадения" +
+            " по первым буквам посетителя или номера авто",
             description = "Доступ: ADMIN, USER.",
             parameters = {
                     @Parameter(in = ParameterIn.QUERY, name = "page"),
                     @Parameter(in = ParameterIn.QUERY, name = "size"),
-                    @Parameter(in = ParameterIn.QUERY, name = "dtype"),
-                    @Parameter(in = ParameterIn.QUERY, name = "territory"),
-                    @Parameter(in = ParameterIn.QUERY, name = "status"),
-                    @Parameter(in = ParameterIn.QUERY, name = "favorite")
+                    @Parameter(in = ParameterIn.QUERY, name = Pass_.DTYPE),
+                    @Parameter(in = ParameterIn.QUERY, name = Pass_.TERRITORY),
+                    @Parameter(in = ParameterIn.QUERY, name = Pass_.STATUS),
+                    @Parameter(in = ParameterIn.QUERY, name = Pass_.FAVORITE),
+                    @Parameter(in = ParameterIn.QUERY, name = "part")
             })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуска найдены",
@@ -152,19 +134,22 @@ public class PassController {
     @GetMapping("/user/{userId}")
     public Page<PassResponseDTO> getPassesByUserId(@PathVariable UUID userId,
                                                    @Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams,
-                                                   @Schema(hidden = true) FilterParams filterParams) {
-        return service.findPassesByUser(userId, pagingParams, filterParams);
+                                                   @Schema(hidden = true) FilterParams filterParams,
+                                                   @RequestParam(value = "part", required = false) String part) {
+        return service.findPassesByUser(userId, pagingParams, filterParams, part);
     }
 
-    @Operation(summary = "Получить список пропусков на конкретную территорию",
+    @Operation(summary = "Получить список пропусков на конкретную территорию, с учетом фильтрации и совпадения " +
+            "по первым буквам посетителя или номера авто",
             description = "Доступ: ADMIN, MANAGER, SECURITY.",
             parameters = {
                     @Parameter(in = ParameterIn.QUERY, name = "page"),
                     @Parameter(in = ParameterIn.QUERY, name = "size"),
-                    @Parameter(in = ParameterIn.QUERY, name = "dtype"),
-                    @Parameter(in = ParameterIn.QUERY, name = "territory"),
-                    @Parameter(in = ParameterIn.QUERY, name = "status"),
-                    @Parameter(in = ParameterIn.QUERY, name = "favorite")
+                    @Parameter(in = ParameterIn.QUERY, name = Pass_.DTYPE),
+                    @Parameter(in = ParameterIn.QUERY, name = Pass_.TERRITORY),
+                    @Parameter(in = ParameterIn.QUERY, name = Pass_.STATUS),
+                    @Parameter(in = ParameterIn.QUERY, name = Pass_.FAVORITE),
+                    @Parameter(in = ParameterIn.QUERY, name = "part")
             })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуска найдены",
@@ -176,19 +161,22 @@ public class PassController {
     public Page<PassResponseDTO> getPassesByTerritoryId(@PathVariable UUID territoryId,
                                                         @Schema(hidden = true)
                                                         @Valid @PagingParam PagingParams pagingParams,
-                                                        @Schema(hidden = true) FilterParams filterParams) {
-        return service.findPassesByTerritory(territoryId, pagingParams, filterParams);
+                                                        @Schema(hidden = true) FilterParams filterParams,
+                                                        @RequestParam(value = "part", required = false) String part) {
+        return service.findPassesByTerritory(territoryId, pagingParams, filterParams, part);
     }
 
-    @Operation(summary = "Получить список пропусков по всем привязанным к пользователю территориям",
+    @Operation(summary = "Получить список пропусков по всем привязанным к пользователю территориям, " +
+            "с учетом фильтрации и совпадения по первым буквам посетителя или номера авто",
             description = "Доступ: ADMIN, MANAGER.",
             parameters = {
                     @Parameter(in = ParameterIn.QUERY, name = "page"),
                     @Parameter(in = ParameterIn.QUERY, name = "size"),
-                    @Parameter(in = ParameterIn.QUERY, name = "dtype"),
-                    @Parameter(in = ParameterIn.QUERY, name = "territory"),
-                    @Parameter(in = ParameterIn.QUERY, name = "status"),
-                    @Parameter(in = ParameterIn.QUERY, name = "favorite")
+                    @Parameter(in = ParameterIn.QUERY, name = Pass_.DTYPE),
+                    @Parameter(in = ParameterIn.QUERY, name = Pass_.TERRITORY),
+                    @Parameter(in = ParameterIn.QUERY, name = Pass_.STATUS),
+                    @Parameter(in = ParameterIn.QUERY, name = Pass_.FAVORITE),
+                    @Parameter(in = ParameterIn.QUERY, name = "part")
             })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуска найдены",
@@ -200,8 +188,9 @@ public class PassController {
     public Page<PassResponseDTO> getPassesByUsersTerritories(@PathVariable UUID userId,
                                                              @Schema(hidden = true)
                                                              @Valid @PagingParam PagingParams pagingParams,
-                                                             @Schema(hidden = true) FilterParams filterParams) {
-        return service.findPassesByUsersTerritories(userId, pagingParams, filterParams);
+                                                             @Schema(hidden = true) FilterParams filterParams,
+                                                             @RequestParam(value = "part", required = false) String part) {
+        return service.findPassesByUsersTerritories(userId, pagingParams, filterParams, part);
     }
 
     /* UPDATE */
