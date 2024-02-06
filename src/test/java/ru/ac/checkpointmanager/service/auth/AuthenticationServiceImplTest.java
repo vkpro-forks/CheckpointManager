@@ -74,7 +74,7 @@ class AuthenticationServiceImplTest {
     @Test
     void shouldThrowEmailAlreadyExistsExceptionIfUserExists() {
         RegistrationDTO registrationDTO = TestUtils.getRegistrationDTO();
-        Mockito.when(userRepository.findByEmail(registrationDTO.getEmail())).thenReturn(Optional.of(TestUtils.getUser()));
+        Mockito.when(userRepository.existsByEmail(registrationDTO.getEmail())).thenReturn(true);
 
         Assertions.assertThatThrownBy(() -> authenticationService.preRegister(registrationDTO))
                 .as("Check if EmailAlreadyExistsException is thrown")
@@ -84,7 +84,7 @@ class AuthenticationServiceImplTest {
     @Test
     void shouldThrowMailSendExceptionIfEmailSendingFails() {
         RegistrationDTO registrationDTO = TestUtils.getRegistrationDTO();
-        Mockito.when(userRepository.findByEmail(registrationDTO.getEmail())).thenReturn(Optional.empty());
+        Mockito.when(userRepository.existsByEmail(registrationDTO.getEmail())).thenReturn(false);
         Mockito.doThrow(new MailException("fail") {
         }).when(emailService).sendRegisterConfirm(Mockito.anyString(), Mockito.anyString());
 
@@ -97,7 +97,7 @@ class AuthenticationServiceImplTest {
     void shouldReturnRegistrationConfirmationDTOBeforeRegistration() {
         RegistrationDTO registrationDTO = TestUtils.getRegistrationDTO();
         String encodedPassword = TestUtils.PASSWORD;
-        Mockito.when(userRepository.findByEmail(registrationDTO.getEmail())).thenReturn(Optional.empty());
+        Mockito.when(userRepository.existsByEmail(registrationDTO.getEmail())).thenReturn(false);
         Mockito.doNothing().when(emailService).sendRegisterConfirm(Mockito.anyString(), Mockito.anyString());
         Mockito.when(passwordEncoder.encode(Mockito.anyString())).thenReturn(encodedPassword);
 
