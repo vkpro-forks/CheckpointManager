@@ -17,6 +17,4 @@ public interface CarBrandService {
     List<CarBrand> getAllBrands();
 
     List<CarBrand> findByBrandsContainingIgnoreCase(String brandName);
-
-    boolean existsById(Long id);
 }

@@ -8,6 +8,8 @@ public class UrlConstants {
 
     public static final String CAR_BRANDS_URL = CAR_URL + "/brands";
 
+    public static final String CAR_BRANDS_URL_VAR = CAR_URL + "/brands/{brandId}";
+
     public static final String CAR_PHONE_URL = CAR_URL + "/phone";
 
     public static final String AVATAR_URL = "/api/v1/avatars";

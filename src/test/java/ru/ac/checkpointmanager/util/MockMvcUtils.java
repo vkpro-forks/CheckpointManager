@@ -8,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import ru.ac.checkpointmanager.dto.CarBrandDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
@@ -74,5 +75,19 @@ public class MockMvcUtils {
         log.info(TestMessage.PERFORM_HTTP, HttpMethod.POST, UrlConstants.AVATAR_TERRITORY_URL, terrId);
         return MockMvcRequestBuilders.multipart(
                 HttpMethod.POST, UrlConstants.AVATAR_TERRITORY_URL, terrId).file(file);
+    }
+
+    public static MockHttpServletRequestBuilder saveCarBrand(CarBrandDTO carBrandDTO) throws JsonProcessingException {
+        log.info(TestMessage.PERFORM_HTTP, HttpMethod.POST.name(), UrlConstants.CAR_BRANDS_URL);
+        return MockMvcRequestBuilders.post(UrlConstants.CAR_BRANDS_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(TestUtils.jsonStringFromObject(carBrandDTO));
+    }
+
+    public static MockHttpServletRequestBuilder updateCarBrand(Long carBrandId, CarBrandDTO carBrandDTO) throws JsonProcessingException {
+        log.info(TestMessage.PERFORM_HTTP, HttpMethod.PUT.name(), UrlConstants.CAR_BRANDS_URL_VAR, carBrandDTO);
+        return MockMvcRequestBuilders.put(UrlConstants.CAR_BRANDS_URL_VAR, carBrandId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(TestUtils.jsonStringFromObject(carBrandDTO));
     }
 }

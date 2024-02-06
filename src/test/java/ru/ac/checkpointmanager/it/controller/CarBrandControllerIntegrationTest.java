@@ -1,32 +1,28 @@
-package ru.ac.checkpointmanager.it;
+package ru.ac.checkpointmanager.it.controller;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.ac.checkpointmanager.config.EnablePostgresAndRedisTestContainers;
 import ru.ac.checkpointmanager.dto.CarBrandDTO;
+import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.exception.handler.ErrorCode;
+import ru.ac.checkpointmanager.exception.handler.ErrorMessage;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
-import ru.ac.checkpointmanager.util.TestMessage;
+import ru.ac.checkpointmanager.util.MockMvcUtils;
 import ru.ac.checkpointmanager.util.TestUtils;
-import ru.ac.checkpointmanager.util.UrlConstants;
-
-import java.util.List;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
@@ -36,7 +32,6 @@ import java.util.List;
 @Slf4j
 @EnablePostgresAndRedisTestContainers
 class CarBrandControllerIntegrationTest {
-
     @Autowired
     MockMvc mockMvc;
 
@@ -50,63 +45,52 @@ class CarBrandControllerIntegrationTest {
 
     @Test
     @SneakyThrows
-    void shouldSaveCarBrand() {
-        String carBrandString = TestUtils.jsonStringFromObject(TestUtils.getCarBrandDTO());
-        log.info(TestMessage.PERFORM_HTTP, HttpMethod.POST.name(), UrlConstants.CAR_BRANDS_URL);
-        mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CAR_BRANDS_URL)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(carBrandString))
-                .andExpect(MockMvcResultMatchers.status().isCreated())
+    void saveCarBrand_AllOk_SaveAndReturnSaved() {
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.saveCarBrand(TestUtils.getCarBrandDTO()));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.brand").value(TestUtils.getCarBrand().getBrand()));
 
-        List<CarBrand> allBrands = carBrandRepository.findAll();
-        Assertions.assertThat(allBrands).hasSize(1);
-        CarBrand carBrand = allBrands.get(0);
-        Assertions.assertThat(carBrand.getBrand()).isEqualTo(TestUtils.getCarBrand().getBrand());
+        Assertions.assertThat(carBrandRepository.findAll()).hasSize(1).flatExtracting(CarBrand::getBrand)
+                .containsExactly(TestUtils.getCarBrand().getBrand());
     }
 
     @Test
     @SneakyThrows
-    void shouldReturnConflictErrorIfCarBrandAlreadyExistsWhenCreateNew() {
+    void saveCarBrand_IfCarBrandAlreadyExistsWhenCreateNew_ReturnConflictError() {
         CarBrand carBrand = TestUtils.getCarBrand();
         CarBrand savedBrand = carBrandRepository.saveAndFlush(carBrand);
-        String carBrandString = TestUtils.jsonStringFromObject(new CarBrandDTO(savedBrand.getBrand()));
-        log.info(TestMessage.PERFORM_HTTP, HttpMethod.POST.name(), UrlConstants.CAR_BRANDS_URL);
-        mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CAR_BRANDS_URL)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(carBrandString))
-                .andExpect(MockMvcResultMatchers.status().is4xxClientError())
+
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.saveCarBrand(new CarBrandDTO(savedBrand.getBrand())));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().is4xxClientError())
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_ERROR_CODE)
                         .value(ErrorCode.CONFLICT.toString()))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_TITLE)
-                        .value(Matchers.startsWith("Object")))
+                        .value(ErrorMessage.OBJECT_ALREADY_EXISTS))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
-                        .value(Matchers.startsWith("CarBrand")));
+                        .value(ExceptionUtils.CAR_BRAND_EXISTS.formatted(carBrand.getBrand())));
     }
 
     @Test
     @SneakyThrows
-    void shouldReturnConflictErrorIfCarBrandAlreadyExistsWhenUpdateForExistingBrand() {
+    void updateCarBrand_IfCarBrandAlreadyExists_ReturnConflictError() {
         CarBrand carBrand = TestUtils.getCarBrand();
         CarBrand savedBrand = carBrandRepository.saveAndFlush(carBrand);
         CarBrand anotherCarBrand = new CarBrand();
         anotherCarBrand.setBrand("BatMobile");
         CarBrand savedAnotherCarBrand = carBrandRepository.saveAndFlush(anotherCarBrand);
         log.info("Two brands saved in repo: {} and {}", savedBrand.getBrand(), savedAnotherCarBrand.getBrand());
-        savedAnotherCarBrand.setBrand(savedBrand.getBrand());
-        String newCarBrandString = TestUtils.jsonStringFromObject(savedAnotherCarBrand);
-        String putUrl = (UrlConstants.CAR_BRANDS_URL + "/" + savedBrand.getId());
-        log.info(TestMessage.PERFORM_HTTP, HttpMethod.PUT.name(), putUrl);
-        mockMvc.perform(MockMvcRequestBuilders.put(putUrl)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(newCarBrandString))
-                .andExpect(MockMvcResultMatchers.status().is4xxClientError())
+
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.updateCarBrand(savedBrand.getId(),
+                new CarBrandDTO(savedAnotherCarBrand.getBrand())));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().is4xxClientError())
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_ERROR_CODE)
                         .value(ErrorCode.CONFLICT.toString()))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_TITLE)
-                        .value(Matchers.startsWith("Object")))
+                        .value(ErrorMessage.OBJECT_ALREADY_EXISTS))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
-                        .value(Matchers.startsWith("CarBrand")));
+                        .value(ExceptionUtils.CAR_BRAND_EXISTS.formatted(anotherCarBrand.getBrand())));
     }
-
 }
