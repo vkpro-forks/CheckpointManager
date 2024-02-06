@@ -193,7 +193,8 @@ public class PassServiceImpl implements PassService {
      */
     @Override
     @Transactional(readOnly = true)
-    public Page<PassResponseDTO> findPassesByUsersTerritories(UUID userId, PagingParams pagingParams, FilterParams filterParams) {
+    public Page<PassResponseDTO> findPassesByUsersTerritories(UUID userId, PagingParams pagingParams,
+                                                              FilterParams filterParams, String part) {
         User user = userService.findUserById(userId);
         List<UUID> terIds = TerritoryUtils.getTerritoryIdsOrThrow(user, userId);
 
@@ -203,6 +204,7 @@ public class PassServiceImpl implements PassService {
                 .get();
 
         spec = spec.and(PassSpecification.byFilterParams(filterParams));
+        spec = addByVisitorAndByCarNumberPartSpecIfPartPresent(part, spec);
 
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
         Page<Pass> foundPasses = passRepository.findAll(spec, pageable);

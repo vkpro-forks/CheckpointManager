@@ -24,7 +24,8 @@ public interface PassService {
 
     Page<PassResponseDTO> findPassesByTerritory(UUID terId, PagingParams pagingParams, FilterParams filterParams, String part);
 
-    Page<PassResponseDTO> findPassesByUsersTerritories(UUID userId, PagingParams pagingParams, FilterParams filterParams);
+    Page<PassResponseDTO> findPassesByUsersTerritories(UUID userId, PagingParams pagingParams, FilterParams filterParams,
+                                                       String part);
 
     PassResponseDTO updatePass(PassUpdateDTO passUpdateDTO);
 

@@ -139,7 +139,8 @@ public class PassController {
         return service.findPassesByUser(userId, pagingParams, filterParams, part);
     }
 
-    @Operation(summary = "Получить список пропусков на конкретную территорию",
+    @Operation(summary = "Получить список пропусков на конкретную территорию, с учетом фильтрации и совпадения " +
+            "по первым буквам посетителя или номера авто",
             description = "Доступ: ADMIN, MANAGER, SECURITY.",
             parameters = {
                     @Parameter(in = ParameterIn.QUERY, name = "page"),
@@ -165,15 +166,17 @@ public class PassController {
         return service.findPassesByTerritory(territoryId, pagingParams, filterParams, part);
     }
 
-    @Operation(summary = "Получить список пропусков по всем привязанным к пользователю территориям",
+    @Operation(summary = "Получить список пропусков по всем привязанным к пользователю территориям, " +
+            "с учетом фильтрации и совпадения по первым буквам посетителя или номера авто",
             description = "Доступ: ADMIN, MANAGER.",
             parameters = {
                     @Parameter(in = ParameterIn.QUERY, name = "page"),
                     @Parameter(in = ParameterIn.QUERY, name = "size"),
-                    @Parameter(in = ParameterIn.QUERY, name = "dtype"),
-                    @Parameter(in = ParameterIn.QUERY, name = "territory"),
-                    @Parameter(in = ParameterIn.QUERY, name = "status"),
-                    @Parameter(in = ParameterIn.QUERY, name = "favorite")
+                    @Parameter(in = ParameterIn.QUERY, name = Pass_.DTYPE),
+                    @Parameter(in = ParameterIn.QUERY, name = Pass_.TERRITORY),
+                    @Parameter(in = ParameterIn.QUERY, name = Pass_.STATUS),
+                    @Parameter(in = ParameterIn.QUERY, name = Pass_.FAVORITE),
+                    @Parameter(in = ParameterIn.QUERY, name = "part")
             })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуска найдены",
@@ -185,8 +188,9 @@ public class PassController {
     public Page<PassResponseDTO> getPassesByUsersTerritories(@PathVariable UUID userId,
                                                              @Schema(hidden = true)
                                                              @Valid @PagingParam PagingParams pagingParams,
-                                                             @Schema(hidden = true) FilterParams filterParams) {
-        return service.findPassesByUsersTerritories(userId, pagingParams, filterParams);
+                                                             @Schema(hidden = true) FilterParams filterParams,
+                                                             @RequestParam(value = "part", required = false) String part) {
+        return service.findPassesByUsersTerritories(userId, pagingParams, filterParams, part);
     }
 
     /* UPDATE */
