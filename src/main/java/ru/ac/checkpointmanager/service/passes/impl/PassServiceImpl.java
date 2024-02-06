@@ -147,14 +147,18 @@ public class PassServiceImpl implements PassService {
     }
 
     @Override
-    public Page<PassResponseDTO> findPassesByUser(UUID userId, PagingParams pagingParams, FilterParams filterParams) {
+    public Page<PassResponseDTO> findPassesByUser(UUID userId, PagingParams pagingParams,
+                                                  FilterParams filterParams, String part) {
         log.debug(METHOD_INVOKE, MethodLog.getMethodName(), userId);
         userService.findById(userId);
 
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
         Specification<Pass> spec = Specification.where(PassSpecification.byUserId(userId))
                 .and(PassSpecification.byFilterParams(filterParams));
-
+        if (!part.isBlank()) {
+            spec = spec.and(Specification.where(PassSpecification.byVisitorPart(part)
+                    .or(PassSpecification.byCarNumberPart(part))));
+        }
         Page<Pass> foundPasses = passRepository.findAll(spec, pageable);
         if (!foundPasses.hasContent()) {
             log.info(PAGE_NO_CONTENT.formatted(pageable.getPageNumber(), pageable.getPageSize(),

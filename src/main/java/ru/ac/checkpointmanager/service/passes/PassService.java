@@ -20,7 +20,7 @@ public interface PassService {
 
     Pass findPassById(UUID passId);
 
-    Page<PassResponseDTO> findPassesByUser(UUID userId, PagingParams pagingParams, FilterParams filterParams);
+    Page<PassResponseDTO> findPassesByUser(UUID userId, PagingParams pagingParams, FilterParams filterParams, String part);
 
     Page<PassResponseDTO> findPassesByTerritory(UUID terId, PagingParams pagingParams, FilterParams filterParams);
 
