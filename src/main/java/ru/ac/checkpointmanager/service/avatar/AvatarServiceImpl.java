@@ -26,14 +26,11 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class AvatarServiceImpl implements AvatarService {
-
-
     public static final String AVATAR_NOT_FOUND_LOG = "[Avatar with id: {}] not found";
 
     private final AvatarRepository avatarRepository;
     private final UserRepository userRepository;
     private final TerritoryRepository territoryRepository;
-
     private final AvatarMapper avatarMapper;
     private final AvatarHelper avatarHelper;
 
@@ -48,12 +45,11 @@ public class AvatarServiceImpl implements AvatarService {
      */
     @Override
     public AvatarDTO uploadAvatar(UUID userId, MultipartFile avatarFile) {
-        //FIXME временно здесь пока не реализуем логику по другому
-        userRepository.findById(userId)
-                .orElseThrow(() -> {
-                    log.warn(ExceptionUtils.USER_NOT_FOUND_MSG, userId);
-                    return new UserNotFoundException(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(userId));
-                });
+        //select count(*) from users u1_0 where u1_0.id=? //TODO remove before merge
+        if (!userRepository.existsById(userId)) {
+            log.warn(ExceptionUtils.USER_NOT_FOUND_MSG, userId);
+            throw new UserNotFoundException(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(userId));
+        }
         //- достали юзера из бд
         //- сделали работу по подготовке аватарки к загрузке
         //- сохранили аватарку в репо
@@ -79,12 +75,11 @@ public class AvatarServiceImpl implements AvatarService {
     //TODO есть идея сделать метод загрузки один для всех сущностей, а далее распределять.
     @Override
     public AvatarDTO uploadAvatarByTerritory(UUID territoryId, MultipartFile avatarFile) {
-        territoryRepository.findById(territoryId)
-                .orElseThrow(() -> {
-                    log.warn(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
-                    return new TerritoryNotFoundException(ExceptionUtils.TERRITORY_NOT_FOUND_MSG
-                            .formatted(territoryId));
-                });
+        if (!territoryRepository.existsById(territoryId)) {
+            log.warn(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
+            throw new TerritoryNotFoundException(ExceptionUtils.TERRITORY_NOT_FOUND_MSG
+                    .formatted(territoryId));
+        }
 
         Avatar avatar = avatarHelper.getOrCreateAvatarByTerritory(territoryId);
         avatarHelper.configureAvatar(avatar, avatarFile);

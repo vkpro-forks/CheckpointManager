@@ -5,6 +5,7 @@ import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
@@ -63,4 +64,9 @@ public class MockMvcUtils {
                 .content(TestUtils.jsonStringFromObject(userUpdateDTO));
     }
 
+    public static MockHttpServletRequestBuilder uploadAvatarForUser(UUID userId, MockMultipartFile file) {
+        log.info(TestMessage.PERFORM_HTTP, HttpMethod.POST, UrlConstants.AVATAR_URL + "/{userId}", userId);
+        return MockMvcRequestBuilders.multipart(
+                HttpMethod.POST, UrlConstants.AVATAR_URL + "/{userId}", userId).file(file);
+    }
 }

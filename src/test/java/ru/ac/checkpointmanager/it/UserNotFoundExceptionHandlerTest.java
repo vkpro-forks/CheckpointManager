@@ -7,9 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -43,19 +41,6 @@ class UserNotFoundExceptionHandlerTest extends GlobalExceptionHandlerBasicTestCo
     void clear() {
         userRepository.deleteAll();
         territoryRepository.deleteAll();
-    }
-
-    @Test
-    @SneakyThrows
-    @WithMockCustomUser
-    void shouldHandleUserNotFoundExceptionForUploadAvatar() {
-        MockMultipartFile file
-                = new MockMultipartFile("avatarFile", "avatar.png", MediaType.IMAGE_PNG_VALUE, new byte[]{1, 2, 3});
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.multipart(
-                        HttpMethod.POST, UrlConstants.AVATAR_URL + "/" + TestUtils.USER_ID).file(file))
-                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
-                        .value(Matchers.startsWith(USER)));
-        ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
