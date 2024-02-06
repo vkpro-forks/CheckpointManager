@@ -22,7 +22,7 @@ public interface PassService {
 
     Page<PassResponseDTO> findPassesByUser(UUID userId, PagingParams pagingParams, FilterParams filterParams, String part);
 
-    Page<PassResponseDTO> findPassesByTerritory(UUID terId, PagingParams pagingParams, FilterParams filterParams);
+    Page<PassResponseDTO> findPassesByTerritory(UUID terId, PagingParams pagingParams, FilterParams filterParams, String part);
 
     Page<PassResponseDTO> findPassesByUsersTerritories(UUID userId, PagingParams pagingParams, FilterParams filterParams);
 

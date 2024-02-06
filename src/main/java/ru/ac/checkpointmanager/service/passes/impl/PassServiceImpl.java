@@ -2,6 +2,7 @@ package ru.ac.checkpointmanager.service.passes.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -117,16 +118,10 @@ public class PassServiceImpl implements PassService {
 
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
         Specification<Pass> spec = PassSpecification.byFilterParams(filterParams);
-        if (!part.isBlank()) {
-            spec = Specification.where(PassSpecification.byVisitorPart(part)
-                    .or(PassSpecification.byCarNumberPart(part))).and(PassSpecification.byFilterParams(filterParams));
-        }
+        spec = addByVisitorAndByCarNumberPartSpecIfPartPresent(part, spec);
 
         Page<Pass> foundPasses = passRepository.findAll(spec, pageable);
-        if (!foundPasses.hasContent()) {
-            log.info(PAGE_NO_CONTENT.formatted(pageable.getPageNumber(), pageable.getPageSize(),
-                    foundPasses.getTotalPages(), foundPasses.getTotalElements()));
-        }
+        checkEmptyPage(foundPasses, pageable);
 
         return foundPasses.map(mapper::toPassDTO);
     }
@@ -155,33 +150,34 @@ public class PassServiceImpl implements PassService {
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
         Specification<Pass> spec = Specification.where(PassSpecification.byUserId(userId))
                 .and(PassSpecification.byFilterParams(filterParams));
-        if (!part.isBlank()) {
-            spec = spec.and(Specification.where(PassSpecification.byVisitorPart(part)
-                    .or(PassSpecification.byCarNumberPart(part))));
-        }
+        spec = addByVisitorAndByCarNumberPartSpecIfPartPresent(part, spec);
+
         Page<Pass> foundPasses = passRepository.findAll(spec, pageable);
-        if (!foundPasses.hasContent()) {
-            log.info(PAGE_NO_CONTENT.formatted(pageable.getPageNumber(), pageable.getPageSize(),
-                    foundPasses.getTotalPages(), foundPasses.getTotalElements()));
-        }
+        checkEmptyPage(foundPasses, pageable);
 
         return foundPasses.map(mapper::toPassDTO);
     }
 
+    private static void checkEmptyPage(Page<Pass> foundPasses, Pageable pageable) {
+        if (!foundPasses.hasContent()) {
+            log.info(PAGE_NO_CONTENT.formatted(pageable.getPageNumber(), pageable.getPageSize(),
+                    foundPasses.getTotalPages(), foundPasses.getTotalElements()));
+        }
+    }
+
     @Override
-    public Page<PassResponseDTO> findPassesByTerritory(UUID terId, PagingParams pagingParams, FilterParams filterParams) {
+    public Page<PassResponseDTO> findPassesByTerritory(UUID terId, PagingParams pagingParams, FilterParams filterParams,
+                                                       String part) {
         log.debug(METHOD_INVOKE, MethodLog.getMethodName(), terId);
         territoryService.findById(terId);
 
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
         Specification<Pass> spec = Specification.where(PassSpecification.byTerritoryId(terId))
                 .and(PassSpecification.byFilterParams(filterParams));
+        spec = addByVisitorAndByCarNumberPartSpecIfPartPresent(part, spec);
 
         Page<Pass> foundPasses = passRepository.findAll(spec, pageable);
-        if (!foundPasses.hasContent()) {
-            log.info(PAGE_NO_CONTENT.formatted(pageable.getPageNumber(), pageable.getPageSize(),
-                    foundPasses.getTotalPages(), foundPasses.getTotalElements()));
-        }
+        checkEmptyPage(foundPasses, pageable);
         return foundPasses.map(mapper::toPassDTO);
     }
 
@@ -211,10 +207,7 @@ public class PassServiceImpl implements PassService {
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
         Page<Pass> foundPasses = passRepository.findAll(spec, pageable);
 
-        if (!foundPasses.hasContent()) {
-            log.info(PAGE_NO_CONTENT.formatted(pageable.getPageNumber(), pageable.getPageSize(),
-                    foundPasses.getTotalPages(), foundPasses.getTotalElements()));
-        }
+        checkEmptyPage(foundPasses, pageable);
         return foundPasses.map(mapper::toPassDTO);
     }
 
@@ -460,5 +453,14 @@ public class PassServiceImpl implements PassService {
             passRepository.save(pass);
             log.info(PASS_STATUS_CROSS, pass.getId(), passCrossings.size(), targetStatus);
         }
+    }
+
+    private Specification<Pass> addByVisitorAndByCarNumberPartSpecIfPartPresent(String part,
+                                                                                Specification<Pass> spec) {
+        if (!StringUtils.isBlank(part)) {
+            spec = spec.and(Specification.where(PassSpecification.byVisitorPart(part)
+                    .or(PassSpecification.byCarNumberPart(part))));
+        }
+        return spec;
     }
 }
