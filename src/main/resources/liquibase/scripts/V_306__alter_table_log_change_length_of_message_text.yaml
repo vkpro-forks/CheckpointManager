@@ -11,7 +11,7 @@ databaseChangeLog:
       id: '306.1'
       author: 'veselov.nikolay'
       labels: 'logs, logs-message, feature-306'
-      comment: 'changing length of varchar column'
+      comment: 'changing length of message column'
       created: '2024-02-07'
       changes:
         - sqlFile:
