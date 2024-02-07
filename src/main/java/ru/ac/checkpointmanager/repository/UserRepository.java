@@ -51,4 +51,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
             "ORDER BY CASE WHEN u.role = 'ADMIN' THEN 1 WHEN u.role = 'MANAGER' THEN 2 " +
             "WHEN u.role = 'SECURITY' THEN 3 ELSE 4 END, u.fullName")
     Page<User> findUsersByTerritoryId(@Param("territoryId") UUID territoryId, Pageable pageable);
+
+    boolean existsByEmail(String email);
+
 }

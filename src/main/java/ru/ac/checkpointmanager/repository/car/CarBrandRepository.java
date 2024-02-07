@@ -11,4 +11,6 @@ public interface CarBrandRepository extends JpaRepository<CarBrand, Long> {
     List<CarBrand> findByBrandContainingIgnoreCase(String brandName);
 
     Optional<CarBrand> findByBrand(String name);
+
+    boolean existsByBrand(String brand);
 }

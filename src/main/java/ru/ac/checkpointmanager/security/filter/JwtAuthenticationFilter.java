@@ -72,7 +72,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String userEmail = jwtService.extractUsername(jwt);
                 if (SecurityContextHolder.getContext().getAuthentication() == null) {
                     UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail); //will throw exception
-                    //TODO rework, auth manager must handle it
                     setAuthenticationContext(request, jwt, userDetails);
                 }
             } else {

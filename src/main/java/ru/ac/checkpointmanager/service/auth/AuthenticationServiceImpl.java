@@ -86,8 +86,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public RegistrationConfirmationDTO preRegister(RegistrationDTO registrationDTO) {
         log.debug(METHOD_WAS_INVOKED, MethodLog.getMethodName());
-        boolean userExist = userRepository.findByEmail(registrationDTO.getEmail()).isPresent();
-        if (userExist) {
+        if (userRepository.existsByEmail(registrationDTO.getEmail())) {
             log.warn(ExceptionUtils.EMAIL_EXISTS.formatted(registrationDTO.getEmail()));
             throw new EmailAlreadyExistsException(ExceptionUtils.EMAIL_EXISTS.formatted(registrationDTO.getEmail()));
         }

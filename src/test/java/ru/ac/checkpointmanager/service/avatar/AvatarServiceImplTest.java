@@ -229,7 +229,7 @@ class AvatarServiceImplTest {
 
     @Test
     void whenUploadAvatarByTerritoryAndTerritoryExistsThenReturnAvatarDTO() {
-        when(territoryRepository.findById(territoryId)).thenReturn(Optional.of(new Territory()));
+        when(territoryRepository.existsById(territoryId)).thenReturn(true);
         when(avatarHelper.getOrCreateAvatarByTerritory(territoryId)).thenReturn(avatar);
         doNothing().when(avatarHelper).configureAvatar(any(Avatar.class), any(MultipartFile.class));
         doNothing().when(avatarHelper).processAndSetAvatarImage(any(Avatar.class), any(MultipartFile.class));
@@ -239,7 +239,7 @@ class AvatarServiceImplTest {
         AvatarDTO actualAvatarDTO = avatarService.uploadAvatarByTerritory(territoryId, avatarFile);
 
         assertEquals(avatar.getMediaType(), actualAvatarDTO.getMediaType());
-        verify(territoryRepository).findById(territoryId);
+        verify(territoryRepository).existsById(territoryId);
         verify(avatarHelper).getOrCreateAvatarByTerritory(territoryId);
         verify(avatarHelper).configureAvatar(avatar, avatarFile);
         verify(avatarHelper).processAndSetAvatarImage(avatar, avatarFile);
@@ -249,17 +249,17 @@ class AvatarServiceImplTest {
 
     @Test
     void whenUploadAvatarByTerritoryAndTerritoryDoesNotExistThenThrowException() {
-        when(territoryRepository.findById(territoryId)).thenReturn(Optional.empty());
+        when(territoryRepository.existsById(territoryId)).thenReturn(false);
 
         assertThrows(TerritoryNotFoundException.class,
                 () -> avatarService.uploadAvatarByTerritory(territoryId, avatarFile));
 
-        verify(territoryRepository).findById(territoryId);
+        verify(territoryRepository).existsById(territoryId);
     }
 
     @Test
     void whenUploadAvatarAndUserExistsThenReturnAvatarDTO() {
-        when(userRepository.findById(userId)).thenReturn(Optional.of(TestUtils.getUser()));
+        when(userRepository.existsById(userId)).thenReturn(true);
         when(avatarHelper.getOrCreateAvatar(userId)).thenReturn(avatar);
         doNothing().when(avatarHelper).configureAvatar(any(Avatar.class), any(MultipartFile.class));
         doNothing().when(avatarHelper).processAndSetAvatarImage(any(Avatar.class), any(MultipartFile.class));
@@ -269,7 +269,7 @@ class AvatarServiceImplTest {
         AvatarDTO actualAvatarDTO = avatarService.uploadAvatar(userId, avatarFile);
 
         assertEquals(avatar.getMediaType(), actualAvatarDTO.getMediaType());
-        verify(userRepository).findById(userId);
+        verify(userRepository).existsById(userId);
         verify(avatarHelper).getOrCreateAvatar(userId);
         verify(avatarHelper).configureAvatar(any(Avatar.class), any(MultipartFile.class));
         verify(avatarHelper).processAndSetAvatarImage(any(Avatar.class), any(MultipartFile.class));
@@ -279,11 +279,11 @@ class AvatarServiceImplTest {
 
     @Test
     void whenUploadAvatarAndUserDoesNotExistThenThrowException() {
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        when(userRepository.existsById(userId)).thenReturn(false);
 
         assertThrows(UserNotFoundException.class, () -> avatarService.uploadAvatar(userId, avatarFile));
 
-        verify(userRepository).findById(userId);
+        verify(userRepository).existsById(userId);
         verify(avatarHelper, never()).getOrCreateAvatar(any(UUID.class));
     }
 

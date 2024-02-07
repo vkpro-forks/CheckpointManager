@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
@@ -21,6 +22,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import ru.ac.checkpointmanager.config.EnablePostgresAndRedisTestContainers;
+import ru.ac.checkpointmanager.config.security.WithMockCustomUser;
 import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
@@ -30,6 +32,7 @@ import ru.ac.checkpointmanager.repository.AvatarRepository;
 import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.security.CustomAuthenticationToken;
+import ru.ac.checkpointmanager.util.MockMvcUtils;
 import ru.ac.checkpointmanager.util.ResultCheckUtils;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
@@ -151,6 +154,34 @@ class AvatarControllerIntegrationTest {
 
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                 .value(ExceptionUtils.AVATAR_NOT_FOUND_FOR_TERRITORY.formatted(savedTerritory.getId())));
+        ResultCheckUtils.checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockCustomUser
+    void uploadAvatar_UserNotFound_HandleExceptionAndReturnNotFound() {
+        MockMultipartFile file
+                = new MockMultipartFile("avatarFile", "avatar.png", MediaType.IMAGE_PNG_VALUE, new byte[]{1, 2, 3});
+
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.uploadAvatarForUser(TestUtils.USER_ID, file));
+
+        resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                .value(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(TestUtils.USER_ID)));
+        ResultCheckUtils.checkNotFoundFields(resultActions);
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockCustomUser
+    void uploadAvatarByTerritory_TerritoryNotFound_HandleExceptionAndReturnNotFound() {
+        MockMultipartFile file
+                = new MockMultipartFile("avatarFile", "avatar.png", MediaType.IMAGE_PNG_VALUE, new byte[]{1, 2, 3});
+
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.uploadAvatarForTerritory(TestUtils.TERR_ID, file));
+
+        resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
+                .value(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(TestUtils.TERR_ID)));
         ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 

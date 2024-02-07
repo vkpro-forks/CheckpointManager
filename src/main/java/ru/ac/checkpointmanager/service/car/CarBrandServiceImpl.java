@@ -6,71 +6,61 @@ import org.springframework.stereotype.Service;
 import ru.ac.checkpointmanager.dto.CarBrandDTO;
 import ru.ac.checkpointmanager.exception.CarBrandAlreadyExistsException;
 import ru.ac.checkpointmanager.exception.CarBrandNotFoundException;
+import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class CarBrandServiceImpl implements CarBrandService {
-
-    public static final String CAR_BRAND_NOT_FOUND_WITH_ID_MSG = "Car brand not found with ID:";
-    public static final String CAR_BRAND_EXISTS = "CarBrand with [name: %s] already exists";
-
     private final CarBrandRepository carBrandRepository;
 
     @Override
     public CarBrand getBrandById(Long brandId) {
-        CarBrand carBrand = carBrandRepository.findById(brandId)
-                .orElseThrow(() -> {
-                    log.warn(CAR_BRAND_NOT_FOUND_WITH_ID_MSG + " {}", brandId);
-                    return new CarBrandNotFoundException(CAR_BRAND_NOT_FOUND_WITH_ID_MSG + " " + brandId);
-                });
+        CarBrand carBrand = carBrandRepository.findById(brandId).orElseThrow(() -> {
+            String errorMsg = ExceptionUtils.CAR_BRAND_NOT_FOUND_ID.formatted(brandId);
+            log.warn(errorMsg);
+            return new CarBrandNotFoundException(errorMsg);
+        });
         log.debug("Car brand with [brandId: {}] retrieved from repository", brandId);
         return carBrand;
     }
 
-
     @Override
     public CarBrand addBrand(CarBrandDTO carBrand) {
-        Optional<CarBrand> carBrandOptional = carBrandRepository.findByBrand(carBrand.getBrand());
-        if (carBrandOptional.isPresent()) {
-            log.warn(CAR_BRAND_EXISTS.formatted(carBrand.getBrand()));
-            throw new CarBrandAlreadyExistsException(CAR_BRAND_EXISTS.formatted(carBrand.getBrand()));
+        if (carBrandRepository.existsByBrand(carBrand.getBrand())) {
+            log.warn(ExceptionUtils.CAR_BRAND_EXISTS.formatted(carBrand.getBrand()));
+            throw new CarBrandAlreadyExistsException(ExceptionUtils.CAR_BRAND_EXISTS.formatted(carBrand.getBrand()));
         }
         CarBrand carBrandEntity = new CarBrand();
         carBrandEntity.setBrand(carBrand.getBrand());
         return carBrandRepository.save(carBrandEntity);
     }
 
-
-    //удалить бренд можно только в том случае, если у этого бренда в бд нет ни одной модели
     @Override
     public void deleteBrand(Long brandId) {
-        CarBrand carBrand = carBrandRepository.findById(brandId)
-                .orElseThrow(() -> {
-                    log.warn(CAR_BRAND_NOT_FOUND_WITH_ID_MSG + " {}", brandId);
-                    return new CarBrandNotFoundException(CAR_BRAND_NOT_FOUND_WITH_ID_MSG + " " + brandId);
-                });
-        carBrandRepository.delete(carBrand);
+        if (!carBrandRepository.existsById(brandId)) {
+            String errorMsg = ExceptionUtils.CAR_BRAND_NOT_FOUND_ID.formatted(brandId);
+            log.warn(errorMsg);
+            throw new CarBrandNotFoundException(errorMsg);
+        }
+        carBrandRepository.deleteById(brandId);
         log.info("Car brand with [id: {}] successfully deleted", brandId);
     }
 
-
     @Override
     public CarBrand updateBrand(Long brandId, CarBrandDTO carBrand) {
-        CarBrand updateCarBrand = carBrandRepository.findById(brandId)
-                .orElseThrow(() -> {
-                    log.warn(CAR_BRAND_NOT_FOUND_WITH_ID_MSG + " {}", brandId);
-                    return new CarBrandNotFoundException(CAR_BRAND_NOT_FOUND_WITH_ID_MSG + " " + brandId);
-                });
-        Optional<CarBrand> carBrandOptional = carBrandRepository.findByBrand(carBrand.getBrand());
-        if (carBrandOptional.isPresent()) {
-            log.warn(CAR_BRAND_EXISTS.formatted(carBrand.getBrand()));
-            throw new CarBrandAlreadyExistsException(CAR_BRAND_EXISTS.formatted(carBrand.getBrand()));
+        CarBrand updateCarBrand = carBrandRepository.findById(brandId).orElseThrow(() -> {
+            String errorMsg = ExceptionUtils.CAR_BRAND_NOT_FOUND_ID.formatted(brandId);
+            log.warn(errorMsg);
+            return new CarBrandNotFoundException(errorMsg);
+        });
+        if (carBrandRepository.existsByBrand(carBrand.getBrand())) {
+            log.warn(ExceptionUtils.CAR_BRAND_EXISTS.formatted(carBrand.getBrand()));
+            throw new CarBrandAlreadyExistsException(ExceptionUtils.CAR_BRAND_EXISTS.formatted(carBrand.getBrand()));
         }
         updateCarBrand.setBrand(carBrand.getBrand());
         CarBrand saved = carBrandRepository.save(updateCarBrand);
@@ -87,10 +77,4 @@ public class CarBrandServiceImpl implements CarBrandService {
     public List<CarBrand> findByBrandsContainingIgnoreCase(String brandName) {
         return carBrandRepository.findByBrandContainingIgnoreCase(brandName);
     }
-
-    @Override
-    public boolean existsById(Long id) {
-        return carBrandRepository.existsById(id);
-    }
-
 }

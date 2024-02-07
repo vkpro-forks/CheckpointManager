@@ -107,8 +107,6 @@ class AvatarHelperImpl implements AvatarHelper {
         try {
             // Читаем изображение из файла
             BufferedImage image = ImageIO.read(avatarFile.getInputStream());
-            //TODO мы уже проверили что файл не null, контент там точно есть
-            // Проверяем и обрабатываем разрешение изображения
             BufferedImage processedImage = processImage(image);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ImageIO.write(processedImage, "png", baos);
@@ -116,7 +114,7 @@ class AvatarHelperImpl implements AvatarHelper {
             log.debug("Avatar image processed and set for entityID: {}", avatar.getId());
         } catch (IOException e) {
             log.error(ExceptionUtils.AVATAR_PROCESSING_ERROR.formatted(e.getMessage()));
-            throw new AvatarProcessingException(ExceptionUtils.AVATAR_PROCESSING_ERROR.formatted(e.getMessage())); //TODO Лёш, жду от тебя тесты)))
+            throw new AvatarProcessingException(ExceptionUtils.AVATAR_PROCESSING_ERROR.formatted(e.getMessage()));
         }
     }
 
@@ -167,9 +165,7 @@ class AvatarHelperImpl implements AvatarHelper {
     public void updateUserAvatar(UUID userId, Avatar avatar) {
         log.debug("Attempting to update avatar for user ID: {}", userId);
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> {
-                    return new UserNotFoundException("This check should be not here");//FIXME это должно перед обработкой картинки
-                });
+                .orElseThrow(() -> new UserNotFoundException("This check should be not here"));
         user.setAvatar(avatar);
         userRepository.save(user);
         log.info("Avatar updated successfully for user ID: {}", userId);
@@ -183,7 +179,7 @@ class AvatarHelperImpl implements AvatarHelper {
      */
     @Override
     public AvatarImageDTO createAvatarImageDTO(Avatar avatar) {
-        byte[] imageData = avatar.getPreview(); //TODO мы же достали из БД, там всё хорошее должно быть
+        byte[] imageData = avatar.getPreview();
 
         String mimeType = avatar.getMediaType();
         mimeType = (mimeType != null) ? mimeType : "application/octet-stream";
@@ -208,9 +204,7 @@ class AvatarHelperImpl implements AvatarHelper {
     public void updateTerritoryAvatar(UUID territoryId, Avatar avatar) {
         log.debug("Attempting to update avatar for user ID: {}", territoryId);
         Territory territory = territoryRepository.findById(territoryId)
-                .orElseThrow(() -> {
-                    return new TerritoryNotFoundException("This check should be not here");//FIXME это должно перед обработкой картинки
-                });
+                .orElseThrow(() -> new TerritoryNotFoundException("This check should be not here"));
         territory.setAvatar(avatar);
         territoryRepository.save(territory);
         log.info("Avatar updated successfully for user ID: {}", territoryId);
