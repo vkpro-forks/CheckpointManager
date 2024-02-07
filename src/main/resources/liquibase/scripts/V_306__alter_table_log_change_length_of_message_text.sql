@@ -1,0 +1,4 @@
+ALTER TABLE public.logs
+    ALTER COLUMN message TYPE VARCHAR(2000);
+
+GO
