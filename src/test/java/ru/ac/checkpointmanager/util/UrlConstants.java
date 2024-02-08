@@ -73,6 +73,8 @@ public class UrlConstants {
 
     public static final String VISITOR_URL = "/api/v1/visitor";
 
+    public static final String VISITOR_URL_ID = VISITOR_URL + "/{visitorId}";
+
     public static final String VISITOR_PHONE_URL = VISITOR_URL + "/phone";
 
     public static final String VISITOR_NAME_URL = VISITOR_URL + "/name";
