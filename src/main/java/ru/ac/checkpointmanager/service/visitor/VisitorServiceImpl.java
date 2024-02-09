@@ -27,6 +27,7 @@ public class VisitorServiceImpl implements VisitorService {
     @Transactional
     public VisitorDTO addVisitor(VisitorDTO visitorDTO) {
         Visitor visitor = visitorMapper.toVisitor(visitorDTO);
+        visitor.setId(UUID.randomUUID());
         Visitor savedVisitor = visitorRepository.save(visitor);
         log.info("New Visitor added id: {}", visitorDTO);
         return visitorMapper.toVisitorDTO(savedVisitor);

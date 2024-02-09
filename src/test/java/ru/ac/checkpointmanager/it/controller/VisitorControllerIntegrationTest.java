@@ -9,13 +9,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.ac.checkpointmanager.config.EnablePostgresAndRedisTestContainers;
 import ru.ac.checkpointmanager.dto.VisitorDTO;
@@ -33,9 +31,9 @@ import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.repository.VisitorRepository;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
 import ru.ac.checkpointmanager.repository.car.CarRepository;
+import ru.ac.checkpointmanager.util.MockMvcUtils;
 import ru.ac.checkpointmanager.util.ResultCheckUtils;
 import ru.ac.checkpointmanager.util.TestUtils;
-import ru.ac.checkpointmanager.util.UrlConstants;
 
 import java.util.List;
 import java.util.Optional;
@@ -85,11 +83,22 @@ class VisitorControllerIntegrationTest {
     @SneakyThrows
     void addVisitor_AllOk_CreateAndReturnVisitor() {
         VisitorDTO visitorDTO = TestUtils.getVisitorDTO();
-        String visitorDTOToSend = TestUtils.jsonStringFromObject(visitorDTO);
 
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.VISITOR_URL)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(visitorDTOToSend));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createVisitor(visitorDTO));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").isNotEmpty())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(visitorDTO.getName()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.phone").value(visitorDTO.getPhone()));
+    }
+
+    @Test
+    @SneakyThrows
+    void addVisitor_VisitorWithoutId_CreateAndReturnVisitor() {
+        VisitorDTO visitorDTO = TestUtils.getVisitorDTO();
+        visitorDTO.setId(null);
+
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.createVisitor(visitorDTO));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").isNotEmpty())
@@ -104,8 +113,7 @@ class VisitorControllerIntegrationTest {
         Visitor savedVisitor = visitorRepository.saveAndFlush(visitor);
         UUID visitorId = savedVisitor.getId();
 
-        ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.get(UrlConstants.VISITOR_URL + "/{visitorId}", visitorId));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.getVisitor(visitorId));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(visitorId.toString()))
@@ -116,8 +124,7 @@ class VisitorControllerIntegrationTest {
     @Test
     @SneakyThrows
     void getVisitor_VisitorNotFound_HandleErrorAndReturnNotFound() {
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
-                .get(UrlConstants.VISITOR_URL + "/" + TestUtils.VISITOR_ID));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.getVisitor(TestUtils.VISITOR_ID));
 
         ResultCheckUtils.checkNotFoundFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
@@ -130,14 +137,10 @@ class VisitorControllerIntegrationTest {
         Visitor visitor = TestUtils.getVisitorRandomUUID();
         Visitor savedVisitor = visitorRepository.saveAndFlush(visitor);
         UUID visitorId = savedVisitor.getId();
-        Visitor visitorForUpdate = TestUtils.getVisitorRandomUUID();
+        VisitorDTO visitorForUpdate = TestUtils.getVisitorDTO();
         visitorForUpdate.setName("Huggy Wuggy");
-        String visitorDTOToSend = TestUtils.jsonStringFromObject(visitorForUpdate);
 
-        ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.put(UrlConstants.VISITOR_URL + "/{visitorId}", visitorId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(visitorDTOToSend));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.updateVisitor(visitorForUpdate, visitorId));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(visitorId.toString()))
@@ -148,12 +151,8 @@ class VisitorControllerIntegrationTest {
     @Test
     @SneakyThrows
     void updateVisitor_VisitorNotFound_HandleErrorAndReturnNotFound() {
-        String visitorDto = TestUtils.jsonStringFromObject(TestUtils.getVisitorDTO());
-
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
-                .put(UrlConstants.VISITOR_URL + "/" + TestUtils.VISITOR_ID)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(visitorDto));
+        ResultActions resultActions = mockMvc.perform(
+                MockMvcUtils.updateVisitor(TestUtils.getVisitorDTO(), TestUtils.VISITOR_ID));
 
         ResultCheckUtils.checkNotFoundFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
@@ -167,8 +166,7 @@ class VisitorControllerIntegrationTest {
         Visitor savedVisitor = visitorRepository.saveAndFlush(visitor);
         UUID visitorId = savedVisitor.getId();
 
-        ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.delete(UrlConstants.VISITOR_URL + "/{visitorId}", visitorId));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.deleteVisitor(visitorId));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isNoContent());
         Optional<Visitor> optionalVisitor = visitorRepository.findById(visitorId);
@@ -178,8 +176,7 @@ class VisitorControllerIntegrationTest {
     @Test
     @SneakyThrows
     void deleteVisitor_VisitorNotFound_HandleErrorAndReturnNotFound() {
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
-                .delete(UrlConstants.VISITOR_URL + "/" + TestUtils.VISITOR_ID));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.deleteVisitor(TestUtils.VISITOR_ID));
 
         ResultCheckUtils.checkNotFoundFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
@@ -199,9 +196,7 @@ class VisitorControllerIntegrationTest {
         visitorRepository.save(visitorTwoInList);
         visitorRepository.flush();
 
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
-                .get(UrlConstants.VISITOR_PHONE_URL)
-                .param("phone", "+7916"));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.getVisitorByPhonePart().param("phone", "+7916"));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(2))
@@ -218,9 +213,7 @@ class VisitorControllerIntegrationTest {
         visitorShouldNotBeInList.setPhone("+123 123 22 33");
         visitorRepository.saveAndFlush(visitorShouldNotBeInList);
 
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
-                .get(UrlConstants.VISITOR_PHONE_URL)
-                .param("phone", "+7916"));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.getVisitorByPhonePart().param("phone", "+7916"));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(0));
@@ -239,9 +232,7 @@ class VisitorControllerIntegrationTest {
         visitorRepository.save(visitorTwoInList);
         visitorRepository.flush();
 
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
-                .get(UrlConstants.VISITOR_NAME_URL)
-                .param("name", "User"));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.getVisitorByNamePart().param("name", "User"));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(2))
@@ -258,9 +249,7 @@ class VisitorControllerIntegrationTest {
         visitorShouldNotBeInList.setName("Bubuka");
         visitorRepository.saveAndFlush(visitorShouldNotBeInList);
 
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
-                .get(UrlConstants.VISITOR_NAME_URL)
-                .param("name", "User"));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.getVisitorByNamePart().param("name", "User"));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(0));
@@ -280,8 +269,7 @@ class VisitorControllerIntegrationTest {
         PassWalk passWalk = TestUtils.getSimpleActiveOneTimePassWalkFor3Hours(savedUser, savedTerritory, savedVisitor);
         PassWalk savedPass = passRepository.saveAndFlush(passWalk);
 
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
-                .get(UrlConstants.VISITOR_PASS_URL, savedPass.getId()));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.getVisitorByPassId(savedPass.getId()));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(savedVisitor.getId().toString()));
@@ -307,8 +295,7 @@ class VisitorControllerIntegrationTest {
         PassAuto pass = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
         PassAuto savedPass = passRepository.saveAndFlush(pass);
         //when
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
-                .get(UrlConstants.VISITOR_PASS_URL, savedPass.getId()));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.getVisitorByPassId(savedPass.getId()));
         //then
         resultActions.andExpect(MockMvcResultMatchers.status().isNotFound());
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
@@ -322,8 +309,7 @@ class VisitorControllerIntegrationTest {
         Visitor visitorUnsaved = TestUtils.getVisitorRandomUUID();
         visitorRepository.saveAndFlush(visitorUnsaved);
 
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
-                .get(UrlConstants.VISITOR_PASS_URL, TestUtils.PASS_ID));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.getVisitorByPassId(TestUtils.PASS_ID));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isNotFound());
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
@@ -348,8 +334,7 @@ class VisitorControllerIntegrationTest {
         anotherVisitor.setName("Huggy Wuggy");
         visitorRepository.saveAndFlush(visitorUnsaved);
 
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
-                .get(UrlConstants.VISITOR_USER_URL, savedUser.getId()));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.getVisitorByUserId(savedUser.getId()));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.[*].name", Matchers.hasItem(savedVisitor.getName())))
@@ -379,8 +364,7 @@ class VisitorControllerIntegrationTest {
         anotherVisitor.setName("Huggy Wuggy");
         visitorRepository.saveAndFlush(anotherVisitor);
 
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
-                .get(UrlConstants.VISITOR_USER_URL, savedUser.getId()));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.getVisitorByUserId(savedUser.getId()));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.[*].name",
@@ -395,13 +379,11 @@ class VisitorControllerIntegrationTest {
         anotherVisitor.setName("Huggy Wuggy");
         visitorRepository.saveAndFlush(anotherVisitor);
 
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
-                .get(UrlConstants.VISITOR_USER_URL, TestUtils.USER_ID));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.getVisitorByUserId(TestUtils.USER_ID));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.[*].name",
                         Matchers.not(Matchers.hasItem(anotherVisitor.getName()))))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(0));
     }
-
 }

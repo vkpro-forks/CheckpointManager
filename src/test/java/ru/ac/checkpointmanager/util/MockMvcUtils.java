@@ -9,6 +9,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import ru.ac.checkpointmanager.dto.CarBrandDTO;
+import ru.ac.checkpointmanager.dto.VisitorDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
@@ -94,5 +95,49 @@ public class MockMvcUtils {
         return MockMvcRequestBuilders.put(UrlConstants.CAR_BRANDS_URL_VAR, carBrandId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(TestUtils.jsonStringFromObject(carBrandDTO));
+    }
+
+    public static MockHttpServletRequestBuilder createVisitor(VisitorDTO visitorDTO) throws JsonProcessingException {
+        log.info(TestMessage.PERFORM_HTTP, HttpMethod.POST.name(), UrlConstants.VISITOR_URL);
+        return MockMvcRequestBuilders.post(UrlConstants.VISITOR_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(TestUtils.jsonStringFromObject(visitorDTO));
+    }
+
+    public static MockHttpServletRequestBuilder getVisitor(UUID visitorId) {
+        log.info(TestMessage.PERFORM_HTTP, HttpMethod.GET.name(), UrlConstants.VISITOR_URL_ID, visitorId);
+        return MockMvcRequestBuilders.get(UrlConstants.VISITOR_URL_ID, visitorId);
+    }
+
+    public static MockHttpServletRequestBuilder updateVisitor(VisitorDTO visitorDTO, UUID visitorId) throws JsonProcessingException {
+        log.info(TestMessage.PERFORM_HTTP, HttpMethod.PUT.name(), UrlConstants.VISITOR_URL_ID, visitorId);
+        return MockMvcRequestBuilders.put(UrlConstants.VISITOR_URL_ID, visitorId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(TestUtils.jsonStringFromObject(visitorDTO));
+    }
+
+    public static MockHttpServletRequestBuilder deleteVisitor(UUID visitorId) {
+        log.info(TestMessage.PERFORM_HTTP, HttpMethod.DELETE.name(), UrlConstants.VISITOR_URL_ID, visitorId);
+        return MockMvcRequestBuilders.delete(UrlConstants.VISITOR_URL_ID, visitorId);
+    }
+
+    public static MockHttpServletRequestBuilder getVisitorByPhonePart() {
+        log.info(TestMessage.PERFORM_HTTP, HttpMethod.GET.name(), UrlConstants.VISITOR_PHONE_URL);
+        return MockMvcRequestBuilders.get(UrlConstants.VISITOR_PHONE_URL);
+    }
+
+    public static MockHttpServletRequestBuilder getVisitorByNamePart() {
+        log.info(TestMessage.PERFORM_HTTP, HttpMethod.GET.name(), UrlConstants.VISITOR_NAME_URL);
+        return MockMvcRequestBuilders.get(UrlConstants.VISITOR_NAME_URL);
+    }
+
+    public static MockHttpServletRequestBuilder getVisitorByPassId(UUID passId) {
+        log.info(TestMessage.PERFORM_HTTP, HttpMethod.GET.name(), UrlConstants.VISITOR_PASS_URL, passId);
+        return MockMvcRequestBuilders.get(UrlConstants.VISITOR_PASS_URL, passId);
+    }
+
+    public static MockHttpServletRequestBuilder getVisitorByUserId(UUID userId) {
+        log.info(TestMessage.PERFORM_HTTP, HttpMethod.GET.name(), UrlConstants.VISITOR_USER_URL, userId);
+        return MockMvcRequestBuilders.get(UrlConstants.VISITOR_USER_URL, userId);
     }
 }

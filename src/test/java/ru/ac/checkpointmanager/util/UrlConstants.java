@@ -41,8 +41,6 @@ public class UrlConstants {
 
     public static final String PASS_URL_TERRITORY = PASS_URL + "/territory/{terrId}";
 
-    public static final String PASS_URL_SEARCH = PASS_URL + "/search";
-
     public static final String TERR_URL = "/api/v1/territory";
 
     public static final String TERR_USERS_URL = TERR_URL + "/%s/users";
@@ -72,6 +70,8 @@ public class UrlConstants {
     public static final String AUTH_REG_URL = AUTH_URL + "/registration";
 
     public static final String VISITOR_URL = "/api/v1/visitor";
+
+    public static final String VISITOR_URL_ID = VISITOR_URL + "/{visitorId}";
 
     public static final String VISITOR_PHONE_URL = VISITOR_URL + "/phone";
 
