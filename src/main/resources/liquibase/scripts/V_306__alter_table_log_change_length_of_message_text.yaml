@@ -1,0 +1,28 @@
+databaseChangeLog:
+  - changeSet:
+      id: '306'
+      author: 'veselov.nikolay'
+      comment: 'tag before changing logs table for increasing message length'
+      changes:
+        - tagDatabase:
+            tag: '306-tag-before'
+
+  - changeSet:
+      id: '306.1'
+      author: 'veselov.nikolay'
+      labels: 'logs, logs-message, feature-306'
+      comment: 'changing length of message column'
+      created: '2024-02-07'
+      changes:
+        - sqlFile:
+            dbms: postgresql
+            encoding: utf8
+            endDelimiter: GO
+            path: V_306__alter_table_log_change_length_of_message_text.sql
+            relativeToChangelogFile: true
+            splitStatements: true
+            stripComments: true
+      rollback:
+        changesetId: '306'
+        changesetPath: liquibase/scripts/V_306__alter_table_log_change_length_of_message_text.yaml
+        changesetAuthor: 'veselov.nikolay'

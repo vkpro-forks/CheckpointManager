@@ -56,7 +56,6 @@ import static ru.ac.checkpointmanager.utils.StringTrimmer.trimThemAll;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class PassServiceImpl implements PassService {
-
     private static final String PAGE_NO_CONTENT = "Page %d, size - %d, has no content (total pages - %d, total elements - %d)";
     private static final String PASS_NOT_UPDATE = "Pass [%s] cannot be updated (%s)";
     private static final String PASS_NOT_CANCEL = "Pass [%s] cannot be canceled (%s)";

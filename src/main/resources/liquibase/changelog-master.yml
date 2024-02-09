@@ -85,9 +85,10 @@ databaseChangeLog:
       file: liquibase/scripts/V_272__alter_table_passes_create_pass_status_enum.yaml
   - include:
       file: liquibase/scripts/V_291__alter_events_view.sql
+  - include:
+      file: liquibase/scripts/V_306__alter_table_log_change_length_of_message_text.yaml
 
   ## ВНЕСЕНИЕ ДЕМО-ДАННЫХ, ОСТАВЛЯЙТЕ ВСЕГДА В КОНЦЕ ФАЙЛА
   - include:
       file: liquibase/insert_demo_data.sql
       labels: demo-data
-
