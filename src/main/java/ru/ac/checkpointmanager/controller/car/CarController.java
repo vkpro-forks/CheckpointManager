@@ -58,7 +58,7 @@ import static ru.ac.checkpointmanager.utils.SwaggerConstants.UPDATE_CAR_MESSAGE;
 @RequiredArgsConstructor
 @Validated
 @SecurityRequirement(name = "bearerAuth")
-@Tag(name = "Car (Машина)", description = ACCESS_ALL_ROLES_MESSAGE)
+@Tag(name = "Car (машины)", description = ACCESS_ALL_ROLES_MESSAGE)
 @ApiResponses(value = {@ApiResponse(responseCode = "401", description = UNAUTHORIZED_MSG,
         content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(responseCode = "500", description = INTERNAL_SERVER_ERROR_MSG,

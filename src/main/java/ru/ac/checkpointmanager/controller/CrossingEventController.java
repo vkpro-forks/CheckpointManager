@@ -34,7 +34,7 @@ import static ru.ac.checkpointmanager.utils.SwaggerConstants.UNAUTHORIZED_MSG;
 @RequestMapping("api/v1/events")
 @RequiredArgsConstructor
 @Validated
-@Tag(name = "Event (события въезд-выезд (пары))", description = "Получение событий по пропуску (пары въезд-выезд")
+@Tag(name = "Event (события)", description = "Получение сгруппированных по парам \"въезд-выезд\" пересечений")
 @ApiResponses(value = {@ApiResponse(responseCode = "401", description = UNAUTHORIZED_MSG),
         @ApiResponse(responseCode = "500", description = INTERNAL_SERVER_ERROR_MSG)})
 @SecurityRequirement(name = "bearerAuth")

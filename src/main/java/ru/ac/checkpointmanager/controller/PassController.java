@@ -58,7 +58,7 @@ public class PassController {
 
     /* CREATE */
     @Operation(summary = "Добавить новый пропуск",
-            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
+            description = "Доступ: ADMIN, MANAGER, SECURITY, USER")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Пропуск успешно добавлен",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -101,7 +101,7 @@ public class PassController {
     }
 
     @Operation(summary = "Найти пропуск по id",
-            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
+            description = "Доступ: ADMIN, MANAGER, SECURITY, USER")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуск найден",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -115,7 +115,7 @@ public class PassController {
 
     @Operation(summary = "Получить список пропусков конкретного пользователя, с учетом фильтрации и совпадения" +
             " по первым буквам посетителя или номера авто",
-            description = "Доступ: ADMIN, USER.",
+            description = "Доступ: ADMIN, USER",
             parameters = {
                     @Parameter(in = ParameterIn.QUERY, name = "page"),
                     @Parameter(in = ParameterIn.QUERY, name = "size"),
@@ -141,7 +141,7 @@ public class PassController {
 
     @Operation(summary = "Получить список пропусков на конкретную территорию, с учетом фильтрации и совпадения " +
             "по первым буквам посетителя или номера авто",
-            description = "Доступ: ADMIN, MANAGER, SECURITY.",
+            description = "Доступ: ADMIN, MANAGER, SECURITY",
             parameters = {
                     @Parameter(in = ParameterIn.QUERY, name = "page"),
                     @Parameter(in = ParameterIn.QUERY, name = "size"),
@@ -168,7 +168,7 @@ public class PassController {
 
     @Operation(summary = "Получить список пропусков по всем привязанным к пользователю территориям, " +
             "с учетом фильтрации и совпадения по первым буквам посетителя или номера авто",
-            description = "Доступ: ADMIN, MANAGER.",
+            description = "Доступ: ADMIN, MANAGER",
             parameters = {
                     @Parameter(in = ParameterIn.QUERY, name = "page"),
                     @Parameter(in = ParameterIn.QUERY, name = "size"),
@@ -195,7 +195,7 @@ public class PassController {
 
     /* UPDATE */
     @Operation(summary = "Изменить существующий пропуск",
-            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
+            description = "Доступ: ADMIN, MANAGER, SECURITY, USER")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуск успешно изменен",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -210,7 +210,7 @@ public class PassController {
     }
 
     @Operation(summary = "Отменить активный пропуск",
-            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
+            description = "Доступ: ADMIN, MANAGER, SECURITY, USER")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуск отменен",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -226,7 +226,7 @@ public class PassController {
     }
 
     @Operation(summary = "Активировать отмененный пропуск",
-            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
+            description = "Доступ: ADMIN, MANAGER, SECURITY, USER")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуск активирован",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -241,8 +241,8 @@ public class PassController {
         return ResponseEntity.ok(activatedPass);
     }
 
-    @Operation(summary = "Отметить выполненным пропуск со статусом Warning (время истекло, последнее пересечение на выезд)",
-            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
+    @Operation(summary = "Отметить выполненным пропуск со статусом \"нет выезда\"",
+            description = "Доступ: ADMIN, MANAGER, SECURITY, USER")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пропуск отмечен выполненным",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -258,7 +258,7 @@ public class PassController {
     }
 
     @Operation(summary = "Отметить пропуск как избранный",
-            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
+            description = "Доступ: ADMIN, MANAGER, SECURITY, USER")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Отмечен"),
             @ApiResponse(responseCode = "404", description = "Не найден")})
@@ -270,7 +270,7 @@ public class PassController {
     }
 
     @Operation(summary = "Отметить пропуск как НЕизбранный",
-            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
+            description = "Доступ: ADMIN, MANAGER, SECURITY, USER")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Отмечен"),
             @ApiResponse(responseCode = "404", description = "Не найден")})
@@ -283,7 +283,7 @@ public class PassController {
 
     /* DELETE */
     @Operation(summary = "Удалить пропуск",
-            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
+            description = "Доступ: ADMIN, MANAGER, SECURITY, USER")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Пропуск успешно удален"),
             @ApiResponse(responseCode = "404", description = "Пропуск не найден")})

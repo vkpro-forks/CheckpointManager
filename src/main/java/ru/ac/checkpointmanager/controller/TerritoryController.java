@@ -44,7 +44,7 @@ import static ru.ac.checkpointmanager.utils.SwaggerConstants.UNAUTHORIZED_MSG;
 @RequestMapping("api/v1/territory")
 @Validated
 @RequiredArgsConstructor
-@Tag(name = "Territory (территория)", description = "Администрирование списка территорий")
+@Tag(name = "Territory (территории)", description = "Администрирование списка территорий")
 @ApiResponses(value = {@ApiResponse(responseCode = "401", description = UNAUTHORIZED_MSG),
         @ApiResponse(responseCode = "500", description = INTERNAL_SERVER_ERROR_MSG)})
 @SecurityRequirement(name = "bearerAuth")
@@ -54,7 +54,7 @@ public class TerritoryController {
 
     /* CREATE */
     @Operation(summary = "Добавить новую территорию",
-            description = "Доступ: ADMIN.")
+            description = "Доступ: ADMIN")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Территория успешно добавлена",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -69,7 +69,7 @@ public class TerritoryController {
 
     /* READ */
     @Operation(summary = "Найти территорию по id",
-            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
+            description = "Доступ: ADMIN, MANAGER, SECURITY, USER")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Территория найдена",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -82,13 +82,13 @@ public class TerritoryController {
     }
 
     @Operation(summary = "Найти список пользователей, привязанных к территории",
-            description = "Доступ: ADMIN, MANAGER.",
+            description = "Доступ: ADMIN, MANAGER",
             parameters = {
                     @Parameter(in = ParameterIn.QUERY, name = "page", example = "0"),
                     @Parameter(in = ParameterIn.QUERY, name = "size", example = "20")
             })
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Пользователи найдены. Возвращает страницу с пользователями.",
+            @ApiResponse(responseCode = "200", description = "Пользователи найдены",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = Page.class))),
             @ApiResponse(responseCode = "404", description = "Территория не найдена")
@@ -101,7 +101,7 @@ public class TerritoryController {
     }
 
     @Operation(summary = "Найти список территорий по названию",
-            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
+            description = "Доступ: ADMIN, MANAGER, SECURITY, USER")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Территории найдены",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -114,7 +114,7 @@ public class TerritoryController {
     }
 
     @Operation(summary = "Получить список всех территорий",
-            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
+            description = "Доступ: ADMIN, MANAGER, SECURITY, USER")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Территории найдены",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -128,7 +128,7 @@ public class TerritoryController {
 
     /* UPDATE */
     @Operation(summary = "Обновить данные территории",
-            description = "Доступ: ADMIN, MANAGER.")
+            description = "Доступ: ADMIN, MANAGER")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Данные успешно изменены",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -142,7 +142,7 @@ public class TerritoryController {
     }
 
     @Operation(summary = "Прикрепить пользователя к территории (дать право создавать пропуска)",
-            description = "Доступ: ADMIN, MANAGER.")
+            description = "Доступ: ADMIN, MANAGER")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Пользователь присоединен"),
             @ApiResponse(responseCode = "400", description = "Указанные пользователь и территория уже соединены"),
@@ -157,7 +157,7 @@ public class TerritoryController {
 
     /* DELETE */
     @Operation(summary = "Удалить территорию и все ее КПП",
-            description = "Доступ: ADMIN.")
+            description = "Доступ: ADMIN")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Территория удалена"),
             @ApiResponse(responseCode = "404", description = "Территория не найдена")})
@@ -169,7 +169,7 @@ public class TerritoryController {
     }
 
     @Operation(summary = "Открепить пользователя от территории (если утрачено право создавать пропуска)",
-            description = "Доступ: ADMIN, MANAGER.")
+            description = "Доступ: ADMIN, MANAGER")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Пользователь отсоединен"),
             @ApiResponse(responseCode = "400", description = "Указанные пользователь и территория не соединены"),

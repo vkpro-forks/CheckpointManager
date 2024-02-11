@@ -56,7 +56,7 @@ import static ru.ac.checkpointmanager.utils.SwaggerConstants.UPDATE_CAR_BRAND_ME
 @RequiredArgsConstructor
 @Validated
 @SecurityRequirement(name = "bearerAuth")
-@Tag(name = "CarBrand (Бренд Машины)", description = BRAND_PROCESSING_MESSAGE)
+@Tag(name = "CarBrand (марки машин)", description = BRAND_PROCESSING_MESSAGE)
 @ApiResponses(value = {@ApiResponse(responseCode = "401", description = UNAUTHORIZED_MSG),
         @ApiResponse(responseCode = "500", description = INTERNAL_SERVER_ERROR_MSG)})
 public class CarBrandController {
