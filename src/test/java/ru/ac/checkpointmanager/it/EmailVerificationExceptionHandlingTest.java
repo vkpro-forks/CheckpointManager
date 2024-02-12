@@ -21,8 +21,7 @@ class EmailVerificationExceptionHandlingTest extends GlobalExceptionHandlerBasic
     void shouldHandleEmailVerificationTokenExceptionForConfirmRegistration() {
         log.info(TestMessage.PERFORM_HTTP, HttpMethod.GET.name(), UrlConstants.CONFIRM_REG_URL);
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
-                        .get(UrlConstants.CONFIRM_REG_URL)
-                        .param("token", TestUtils.EMAIL_STRING_TOKEN))
+                        .get(UrlConstants.CONFIRM_REG_URL.formatted(TestUtils.EMAIL_STRING_TOKEN)))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
         checkEmailVerificationTokenErrorFields(resultActions);
     }

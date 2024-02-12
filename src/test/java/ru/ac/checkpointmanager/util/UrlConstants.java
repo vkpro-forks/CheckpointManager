@@ -59,7 +59,7 @@ public class UrlConstants {
 
     public static final String CONFIRM_EMAIL_URL = CONFIRM_URL + "/email";
 
-    public static final String CONFIRM_REG_URL = CONFIRM_URL + "/registration";
+    public static final String CONFIRM_REG_URL = CONFIRM_URL + "/registration/%s";
 
     public static final String AUTH_URL = "/api/v1/authentication";
 
