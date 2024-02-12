@@ -107,7 +107,8 @@ public final class PassSpecification {
         return (root, query, criteriaBuilder) -> {
             Root<PassAuto> paRoot = criteriaBuilder.treat(root, PassAuto.class);
             Join<Car, PassAuto> carJoin = paRoot.join(PassAuto_.CAR, JoinType.LEFT);
-            return criteriaBuilder.like(carJoin.get(Car_.LICENSE_PLATE), part + "%");
+            return criteriaBuilder.like(
+                    criteriaBuilder.lower(carJoin.get(Car_.LICENSE_PLATE)), part.toLowerCase() + "%");
         };
     }
 
@@ -124,7 +125,8 @@ public final class PassSpecification {
         return (root, query, criteriaBuilder) -> {
             Root<PassWalk> paRoot = criteriaBuilder.treat(root, PassWalk.class);
             Join<Visitor, PassWalk> visitorJoin = paRoot.join(PassWalk_.VISITOR, JoinType.LEFT);
-            return criteriaBuilder.like(visitorJoin.get(Visitor_.NAME), part + "%");
+            return criteriaBuilder.like(
+                    criteriaBuilder.lower(visitorJoin.get(Visitor_.NAME)), part.toLowerCase() + "%");
         };
     }
 
