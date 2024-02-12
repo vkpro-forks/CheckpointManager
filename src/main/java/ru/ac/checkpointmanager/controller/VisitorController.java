@@ -145,14 +145,14 @@ public class VisitorController {
     }
 
     @Operation(summary = "Найти посетителя по Id пользователя",
-            description = "Доступ: ADMIN, MANAGER, SECURITY")
+            description = "Доступ: ADMIN, MANAGER, SECURITY, USER")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Посетитель успешно найден",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = VisitorDTO.class))}),
             @ApiResponse(responseCode = "404", description = "Посетитель с id user, не существует")
     })
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @GetMapping("/user/{userId}")
     public List<VisitorDTO> searchByUserId(@PathVariable UUID userId) {
         return visitorService.findByUserId(userId);

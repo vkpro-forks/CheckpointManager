@@ -23,17 +23,24 @@ import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.car.Car;
 import ru.ac.checkpointmanager.model.car.CarBrand;
+import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
+import ru.ac.checkpointmanager.model.passes.PassStatus;
+import ru.ac.checkpointmanager.model.passes.PassTimeType;
 import ru.ac.checkpointmanager.repository.PassRepository;
 import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
 import ru.ac.checkpointmanager.repository.car.CarRepository;
+import ru.ac.checkpointmanager.util.MockMvcUtils;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
@@ -61,6 +68,14 @@ class CarControllerIntegrationTest {
     @Autowired
     UserRepository userRepository;
 
+    Territory savedTerritory;
+
+    User savedUser;
+
+    CarBrand savedCarBrand;
+
+    Car savedCar;
+
     @AfterEach
     void clear() {
         passRepository.deleteAll();
@@ -73,7 +88,7 @@ class CarControllerIntegrationTest {
     @Test
     @SneakyThrows
     void shouldAddCar() {
-        CarBrand savedCarBrand = saveCarBrandInRepo();
+        saveCarBrandInRepo();
         CarDTO carDTO = new CarDTO();
         carDTO.setLicensePlate(TestUtils.LICENSE_PLATE);
         carDTO.setBrand(TestUtils.getCarBrandDTO());
@@ -126,11 +141,11 @@ class CarControllerIntegrationTest {
         Car car = TestUtils.getCar(carBrand);
         Car savedCar = carRepository.saveAndFlush(car);
         PassAuto passAuto = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
-
         passRepository.saveAndFlush(passAuto);
 
-        mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.CAR_USER_URL + "/" + savedUser.getId()))
-                .andExpect(MockMvcResultMatchers.status().isOk())
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.searchCarByUserId(savedUser.getId()));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.[0].id").value(savedCar.getId().toString()));
     }
 
@@ -162,7 +177,7 @@ class CarControllerIntegrationTest {
         CarBrand anotherCarBrand = new CarBrand();
         String evilCarBrand = "EvilCar";
         anotherCarBrand.setBrand(evilCarBrand);
-        CarBrand savedAnotherCarBrand = carBrandRepository.save(anotherCarBrand);
+        carBrandRepository.save(anotherCarBrand);
         Car car = TestUtils.getCar(carBrand);
         Car savedCar = carRepository.saveAndFlush(car);
         CarDTO carDto = TestUtils.getCarDto();
@@ -179,9 +194,63 @@ class CarControllerIntegrationTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.brand.brand").value(evilCarBrand));
     }
 
+    @Test
+    @SneakyThrows
+    void searchByUserId_CarIncludedInFourPasses_ReturnOneCar() {
+        saveTerritoryUserCarBrand();
+        saveCar();
+        List<Pass> passesToSave = new ArrayList<>();
+        for (int i = 0; i < 4; i++) {
+            passesToSave.add(createPassWithStatusAndTime(i));
+        }
+        passRepository.saveAllAndFlush(passesToSave);
+
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.searchCarByUserId(savedUser.getId()));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.size()").value(1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.[0].id").value(savedCar.getId().toString()));
+    }
+
     private CarBrand saveCarBrandInRepo() {
         CarBrand carBrand = TestUtils.getCarBrand();
         return carBrandRepository.saveAndFlush(carBrand);
+    }
+
+    private PassAuto createPassWithStatusAndTime(int i) {
+        LocalDateTime baseLdt = LocalDateTime.of(2024, 1, 1, 23, 0, 1);
+        PassAuto pass = new PassAuto();
+        pass.setId(UUID.randomUUID());
+        pass.setTimeType(PassTimeType.ONETIME);
+        pass.setStartTime(baseLdt.plusHours(i));
+        pass.setEndTime(baseLdt.plusHours(5 + i));
+        pass.setStatus(PassStatus.ACTIVE);
+        pass.setTerritory(savedTerritory);
+        pass.setUser(savedUser);
+        pass.setCar(savedCar);
+        return pass;
+    }
+
+    private void saveTerritoryUserCarBrand() {
+        saveTerritoryAndUser();
+        savedCarBrand = saveCarBrandInRepo();
+    }
+
+    private void saveTerritoryAndUser() {
+        Territory territory = new Territory();
+        territory.setName(TestUtils.TERR_NAME);
+        User user = TestUtils.getUser();
+        savedUser = userRepository.saveAndFlush(user);
+        territory.setUsers(List.of(savedUser));
+        savedTerritory = territoryRepository.saveAndFlush(territory);
+    }
+
+    private void saveCar() {
+        Car car = new Car();
+        car.setLicensePlate(TestUtils.getCarDto().getLicensePlate());
+        car.setBrand(savedCarBrand);
+        car.setId(TestUtils.getCarDto().getId());
+        savedCar = carRepository.saveAndFlush(car);//save car and repo change its id
     }
 
 }

@@ -117,7 +117,7 @@ class CarControllerValidationIntegrationTest {
     @SneakyThrows
     void searchByUserId_BadUUIDPassed_HandleErrorAndReturnBadRequest() {
         ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.get(UrlConstants.CAR_USER_URL + "/{userId}", "123"));
+                MockMvcRequestBuilders.get(UrlConstants.CAR_USER_URL, "123"));
 
         ResultCheckUtils.checkWrongTypeFields(resultActions);
     }
