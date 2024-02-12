@@ -10,10 +10,9 @@ import java.util.UUID;
 
 public interface CarRepository extends JpaRepository<Car, UUID> {
 
-    @Query(value = "SELECT c.* FROM cars c JOIN passes p ON c.id = p.car_id WHERE p.user_id = :userId"
+    @Query(value = "SELECT DISTINCT c.*   FROM cars c JOIN passes p ON c.id = p.car_id WHERE p.user_id = :userId"
             , nativeQuery = true)
     List<Car> findCarsByUserId(@Param("userId") UUID userId);
 
     List<Car> findByPhoneContaining(String phone);
-
 }

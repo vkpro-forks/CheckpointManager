@@ -140,4 +140,9 @@ public class MockMvcUtils {
         log.info(TestMessage.PERFORM_HTTP, HttpMethod.GET.name(), UrlConstants.VISITOR_USER_URL, userId);
         return MockMvcRequestBuilders.get(UrlConstants.VISITOR_USER_URL, userId);
     }
+
+    public static MockHttpServletRequestBuilder searchCarByUserId(UUID userId) {
+        log.info(TestMessage.PERFORM_HTTP, HttpMethod.GET.name(), UrlConstants.CAR_USER_URL, userId);
+        return MockMvcRequestBuilders.get(UrlConstants.CAR_USER_URL, userId);
+    }
 }
