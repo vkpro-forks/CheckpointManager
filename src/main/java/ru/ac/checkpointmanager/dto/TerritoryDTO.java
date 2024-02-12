@@ -29,8 +29,10 @@ public class TerritoryDTO {
     private String note;
 
     @NotBlank
+    @Size(min = 2, max = 30)
     private String city;
 
     @NotBlank
+    @Size(min = 2, max = 60)
     private String address;
 }
