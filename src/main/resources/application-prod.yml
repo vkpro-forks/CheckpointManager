@@ -23,7 +23,7 @@ spring:
       password: admin
 
 app:
-  confirmation-link: https://checkpoint-manager.ru/api/v1/confirm/registration?token=
+  confirmation-link: https://checkpoint-manager.vercel.app/registration/
   confirmation-email-link: https://checkpoint-manager.ru/api/v1/confirm/email?token=
 
 cors:
