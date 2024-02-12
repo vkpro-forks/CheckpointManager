@@ -15,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -54,10 +53,11 @@ public class ConfirmController {
                     description = "NOT_FOUND: Ссылка подтверждения недействительна или истек срок действия"
             )
     })
-    @GetMapping("/registration/{token}")
+    @GetMapping("/registration")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void confirmRegistration(@Parameter(description = "Токен из письма для подтверждения")
-                                    @PathVariable("token") String token) {
+    public void confirmRegistration(
+            @Parameter(description = "Токен из письма для подтверждения")
+            @RequestParam("token") String token) {
         authenticationService.confirmRegistration(token);
     }
 
@@ -76,7 +76,7 @@ public class ConfirmController {
     })
     @GetMapping("/email")
     public AuthResponseDTO confirmEmail(@Parameter(description = "Токен из письма для подтверждения")
-                                        @RequestParam("token") String token) {
+                                               @RequestParam("token") String token) {
         return userService.confirmEmail(token);
     }
 }
