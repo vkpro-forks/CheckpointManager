@@ -45,7 +45,7 @@ import static ru.ac.checkpointmanager.utils.SwaggerConstants.INTERNAL_SERVER_ERR
 import static ru.ac.checkpointmanager.utils.SwaggerConstants.UNAUTHORIZED_MSG;
 
 @RestController
-@RequestMapping("api/v1/pass")
+@RequestMapping("api/v1/passes")
 @RequiredArgsConstructor
 @Validated
 @Tag(name = "Pass (пропуска)", description = "Операции с пропусками для машин и людей")

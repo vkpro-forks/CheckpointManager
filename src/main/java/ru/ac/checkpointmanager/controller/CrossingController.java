@@ -41,7 +41,7 @@ import static ru.ac.checkpointmanager.utils.SwaggerConstants.UNAUTHORIZED_MSG;
 
 @Slf4j
 @RestController
-@RequestMapping("api/v1/crossing")
+@RequestMapping("api/v1/crossings")
 @Validated
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
@@ -57,7 +57,7 @@ public class CrossingController {
     private final CrossingService crossingService;
 
     @Operation(summary = "Создание события: въезд/вход на территорию",
-            description = "Доступ: ADMIN, SECURITY.")
+            description = "Доступ: ADMIN - любые территории, SECURITY  - только свои")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пересечение успешно добавлено",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -65,14 +65,14 @@ public class CrossingController {
             @ApiResponse(responseCode = "400", description = BAD_REQUEST_MESSAGE,
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
     })
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SECURITY')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_SECURITY') and @checkpointAuthFacade.isIdMatch(#crossingDTO.checkpointId))")
     @PostMapping("/in")
     public CrossingDTO addCrossingIn(@Valid @RequestBody CrossingRequestDTO crossingDTO) {
         return crossingService.addCrossing(crossingDTO, Direction.IN);
     }
 
     @Operation(summary = "Создание события: выезд/выход с территории",
-            description = "Доступ: ADMIN, SECURITY.")
+            description = "Доступ: ADMIN - любые территории, SECURITY  - только свои")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пересечение успешно добавлено",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -80,7 +80,7 @@ public class CrossingController {
             @ApiResponse(responseCode = "400", description = BAD_REQUEST_MESSAGE,
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
     })
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SECURITY')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_SECURITY') and @checkpointAuthFacade.isIdMatch(#crossingDTO.checkpointId))")
     @PostMapping("/out")
     public CrossingDTO addCrossingOut(@Valid @RequestBody CrossingRequestDTO crossingDTO) {
         return crossingService.addCrossing(crossingDTO, Direction.OUT);
@@ -126,17 +126,19 @@ public class CrossingController {
     }
 
     @Operation(summary = "Получить список пересечений по id пропуска",
-            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
+            description = "Доступ: ADMIN - все пропуска, MANAGER, SECURITY - пропуска на свои территории, USER - свои пропуска")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Найдены пересечения по пропуску",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = CrossingDTO.class)))}),
             @ApiResponse(responseCode = "404", description = "Пропуск не найден")
     })
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
-    @GetMapping("/pass/{id}")
-    public ResponseEntity<List<CrossingDTO>> getByPassId(@PathVariable UUID id) {
-        List<CrossingDTO> foundCrossings = crossingService.getByPassId(id);
+    @PreAuthorize("hasRole('ROLE_ADMIN') " +
+            "or (hasAnyRole('ROLE_MANAGER', 'ROLE_SECURITY') and @passAuthFacade.isTerritoryIdMatch(#passId)) " +
+            "or (hasRole('ROLE_USER') and @passAuthFacade.isIdMatch(#passId))")
+    @GetMapping("/pass/{passId}")
+    public ResponseEntity<List<CrossingDTO>> getByPassId(@PathVariable UUID passId) {
+        List<CrossingDTO> foundCrossings = crossingService.getByPassId(passId);
         return ResponseEntity.ok(foundCrossings);
     }
 }

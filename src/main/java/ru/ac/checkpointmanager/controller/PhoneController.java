@@ -36,7 +36,7 @@ import static ru.ac.checkpointmanager.utils.SwaggerConstants.UNAUTHORIZED_MSG;
 
 
 @RestController
-@RequestMapping("api/v1/phone")
+@RequestMapping("api/v1/phones")
 @Validated
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")

@@ -35,7 +35,7 @@ import java.util.UUID;
 import static ru.ac.checkpointmanager.utils.SwaggerConstants.*;
 
 @RestController
-@RequestMapping("api/v1/checkpoint")
+@RequestMapping("api/v1/checkpoints")
 @Validated
 @RequiredArgsConstructor
 @Tag(name = "Checkpoint (КПП)", description = "Администрирование списка КПП для обслуживаемых территорий")
@@ -91,27 +91,27 @@ public class CheckpointController {
     }
 
     @Operation(summary = "Получить список всех КПП",
-            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
+            description = "Доступ: ADMIN")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "КПП найдены",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = CheckpointDTO.class)))),
             @ApiResponse(responseCode = "404", description = KPP_NOT_FOUND_PLURAL)})
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @GetMapping
     public List<CheckpointDTO> getCheckpoints() {
         return checkpointService.findAllCheckpoints();
     }
 
     @Operation(summary = "Получить список КПП, привязанных к указанной территории",
-            description = "Доступ: ADMIN, MANAGER, SECURITY, USER.")
+            description = "Доступ: ADMIN - любые территории, MANAGER, SECURITY, USER - только свои")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "КПП найдены",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = CheckpointDTO.class)))),
             @ApiResponse(responseCode = "400", description = "Не найдена указанная территория"),
             @ApiResponse(responseCode = "404", description = KPP_NOT_FOUND_PLURAL)})
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN') or @territoryAuthFacade.isIdMatch(#territoryId)")
     @GetMapping("/territory/{territoryId}")
     public List<CheckpointDTO> getCheckpointsByTerritoryId(@Parameter(description = "ID территории")
                                                            @PathVariable UUID territoryId) {
@@ -119,15 +119,15 @@ public class CheckpointController {
     }
 
     /* UPDATE */
-    @Operation(summary = "Изменить существующий КПП",
-            description = "Доступ: ADMIN, MANAGER.")
+    @Operation(summary = "Изменить КПП",
+            description = "Доступ: ADMIN - любые территории, MANAGER - только свои")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "КПП успешно изменен",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CheckpointDTO.class))}),
             @ApiResponse(responseCode = "400", description = FAILED_FIELD_VALIDATION_MESSAGE),
             @ApiResponse(responseCode = "404", description = KPP_NOT_FOUND_SINGULAR)})
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_MANAGER') and @checkpointAuthFacade.isIdMatch(#checkpointDTO.id))")
     @PutMapping
     public ResponseEntity<?> updateCheckpoint(@RequestBody @Valid CheckpointDTO checkpointDTO) {
         CheckpointDTO updatedCheckpoint = checkpointService.updateCheckpoint(checkpointDTO);

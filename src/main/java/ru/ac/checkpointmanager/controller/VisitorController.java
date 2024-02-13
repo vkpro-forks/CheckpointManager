@@ -37,7 +37,7 @@ import static ru.ac.checkpointmanager.utils.SwaggerConstants.UNAUTHORIZED_MSG;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1/visitor")
+@RequestMapping("api/v1/visitors")
 @Validated
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Visitor (посетители)", description = "Работа со списком посетителей")

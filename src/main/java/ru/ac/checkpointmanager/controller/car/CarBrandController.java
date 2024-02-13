@@ -52,7 +52,7 @@ import static ru.ac.checkpointmanager.utils.SwaggerConstants.UPDATE_CAR_BRAND_ME
 
 @Slf4j
 @RestController
-@RequestMapping("api/v1/car")
+@RequestMapping("api/v1/cars")
 @RequiredArgsConstructor
 @Validated
 @SecurityRequirement(name = "bearerAuth")

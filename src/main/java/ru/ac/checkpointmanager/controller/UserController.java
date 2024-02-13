@@ -47,7 +47,7 @@ import static ru.ac.checkpointmanager.utils.SwaggerConstants.INTERNAL_SERVER_ERR
 import static ru.ac.checkpointmanager.utils.SwaggerConstants.UNAUTHORIZED_MSG;
 
 @RestController
-@RequestMapping("api/v1/user")
+@RequestMapping("api/v1/users")
 @Validated
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
@@ -87,8 +87,8 @@ public class UserController {
         return userService.findById(id);
     }
 
-    @Operation(summary = "Поиск территории по id пользователя",
-            description = "Доступ: USER - со своим id; ADMIN, MANAGER, SECURITY - с любым."
+    @Operation(summary = "Поиск территорий по id пользователя",
+            description = "Доступ: USER, MANAGER, SECURITY - со своим id; ADMIN - с любым."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -102,7 +102,7 @@ public class UserController {
                     description = "FORBIDDEN: роль пользователя не предоставляет доступ к данному api"
             )
     })
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY') or @userAuthFacade.isIdMatch(#userId)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN') or @userAuthFacade.isIdMatch(#userId)")
     @GetMapping("/{userId}/territories")
     public List<TerritoryDTO> getTerritoriesByUser(
             @Parameter(description = "Уникальный идентификатор пользователя", required = true)
@@ -180,7 +180,7 @@ public class UserController {
     }
 
     @Operation(summary = "Получения списка номеров телефона, привязанных к пользователю",
-            description = "Доступ: USER - со своим id; ADMIN, MANAGER, SECURITY - с любым."
+            description = "Доступ: USER - со своим id; ADMIN, MANAGER, SECURITY - с любым"
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -387,7 +387,7 @@ public class UserController {
     }
 
     @Operation(summary = "Удалить пользователя по id",
-            description = "Доступ: USER, SECURITY - со своим id; ADMIN, MANAGER - с любым."
+            description = "Доступ: USER, SECURITY, MANAGER - со своим id; ADMIN - с любым."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -403,7 +403,7 @@ public class UserController {
                     description = "NOT_FOUND: пользователь не найден"
             )
     })
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER') or @userAuthFacade.isIdMatch(#id)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN') or @userAuthFacade.isIdMatch(#id)")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@Parameter(description = "Уникальный идентификатор пользователя", required = true)
