@@ -93,11 +93,11 @@ public class PhoneController {
                     description = "NOT_FOUND: номера с таким id не найдено"
             )
     })
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY') or @phoneAuthFacade.isIdMatch(#id)")
-    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY') or @phoneAuthFacade.isIdMatch(#phoneId)")
+    @GetMapping("/{phoneId}")
     public PhoneDTO findById(@Parameter(description = "Уникальный идентификатор телефона")
-                             @PathVariable UUID id) {
-        return phoneService.findById(id);
+                             @PathVariable UUID phoneId) {
+        return phoneService.findById(phoneId);
     }
 
     @Operation(summary = "Получить список всех номеров",
@@ -154,11 +154,11 @@ public class PhoneController {
                     description = "NOT_FOUND: телефон не найден"
             )
     })
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER') or @phoneAuthFacade.isIdMatch(#id)")
-    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER') or @phoneAuthFacade.isIdMatch(#phoneId)")
+    @DeleteMapping("/{phoneId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteNumber(@Parameter(description = "Уникальный идентификатор телефона")
-                             @PathVariable UUID id) {
-        phoneService.deletePhoneNumber(id);
+                             @PathVariable UUID phoneId) {
+        phoneService.deletePhoneNumber(phoneId);
     }
 }

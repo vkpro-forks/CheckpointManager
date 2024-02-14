@@ -61,7 +61,7 @@ public class AvatarController {
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY') or @userAuthFacade.isIdMatch(#userId)")
-    @PostMapping(value = "/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/users/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public AvatarDTO uploadAvatar(@PathVariable UUID userId,
                                   @RequestPart @AvatarImageCheck MultipartFile avatarFile) {
@@ -77,7 +77,7 @@ public class AvatarController {
                     content = @Content(schema = @Schema(implementation = AvatarNotFoundException.class))),
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
-    @GetMapping("/{userId}")
+    @GetMapping("/users/{userId}")
     public ResponseEntity<byte[]> getAvatar(@PathVariable UUID userId) {
         AvatarImageDTO avatarImageDTO = avatarService.getAvatarByUserId(userId);
         return createResponseEntity(avatarImageDTO);
@@ -90,7 +90,7 @@ public class AvatarController {
                     content = @Content(schema = @Schema(implementation = AvatarNotFoundException.class))),
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY') or @userAuthFacade.isIdMatch(#userId)")
-    @DeleteMapping("/user/{userId}")
+    @DeleteMapping("/users/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteAvatarByUserId(@PathVariable UUID userId) {
         avatarService.deleteAvatarByUserId(userId);
@@ -118,7 +118,7 @@ public class AvatarController {
                     content = @Content(schema = @Schema(implementation = AvatarNotFoundException.class))),
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
-    @GetMapping("/avatars/{avatarId}")
+    @GetMapping("/{avatarId}")
     public ResponseEntity<byte[]> getAvatarById(@PathVariable UUID avatarId) {
         AvatarImageDTO avatarImageDTO = avatarService.getAvatarImageByAvatarId(avatarId);
         return createResponseEntity(avatarImageDTO);
@@ -154,7 +154,7 @@ public class AvatarController {
             @ApiResponse(responseCode = "400", description = BAD_REQUEST_MESSAGE,
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
     })
-    @PostMapping(value = "/territory/{territoryId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/territories/{territoryId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public AvatarDTO uploadAvatarByTerritory(@PathVariable UUID territoryId,
                                              @RequestPart @AvatarImageCheck MultipartFile avatarFile) {
@@ -169,7 +169,7 @@ public class AvatarController {
             @ApiResponse(responseCode = "404", description = AVATAR_NOT_FOUND_MESSAGE,
                     content = @Content(schema = @Schema(implementation = AvatarNotFoundException.class))),
     })
-    @GetMapping("/territory/{territoryId}")
+    @GetMapping("/territories/{territoryId}")
     public ResponseEntity<byte[]> getAvatarByTerritory(@PathVariable UUID territoryId) {
         AvatarImageDTO avatarImageDTO = avatarService.getAvatarImageByTerritoryId(territoryId);
         return createResponseEntity(avatarImageDTO);

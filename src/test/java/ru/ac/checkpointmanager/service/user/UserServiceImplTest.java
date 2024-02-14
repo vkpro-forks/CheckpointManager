@@ -685,13 +685,13 @@ class UserServiceImplTest {
         UUID userId = TestUtils.USER_ID;
         String phone = "1234567890";
         List<String> phoneNumbers = List.of(phone);
-        when(phoneRepository.getNumbersByUserId(userId)).thenReturn(phoneNumbers);
+        when(phoneRepository.getPhonesByUserId(userId)).thenReturn(phoneNumbers);
 
-        Collection<String> result = userService.findUsersPhoneNumbers(userId);
+        Collection<String> result = userService.findUsersPhones(userId);
 
         Assertions.assertThat(result).isNotEmpty().contains(phone);
         Assertions.assertThat(phoneNumbers).hasSameSizeAs(result);
-        Mockito.verify(phoneRepository).getNumbersByUserId(userId);
+        Mockito.verify(phoneRepository).getPhonesByUserId(userId);
     }
 
     @Test

@@ -148,7 +148,7 @@ public class TerritoryController {
             @ApiResponse(responseCode = "400", description = "Указанные пользователь и территория уже соединены"),
             @ApiResponse(responseCode = "404", description = "Пользователь или территория не найдены")})
     @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_MANAGER') and @territoryAuthFacade.isIdMatch(#territoryId))")
-    @PatchMapping("/{territoryId}/user/{userId}")
+    @PatchMapping("/{territoryId}/users/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void attachUserToTerritory(@PathVariable UUID territoryId,
                                       @PathVariable UUID userId) {
@@ -162,10 +162,10 @@ public class TerritoryController {
             @ApiResponse(responseCode = "204", description = "Территория удалена"),
             @ApiResponse(responseCode = "404", description = "Территория не найдена")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{territoryId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteTerritory(@PathVariable UUID id) {
-        territoryService.deleteTerritoryById(id);
+    public void deleteTerritory(@PathVariable UUID territoryId) {
+        territoryService.deleteTerritoryById(territoryId);
     }
 
     @Operation(summary = "Открепить пользователя от территории (лишить права создавать пропуска на неё)",
@@ -175,7 +175,7 @@ public class TerritoryController {
             @ApiResponse(responseCode = "400", description = "Указанные пользователь и территория не соединены"),
             @ApiResponse(responseCode = "404", description = "Пользователь или территория не найдены")})
     @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_MANAGER') and @territoryAuthFacade.isIdMatch(#territoryId))")
-    @DeleteMapping("/{territoryId}/user/{userId}")
+    @DeleteMapping("/{territoryId}/users/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void detachUserFromTerritory(@PathVariable UUID territoryId,
                                         @PathVariable UUID userId) {

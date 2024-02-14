@@ -52,7 +52,7 @@ import static ru.ac.checkpointmanager.utils.SwaggerConstants.UPDATE_CAR_BRAND_ME
 
 @Slf4j
 @RestController
-@RequestMapping("api/v1/cars")
+@RequestMapping("api/v1/cars/brands")
 @RequiredArgsConstructor
 @Validated
 @SecurityRequirement(name = "bearerAuth")
@@ -72,7 +72,7 @@ public class CarBrandController {
             @ApiResponse(responseCode = "400", description = FAILED_FIELD_VALIDATION_MESSAGE)
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    @PostMapping("/brands")
+    @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
     public CarBrand createBrand(@Valid @RequestBody CarBrandDTO brand) {
         return carBrandService.addBrand(brand);
@@ -87,9 +87,9 @@ public class CarBrandController {
             @ApiResponse(responseCode = "404", description = BRAND_NOT_EXIST_MESSAGE)
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
-    @GetMapping("/brands/{id}")
-    public ResponseEntity<CarBrand> getCarBrandById(@PathVariable Long id) {
-        CarBrand brand = carBrandService.getBrandById(id);
+    @GetMapping("/{brandId}")
+    public ResponseEntity<CarBrand> getCarBrandById(@PathVariable Long brandId) {
+        CarBrand brand = carBrandService.getBrandById(brandId);
         log.debug("Retrieved CarBrand by ID: {}", brand);
         return new ResponseEntity<>(brand, HttpStatus.OK);
     }
@@ -104,10 +104,10 @@ public class CarBrandController {
             @ApiResponse(responseCode = "404", description = BRAND_NOT_EXIST_MESSAGE)
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    @DeleteMapping("/brands/{id}")
+    @DeleteMapping("/{brandId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteCarBrandById(@PathVariable Long id) {
-        carBrandService.deleteBrand(id);
+    public void deleteCarBrandById(@PathVariable Long brandId) {
+        carBrandService.deleteBrand(brandId);
     }
 
     @Operation(summary = UPDATE_CAR_BRAND_MESSAGE,
@@ -119,10 +119,10 @@ public class CarBrandController {
             @ApiResponse(responseCode = "400", description = FAILED_FIELD_VALIDATION_MESSAGE)
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    @PutMapping("/brands/{id}")
-    public CarBrand updateCarBrand(@Valid @PathVariable Long id,
+    @PutMapping("/{brandId}")
+    public CarBrand updateCarBrand(@Valid @PathVariable Long brandId,
                                    @Valid @RequestBody CarBrandDTO carBrandDetails) {
-        return carBrandService.updateBrand(id, carBrandDetails);
+        return carBrandService.updateBrand(brandId, carBrandDetails);
     }
 
     @Operation(summary = GET_ALL_CAR_BRANDS_MESSAGE,
@@ -133,7 +133,7 @@ public class CarBrandController {
                             schema = @Schema(implementation = CarBrand.class))}),
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
-    @GetMapping("/brands/all")
+    @GetMapping()
     public ResponseEntity<List<CarBrand>> getAllBrands() {
         List<CarBrand> allBrands = carBrandService.getAllBrands();
         log.debug("Retrieved all CarBrands");
@@ -148,7 +148,7 @@ public class CarBrandController {
                             schema = @Schema(implementation = CarBrand.class))}),
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
-    @GetMapping("/brands-name")
+    @GetMapping("/name")
     public ResponseEntity<List<CarBrand>> getBrandsByName(@RequestParam String brandNamePart) {
         List<CarBrand> brands = carBrandService.findByBrandsContainingIgnoreCase(brandNamePart);
         log.debug("Retrieved CarBrands by name part: {}", brands);

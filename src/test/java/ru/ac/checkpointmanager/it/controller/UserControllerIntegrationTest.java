@@ -311,7 +311,7 @@ class UserControllerIntegrationTest {
         userRepository.saveAndFlush(savedUser);
         UUID userId = savedUser.getId();
 
-        mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL + "/numbers/{id}", userId)
+        mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL + "/{userId}/phones", userId)
                         .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -325,7 +325,7 @@ class UserControllerIntegrationTest {
         CustomAuthenticationToken authToken = TestUtils.getAuthToken(savedUser);
         UUID anotherId = UUID.randomUUID();
 
-        mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL + "/numbers/{id}", anotherId)
+        mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL + "/{userId}/phones", anotherId)
                         .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden());
@@ -342,7 +342,7 @@ class UserControllerIntegrationTest {
         userRepository.saveAndFlush(savedUser);
         UUID userId = savedUser.getId();
 
-        mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL + "/numbers/{id}", userId).
+        mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL + "/{userId}/phones", userId).
                         contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))

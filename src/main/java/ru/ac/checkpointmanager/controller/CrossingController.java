@@ -119,9 +119,9 @@ public class CrossingController {
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SECURITY')")
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getCrossing(@PathVariable UUID id) {
-        CrossingDTO crossing = crossingService.getCrossing(id);
+    @GetMapping("/{crossingId}")
+    public ResponseEntity<?> getCrossing(@PathVariable UUID crossingId) {
+        CrossingDTO crossing = crossingService.getCrossing(crossingId);
         return new ResponseEntity<>(crossing, HttpStatus.OK);
     }
 
@@ -136,7 +136,7 @@ public class CrossingController {
     @PreAuthorize("hasRole('ROLE_ADMIN') " +
             "or (hasAnyRole('ROLE_MANAGER', 'ROLE_SECURITY') and @passAuthFacade.isTerritoryIdMatch(#passId)) " +
             "or (hasRole('ROLE_USER') and @passAuthFacade.isIdMatch(#passId))")
-    @GetMapping("/pass/{passId}")
+    @GetMapping("/passes/{passId}")
     public ResponseEntity<List<CrossingDTO>> getByPassId(@PathVariable UUID passId) {
         List<CrossingDTO> foundCrossings = crossingService.getByPassId(passId);
         return ResponseEntity.ok(foundCrossings);

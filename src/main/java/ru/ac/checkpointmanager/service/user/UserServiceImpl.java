@@ -566,9 +566,9 @@ public class UserServiceImpl implements UserService {
      * @throws UserNotFoundException если пользователь с указанным идентификатором не найден.
      */
     @Override
-    public Collection<String> findUsersPhoneNumbers(UUID userId) {
+    public Collection<String> findUsersPhones(UUID userId) {
         log.debug("Method {}, UUID {}", MethodLog.getMethodName(), userId);
-        return phoneRepository.getNumbersByUserId(userId);
+        return phoneRepository.getPhonesByUserId(userId);
     }
 
     /**

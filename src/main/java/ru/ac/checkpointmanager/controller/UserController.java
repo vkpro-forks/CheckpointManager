@@ -81,10 +81,10 @@ public class UserController {
             )
     })
     @PreAuthorize(value = "hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
-    @GetMapping("/{id}")
+    @GetMapping("/{userId}")
     public UserResponseDTO findUserById(@Parameter(description = "Уникальный идентификатор пользователя", required = true)
-                                        @PathVariable UUID id) {
-        return userService.findById(id);
+                                        @PathVariable UUID userId) {
+        return userService.findById(userId);
     }
 
     @Operation(summary = "Поиск территорий по id пользователя",
@@ -190,12 +190,12 @@ public class UserController {
                             array = @ArraySchema(schema = @Schema(implementation = String.class)))
             )
     })
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY') or @userAuthFacade.isIdMatch(#id)")
-    @GetMapping("/numbers/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY') or @userAuthFacade.isIdMatch(#userId)")
+    @GetMapping("/{userId}/phones")
     public Collection<String> findUsersPhoneNumbers(
             @Parameter(description = "Уникальный идентификатор пользователя", required = true)
-            @PathVariable UUID id) {
-        return userService.findUsersPhoneNumbers(id);
+            @PathVariable UUID userId) {
+        return userService.findUsersPhones(userId);
     }
 
     @Operation(summary = "Изменение данных пользователя",
@@ -328,12 +328,12 @@ public class UserController {
             )
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
-    @PatchMapping("/{id}")
+    @PatchMapping("/{userId}")
     public UserResponseDTO updateBlockStatus(@Parameter(description = "Уникальный идентификатор пользователя", required = true)
-                                             @PathVariable UUID id,
+                                             @PathVariable UUID userId,
                                              @Parameter(description = "Статус блокировки: true для блокировки пользователя, false для разблокировки", required = true)
                                              @RequestParam Boolean isBlocked) {
-        return userService.updateBlockStatus(id, isBlocked);
+        return userService.updateBlockStatus(userId, isBlocked);
     }
 
     @Operation(summary = "Заблокировать пользователя по id",
@@ -354,11 +354,11 @@ public class UserController {
             )
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
-    @PatchMapping("/block/{id}")
+    @PatchMapping("/block/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void blockById(@Parameter(description = "Уникальный идентификатор пользователя", required = true)
-                          @PathVariable UUID id) {
-        userService.blockById(id);
+                          @PathVariable UUID userId) {
+        userService.blockById(userId);
     }
 
     @Operation(summary = "Разблокировать пользователя по id",
@@ -379,11 +379,11 @@ public class UserController {
             )
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
-    @PatchMapping("/unblock/{id}")
+    @PatchMapping("/unblock/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void unblockById(@Parameter(description = "Уникальный идентификатор пользователя", required = true)
-                            @PathVariable UUID id) {
-        userService.unblockById(id);
+                            @PathVariable UUID userId) {
+        userService.unblockById(userId);
     }
 
     @Operation(summary = "Удалить пользователя по id",
@@ -403,11 +403,11 @@ public class UserController {
                     description = "NOT_FOUND: пользователь не найден"
             )
     })
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN') or @userAuthFacade.isIdMatch(#id)")
-    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN') or @userAuthFacade.isIdMatch(#userId)")
+    @DeleteMapping("/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@Parameter(description = "Уникальный идентификатор пользователя", required = true)
-                           @PathVariable UUID id) {
-        userService.deleteUser(id);
+                           @PathVariable UUID userId) {
+        userService.deleteUser(userId);
     }
 }

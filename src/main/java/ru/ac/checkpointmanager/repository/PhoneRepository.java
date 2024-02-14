@@ -17,5 +17,5 @@ public interface PhoneRepository extends JpaRepository<Phone, UUID> {
 
     // ищет в таблице phones номера, которые привязаны к переданному user_id
     @Query(value = "SELECT number FROM phones WHERE user_id = :user_id", nativeQuery = true)
-    Collection<String> getNumbersByUserId(@Param("user_id") UUID id);
+    Collection<String> getPhonesByUserId(@Param("user_id") UUID id);
 }

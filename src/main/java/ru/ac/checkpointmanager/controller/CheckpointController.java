@@ -70,9 +70,9 @@ public class CheckpointController {
                             schema = @Schema(implementation = CheckpointDTO.class))}),
             @ApiResponse(responseCode = "404", description = KPP_NOT_FOUND_SINGULAR)})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
-    @GetMapping("/{id}")
-    public ResponseEntity<CheckpointDTO> getCheckpoint(@PathVariable("id") UUID id) {
-        CheckpointDTO foundCheckpoint = checkpointService.findById(id);
+    @GetMapping("/{checkpointId}")
+    public ResponseEntity<CheckpointDTO> getCheckpoint(@PathVariable UUID checkpointId) {
+        CheckpointDTO foundCheckpoint = checkpointService.findById(checkpointId);
         return ResponseEntity.ok(foundCheckpoint);
     }
 
@@ -112,7 +112,7 @@ public class CheckpointController {
             @ApiResponse(responseCode = "400", description = "Не найдена указанная территория"),
             @ApiResponse(responseCode = "404", description = KPP_NOT_FOUND_PLURAL)})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN') or @territoryAuthFacade.isIdMatch(#territoryId)")
-    @GetMapping("/territory/{territoryId}")
+    @GetMapping("/territories/{territoryId}")
     public List<CheckpointDTO> getCheckpointsByTerritoryId(@Parameter(description = "ID территории")
                                                            @PathVariable UUID territoryId) {
         return checkpointService.findCheckpointsByTerritoryId(territoryId);
@@ -141,10 +141,10 @@ public class CheckpointController {
             @ApiResponse(responseCode = "204", description = "КПП успешно удален"),
             @ApiResponse(responseCode = "404", description = KPP_NOT_FOUND_SINGULAR)})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    @DeleteMapping("{id}")
+    @DeleteMapping("{checkpointId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteCheckpoint(@PathVariable UUID id) {
-        checkpointService.deleteCheckpointById(id);
+    public void deleteCheckpoint(@PathVariable UUID checkpointId) {
+        checkpointService.deleteCheckpointById(checkpointId);
     }
 
 }
