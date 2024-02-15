@@ -42,7 +42,7 @@ class AvatarControllerIntegrationTest {
         MockMultipartFile file
                 = new MockMultipartFile("avatarFile", "avatar.buba", MediaType.IMAGE_PNG_VALUE, new byte[]{1, 2, 3});
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.multipart(
-                HttpMethod.POST, UrlConstants.AVATAR_URL + "/" + TestUtils.USER_ID).file(file));
+                HttpMethod.POST, UrlConstants.AVATAR_URL + "/users/" + TestUtils.USER_ID).file(file));
         ResultCheckUtils.checkCommonValidationFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers
                 .jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0)).value("avatarFile"));

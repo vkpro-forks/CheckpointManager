@@ -54,7 +54,7 @@ import static ru.ac.checkpointmanager.utils.SwaggerConstants.UPDATE_CAR_MESSAGE;
 
 @Slf4j
 @RestController
-@RequestMapping("api/v1/car")
+@RequestMapping("api/v1/cars")
 @RequiredArgsConstructor
 @Validated
 @SecurityRequirement(name = "bearerAuth")
@@ -139,7 +139,7 @@ public class CarController {
                             schema = @Schema(implementation = CarDTO.class))}),
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
-    @GetMapping("/user/{userId}")
+    @GetMapping("/users/{userId}")
     public List<CarDTO> searchByUserId(@PathVariable UUID userId) {
         List<Car> cars = carService.findByUserId(userId);
         return mapper.toCarDTOs(cars);
@@ -158,5 +158,4 @@ public class CarController {
         List<Car> cars = carService.findByPhonePart(phone);
         return mapper.toCarDTOs(cars);
     }
-
 }

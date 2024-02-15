@@ -22,11 +22,11 @@ import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.utils.MethodLog;
+import ru.ac.checkpointmanager.utils.StringTrimmer;
 
 import java.util.List;
 import java.util.UUID;
 
-import static ru.ac.checkpointmanager.utils.StringTrimmer.trimThemAll;
 
 @Service
 @Slf4j
@@ -47,7 +47,7 @@ public class TerritoryServiceImpl implements TerritoryService {
     public TerritoryDTO addTerritory(TerritoryDTO territoryDTO) {
         log.debug(METHOD_CALLED_UUID_LOG, MethodLog.getMethodName(), territoryDTO.getId());
         Territory territory = territoryMapper.toTerritory(territoryDTO);
-        trimThemAll(territory);
+        StringTrimmer.trimThemAll(territory);
         Territory saved = territoryRepository.save(territory);
         log.info("Territory with [id: {}] was saved", territory.getId());
         return territoryMapper.toTerritoryDTO(saved);
@@ -103,7 +103,7 @@ public class TerritoryServiceImpl implements TerritoryService {
     public TerritoryDTO updateTerritory(TerritoryDTO territoryDTO) {
         UUID territoryId = territoryDTO.getId();
         log.debug(METHOD_CALLED_UUID_LOG, MethodLog.getMethodName(), territoryId);
-        trimThemAll(territoryDTO);
+        StringTrimmer.trimThemAll(territoryDTO);
         Territory foundTerritory = territoryRepository.findById(territoryId).orElseThrow(
                 () -> {
                     log.warn(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(territoryId));

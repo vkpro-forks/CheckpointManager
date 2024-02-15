@@ -45,7 +45,7 @@ import static ru.ac.checkpointmanager.utils.SwaggerConstants.INTERNAL_SERVER_ERR
 import static ru.ac.checkpointmanager.utils.SwaggerConstants.UNAUTHORIZED_MSG;
 
 @RestController
-@RequestMapping("api/v1/pass")
+@RequestMapping("api/v1/passes")
 @RequiredArgsConstructor
 @Validated
 @Tag(name = "Pass (пропуска)", description = "Операции с пропусками для машин и людей")
@@ -108,9 +108,9 @@ public class PassController {
                             schema = @Schema(implementation = PassResponseDTO.class))}),
             @ApiResponse(responseCode = "404", description = "Пропуск не найден")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
-    @GetMapping("/{id}")
-    public PassResponseDTO getPass(@PathVariable("id") UUID id) {
-        return service.findById(id);
+    @GetMapping("/{passId}")
+    public PassResponseDTO getPass(@PathVariable UUID passId) {
+        return service.findById(passId);
     }
 
     @Operation(summary = "Получить список пропусков конкретного пользователя, с учетом фильтрации и совпадения" +
@@ -131,7 +131,7 @@ public class PassController {
                             array = @ArraySchema(schema = @Schema(implementation = PassResponseDTO.class)))),
             @ApiResponse(responseCode = "404", description = "Пользователь не найден")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
-    @GetMapping("/user/{userId}")
+    @GetMapping("/users/{userId}")
     public Page<PassResponseDTO> getPassesByUserId(@PathVariable UUID userId,
                                                    @Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams,
                                                    @Schema(hidden = true) FilterParams filterParams,
@@ -157,7 +157,7 @@ public class PassController {
                             array = @ArraySchema(schema = @Schema(implementation = PassResponseDTO.class)))),
             @ApiResponse(responseCode = "404", description = "Территория не найдена")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
-    @GetMapping("/territory/{territoryId}")
+    @GetMapping("/territories/{territoryId}")
     public Page<PassResponseDTO> getPassesByTerritoryId(@PathVariable UUID territoryId,
                                                         @Schema(hidden = true)
                                                         @Valid @PagingParam PagingParams pagingParams,
@@ -184,7 +184,7 @@ public class PassController {
                             array = @ArraySchema(schema = @Schema(implementation = PassResponseDTO.class)))),
             @ApiResponse(responseCode = "404", description = "Пользователь или территории не найдены")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
-    @GetMapping("/user/{userId}/territories")
+    @GetMapping("/users/{userId}/territories")
     public Page<PassResponseDTO> getPassesByUsersTerritories(@PathVariable UUID userId,
                                                              @Schema(hidden = true)
                                                              @Valid @PagingParam PagingParams pagingParams,
@@ -218,10 +218,10 @@ public class PassController {
             @ApiResponse(responseCode = "400", description = "Пропуск не является активным"),
             @ApiResponse(responseCode = "404", description = "Пропуск не найден")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
-    @PatchMapping("/{id}/cancel")
-    public ResponseEntity<PassResponseDTO> cancelPass(@PathVariable UUID id) {
+    @PatchMapping("/{passId}/cancel")
+    public ResponseEntity<PassResponseDTO> cancelPass(@PathVariable UUID passId) {
 
-        PassResponseDTO cancelledPass = service.cancelPass(id);
+        PassResponseDTO cancelledPass = service.cancelPass(passId);
         return ResponseEntity.ok(cancelledPass);
     }
 
@@ -234,10 +234,10 @@ public class PassController {
             @ApiResponse(responseCode = "400", description = "Пропуск не является отмененным; время действия пропуска истекло"),
             @ApiResponse(responseCode = "404", description = "Пропуск не найден")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
-    @PatchMapping("/{id}/activate")
-    public ResponseEntity<PassResponseDTO> activatePass(@PathVariable UUID id) {
+    @PatchMapping("/{passId}/activate")
+    public ResponseEntity<PassResponseDTO> activatePass(@PathVariable UUID passId) {
 
-        PassResponseDTO activatedPass = service.activateCancelledPass(id);
+        PassResponseDTO activatedPass = service.activateCancelledPass(passId);
         return ResponseEntity.ok(activatedPass);
     }
 
@@ -250,10 +250,10 @@ public class PassController {
             @ApiResponse(responseCode = "400", description = "Стутус отличен от Warning"),
             @ApiResponse(responseCode = "404", description = "Пропуск не найден")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
-    @PatchMapping("/{id}/unwarning")
-    public ResponseEntity<PassResponseDTO> unWarningPass(@PathVariable UUID id) {
+    @PatchMapping("/{passId}/unwarning")
+    public ResponseEntity<PassResponseDTO> unWarningPass(@PathVariable UUID passId) {
 
-        PassResponseDTO completedPass = service.unWarningPass(id);
+        PassResponseDTO completedPass = service.unWarningPass(passId);
         return ResponseEntity.ok(completedPass);
     }
 
@@ -263,10 +263,10 @@ public class PassController {
             @ApiResponse(responseCode = "204", description = "Отмечен"),
             @ApiResponse(responseCode = "404", description = "Не найден")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
-    @PatchMapping("/{id}/favorite")
+    @PatchMapping("/{passId}/favorite")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void markFavorite(@PathVariable UUID id) {
-        service.markFavorite(id);
+    public void markFavorite(@PathVariable UUID passId) {
+        service.markFavorite(passId);
     }
 
     @Operation(summary = "Отметить пропуск как НЕизбранный",
@@ -275,10 +275,10 @@ public class PassController {
             @ApiResponse(responseCode = "204", description = "Отмечен"),
             @ApiResponse(responseCode = "404", description = "Не найден")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
-    @PatchMapping("/{id}/not_favorite")
+    @PatchMapping("/{passId}/not_favorite")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void unmarkFavorite(@PathVariable UUID id) {
-        service.unmarkFavorite(id);
+    public void unmarkFavorite(@PathVariable UUID passId) {
+        service.unmarkFavorite(passId);
     }
 
     /* DELETE */
@@ -288,9 +288,9 @@ public class PassController {
             @ApiResponse(responseCode = "204", description = "Пропуск успешно удален"),
             @ApiResponse(responseCode = "404", description = "Пропуск не найден")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{passId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deletePass(@PathVariable UUID id) {
-        service.deletePass(id);
+    public void deletePass(@PathVariable UUID passId) {
+        service.deletePass(passId);
     }
 }

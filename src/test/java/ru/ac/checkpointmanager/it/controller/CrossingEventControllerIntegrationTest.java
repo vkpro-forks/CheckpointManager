@@ -161,7 +161,7 @@ class CrossingEventControllerIntegrationTest {
         crossingRepository.saveAndFlush(TestUtils.getCrossing(savedPass, savedCheckPoint, Direction.OUT));
 
         ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.get(UrlConstants.EVENT_ALL_URL));
+                MockMvcRequestBuilders.get(UrlConstants.EVENT_URL));
 
         checkEventFields(resultActions, savedPass);
     }
@@ -177,7 +177,7 @@ class CrossingEventControllerIntegrationTest {
         crossingRepository.saveAndFlush(TestUtils.getCrossing(savedPass, savedCheckPoint, Direction.OUT));
 
         ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.get(UrlConstants.EVENT_URL + "/user/{userId}/territories", savedUser.getId()));
+                MockMvcRequestBuilders.get(UrlConstants.EVENT_URL + "/users/{userId}/territories", savedUser.getId()));
 
         checkEventFields(resultActions, savedPass);
     }
@@ -187,7 +187,7 @@ class CrossingEventControllerIntegrationTest {
     @WithMockUser(roles = {"MANAGER"})
     void findEventsByUsersTerritories_UserNotFound_ReturnPageWithObjects() {
         ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.get(UrlConstants.EVENT_URL + "/user/{userId}/territories", TestUtils.USER_ID));
+                MockMvcRequestBuilders.get(UrlConstants.EVENT_URL + "/users/{userId}/territories", TestUtils.USER_ID));
 
         resultActions.andExpect(status().isNotFound())
                 .andExpectAll(jsonPath(TestUtils.JSON_DETAIL)
@@ -202,7 +202,7 @@ class CrossingEventControllerIntegrationTest {
         User user = TestUtils.getUser();
         User anotherSavedUser = userRepository.saveAndFlush(user);
         ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.get(UrlConstants.EVENT_URL + "/user/{userId}/territories", anotherSavedUser.getId()));
+                MockMvcRequestBuilders.get(UrlConstants.EVENT_URL + "/users/{userId}/territories", anotherSavedUser.getId()));
 
         resultActions.andExpect(status().isNotFound());
         ResultCheckUtils.checkNotFoundFields(resultActions);

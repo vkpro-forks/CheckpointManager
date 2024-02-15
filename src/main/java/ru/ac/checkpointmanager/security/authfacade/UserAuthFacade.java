@@ -1,16 +1,15 @@
 package ru.ac.checkpointmanager.security.authfacade;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.ac.checkpointmanager.model.User;
 
 import java.util.UUID;
 
 @Component("userAuthFacade")
-@RequiredArgsConstructor
-@Slf4j
-public class UserAuthFacade implements AuthFacade {
+public final class UserAuthFacade implements AuthFacade {
+
+    private UserAuthFacade() {
+    }
 
     @Override
     public boolean isIdMatch(UUID userId) {

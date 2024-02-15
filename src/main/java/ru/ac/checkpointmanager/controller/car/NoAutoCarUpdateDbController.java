@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.service.car.CarDataUpdater;
 
 @RestController
-@RequestMapping("api/v1/car")
+@RequestMapping("api/v1/cars")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 @PreAuthorize("hasAnyRole('ROLE_ADMIN')")

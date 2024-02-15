@@ -72,9 +72,9 @@ public class MockMvcUtils {
     }
 
     public static MockHttpServletRequestBuilder uploadAvatarForUser(UUID userId, MockMultipartFile file) {
-        log.info(TestMessage.PERFORM_HTTP, HttpMethod.POST, UrlConstants.AVATAR_URL + "/{userId}", userId);
+        log.info(TestMessage.PERFORM_HTTP, HttpMethod.POST, UrlConstants.AVATAR_USER_URL, userId);
         return MockMvcRequestBuilders.multipart(
-                HttpMethod.POST, UrlConstants.AVATAR_URL + "/{userId}", userId).file(file);
+                HttpMethod.POST, UrlConstants.AVATAR_USER_URL, userId).file(file);
     }
 
     public static MockHttpServletRequestBuilder uploadAvatarForTerritory(UUID terrId, MockMultipartFile file) {

@@ -49,7 +49,7 @@ public interface UserService {
 
     Page<UserResponseDTO> getAll(PagingParams pagingParams);
 
-    Collection<String> findUsersPhoneNumbers(UUID userId);
+    Collection<String> findUsersPhones(UUID userId);
 
     void assignAvatarToUser(UUID userId, Avatar avatar);
 

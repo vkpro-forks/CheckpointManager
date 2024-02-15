@@ -1,7 +1,5 @@
 package ru.ac.checkpointmanager.security.authfacade;
 
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.avatar.Avatar;
@@ -9,11 +7,13 @@ import ru.ac.checkpointmanager.service.avatar.AvatarService;
 
 import java.util.UUID;
 @Component("avatarAuthFacade")
-@AllArgsConstructor
-@Slf4j
-public class AvatarAuthFacade implements AuthFacade {
+public final class AvatarAuthFacade implements AuthFacade {
 
-    private AvatarService avatarService;
+    private final AvatarService avatarService;
+
+    private AvatarAuthFacade(AvatarService avatarService) {
+        this.avatarService = avatarService;
+    }
 
     @Override
     public boolean isIdMatch(UUID avatarId) {

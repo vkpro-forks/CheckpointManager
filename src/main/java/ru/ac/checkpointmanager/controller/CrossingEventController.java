@@ -54,7 +54,7 @@ public class CrossingEventController {
                             array = @ArraySchema(schema = @Schema(implementation = PassInOutView.class)))),
             @ApiResponse(responseCode = "404", description = "Пользователь не найден")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
-    @GetMapping("/user/{userId}")
+    @GetMapping("/users/{userId}")
     public Page<PassInOutView> getEventsByUserId(@PathVariable UUID userId,
                                                  @Schema(hidden = true)
                                                  @Valid @PagingParam PagingParams pagingParams) {
@@ -73,7 +73,7 @@ public class CrossingEventController {
                             array = @ArraySchema(schema = @Schema(implementation = PassInOutView.class)))),
             @ApiResponse(responseCode = "404", description = "Территория не найдена")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
-    @GetMapping("/territory/{territoryId}")
+    @GetMapping("/territories/{territoryId}")
     public Page<PassInOutView> getEventsByTerritoryId(@PathVariable UUID territoryId,
                                                       @Schema(hidden = true)
                                                       @Valid
@@ -93,7 +93,7 @@ public class CrossingEventController {
                             array = @ArraySchema(schema = @Schema(implementation = PassInOutView.class)))),
             @ApiResponse(responseCode = "404", description = "Пользователь или территории не найдены")})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
-    @GetMapping("/user/{userId}/territories")
+    @GetMapping("/users/{userId}/territories")
     public Page<PassInOutView> findEventsByUsersTerritories(@PathVariable UUID userId,
                                                             @Schema(hidden = true)
                                                             @Valid
@@ -112,7 +112,7 @@ public class CrossingEventController {
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = PassInOutView.class))))})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    @GetMapping("/all")
+    @GetMapping()
     public Page<PassInOutView> getAllEvents(@Schema(hidden = true) @Valid
                                                  @PagingParam PagingParams pagingParams) {
         return passInOutViewService.findAll(pagingParams);

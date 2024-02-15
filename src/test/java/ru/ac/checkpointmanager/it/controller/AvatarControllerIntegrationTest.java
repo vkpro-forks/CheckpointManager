@@ -197,7 +197,7 @@ class AvatarControllerIntegrationTest {
         UUID userId = savedUser.getId();
         CustomAuthenticationToken authToken = TestUtils.getAuthToken(savedUser);
 
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.AVATAR_URL + "/user/{userId}", userId)
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.AVATAR_USER_URL, userId)
                 .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
                 .contentType(MediaType.APPLICATION_JSON));
 

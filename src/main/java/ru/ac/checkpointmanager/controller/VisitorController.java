@@ -37,7 +37,7 @@ import static ru.ac.checkpointmanager.utils.SwaggerConstants.UNAUTHORIZED_MSG;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1/visitor")
+@RequestMapping("api/v1/visitors")
 @Validated
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Visitor (посетители)", description = "Работа со списком посетителей")
@@ -70,9 +70,9 @@ public class VisitorController {
                             schema = @Schema(implementation = VisitorDTO.class))}),
             @ApiResponse(responseCode = "404", description = "Посетитель не существует")
     })
-    @GetMapping("/{id}")
-    public VisitorDTO getVisitor(@PathVariable UUID id) {
-        return visitorService.getVisitor(id);
+    @GetMapping("/{visitorId}")
+    public VisitorDTO getVisitor(@PathVariable UUID visitorId) {
+        return visitorService.getVisitor(visitorId);
     }
 
     @Operation(summary = "Обновить информацию о посетителе по ID",
@@ -85,9 +85,9 @@ public class VisitorController {
             @ApiResponse(responseCode = "404", description = "Посетителя с таким ID не существует")
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
-    @PutMapping("/{id}")
-    public VisitorDTO updateVisitor(@PathVariable UUID id, @RequestBody @Valid VisitorDTO visitorDTO) {
-        return visitorService.updateVisitor(id, visitorDTO);
+    @PutMapping("/{visitorId}")
+    public VisitorDTO updateVisitor(@PathVariable UUID visitorId, @RequestBody @Valid VisitorDTO visitorDTO) {
+        return visitorService.updateVisitor(visitorId, visitorDTO);
     }
 
     @Operation(summary = "Удалить посетителя",
@@ -97,10 +97,10 @@ public class VisitorController {
             @ApiResponse(responseCode = "404", description = "Посетитель не существует")
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{visitorId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteVisitor(@PathVariable UUID id) {
-        visitorService.deleteVisitor(id);
+    public void deleteVisitor(@PathVariable UUID visitorId) {
+        visitorService.deleteVisitor(visitorId);
     }
 
     @Operation(summary = "Найти посетителя по номеру телефона (части номера)",
@@ -139,7 +139,7 @@ public class VisitorController {
             @ApiResponse(responseCode = "404", description = "Посетитель с id пропуска, не существует")
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
-    @GetMapping("/pass/{passId}")
+    @GetMapping("/passes/{passId}")
     public VisitorDTO searchByPassId(@PathVariable UUID passId) {
         return visitorService.findByPassId(passId);
     }
@@ -153,7 +153,7 @@ public class VisitorController {
             @ApiResponse(responseCode = "404", description = "Посетитель с id user, не существует")
     })
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
-    @GetMapping("/user/{userId}")
+    @GetMapping("/users/{userId}")
     public List<VisitorDTO> searchByUserId(@PathVariable UUID userId) {
         return visitorService.findByUserId(userId);
     }
