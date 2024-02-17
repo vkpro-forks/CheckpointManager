@@ -84,6 +84,6 @@ tasks.named('test') {
 
 processResources {
     filesMatching("**/application.yml") {
-        expand(version: project.version)
+        expand(version: project.version, dbName: System.getenv("PG_DB"))
     }
 }
