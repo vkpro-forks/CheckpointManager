@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <property name="LOG_PATH" value="${LOG_PATH:-./logs}"/>
-    <property name="DB_URL" value="${DB_URL:-jdbc:postgresql://localhost:5432/chpmanDB}"/>
-    <property name="DB_USER" value="${DB_USER:-chpman}"/>
-    <property name="DB_PASS" value="${DB_PASS:-chpmanPass%}"/>
+    <property name="DB_URL" value="jdbc:postgresql://localhost:5432/${PG_DB}"/>
+    <property name="DB_USER" value="${PG_USER}"/>
+    <property name="DB_PASS" value="${PG_PASS}"/>
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
