@@ -31,7 +31,6 @@ import ru.ac.checkpointmanager.exception.MismatchCurrentPasswordException;
 import ru.ac.checkpointmanager.exception.ObjectAlreadyExistsException;
 import ru.ac.checkpointmanager.exception.PasswordConfirmationException;
 import ru.ac.checkpointmanager.exception.PhoneAlreadyExistException;
-import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.mapper.TerritoryMapper;
 import ru.ac.checkpointmanager.mapper.UserMapper;
@@ -54,6 +53,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Сервисный класс для управления информацией о пользователях.
@@ -141,29 +141,37 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * Находит список территорий, связанных с пользователем по его уникальному идентификатору (UUID).
-     * <p>
-     * Этот метод выполняет поиск всех территорий, которые связаны с указанным пользователем.
-     * Если территории для данного пользователя не найдены, выбрасывается исключение {@link TerritoryNotFoundException}.
-     * <p>
+     * Находит список территорий, связанных с пользователем по его уникальному идентификатору (UUID)
      *
      * @param userId Уникальный идентификатор пользователя, для которого нужно найти территории.
      * @return Список {@link TerritoryDTO}, представляющий территории пользователя.
-     * @throws TerritoryNotFoundException если территории для указанного пользователя не найдены.
-     * @see TerritoryNotFoundException
      */
     @Cacheable(value = "user-territory", key = "#userId")
     @Override
     public List<TerritoryDTO> findTerritoriesByUserId(UUID userId) {
         log.debug(METHOD_UUID, MethodLog.getMethodName(), userId);
-        User user = userRepository.findUserWithTerritoriesById(userId).orElseThrow(
-                () -> {
-                    log.warn(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(userId));
-                    return new UserNotFoundException(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(userId));
-                }
-        );
-        List<Territory> territories = user.getTerritories();
+        List<Territory> territories = findTerritoriesByUser(userId);
         return territoryMapper.toTerritoriesDTO(territories);
+    }
+
+    /**
+     * Находит список территорий, общих для запрашивающего и указанного пользователей
+     *
+     * @param userId Уникальный идентификатор пользователя, для которого нужно найти территории.
+     * @return Список {@link TerritoryDTO}, представляющий территории пользователя.
+     */
+    @Override
+    public List<TerritoryDTO> findCommonTerritoriesByUserId(UUID userId) {
+        log.debug(METHOD_UUID, MethodLog.getMethodName(), userId);
+
+        UUID currentUserid = authFacade.getCurrentUser().getId();
+        List<Territory> filterTerritories = findTerritoriesByUser(currentUserid);
+        List<Territory> requestTerritories = findTerritoriesByUser(userId);
+
+        List<Territory> commonTerritories = requestTerritories.stream()
+                .filter(filterTerritories::contains)
+                .collect(Collectors.toList());
+        return territoryMapper.toTerritoriesDTO(commonTerritories);
     }
 
     /**
@@ -589,5 +597,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public User findByPassId(UUID passId) {
         return userRepository.findByPassId(passId);
+    }
+
+    private List<Territory> findTerritoriesByUser(UUID userId) {
+        User user = userRepository.findUserWithTerritoriesById(userId).orElseThrow(
+                () -> {
+                    log.warn(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(userId));
+                    return new UserNotFoundException(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(userId));
+                }
+        );
+        return user.getTerritories();
     }
 }
