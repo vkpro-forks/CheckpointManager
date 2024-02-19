@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <property name="DB_URL" value="jdbc:postgresql://localhost:5432/${PG_DB}"/>
+    <property name="DB_URL" value="jdbc:postgresql://postgres-db:5432/${PG_DB}"/>
     <property name="DB_USER" value="${PG_USER}"/>
     <property name="DB_PASS" value="${PG_PASS}"/>
 
