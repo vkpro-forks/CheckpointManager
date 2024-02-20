@@ -41,6 +41,7 @@ import ru.ac.checkpointmanager.model.avatar.Avatar;
 import ru.ac.checkpointmanager.model.enums.PhoneNumberType;
 import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
+import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.security.authfacade.AuthFacade;
 import ru.ac.checkpointmanager.security.jwt.JwtService;
@@ -53,7 +54,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * Сервисный класс для управления информацией о пользователях.
@@ -83,6 +83,7 @@ public class UserServiceImpl implements UserService {
     private final TerritoryMapper territoryMapper;
     private final UserRepository userRepository;
     private final PhoneRepository phoneRepository;
+    private final TerritoryRepository territoryRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final RedisCacheManager cacheManager;
@@ -95,6 +96,7 @@ public class UserServiceImpl implements UserService {
                            TerritoryMapper territoryMapper,
                            UserRepository userRepository,
                            PhoneRepository phoneRepository,
+                           TerritoryRepository territoryRepository,
                            PasswordEncoder passwordEncoder,
                            EmailService emailService,
                            RedisCacheManager cacheManager,
@@ -104,6 +106,7 @@ public class UserServiceImpl implements UserService {
         this.territoryMapper = territoryMapper;
         this.userRepository = userRepository;
         this.phoneRepository = phoneRepository;
+        this.territoryRepository = territoryRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
         this.cacheManager = cacheManager;
@@ -163,14 +166,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<TerritoryDTO> findCommonTerritoriesByUserId(UUID userId) {
         log.debug(METHOD_UUID, MethodLog.getMethodName(), userId);
-
         UUID currentUserid = authFacade.getCurrentUser().getId();
-        List<Territory> filterTerritories = findTerritoriesByUser(currentUserid);
-        List<Territory> requestTerritories = findTerritoriesByUser(userId);
-
-        List<Territory> commonTerritories = requestTerritories.stream()
-                .filter(filterTerritories::contains)
-                .collect(Collectors.toList());
+        List<Territory> commonTerritories = territoryRepository.findCommonTerritories(userId, currentUserid);
         return territoryMapper.toTerritoriesDTO(commonTerritories);
     }
 
