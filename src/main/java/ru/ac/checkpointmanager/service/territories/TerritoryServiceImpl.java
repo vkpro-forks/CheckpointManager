@@ -112,10 +112,10 @@ public class TerritoryServiceImpl implements TerritoryService {
                             .formatted(territoryId));
                 });
 
-        foundTerritory.setName(territoryDTO.getName());
-        foundTerritory.setNote(territoryDTO.getNote());
-        foundTerritory.setCity(territoryDTO.getCity());
-        foundTerritory.setAddress(territoryDTO.getAddress());
+        if (territoryDTO.getName() != null) foundTerritory.setName(territoryDTO.getName());
+        if (territoryDTO.getNote() != null) foundTerritory.setNote(territoryDTO.getNote());
+        if (territoryDTO.getCity() != null) foundTerritory.setCity(territoryDTO.getCity());
+        if (territoryDTO.getAddress() != null) foundTerritory.setAddress(territoryDTO.getAddress());
 
         territoryRepository.save(foundTerritory);
         return territoryMapper.toTerritoryDTO(foundTerritory);
