@@ -1,6 +1,7 @@
 package ru.ac.checkpointmanager.service.territories;
 
 import org.springframework.data.domain.Page;
+import ru.ac.checkpointmanager.dto.TerritoryUpdateDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
@@ -23,7 +24,7 @@ public interface TerritoryService {
 
     List<TerritoryDTO> findAllTerritories();
 
-    TerritoryDTO updateTerritory(TerritoryDTO territoryDTO);
+    TerritoryDTO updateTerritory(TerritoryUpdateDTO territoryDTO);
 
     void attachUserToTerritory(UUID territoryId, UUID userId);
 

@@ -18,11 +18,13 @@ public class VisitorDTO {
     private UUID id;
 
     @NotBlank
+    @Size(max = 30)
     private String name;
 
     @Size(min = 11, max = 20)
     @Pattern(regexp = ValidationUtils.PHONE_REGEXP)
     private String phone;
 
+    @Size(max = 30)
     private String note;
 }

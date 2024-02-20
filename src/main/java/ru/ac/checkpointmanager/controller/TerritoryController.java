@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.annotation.PagingParam;
+import ru.ac.checkpointmanager.dto.TerritoryUpdateDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
@@ -137,7 +138,7 @@ public class TerritoryController {
             @ApiResponse(responseCode = "404", description = "Территория не найдена")})
     @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_MANAGER') and @territoryAuthFacade.isIdMatch(#territoryDTO.id))")
     @PutMapping
-    public TerritoryDTO updateTerritory(@RequestBody @Valid TerritoryDTO territoryDTO) {
+    public TerritoryDTO updateTerritory(@RequestBody @Valid TerritoryUpdateDTO territoryDTO) {
         return territoryService.updateTerritory(territoryDTO);
     }
 

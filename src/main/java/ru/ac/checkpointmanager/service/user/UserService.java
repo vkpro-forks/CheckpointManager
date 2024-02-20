@@ -25,6 +25,8 @@ public interface UserService {
 
     List<TerritoryDTO> findTerritoriesByUserId(UUID userId);
 
+    List<TerritoryDTO> findCommonTerritoriesByUserId(UUID userId);
+
     Collection<UserResponseDTO> findByName(String name);
 
     UserResponseDTO findByEmail(String email);

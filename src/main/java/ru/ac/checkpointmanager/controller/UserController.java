@@ -110,6 +110,29 @@ public class UserController {
         return userService.findTerritoriesByUserId(userId);
     }
 
+    @Operation(summary = "Поиск общих с конкретным пользователем территорий",
+            description = "Доступ: ADMIN, MANAGER"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "OK: возвращется список привязанных территорий",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            array = @ArraySchema(schema = @Schema(implementation = TerritoryDTO.class)))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "FORBIDDEN: роль пользователя не предоставляет доступ к данному api"
+            )
+    })
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    @GetMapping("/{userId}/common_territories")
+    public List<TerritoryDTO> getCommonTerritoriesByUser(
+            @Parameter(description = "Уникальный идентификатор пользователя", required = true)
+            @PathVariable UUID userId) {
+        return userService.findCommonTerritoriesByUserId(userId);
+    }
+
     @Operation(summary = "Поиск пользователя по имени",
             description = "Доступ: USER, ADMIN, MANAGER, SECURITY."
     )

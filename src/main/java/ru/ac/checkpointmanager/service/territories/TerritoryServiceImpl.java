@@ -8,6 +8,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.ac.checkpointmanager.dto.TerritoryUpdateDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
@@ -100,7 +101,7 @@ public class TerritoryServiceImpl implements TerritoryService {
 
     @Override
     @Transactional
-    public TerritoryDTO updateTerritory(TerritoryDTO territoryDTO) {
+    public TerritoryDTO updateTerritory(TerritoryUpdateDTO territoryDTO) {
         UUID territoryId = territoryDTO.getId();
         log.debug(METHOD_CALLED_UUID_LOG, MethodLog.getMethodName(), territoryId);
         StringTrimmer.trimThemAll(territoryDTO);
@@ -111,10 +112,10 @@ public class TerritoryServiceImpl implements TerritoryService {
                             .formatted(territoryId));
                 });
 
-        foundTerritory.setName(territoryDTO.getName());
-        foundTerritory.setNote(territoryDTO.getNote());
-        foundTerritory.setCity(territoryDTO.getCity());
-        foundTerritory.setAddress(territoryDTO.getAddress());
+        if (territoryDTO.getName() != null) foundTerritory.setName(territoryDTO.getName());
+        if (territoryDTO.getNote() != null) foundTerritory.setNote(territoryDTO.getNote());
+        if (territoryDTO.getCity() != null) foundTerritory.setCity(territoryDTO.getCity());
+        if (territoryDTO.getAddress() != null) foundTerritory.setAddress(territoryDTO.getAddress());
 
         territoryRepository.save(foundTerritory);
         return territoryMapper.toTerritoryDTO(foundTerritory);
