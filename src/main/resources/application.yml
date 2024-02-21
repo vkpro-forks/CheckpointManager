@@ -1,11 +1,11 @@
 app:
-  version: ${version}
+  version: ${PROJECT_VERSION}
   confirmation-link: http://localhost:8080/api/v1/confirm/registration?token=
   confirmation-email-link: http://localhost:8080/api/v1/confirm/email?token=
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/chpmanDB
+    url: jdbc:postgresql://localhost:5432/${PG_DB}
     username: ENC(Uc85OP6GEvKtQllbcLA692QIMR3KDCFfpS/lM+LR8bUGaJwi95B12dETN80fITgs)
     password: ENC(i4h0qLUz/CBD0HIG5jfiQMexlrPQX7pu3/xYiwfMBl7BPK72rues7kAI3DdhSfDG)
   servlet:

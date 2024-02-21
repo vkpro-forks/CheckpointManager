@@ -18,7 +18,6 @@ bootRun {
     ]
 }
 
-
 group = 'ru.ac'
 version = '0.1.17-SNAPSHOT-TEST'
 
@@ -77,13 +76,6 @@ checkstyle {
     configFile file("config/checkstyle/checkstyle.xml")
 }
 
-
 tasks.named('test') {
     useJUnitPlatform()
-}
-
-processResources {
-    filesMatching("**/application.yml") {
-        expand(version: project.version)
-    }
 }
