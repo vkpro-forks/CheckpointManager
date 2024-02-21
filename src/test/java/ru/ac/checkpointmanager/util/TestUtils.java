@@ -303,6 +303,14 @@ public class TestUtils {
                 .create();
     }
 
+    public static Phone getPhone(String number, User user) {
+        Phone phone = new Phone();
+        phone.setNumber(number);
+        phone.setType(PhoneNumberType.MOBILE);
+        phone.setUser(user);
+        return phone;
+    }
+
     public static User getUserForDB() {
         User user = new User();
         user.setFullName(FULL_NAME);

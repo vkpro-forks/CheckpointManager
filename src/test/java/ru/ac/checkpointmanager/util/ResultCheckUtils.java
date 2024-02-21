@@ -1,12 +1,25 @@
 package ru.ac.checkpointmanager.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import ru.ac.checkpointmanager.assertion.ResultActionsAssert;
 import ru.ac.checkpointmanager.exception.handler.ErrorCode;
 import ru.ac.checkpointmanager.exception.handler.ErrorMessage;
 
+@Slf4j
 public class ResultCheckUtils {
+
+    private ResultCheckUtils() {
+        throw new AssertionError("no instances");
+    }
+
+    public static void verifyUserResponseDTO(ResultActions resultActions, String id, String fullName, String mainNumber) throws Exception {
+        log.info("Verifying UserResponseDTO");
+        ResultActionsAssert.assertThat(resultActions).idMatches(id).fullNameMatches(fullName).mainNumberMatches(mainNumber)
+                .contentTypeIsAppJson();
+    }
 
     public static void checkWrongTypeFields(ResultActions resultActions) throws Exception {
         resultActions.andExpect(MockMvcResultMatchers.status().isBadRequest())
@@ -43,9 +56,4 @@ public class ResultCheckUtils {
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(index))
                 .value(field));
     }
-
-    private ResultCheckUtils() {
-        throw new AssertionError("no instances");
-    }
-
 }
