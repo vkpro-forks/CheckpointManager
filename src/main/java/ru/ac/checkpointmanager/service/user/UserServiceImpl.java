@@ -227,9 +227,9 @@ public class UserServiceImpl implements UserService {
                     log.warn(USER_NOT_FOUND_MSG.formatted(updateUserId));
                     return new UserNotFoundException(USER_NOT_FOUND_MSG.formatted(updateUserId));
                 });
-
-        foundUser.setFullName(userUpdateDTO.getFullName());
-
+        if (userUpdateDTO.getFullName() != null) {
+            foundUser.setFullName(userUpdateDTO.getFullName());
+        }
         if (userUpdateDTO.getMainNumber() != null) {
             String newMainNumber = FieldsValidation.cleanPhone(userUpdateDTO.getMainNumber());
             if (!foundUser.getMainNumber().equals(newMainNumber)) {

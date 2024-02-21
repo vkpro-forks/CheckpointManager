@@ -450,6 +450,33 @@ class UserControllerIntegrationTest {
     @Test
     @SneakyThrows
     @WithMockCustomUser
+    void updateUser_ChangeExistingMainNumberToNewNoFullNameInDto_UpdateAndReturnDto() {
+        //given
+        UUID userId = savedUser.getId();
+        savedUser.setMainNumber(FieldsValidation.cleanPhone("+79167868134"));
+        userRepository.saveAndFlush(savedUser);
+        UserUpdateDTO userUpdateDTO = TestUtils.getUserUpdateDTO();
+        userUpdateDTO.setId(userId);
+        userUpdateDTO.setFullName(null);
+        String cleanedPhone = FieldsValidation.cleanPhone(userUpdateDTO.getMainNumber());
+        userUpdateDTO.setMainNumber(cleanedPhone);
+        Phone phone = new Phone();
+        phone.setNumber("79167868125");
+        phone.setType(PhoneNumberType.MOBILE);
+        phone.setUser(savedUser);
+        phoneRepository.saveAndFlush(phone);
+        //when
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.updateUser(userUpdateDTO));
+        //then
+        resultActions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", Matchers.is(userUpdateDTO.getId().toString())))
+                .andExpect(jsonPath("$.fullName", Matchers.is(savedUser.getFullName())))
+                .andExpect(jsonPath("$.mainNumber", Matchers.is(userUpdateDTO.getMainNumber())));
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockCustomUser
     void updateUser_IfPhoneNotIdDB_UpdateAndReturnDto() {
         //given
         UUID userId = savedUser.getId();
