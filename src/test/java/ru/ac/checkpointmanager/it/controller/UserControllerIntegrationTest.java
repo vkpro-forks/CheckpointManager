@@ -166,6 +166,42 @@ class UserControllerIntegrationTest {
 
     @Test
     @SneakyThrows
+    void getCommonTerritoriesByUserIsOKWithRightId() {
+        //запрашивающий юзер, менеджер
+        savedUser.setRole(Role.MANAGER);
+        userRepository.saveAndFlush(savedUser);
+        CustomAuthenticationToken authToken = TestUtils.getAuthToken(savedUser);
+
+        //какой-то другой существующий юзер
+        User user = TestUtils.getUser();
+        User otherUser = userRepository.saveAndFlush(user);
+        UUID userId = otherUser.getId();
+
+        Territory territory1 = TestUtils.getTerritoryForDB();
+        Territory territory2 = TestUtils.getTerritoryForDB();
+        Territory territory3 = TestUtils.getTerritoryForDB();
+
+        //по две территории у каждого юзера, но только одна общая, которая должна содержаться в результате вызова
+        territory1.setUsers(List.of(savedUser));
+        territory2.setUsers(List.of(savedUser, otherUser));
+        territory3.setUsers(List.of(otherUser));
+
+        territoryRepository.saveAndFlush(territory1);
+        territoryRepository.saveAndFlush(territory2);
+        territoryRepository.saveAndFlush(territory3);
+
+        mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL + "/{userId}/common_territories", userId)
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.length()", Matchers.is(1)))
+                .andExpect(jsonPath("$[*].name", Matchers.hasItem(territory2.getName())))
+                .andExpect(jsonPath("$[*].id", Matchers.hasItem(territory2.getId().toString())));
+    }
+
+    @Test
+    @SneakyThrows
     void getTerritoriesByUser_UserNotExists_HandleExceptionAndReturnNotFound() {
         //given
         CustomAuthenticationToken authToken = TestUtils.getAuthToken(savedUser);
