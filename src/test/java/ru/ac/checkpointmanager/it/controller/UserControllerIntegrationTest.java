@@ -36,7 +36,6 @@ import ru.ac.checkpointmanager.exception.handler.ErrorCode;
 import ru.ac.checkpointmanager.model.Phone;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
-import ru.ac.checkpointmanager.model.enums.PhoneNumberType;
 import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
 import ru.ac.checkpointmanager.repository.TerritoryRepository;
@@ -472,11 +471,7 @@ class UserControllerIntegrationTest {
         userUpdateDTO.setId(userId);
         String cleanedPhone = FieldsValidation.cleanPhone(userUpdateDTO.getMainNumber());
         userUpdateDTO.setMainNumber(cleanedPhone);
-        Phone phone = new Phone();
-        phone.setNumber("79167868125");
-        phone.setType(PhoneNumberType.MOBILE);
-        phone.setUser(savedUser);
-        phoneRepository.saveAndFlush(phone);
+        phoneRepository.saveAndFlush(TestUtils.getPhone("79167868125", savedUser));
         //when
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.updateUser(userUpdateDTO));
         //then
