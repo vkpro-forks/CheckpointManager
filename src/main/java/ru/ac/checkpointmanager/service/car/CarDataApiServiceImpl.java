@@ -1,8 +1,8 @@
 package ru.ac.checkpointmanager.service.car;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.ac.checkpointmanager.service.car.CarDataApiService;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -11,6 +11,7 @@ import java.net.http.HttpResponse;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CarDataApiServiceImpl implements CarDataApiService {
 
     private static final String API_KEY = "dff24af1a1mshd56bcb5f8268c84p1cc70bjsna9726c66d5eb";
@@ -19,7 +20,7 @@ public class CarDataApiServiceImpl implements CarDataApiService {
 
     @Override
     public String fetchCarData(String limit, String page) {
-        System.out.println("Method fetchCarData is called");
+        log.debug("Method fetchCarData is called");
 
         String apiUrl = "https://car-data.p.rapidapi.com/cars?limit=" + limit + "&page=" + page;
 
@@ -37,7 +38,7 @@ public class CarDataApiServiceImpl implements CarDataApiService {
             if (statusCode == 200) {
                 return response.body();
             } else {
-                System.err.println("API request failed with status code: " + statusCode);
+                log.warn("API request failed with status code: " + statusCode);
                 return null;
             }
         } catch (Exception e) {
@@ -48,7 +49,7 @@ public class CarDataApiServiceImpl implements CarDataApiService {
 
     @Override
     public String fetchCarDataWithBrandAndModel(String limit, String page, String brand, String model) {
-        System.out.println("Method fetchCarDataWithBrandAndModel is called");
+        log.debug("Method fetchCarDataWithBrandAndModel is called");
 
         StringBuilder apiUrlBuilder = new StringBuilder("https://car-data.p.rapidapi.com/cars?");
 
@@ -60,7 +61,7 @@ public class CarDataApiServiceImpl implements CarDataApiService {
 
 
         String apiUrl = apiUrlBuilder.toString();
-        System.out.println("API URL: " + apiUrl);
+        log.debug("API URL: " + apiUrl);
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
@@ -76,7 +77,7 @@ public class CarDataApiServiceImpl implements CarDataApiService {
             if (statusCode == 200) {
                 return response.body();
             } else {
-                System.err.println("API request failed with status code: " + statusCode);
+                log.warn("API request failed with status code: " + statusCode);
                 return null;
             }
         } catch (Exception e) {
