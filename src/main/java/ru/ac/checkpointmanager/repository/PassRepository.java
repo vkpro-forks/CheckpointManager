@@ -24,6 +24,19 @@ import java.util.UUID;
 public interface PassRepository extends JpaRepository<Pass, UUID>, JpaSpecificationExecutor<Pass> {
 
     /**
+     * Фрагмент SQL, определяющий логику сортировки списка пропусков.
+     * Эта логика сортирует сущности в первую очередь на основе их статуса в определённом порядке:
+     * WARNING, ACTIVE, DELAYED, за которыми следуют все остальные статусы.
+     * При одинаковых статусах сортируются по времени начала действия в порядке убывания
+     *
+     * @deprecated после введения фильтрации с помощью jpa specification
+     */
+    @Deprecated
+    String SORT_LOGIC = "ORDER BY CASE " +
+            "p.status WHEN 'WARNING' THEN 1 WHEN 'ACTIVE' THEN 2 WHEN 'DELAYED' THEN 3 ELSE 4 END, " +
+            "p.start_time DESC";
+
+    /**
      * Ищет пропуски по статусу и достигнутому времени начала или окончания.
      *
      * @param status     {@link PassStatus} Статус, который мы хотим проверить
@@ -77,19 +90,6 @@ public interface PassRepository extends JpaRepository<Pass, UUID>, JpaSpecificat
     @Query(value = "SELECT * FROM pass_in_out_view p WHERE p.territory_id IN :terIds ORDER BY in_time DESC"
             , nativeQuery = true)
     Page<PassInOutView> findEventsByTerritories(@Param("terIds") List<UUID> terIds, Pageable pageable);
-
-    /**
-     * Фрагмент SQL, определяющий логику сортировки списка пропусков.
-     * Эта логика сортирует сущности в первую очередь на основе их статуса в определённом порядке:
-     * WARNING, ACTIVE, DELAYED, за которыми следуют все остальные статусы.
-     * При одинаковых статусах сортируются по времени начала действия в порядке убывания
-     *
-     * @deprecated после введения фильтрации с помощью jpa specification
-     */
-    @Deprecated(since = "0.1.14", forRemoval = true)
-    String SORT_LOGIC = "ORDER BY CASE " +
-            "p.status WHEN 'WARNING' THEN 1 WHEN 'ACTIVE' THEN 2 WHEN 'DELAYED' THEN 3 ELSE 4 END, " +
-            "p.start_time DESC";
 
     /**
      * Получает страницу объектов Pass, отсортированных по заданной логике.
