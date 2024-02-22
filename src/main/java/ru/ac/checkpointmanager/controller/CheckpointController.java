@@ -32,7 +32,11 @@ import ru.ac.checkpointmanager.service.checkpoints.CheckpointService;
 import java.util.List;
 import java.util.UUID;
 
-import static ru.ac.checkpointmanager.utils.SwaggerConstants.*;
+import static ru.ac.checkpointmanager.utils.SwaggerConstants.FAILED_FIELD_VALIDATION_MESSAGE;
+import static ru.ac.checkpointmanager.utils.SwaggerConstants.INTERNAL_SERVER_ERROR_MSG;
+import static ru.ac.checkpointmanager.utils.SwaggerConstants.KPP_NOT_FOUND_PLURAL;
+import static ru.ac.checkpointmanager.utils.SwaggerConstants.KPP_NOT_FOUND_SINGULAR;
+import static ru.ac.checkpointmanager.utils.SwaggerConstants.UNAUTHORIZED_MSG;
 
 @RestController
 @RequestMapping("api/v1/checkpoints")
@@ -129,9 +133,8 @@ public class CheckpointController {
             @ApiResponse(responseCode = "404", description = KPP_NOT_FOUND_SINGULAR)})
     @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_MANAGER') and @checkpointAuthFacade.isIdMatch(#checkpointDTO.id))")
     @PutMapping
-    public ResponseEntity<?> updateCheckpoint(@RequestBody @Valid CheckpointDTO checkpointDTO) {
-        CheckpointDTO updatedCheckpoint = checkpointService.updateCheckpoint(checkpointDTO);
-        return ResponseEntity.ok(updatedCheckpoint);
+    public CheckpointDTO updateCheckpoint(@RequestBody @Valid CheckpointDTO checkpointDTO) {
+        return checkpointService.updateCheckpoint(checkpointDTO);
     }
 
     /* DELETE */
