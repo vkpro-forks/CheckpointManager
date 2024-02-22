@@ -1,6 +1,7 @@
 package ru.ac.checkpointmanager.service.user;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -232,7 +233,7 @@ public class UserServiceImpl implements UserService {
         }
         if (userUpdateDTO.getMainNumber() != null) {
             String newMainNumber = FieldsValidation.cleanPhone(userUpdateDTO.getMainNumber());
-            if (!foundUser.getMainNumber().equals(newMainNumber)) {
+            if (!StringUtils.equals(foundUser.getMainNumber(), newMainNumber)) {
                 Optional<Phone> optionalNumber = phoneRepository.findByNumber(newMainNumber);
                 Phone phone;
                 if (optionalNumber.isEmpty()) {
@@ -245,12 +246,12 @@ public class UserServiceImpl implements UserService {
                 } else {
                     phone = optionalNumber.get();
                 }
-                foundUser.setMainNumber(phone.getNumber());
                 if (!phone.getUser().getId().equals(foundUser.getId())) {
                     log.warn(ExceptionUtils.PHONE_BELONGS_TO_ANOTHER_USER.formatted(newMainNumber));
                     throw new PhoneAlreadyExistException(
                             ExceptionUtils.PHONE_BELONGS_TO_ANOTHER_USER.formatted(newMainNumber));
                 }
+                foundUser.setMainNumber(phone.getNumber());
             }
         }
         userRepository.save(foundUser);

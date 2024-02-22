@@ -240,6 +240,28 @@ class UserServiceImplTest {
     }
 
     @Test
+    void updateUser_UserDoesntHaveMainNumber_UpdateAndReturn() {
+        User user = TestUtils.getUser();// user with null main number
+        UUID userId = user.getId();
+        user.setMainNumber(null);
+        UserUpdateDTO userUpdateDTO = TestUtils.getUserUpdateDTO();
+        userUpdateDTO.setId(userId);
+        Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        Phone phone = TestUtils.getPhone();
+        String cleanedNewPhone = FieldsValidation.cleanPhone(userUpdateDTO.getMainNumber());
+        phone.setNumber(cleanedNewPhone);
+        phone.setUser(user);//this is user's another phone number, but not main
+        Mockito.when(phoneRepository.findByNumber(Mockito.any())).thenReturn(Optional.of(phone));
+
+        userService.updateUser(userUpdateDTO);
+
+        Mockito.verify(userRepository).save(userArgumentCaptor.capture());
+        Assertions.assertThat(userArgumentCaptor.getValue().getMainNumber()).isEqualTo(cleanedNewPhone);
+        Mockito.verify(phoneRepository).findByNumber(cleanedNewPhone);
+        Mockito.verify(phoneRepository, Mockito.never()).save(Mockito.any());
+    }
+
+    @Test
     void updateUser_IfNewPhoneTheSameAsCurrent_NotSetPhone() {
         User user = TestUtils.getUser();
         UUID userId = user.getId();
