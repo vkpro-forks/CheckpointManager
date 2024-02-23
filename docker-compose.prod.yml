@@ -7,15 +7,17 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - postgres-db
-      - avatars-storage
-      - redis-cache
+      avatars-storage:
+        condition: service_started
+      redis-cache:
+        condition: service_started
+      postgres-db:
+        condition: service_healthy
     volumes:
       - logs:/path/to/remote/logs # Использование именованного тома для логов
     environment:
       - LOGGING_CONFIG=classpath:logback-prod-docker.xml
       - LOG_PATH=/path/to/remote/logs
-      - DB_URL=jdbc:postgresql://postgres-db:5432/${PG_DB}
       - SPRING_PROFILES_ACTIVE=prod
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/${PG_DB}
       - SPRING_DATASOURCE_USERNAME=${PG_USER}
@@ -25,7 +27,8 @@ services:
       - SPRING_DATA_REDIS_PASSWORD=${REDIS_PASS}
       - AVATAR_STORAGE_PATH=/avatars
       - TZ=UTC
-      - JASYPT_ENCRYPTOR_PASSWORD=${JASYPT_ENCRYPTOR_PASSWORD}
+    env_file:
+      - .env
 
   # Сервис для базы данных PostgreSQL
   postgres-db:
@@ -39,6 +42,11 @@ services:
       - POSTGRES_USER=${PG_USER}
       - POSTGRES_PASSWORD=${PG_PASS}
       - TZ=UTC
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}" ]
+      interval: 5s
+      timeout: 10s
+      retries: 5
 
   #Сервис для кеширования в Redis
   redis-cache:
