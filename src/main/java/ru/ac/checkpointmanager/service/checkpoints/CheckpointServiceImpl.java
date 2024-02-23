@@ -98,10 +98,10 @@ public class CheckpointServiceImpl implements CheckpointService {
                 });
         StringTrimmer.trimThemAll(checkpointDTO);
 
-        if(checkpointDTO.getName() != null) foundCheckpoint.setName(checkpointDTO.getName());
-        if(checkpointDTO.getType() != null) foundCheckpoint.setType(checkpointDTO.getType());
-        if(checkpointDTO.getNote() != null) foundCheckpoint.setNote(checkpointDTO.getNote());
-        if(checkpointDTO.getTerritory() != null) {
+        if (checkpointDTO.getName() != null) foundCheckpoint.setName(checkpointDTO.getName());
+        if (checkpointDTO.getType() != null) foundCheckpoint.setType(checkpointDTO.getType());
+        if (checkpointDTO.getNote() != null) foundCheckpoint.setNote(checkpointDTO.getNote());
+        if (checkpointDTO.getTerritory() != null) {
             Territory territory = territoryService.findTerritoryById(checkpointDTO.getTerritory().getId());
             foundCheckpoint.setTerritory(territory);
         }
