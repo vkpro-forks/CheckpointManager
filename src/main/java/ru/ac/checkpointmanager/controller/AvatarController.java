@@ -33,7 +33,11 @@ import ru.ac.checkpointmanager.validation.annotation.AvatarImageCheck;
 
 import java.util.UUID;
 
-import static ru.ac.checkpointmanager.utils.SwaggerConstants.*;
+import static ru.ac.checkpointmanager.utils.SwaggerConstants.AVATAR_NOT_FOUND_MESSAGE;
+import static ru.ac.checkpointmanager.utils.SwaggerConstants.BAD_REQUEST_MESSAGE;
+import static ru.ac.checkpointmanager.utils.SwaggerConstants.INTERNAL_SERVER_ERROR_MSG;
+import static ru.ac.checkpointmanager.utils.SwaggerConstants.UNAUTHORIZED_MSG;
+
 
 @Slf4j
 @RestController

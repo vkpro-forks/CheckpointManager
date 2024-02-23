@@ -2,10 +2,6 @@ package ru.ac.checkpointmanager.exception;
 
 public final class ExceptionUtils {
 
-    private ExceptionUtils() {
-        throw new AssertionError("No instances, please");
-    }
-
     public static final String USER_NOT_FOUND_MSG = "User with [id: %s] not found";
 
     public static final String TERRITORY_NOT_FOUND_MSG = "Territory with [id: %s] not found";
@@ -57,4 +53,8 @@ public final class ExceptionUtils {
     public static final String CAR_BRAND_EXISTS = "CarBrand with [name: %s] already exists";
 
     public static final String CAR_BRAND_NOT_FOUND_ID = "Car brand not found with id: %s";
+
+    private ExceptionUtils() {
+        throw new AssertionError("No instances, please");
+    }
 }
