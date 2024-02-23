@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.dto.CheckpointDTO;
+import ru.ac.checkpointmanager.dto.CheckpointUpdateDTO;
 import ru.ac.checkpointmanager.service.checkpoints.CheckpointService;
 
 import java.util.List;
@@ -133,7 +134,7 @@ public class CheckpointController {
             @ApiResponse(responseCode = "404", description = KPP_NOT_FOUND_SINGULAR)})
     @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_MANAGER') and @checkpointAuthFacade.isIdMatch(#checkpointDTO.id))")
     @PutMapping
-    public CheckpointDTO updateCheckpoint(@RequestBody @Valid CheckpointDTO checkpointDTO) {
+    public CheckpointDTO updateCheckpoint(@RequestBody @Valid CheckpointUpdateDTO checkpointDTO) {
         return checkpointService.updateCheckpoint(checkpointDTO);
     }
 

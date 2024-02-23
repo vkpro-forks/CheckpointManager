@@ -1,6 +1,7 @@
 package ru.ac.checkpointmanager.service.checkpoints;
 
 import ru.ac.checkpointmanager.dto.CheckpointDTO;
+import ru.ac.checkpointmanager.dto.CheckpointUpdateDTO;
 import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
 
 import java.util.List;
@@ -20,7 +21,7 @@ public interface CheckpointService {
 
     List<CheckpointDTO> findCheckpointsByTerritoryId(UUID id);
 
-    CheckpointDTO updateCheckpoint(CheckpointDTO checkpointDTO);
+    CheckpointDTO updateCheckpoint(CheckpointUpdateDTO checkpointDTO);
 
     void deleteCheckpointById(UUID id);
 }
