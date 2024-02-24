@@ -15,7 +15,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class CheckpointUpdateDTO {
 
-    @NotNull()
+    @NotNull
     private UUID id;
 
     @Size(min = 2, max = 60)
