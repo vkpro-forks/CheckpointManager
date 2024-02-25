@@ -21,7 +21,7 @@ import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
-import ru.ac.checkpointmanager.ext.argprovider.CarWithFieldsArgumentProvider;
+import ru.ac.checkpointmanager.ext.argprovider.CarWithFieldsWithBrandArgumentProvider;
 import ru.ac.checkpointmanager.ext.argprovider.VisitorWithFieldsArgumentProvider;
 import ru.ac.checkpointmanager.mapper.PassMapper;
 import ru.ac.checkpointmanager.model.Territory;
@@ -153,19 +153,37 @@ class PassResolverImplTest {
     }
 
     @ParameterizedTest
-    @ArgumentsSource(CarWithFieldsArgumentProvider.class)
+    @ArgumentsSource(CarWithFieldsWithBrandArgumentProvider.class)
     void updatePass_UpdateWithCarCarBrandInRepo_ReturnUpdatedPass(CarDTO carDTO, Triple<String, String, String> fields) {
         PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTOWithCar();
         passUpdateDTO.setCar(carDTO);
-        Pass pass = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(TestUtils.getUser(), null,
-                TestUtils.getCar(TestUtils.getCarBrand()));
+        Car car = TestUtils.getCar(TestUtils.getCarBrand());
+        Pass pass = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(TestUtils.getUser(), null, car);
         Mockito.when(carBrandRepository.findByBrand(Mockito.anyString())).thenReturn(Optional.of(TestUtils.getCarBrand()));
 
         Pass updatedPass = passResolver.updatePass(passUpdateDTO, pass);
 
         PassAssert.assertThat(updatedPass).isPassAutoWithMatchedCarFields(
-                TestUtils.getCarDto().getLicensePlate(), TestUtils.getCarDto().getPhone(), TestUtils.getCarBrand());
+                fields.getLeft() == null ? car.getLicensePlate() : carDTO.getLicensePlate(),
+                fields.getMiddle() == null ? car.getPhone() : carDTO.getPhone(),
+                TestUtils.getCarBrand());
         Mockito.verify(carBrandRepository).findByBrand(Mockito.anyString());
+    }
+
+    @Test
+    void updateCar_UpdateCarWithDTOWithoutBrand_ReturnUpdatedPass() {
+        PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTOWithCar();
+        Car car = TestUtils.getCar(TestUtils.getCarBrand());
+        Pass pass = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(TestUtils.getUser(), null, car);
+        passUpdateDTO.getCar().setBrand(null);
+
+        Pass updatedPass = passResolver.updatePass(passUpdateDTO, pass);
+
+        CarDTO carDTO = passUpdateDTO.getCar();
+        PassAssert.assertThat(updatedPass).isPassAutoWithMatchedCarFields(
+                carDTO.getLicensePlate(),
+                carDTO.getPhone(), TestUtils.getCarBrand());
+        Mockito.verifyNoInteractions(carBrandRepository);
     }
 
     @Test
