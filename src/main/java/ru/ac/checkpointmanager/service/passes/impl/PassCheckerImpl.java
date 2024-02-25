@@ -2,10 +2,12 @@ package ru.ac.checkpointmanager.service.passes.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.exception.MismatchedTerritoryException;
 import ru.ac.checkpointmanager.exception.pass.InactivePassException;
+import ru.ac.checkpointmanager.exception.pass.ModifyPassException;
 import ru.ac.checkpointmanager.exception.pass.UserTerritoryRelationException;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
@@ -85,6 +87,15 @@ public class PassCheckerImpl implements PassChecker {
                 !pass.getDtype().equals(checkpoint.getType().toString())) {
             log.warn("Conflict between the types of pass and checkpoint [pass - %s, %s], [checkpoint - %s, %s]"
                     .formatted(pass.getId(), pass.getDtype(), checkpoint.getId(), checkpoint.getType()));
+        }
+    }
+
+    @Override
+    public void isPassUpdatable(@NonNull Pass pass) {
+        PassStatus passStatus = pass.getStatus();
+        if (passStatus != PassStatus.ACTIVE && passStatus != PassStatus.DELAYED) {
+            log.warn(ExceptionUtils.PASS_NOT_UPDATE.formatted(pass.getId(), passStatus));
+            throw new ModifyPassException(ExceptionUtils.PASS_NOT_UPDATE.formatted(pass.getId(), passStatus));
         }
     }
 }

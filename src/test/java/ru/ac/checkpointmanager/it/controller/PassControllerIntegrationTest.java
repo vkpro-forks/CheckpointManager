@@ -20,7 +20,10 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.ac.checkpointmanager.config.EnablePostgresAndRedisTestContainers;
+import ru.ac.checkpointmanager.dto.CarBrandDTO;
+import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
+import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
@@ -309,13 +312,29 @@ class PassControllerIntegrationTest {
         ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
+    //UPDATE PASS
+
+    @Test
+    @SneakyThrows
+    void updatePass_AllOkShouldUpdateExistingPassWithCar_ReturnUpdatedPass() {
+        saveTerritoryUserCarBrandAndCar();
+        PassAuto passAuto = passRepository.saveAndFlush(
+                TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar));
+        PassUpdateDTO passUpdateDTO = new PassUpdateDTO(null, PassTimeType.PERMANENT,
+                LocalDateTime.now().minusDays(1), LocalDateTime.now().plusDays(1),
+                null, new CarDTO(savedCar.getId(), savedCar.getLicensePlate(),
+                new CarBrandDTO(savedCar.getBrand().getBrand()), null), passAuto.getId());
+
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.updatePass(passUpdateDTO));
+        resultActions.andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
     //DELETING PASSES
     @ParameterizedTest
     @EnumSource(PassStatus.class)
     @SneakyThrows
     void deletePass_PassWithAuto_ReturnNoContent(PassStatus passStatus) {
-        saveTerritoryUserCarBrand();
-        saveCar();
+        saveTerritoryUserCarBrandAndCar();
         PassAuto pass = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
         pass.setStatus(passStatus);
         PassAuto savedPass = passRepository.saveAndFlush(pass);
@@ -845,6 +864,11 @@ class PassControllerIntegrationTest {
         car.setBrand(savedCarBrand);
         car.setId(TestUtils.getCarDto().getId());
         savedCar = carRepository.saveAndFlush(car);//save car and repo change its id
+    }
+
+    private void saveTerritoryUserCarBrandAndCar() {
+        saveTerritoryUserCarBrand();
+        saveCar();
     }
 
     private static Stream<Arguments> getPassesForFilterByStatus() {
