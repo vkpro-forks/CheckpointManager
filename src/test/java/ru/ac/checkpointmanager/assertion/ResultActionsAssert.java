@@ -42,9 +42,6 @@ public class ResultActionsAssert extends AbstractAssert<ResultActionsAssert, Res
         return this;
     }
 
-
-
-
     public static ResultActionsAssert assertThat(ResultActions resultActions) {
         return new ResultActionsAssert(resultActions);
     }

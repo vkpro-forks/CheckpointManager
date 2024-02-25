@@ -28,7 +28,6 @@ import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.repository.PassRepository;
 import ru.ac.checkpointmanager.service.passes.impl.PassCheckerImpl;
-import ru.ac.checkpointmanager.util.AssertionsUtils;
 import ru.ac.checkpointmanager.util.TestUtils;
 
 import java.util.UUID;
@@ -161,10 +160,10 @@ class PassCheckerImplTest {
         passAuto.setId(TestUtils.PASS_ID);
         passAuto.setStatus(passStatus);
 
-        AssertionsUtils.checkExceptionTypeWithParentAndMessage(
-                () -> passChecker.isPassUpdatable(passAuto),
-                ModifyPassException.class, PassException.class,
-                ExceptionUtils.PASS_NOT_UPDATE.formatted(TestUtils.PASS_ID, passStatus.name()));
+        Assertions.assertThatExceptionOfType(ModifyPassException.class)
+                .isThrownBy(() -> passChecker.isPassUpdatable(passAuto))
+                .withMessage(ExceptionUtils.PASS_NOT_UPDATE.formatted(TestUtils.PASS_ID, passStatus.name()))
+                .isInstanceOf(PassException.class);
     }
 
     private static Stream<Arguments> getTerritoriesForCheckpointAndPass() {

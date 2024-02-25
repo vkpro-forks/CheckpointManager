@@ -1,22 +1,32 @@
 package ru.ac.checkpointmanager.service.passes;
 
+import org.apache.commons.lang3.tuple.Triple;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.test.util.ReflectionTestUtils;
+import ru.ac.checkpointmanager.assertion.PassAssert;
 import ru.ac.checkpointmanager.dto.CarBrandDTO;
+import ru.ac.checkpointmanager.dto.CarDTO;
+import ru.ac.checkpointmanager.dto.VisitorDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
+import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
+import ru.ac.checkpointmanager.ext.argprovider.CarWithFieldsArgumentProvider;
+import ru.ac.checkpointmanager.ext.argprovider.VisitorWithFieldsArgumentProvider;
 import ru.ac.checkpointmanager.mapper.PassMapper;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
+import ru.ac.checkpointmanager.model.Visitor;
 import ru.ac.checkpointmanager.model.car.Car;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.model.passes.Pass;
@@ -142,4 +152,51 @@ class PassResolverImplTest {
                 .isInstanceOf(TerritoryNotFoundException.class);
     }
 
+    @ParameterizedTest
+    @ArgumentsSource(CarWithFieldsArgumentProvider.class)
+    void updatePass_UpdateWithCarCarBrandInRepo_ReturnUpdatedPass(CarDTO carDTO, Triple<String, String, String> fields) {
+        PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTOWithCar();
+        passUpdateDTO.setCar(carDTO);
+        Pass pass = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(TestUtils.getUser(), null,
+                TestUtils.getCar(TestUtils.getCarBrand()));
+        Mockito.when(carBrandRepository.findByBrand(Mockito.anyString())).thenReturn(Optional.of(TestUtils.getCarBrand()));
+
+        Pass updatedPass = passResolver.updatePass(passUpdateDTO, pass);
+
+        PassAssert.assertThat(updatedPass).isPassAutoWithMatchedCarFields(
+                TestUtils.getCarDto().getLicensePlate(), TestUtils.getCarDto().getPhone(), TestUtils.getCarBrand());
+        Mockito.verify(carBrandRepository).findByBrand(Mockito.anyString());
+    }
+
+    @Test
+    void updatePass_UpdateWithCarCarBrandNotInRepo_ReturnUpdatedPass() {
+        PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTOWithCar();
+        Pass pass = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(TestUtils.getUser(), null,
+                TestUtils.getCar(TestUtils.getCarBrand()));
+        Mockito.when(carBrandRepository.findByBrand(Mockito.anyString())).thenReturn(Optional.empty());
+        Mockito.when(carBrandRepository.save(Mockito.any())).thenReturn(TestUtils.getCarBrand());
+
+        Pass updatedPass = passResolver.updatePass(passUpdateDTO, pass);
+
+        PassAssert.assertThat(updatedPass).isPassAutoWithMatchedCarFields(
+                TestUtils.getCarDto().getLicensePlate(), TestUtils.getCarDto().getPhone(), TestUtils.getCarBrand());
+        Mockito.verify(carBrandRepository).findByBrand(Mockito.anyString());
+        Mockito.verify(carBrandRepository).save(Mockito.any());
+    }
+
+    @ParameterizedTest
+    @ArgumentsSource(VisitorWithFieldsArgumentProvider.class)
+    void updatePass_UpdateWithVisitor_ReturnUpdatedPass(VisitorDTO visitorDTO, Triple<String, String, String> fields) {
+        PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTOVisitor();
+        passUpdateDTO.setVisitor(visitorDTO);
+        Visitor visitor = TestUtils.getVisitorRandomUUID();
+        Pass pass = TestUtils.getSimpleActiveOneTimePassWalkFor3Hours(TestUtils.getUser(), null, visitor);
+
+        Pass updatedPass = passResolver.updatePass(passUpdateDTO, pass);
+
+        PassAssert.assertThat(updatedPass).isPassWalkWithMatchedVisitorFields(
+                fields.getLeft() == null ? visitor.getName() : visitorDTO.getName(),
+                fields.getMiddle() == null ? visitor.getPhone() : visitorDTO.getPhone(),
+                fields.getRight() == null ? visitor.getNote() : visitorDTO.getNote());
+    }
 }
