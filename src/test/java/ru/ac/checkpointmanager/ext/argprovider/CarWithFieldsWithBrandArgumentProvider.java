@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 public class CarWithFieldsWithBrandArgumentProvider implements ArgumentsProvider {
 
     @Override
-    public Stream<? extends Arguments> provideArguments(ExtensionContext context) throws Exception {
+    public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
         log.info("Configure arguments for CarDTO");
         CarDTO carDTO = TestUtils.getCarDto();
         CarDTO carDTOWithNullPlate = new CarDTO(null, null, TestUtils.getCarBrandDTO(), TestUtils.PHONE_NUM);
