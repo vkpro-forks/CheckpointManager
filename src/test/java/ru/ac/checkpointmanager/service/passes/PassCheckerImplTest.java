@@ -28,6 +28,7 @@ import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.repository.PassRepository;
 import ru.ac.checkpointmanager.service.passes.impl.PassCheckerImpl;
+import ru.ac.checkpointmanager.util.PassTestData;
 import ru.ac.checkpointmanager.util.TestUtils;
 
 import java.util.UUID;
@@ -157,12 +158,12 @@ class PassCheckerImplTest {
     @EnumSource(value = PassStatus.class, names = {"ACTIVE", "DELAYED"}, mode = EnumSource.Mode.EXCLUDE)
     void isPassUpdatable_ThrowException(PassStatus passStatus) {
         PassAuto passAuto = new PassAuto();
-        passAuto.setId(TestUtils.PASS_ID);
+        passAuto.setId(PassTestData.PASS_ID);
         passAuto.setStatus(passStatus);
 
         Assertions.assertThatExceptionOfType(ModifyPassException.class)
                 .isThrownBy(() -> passChecker.isPassUpdatable(passAuto))
-                .withMessage(ExceptionUtils.PASS_NOT_UPDATE.formatted(TestUtils.PASS_ID, passStatus.name()))
+                .withMessage(ExceptionUtils.PASS_NOT_UPDATE.formatted(PassTestData.PASS_ID, passStatus.name()))
                 .isInstanceOf(PassException.class);
     }
 

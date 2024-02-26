@@ -41,6 +41,7 @@ import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
 import ru.ac.checkpointmanager.service.passes.impl.PassResolverImpl;
+import ru.ac.checkpointmanager.util.PassTestData;
 import ru.ac.checkpointmanager.util.TestUtils;
 
 import java.util.Optional;
@@ -72,7 +73,7 @@ class PassResolverImplTest {
         Mockito.when(userRepository.findById(TestUtils.USER_ID)).thenReturn(Optional.of(user));
         Mockito.when(territoryRepository.findById(TestUtils.TERR_ID)).thenReturn(Optional.of(territory));
         Mockito.when(carBrandRepository.findByBrand(Mockito.any())).thenReturn(Optional.of(TestUtils.getCarBrand()));
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
+        PassCreateDTO passCreateDTO = PassTestData.getPassCreateDTOWithCar();
 
         Pass pass = passResolver.createPass(passCreateDTO);
 
@@ -98,7 +99,8 @@ class PassResolverImplTest {
         String notExistedCarBrand = "HateMobile";
         CarBrand createdCarBrand = new CarBrand(notExistedCarBrand);
         Mockito.when(carBrandRepository.save(Mockito.any())).thenReturn(createdCarBrand);
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
+        PassCreateDTO passCreateDTO = PassTestData.getPassCreateDTOWithCar();
+        assert passCreateDTO.getCar() != null;
         passCreateDTO.getCar().setBrand(new CarBrandDTO(notExistedCarBrand));
 
         Pass pass = passResolver.createPass(passCreateDTO);
@@ -122,7 +124,7 @@ class PassResolverImplTest {
         Territory territory = TestUtils.getTerritory();
         Mockito.when(userRepository.findById(TestUtils.USER_ID)).thenReturn(Optional.of(user));
         Mockito.when(territoryRepository.findById(TestUtils.TERR_ID)).thenReturn(Optional.of(territory));
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithVisitor();
+        PassCreateDTO passCreateDTO = PassTestData.getPassCreateDTOWithVisitor();
 
         Pass pass = passResolver.createPass(passCreateDTO);
 
@@ -140,7 +142,7 @@ class PassResolverImplTest {
     @Test
     void shouldThrowExceptionIfUserNotExists() {
         Mockito.when(userRepository.findById(TestUtils.USER_ID)).thenReturn(Optional.empty());
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithVisitor();
+        PassCreateDTO passCreateDTO = PassTestData.getPassCreateDTOWithVisitor();
 
         Assertions.assertThatThrownBy(() -> passResolver.createPass(passCreateDTO))
                 .isInstanceOf(UserNotFoundException.class);
@@ -151,7 +153,7 @@ class PassResolverImplTest {
         User user = TestUtils.getUser();
         Mockito.when(userRepository.findById(TestUtils.USER_ID)).thenReturn(Optional.of(user));
         Mockito.when(territoryRepository.findById(TestUtils.TERR_ID)).thenReturn(Optional.empty());
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithVisitor();
+        PassCreateDTO passCreateDTO = PassTestData.getPassCreateDTOWithVisitor();
 
         Assertions.assertThatThrownBy(() -> passResolver.createPass(passCreateDTO))
                 .isInstanceOf(TerritoryNotFoundException.class);
@@ -160,10 +162,10 @@ class PassResolverImplTest {
     @ParameterizedTest
     @ArgumentsSource(CarWithFieldsWithBrandArgumentProvider.class)
     void updatePass_UpdateWithCarCarBrandInRepo_ReturnUpdatedPass(CarDTO carDTO, Triple<String, String, String> fields) {
-        PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTOWithCar();
+        PassUpdateDTO passUpdateDTO = PassTestData.getPassUpdateDTOWithCar();
         passUpdateDTO.setCar(carDTO);
         Car car = TestUtils.getCar(TestUtils.getCarBrand());
-        Pass pass = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(TestUtils.getUser(), null, car);
+        Pass pass = PassTestData.getSimpleActiveOneTimePassAutoFor3Hours(TestUtils.getUser(), null, car);
         Mockito.when(carBrandRepository.findByBrand(Mockito.anyString())).thenReturn(Optional.of(TestUtils.getCarBrand()));
 
         Pass updatedPass = passResolver.updatePass(passUpdateDTO, pass);
@@ -177,9 +179,10 @@ class PassResolverImplTest {
 
     @Test
     void updateCar_UpdateCarWithDTOWithoutBrand_ReturnUpdatedPass() {
-        PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTOWithCar();
+        PassUpdateDTO passUpdateDTO = PassTestData.getPassUpdateDTOWithCar();
         Car car = TestUtils.getCar(TestUtils.getCarBrand());
-        Pass pass = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(TestUtils.getUser(), null, car);
+        Pass pass = PassTestData.getSimpleActiveOneTimePassAutoFor3Hours(TestUtils.getUser(), null, car);
+        assert passUpdateDTO.getCar() != null;
         passUpdateDTO.getCar().setBrand(null);
 
         Pass updatedPass = passResolver.updatePass(passUpdateDTO, pass);
@@ -193,8 +196,8 @@ class PassResolverImplTest {
 
     @Test
     void updatePass_UpdateWithCarCarBrandNotInRepo_ReturnUpdatedPass() {
-        PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTOWithCar();
-        Pass pass = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(TestUtils.getUser(), null,
+        PassUpdateDTO passUpdateDTO = PassTestData.getPassUpdateDTOWithCar();
+        Pass pass = PassTestData.getSimpleActiveOneTimePassAutoFor3Hours(TestUtils.getUser(), null,
                 TestUtils.getCar(TestUtils.getCarBrand()));
         Mockito.when(carBrandRepository.findByBrand(Mockito.anyString())).thenReturn(Optional.empty());
         Mockito.when(carBrandRepository.save(Mockito.any())).thenReturn(TestUtils.getCarBrand());
@@ -210,10 +213,10 @@ class PassResolverImplTest {
     @ParameterizedTest
     @ArgumentsSource(VisitorWithFieldsArgumentProvider.class)
     void updatePass_UpdateWithVisitor_ReturnUpdatedPass(VisitorDTO visitorDTO, Triple<String, String, String> fields) {
-        PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTOVisitor();
+        PassUpdateDTO passUpdateDTO = PassTestData.getPassUpdateDTOVisitor();
         passUpdateDTO.setVisitor(visitorDTO);
         Visitor visitor = TestUtils.getVisitorRandomUUID();
-        Pass pass = TestUtils.getSimpleActiveOneTimePassWalkFor3Hours(TestUtils.getUser(), null, visitor);
+        Pass pass = PassTestData.getSimpleActiveOneTimePassWalkFor3Hours(TestUtils.getUser(), null, visitor);
 
         Pass updatedPass = passResolver.updatePass(passUpdateDTO, pass);
 

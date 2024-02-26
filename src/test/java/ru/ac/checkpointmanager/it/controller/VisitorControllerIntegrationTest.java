@@ -32,6 +32,7 @@ import ru.ac.checkpointmanager.repository.VisitorRepository;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
 import ru.ac.checkpointmanager.repository.car.CarRepository;
 import ru.ac.checkpointmanager.util.MockMvcUtils;
+import ru.ac.checkpointmanager.util.PassTestData;
 import ru.ac.checkpointmanager.util.ResultCheckUtils;
 import ru.ac.checkpointmanager.util.TestUtils;
 
@@ -266,7 +267,7 @@ class VisitorControllerIntegrationTest {
         Territory savedTerritory = territoryRepository.saveAndFlush(territory);
         Visitor visitorUnsaved = TestUtils.getVisitorRandomUUID();
         Visitor savedVisitor = visitorRepository.saveAndFlush(visitorUnsaved);
-        PassWalk passWalk = TestUtils.getSimpleActiveOneTimePassWalkFor3Hours(savedUser, savedTerritory, savedVisitor);
+        PassWalk passWalk = PassTestData.getSimpleActiveOneTimePassWalkFor3Hours(savedUser, savedTerritory, savedVisitor);
         PassWalk savedPass = passRepository.saveAndFlush(passWalk);
 
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.getVisitorByPassId(savedPass.getId()));
@@ -292,7 +293,7 @@ class VisitorControllerIntegrationTest {
         car.setBrand(savedCarBrand);
         car.setId(TestUtils.getCarDto().getId());
         Car savedCar = carRepository.saveAndFlush(car);
-        PassAuto pass = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
+        PassAuto pass = PassTestData.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
         PassAuto savedPass = passRepository.saveAndFlush(pass);
         //when
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.getVisitorByPassId(savedPass.getId()));
@@ -309,11 +310,11 @@ class VisitorControllerIntegrationTest {
         Visitor visitorUnsaved = TestUtils.getVisitorRandomUUID();
         visitorRepository.saveAndFlush(visitorUnsaved);
 
-        ResultActions resultActions = mockMvc.perform(MockMvcUtils.getVisitorByPassId(TestUtils.PASS_ID));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.getVisitorByPassId(PassTestData.PASS_ID));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isNotFound());
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
-                .value(ExceptionUtils.VISITOR_BY_PASS_NOT_FOUND.formatted(TestUtils.PASS_ID)));
+                .value(ExceptionUtils.VISITOR_BY_PASS_NOT_FOUND.formatted(PassTestData.PASS_ID)));
         ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
@@ -328,7 +329,7 @@ class VisitorControllerIntegrationTest {
         Territory savedTerritory = territoryRepository.saveAndFlush(territory);
         Visitor visitorUnsaved = TestUtils.getVisitorRandomUUID();
         Visitor savedVisitor = visitorRepository.saveAndFlush(visitorUnsaved);
-        PassWalk passWalk = TestUtils.getSimpleActiveOneTimePassWalkFor3Hours(savedUser, savedTerritory, savedVisitor);
+        PassWalk passWalk = PassTestData.getSimpleActiveOneTimePassWalkFor3Hours(savedUser, savedTerritory, savedVisitor);
         passRepository.saveAndFlush(passWalk);
         Visitor anotherVisitor = TestUtils.getVisitorRandomUUID();
         anotherVisitor.setName("Huggy Wuggy");
@@ -358,7 +359,7 @@ class VisitorControllerIntegrationTest {
         car.setBrand(savedCarBrand);
         car.setId(TestUtils.getCarDto().getId());
         Car savedCar = carRepository.saveAndFlush(car);
-        PassAuto pass = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
+        PassAuto pass = PassTestData.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
         passRepository.saveAndFlush(pass);
         Visitor anotherVisitor = TestUtils.getVisitorRandomUUID();
         anotherVisitor.setName("Huggy Wuggy");

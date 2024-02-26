@@ -28,6 +28,7 @@ import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
 import ru.ac.checkpointmanager.repository.car.CarRepository;
+import ru.ac.checkpointmanager.util.PassTestData;
 import ru.ac.checkpointmanager.util.ResultCheckUtils;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
@@ -212,7 +213,7 @@ class NotFoundExceptionGlobalExceptionHandlerTest extends GlobalExceptionHandler
     @SneakyThrows
     void shouldHandleTerritoryNotFoundExceptionForAddPass() {
         User savedUser = userRepository.save(TestUtils.getUser());
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
+        PassCreateDTO passCreateDTO = PassTestData.getPassCreateDTOWithCar();
         passCreateDTO.setUserId(savedUser.getId());
         String passDtoCreate = TestUtils.jsonStringFromObject(passCreateDTO);
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.PASS_URL)

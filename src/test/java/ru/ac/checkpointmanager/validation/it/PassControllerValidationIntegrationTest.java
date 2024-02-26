@@ -27,6 +27,7 @@ import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.mapper.PassMapper;
 import ru.ac.checkpointmanager.service.passes.PassService;
 import ru.ac.checkpointmanager.util.MockMvcUtils;
+import ru.ac.checkpointmanager.util.PassTestData;
 import ru.ac.checkpointmanager.util.ResultCheckUtils;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
@@ -70,7 +71,7 @@ class PassControllerValidationIntegrationTest {
     @Test
     @SneakyThrows
     void addPass_NullCarAndVisitorFields_HandleExceptionAndReturnValidationError() { // testing CarOrVisitorFieldsCheck
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
+        PassCreateDTO passCreateDTO = PassTestData.getPassCreateDTOWithCar();
         passCreateDTO.setCar(null);
         passCreateDTO.setVisitor(null);
 
@@ -82,7 +83,7 @@ class PassControllerValidationIntegrationTest {
     @Test
     @SneakyThrows
     void addPass_BothCarAndVisitorFieldsForAddPass_HandleExceptionAndReturnValidationError() { // testing CarOrVisitorFieldsCheck
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
+        PassCreateDTO passCreateDTO = PassTestData.getPassCreateDTOWithCar();
         passCreateDTO.setVisitor(TestUtils.getVisitorDTO());
 
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passCreateDTO));
@@ -93,7 +94,7 @@ class PassControllerValidationIntegrationTest {
     @Test
     @SneakyThrows
     void updatePass_NullCarAndVisitorFields_HandleExceptionAndReturnValidationError() { // testing CarOrVisitorFieldsCheck
-        PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTOWithCar();
+        PassUpdateDTO passUpdateDTO = PassTestData.getPassUpdateDTOWithCar();
         passUpdateDTO.setCar(null);
         passUpdateDTO.setVisitor(null);
 
@@ -105,7 +106,7 @@ class PassControllerValidationIntegrationTest {
     @Test
     @SneakyThrows
     void updatePass_BothCarAndVisitorFields_HandleExceptionAndReturnValidationError() { // testing CarOrVisitorFieldsCheck
-        PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTOWithCar();
+        PassUpdateDTO passUpdateDTO = PassTestData.getPassUpdateDTOWithCar();
         passUpdateDTO.setVisitor(TestUtils.getVisitorDTO());
 
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.updatePass(passUpdateDTO));
@@ -116,7 +117,7 @@ class PassControllerValidationIntegrationTest {
     @Test
     @SneakyThrows
     void addPass_IncorrectStartAndEndTimeFields_HandleExceptionAndReturnValidationError() { // testing PassTimeCheck
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
+        PassCreateDTO passCreateDTO = PassTestData.getPassCreateDTOWithCar();
         passCreateDTO.setEndTime(LocalDateTime.now().plusHours(1));
         passCreateDTO.setStartTime(LocalDateTime.now().plusHours(3));
 
@@ -128,7 +129,7 @@ class PassControllerValidationIntegrationTest {
     @Test
     @SneakyThrows
     void updatePass_IncorrectStartAndEndTimeFields_HandleExceptionAndReturnValidationError() { // testing PassTimeCheck
-        PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTOWithCar();
+        PassUpdateDTO passUpdateDTO = PassTestData.getPassUpdateDTOWithCar();
         passUpdateDTO.setEndTime(LocalDateTime.now().plusHours(1));
         passUpdateDTO.setStartTime(LocalDateTime.now().plusHours(3));
 
@@ -142,7 +143,7 @@ class PassControllerValidationIntegrationTest {
     @SneakyThrows
     void addPass_StartOrEndTimeOfPassIsNull_HandleExceptionAndReturnValidationError(
             LocalDateTime startTime, LocalDateTime endTime) { // testing NotNull
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
+        PassCreateDTO passCreateDTO = PassTestData.getPassCreateDTOWithCar();
         passCreateDTO.setEndTime(startTime);
         passCreateDTO.setStartTime(endTime);
 
@@ -156,7 +157,7 @@ class PassControllerValidationIntegrationTest {
     @SneakyThrows
     void updatePass_IfStartOrEndTimeOfPassIsNullInPassUpdateDTO_HandleExceptionAndReturnValidationError(
             LocalDateTime startTime, LocalDateTime endTime) { // testing NotNull
-        PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTOWithCar();
+        PassUpdateDTO passUpdateDTO = PassTestData.getPassUpdateDTOWithCar();
         passUpdateDTO.setEndTime(startTime);
         passUpdateDTO.setStartTime(endTime);
 
@@ -168,7 +169,7 @@ class PassControllerValidationIntegrationTest {
     @Test
     @SneakyThrows
     void addPass_EndTimeNotInFuture_HandleExceptionAndReturnValidationError() { // testing Future
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
+        PassCreateDTO passCreateDTO = PassTestData.getPassCreateDTOWithCar();
         passCreateDTO.setEndTime(LocalDateTime.now().minusDays(1));
 
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passCreateDTO));
@@ -180,7 +181,7 @@ class PassControllerValidationIntegrationTest {
     @Test
     @SneakyThrows
     void updatePass_EndTimeNotInFuture_HandleExceptionAndReturnValidationError() { // testing Future
-        PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTOWithCar();
+        PassUpdateDTO passUpdateDTO = PassTestData.getPassUpdateDTOWithCar();
         passUpdateDTO.setEndTime(LocalDateTime.now().minusDays(1));
 
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.updatePass(passUpdateDTO));
@@ -194,7 +195,8 @@ class PassControllerValidationIntegrationTest {
     @MethodSource("getBadVisitorDto")
     @SneakyThrows
     void addPass_VisitorHasBadField_HandleExceptionAndReturnValidationError(String name, String phone, String field) {
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithVisitor();
+        PassCreateDTO passCreateDTO = PassTestData.getPassCreateDTOWithVisitor();
+        assert passCreateDTO.getVisitor() != null;
         passCreateDTO.getVisitor().setName(name);
         passCreateDTO.getVisitor().setPhone(phone);
 
@@ -208,7 +210,8 @@ class PassControllerValidationIntegrationTest {
     @MethodSource("getBadVisitorDto")
     @SneakyThrows
     void updatePass_VisitorHasBadField_HandleExceptionAndReturnValidationError(String name, String phone, String field) {
-        PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTOVisitor();
+        PassUpdateDTO passUpdateDTO = PassTestData.getPassUpdateDTOVisitor();
+        assert passUpdateDTO.getVisitor() != null;
         passUpdateDTO.getVisitor().setName(name);
         passUpdateDTO.getVisitor().setPhone(phone);
 
@@ -223,8 +226,9 @@ class PassControllerValidationIntegrationTest {
     @SneakyThrows
     void addPass_CarHasBadField_HandleExceptionAndReturnValidationError(String licensePlate, CarBrandDTO carBrandDTO,
                                                                         String phone, String field) {
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
+        PassCreateDTO passCreateDTO = PassTestData.getPassCreateDTOWithCar();
         CarDTO car = passCreateDTO.getCar();
+        assert car != null;
         car.setLicensePlate(licensePlate);
         car.setPhone(phone);
         car.setBrand(carBrandDTO);
@@ -240,8 +244,9 @@ class PassControllerValidationIntegrationTest {
     @SneakyThrows
     void updatePass_CarHasBadField_HandleExceptionAndReturnValidationError(String licensePlate, CarBrandDTO carBrandDTO,
                                                                            String phone, String field) {
-        PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTOWithCar();
+        PassUpdateDTO passUpdateDTO = PassTestData.getPassUpdateDTOWithCar();
         CarDTO car = passUpdateDTO.getCar();
+        assert car != null;
         car.setLicensePlate(licensePlate);
         car.setPhone(phone);
         car.setBrand(carBrandDTO);
@@ -256,7 +261,7 @@ class PassControllerValidationIntegrationTest {
     @MethodSource("getNullIds")
     @SneakyThrows
     void addPass_NullUserIdOrTerritoryId_HandleExceptionAndReturnValidationError(UUID userId, UUID terrId, String field) {
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithVisitor();
+        PassCreateDTO passCreateDTO = PassTestData.getPassCreateDTOWithVisitor();
         passCreateDTO.setTerritoryId(terrId);
         passCreateDTO.setUserId(userId);
 
@@ -269,7 +274,7 @@ class PassControllerValidationIntegrationTest {
     @Test
     @SneakyThrows
     void addPass_TooLongComment_HandleExceptionAndReturnValidationError() {
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithVisitor();
+        PassCreateDTO passCreateDTO = PassTestData.getPassCreateDTOWithVisitor();
         passCreateDTO.setComment("a".repeat(31));
 
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passCreateDTO));

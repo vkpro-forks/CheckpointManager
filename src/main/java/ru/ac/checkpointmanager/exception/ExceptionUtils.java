@@ -61,6 +61,7 @@ public final class ExceptionUtils {
     public static final String CHANGE_PASS_TYPE_TO_WALK = "Attempt to modify Pass Auto for visitor";
 
     public static final String CHANGE_PASS_TYPE_TO_AUTO = "Attempt to modify Pass Walk for auto";
+    public static final String OVERLAP_PASS = "Reject: user [%s] has an overlapping pass [%s]";
 
     private ExceptionUtils() {
         throw new AssertionError("No instances, please");

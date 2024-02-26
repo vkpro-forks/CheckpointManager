@@ -42,6 +42,7 @@ import ru.ac.checkpointmanager.repository.VisitorRepository;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
 import ru.ac.checkpointmanager.repository.car.CarRepository;
 import ru.ac.checkpointmanager.util.MockMvcUtils;
+import ru.ac.checkpointmanager.util.PassTestData;
 import ru.ac.checkpointmanager.util.ResultCheckUtils;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
@@ -106,9 +107,10 @@ class PassControllerIntegrationTest {
     @SneakyThrows
     void addPass_NewCarWithoutIdWhenCarInRepoDoesntExists_SaveAndReturn() {
         saveTerritoryAndUser();
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
+        PassCreateDTO passCreateDTO = PassTestData.getPassCreateDTOWithCar();
         passCreateDTO.setUserId(savedUser.getId());
         passCreateDTO.setTerritoryId(savedTerritory.getId());
+        assert passCreateDTO.getCar() != null;
         passCreateDTO.getCar().setId(null);
         passCreateDTO.getCar().setBrand(TestUtils.getCarBrandDTO());//set saved car brand, if no car brand in DB, 404 will be thrown
 
@@ -129,9 +131,10 @@ class PassControllerIntegrationTest {
     @SneakyThrows
     void addPass_NewCarWithoutIdWhenCarInRepoDoesntExistsAndBrandDoesntExists_SaveAndReturn() {
         saveTerritoryUserCarBrand();
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
+        PassCreateDTO passCreateDTO = PassTestData.getPassCreateDTOWithCar();
         passCreateDTO.setUserId(savedUser.getId());
         passCreateDTO.setTerritoryId(savedTerritory.getId());
+        assert passCreateDTO.getCar() != null;
         passCreateDTO.getCar().setId(null);
         passCreateDTO.getCar().setBrand(TestUtils.getCarBrandDTO());//set saved car brand, if no car brand in DB, 404 will be thrown
 
@@ -153,9 +156,10 @@ class PassControllerIntegrationTest {
     void addPass_ExistingCarIdWhenCarInRepoExists_SaveAndReturn() {
         saveTerritoryUserCarBrand();
         saveCar();
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
+        PassCreateDTO passCreateDTO = PassTestData.getPassCreateDTOWithCar();
         passCreateDTO.setUserId(savedUser.getId());
         passCreateDTO.setTerritoryId(savedTerritory.getId());
+        assert passCreateDTO.getCar() != null;
         passCreateDTO.getCar().setBrand(TestUtils.getCarBrandDTO());//set saved car brand, if no car brand in DB, 404 will be thrown
         passCreateDTO.getCar().setId(savedCar.getId());
         passCreateDTO.getCar().setLicensePlate(savedCar.getLicensePlate());
@@ -178,9 +182,10 @@ class PassControllerIntegrationTest {
     void addPass_ExistingCarInRepoButCarInDtoWillBeWithoutId_SaveAndReturn() {
         saveTerritoryUserCarBrand();
         saveCar();
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
+        PassCreateDTO passCreateDTO = PassTestData.getPassCreateDTOWithCar();
         passCreateDTO.setUserId(savedUser.getId());
         passCreateDTO.setTerritoryId(savedTerritory.getId());
+        assert passCreateDTO.getCar() != null;
         passCreateDTO.getCar().setBrand(TestUtils.getCarBrandDTO());//set saved car brand, if no car brand in DB, 404 will be thrown
         passCreateDTO.getCar().setId(null);//don't pass ID of car, pass only license plate
         passCreateDTO.getCar().setLicensePlate(savedCar.getLicensePlate());
@@ -214,9 +219,10 @@ class PassControllerIntegrationTest {
     @SneakyThrows
     void addPass_NoCarInRepoButCarInDtoWillBeWithId_SaveAndReturn() {
         saveTerritoryUserCarBrand();
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
+        PassCreateDTO passCreateDTO = PassTestData.getPassCreateDTOWithCar();
         passCreateDTO.setUserId(savedUser.getId());
         passCreateDTO.setTerritoryId(savedTerritory.getId());
+        assert passCreateDTO.getCar() != null;
         passCreateDTO.getCar().setBrand(TestUtils.getCarBrandDTO());//set saved car brand, if no car brand in DB, 404 will be thrown
         passCreateDTO.getCar().setId(TestUtils.CAR_ID);
         passCreateDTO.getCar().setLicensePlate(TestUtils.LICENSE_PLATE);
@@ -243,7 +249,8 @@ class PassControllerIntegrationTest {
     @SneakyThrows
     void addPass_VisitorWithoutIdNotInDb_SaveAndReturn() {
         saveTerritoryAndUser();
-        PassCreateDTO passCreateDto = TestUtils.getPassCreateDTOWithVisitor();
+        PassCreateDTO passCreateDto = PassTestData.getPassCreateDTOWithVisitor();
+        assert passCreateDto.getVisitor() != null;
         passCreateDto.getVisitor().setId(null);
         passCreateDto.setTerritoryId(savedTerritory.getId());
         passCreateDto.setUserId(savedUser.getId());
@@ -262,7 +269,8 @@ class PassControllerIntegrationTest {
     @SneakyThrows
     void addPass_VisitorWithIdNotInDb_SaveAndReturn() {
         saveTerritoryAndUser();
-        PassCreateDTO passCreateDto = TestUtils.getPassCreateDTOWithVisitor();
+        PassCreateDTO passCreateDto = PassTestData.getPassCreateDTOWithVisitor();
+        assert passCreateDto.getVisitor() != null;
         passCreateDto.getVisitor().setId(TestUtils.VISITOR_ID);
         passCreateDto.setTerritoryId(savedTerritory.getId());
         passCreateDto.setUserId(savedUser.getId());
@@ -283,7 +291,8 @@ class PassControllerIntegrationTest {
         saveTerritoryAndUser();
         Visitor visitorUnsaved = TestUtils.getVisitorRandomUUID();
         Visitor savedVisitor = visitorRepository.saveAndFlush(visitorUnsaved);
-        PassCreateDTO passCreateDto = TestUtils.getPassCreateDTOWithVisitor();
+        PassCreateDTO passCreateDto = PassTestData.getPassCreateDTOWithVisitor();
+        assert passCreateDto.getVisitor() != null;
         passCreateDto.getVisitor().setId(savedVisitor.getId());
         String updatedName = "Huggy Wuggy";
         passCreateDto.getVisitor().setName(updatedName);
@@ -303,7 +312,7 @@ class PassControllerIntegrationTest {
     @Test
     @SneakyThrows
     void addPass_NoUser_HandleUserNotFoundExceptionForAddPass() {
-        PassCreateDTO passCreateDTOWithCar = TestUtils.getPassCreateDTOWithCar();
+        PassCreateDTO passCreateDTOWithCar = PassTestData.getPassCreateDTOWithCar();
 
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passCreateDTOWithCar));
 
@@ -319,7 +328,7 @@ class PassControllerIntegrationTest {
     void updatePass_AllOkShouldUpdateExistingPassWithCar_ReturnUpdatedPass() {
         saveTerritoryUserCarBrandAndCar();
         PassAuto passAuto = passRepository.saveAndFlush(
-                TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar));
+                PassTestData.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar));
         PassUpdateDTO passUpdateDTO = new PassUpdateDTO(null, PassTimeType.PERMANENT,
                 LocalDateTime.now().minusDays(1), LocalDateTime.now().plusDays(1),
                 null, new CarDTO(savedCar.getId(), savedCar.getLicensePlate(),
@@ -335,7 +344,7 @@ class PassControllerIntegrationTest {
     @SneakyThrows
     void deletePass_PassWithAuto_ReturnNoContent(PassStatus passStatus) {
         saveTerritoryUserCarBrandAndCar();
-        PassAuto pass = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
+        PassAuto pass = PassTestData.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
         pass.setStatus(passStatus);
         PassAuto savedPass = passRepository.saveAndFlush(pass);
         List<Pass> allPasses = passRepository.findAll();
@@ -549,7 +558,7 @@ class PassControllerIntegrationTest {
         visitor.setId(TestUtils.VISITOR_ID);
         visitor.setName("Vasya");
         visitor.setPhone(TestUtils.PHONE_NUM);
-        PassWalk passWalk = TestUtils.getPassWalk(PassStatus.ACTIVE, LocalDateTime.now(),
+        PassWalk passWalk = PassTestData.getPassWalk(PassStatus.ACTIVE, LocalDateTime.now(),
                 LocalDateTime.now().plusDays(1), savedUser,
                 savedTerritory, visitor, PassTimeType.PERMANENT);
         PassAuto savedPassAuto = passRepository.saveAndFlush(passAuto);
@@ -576,7 +585,7 @@ class PassControllerIntegrationTest {
         visitor.setId(TestUtils.VISITOR_ID);
         visitor.setName("Vasya");
         visitor.setPhone(TestUtils.PHONE_NUM);
-        PassWalk passWalk = TestUtils.getPassWalk(PassStatus.ACTIVE, LocalDateTime.now(),
+        PassWalk passWalk = PassTestData.getPassWalk(PassStatus.ACTIVE, LocalDateTime.now(),
                 LocalDateTime.now().plusDays(1), savedUser,
                 savedTerritory, visitor, PassTimeType.PERMANENT);
         PassAuto savedPassAuto = passRepository.saveAndFlush(passAuto);
@@ -603,7 +612,7 @@ class PassControllerIntegrationTest {
         visitor.setId(TestUtils.VISITOR_ID);
         visitor.setName("Vasya");
         visitor.setPhone(TestUtils.PHONE_NUM);
-        PassWalk passWalk = TestUtils.getPassWalk(PassStatus.ACTIVE, LocalDateTime.now(),
+        PassWalk passWalk = PassTestData.getPassWalk(PassStatus.ACTIVE, LocalDateTime.now(),
                 LocalDateTime.now().plusDays(1), savedUser,
                 savedTerritory, visitor, PassTimeType.PERMANENT);
         PassAuto savedPassAuto = passRepository.saveAndFlush(passAuto);
@@ -630,7 +639,7 @@ class PassControllerIntegrationTest {
         visitor.setId(TestUtils.VISITOR_ID);
         visitor.setName("Vasya");
         visitor.setPhone(TestUtils.PHONE_NUM);
-        PassWalk passWalk = TestUtils.getPassWalk(PassStatus.ACTIVE, LocalDateTime.now(),
+        PassWalk passWalk = PassTestData.getPassWalk(PassStatus.ACTIVE, LocalDateTime.now(),
                 LocalDateTime.now().plusDays(1), savedUser,
                 savedTerritory, visitor, PassTimeType.PERMANENT);
         PassAuto savedPassAuto = passRepository.saveAndFlush(passAuto);
@@ -657,7 +666,7 @@ class PassControllerIntegrationTest {
         visitor.setId(TestUtils.VISITOR_ID);
         visitor.setName("А420");
         visitor.setPhone(TestUtils.PHONE_NUM);
-        PassWalk passWalk = TestUtils.getPassWalk(PassStatus.ACTIVE, LocalDateTime.now(),
+        PassWalk passWalk = PassTestData.getPassWalk(PassStatus.ACTIVE, LocalDateTime.now(),
                 LocalDateTime.now().plusDays(1), savedUser,
                 savedTerritory, visitor, PassTimeType.PERMANENT);
         PassAuto savedPassAuto = passRepository.saveAndFlush(passAuto);
@@ -687,7 +696,7 @@ class PassControllerIntegrationTest {
         visitor.setId(TestUtils.VISITOR_ID);
         visitor.setName("а420");
         visitor.setPhone(TestUtils.PHONE_NUM);
-        PassWalk passWalk = TestUtils.getPassWalk(PassStatus.ACTIVE, LocalDateTime.now(),
+        PassWalk passWalk = PassTestData.getPassWalk(PassStatus.ACTIVE, LocalDateTime.now(),
                 LocalDateTime.now().plusDays(1), savedUser,
                 savedTerritory, visitor, PassTimeType.PERMANENT);
         PassAuto savedPassAuto = passRepository.saveAndFlush(passAuto);
@@ -717,7 +726,7 @@ class PassControllerIntegrationTest {
         visitor.setId(TestUtils.VISITOR_ID);
         visitor.setName("Petya");
         visitor.setPhone(TestUtils.PHONE_NUM);
-        PassWalk passWalk = TestUtils.getPassWalk(PassStatus.ACTIVE, LocalDateTime.now(),
+        PassWalk passWalk = PassTestData.getPassWalk(PassStatus.ACTIVE, LocalDateTime.now(),
                 LocalDateTime.now().plusDays(1), savedUser,
                 savedTerritory, visitor, PassTimeType.PERMANENT);
         passRepository.saveAndFlush(passAuto);
@@ -745,7 +754,7 @@ class PassControllerIntegrationTest {
         visitor.setId(TestUtils.VISITOR_ID);
         visitor.setName("A420");
         visitor.setPhone(TestUtils.PHONE_NUM);
-        PassWalk passWalk = TestUtils.getPassWalk(PassStatus.ACTIVE, LocalDateTime.now(),
+        PassWalk passWalk = PassTestData.getPassWalk(PassStatus.ACTIVE, LocalDateTime.now(),
                 LocalDateTime.now().plusDays(1), savedUser,
                 savedTerritory, visitor, PassTimeType.PERMANENT);
         passRepository.saveAndFlush(passAuto);
@@ -773,7 +782,7 @@ class PassControllerIntegrationTest {
         visitor.setId(TestUtils.VISITOR_ID);
         visitor.setName("A420");
         visitor.setPhone(TestUtils.PHONE_NUM);
-        PassWalk passWalk = TestUtils.getPassWalk(PassStatus.ACTIVE, LocalDateTime.now(),
+        PassWalk passWalk = PassTestData.getPassWalk(PassStatus.ACTIVE, LocalDateTime.now(),
                 LocalDateTime.now().plusDays(1), savedUser,
                 savedTerritory, visitor, PassTimeType.PERMANENT);
         PassAuto savedPassAuto = passRepository.saveAndFlush(passAuto);
@@ -794,7 +803,7 @@ class PassControllerIntegrationTest {
     @Test
     @SneakyThrows
     void getPass_NotFound_ReturnNotFound() {
-        ResultActions resultActions = mockMvc.perform(MockMvcUtils.getPass(TestUtils.PASS_ID));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.getPass(PassTestData.PASS_ID));
 
         ResultCheckUtils.checkNotFoundFields(resultActions);
     }
@@ -802,20 +811,20 @@ class PassControllerIntegrationTest {
     @Test
     @SneakyThrows
     void updatePass_NotFound_ReturnNotFound() {
-        ResultActions resultActions = mockMvc.perform(MockMvcUtils.updatePass(TestUtils.getPassUpdateDTOWithCar()));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.updatePass(PassTestData.getPassUpdateDTOWithCar()));
 
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
-                .value(ExceptionUtils.PASS_NOT_FOUND.formatted(TestUtils.PASS_ID)));
+                .value(ExceptionUtils.PASS_NOT_FOUND.formatted(PassTestData.PASS_ID)));
         ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
     @SneakyThrows
     void deletePass_NotFound_ReturnNotFound() {
-        ResultActions resultActions = mockMvc.perform(MockMvcUtils.deletePass(TestUtils.PASS_ID));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.deletePass(PassTestData.PASS_ID));
 
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
-                .value(ExceptionUtils.PASS_NOT_FOUND.formatted(TestUtils.PASS_ID)));
+                .value(ExceptionUtils.PASS_NOT_FOUND.formatted(PassTestData.PASS_ID)));
         ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 
@@ -823,10 +832,10 @@ class PassControllerIntegrationTest {
     @MethodSource("passUrlsForPatchMethodsArguments")
     @SneakyThrows
     void patchMethods_NotFound_ReturnNotFound(String url) {
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.patch(url, TestUtils.PASS_ID));
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.patch(url, PassTestData.PASS_ID));
 
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
-                .value(ExceptionUtils.PASS_NOT_FOUND.formatted(TestUtils.PASS_ID)));
+                .value(ExceptionUtils.PASS_NOT_FOUND.formatted(PassTestData.PASS_ID)));
         ResultCheckUtils.checkNotFoundFields(resultActions);
     }
 

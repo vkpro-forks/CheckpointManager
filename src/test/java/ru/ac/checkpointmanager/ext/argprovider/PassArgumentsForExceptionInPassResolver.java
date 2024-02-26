@@ -9,7 +9,7 @@ import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.model.passes.PassWalk;
 import ru.ac.checkpointmanager.specification.model.PassAuto_;
 import ru.ac.checkpointmanager.specification.model.PassWalk_;
-import ru.ac.checkpointmanager.util.TestUtils;
+import ru.ac.checkpointmanager.util.PassTestData;
 
 import java.util.stream.Stream;
 
@@ -23,8 +23,8 @@ public class PassArgumentsForExceptionInPassResolver implements ArgumentsProvide
         PassWalk passWalk = new PassWalk();
         passWalk.setDtype(PassWalk_.DTYPE);
         return Stream.of(
-                Arguments.of(passAuto, TestUtils.getPassUpdateDTOVisitor(), ExceptionUtils.CHANGE_PASS_TYPE_TO_WALK),
-                Arguments.of(passWalk, TestUtils.getPassUpdateDTOWithCar(), ExceptionUtils.CHANGE_PASS_TYPE_TO_AUTO)
+                Arguments.of(passAuto, PassTestData.getPassUpdateDTOVisitor(), ExceptionUtils.CHANGE_PASS_TYPE_TO_WALK),
+                Arguments.of(passWalk, PassTestData.getPassUpdateDTOWithCar(), ExceptionUtils.CHANGE_PASS_TYPE_TO_AUTO)
         );
     }
 }

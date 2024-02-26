@@ -63,7 +63,6 @@ public class PassServiceImpl implements PassService {
     private static final String METHOD_INVOKE = "Method {} [{}]";
     private static final String PASS_STATUS = "Pass [{}], changed status on {}";
     private static final String PASS_STATUS_CROSS = "Pass [{}], exist {} crossings, changed status on {}";
-    private static final String OVERLAP_PASS = "Reject: user [%s] has an overlapping pass [%s]";
 
     private final PassRepository passRepository;
     private final CrossingRepository crossingRepository;
@@ -214,6 +213,7 @@ public class PassServiceImpl implements PassService {
 
     @Override
     @Transactional
+    @NonNull
     public PassResponseDTO updatePass(@NonNull PassUpdateDTO passUpdateDTO) {
         log.debug(METHOD_INVOKE, MethodLog.getMethodName(), passUpdateDTO);
 
@@ -224,17 +224,16 @@ public class PassServiceImpl implements PassService {
             throw new ModifyPassException(ExceptionUtils.PASS_HAS_NO_USER.formatted(passId));
         }
         passChecker.isPassUpdatable(existPass);
-
+        //TODO check overlap before resolving
         Pass newStatePass = passResolver.updatePass(passUpdateDTO, existPass);
+        newStatePass.setStartTime(passUpdateDTO.getStartTime()); //not null
+        newStatePass.setEndTime(passUpdateDTO.getEndTime()); //not null
         checkOverlapTime(newStatePass);
         trimThemAll(newStatePass);
         if (passUpdateDTO.getComment() != null) {
             existPass.setComment(passUpdateDTO.getComment());
         }
-        //these fields below are NonNull (validated)
-        existPass.setTimeType(passUpdateDTO.getTimeType());
-        existPass.setStartTime(passUpdateDTO.getStartTime());
-        existPass.setEndTime(passUpdateDTO.getEndTime());
+        existPass.setTimeType(passUpdateDTO.getTimeType()); //timeType notNull
 
         Pass updatedPass = passRepository.save(existPass);
         log.info("Pass updated: {}", updatedPass);
@@ -362,8 +361,8 @@ public class PassServiceImpl implements PassService {
                 .findFirst();
 
         if (overlapPass.isPresent()) {
-            log.info(OVERLAP_PASS.formatted(newPass.getUser().getId(), overlapPass.get().getId()));
-            throw new OverlapPassException(OVERLAP_PASS.formatted(newPass.getUser().getId(), overlapPass.get().getId()));
+            log.info(ExceptionUtils.OVERLAP_PASS.formatted(newPass.getUser().getId(), overlapPass.get().getId()));
+            throw new OverlapPassException(ExceptionUtils.OVERLAP_PASS.formatted(newPass.getUser().getId(), overlapPass.get().getId()));
         }
     }
 

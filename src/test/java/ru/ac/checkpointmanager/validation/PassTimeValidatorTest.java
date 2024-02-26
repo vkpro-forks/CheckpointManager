@@ -10,7 +10,7 @@ import ru.ac.checkpointmanager.dto.passes.PassBaseDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.ext.ValidationContextTestResolver;
-import ru.ac.checkpointmanager.util.TestUtils;
+import ru.ac.checkpointmanager.util.PassTestData;
 
 import java.time.LocalDateTime;
 import java.util.stream.Stream;
@@ -43,10 +43,10 @@ class PassTimeValidatorTest {
     }
 
     private static Stream<Object> getCorrectPassDtoArguments() {
-        PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTOWithCar();
+        PassUpdateDTO passUpdateDTO = PassTestData.getPassUpdateDTOWithCar();
         passUpdateDTO.setStartTime(LocalDateTime.now().plusHours(1));
         passUpdateDTO.setEndTime(LocalDateTime.now().plusHours(2));
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
+        PassCreateDTO passCreateDTO = PassTestData.getPassCreateDTOWithCar();
         passCreateDTO.setStartTime(LocalDateTime.now().plusHours(1));
         passCreateDTO.setEndTime(LocalDateTime.now().plusHours(2));
         return Stream.of(
@@ -56,10 +56,10 @@ class PassTimeValidatorTest {
     }
 
     private static Stream<Object> getIncorrectPassDtoArguments() {
-        PassCreateDTO passCreateDTO = TestUtils.getPassCreateDTOWithCar();
+        PassCreateDTO passCreateDTO = PassTestData.getPassCreateDTOWithCar();
         passCreateDTO.setEndTime(LocalDateTime.now().plusHours(1));
         passCreateDTO.setStartTime(LocalDateTime.now().plusHours(2));
-        PassUpdateDTO passUpdateDTO = TestUtils.getPassUpdateDTOWithCar();
+        PassUpdateDTO passUpdateDTO = PassTestData.getPassUpdateDTOWithCar();
         passUpdateDTO.setEndTime(LocalDateTime.now().plusHours(1));
         passUpdateDTO.setStartTime(LocalDateTime.now().plusHours(2));
         return Stream.of(

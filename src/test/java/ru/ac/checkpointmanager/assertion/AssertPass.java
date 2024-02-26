@@ -7,7 +7,10 @@ import ru.ac.checkpointmanager.model.car.Car;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
+import ru.ac.checkpointmanager.model.passes.PassTimeType;
 import ru.ac.checkpointmanager.model.passes.PassWalk;
+
+import java.time.LocalDateTime;
 
 public class AssertPass extends AbstractAssert<AssertPass, Pass> {
     protected AssertPass(Pass pass) {
@@ -30,6 +33,14 @@ public class AssertPass extends AbstractAssert<AssertPass, Pass> {
         return this;
     }
 
+    public AssertPass isPassFieldsMatches(String comment, LocalDateTime startTime, LocalDateTime endTime,
+                                          PassTimeType passTimeType) {
+        isNotNull();
+        assertThat(actual).asInstanceOf(InstanceOfAssertFactories.type(Pass.class))
+                .extracting(Pass::getComment, Pass::getStartTime, Pass::getEndTime, Pass::getTimeType)
+                .containsExactly(comment, startTime, endTime, passTimeType);
+        return this;
+    }
 
     public static AssertPass assertThat(Pass pass) {
         return new AssertPass(pass);
