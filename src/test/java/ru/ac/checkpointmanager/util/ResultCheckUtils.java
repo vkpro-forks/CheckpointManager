@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import ru.ac.checkpointmanager.assertion.ResultActionsAssert;
+import ru.ac.checkpointmanager.assertion.AssertResultActions;
 import ru.ac.checkpointmanager.exception.handler.ErrorCode;
 import ru.ac.checkpointmanager.exception.handler.ErrorMessage;
 
@@ -17,7 +17,7 @@ public class ResultCheckUtils {
 
     public static void verifyUserResponseDTO(ResultActions resultActions, String id, String fullName, String mainNumber) throws Exception {
         log.info("Verifying UserResponseDTO");
-        ResultActionsAssert.assertThat(resultActions).idMatches(id).fullNameMatches(fullName).mainNumberMatches(mainNumber)
+        AssertResultActions.assertThat(resultActions).idMatches(id).fullNameMatches(fullName).mainNumberMatches(mainNumber)
                 .contentTypeIsAppJson();
     }
 

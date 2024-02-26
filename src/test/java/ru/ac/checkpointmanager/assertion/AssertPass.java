@@ -9,12 +9,12 @@ import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.model.passes.PassWalk;
 
-public class PassAssert extends AbstractAssert<PassAssert, Pass> {
-    protected PassAssert(Pass pass) {
-        super(pass, PassAssert.class);
+public class AssertPass extends AbstractAssert<AssertPass, Pass> {
+    protected AssertPass(Pass pass) {
+        super(pass, AssertPass.class);
     }
 
-    public PassAssert isPassAutoWithMatchedCarFields(String licensePlate, String phone, CarBrand carBrand) {
+    public AssertPass isPassAutoWithMatchedCarFields(String licensePlate, String phone, CarBrand carBrand) {
         isNotNull();
         assertThat(actual).asInstanceOf(InstanceOfAssertFactories.type(PassAuto.class))
                 .extracting(PassAuto::getCar).extracting(Car::getLicensePlate, Car::getPhone, Car::getBrand)
@@ -22,7 +22,7 @@ public class PassAssert extends AbstractAssert<PassAssert, Pass> {
         return this;
     }
 
-    public PassAssert isPassWalkWithMatchedVisitorFields(String name, String phone, String note) {
+    public AssertPass isPassWalkWithMatchedVisitorFields(String name, String phone, String note) {
         isNotNull();
         assertThat(actual).asInstanceOf(InstanceOfAssertFactories.type(PassWalk.class))
                 .extracting(PassWalk::getVisitor).extracting(Visitor::getName, Visitor::getPhone, Visitor::getNote)
@@ -31,8 +31,8 @@ public class PassAssert extends AbstractAssert<PassAssert, Pass> {
     }
 
 
-    public static PassAssert assertThat(Pass pass) {
-        return new PassAssert(pass);
+    public static AssertPass assertThat(Pass pass) {
+        return new AssertPass(pass);
     }
 
 }

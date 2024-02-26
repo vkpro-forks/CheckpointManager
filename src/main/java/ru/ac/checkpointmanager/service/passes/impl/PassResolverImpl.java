@@ -29,6 +29,8 @@ import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
 import ru.ac.checkpointmanager.service.passes.PassResolver;
+import ru.ac.checkpointmanager.specification.model.PassAuto_;
+import ru.ac.checkpointmanager.specification.model.PassWalk_;
 
 import java.util.UUID;
 
@@ -113,26 +115,26 @@ public class PassResolverImpl implements PassResolver {
     public Pass updatePass(@NonNull PassUpdateDTO passUpdateDTO, @NonNull Pass existPass) {
         CarDTO carToUpdate = passUpdateDTO.getCar();
         if (passUpdateDTO.getCar() != null) {
-            if (!StringUtils.equals(existPass.getDtype(), "AUTO")) {
-                throw new ModifyPassException("Attempt to modify auto pass for visitor");
+            if (!StringUtils.equals(existPass.getDtype(), PassAuto_.DTYPE)) {
+                log.warn(ExceptionUtils.CHANGE_PASS_TYPE_TO_AUTO);
+                throw new ModifyPassException(ExceptionUtils.CHANGE_PASS_TYPE_TO_AUTO);
             }
             PassAuto existPassAuto = (PassAuto) existPass;
             updateCarInPassAuto(existPassAuto, carToUpdate);
             return existPassAuto;
 
-        } else {
-            VisitorDTO visitorToUpdate = passUpdateDTO.getVisitor();
-            if (visitorToUpdate != null) {
-                if (!StringUtils.equals(existPass.getDtype(), "WALK")) {
-                    throw new ModifyPassException("Attempt to modify walk pass for auto");
-                }
-                PassWalk existPassWalk = (PassWalk) existPass;
-                updateVisitorInPassWalk(existPassWalk, visitorToUpdate);
-                return existPassWalk;
+        } else if (passUpdateDTO.getVisitor() != null) {
+            if (!StringUtils.equals(existPass.getDtype(), PassWalk_.DTYPE)) {
+                log.warn(ExceptionUtils.CHANGE_PASS_TYPE_TO_WALK);
+                throw new ModifyPassException(ExceptionUtils.CHANGE_PASS_TYPE_TO_WALK);
             }
+            PassWalk existPassWalk = (PassWalk) existPass;
+            updateVisitorInPassWalk(existPassWalk, passUpdateDTO.getVisitor());
+            return existPassWalk;
+        } else {
+            log.error(ExceptionUtils.PASS_RESOLVING_ERROR);
+            throw new CriticalServerException(ExceptionUtils.PASS_RESOLVING_ERROR);
         }
-        log.error(ExceptionUtils.PASS_RESOLVING_ERROR);
-        throw new CriticalServerException(ExceptionUtils.PASS_RESOLVING_ERROR);
     }
 
     private void setUpCar(Car car, CarBrandDTO brand) {

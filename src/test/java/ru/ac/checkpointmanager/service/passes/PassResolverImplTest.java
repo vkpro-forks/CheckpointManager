@@ -13,15 +13,20 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.test.util.ReflectionTestUtils;
-import ru.ac.checkpointmanager.assertion.PassAssert;
+import ru.ac.checkpointmanager.assertion.AssertPass;
 import ru.ac.checkpointmanager.dto.CarBrandDTO;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.VisitorDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
+import ru.ac.checkpointmanager.exception.CriticalServerException;
+import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
+import ru.ac.checkpointmanager.exception.pass.ModifyPassException;
+import ru.ac.checkpointmanager.exception.pass.PassException;
 import ru.ac.checkpointmanager.ext.argprovider.CarWithFieldsWithBrandArgumentProvider;
+import ru.ac.checkpointmanager.ext.argprovider.PassArgumentsForExceptionInPassResolver;
 import ru.ac.checkpointmanager.ext.argprovider.VisitorWithFieldsArgumentProvider;
 import ru.ac.checkpointmanager.mapper.PassMapper;
 import ru.ac.checkpointmanager.model.Territory;
@@ -163,7 +168,7 @@ class PassResolverImplTest {
 
         Pass updatedPass = passResolver.updatePass(passUpdateDTO, pass);
 
-        PassAssert.assertThat(updatedPass).isPassAutoWithMatchedCarFields(
+        AssertPass.assertThat(updatedPass).isPassAutoWithMatchedCarFields(
                 fields.getLeft() == null ? car.getLicensePlate() : carDTO.getLicensePlate(),
                 fields.getMiddle() == null ? car.getPhone() : carDTO.getPhone(),
                 TestUtils.getCarBrand());
@@ -180,7 +185,7 @@ class PassResolverImplTest {
         Pass updatedPass = passResolver.updatePass(passUpdateDTO, pass);
 
         CarDTO carDTO = passUpdateDTO.getCar();
-        PassAssert.assertThat(updatedPass).isPassAutoWithMatchedCarFields(
+        AssertPass.assertThat(updatedPass).isPassAutoWithMatchedCarFields(
                 carDTO.getLicensePlate(),
                 carDTO.getPhone(), TestUtils.getCarBrand());
         Mockito.verifyNoInteractions(carBrandRepository);
@@ -196,7 +201,7 @@ class PassResolverImplTest {
 
         Pass updatedPass = passResolver.updatePass(passUpdateDTO, pass);
 
-        PassAssert.assertThat(updatedPass).isPassAutoWithMatchedCarFields(
+        AssertPass.assertThat(updatedPass).isPassAutoWithMatchedCarFields(
                 TestUtils.getCarDto().getLicensePlate(), TestUtils.getCarDto().getPhone(), TestUtils.getCarBrand());
         Mockito.verify(carBrandRepository).findByBrand(Mockito.anyString());
         Mockito.verify(carBrandRepository).save(Mockito.any());
@@ -212,9 +217,27 @@ class PassResolverImplTest {
 
         Pass updatedPass = passResolver.updatePass(passUpdateDTO, pass);
 
-        PassAssert.assertThat(updatedPass).isPassWalkWithMatchedVisitorFields(
+        AssertPass.assertThat(updatedPass).isPassWalkWithMatchedVisitorFields(
                 fields.getLeft() == null ? visitor.getName() : visitorDTO.getName(),
                 fields.getMiddle() == null ? visitor.getPhone() : visitorDTO.getPhone(),
                 fields.getRight() == null ? visitor.getNote() : visitorDTO.getNote());
+    }
+
+    @ParameterizedTest
+    @ArgumentsSource(PassArgumentsForExceptionInPassResolver.class)
+    void updatePass_TryToChangePassType_ThrowException(Pass pass, PassUpdateDTO passUpdateDTO, String exceptionMsg) {
+        Assertions.assertThatExceptionOfType(ModifyPassException.class).isThrownBy(
+                        () -> passResolver.updatePass(passUpdateDTO, pass))
+                .withMessage(exceptionMsg)
+                .isInstanceOf(PassException.class);
+    }
+
+    @Test
+    void updatePass_NoCarNoVisitor_ThrowException() {
+        PassUpdateDTO passUpdateDTO = new PassUpdateDTO();
+        PassAuto passAuto = new PassAuto();
+        Assertions.assertThatExceptionOfType(CriticalServerException.class).isThrownBy(
+                        () -> passResolver.updatePass(passUpdateDTO, passAuto))
+                .withMessage(ExceptionUtils.PASS_RESOLVING_ERROR);
     }
 }
