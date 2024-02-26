@@ -152,8 +152,8 @@ public class UserController {
         return userService.findByName(name);
     }
 
-    @Operation(summary = "Получить список всех пользователей с пагинацией",
-            description = "Доступ: ADMIN, MANAGER, SECURITY.",
+    @Operation(summary = "Получить список всех пользователей",
+            description = "Доступ: ADMIN",
             parameters = {
                     @Parameter(in = ParameterIn.QUERY, name = "page", example = "0"),
                     @Parameter(in = ParameterIn.QUERY, name = "size", example = "20")
@@ -171,10 +171,35 @@ public class UserController {
                     description = "FORBIDDEN: роль пользователя не предоставляет доступ к данному api"
             )
     })
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping()
     public Page<UserResponseDTO> getAll(@Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams) {
         return userService.getAll(pagingParams);
+    }
+
+    @Operation(summary = "Получить список пользователей, связанных с территориями менеджера",
+            description = "Доступ: MANAGER",
+            parameters = {
+                    @Parameter(in = ParameterIn.QUERY, name = "page", example = "0"),
+                    @Parameter(in = ParameterIn.QUERY, name = "size", example = "20")
+            })
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "OK: возвращает страницу пользователей, содержащую объекты UserResponseDTO",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = Page.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "FORBIDDEN: роль пользователя не предоставляет доступ к данному api"
+            )
+    })
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
+    @GetMapping("/associated/")
+    public Page<UserResponseDTO> getTerritoriesAssociatedUsers(@Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams) {
+        return userService.getTerritoriesAssociatedUsers(pagingParams);
     }
 
     @Operation(summary = "Поиск пользователя по почте",

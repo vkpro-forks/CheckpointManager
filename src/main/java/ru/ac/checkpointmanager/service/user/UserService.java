@@ -51,6 +51,8 @@ public interface UserService {
 
     Page<UserResponseDTO> getAll(PagingParams pagingParams);
 
+    Page<UserResponseDTO> getTerritoriesAssociatedUsers(PagingParams pagingParams);
+
     Collection<String> findUsersPhones(UUID userId);
 
     void assignAvatarToUser(UUID userId, Avatar avatar);
