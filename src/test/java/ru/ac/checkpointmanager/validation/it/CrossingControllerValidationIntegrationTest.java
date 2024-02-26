@@ -23,7 +23,7 @@ import ru.ac.checkpointmanager.dto.CrossingRequestDTO;
 import ru.ac.checkpointmanager.model.avatar.AvatarProperties;
 import ru.ac.checkpointmanager.service.crossing.CrossingService;
 import ru.ac.checkpointmanager.util.PassTestData;
-import ru.ac.checkpointmanager.util.ResultCheckUtils;
+import ru.ac.checkpointmanager.util.CheckResultActionsUtils;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 
@@ -58,7 +58,7 @@ public class CrossingControllerValidationIntegrationTest {
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0))
                         .value("performedAt"));
 
-        ResultCheckUtils.checkCommonValidationFields(resultActions);
+        CheckResultActionsUtils.checkCommonValidationFields(resultActions);
     }
 
     @ParameterizedTest
@@ -75,7 +75,7 @@ public class CrossingControllerValidationIntegrationTest {
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0))
                         .value("passId"));
 
-        ResultCheckUtils.checkCommonValidationFields(resultActions);
+        CheckResultActionsUtils.checkCommonValidationFields(resultActions);
     }
 
     @ParameterizedTest
@@ -92,7 +92,7 @@ public class CrossingControllerValidationIntegrationTest {
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0))
                         .value("checkpointId"));
 
-        ResultCheckUtils.checkCommonValidationFields(resultActions);
+        CheckResultActionsUtils.checkCommonValidationFields(resultActions);
     }
 
 

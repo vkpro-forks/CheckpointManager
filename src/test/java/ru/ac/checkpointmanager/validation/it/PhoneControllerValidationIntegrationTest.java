@@ -20,7 +20,7 @@ import ru.ac.checkpointmanager.config.ValidationTestConfiguration;
 import ru.ac.checkpointmanager.controller.PhoneController;
 import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.service.phone.PhoneService;
-import ru.ac.checkpointmanager.util.ResultCheckUtils;
+import ru.ac.checkpointmanager.util.CheckResultActionsUtils;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 
@@ -54,7 +54,7 @@ class PhoneControllerValidationIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(phoneDTOToPass));
 
-        ResultCheckUtils.checkCommonValidationFields(resultActions);
+        CheckResultActionsUtils.checkCommonValidationFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0))
                 .value(field));
     }

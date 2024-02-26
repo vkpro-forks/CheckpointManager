@@ -9,9 +9,9 @@ import ru.ac.checkpointmanager.exception.handler.ErrorCode;
 import ru.ac.checkpointmanager.exception.handler.ErrorMessage;
 
 @Slf4j
-public class ResultCheckUtils {
+public class CheckResultActionsUtils {
 
-    private ResultCheckUtils() {
+    private CheckResultActionsUtils() {
         throw new AssertionError("no instances");
     }
 

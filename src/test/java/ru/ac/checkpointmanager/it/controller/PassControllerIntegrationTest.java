@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import ru.ac.checkpointmanager.assertion.AssertResultActions;
 import ru.ac.checkpointmanager.config.EnablePostgresAndRedisTestContainers;
 import ru.ac.checkpointmanager.dto.CarBrandDTO;
 import ru.ac.checkpointmanager.dto.CarDTO;
@@ -41,9 +42,9 @@ import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.repository.VisitorRepository;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
 import ru.ac.checkpointmanager.repository.car.CarRepository;
+import ru.ac.checkpointmanager.util.CheckResultActionsUtils;
 import ru.ac.checkpointmanager.util.MockMvcUtils;
 import ru.ac.checkpointmanager.util.PassTestData;
-import ru.ac.checkpointmanager.util.ResultCheckUtils;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 
@@ -318,7 +319,7 @@ class PassControllerIntegrationTest {
 
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                 .value(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(passCreateDTOWithCar.getUserId())));
-        ResultCheckUtils.checkNotFoundFields(resultActions);
+        CheckResultActionsUtils.checkNotFoundFields(resultActions);
     }
 
     //UPDATE PASS
@@ -329,13 +330,20 @@ class PassControllerIntegrationTest {
         saveTerritoryUserCarBrandAndCar();
         PassAuto passAuto = passRepository.saveAndFlush(
                 PassTestData.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar));
-        PassUpdateDTO passUpdateDTO = new PassUpdateDTO(null, PassTimeType.PERMANENT,
+        String anotherLicensePlate = "А425ВХ799";
+        String updatedComment = "my comment";
+        PassUpdateDTO passUpdateDTO = new PassUpdateDTO(updatedComment, PassTimeType.PERMANENT,
                 LocalDateTime.now().minusDays(1), LocalDateTime.now().plusDays(1),
-                null, new CarDTO(savedCar.getId(), savedCar.getLicensePlate(),
+                null, new CarDTO(savedCar.getId(), anotherLicensePlate,
                 new CarBrandDTO(savedCar.getBrand().getBrand()), null), passAuto.getId());
 
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.updatePass(passUpdateDTO));
         resultActions.andExpect(MockMvcResultMatchers.status().isOk());
+        AssertResultActions.assertThat(resultActions).commentMatches(updatedComment)
+                .contentTypeIsAppJson()
+                .startDateMatches(passUpdateDTO.getStartTime())
+                .endDateMatches(passUpdateDTO.getEndTime())
+                .passCarLicensePlateMatches(anotherLicensePlate);
     }
 
     //DELETING PASSES
@@ -414,7 +422,7 @@ class PassControllerIntegrationTest {
 
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                 .value(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(TestUtils.USER_ID)));
-        ResultCheckUtils.checkNotFoundFields(resultActions);
+        CheckResultActionsUtils.checkNotFoundFields(resultActions);
     }
 
     @ParameterizedTest
@@ -805,7 +813,7 @@ class PassControllerIntegrationTest {
     void getPass_NotFound_ReturnNotFound() {
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.getPass(PassTestData.PASS_ID));
 
-        ResultCheckUtils.checkNotFoundFields(resultActions);
+        CheckResultActionsUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -815,7 +823,7 @@ class PassControllerIntegrationTest {
 
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                 .value(ExceptionUtils.PASS_NOT_FOUND.formatted(PassTestData.PASS_ID)));
-        ResultCheckUtils.checkNotFoundFields(resultActions);
+        CheckResultActionsUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -825,7 +833,7 @@ class PassControllerIntegrationTest {
 
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                 .value(ExceptionUtils.PASS_NOT_FOUND.formatted(PassTestData.PASS_ID)));
-        ResultCheckUtils.checkNotFoundFields(resultActions);
+        CheckResultActionsUtils.checkNotFoundFields(resultActions);
     }
 
     @ParameterizedTest
@@ -836,7 +844,7 @@ class PassControllerIntegrationTest {
 
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                 .value(ExceptionUtils.PASS_NOT_FOUND.formatted(PassTestData.PASS_ID)));
-        ResultCheckUtils.checkNotFoundFields(resultActions);
+        CheckResultActionsUtils.checkNotFoundFields(resultActions);
     }
 
     private PassAuto createPassWithStatusAndTime(PassStatus passStatus, int i) {

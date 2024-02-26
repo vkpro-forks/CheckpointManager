@@ -47,7 +47,7 @@ import ru.ac.checkpointmanager.service.crossing.CrossingPassHandler;
 import ru.ac.checkpointmanager.service.crossing.impl.PassProcessorOnetime;
 import ru.ac.checkpointmanager.service.crossing.impl.PassProcessorPermanent;
 import ru.ac.checkpointmanager.util.PassTestData;
-import ru.ac.checkpointmanager.util.ResultCheckUtils;
+import ru.ac.checkpointmanager.util.CheckResultActionsUtils;
 import ru.ac.checkpointmanager.util.TestMessage;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
@@ -192,7 +192,7 @@ class CrossingControllerIntegrationTest {
         //then
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                 .value(ExceptionUtils.PASS_NOT_FOUND.formatted(PassTestData.PASS_ID)));
-        ResultCheckUtils.checkNotFoundFields(resultActions);
+        CheckResultActionsUtils.checkNotFoundFields(resultActions);
     }
 
     @ParameterizedTest
@@ -324,7 +324,7 @@ class CrossingControllerIntegrationTest {
         //then
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                 .value(ExceptionUtils.CHECKPOINT_NOT_FOUND.formatted(TestUtils.CHECKPOINT_ID)));
-        ResultCheckUtils.checkNotFoundFields(resultActions);
+        CheckResultActionsUtils.checkNotFoundFields(resultActions);
     }
 
     private Pass setupAndSavePass(PassStatus passStatus) {

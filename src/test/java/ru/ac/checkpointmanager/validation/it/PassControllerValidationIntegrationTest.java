@@ -28,7 +28,7 @@ import ru.ac.checkpointmanager.mapper.PassMapper;
 import ru.ac.checkpointmanager.service.passes.PassService;
 import ru.ac.checkpointmanager.util.MockMvcUtils;
 import ru.ac.checkpointmanager.util.PassTestData;
-import ru.ac.checkpointmanager.util.ResultCheckUtils;
+import ru.ac.checkpointmanager.util.CheckResultActionsUtils;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 
@@ -149,7 +149,7 @@ class PassControllerValidationIntegrationTest {
 
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passCreateDTO));
 
-        ResultCheckUtils.checkCommonValidationFields(resultActions);
+        CheckResultActionsUtils.checkCommonValidationFields(resultActions);
     }
 
     @ParameterizedTest
@@ -163,7 +163,7 @@ class PassControllerValidationIntegrationTest {
 
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.updatePass(passUpdateDTO));
 
-        ResultCheckUtils.checkCommonValidationFields(resultActions);
+        CheckResultActionsUtils.checkCommonValidationFields(resultActions);
     }
 
     @Test
@@ -174,8 +174,8 @@ class PassControllerValidationIntegrationTest {
 
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passCreateDTO));
 
-        ResultCheckUtils.checkCommonValidationFields(resultActions);
-        ResultCheckUtils.checkValidationField(resultActions, 0, END_TIME);
+        CheckResultActionsUtils.checkCommonValidationFields(resultActions);
+        CheckResultActionsUtils.checkValidationField(resultActions, 0, END_TIME);
     }
 
     @Test
@@ -186,8 +186,8 @@ class PassControllerValidationIntegrationTest {
 
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.updatePass(passUpdateDTO));
 
-        ResultCheckUtils.checkCommonValidationFields(resultActions);
-        ResultCheckUtils.checkValidationField(resultActions, 0, END_TIME);
+        CheckResultActionsUtils.checkCommonValidationFields(resultActions);
+        CheckResultActionsUtils.checkValidationField(resultActions, 0, END_TIME);
     }
 
 
@@ -202,8 +202,8 @@ class PassControllerValidationIntegrationTest {
 
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passCreateDTO));
 
-        ResultCheckUtils.checkCommonValidationFields(resultActions);
-        ResultCheckUtils.checkValidationField(resultActions, 0, field);
+        CheckResultActionsUtils.checkCommonValidationFields(resultActions);
+        CheckResultActionsUtils.checkValidationField(resultActions, 0, field);
     }
 
     @ParameterizedTest
@@ -217,8 +217,8 @@ class PassControllerValidationIntegrationTest {
 
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.updatePass(passUpdateDTO));
 
-        ResultCheckUtils.checkCommonValidationFields(resultActions);
-        ResultCheckUtils.checkValidationField(resultActions, 0, field);
+        CheckResultActionsUtils.checkCommonValidationFields(resultActions);
+        CheckResultActionsUtils.checkValidationField(resultActions, 0, field);
     }
 
     @ParameterizedTest
@@ -235,8 +235,8 @@ class PassControllerValidationIntegrationTest {
 
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passCreateDTO));
 
-        ResultCheckUtils.checkCommonValidationFields(resultActions);
-        ResultCheckUtils.checkValidationField(resultActions, 0, field);
+        CheckResultActionsUtils.checkCommonValidationFields(resultActions);
+        CheckResultActionsUtils.checkValidationField(resultActions, 0, field);
     }
 
     @ParameterizedTest
@@ -253,8 +253,8 @@ class PassControllerValidationIntegrationTest {
 
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.updatePass(passUpdateDTO));
 
-        ResultCheckUtils.checkCommonValidationFields(resultActions);
-        ResultCheckUtils.checkValidationField(resultActions, 0, field);
+        CheckResultActionsUtils.checkCommonValidationFields(resultActions);
+        CheckResultActionsUtils.checkValidationField(resultActions, 0, field);
     }
 
     @ParameterizedTest
@@ -267,8 +267,8 @@ class PassControllerValidationIntegrationTest {
 
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passCreateDTO));
 
-        ResultCheckUtils.checkCommonValidationFields(resultActions);
-        ResultCheckUtils.checkValidationField(resultActions, 0, field);
+        CheckResultActionsUtils.checkCommonValidationFields(resultActions);
+        CheckResultActionsUtils.checkValidationField(resultActions, 0, field);
     }
 
     @Test
@@ -279,8 +279,8 @@ class PassControllerValidationIntegrationTest {
 
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.createPass(passCreateDTO));
 
-        ResultCheckUtils.checkCommonValidationFields(resultActions);
-        ResultCheckUtils.checkValidationField(resultActions, 0, "comment");
+        CheckResultActionsUtils.checkCommonValidationFields(resultActions);
+        CheckResultActionsUtils.checkValidationField(resultActions, 0, "comment");
     }
 
     @ParameterizedTest
@@ -289,11 +289,11 @@ class PassControllerValidationIntegrationTest {
     void allEndpoints_BadUUIDPassed_ReturnBadRequest(MockHttpServletRequestBuilder requestBuilder) {
         ResultActions resultActions = mockMvc.perform(requestBuilder);
 
-        ResultCheckUtils.checkWrongTypeFields(resultActions);
+        CheckResultActionsUtils.checkWrongTypeFields(resultActions);
     }
 
     private static void checkCarOrVisitorFields(ResultActions resultActions) throws Exception {
-        ResultCheckUtils.checkCommonValidationFields(resultActions);
+        CheckResultActionsUtils.checkCommonValidationFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0))
                         .value(Matchers.anyOf(Matchers.is(CAR), Matchers.is(VISITOR))))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(1))
@@ -301,7 +301,7 @@ class PassControllerValidationIntegrationTest {
     }
 
     private static void checkStartEndTimeFields(ResultActions resultActions) throws Exception {
-        ResultCheckUtils.checkCommonValidationFields(resultActions);
+        CheckResultActionsUtils.checkCommonValidationFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0))
                         .value(Matchers.anyOf(Matchers.is(START_TIME), Matchers.is(END_TIME))))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(1))

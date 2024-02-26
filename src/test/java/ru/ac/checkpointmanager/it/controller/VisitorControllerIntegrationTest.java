@@ -33,7 +33,7 @@ import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
 import ru.ac.checkpointmanager.repository.car.CarRepository;
 import ru.ac.checkpointmanager.util.MockMvcUtils;
 import ru.ac.checkpointmanager.util.PassTestData;
-import ru.ac.checkpointmanager.util.ResultCheckUtils;
+import ru.ac.checkpointmanager.util.CheckResultActionsUtils;
 import ru.ac.checkpointmanager.util.TestUtils;
 
 import java.util.List;
@@ -127,7 +127,7 @@ class VisitorControllerIntegrationTest {
     void getVisitor_VisitorNotFound_HandleErrorAndReturnNotFound() {
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.getVisitor(TestUtils.VISITOR_ID));
 
-        ResultCheckUtils.checkNotFoundFields(resultActions);
+        CheckResultActionsUtils.checkNotFoundFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                 .value(ExceptionUtils.VISITOR_NOT_FOUND.formatted(TestUtils.VISITOR_ID)));
     }
@@ -155,7 +155,7 @@ class VisitorControllerIntegrationTest {
         ResultActions resultActions = mockMvc.perform(
                 MockMvcUtils.updateVisitor(TestUtils.getVisitorDTO(), TestUtils.VISITOR_ID));
 
-        ResultCheckUtils.checkNotFoundFields(resultActions);
+        CheckResultActionsUtils.checkNotFoundFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                 .value(ExceptionUtils.VISITOR_NOT_FOUND.formatted(TestUtils.VISITOR_ID)));
     }
@@ -179,7 +179,7 @@ class VisitorControllerIntegrationTest {
     void deleteVisitor_VisitorNotFound_HandleErrorAndReturnNotFound() {
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.deleteVisitor(TestUtils.VISITOR_ID));
 
-        ResultCheckUtils.checkNotFoundFields(resultActions);
+        CheckResultActionsUtils.checkNotFoundFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                 .value(ExceptionUtils.VISITOR_NOT_FOUND.formatted(TestUtils.VISITOR_ID)));
     }
@@ -301,7 +301,7 @@ class VisitorControllerIntegrationTest {
         resultActions.andExpect(MockMvcResultMatchers.status().isNotFound());
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                 .value(ExceptionUtils.VISITOR_BY_PASS_NOT_FOUND.formatted(savedPass.getId())));
-        ResultCheckUtils.checkNotFoundFields(resultActions);
+        CheckResultActionsUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -315,7 +315,7 @@ class VisitorControllerIntegrationTest {
         resultActions.andExpect(MockMvcResultMatchers.status().isNotFound());
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                 .value(ExceptionUtils.VISITOR_BY_PASS_NOT_FOUND.formatted(PassTestData.PASS_ID)));
-        ResultCheckUtils.checkNotFoundFields(resultActions);
+        CheckResultActionsUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
