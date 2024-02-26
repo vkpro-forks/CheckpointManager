@@ -7,6 +7,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,11 +22,11 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.ac.checkpointmanager.assertion.AssertResultActions;
 import ru.ac.checkpointmanager.config.EnablePostgresAndRedisTestContainers;
-import ru.ac.checkpointmanager.dto.CarBrandDTO;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.exception.ExceptionUtils;
+import ru.ac.checkpointmanager.ext.argprovider.PassUpdateDTOWithCarArgumentProvider;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.Visitor;
@@ -324,9 +325,28 @@ class PassControllerIntegrationTest {
 
     //UPDATE PASS
 
+    @ParameterizedTest
+    @ArgumentsSource(PassUpdateDTOWithCarArgumentProvider.class)
+    @SneakyThrows
+    void updatePass_AllOkShouldUpdateExistingPassWithCar_ReturnUpdatedPass(PassUpdateDTO passUpdateDTO) {
+        saveTerritoryUserCarBrandAndCar();
+        PassAuto passAuto = passRepository.saveAndFlush(
+                PassTestData.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar));
+        passUpdateDTO.setId(passAuto.getId());
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.updatePass(passUpdateDTO));
+        resultActions.andExpect(MockMvcResultMatchers.status().isOk());
+        assert passUpdateDTO.getCar() != null;
+        AssertResultActions.assertThat(resultActions).commentMatches(passUpdateDTO.getComment())
+                .contentTypeIsAppJson()
+                .startDateMatches(passUpdateDTO.getStartTime())
+                .endDateMatches(passUpdateDTO.getEndTime())
+                .passCarLicensePlateMatches(passUpdateDTO.getCar().getLicensePlate())
+                .passTimeTypeMatches(passUpdateDTO.getTimeType());
+    }
+
     @Test
     @SneakyThrows
-    void updatePass_AllOkShouldUpdateExistingPassWithCar_ReturnUpdatedPass() {
+    void updatePass_AllOkShouldUpdateNewCar_ReturnUpdatedPass() {
         saveTerritoryUserCarBrandAndCar();
         PassAuto passAuto = passRepository.saveAndFlush(
                 PassTestData.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar));
@@ -334,8 +354,8 @@ class PassControllerIntegrationTest {
         String updatedComment = "my comment";
         PassUpdateDTO passUpdateDTO = new PassUpdateDTO(updatedComment, PassTimeType.PERMANENT,
                 LocalDateTime.now().minusDays(1), LocalDateTime.now().plusDays(1),
-                null, new CarDTO(savedCar.getId(), anotherLicensePlate,
-                new CarBrandDTO(savedCar.getBrand().getBrand()), null), passAuto.getId());
+                null, new CarDTO(null, anotherLicensePlate,
+                TestUtils.getCarBrandDTO(), null), passAuto.getId());
 
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.updatePass(passUpdateDTO));
         resultActions.andExpect(MockMvcResultMatchers.status().isOk());
@@ -343,7 +363,8 @@ class PassControllerIntegrationTest {
                 .contentTypeIsAppJson()
                 .startDateMatches(passUpdateDTO.getStartTime())
                 .endDateMatches(passUpdateDTO.getEndTime())
-                .passCarLicensePlateMatches(anotherLicensePlate);
+                .passCarLicensePlateMatches(anotherLicensePlate)
+                .passTimeTypeMatches(passUpdateDTO.getTimeType());
     }
 
     //DELETING PASSES

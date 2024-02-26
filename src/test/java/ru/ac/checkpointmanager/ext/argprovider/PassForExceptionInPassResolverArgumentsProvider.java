@@ -14,7 +14,7 @@ import ru.ac.checkpointmanager.util.PassTestData;
 import java.util.stream.Stream;
 
 @Slf4j
-public class PassArgumentsForExceptionInPassResolver implements ArgumentsProvider {
+public class PassForExceptionInPassResolverArgumentsProvider implements ArgumentsProvider {
     @Override
     public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
         log.info("Configuring arguments with passes and passUpdateDtos for checking exceptions");

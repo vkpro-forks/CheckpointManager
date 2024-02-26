@@ -26,7 +26,7 @@ import ru.ac.checkpointmanager.exception.UserNotFoundException;
 import ru.ac.checkpointmanager.exception.pass.ModifyPassException;
 import ru.ac.checkpointmanager.exception.pass.PassException;
 import ru.ac.checkpointmanager.ext.argprovider.CarWithFieldsWithBrandArgumentProvider;
-import ru.ac.checkpointmanager.ext.argprovider.PassArgumentsForExceptionInPassResolver;
+import ru.ac.checkpointmanager.ext.argprovider.PassForExceptionInPassResolverArgumentsProvider;
 import ru.ac.checkpointmanager.ext.argprovider.VisitorWithFieldsArgumentProvider;
 import ru.ac.checkpointmanager.mapper.PassMapper;
 import ru.ac.checkpointmanager.model.Territory;
@@ -227,7 +227,7 @@ class PassResolverImplTest {
     }
 
     @ParameterizedTest
-    @ArgumentsSource(PassArgumentsForExceptionInPassResolver.class)
+    @ArgumentsSource(PassForExceptionInPassResolverArgumentsProvider.class)
     void updatePass_TryToChangePassType_ThrowException(Pass pass, PassUpdateDTO passUpdateDTO, String exceptionMsg) {
         Assertions.assertThatExceptionOfType(ModifyPassException.class).isThrownBy(
                         () -> passResolver.updatePass(passUpdateDTO, pass))

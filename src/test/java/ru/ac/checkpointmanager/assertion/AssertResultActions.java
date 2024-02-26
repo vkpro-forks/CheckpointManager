@@ -5,6 +5,7 @@ import org.hamcrest.Matchers;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import ru.ac.checkpointmanager.model.passes.PassTimeType;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -24,6 +25,8 @@ public class AssertResultActions extends AbstractAssert<AssertResultActions, Res
     public static final String JSON_CAR_LICENSE_PLATE = "$.car.licensePlate";
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    public static final String JSON_TIME_TYPE = "$.timeType";
+    public static final String JSON_TIME_TYPE_DESC = "$.timeTypeDescription";
 
     protected AssertResultActions(ResultActions resultActions) {
         super(resultActions, AssertResultActions.class);
@@ -74,6 +77,14 @@ public class AssertResultActions extends AbstractAssert<AssertResultActions, Res
     public AssertResultActions passCarLicensePlateMatches(String licensePlate) throws Exception {
         isNotNull();
         actual.andExpect(MockMvcResultMatchers.jsonPath(JSON_CAR_LICENSE_PLATE, Matchers.equalTo(licensePlate)));
+        return this;
+    }
+
+    public AssertResultActions passTimeTypeMatches(PassTimeType passTimeType) throws Exception {
+        isNotNull();
+        actual.andExpect(MockMvcResultMatchers.jsonPath(JSON_TIME_TYPE, Matchers.equalTo(passTimeType.name())))
+                .andExpect(MockMvcResultMatchers.jsonPath(JSON_TIME_TYPE_DESC,
+                        Matchers.equalTo(passTimeType.getDescription())));
         return this;
     }
 
