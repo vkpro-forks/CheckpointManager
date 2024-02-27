@@ -24,9 +24,12 @@ public class AssertResultActions extends AbstractAssert<AssertResultActions, Res
 
     public static final String JSON_CAR_LICENSE_PLATE = "$.car.licensePlate";
 
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
     public static final String JSON_TIME_TYPE = "$.timeType";
     public static final String JSON_TIME_TYPE_DESC = "$.timeTypeDescription";
+    public static final String JSON_PASS_VISITOR_NAME = "$.visitor.name";
+    public static final String JSON_PASS_VISITOR_PHONE = "$.visitor.phone";
+    public static final String JSON_PASS_VISITOR_NOTE = "$.visitor.note";
 
     protected AssertResultActions(ResultActions resultActions) {
         super(resultActions, AssertResultActions.class);
@@ -85,6 +88,24 @@ public class AssertResultActions extends AbstractAssert<AssertResultActions, Res
         actual.andExpect(MockMvcResultMatchers.jsonPath(JSON_TIME_TYPE, Matchers.equalTo(passTimeType.name())))
                 .andExpect(MockMvcResultMatchers.jsonPath(JSON_TIME_TYPE_DESC,
                         Matchers.equalTo(passTimeType.getDescription())));
+        return this;
+    }
+
+    public AssertResultActions passVisitorNameMatches(String name) throws Exception {
+        isNotNull();
+        actual.andExpect(MockMvcResultMatchers.jsonPath(JSON_PASS_VISITOR_NAME, Matchers.equalTo(name)));
+        return this;
+    }
+
+    public AssertResultActions passVisitorPhoneMatches(String phone) throws Exception {
+        isNotNull();
+        actual.andExpect(MockMvcResultMatchers.jsonPath(JSON_PASS_VISITOR_PHONE, Matchers.equalTo(phone)));
+        return this;
+    }
+
+    public AssertResultActions passVisitorNoteMatches(String note) throws Exception {
+        isNotNull();
+        actual.andExpect(MockMvcResultMatchers.jsonPath(JSON_PASS_VISITOR_NOTE, Matchers.equalTo(note)));
         return this;
     }
 

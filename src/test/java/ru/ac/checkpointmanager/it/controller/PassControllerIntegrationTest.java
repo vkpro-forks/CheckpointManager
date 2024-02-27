@@ -22,11 +22,12 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.ac.checkpointmanager.assertion.AssertResultActions;
 import ru.ac.checkpointmanager.config.EnablePostgresAndRedisTestContainers;
-import ru.ac.checkpointmanager.dto.CarDTO;
+import ru.ac.checkpointmanager.dto.VisitorDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.ext.argprovider.PassUpdateDTOWithCarArgumentProvider;
+import ru.ac.checkpointmanager.ext.argprovider.PassUpdateDTOWithVisitorArgumentProvider;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.Visitor;
@@ -328,7 +329,7 @@ class PassControllerIntegrationTest {
     @ParameterizedTest
     @ArgumentsSource(PassUpdateDTOWithCarArgumentProvider.class)
     @SneakyThrows
-    void updatePass_AllOkShouldUpdateExistingPassWithCar_ReturnUpdatedPass(PassUpdateDTO passUpdateDTO) {
+    void updatePass_AllOkShouldUpdateWithCars_ReturnUpdatedPass(PassUpdateDTO passUpdateDTO) {
         saveTerritoryUserCarBrandAndCar();
         PassAuto passAuto = passRepository.saveAndFlush(
                 PassTestData.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar));
@@ -336,35 +337,38 @@ class PassControllerIntegrationTest {
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.updatePass(passUpdateDTO));
         resultActions.andExpect(MockMvcResultMatchers.status().isOk());
         assert passUpdateDTO.getCar() != null;
+
         AssertResultActions.assertThat(resultActions).commentMatches(passUpdateDTO.getComment())
                 .contentTypeIsAppJson()
                 .startDateMatches(passUpdateDTO.getStartTime())
                 .endDateMatches(passUpdateDTO.getEndTime())
-                .passCarLicensePlateMatches(passUpdateDTO.getCar().getLicensePlate())
-                .passTimeTypeMatches(passUpdateDTO.getTimeType());
+                .passTimeTypeMatches(passUpdateDTO.getTimeType())
+                .passCarLicensePlateMatches(passUpdateDTO.getCar().getLicensePlate());
     }
 
-    @Test
+    @ParameterizedTest
+    @ArgumentsSource(PassUpdateDTOWithVisitorArgumentProvider.class)
     @SneakyThrows
-    void updatePass_AllOkShouldUpdateNewCar_ReturnUpdatedPass() {
-        saveTerritoryUserCarBrandAndCar();
-        PassAuto passAuto = passRepository.saveAndFlush(
-                PassTestData.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar));
-        String anotherLicensePlate = "А425ВХ799";
-        String updatedComment = "my comment";
-        PassUpdateDTO passUpdateDTO = new PassUpdateDTO(updatedComment, PassTimeType.PERMANENT,
-                LocalDateTime.now().minusDays(1), LocalDateTime.now().plusDays(1),
-                null, new CarDTO(null, anotherLicensePlate,
-                TestUtils.getCarBrandDTO(), null), passAuto.getId());
-
+    void updatePass_AllOkShouldUpdateWithVisitors_ReturnUpdatedPass(PassUpdateDTO passUpdateDTO) {
+        saveTerritoryAndUser();
+        Visitor visitorUnsaved = TestUtils.getVisitorRandomUUID();
+        Visitor savedVisitor = visitorRepository.saveAndFlush(visitorUnsaved);
+        PassWalk savedPassWalk = passRepository.saveAndFlush(
+                PassTestData.getSimpleActiveOneTimePassWalkFor3Hours(savedUser, savedTerritory, savedVisitor));
+        passUpdateDTO.setId(savedPassWalk.getId());
+        VisitorDTO visitorDTO = passUpdateDTO.getVisitor();
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.updatePass(passUpdateDTO));
         resultActions.andExpect(MockMvcResultMatchers.status().isOk());
-        AssertResultActions.assertThat(resultActions).commentMatches(updatedComment)
+
+        assert visitorDTO != null;
+        AssertResultActions.assertThat(resultActions).commentMatches(passUpdateDTO.getComment())
                 .contentTypeIsAppJson()
                 .startDateMatches(passUpdateDTO.getStartTime())
                 .endDateMatches(passUpdateDTO.getEndTime())
-                .passCarLicensePlateMatches(anotherLicensePlate)
-                .passTimeTypeMatches(passUpdateDTO.getTimeType());
+                .passTimeTypeMatches(passUpdateDTO.getTimeType())
+                .passVisitorNameMatches(visitorDTO.getName())
+                .passVisitorPhoneMatches(visitorDTO.getPhone())
+                .passVisitorNoteMatches(visitorDTO.getNote());
     }
 
     //DELETING PASSES
