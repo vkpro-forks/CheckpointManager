@@ -20,7 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import ru.ac.checkpointmanager.assertion.AssertResultActions;
+import ru.ac.checkpointmanager.assertion.AssertPassResultActions;
 import ru.ac.checkpointmanager.config.EnablePostgresAndRedisTestContainers;
 import ru.ac.checkpointmanager.dto.VisitorDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
@@ -338,12 +338,12 @@ class PassControllerIntegrationTest {
         resultActions.andExpect(MockMvcResultMatchers.status().isOk());
         assert passUpdateDTO.getCar() != null;
 
-        AssertResultActions.assertThat(resultActions).commentMatches(passUpdateDTO.getComment())
-                .contentTypeIsAppJson()
+        AssertPassResultActions.assertThat(resultActions).commentMatches(passUpdateDTO.getComment())
                 .startDateMatches(passUpdateDTO.getStartTime())
                 .endDateMatches(passUpdateDTO.getEndTime())
                 .passTimeTypeMatches(passUpdateDTO.getTimeType())
-                .passCarLicensePlateMatches(passUpdateDTO.getCar().getLicensePlate());
+                .passCarLicensePlateMatches(passUpdateDTO.getCar().getLicensePlate())
+                .contentTypeIsAppJson();
     }
 
     @ParameterizedTest
@@ -361,14 +361,14 @@ class PassControllerIntegrationTest {
         resultActions.andExpect(MockMvcResultMatchers.status().isOk());
 
         assert visitorDTO != null;
-        AssertResultActions.assertThat(resultActions).commentMatches(passUpdateDTO.getComment())
-                .contentTypeIsAppJson()
+        AssertPassResultActions.assertThat(resultActions).commentMatches(passUpdateDTO.getComment())
                 .startDateMatches(passUpdateDTO.getStartTime())
                 .endDateMatches(passUpdateDTO.getEndTime())
                 .passTimeTypeMatches(passUpdateDTO.getTimeType())
                 .passVisitorNameMatches(visitorDTO.getName())
                 .passVisitorPhoneMatches(visitorDTO.getPhone())
-                .passVisitorNoteMatches(visitorDTO.getNote());
+                .passVisitorNoteMatches(visitorDTO.getNote())
+                .contentTypeIsAppJson();
     }
 
     //DELETING PASSES
