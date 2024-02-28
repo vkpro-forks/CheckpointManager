@@ -7,12 +7,9 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      avatars-storage:
-        condition: service_started
-      redis-cache:
-        condition: service_started
-      postgres-db:
-        condition: service_healthy
+      - postgres-db
+      - avatars-storage
+      - redis-cache
     volumes:
       - logs:/path/to/remote/logs # Использование именованного тома для логов
     environment:
