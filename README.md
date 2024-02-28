@@ -1,4 +1,5 @@
 [![](https://img.shields.io/badge/Spring%20Boot%20Version-3.1.2-orange)](/build.gradle) [![](https://img.shields.io/badge/Java%20Version-17-orange)](/build.gradle)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/d27cf1c00fbd44409c53bd7dc4a829f9)](https://app.codacy.com?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 
 <div align="center">
 <img src="https://github.com/AnvilCoder/CheckpointManager/assets/124284597/8f2d0df9-e77e-486f-8bee-a2bd3276d492" alt="Логотип Checkpoint Manager" width="400" height="100"/>

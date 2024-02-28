@@ -31,7 +31,7 @@ services:
       - AVATAR_STORAGE_PATH=/avatars
       - TZ=UTC
     env_file:
-      - .env.sample
+      - .env
   # Сервис для базы данных PostgreSQL
   postgres-db:
     image: postgres:latest
