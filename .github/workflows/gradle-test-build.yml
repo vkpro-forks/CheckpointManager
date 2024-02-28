@@ -9,11 +9,11 @@ name: Java CI/CD with Gradle
 
 on:
   push:
-    branches-ignore:
-      - 'master'
+    branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
   workflow_dispatch:
+
 
 permissions:
   contents: read
@@ -21,7 +21,6 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK 17
@@ -39,6 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     steps:
+      - uses: actions/checkout@v3
       - name: Set Project Version
         run: |
           echo "PROJECT_VERSION=$(grep -Po "version = '\K[^']+" build.gradle)" >> $GITHUB_ENV
