@@ -48,6 +48,8 @@ jobs:
           echo "PG_DB=${{ secrets.PG_DB }}" >> .env
           echo "PG_USER=${{ secrets.PG_USER }}" >> .env
           echo "PG_PASS=${{ secrets.PG_PASS }}" >> .env
+        # Поскольку PROJECT_VERSION добавляется вручную, этот шаг не требуется
+        # echo "PROJECT_VERSION=0.1.18-SNAPSHOT-TEST" >> .env
       - name: Build and Push Docker Image
         run: |
           docker-compose build
@@ -65,10 +67,8 @@ jobs:
         run: ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
       - name: Deploy to Server
         run: |
-          scp .env docker-compose.prod.yml Dockerfile deploy.sh build/libs/app.jar nginx.conf root@185.233.83.75:~
-          ssh root@185.233.83.75 "docker-compose --env-file .env -f docker-compose.prod.yml pull && docker-compose --env-file .env -f docker-compose.prod.yml up -d"
-          ssh root@185.233.83.75 "bash deploy.sh"
+          scp .env docker-compose.prod.yml Dockerfile deploy.sh build/libs/app.jar nginx.conf ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }}:~
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "docker-compose --env-file .env -f docker-compose.prod.yml pull && docker-compose --env-file .env -f docker-compose.prod.yml up -d"
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "bash deploy.sh"
         env:
           PROJECT_VERSION: ${{ env.PROJECT_VERSION }}
-
-
