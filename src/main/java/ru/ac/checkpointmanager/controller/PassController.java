@@ -44,6 +44,7 @@ import java.util.UUID;
 
 import static ru.ac.checkpointmanager.utils.SwaggerConstants.INTERNAL_SERVER_ERROR_MSG;
 import static ru.ac.checkpointmanager.utils.SwaggerConstants.UNAUTHORIZED_MSG;
+import static ru.ac.checkpointmanager.utils.SwaggerConstants.ACCESS_ADMIN_MESSAGE;
 import static ru.ac.checkpointmanager.utils.SwaggerConstants.PASSES_ARE_FOUND_MESSAGE;
 import static ru.ac.checkpointmanager.utils.SwaggerConstants.PASS_NOT_FOUND_MESSAGE;
 import static ru.ac.checkpointmanager.utils.SwaggerConstants.PASS_ACCESS_ALL_MESSAGE;
@@ -80,7 +81,7 @@ public class PassController {
     /* READ */
     @Operation(summary = "Получить список всех пропусков, с учетом фильтрации и совпадения" +
             " по первым буквам посетителя или номера авто",
-            description = PASS_ACCESS_ALL_MESSAGE,
+            description = ACCESS_ADMIN_MESSAGE,
             parameters = {
                     @Parameter(in = ParameterIn.QUERY, name = "page"),
                     @Parameter(in = ParameterIn.QUERY, name = "size"),
@@ -95,7 +96,7 @@ public class PassController {
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = PassResponseDTO.class)))),
             @ApiResponse(responseCode = "404", description = "Пропуска не найдены")})
-    @AllRolesPreAuthorize
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping
     public Page<PassResponseDTO> getPasses(@Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams,
                                            @Schema(hidden = true) FilterParams filterParams,
