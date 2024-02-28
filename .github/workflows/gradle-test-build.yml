@@ -40,6 +40,14 @@ jobs:
           mv build/libs/*-$PROJECT_VERSION.jar build/libs/app.jar
         env:
           PROJECT_VERSION: ${{ env.PROJECT_VERSION }}
+      - name: Create .env file
+        run: |
+          echo "JASYPT_ENCRYPTOR_PASSWORD=${{ secrets.JASYPT_ENCRYPTOR_PASSWORD }}" >> .env
+          echo "SPRING_DATA_REDIS_PASSWORD=${{ secrets.SPRING_DATA_REDIS_PASSWORD }}" >> .env
+          echo "REDIS_PASS=${{ secrets.REDIS_PASS }}" >> .env
+          echo "PG_DB=${{ secrets.PG_DB }}" >> .env
+          echo "PG_USER=${{ secrets.PG_USER }}" >> .env
+          echo "PG_PASS=${{ secrets.PG_PASS }}" >> .env
       - name: Build and Push Docker Image
         run: |
           docker-compose build
@@ -56,6 +64,8 @@ jobs:
       - name: Deploy to Server
         run: |
           scp .env docker-compose.prod.yml Dockerfile deploy.sh build/libs/app.jar nginx.conf root@185.233.83.75:~
-          ssh root@185.233.83.75 "PROJECT_VERSION=${{ env.PROJECT_VERSION }} bash deploy.sh"
+          ssh root@185.233.83.75 "docker-compose --env-file .env -f docker-compose.prod.yml pull && docker-compose --env-file .env -f docker-compose.prod.yml up -d"
+          ssh root@185.233.83.75 "bash deploy.sh"
         env:
           PROJECT_VERSION: ${{ env.PROJECT_VERSION }}
+
