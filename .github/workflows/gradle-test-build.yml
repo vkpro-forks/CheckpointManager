@@ -48,8 +48,9 @@ jobs:
           echo "PG_DB=${{ secrets.PG_DB }}" >> .env
           echo "PG_USER=${{ secrets.PG_USER }}" >> .env
           echo "PG_PASS=${{ secrets.PG_PASS }}" >> .env
+          echo "PROJECT_VERSION=${{ env.PROJECT_VERSION }}" >> .env
         # Поскольку PROJECT_VERSION добавляется вручную, этот шаг не требуется
-        # echo "PROJECT_VERSION=0.1.18-SNAPSHOT-TEST" >> .env
+          echo "PROJECT_VERSION=0.1.18-SNAPSHOT-TEST" >> .env
       - name: Build and Push Docker Image
         run: |
           docker-compose build
