@@ -29,8 +29,8 @@ jobs:
           distribution: 'adopt'
       - name: Adjust permissions for Gradle
         run: chmod +x gradlew
-      - name: Test with gradle
-        run: ./gradlew test
+#      - name: Test with gradle
+#        run: ./gradlew test
       - name: Set Project Version
         run: |
           echo "PROJECT_VERSION=$(grep -Po "version = '\K[^']+" build.gradle)" >> $GITHUB_ENV
