@@ -61,6 +61,8 @@ jobs:
         uses: webfactory/ssh-agent@v0.5.1
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Add server to known hosts
+        run: ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
       - name: Deploy to Server
         run: |
           scp .env docker-compose.prod.yml Dockerfile deploy.sh build/libs/app.jar nginx.conf root@185.233.83.75:~
@@ -68,4 +70,5 @@ jobs:
           ssh root@185.233.83.75 "bash deploy.sh"
         env:
           PROJECT_VERSION: ${{ env.PROJECT_VERSION }}
+
 
