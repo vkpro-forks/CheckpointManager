@@ -13,8 +13,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.exception.MismatchedTerritoryException;
 import ru.ac.checkpointmanager.exception.pass.InactivePassException;
+import ru.ac.checkpointmanager.exception.pass.ModifyPassException;
 import ru.ac.checkpointmanager.exception.pass.PassException;
 import ru.ac.checkpointmanager.exception.pass.UserTerritoryRelationException;
 import ru.ac.checkpointmanager.ext.LoggingMemoryAppenderTestResolver;
@@ -26,6 +28,7 @@ import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.repository.PassRepository;
 import ru.ac.checkpointmanager.service.passes.impl.PassCheckerImpl;
+import ru.ac.checkpointmanager.util.PassTestData;
 import ru.ac.checkpointmanager.util.TestUtils;
 
 import java.util.UUID;
@@ -140,6 +143,28 @@ class PassCheckerImplTest {
         Assertions.assertThat(!memoryAppender.contains("Conflict between the types", Level.WARN))
                 .as("Check standard flow without WARN")
                 .isTrue();
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = PassStatus.class, names = {"ACTIVE", "DELAYED"}, mode = EnumSource.Mode.INCLUDE)
+    void isPassUpdatable_NoExceptions(PassStatus passStatus) {
+        PassAuto passAuto = new PassAuto();
+        passAuto.setStatus(passStatus);
+
+        Assertions.assertThatNoException().isThrownBy(() -> passChecker.isPassUpdatable(passAuto));
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = PassStatus.class, names = {"ACTIVE", "DELAYED"}, mode = EnumSource.Mode.EXCLUDE)
+    void isPassUpdatable_ThrowException(PassStatus passStatus) {
+        PassAuto passAuto = new PassAuto();
+        passAuto.setId(PassTestData.PASS_ID);
+        passAuto.setStatus(passStatus);
+
+        Assertions.assertThatExceptionOfType(ModifyPassException.class)
+                .isThrownBy(() -> passChecker.isPassUpdatable(passAuto))
+                .withMessage(ExceptionUtils.PASS_NOT_UPDATE.formatted(PassTestData.PASS_ID, passStatus.name()))
+                .isInstanceOf(PassException.class);
     }
 
     private static Stream<Arguments> getTerritoriesForCheckpointAndPass() {

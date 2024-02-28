@@ -33,6 +33,7 @@ import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
 import ru.ac.checkpointmanager.repository.car.CarRepository;
+import ru.ac.checkpointmanager.util.PassTestData;
 import ru.ac.checkpointmanager.util.TestMessage;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
@@ -92,7 +93,7 @@ class TerritoryControllerIntegrationTest {
         CarBrand savedCarBrand = carBrandRepository.saveAndFlush(TestUtils.getCarBrand());
         Car car = TestUtils.getCar(savedCarBrand);
         Car savedCar = carRepository.saveAndFlush(car);
-        PassAuto passAuto = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
+        PassAuto passAuto = PassTestData.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
         passRepository.saveAndFlush(passAuto);
         log.info("SAVED territory, user, car brand, car");
         String url = UrlConstants.TERR_URL + "/" + savedTerritory.getId();
@@ -119,7 +120,7 @@ class TerritoryControllerIntegrationTest {
         CarBrand savedCarBrand = carBrandRepository.saveAndFlush(TestUtils.getCarBrand());
         Car car = TestUtils.getCar(savedCarBrand);
         Car savedCar = carRepository.saveAndFlush(car);
-        PassAuto passAuto = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
+        PassAuto passAuto = PassTestData.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
         passRepository.saveAndFlush(passAuto);
         Checkpoint checkpoint = TestUtils.getCheckpoint(CheckpointType.UNIVERSAL, savedTerritory);
         Checkpoint savedCheckPoint = checkpointRepository.saveAndFlush(checkpoint);

@@ -2,14 +2,20 @@ package ru.ac.checkpointmanager.service.passes.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.CarBrandDTO;
+import ru.ac.checkpointmanager.dto.CarDTO;
+import ru.ac.checkpointmanager.dto.VisitorDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
+import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.exception.CriticalServerException;
 import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.exception.UserNotFoundException;
+import ru.ac.checkpointmanager.exception.pass.ModifyPassException;
 import ru.ac.checkpointmanager.mapper.PassMapper;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
@@ -23,6 +29,8 @@ import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
 import ru.ac.checkpointmanager.service.passes.PassResolver;
+import ru.ac.checkpointmanager.specification.model.PassAuto_;
+import ru.ac.checkpointmanager.specification.model.PassWalk_;
 
 import java.util.UUID;
 
@@ -51,7 +59,7 @@ public class PassResolverImpl implements PassResolver {
      */
     @Override
     @Transactional
-    public Pass createPass(PassCreateDTO passCreateDTO) {
+    public Pass createPass(@NonNull PassCreateDTO passCreateDTO) {
         UUID userId = passCreateDTO.getUserId();
         UUID territoryId = passCreateDTO.getTerritoryId();
         User user = userRepository.findById(userId)
@@ -68,17 +76,9 @@ public class PassResolverImpl implements PassResolver {
                         });
         Pass pass;
         if (passCreateDTO.getCar() != null) {
-            CarBrandDTO brand = passCreateDTO.getCar().getBrand();
-            CarBrand carBrand = carBrandRepository.findByBrand(brand.getBrand()).orElseGet(() -> {
-                log.info("CarBrand saved to DB");
-                return carBrandRepository.save(new CarBrand(brand.getBrand()));
-            });
             PassAuto passAuto = passMapper.toPassAuto(passCreateDTO);
             Car car = passAuto.getCar();
-            car.setBrand(carBrand);
-            if (car.getId() == null) {
-                car.setId(UUID.randomUUID());
-            }
+            setUpCar(car, passCreateDTO.getCar().getBrand());
             pass = passAuto;
             log.debug("Setting up passAuto for auto: {}", car.getId());
         } else {
@@ -100,4 +100,83 @@ public class PassResolverImpl implements PassResolver {
         return pass;
     }
 
+    /**
+     * Исходя из полученного пропуска и дто, определяет тип пропуска и обновляет внутренние поля вложенной сущности,
+     * авто или посетителя
+     *
+     * @param passUpdateDTO ДТО содержащее данные о пропуске
+     * @param existPass     найденный пропуск
+     * @return {@link Pass} пропуск с необходимыми данными для дальнейшей обработки
+     * @throws ModifyPassException     при попытке обновить несоответствующую вложенную сущность
+     * @throws CriticalServerException если не удалось определить тип пропуска для обновления
+     */
+    @Override
+    @Transactional
+    public Pass updatePass(@NonNull PassUpdateDTO passUpdateDTO, @NonNull Pass existPass) {
+        CarDTO carToUpdate = passUpdateDTO.getCar();
+        if (passUpdateDTO.getCar() != null) {
+            if (!StringUtils.equals(existPass.getDtype(), PassAuto_.DTYPE)) {
+                log.warn(ExceptionUtils.CHANGE_PASS_TYPE_TO_AUTO);
+                throw new ModifyPassException(ExceptionUtils.CHANGE_PASS_TYPE_TO_AUTO);
+            }
+            PassAuto existPassAuto = (PassAuto) existPass;
+            updateCarInPassAuto(existPassAuto, carToUpdate);
+            return existPassAuto;
+
+        } else if (passUpdateDTO.getVisitor() != null) {
+            if (!StringUtils.equals(existPass.getDtype(), PassWalk_.DTYPE)) {
+                log.warn(ExceptionUtils.CHANGE_PASS_TYPE_TO_WALK);
+                throw new ModifyPassException(ExceptionUtils.CHANGE_PASS_TYPE_TO_WALK);
+            }
+            PassWalk existPassWalk = (PassWalk) existPass;
+            updateVisitorInPassWalk(existPassWalk, passUpdateDTO.getVisitor());
+            return existPassWalk;
+        } else {
+            log.error(ExceptionUtils.PASS_RESOLVING_ERROR);
+            throw new CriticalServerException(ExceptionUtils.PASS_RESOLVING_ERROR);
+        }
+    }
+
+    private void setUpCar(Car car, CarBrandDTO brand) {
+        if (car.getId() == null) {
+            car.setId(UUID.randomUUID());
+        }
+        setUpCarBrand(car, brand);
+    }
+
+    private void setUpCarBrand(Car car, CarBrandDTO brand) {
+        CarBrand carBrand = carBrandRepository.findByBrand(brand.getBrand()).orElseGet(() -> {
+            log.info("CarBrand saved to DB");
+            return carBrandRepository.save(new CarBrand(brand.getBrand()));
+        });
+        car.setBrand(carBrand);
+    }
+
+    private void updateCarInPassAuto(PassAuto existPassAuto, CarDTO carToUpdate) {
+        Car existsCar = existPassAuto.getCar();
+        if (carToUpdate.getPhone() != null) {
+            existsCar.setPhone(carToUpdate.getPhone());
+        }
+        if (carToUpdate.getLicensePlate() != null) {
+            existsCar.setLicensePlate(carToUpdate.getLicensePlate());
+        }
+        if (carToUpdate.getBrand() != null) {
+            setUpCarBrand(existsCar, carToUpdate.getBrand());
+        }
+        log.debug("Pass updated with new Car");
+    }
+
+    private void updateVisitorInPassWalk(PassWalk existPassWalk, VisitorDTO visitorToUpdate) {
+        Visitor visitor = existPassWalk.getVisitor();
+        if (visitorToUpdate.getPhone() != null) {
+            visitor.setPhone(visitorToUpdate.getPhone());
+        }
+        if (visitorToUpdate.getName() != null) {
+            visitor.setName(visitorToUpdate.getName());
+        }
+        if (visitorToUpdate.getNote() != null) {
+            visitor.setNote(visitor.getNote());
+        }
+        log.debug("Pass updated with new Visitor");
+    }
 }

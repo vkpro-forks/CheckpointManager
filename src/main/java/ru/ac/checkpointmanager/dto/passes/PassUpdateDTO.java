@@ -4,6 +4,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.VisitorDTO;
 import ru.ac.checkpointmanager.model.passes.PassTimeType;
@@ -20,8 +22,8 @@ public class PassUpdateDTO extends PassBaseDTO {
     @NotNull
     private UUID id;
 
-    public PassUpdateDTO(String comment, PassTimeType timeType, LocalDateTime startTime,
-                         LocalDateTime endTime, VisitorDTO visitor, CarDTO car, UUID id) {
+    public PassUpdateDTO(@Nullable String comment, @NonNull PassTimeType timeType, @NonNull LocalDateTime startTime,
+                         @NonNull LocalDateTime endTime, @Nullable VisitorDTO visitor, @Nullable CarDTO car, @NonNull UUID id) {
         super(comment, timeType, startTime, endTime, visitor, car);
         this.id = id;
     }

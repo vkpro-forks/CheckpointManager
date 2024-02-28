@@ -1,5 +1,6 @@
 package ru.ac.checkpointmanager.service.passes;
 
+import org.springframework.lang.NonNull;
 import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
 import ru.ac.checkpointmanager.model.passes.Pass;
 
@@ -15,4 +16,5 @@ public interface PassChecker {
 
     void checkPassAndCheckpointCompatibility(Pass pass, Checkpoint checkpoint);
 
+    void isPassUpdatable(@NonNull Pass pass);
 }

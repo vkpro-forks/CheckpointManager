@@ -8,6 +8,8 @@ public abstract class PassAuto_ {
 
     public static final String CAR = "car";
 
+    public static final String DTYPE = "AUTO";
+
     private PassAuto_() {
     }
 

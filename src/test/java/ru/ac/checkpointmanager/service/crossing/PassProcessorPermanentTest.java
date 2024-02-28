@@ -10,6 +10,7 @@ import ru.ac.checkpointmanager.ext.MemoryAppender;
 import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.service.crossing.impl.PassProcessorPermanent;
+import ru.ac.checkpointmanager.util.PassTestData;
 import ru.ac.checkpointmanager.util.TestUtils;
 
 @ExtendWith(LoggingMemoryAppenderTestResolver.class)
@@ -27,7 +28,7 @@ class PassProcessorPermanentTest {
 
     @Test
     void process_DirectionIn_noExceptionsAndOneDebugLog() {
-        PassAuto passAuto = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(TestUtils.getUser(),
+        PassAuto passAuto = PassTestData.getSimpleActiveOneTimePassAutoFor3Hours(TestUtils.getUser(),
                 TestUtils.getTerritory(),
                 TestUtils.getCar(TestUtils.getCarBrand()));
         passAuto.setExpectedDirection(Direction.IN);
@@ -47,7 +48,7 @@ class PassProcessorPermanentTest {
 
     @Test
     void process_DirectionOut_noExceptionsOneDebugLogAndWarnLog() {
-        PassAuto passAuto = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(TestUtils.getUser(),
+        PassAuto passAuto = PassTestData.getSimpleActiveOneTimePassAutoFor3Hours(TestUtils.getUser(),
                 TestUtils.getTerritory(),
                 TestUtils.getCar(TestUtils.getCarBrand()));
         passAuto.setExpectedDirection(Direction.IN);

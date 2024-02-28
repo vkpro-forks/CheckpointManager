@@ -25,7 +25,7 @@ import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.mapper.CarMapper;
 import ru.ac.checkpointmanager.model.avatar.AvatarProperties;
 import ru.ac.checkpointmanager.service.car.CarService;
-import ru.ac.checkpointmanager.util.ResultCheckUtils;
+import ru.ac.checkpointmanager.util.CheckResultActionsUtils;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 
@@ -61,7 +61,7 @@ class CarControllerValidationIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(carDtoString));
 
-        ResultCheckUtils.checkCommonValidationFields(resultActions);
+        CheckResultActionsUtils.checkCommonValidationFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers
                 .jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0)).value(Matchers.anyOf(
                         Matchers.startsWithIgnoringCase(LICENSE_PLATE),
@@ -81,7 +81,7 @@ class CarControllerValidationIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(carDtoString));
 
-        ResultCheckUtils.checkCommonValidationFields(resultActions);
+        CheckResultActionsUtils.checkCommonValidationFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers
                 .jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0)).value(Matchers.anyOf(
                         Matchers.startsWithIgnoringCase(LICENSE_PLATE),
@@ -101,7 +101,7 @@ class CarControllerValidationIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(carDtoString));
 
-        ResultCheckUtils.checkWrongTypeFields(resultActions);
+        CheckResultActionsUtils.checkWrongTypeFields(resultActions);
     }
 
     @Test
@@ -110,7 +110,7 @@ class CarControllerValidationIntegrationTest {
         ResultActions resultActions = mockMvc.perform(
                 MockMvcRequestBuilders.delete(UrlConstants.CAR_URL + "/{carId}", "123"));
 
-        ResultCheckUtils.checkWrongTypeFields(resultActions);
+        CheckResultActionsUtils.checkWrongTypeFields(resultActions);
     }
 
     @Test
@@ -119,7 +119,7 @@ class CarControllerValidationIntegrationTest {
         ResultActions resultActions = mockMvc.perform(
                 MockMvcRequestBuilders.get(UrlConstants.CAR_USER_URL, "123"));
 
-        ResultCheckUtils.checkWrongTypeFields(resultActions);
+        CheckResultActionsUtils.checkWrongTypeFields(resultActions);
     }
 
     @ParameterizedTest
@@ -129,7 +129,7 @@ class CarControllerValidationIntegrationTest {
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.CAR_PHONE_URL)
                 .param(PHONE, phone));
 
-        ResultCheckUtils.checkCommonValidationFields(resultActions);
+        CheckResultActionsUtils.checkCommonValidationFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0))
                 .value(PHONE));
     }
@@ -141,7 +141,7 @@ class CarControllerValidationIntegrationTest {
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.CAR_PHONE_URL)
                 .param(PHONE, phone));
 
-        ResultCheckUtils.checkMissingRequestParamFields(resultActions);
+        CheckResultActionsUtils.checkMissingRequestParamFields(resultActions);
     }
 
     private static Stream<CarDTO> getBadCarDto() {

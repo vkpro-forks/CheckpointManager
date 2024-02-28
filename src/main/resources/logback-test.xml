@@ -24,11 +24,11 @@
 
     <root level="info">
         <appender-ref ref="STDOUT"/>
-        <appender-ref ref="FILE"/>
+        <!--<appender-ref ref="FILE"/> -->
     </root>
 
     <logger name="ru.ac.checkpointmanager" level="debug">
-        <appender-ref ref="FILE"/>
+        <!--<appender-ref ref="FILE"/> -->
     </logger>
 
 

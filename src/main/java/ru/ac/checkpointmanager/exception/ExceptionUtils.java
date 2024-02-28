@@ -50,9 +50,18 @@ public final class ExceptionUtils {
 
     public static final String PASS_TIME_TYPE_NOOOOOO = "No PassTimeType for string value: %s";
 
+    public static final String PASS_NOT_UPDATE = "Pass [%s] cannot be updated with status (%s)";
+
+    public static final String PASS_HAS_NO_USER = "Pass [%s] hasn't user";
+
     public static final String CAR_BRAND_EXISTS = "CarBrand with [name: %s] already exists";
 
     public static final String CAR_BRAND_NOT_FOUND_ID = "Car brand not found with id: %s";
+
+    public static final String CHANGE_PASS_TYPE_TO_WALK = "Attempt to modify Pass Auto for visitor";
+
+    public static final String CHANGE_PASS_TYPE_TO_AUTO = "Attempt to modify Pass Walk for auto";
+    public static final String OVERLAP_PASS = "Reject: user [%s] has an overlapping pass [%s]";
 
     private ExceptionUtils() {
         throw new AssertionError("No instances, please");

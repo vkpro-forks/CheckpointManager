@@ -14,6 +14,7 @@ import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
 import ru.ac.checkpointmanager.repository.CrossingRepository;
 import ru.ac.checkpointmanager.service.crossing.impl.PassProcessorOnetime;
+import ru.ac.checkpointmanager.util.PassTestData;
 import ru.ac.checkpointmanager.util.TestUtils;
 
 import java.util.Collections;
@@ -30,7 +31,7 @@ class PassProcessorOnetimeTest {
 
     @Test
     void processPass_ifDirectionOut_setStatusWithoutExceptions() {
-        PassAuto passAuto = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(TestUtils.getUser(),
+        PassAuto passAuto = PassTestData.getSimpleActiveOneTimePassAutoFor3Hours(TestUtils.getUser(),
                 TestUtils.getTerritory(),
                 TestUtils.getCar(TestUtils.getCarBrand()));
         passAuto.setExpectedDirection(Direction.IN);
@@ -44,7 +45,7 @@ class PassProcessorOnetimeTest {
 
     @Test
     void processPass_ifDirectionInAndNoCrossings_passStatusUnchanged() {
-        PassAuto passAuto = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(TestUtils.getUser(),
+        PassAuto passAuto = PassTestData.getSimpleActiveOneTimePassAutoFor3Hours(TestUtils.getUser(),
                 TestUtils.getTerritory(),
                 TestUtils.getCar(TestUtils.getCarBrand()));
         passAuto.setExpectedDirection(Direction.IN);
@@ -59,7 +60,7 @@ class PassProcessorOnetimeTest {
 
     @Test
     void processPass_IfDirectionInAndCrossingsExists_throwPassAlreadyUsedException() {
-        PassAuto passAuto = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(TestUtils.getUser(),
+        PassAuto passAuto = PassTestData.getSimpleActiveOneTimePassAutoFor3Hours(TestUtils.getUser(),
                 TestUtils.getTerritory(),
                 TestUtils.getCar(TestUtils.getCarBrand()));
         passAuto.setExpectedDirection(Direction.IN);

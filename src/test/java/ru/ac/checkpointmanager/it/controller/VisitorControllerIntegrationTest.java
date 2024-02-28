@@ -32,7 +32,8 @@ import ru.ac.checkpointmanager.repository.VisitorRepository;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
 import ru.ac.checkpointmanager.repository.car.CarRepository;
 import ru.ac.checkpointmanager.util.MockMvcUtils;
-import ru.ac.checkpointmanager.util.ResultCheckUtils;
+import ru.ac.checkpointmanager.util.PassTestData;
+import ru.ac.checkpointmanager.util.CheckResultActionsUtils;
 import ru.ac.checkpointmanager.util.TestUtils;
 
 import java.util.List;
@@ -126,7 +127,7 @@ class VisitorControllerIntegrationTest {
     void getVisitor_VisitorNotFound_HandleErrorAndReturnNotFound() {
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.getVisitor(TestUtils.VISITOR_ID));
 
-        ResultCheckUtils.checkNotFoundFields(resultActions);
+        CheckResultActionsUtils.checkNotFoundFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                 .value(ExceptionUtils.VISITOR_NOT_FOUND.formatted(TestUtils.VISITOR_ID)));
     }
@@ -154,7 +155,7 @@ class VisitorControllerIntegrationTest {
         ResultActions resultActions = mockMvc.perform(
                 MockMvcUtils.updateVisitor(TestUtils.getVisitorDTO(), TestUtils.VISITOR_ID));
 
-        ResultCheckUtils.checkNotFoundFields(resultActions);
+        CheckResultActionsUtils.checkNotFoundFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                 .value(ExceptionUtils.VISITOR_NOT_FOUND.formatted(TestUtils.VISITOR_ID)));
     }
@@ -178,7 +179,7 @@ class VisitorControllerIntegrationTest {
     void deleteVisitor_VisitorNotFound_HandleErrorAndReturnNotFound() {
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.deleteVisitor(TestUtils.VISITOR_ID));
 
-        ResultCheckUtils.checkNotFoundFields(resultActions);
+        CheckResultActionsUtils.checkNotFoundFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                 .value(ExceptionUtils.VISITOR_NOT_FOUND.formatted(TestUtils.VISITOR_ID)));
     }
@@ -266,7 +267,7 @@ class VisitorControllerIntegrationTest {
         Territory savedTerritory = territoryRepository.saveAndFlush(territory);
         Visitor visitorUnsaved = TestUtils.getVisitorRandomUUID();
         Visitor savedVisitor = visitorRepository.saveAndFlush(visitorUnsaved);
-        PassWalk passWalk = TestUtils.getSimpleActiveOneTimePassWalkFor3Hours(savedUser, savedTerritory, savedVisitor);
+        PassWalk passWalk = PassTestData.getSimpleActiveOneTimePassWalkFor3Hours(savedUser, savedTerritory, savedVisitor);
         PassWalk savedPass = passRepository.saveAndFlush(passWalk);
 
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.getVisitorByPassId(savedPass.getId()));
@@ -292,7 +293,7 @@ class VisitorControllerIntegrationTest {
         car.setBrand(savedCarBrand);
         car.setId(TestUtils.getCarDto().getId());
         Car savedCar = carRepository.saveAndFlush(car);
-        PassAuto pass = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
+        PassAuto pass = PassTestData.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
         PassAuto savedPass = passRepository.saveAndFlush(pass);
         //when
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.getVisitorByPassId(savedPass.getId()));
@@ -300,7 +301,7 @@ class VisitorControllerIntegrationTest {
         resultActions.andExpect(MockMvcResultMatchers.status().isNotFound());
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                 .value(ExceptionUtils.VISITOR_BY_PASS_NOT_FOUND.formatted(savedPass.getId())));
-        ResultCheckUtils.checkNotFoundFields(resultActions);
+        CheckResultActionsUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -309,12 +310,12 @@ class VisitorControllerIntegrationTest {
         Visitor visitorUnsaved = TestUtils.getVisitorRandomUUID();
         visitorRepository.saveAndFlush(visitorUnsaved);
 
-        ResultActions resultActions = mockMvc.perform(MockMvcUtils.getVisitorByPassId(TestUtils.PASS_ID));
+        ResultActions resultActions = mockMvc.perform(MockMvcUtils.getVisitorByPassId(PassTestData.PASS_ID));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isNotFound());
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
-                .value(ExceptionUtils.VISITOR_BY_PASS_NOT_FOUND.formatted(TestUtils.PASS_ID)));
-        ResultCheckUtils.checkNotFoundFields(resultActions);
+                .value(ExceptionUtils.VISITOR_BY_PASS_NOT_FOUND.formatted(PassTestData.PASS_ID)));
+        CheckResultActionsUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -328,7 +329,7 @@ class VisitorControllerIntegrationTest {
         Territory savedTerritory = territoryRepository.saveAndFlush(territory);
         Visitor visitorUnsaved = TestUtils.getVisitorRandomUUID();
         Visitor savedVisitor = visitorRepository.saveAndFlush(visitorUnsaved);
-        PassWalk passWalk = TestUtils.getSimpleActiveOneTimePassWalkFor3Hours(savedUser, savedTerritory, savedVisitor);
+        PassWalk passWalk = PassTestData.getSimpleActiveOneTimePassWalkFor3Hours(savedUser, savedTerritory, savedVisitor);
         passRepository.saveAndFlush(passWalk);
         Visitor anotherVisitor = TestUtils.getVisitorRandomUUID();
         anotherVisitor.setName("Huggy Wuggy");
@@ -358,7 +359,7 @@ class VisitorControllerIntegrationTest {
         car.setBrand(savedCarBrand);
         car.setId(TestUtils.getCarDto().getId());
         Car savedCar = carRepository.saveAndFlush(car);
-        PassAuto pass = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
+        PassAuto pass = PassTestData.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
         passRepository.saveAndFlush(pass);
         Visitor anotherVisitor = TestUtils.getVisitorRandomUUID();
         anotherVisitor.setName("Huggy Wuggy");

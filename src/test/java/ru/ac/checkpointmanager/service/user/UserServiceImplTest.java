@@ -47,6 +47,7 @@ import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.security.authfacade.AuthFacade;
 import ru.ac.checkpointmanager.security.jwt.JwtService;
 import ru.ac.checkpointmanager.service.email.EmailService;
+import ru.ac.checkpointmanager.util.PassTestData;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.utils.FieldsValidation;
 
@@ -729,7 +730,7 @@ class UserServiceImplTest {
     @Test
     void findByPassIdReturnsUser() {
         User user = TestUtils.getUser();
-        UUID passId = TestUtils.PASS_ID;
+        UUID passId = PassTestData.PASS_ID;
 
         when(userRepository.findByPassId(passId)).thenReturn(user);
         User result = userService.findByPassId(passId);

@@ -21,6 +21,7 @@ import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.model.passes.PassTimeType;
 import ru.ac.checkpointmanager.repository.PassRepository;
 import ru.ac.checkpointmanager.service.crossing.PassProcessor;
+import ru.ac.checkpointmanager.util.PassTestData;
 import ru.ac.checkpointmanager.util.TestUtils;
 
 import java.util.Collections;
@@ -57,7 +58,7 @@ class CrossingPassHandlerImplTest {
     @ParameterizedTest
     @MethodSource("getTestDirections")
     void handle_OneTimePass_ChangeDirectionAndSave(Direction in, Direction changed) {
-        PassAuto passAuto = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(TestUtils.getUser(),
+        PassAuto passAuto = PassTestData.getSimpleActiveOneTimePassAutoFor3Hours(TestUtils.getUser(),
                 TestUtils.getTerritory(),
                 TestUtils.getCar(TestUtils.getCarBrand()));
         passAuto.setExpectedDirection(in);
@@ -75,7 +76,7 @@ class CrossingPassHandlerImplTest {
     @ParameterizedTest
     @MethodSource("getTestDirections")
     void handle_PermanentPass_ChangeDirectionAndSave(Direction in, Direction changed) {
-        PassAuto passAuto = TestUtils.getSimpleActivePermanentAutoFor3Hours(TestUtils.getUser(),
+        PassAuto passAuto = PassTestData.getSimpleActivePermanentAutoFor3Hours(TestUtils.getUser(),
                 TestUtils.getTerritory(),
                 TestUtils.getCar(TestUtils.getCarBrand()));
         passAuto.setExpectedDirection(in);

@@ -22,7 +22,8 @@ import ru.ac.checkpointmanager.controller.CrossingController;
 import ru.ac.checkpointmanager.dto.CrossingRequestDTO;
 import ru.ac.checkpointmanager.model.avatar.AvatarProperties;
 import ru.ac.checkpointmanager.service.crossing.CrossingService;
-import ru.ac.checkpointmanager.util.ResultCheckUtils;
+import ru.ac.checkpointmanager.util.PassTestData;
+import ru.ac.checkpointmanager.util.CheckResultActionsUtils;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 
@@ -47,7 +48,7 @@ public class CrossingControllerValidationIntegrationTest {
     @MethodSource("getWrongZdt")
     @SneakyThrows
     void shouldReturnValidationErrorWithWrongDatePassed(ZonedDateTime zonedDateTime, String direction) {
-        CrossingRequestDTO crossingRequestDTO = new CrossingRequestDTO(TestUtils.PASS_ID, TestUtils.CHECKPOINT_ID,
+        CrossingRequestDTO crossingRequestDTO = new CrossingRequestDTO(PassTestData.PASS_ID, TestUtils.CHECKPOINT_ID,
                 zonedDateTime);
         String crossingDtoString = TestUtils.jsonStringFromObject(crossingRequestDTO);
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CROSSING_URL + direction)
@@ -57,7 +58,7 @@ public class CrossingControllerValidationIntegrationTest {
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0))
                         .value("performedAt"));
 
-        ResultCheckUtils.checkCommonValidationFields(resultActions);
+        CheckResultActionsUtils.checkCommonValidationFields(resultActions);
     }
 
     @ParameterizedTest
@@ -74,14 +75,14 @@ public class CrossingControllerValidationIntegrationTest {
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0))
                         .value("passId"));
 
-        ResultCheckUtils.checkCommonValidationFields(resultActions);
+        CheckResultActionsUtils.checkCommonValidationFields(resultActions);
     }
 
     @ParameterizedTest
     @ValueSource(strings = {IN, OUT})
     @SneakyThrows
     void shouldReturnValidationErrorWithNullCheckpointId(String direction) {
-        CrossingRequestDTO crossingRequestDTO = new CrossingRequestDTO(TestUtils.PASS_ID, null,
+        CrossingRequestDTO crossingRequestDTO = new CrossingRequestDTO(PassTestData.PASS_ID, null,
                 ZonedDateTime.now());
         String crossingDtoString = TestUtils.jsonStringFromObject(crossingRequestDTO);
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(UrlConstants.CROSSING_URL + direction)
@@ -91,7 +92,7 @@ public class CrossingControllerValidationIntegrationTest {
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0))
                         .value("checkpointId"));
 
-        ResultCheckUtils.checkCommonValidationFields(resultActions);
+        CheckResultActionsUtils.checkCommonValidationFields(resultActions);
     }
 
 

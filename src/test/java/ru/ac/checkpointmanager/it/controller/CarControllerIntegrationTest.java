@@ -33,6 +33,7 @@ import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
 import ru.ac.checkpointmanager.repository.car.CarRepository;
 import ru.ac.checkpointmanager.util.MockMvcUtils;
+import ru.ac.checkpointmanager.util.PassTestData;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 
@@ -119,7 +120,7 @@ class CarControllerIntegrationTest {
         Territory savedTerritory = territoryRepository.saveAndFlush(territory);
         Car car = TestUtils.getCar(carBrand);
         Car savedCar = carRepository.saveAndFlush(car);
-        PassAuto passAuto = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
+        PassAuto passAuto = PassTestData.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
         passRepository.saveAndFlush(passAuto);
 
         mockMvc.perform(MockMvcRequestBuilders.delete(UrlConstants.CAR_URL + "/" + savedCar.getId()))
@@ -140,7 +141,7 @@ class CarControllerIntegrationTest {
         Territory savedTerritory = territoryRepository.saveAndFlush(territory);
         Car car = TestUtils.getCar(carBrand);
         Car savedCar = carRepository.saveAndFlush(car);
-        PassAuto passAuto = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
+        PassAuto passAuto = PassTestData.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
         passRepository.saveAndFlush(passAuto);
 
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.searchCarByUserId(savedUser.getId()));

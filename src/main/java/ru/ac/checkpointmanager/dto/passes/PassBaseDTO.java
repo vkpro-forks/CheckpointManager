@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.lang.Nullable;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.VisitorDTO;
 import ru.ac.checkpointmanager.model.passes.PassTimeType;
@@ -26,6 +27,7 @@ import java.time.LocalDateTime;
 public abstract class PassBaseDTO {
 
     @Size(max = 30)
+    @Nullable
     private String comment;
 
     @NotNull
@@ -39,9 +41,11 @@ public abstract class PassBaseDTO {
     private LocalDateTime endTime;
 
     @Valid
+    @Nullable
     private VisitorDTO visitor;
 
     @Valid
+    @Nullable
     private CarDTO car;
 
 }
