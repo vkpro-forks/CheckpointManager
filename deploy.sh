@@ -14,4 +14,4 @@ docker pull aasurov/anvilcoder:checkpoint-manager-$PROJECT_VERSION
 docker-compose -f docker-compose.prod.yml up -d
 
 # Шаг 4: Удаление всех файлов внутри каталога
-rm -f app.jar deploy.sh docker-compose.prod.yml Dockerfile
+rm -f app.jar deploy.sh docker-compose.prod.yml Dockerfile .env
