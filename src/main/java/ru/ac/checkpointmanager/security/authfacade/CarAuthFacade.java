@@ -23,6 +23,6 @@ public final class CarAuthFacade implements AuthFacade {
     @Override
     public boolean isIdMatch(UUID carId) {
         UUID userId = getCurrentUser().getId();
-        return carRepository.checkIfUserHasPassByCarId(userId, carId);
+        return carRepository.checkUserCarRelation(userId, carId);
     }
 }

@@ -21,5 +21,5 @@ public interface CarRepository extends JpaRepository<Car, UUID> {
             "JOIN cars c ON c.id = p.car_id " +
             "WHERE c.id = :carId AND p.user_id = :userId)"
             , nativeQuery = true)
-    boolean checkIfUserHasPassByCarId(@Param("userId") UUID userId, @Param("carId") UUID carId);
+    boolean checkUserCarRelation(@Param("userId") UUID userId, @Param("carId") UUID carId);
 }

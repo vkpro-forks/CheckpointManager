@@ -52,11 +52,6 @@ public class SwaggerConstants {
     public static final String FIND_CAR_BY_PHONE_NUMBER_MESSAGE = "Найти машину по номеру телефона.";
     public static final String CAR_FOUND_SUCCESS_MESSAGE =
             "Машина успешно найдена. Может вернуть пустой список если машины не найдены.";
-    public static final String ACCESS_ADMIN_USER_MESSAGE =
-            "Доступ: ADMIN - все машины, USER - только машины, которые фигурируют в пропусках пользователя";
-    public static final String ACCESS_ADMIN_MANAGER_SECURITY_USER_MESSAGE =
-            "Доступ: ADMIN - любые машины, MANAGER, SECURITY - только машины, относящиеся к их территории, " +
-                    "USER - только машины, которые фигурируют в пропусках данного пользователя";
 
     //для CrossingEventController
     public static final String EVENTS_ARE_FOUND_MESSAGE = "События найдены";

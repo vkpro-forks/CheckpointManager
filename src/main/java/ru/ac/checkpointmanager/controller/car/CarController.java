@@ -52,7 +52,6 @@ import static ru.ac.checkpointmanager.utils.SwaggerConstants.GET_CARS_BY_USER_ME
 import static ru.ac.checkpointmanager.utils.SwaggerConstants.INTERNAL_SERVER_ERROR_MSG;
 import static ru.ac.checkpointmanager.utils.SwaggerConstants.UNAUTHORIZED_MSG;
 import static ru.ac.checkpointmanager.utils.SwaggerConstants.UPDATE_CAR_MESSAGE;
-import static ru.ac.checkpointmanager.utils.SwaggerConstants.ACCESS_ADMIN_MANAGER_SECURITY_USER_MESSAGE;
 
 @Slf4j
 @RestController
@@ -132,7 +131,8 @@ public class CarController {
     }
 
     @Operation(summary = GET_CARS_BY_USER_MESSAGE,
-            description = ACCESS_ADMIN_MANAGER_SECURITY_USER_MESSAGE)
+            description = "Доступ: ADMIN - любые машины, MANAGER, SECURITY - только машины, относящиеся к их территории, " +
+                    "USER - только машины, которые фигурируют в пропусках данного пользователя")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = CAR_LIST_RECEIVED_MESSAGE,
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -148,7 +148,7 @@ public class CarController {
     }
 
     @Operation(summary = FIND_CAR_BY_PHONE_NUMBER_MESSAGE,
-            description = ACCESS_ADMIN_MANAGER_SECURITY_USER_MESSAGE)
+            description = ACCESS_ADMIN_MESSAGE)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = CAR_FOUND_SUCCESS_MESSAGE,
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
