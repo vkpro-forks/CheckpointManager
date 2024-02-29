@@ -211,7 +211,7 @@ class CrossingEventControllerIntegrationTest {
 
         resultActions.andExpect(status().isForbidden())
                 .andExpectAll(jsonPath(TestUtils.JSON_DETAIL).value("Access Denied"));
-        ResultCheckUtils.checkForbiddenFields(resultActions);
+        CheckResultActionsUtils.checkForbiddenFields(resultActions);
     }
 
     @Test
