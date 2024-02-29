@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import ru.ac.checkpointmanager.annotation.AllRolesPreAuthorize;
+import ru.ac.checkpointmanager.annotation.PreAuthorizeAllRoles;
 import ru.ac.checkpointmanager.dto.CarBrandDTO;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.service.car.CarBrandService;
@@ -87,7 +87,7 @@ public class CarBrandController {
                             schema = @Schema(implementation = CarBrand.class))}),
             @ApiResponse(responseCode = "404", description = BRAND_NOT_EXIST_MESSAGE)
     })
-    @AllRolesPreAuthorize
+    @PreAuthorizeAllRoles
     @GetMapping("/{brandId}")
     public ResponseEntity<CarBrand> getCarBrandById(@PathVariable Long brandId) {
         CarBrand brand = carBrandService.getBrandById(brandId);
@@ -133,7 +133,7 @@ public class CarBrandController {
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CarBrand.class))}),
     })
-    @AllRolesPreAuthorize
+    @PreAuthorizeAllRoles
     @GetMapping()
     public ResponseEntity<List<CarBrand>> getAllBrands() {
         List<CarBrand> allBrands = carBrandService.getAllBrands();
@@ -148,7 +148,7 @@ public class CarBrandController {
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CarBrand.class))}),
     })
-    @AllRolesPreAuthorize
+    @PreAuthorizeAllRoles
     @GetMapping("/name")
     public ResponseEntity<List<CarBrand>> getBrandsByName(@RequestParam String brandNamePart) {
         List<CarBrand> brands = carBrandService.findByBrandsContainingIgnoreCase(brandNamePart);

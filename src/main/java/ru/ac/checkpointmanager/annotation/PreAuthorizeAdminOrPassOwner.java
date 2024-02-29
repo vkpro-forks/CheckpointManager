@@ -16,5 +16,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @PreAuthorize("hasRole('ROLE_ADMIN') or @passAuthFacade.isIdMatch(#passId)")
-public @interface IsAdminOrUserWhoOwnsPass {
+public @interface PreAuthorizeAdminOrPassOwner {
 }

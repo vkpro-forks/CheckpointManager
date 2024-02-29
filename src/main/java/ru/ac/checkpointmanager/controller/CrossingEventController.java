@@ -44,7 +44,7 @@ public class CrossingEventController {
 
     private final PassInOutViewService passInOutViewService;
 
-    @Operation(summary = "Получить список событий по пропускам пользователя (для User)",
+    @Operation(summary = "Получить список событий по пропускам пользователя (для Us`er)",
             description = "Доступ: ADMIN - события всех пользователей, USER - только свои",
             parameters = {
                     @Parameter(in = ParameterIn.QUERY, name = "page", example = "0"),

@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import ru.ac.checkpointmanager.annotation.IsAdminOrUserWhoOwnsPass;
+import ru.ac.checkpointmanager.annotation.PreAuthorizeAdminOrPassOwner;
 import ru.ac.checkpointmanager.annotation.PagingParam;
 import ru.ac.checkpointmanager.dto.passes.FilterParams;
 import ru.ac.checkpointmanager.dto.passes.PagingParams;
@@ -122,7 +122,7 @@ public class PassController {
 
     @Operation(summary = "Получить список пропусков конкретного пользователя, с учетом фильтрации и совпадения" +
             " по первым буквам посетителя или номера авто",
-            description = "Доступ: ADMIN - пропуски всех пользователей, MANAGER, SECURITY, USER - только свои",
+            description = "Доступ: ADMIN - пропуска всех пользователей, MANAGER, SECURITY, USER - только свои",
             parameters = {
                     @Parameter(in = ParameterIn.QUERY, name = "page"),
                     @Parameter(in = ParameterIn.QUERY, name = "size"),
@@ -148,34 +148,6 @@ public class PassController {
 
     @Operation(summary = "Получить список пропусков на конкретную территорию, с учетом фильтрации и совпадения " +
             "по первым буквам посетителя или номера авто",
-            description = "Доступ: ADMIN - поиск по всем пропускам, MANAGER, SECURITY - по своим территориям",
-            parameters = {
-                    @Parameter(in = ParameterIn.QUERY, name = "page"),
-                    @Parameter(in = ParameterIn.QUERY, name = "size"),
-                    @Parameter(in = ParameterIn.QUERY, name = Pass_.DTYPE),
-                    @Parameter(in = ParameterIn.QUERY, name = Pass_.TERRITORY),
-                    @Parameter(in = ParameterIn.QUERY, name = Pass_.STATUS),
-                    @Parameter(in = ParameterIn.QUERY, name = Pass_.FAVORITE),
-                    @Parameter(in = ParameterIn.QUERY, name = "part")
-            })
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = PASSES_ARE_FOUND_MESSAGE,
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            array = @ArraySchema(schema = @Schema(implementation = PassResponseDTO.class)))),
-            @ApiResponse(responseCode = "404", description = "Территория не найдена")})
-    @PreAuthorize("hasRole('ROLE_ADMIN') " +
-            "or (hasAnyRole('ROLE_MANAGER', 'ROLE_SECURITY') and @territoryAuthFacade.isIdMatch(#territoryId))")
-    @GetMapping("/territories/{territoryId}")
-    public Page<PassResponseDTO> getPassesByTerritoryId(@PathVariable UUID territoryId,
-                                                        @Schema(hidden = true)
-                                                        @Valid @PagingParam PagingParams pagingParams,
-                                                        @Schema(hidden = true) FilterParams filterParams,
-                                                        @RequestParam(value = "part", required = false) String part) {
-        return service.findPassesByTerritory(territoryId, pagingParams, filterParams, part);
-    }
-
-    @Operation(summary = "Получить список пропусков по всем привязанным к пользователю территориям, " +
-            "с учетом фильтрации и совпадения по первым буквам посетителя или номера авто",
             description = "Доступ: ADMIN - поиск по всем пропускам, SECURITY - по своим территориям",
             parameters = {
                     @Parameter(in = ParameterIn.QUERY, name = "page"),
@@ -190,8 +162,36 @@ public class PassController {
             @ApiResponse(responseCode = "200", description = PASSES_ARE_FOUND_MESSAGE,
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = PassResponseDTO.class)))),
-            @ApiResponse(responseCode = "404", description = "Пользователь или территории не найдены")})
+            @ApiResponse(responseCode = "404", description = "Территория не найдена")})
     @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_SECURITY') and @userAuthFacade.isIdMatch(#userId))")
+    @GetMapping("/territories/{territoryId}")
+    public Page<PassResponseDTO> getPassesByTerritoryId(@PathVariable UUID territoryId,
+                                                        @Schema(hidden = true)
+                                                        @Valid @PagingParam PagingParams pagingParams,
+                                                        @Schema(hidden = true) FilterParams filterParams,
+                                                        @RequestParam(value = "part", required = false) String part) {
+        return service.findPassesByTerritory(territoryId, pagingParams, filterParams, part);
+    }
+
+    @Operation(summary = "Получить список пропусков по всем привязанным к пользователю территориям, " +
+            "с учетом фильтрации и совпадения по первым буквам посетителя или номера авто",
+            description = "Доступ: ADMIN - поиск по всем пропускам, MANAGER, SECURITY - по своим территориям",
+            parameters = {
+                    @Parameter(in = ParameterIn.QUERY, name = "page"),
+                    @Parameter(in = ParameterIn.QUERY, name = "size"),
+                    @Parameter(in = ParameterIn.QUERY, name = Pass_.DTYPE),
+                    @Parameter(in = ParameterIn.QUERY, name = Pass_.TERRITORY),
+                    @Parameter(in = ParameterIn.QUERY, name = Pass_.STATUS),
+                    @Parameter(in = ParameterIn.QUERY, name = Pass_.FAVORITE),
+                    @Parameter(in = ParameterIn.QUERY, name = "part")
+            })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = PASSES_ARE_FOUND_MESSAGE,
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            array = @ArraySchema(schema = @Schema(implementation = PassResponseDTO.class)))),
+            @ApiResponse(responseCode = "404", description = "Пользователь или территории не найдены")})
+    @PreAuthorize("hasRole('ROLE_ADMIN') " +
+            "or (hasAnyRole('ROLE_MANAGER', 'ROLE_SECURITY') and @territoryAuthFacade.isIdMatch(#territoryId))")
     @GetMapping("/users/{userId}/territories")
     public Page<PassResponseDTO> getPassesByUsersTerritories(@PathVariable UUID userId,
                                                              @Schema(hidden = true)
@@ -225,7 +225,7 @@ public class PassController {
                             schema = @Schema(implementation = PassResponseDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Пропуск не является активным"),
             @ApiResponse(responseCode = "404", description = PASS_NOT_FOUND_MESSAGE)})
-    @IsAdminOrUserWhoOwnsPass
+    @PreAuthorizeAdminOrPassOwner
     @PatchMapping("/{passId}/cancel")
     public ResponseEntity<PassResponseDTO> cancelPass(@PathVariable UUID passId) {
 
@@ -241,7 +241,7 @@ public class PassController {
                             schema = @Schema(implementation = PassResponseDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Пропуск не является отмененным; время действия пропуска истекло"),
             @ApiResponse(responseCode = "404", description = PASS_NOT_FOUND_MESSAGE)})
-    @IsAdminOrUserWhoOwnsPass
+    @PreAuthorizeAdminOrPassOwner
     @PatchMapping("/{passId}/activate")
     public ResponseEntity<PassResponseDTO> activatePass(@PathVariable UUID passId) {
 
@@ -271,7 +271,7 @@ public class PassController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Отмечен"),
             @ApiResponse(responseCode = "404", description = "Не найден")})
-    @IsAdminOrUserWhoOwnsPass
+    @PreAuthorizeAdminOrPassOwner
     @PatchMapping("/{passId}/favorite")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void markFavorite(@PathVariable UUID passId) {
@@ -283,7 +283,7 @@ public class PassController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Отмечен"),
             @ApiResponse(responseCode = "404", description = "Не найден")})
-    @IsAdminOrUserWhoOwnsPass
+    @PreAuthorizeAdminOrPassOwner
     @PatchMapping("/{passId}/not_favorite")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void unmarkFavorite(@PathVariable UUID passId) {
