@@ -4,22 +4,23 @@
 # documentation.
 # This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
-
-name: Java CI with Gradle
+# АЖДывфалыждлваждылваждыва
+name: Java CI/CD with Gradle
 
 on:
   push:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
+  workflow_dispatch:
+
 
 permissions:
   contents: read
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK 17
@@ -31,6 +32,20 @@ jobs:
         run: chmod +x gradlew
       - name: Test with gradle
         run: ./gradlew test
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'adopt'
+      - name: Adjust permissions for Gradle Wrapper
+        run: chmod +x gradlew
       - name: Set Project Version
         run: |
           echo "PROJECT_VERSION=$(grep -Po "version = '\K[^']+" build.gradle)" >> $GITHUB_ENV
@@ -38,5 +53,38 @@ jobs:
         run: |
           ./gradlew build
           mv build/libs/*-$PROJECT_VERSION.jar build/libs/app.jar
+        env:
+          PROJECT_VERSION: ${{ env.PROJECT_VERSION }}
+      - name: Create .env file
+        run: |
+          echo "JASYPT_ENCRYPTOR_PASSWORD=${{ secrets.JASYPT_ENCRYPTOR_PASSWORD }}" >> .env
+          echo "SPRING_DATA_REDIS_PASSWORD=${{ secrets.SPRING_DATA_REDIS_PASSWORD }}" >> .env
+          echo "REDIS_PASS=${{ secrets.REDIS_PASS }}" >> .env
+          echo "PG_DB=${{ secrets.PG_DB }}" >> .env
+          echo "PG_USER=${{ secrets.PG_USER }}" >> .env
+          echo "PG_PASS=${{ secrets.PG_PASS }}" >> .env
+          echo "PROJECT_VERSION=${{ env.PROJECT_VERSION }}" >> .env
+          # Поскольку PROJECT_VERSION добавляется вручную, этот шаг не требуется
+          echo "PROJECT_VERSION=0.1.19-SNAPSHOT-TEST" >> .env
+      - name: Build and Push Docker Image
+        run: |
+          docker-compose build
+          docker tag checkpoint-manager:$PROJECT_VERSION aasurov/anvilcoder:checkpoint-manager-$PROJECT_VERSION
+          echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u aasurov --password-stdin
+          docker push aasurov/anvilcoder:checkpoint-manager-$PROJECT_VERSION
+        env:
+          PROJECT_VERSION: ${{ env.PROJECT_VERSION }}
+          DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.5.1
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Add server to known hosts
+        run: ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+      - name: Deploy to Server
+        run: |
+          scp .env docker-compose.prod.yml Dockerfile deploy.sh build/libs/app.jar nginx.conf ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }}:~
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "docker-compose --env-file .env -f docker-compose.prod.yml pull && docker-compose --env-file .env -f docker-compose.prod.yml up -d"
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "bash deploy.sh"
         env:
           PROJECT_VERSION: ${{ env.PROJECT_VERSION }}

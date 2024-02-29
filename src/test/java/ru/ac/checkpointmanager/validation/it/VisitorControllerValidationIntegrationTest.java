@@ -22,7 +22,7 @@ import ru.ac.checkpointmanager.controller.VisitorController;
 import ru.ac.checkpointmanager.dto.VisitorDTO;
 import ru.ac.checkpointmanager.mapper.VisitorMapper;
 import ru.ac.checkpointmanager.service.visitor.VisitorService;
-import ru.ac.checkpointmanager.util.ResultCheckUtils;
+import ru.ac.checkpointmanager.util.CheckResultActionsUtils;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 
@@ -53,7 +53,7 @@ class VisitorControllerValidationIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(visitorDtoString));
 
-        ResultCheckUtils.checkCommonValidationFields(resultActions);
+        CheckResultActionsUtils.checkCommonValidationFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0))
                 .value(Matchers.anyOf(
                         Matchers.startsWithIgnoringCase("name"),
@@ -73,7 +73,7 @@ class VisitorControllerValidationIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(visitorDtoString));
 
-        ResultCheckUtils.checkCommonValidationFields(resultActions);
+        CheckResultActionsUtils.checkCommonValidationFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0))
                 .value(Matchers.anyOf(
                         Matchers.startsWithIgnoringCase("name"),
@@ -88,7 +88,7 @@ class VisitorControllerValidationIntegrationTest {
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.VISITOR_PHONE_URL)
                 .param("phone", phone));
 
-        ResultCheckUtils.checkCommonValidationFields(resultActions);
+        CheckResultActionsUtils.checkCommonValidationFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0))
                 .value(Matchers.startsWithIgnoringCase("phone")));
     }
@@ -100,7 +100,7 @@ class VisitorControllerValidationIntegrationTest {
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.VISITOR_NAME_URL)
                 .param("name", name));
 
-        ResultCheckUtils.checkCommonValidationFields(resultActions);
+        CheckResultActionsUtils.checkCommonValidationFields(resultActions);
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0))
                 .value(Matchers.startsWithIgnoringCase("name")));
     }

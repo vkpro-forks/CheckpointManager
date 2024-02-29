@@ -19,7 +19,7 @@ import ru.ac.checkpointmanager.config.ValidationTestConfiguration;
 import ru.ac.checkpointmanager.controller.UserController;
 import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
 import ru.ac.checkpointmanager.service.user.UserService;
-import ru.ac.checkpointmanager.util.ResultCheckUtils;
+import ru.ac.checkpointmanager.util.CheckResultActionsUtils;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 
@@ -50,7 +50,7 @@ class UserControllerValidationIntegrationTest {
                 .content(userPutDTOString));
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(0))
                 .value("mainNumber"));
-        ResultCheckUtils.checkCommonValidationFields(resultActions);
+        CheckResultActionsUtils.checkCommonValidationFields(resultActions);
     }
 
     private static Stream<String> getBadPhones() {

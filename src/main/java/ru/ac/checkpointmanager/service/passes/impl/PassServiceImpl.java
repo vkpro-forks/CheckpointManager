@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.lang.NonNull;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +24,6 @@ import ru.ac.checkpointmanager.exception.pass.OverlapPassException;
 import ru.ac.checkpointmanager.exception.pass.PassNotFoundException;
 import ru.ac.checkpointmanager.mapper.PassMapper;
 import ru.ac.checkpointmanager.model.Crossing;
-import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.passes.PassConstant;
@@ -57,13 +57,12 @@ import static ru.ac.checkpointmanager.utils.StringTrimmer.trimThemAll;
 @Transactional(readOnly = true)
 public class PassServiceImpl implements PassService {
     private static final String PAGE_NO_CONTENT = "Page %d, size - %d, has no content (total pages - %d, total elements - %d)";
-    private static final String PASS_NOT_UPDATE = "Pass [%s] cannot be updated (%s)";
+
     private static final String PASS_NOT_CANCEL = "Pass [%s] cannot be canceled (%s)";
     private static final String PASS_NOT_ACTIVATED = "Pass [%s] cannot be activated (%s)";
     private static final String METHOD_INVOKE = "Method {} [{}]";
     private static final String PASS_STATUS = "Pass [{}], changed status on {}";
     private static final String PASS_STATUS_CROSS = "Pass [{}], exist {} crossings, changed status on {}";
-    private static final String OVERLAP_PASS = "Reject: user [%s] has an overlapping pass [%s]";
 
     private final PassRepository passRepository;
     private final CrossingRepository crossingRepository;
@@ -211,31 +210,27 @@ public class PassServiceImpl implements PassService {
 
     @Override
     @Transactional
-    public PassResponseDTO updatePass(PassUpdateDTO passUpdateDTO) {
+    @NonNull
+    public PassResponseDTO updatePass(@NonNull PassUpdateDTO passUpdateDTO) {
         log.debug(METHOD_INVOKE, MethodLog.getMethodName(), passUpdateDTO);
 
         UUID passId = passUpdateDTO.getId();
         Pass existPass = findPassById(passId);
-        PassStatus passStatus = existPass.getStatus();
-
-        if (passStatus != PassStatus.ACTIVE && passStatus != PassStatus.DELAYED) {
-            log.warn(PASS_NOT_UPDATE.formatted(passId, passStatus));
-            throw new ModifyPassException(PASS_NOT_UPDATE.formatted(passId, passStatus));
+        if (existPass.getUser() == null) {
+            log.warn(ExceptionUtils.PASS_HAS_NO_USER.formatted(passId));
+            throw new ModifyPassException(ExceptionUtils.PASS_HAS_NO_USER.formatted(passId));
         }
-
-        User user = userService.findByPassId(passId);
-        Territory territory = territoryService.findByPassId(passId);
-        passChecker.checkUserTerritoryRelation(user.getId(), territory.getId());
-        Pass newStatePass = mapper.toPass(passUpdateDTO, user, territory);
-
+        passChecker.isPassUpdatable(existPass);
+        //TODO check overlap before resolving
+        Pass newStatePass = passResolver.updatePass(passUpdateDTO, existPass);
+        newStatePass.setStartTime(passUpdateDTO.getStartTime()); //not null
+        newStatePass.setEndTime(passUpdateDTO.getEndTime()); //not null
         checkOverlapTime(newStatePass);
         trimThemAll(newStatePass);
-
-        existPass.setComment(newStatePass.getComment());
-        existPass.setTimeType(newStatePass.getTimeType());
-        existPass.setStartTime(newStatePass.getStartTime());
-        existPass.setEndTime(newStatePass.getEndTime());
-        existPass.setAttachedEntity(newStatePass);
+        if (passUpdateDTO.getComment() != null) {
+            existPass.setComment(passUpdateDTO.getComment());
+        }
+        existPass.setTimeType(passUpdateDTO.getTimeType()); //timeType notNull
 
         Pass updatedPass = passRepository.save(existPass);
         log.info("Pass updated: {}", updatedPass);
@@ -363,8 +358,8 @@ public class PassServiceImpl implements PassService {
                 .findFirst();
 
         if (overlapPass.isPresent()) {
-            log.info(OVERLAP_PASS.formatted(newPass.getUser().getId(), overlapPass.get().getId()));
-            throw new OverlapPassException(OVERLAP_PASS.formatted(newPass.getUser().getId(), overlapPass.get().getId()));
+            log.info(ExceptionUtils.OVERLAP_PASS.formatted(newPass.getUser().getId(), overlapPass.get().getId()));
+            throw new OverlapPassException(ExceptionUtils.OVERLAP_PASS.formatted(newPass.getUser().getId(), overlapPass.get().getId()));
         }
     }
 

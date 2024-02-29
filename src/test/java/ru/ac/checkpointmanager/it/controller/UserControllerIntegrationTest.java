@@ -42,7 +42,7 @@ import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.security.CustomAuthenticationToken;
 import ru.ac.checkpointmanager.util.MockMvcUtils;
-import ru.ac.checkpointmanager.util.ResultCheckUtils;
+import ru.ac.checkpointmanager.util.CheckResultActionsUtils;
 import ru.ac.checkpointmanager.util.TestMessage;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
@@ -125,7 +125,7 @@ class UserControllerIntegrationTest {
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL + "/{id}", userId))
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(Matchers.startsWith(USER)));
-        ResultCheckUtils.checkNotFoundFields(resultActions);
+        CheckResultActionsUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -224,7 +224,7 @@ class UserControllerIntegrationTest {
         resultActions.andExpect(status().isNotFound())
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
                         .value(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(userId)));
-        ResultCheckUtils.checkNotFoundFields(resultActions);
+        CheckResultActionsUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -469,7 +469,7 @@ class UserControllerIntegrationTest {
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.updateUser(userUpdateDTO));
         //then
         resultActions.andExpect(status().isOk());
-        ResultCheckUtils.verifyUserResponseDTO(resultActions, userId.toString(), userUpdateDTO.getFullName(),
+        CheckResultActionsUtils.verifyUserResponseDTO(resultActions, userId.toString(), userUpdateDTO.getFullName(),
                 userUpdateDTO.getMainNumber());
     }
 
@@ -491,7 +491,7 @@ class UserControllerIntegrationTest {
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.updateUser(userUpdateDTO));
         //then
         resultActions.andExpect(status().isOk());
-        ResultCheckUtils.verifyUserResponseDTO(resultActions, userId.toString(), savedUser.getFullName(),
+        CheckResultActionsUtils.verifyUserResponseDTO(resultActions, userId.toString(), savedUser.getFullName(),
                 userUpdateDTO.getMainNumber());
     }
 
@@ -512,7 +512,7 @@ class UserControllerIntegrationTest {
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.updateUser(userUpdateDTO));
         //then
         resultActions.andExpect(status().isOk());
-        ResultCheckUtils.verifyUserResponseDTO(resultActions, userId.toString(), userUpdateDTO.getFullName(),
+        CheckResultActionsUtils.verifyUserResponseDTO(resultActions, userId.toString(), userUpdateDTO.getFullName(),
                 userUpdateDTO.getMainNumber());
     }
 
@@ -530,7 +530,7 @@ class UserControllerIntegrationTest {
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.updateUser(userUpdateDTO));
         //then
         resultActions.andExpect(status().isOk());
-        ResultCheckUtils.verifyUserResponseDTO(resultActions, userId.toString(), userUpdateDTO.getFullName(),
+        CheckResultActionsUtils.verifyUserResponseDTO(resultActions, userId.toString(), userUpdateDTO.getFullName(),
                 userUpdateDTO.getMainNumber());
         Assertions.assertThat(phoneRepository.findAll()).hasSize(1).flatExtracting(Phone::getNumber)
                 .containsOnly(cleanedPhone);
@@ -572,7 +572,7 @@ class UserControllerIntegrationTest {
         UserUpdateDTO userUpdateDTO = TestUtils.getUserUpdateDTO();
 
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.updateUser(userUpdateDTO));
-        ResultCheckUtils.checkNotFoundFields(resultActions);
+        CheckResultActionsUtils.checkNotFoundFields(resultActions);
     }
 
     @Test

@@ -38,7 +38,8 @@ import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.repository.car.CarBrandRepository;
 import ru.ac.checkpointmanager.repository.car.CarRepository;
-import ru.ac.checkpointmanager.util.ResultCheckUtils;
+import ru.ac.checkpointmanager.util.PassTestData;
+import ru.ac.checkpointmanager.util.CheckResultActionsUtils;
 import ru.ac.checkpointmanager.util.TestUtils;
 import ru.ac.checkpointmanager.util.UrlConstants;
 
@@ -137,7 +138,7 @@ class CrossingEventControllerIntegrationTest {
         resultActions.andExpect(status().isNotFound())
                 .andExpectAll(jsonPath(TestUtils.JSON_DETAIL)
                         .value(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(TestUtils.USER_ID)));
-        ResultCheckUtils.checkNotFoundFields(resultActions);
+        CheckResultActionsUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -166,7 +167,7 @@ class CrossingEventControllerIntegrationTest {
         resultActions.andExpect(status().isNotFound())
                 .andExpectAll(jsonPath(TestUtils.JSON_DETAIL)
                         .value(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(TestUtils.TERR_ID)));
-        ResultCheckUtils.checkNotFoundFields(resultActions);
+        CheckResultActionsUtils.checkNotFoundFields(resultActions);
     }
 
     @Test
@@ -224,7 +225,7 @@ class CrossingEventControllerIntegrationTest {
                         .with(SecurityMockMvcRequestPostProcessors.user(anotherSavedUser)));
 
         resultActions.andExpect(status().isNotFound());
-        ResultCheckUtils.checkNotFoundFields(resultActions);
+        CheckResultActionsUtils.checkNotFoundFields(resultActions);
     }
 
     private Pass setupAndSavePass() {
@@ -241,7 +242,7 @@ class CrossingEventControllerIntegrationTest {
         car.setBrand(savedCarBrand);
         savedCar = carRepository.saveAndFlush(car);
 
-        PassAuto pass = TestUtils.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
+        PassAuto pass = PassTestData.getSimpleActiveOneTimePassAutoFor3Hours(savedUser, savedTerritory, savedCar);
         pass.setStatus(PassStatus.ACTIVE);
         return passRepository.saveAndFlush(pass);
     }

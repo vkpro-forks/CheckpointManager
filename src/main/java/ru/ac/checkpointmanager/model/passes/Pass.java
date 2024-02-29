@@ -6,6 +6,7 @@ import jakarta.persistence.DiscriminatorType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
@@ -42,7 +43,7 @@ public abstract class Pass {
     @EqualsAndHashCode.Include
     private UUID id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     private User user;
 
@@ -56,7 +57,7 @@ public abstract class Pass {
     @Enumerated(EnumType.STRING)
     private PassTimeType timeType;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "territory_id")
     private Territory territory;
 

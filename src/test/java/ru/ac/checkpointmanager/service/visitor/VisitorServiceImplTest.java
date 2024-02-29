@@ -19,6 +19,7 @@ import ru.ac.checkpointmanager.exception.VisitorNotFoundException;
 import ru.ac.checkpointmanager.mapper.VisitorMapper;
 import ru.ac.checkpointmanager.model.Visitor;
 import ru.ac.checkpointmanager.repository.VisitorRepository;
+import ru.ac.checkpointmanager.util.PassTestData;
 import ru.ac.checkpointmanager.util.TestUtils;
 
 import java.util.Collections;
@@ -175,12 +176,12 @@ class VisitorServiceImplTest {
     @Test
     void findByPassId_AllOk_ReturnVisitorDto() {
         Visitor visitor = TestUtils.getVisitorRandomUUID();
-        Mockito.when(visitorRepository.findVisitorByPasses_Id(TestUtils.PASS_ID)).thenReturn(Optional.of(visitor));
+        Mockito.when(visitorRepository.findVisitorByPasses_Id(PassTestData.PASS_ID)).thenReturn(Optional.of(visitor));
 
-        VisitorDTO foundDto = visitorService.findByPassId(TestUtils.PASS_ID);
+        VisitorDTO foundDto = visitorService.findByPassId(PassTestData.PASS_ID);
 
         Assertions.assertThat(foundDto).isEqualTo(visitorMapper.toVisitorDTO(visitor));
-        Mockito.verify(visitorRepository, Mockito.times(1)).findVisitorByPasses_Id(TestUtils.PASS_ID);
+        Mockito.verify(visitorRepository, Mockito.times(1)).findVisitorByPasses_Id(PassTestData.PASS_ID);
     }
 
     @Test
@@ -188,9 +189,9 @@ class VisitorServiceImplTest {
         Mockito.when(visitorRepository.findVisitorByPasses_Id(Mockito.any())).thenReturn(Optional.empty());
 
         Assertions.assertThatExceptionOfType(VisitorNotFoundException.class)
-                .isThrownBy(() -> visitorService.findByPassId(TestUtils.PASS_ID))
+                .isThrownBy(() -> visitorService.findByPassId(PassTestData.PASS_ID))
                 .isInstanceOf(EntityNotFoundException.class)
-                .withMessage(ExceptionUtils.VISITOR_BY_PASS_NOT_FOUND.formatted(TestUtils.PASS_ID));
+                .withMessage(ExceptionUtils.VISITOR_BY_PASS_NOT_FOUND.formatted(PassTestData.PASS_ID));
     }
 
     @Test

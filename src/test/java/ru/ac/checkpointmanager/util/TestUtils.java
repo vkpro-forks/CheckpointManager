@@ -22,8 +22,6 @@ import ru.ac.checkpointmanager.dto.CrossingRequestDTO;
 import ru.ac.checkpointmanager.dto.PhoneDTO;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.VisitorDTO;
-import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
-import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.dto.user.AuthRequestDTO;
 import ru.ac.checkpointmanager.dto.user.EmailConfirmationDTO;
 import ru.ac.checkpointmanager.dto.user.NewEmailDTO;
@@ -47,10 +45,6 @@ import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.model.enums.PhoneNumberType;
 import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.model.passes.Pass;
-import ru.ac.checkpointmanager.model.passes.PassAuto;
-import ru.ac.checkpointmanager.model.passes.PassStatus;
-import ru.ac.checkpointmanager.model.passes.PassTimeType;
-import ru.ac.checkpointmanager.model.passes.PassWalk;
 import ru.ac.checkpointmanager.security.CustomAuthenticationToken;
 
 import javax.imageio.ImageIO;
@@ -78,8 +72,6 @@ public class TestUtils {
     public static final String USER_NAME = "name";
 
     public static final String ERROR_MESSAGE_SHOULD = "This check should be not here";
-
-    public static final UUID PASS_ID = UUID.randomUUID();
 
     public static final int NO_VALID_WIDTH = 2000;
 
@@ -162,7 +154,7 @@ public class TestUtils {
     public static CrossingDTO getCrossingDTO() {
         return new CrossingDTO(
                 CROSSING_ID,
-                PASS_ID,
+                PassTestData.PASS_ID,
                 CHECKPOINT_ID,
                 ZonedDateTime.now(),
                 Direction.IN
@@ -171,7 +163,7 @@ public class TestUtils {
 
     public static CrossingRequestDTO getCrossingRequestDTO() {
         return new CrossingRequestDTO(
-                PASS_ID,
+                PassTestData.PASS_ID,
                 CHECKPOINT_ID,
                 ZonedDateTime.now()
         );
@@ -227,56 +219,6 @@ public class TestUtils {
                 LICENSE_PLATE,
                 getCarBrandDTO(),
                 PHONE_NUM
-        );
-    }
-
-    public static PassUpdateDTO getPassUpdateDTOWithCar() {
-        return new PassUpdateDTO(
-                "comment",
-                PassTimeType.ONETIME,
-                LocalDateTime.now().plusHours(1),
-                LocalDateTime.now().plusHours(7),
-                null,
-                getCarDto(),
-                PASS_ID
-        );
-    }
-
-    public static PassUpdateDTO getPassUpdateDTOVisitor() {
-        return new PassUpdateDTO(
-                "comment",
-                PassTimeType.ONETIME,
-                LocalDateTime.now().plusHours(1),
-                LocalDateTime.now().plusHours(7),
-                getVisitorDTO(),
-                null,
-                PASS_ID
-        );
-    }
-
-    public static PassCreateDTO getPassCreateDTOWithCar() {
-        return new PassCreateDTO(
-                "comment",
-                PassTimeType.ONETIME,
-                LocalDateTime.now().plusHours(1),
-                LocalDateTime.now().plusHours(7),
-                null,
-                getCarDto(),
-                USER_ID,
-                TERR_ID
-        );
-    }
-
-    public static PassCreateDTO getPassCreateDTOWithVisitor() {
-        return new PassCreateDTO(
-                "comment",
-                PassTimeType.ONETIME,
-                LocalDateTime.now().plusHours(1),
-                LocalDateTime.now().plusHours(7),
-                getVisitorDTO(),
-                null,
-                USER_ID,
-                TERR_ID
         );
     }
 
@@ -421,66 +363,6 @@ public class TestUtils {
                 PHONE_NUM,
                 "note"
         );
-    }
-
-    public static PassAuto getSimpleActiveOneTimePassAutoFor3Hours(User user, Territory territory, Car car) {
-        PassAuto passAuto = new PassAuto();
-        passAuto.setStartTime(LocalDateTime.now());
-        passAuto.setEndTime(LocalDateTime.now().plusHours(3));
-        passAuto.setId(UUID.randomUUID());
-        passAuto.setTimeType(PassTimeType.ONETIME);
-        passAuto.setDtype("AUTO");
-        passAuto.setStatus(PassStatus.ACTIVE);
-        passAuto.setCar(car);
-        passAuto.setUser(user);
-        passAuto.setTerritory(territory);
-        passAuto.setId(UUID.randomUUID());
-        return passAuto;
-    }
-
-    public static PassAuto getSimpleActivePermanentAutoFor3Hours(User user, Territory territory, Car car) {
-        PassAuto passAuto = new PassAuto();
-        passAuto.setStartTime(LocalDateTime.now());
-        passAuto.setEndTime(LocalDateTime.now().plusHours(3));
-        passAuto.setId(UUID.randomUUID());
-        passAuto.setTimeType(PassTimeType.PERMANENT);
-        passAuto.setDtype("AUTO");
-        passAuto.setStatus(PassStatus.ACTIVE);
-        passAuto.setCar(car);
-        passAuto.setUser(user);
-        passAuto.setTerritory(territory);
-        passAuto.setId(UUID.randomUUID());
-        return passAuto;
-    }
-
-    public static PassWalk getSimpleActiveOneTimePassWalkFor3Hours(User user, Territory territory, Visitor visitor) {
-        PassWalk passWalk = new PassWalk();
-        passWalk.setStartTime(LocalDateTime.now());
-        passWalk.setEndTime(LocalDateTime.now().plusHours(3));
-        passWalk.setId(UUID.randomUUID());
-        passWalk.setTimeType(PassTimeType.ONETIME);
-        passWalk.setDtype("WALK");
-        passWalk.setStatus(PassStatus.ACTIVE);
-        passWalk.setVisitor(visitor);
-        passWalk.setUser(user);
-        passWalk.setTerritory(territory);
-        passWalk.setId(UUID.randomUUID());
-        return passWalk;
-    }
-
-    public static PassWalk getPassWalk(PassStatus passStatus, LocalDateTime startTime, LocalDateTime endTime, User savedUser,
-                                       Territory savedTerritory, Visitor savedVisitor, PassTimeType passTimeType) {
-        PassWalk passWalk = new PassWalk();
-        passWalk.setStatus(passStatus);
-        passWalk.setStartTime(startTime);
-        passWalk.setEndTime(endTime);
-        passWalk.setUser(savedUser);
-        passWalk.setDtype("WALK");
-        passWalk.setTerritory(savedTerritory);
-        passWalk.setVisitor(savedVisitor);//name USERNAME
-        passWalk.setTimeType(passTimeType);
-        passWalk.setId(UUID.randomUUID());
-        return passWalk;
     }
 
 

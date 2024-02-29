@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.lang.Nullable;
 import ru.ac.checkpointmanager.utils.ValidationUtils;
 
 import java.util.UUID;
@@ -23,8 +24,10 @@ public class VisitorDTO {
 
     @Size(min = 11, max = 20)
     @Pattern(regexp = ValidationUtils.PHONE_REGEXP)
+    @Nullable
     private String phone;
 
     @Size(max = 30)
+    @Nullable
     private String note;
 }

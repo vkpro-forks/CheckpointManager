@@ -27,6 +27,7 @@ import ru.ac.checkpointmanager.service.checkpoints.CheckpointService;
 import ru.ac.checkpointmanager.service.crossing.impl.CrossingServiceImpl;
 import ru.ac.checkpointmanager.service.passes.PassChecker;
 import ru.ac.checkpointmanager.service.passes.PassService;
+import ru.ac.checkpointmanager.util.PassTestData;
 import ru.ac.checkpointmanager.util.TestUtils;
 
 @ExtendWith({MockitoExtension.class, LoggingMemoryAppenderTestResolver.class})
@@ -66,7 +67,7 @@ class CrossingServiceImplTest {
         Territory territory = TestUtils.getTerritory();
         passAuto.setTerritory(territory);
         Checkpoint checkpoint = TestUtils.getCheckpoint(CheckpointType.UNIVERSAL, territory);
-        Mockito.when(passService.findPassById(TestUtils.PASS_ID))
+        Mockito.when(passService.findPassById(PassTestData.PASS_ID))
                 .thenReturn(passAuto);
         Mockito.when(checkpointService.findCheckpointById(TestUtils.CHECKPOINT_ID))
                 .thenReturn(checkpoint);
