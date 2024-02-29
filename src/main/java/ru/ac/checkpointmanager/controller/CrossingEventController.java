@@ -44,7 +44,7 @@ public class CrossingEventController {
 
     private final PassInOutViewService passInOutViewService;
 
-    @Operation(summary = "Получить список событий по пропускам пользователя (для Us`er)",
+    @Operation(summary = "Получить список событий по пропускам пользователя (для User)",
             description = "Доступ: ADMIN - события всех пользователей, USER - только свои",
             parameters = {
                     @Parameter(in = ParameterIn.QUERY, name = "page", example = "0"),
@@ -55,7 +55,7 @@ public class CrossingEventController {
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = PassInOutView.class)))),
             @ApiResponse(responseCode = "404", description = "Пользователь не найден")})
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_USER') and @userAuthFacade.isIdMatch(#userId))")
     @GetMapping("/users/{userId}")
     public Page<PassInOutView> getEventsByUserId(@PathVariable UUID userId,
                                                  @Schema(hidden = true)
@@ -74,7 +74,7 @@ public class CrossingEventController {
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = PassInOutView.class)))),
             @ApiResponse(responseCode = "404", description = "Территория не найдена")})
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SECURITY')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_SECURITY') and @territoryAuthFacade.isIdMatch(#territoryId))")
     @GetMapping("/territories/{territoryId}")
     public Page<PassInOutView> getEventsByTerritoryId(@PathVariable UUID territoryId,
                                                       @Schema(hidden = true)
@@ -83,7 +83,7 @@ public class CrossingEventController {
         return passInOutViewService.findEventsByTerritory(territoryId, pagingParams);
     }
 
-    @Operation(summary = "Получить список событий по всем привязанным к пользователю территориям (для Manager)",
+    @Operation(summary = "Получить список событий по всем привязанным к пользователю территориям (для Manager и Security)",
             description = "Доступ: ADMIN - по всем территориям, MANAGER, SECURITY - только на закрепленной территории",
             parameters = {
                     @Parameter(in = ParameterIn.QUERY, name = "page", example = "0"),
@@ -94,7 +94,7 @@ public class CrossingEventController {
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = PassInOutView.class)))),
             @ApiResponse(responseCode = "404", description = "Пользователь или территории не найдены")})
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or (hasAnyRole('ROLE_MANAGER', 'ROLE_SECURITY') and @userAuthFacade.isIdMatch(#userId))")
     @GetMapping("/users/{userId}/territories")
     public Page<PassInOutView> findEventsByUsersTerritories(@PathVariable UUID userId,
                                                             @Schema(hidden = true)

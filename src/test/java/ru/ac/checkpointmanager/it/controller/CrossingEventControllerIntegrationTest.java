@@ -3,16 +3,21 @@ package ru.ac.checkpointmanager.it.controller;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 import ru.ac.checkpointmanager.config.EnablePostgresAndRedisTestContainers;
 import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.model.Territory;
@@ -22,6 +27,7 @@ import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
 import ru.ac.checkpointmanager.model.checkpoints.CheckpointType;
 import ru.ac.checkpointmanager.model.enums.Direction;
+import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
@@ -73,6 +79,9 @@ class CrossingEventControllerIntegrationTest {
     @Autowired
     CheckpointRepository checkpointRepository;
 
+    @Autowired
+    WebApplicationContext context;
+
     Territory savedTerritory;
 
     User savedUser;
@@ -80,6 +89,16 @@ class CrossingEventControllerIntegrationTest {
     Car savedCar;
 
     CarBrand savedCarBrand;
+
+    @BeforeEach
+    void init() {
+        User user = TestUtils.getUser();
+        user.setRole(Role.MANAGER);
+        savedUser = userRepository.saveAndFlush(user);
+        mockMvc = MockMvcBuilders.webAppContextSetup(context)
+                .apply(SecurityMockMvcConfigurers.springSecurity())
+                .build();
+    }
 
     @AfterEach
     void clear() {
@@ -168,7 +187,6 @@ class CrossingEventControllerIntegrationTest {
 
     @Test
     @SneakyThrows
-    @WithMockUser(roles = {"MANAGER"})
     void findEventsByUsersTerritories_AllOk_ReturnPageWithObjects() {
         Pass savedPass = setupAndSavePass();
         Checkpoint checkpoint = TestUtils.getCheckpoint(CheckpointType.AUTO, savedPass.getTerritory());
@@ -177,32 +195,33 @@ class CrossingEventControllerIntegrationTest {
         crossingRepository.saveAndFlush(TestUtils.getCrossing(savedPass, savedCheckPoint, Direction.OUT));
 
         ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.get(UrlConstants.EVENT_URL + "/users/{userId}/territories", savedUser.getId()));
+                MockMvcRequestBuilders.get(UrlConstants.EVENT_URL + "/users/{userId}/territories", savedUser.getId())
+                        .with(SecurityMockMvcRequestPostProcessors.user(savedUser)));
 
         checkEventFields(resultActions, savedPass);
     }
 
     @Test
     @SneakyThrows
-    @WithMockUser(roles = {"MANAGER"})
-    void findEventsByUsersTerritories_UserNotFound_ReturnPageWithObjects() {
+    void findEventsByUsersTerritories_UserHasNoAccess_ReturnPageWithObjects() {
         ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.get(UrlConstants.EVENT_URL + "/users/{userId}/territories", TestUtils.USER_ID));
+                MockMvcRequestBuilders.get(UrlConstants.EVENT_URL + "/users/{userId}/territories", TestUtils.USER_ID)
+                        .with(SecurityMockMvcRequestPostProcessors.user(savedUser)));
 
-        resultActions.andExpect(status().isNotFound())
-                .andExpectAll(jsonPath(TestUtils.JSON_DETAIL)
-                        .value(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(TestUtils.USER_ID)));
-        ResultCheckUtils.checkNotFoundFields(resultActions);
+        resultActions.andExpect(status().isForbidden())
+                .andExpectAll(jsonPath(TestUtils.JSON_DETAIL).value("Access Denied"));
+        ResultCheckUtils.checkForbiddenFields(resultActions);
     }
 
     @Test
     @SneakyThrows
-    @WithMockUser(roles = {"MANAGER"})
     void findEventsByUsersTerritories_TerritoryNotFound_ReturnPageWithObjects() {
         User user = TestUtils.getUser();
+        user.setRole(Role.MANAGER);
         User anotherSavedUser = userRepository.saveAndFlush(user);
         ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.get(UrlConstants.EVENT_URL + "/users/{userId}/territories", anotherSavedUser.getId()));
+                MockMvcRequestBuilders.get(UrlConstants.EVENT_URL + "/users/{userId}/territories", anotherSavedUser.getId())
+                        .with(SecurityMockMvcRequestPostProcessors.user(anotherSavedUser)));
 
         resultActions.andExpect(status().isNotFound());
         ResultCheckUtils.checkNotFoundFields(resultActions);
