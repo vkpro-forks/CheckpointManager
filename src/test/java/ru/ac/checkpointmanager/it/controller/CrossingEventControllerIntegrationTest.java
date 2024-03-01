@@ -191,6 +191,7 @@ class CrossingEventControllerIntegrationTest {
     @SneakyThrows
     void findEventsByUsersTerritories_UserHasNoAccess_ReturnPageWithObjects() {
         User user = TestUtils.getUser();
+        user.setRole(Role.SECURITY);
         ResultActions resultActions = mockMvc.perform(
                 MockMvcRequestBuilders.get(UrlConstants.EVENT_URL + "/users/{userId}/territories", TestUtils.USER_ID)
                         .with(SecurityMockMvcRequestPostProcessors.user(user)));
