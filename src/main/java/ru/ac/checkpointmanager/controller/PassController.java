@@ -162,7 +162,7 @@ public class PassController {
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = PassResponseDTO.class)))),
             @ApiResponse(responseCode = "404", description = "Территория не найдена")})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_SECURITY') and @userAuthFacade.isIdMatch(#userId))")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_SECURITY') and @territoryAuthFacade.isIdMatch(#territoryId))")
     @GetMapping("/territories/{territoryId}")
     public Page<PassResponseDTO> getPassesByTerritoryId(@PathVariable UUID territoryId,
                                                         @Schema(hidden = true)
@@ -190,7 +190,7 @@ public class PassController {
                             array = @ArraySchema(schema = @Schema(implementation = PassResponseDTO.class)))),
             @ApiResponse(responseCode = "404", description = "Пользователь или территории не найдены")})
     @PreAuthorize("hasRole('ROLE_ADMIN') " +
-            "or (hasAnyRole('ROLE_MANAGER', 'ROLE_SECURITY') and @territoryAuthFacade.isIdMatch(#territoryId))")
+            "or (hasAnyRole('ROLE_MANAGER', 'ROLE_SECURITY') and @userAuthFacade.isIdMatch(#userId))")
     @GetMapping("/users/{userId}/territories")
     public Page<PassResponseDTO> getPassesByUsersTerritories(@PathVariable UUID userId,
                                                              @Schema(hidden = true)
