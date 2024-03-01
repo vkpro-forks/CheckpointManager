@@ -26,4 +26,10 @@ public interface TerritoryRepository extends JpaRepository<Territory, UUID> {
 
     @Query("SELECT t FROM User u1 JOIN u1.territories t JOIN User u2 ON t MEMBER OF u2.territories WHERE u1.id = :userId1 AND u2.id = :userId2")
     List<Territory> findCommonTerritories(@Param("userId1") UUID userId1, @Param("userId2") UUID userId2);
+
+    @Query(value = "SELECT EXISTS (SELECT u.territory_id FROM user_territory u WHERE user_id = :firstId " +
+            "INTERSECT " +
+            "SELECT u.territory_id FROM user_territory u WHERE user_id = :secondId)"
+            , nativeQuery = true)
+    boolean checkIfUsersAreInTheSameTerritory(@Param("firstId") UUID currentUserId, @Param("secondId") UUID userId);
 }

@@ -15,4 +15,11 @@ public interface CarRepository extends JpaRepository<Car, UUID> {
     List<Car> findCarsByUserId(@Param("userId") UUID userId);
 
     List<Car> findByPhoneContaining(String phone);
+
+    @Query(value = "SELECT EXISTS (" +
+            "SELECT * FROM passes p " +
+            "JOIN cars c ON c.id = p.car_id " +
+            "WHERE c.id = :carId AND p.user_id = :userId)"
+            , nativeQuery = true)
+    boolean checkUserCarRelation(@Param("userId") UUID userId, @Param("carId") UUID carId);
 }

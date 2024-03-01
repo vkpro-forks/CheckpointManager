@@ -25,4 +25,10 @@ public interface VisitorRepository extends JpaRepository<Visitor, UUID> {
             , nativeQuery = true)
     List<Visitor> findVisitorsByUserId(@Param("userId") UUID userId);
 
+    @Query(value = "SELECT EXISTS (" +
+            "SELECT * FROM passes p " +
+            "JOIN visitors v ON p.visitor_id = v.id " +
+            "WHERE v.id = :visitorId AND p.user_id = :userId)"
+            , nativeQuery = true)
+    boolean checkUserVisitorRelation(@Param("userId") UUID userId, @Param("visitorId") UUID visitorId);
 }

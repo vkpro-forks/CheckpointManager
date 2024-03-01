@@ -52,6 +52,15 @@ public class CheckResultActionsUtils {
                 .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_TITLE).isNotEmpty());
     }
 
+    public static void checkForbiddenFields(ResultActions resultActions) throws Exception {
+        resultActions.andExpect(MockMvcResultMatchers.status().isForbidden())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_ERROR_CODE)
+                        .value(ErrorCode.FORBIDDEN.toString()))
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_TIMESTAMP).isNotEmpty())
+                .andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_TITLE).isNotEmpty());
+    }
+
     public static void checkValidationField(ResultActions resultActions, int index, String field) throws Exception {
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_VIOLATIONS_FIELD.formatted(index))
                 .value(field));

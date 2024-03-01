@@ -50,14 +50,15 @@ public class SwaggerConstants {
     public static final String GET_ALL_CARS_MESSAGE = "Получение всех машин.";
     public static final String GET_CARS_BY_USER_MESSAGE = "Получение всех машин по user.";
     public static final String FIND_CAR_BY_PHONE_NUMBER_MESSAGE = "Найти машину по номеру телефона.";
-    public static final String CAR_FOUND_SUCCESS_MESSAGE = "Машина успешно найдена. Может вернуть пустой список если машины не найдены.";
+    public static final String CAR_FOUND_SUCCESS_MESSAGE =
+            "Машина успешно найдена. Может вернуть пустой список если машины не найдены.";
 
+    //для CrossingEventController
+    public static final String EVENTS_ARE_FOUND_MESSAGE = "События найдены";
 
-
-
-
-
-
-
-
+    //для PassController
+    public static final String PASSES_ARE_FOUND_MESSAGE = "Пропуска найдены";
+    public static final String PASS_NOT_FOUND_MESSAGE = "Пропуск не найден";
+    public static final String PASS_ACCESS_ALL_MESSAGE =
+            "Доступ: ADMIN - пропуски всех пользователей, MANAGER, SECURITY, USER - только свои";
 }

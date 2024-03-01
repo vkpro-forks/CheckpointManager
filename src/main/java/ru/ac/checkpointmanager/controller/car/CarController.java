@@ -35,8 +35,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static ru.ac.checkpointmanager.utils.SwaggerConstants.ACCESS_ADMIN_MESSAGE;
-import static ru.ac.checkpointmanager.utils.SwaggerConstants.ACCESS_ALL_ROLES_MESSAGE;
 import static ru.ac.checkpointmanager.utils.SwaggerConstants.ADD_CAR_MESSAGE;
+import static ru.ac.checkpointmanager.utils.SwaggerConstants.ACCESS_ALL_ROLES_MESSAGE;
 import static ru.ac.checkpointmanager.utils.SwaggerConstants.CAR_ADDED_SUCCESS_MESSAGE;
 import static ru.ac.checkpointmanager.utils.SwaggerConstants.CAR_DELETED_SUCCESS_MESSAGE;
 import static ru.ac.checkpointmanager.utils.SwaggerConstants.CAR_FOUND_SUCCESS_MESSAGE;
@@ -58,14 +58,12 @@ import static ru.ac.checkpointmanager.utils.SwaggerConstants.UPDATE_CAR_MESSAGE;
 @RequiredArgsConstructor
 @Validated
 @SecurityRequirement(name = "bearerAuth")
-@Tag(name = "Car (машины)", description = ACCESS_ALL_ROLES_MESSAGE)
+@Tag(name = "Car (машины)", description = "Управление машинами")
 @ApiResponses(value = {@ApiResponse(responseCode = "401", description = UNAUTHORIZED_MSG,
         content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(responseCode = "500", description = INTERNAL_SERVER_ERROR_MSG,
                 content = @Content(schema = @Schema(implementation = ProblemDetail.class)))})
-
 public class CarController {
-
     private final CarMapper mapper;
     private final CarService carService;
 
@@ -78,7 +76,6 @@ public class CarController {
             @ApiResponse(responseCode = "400", description = FAILED_FIELD_VALIDATION_MESSAGE,
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
-    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public CarDTO addCar(@Valid @RequestBody CarDTO carDTO) {
@@ -88,7 +85,7 @@ public class CarController {
     }
 
     @Operation(summary = UPDATE_CAR_MESSAGE,
-            description = ACCESS_ADMIN_MESSAGE)
+            description = "Доступ: ADMIN - все машины, MANAGER, SECURITY, USER - в своих пропусках")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = CAR_UPDATED_SUCCESS_MESSAGE,
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -96,21 +93,21 @@ public class CarController {
             @ApiResponse(responseCode = "400", description = FAILED_FIELD_VALIDATION_MESSAGE,
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @carAuthFacade.isIdMatch(#carId)")
     @PutMapping("/{carId}")
-    public Car updateCar(@PathVariable UUID carId,
-                         @Valid @RequestBody CarDTO updateCarDto) {
-        return carService.updateCar(carId, updateCarDto);
+    public CarDTO updateCar(@PathVariable UUID carId,
+                            @Valid @RequestBody CarDTO updateCarDto) {
+        return mapper.toCarDTO(carService.updateCar(carId, updateCarDto));
     }
 
     @Operation(summary = DELETE_CAR_MESSAGE,
-            description = ACCESS_ADMIN_MESSAGE)
+            description = "Доступ: ADMIN - все машины, MANAGER, SECURITY, USER - в своих пропусках")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = CAR_DELETED_SUCCESS_MESSAGE),
             @ApiResponse(responseCode = "404", description = CAR_NOT_EXIST_MESSAGE,
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @carAuthFacade.isIdMatch(#carId)")
     @DeleteMapping("/{carId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCar(@PathVariable UUID carId) {
@@ -118,13 +115,13 @@ public class CarController {
     }
 
     @Operation(summary = GET_ALL_CARS_MESSAGE,
-            description = ACCESS_ALL_ROLES_MESSAGE)
+            description = ACCESS_ADMIN_MESSAGE)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = CAR_LIST_RECEIVED_MESSAGE,
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CarDTO.class))}),
     })
-    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping
     public List<CarDTO> getAllCars() {
         List<Car> carList = carService.getAllCars();
@@ -132,13 +129,16 @@ public class CarController {
     }
 
     @Operation(summary = GET_CARS_BY_USER_MESSAGE,
-            description = ACCESS_ALL_ROLES_MESSAGE)
+            description = "Доступ: ADMIN - любые машины, MANAGER, SECURITY - только машины, относящиеся к их территории, " +
+                    "USER - только машины, которые фигурируют в пропусках данного пользователя")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = CAR_LIST_RECEIVED_MESSAGE,
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CarDTO.class))}),
     })
-    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') " +
+            "or (hasAnyRole('ROLE_MANAGER', 'ROLE_SECURITY') and @territoryAuthFacade.isUserIdMatch(#userId)) " +
+            "or (hasRole('ROLE_USER') and @userAuthFacade.isIdMatch(#userId))")
     @GetMapping("/users/{userId}")
     public List<CarDTO> searchByUserId(@PathVariable UUID userId) {
         List<Car> cars = carService.findByUserId(userId);
@@ -146,13 +146,13 @@ public class CarController {
     }
 
     @Operation(summary = FIND_CAR_BY_PHONE_NUMBER_MESSAGE,
-            description = ACCESS_ALL_ROLES_MESSAGE)
+            description = ACCESS_ADMIN_MESSAGE)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = CAR_FOUND_SUCCESS_MESSAGE,
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CarDTO.class))}),
     })
-    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/phone")
     public List<CarDTO> searchByPhone(@RequestParam @NotBlank String phone) {
         List<Car> cars = carService.findByPhonePart(phone);

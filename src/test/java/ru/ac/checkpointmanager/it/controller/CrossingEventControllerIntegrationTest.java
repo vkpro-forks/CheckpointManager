@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -22,6 +23,7 @@ import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
 import ru.ac.checkpointmanager.model.checkpoints.CheckpointType;
 import ru.ac.checkpointmanager.model.enums.Direction;
+import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
 import ru.ac.checkpointmanager.model.passes.PassStatus;
@@ -169,41 +171,44 @@ class CrossingEventControllerIntegrationTest {
 
     @Test
     @SneakyThrows
-    @WithMockUser(roles = {"MANAGER"})
     void findEventsByUsersTerritories_AllOk_ReturnPageWithObjects() {
         Pass savedPass = setupAndSavePass();
         Checkpoint checkpoint = TestUtils.getCheckpoint(CheckpointType.AUTO, savedPass.getTerritory());
         Checkpoint savedCheckPoint = checkpointRepository.saveAndFlush(checkpoint);
         crossingRepository.saveAndFlush(TestUtils.getCrossing(savedPass, savedCheckPoint, Direction.IN));
         crossingRepository.saveAndFlush(TestUtils.getCrossing(savedPass, savedCheckPoint, Direction.OUT));
+        User user = savedPass.getUser();
+        user.setRole(Role.MANAGER);
 
         ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.get(UrlConstants.EVENT_URL + "/users/{userId}/territories", savedUser.getId()));
+                MockMvcRequestBuilders.get(UrlConstants.EVENT_URL + "/users/{userId}/territories", user.getId())
+                        .with(SecurityMockMvcRequestPostProcessors.user(user)));
 
         checkEventFields(resultActions, savedPass);
     }
 
     @Test
     @SneakyThrows
-    @WithMockUser(roles = {"MANAGER"})
-    void findEventsByUsersTerritories_UserNotFound_ReturnPageWithObjects() {
+    void findEventsByUsersTerritories_UserHasNoAccess_ReturnPageWithObjects() {
+        User user = TestUtils.getUser();
         ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.get(UrlConstants.EVENT_URL + "/users/{userId}/territories", TestUtils.USER_ID));
+                MockMvcRequestBuilders.get(UrlConstants.EVENT_URL + "/users/{userId}/territories", TestUtils.USER_ID)
+                        .with(SecurityMockMvcRequestPostProcessors.user(user)));
 
-        resultActions.andExpect(status().isNotFound())
-                .andExpectAll(jsonPath(TestUtils.JSON_DETAIL)
-                        .value(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(TestUtils.USER_ID)));
-        CheckResultActionsUtils.checkNotFoundFields(resultActions);
+        resultActions.andExpect(status().isForbidden())
+                .andExpectAll(jsonPath(TestUtils.JSON_DETAIL).value("Access Denied"));
+        CheckResultActionsUtils.checkForbiddenFields(resultActions);
     }
 
     @Test
     @SneakyThrows
-    @WithMockUser(roles = {"MANAGER"})
     void findEventsByUsersTerritories_TerritoryNotFound_ReturnPageWithObjects() {
         User user = TestUtils.getUser();
+        user.setRole(Role.MANAGER);
         User anotherSavedUser = userRepository.saveAndFlush(user);
         ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.get(UrlConstants.EVENT_URL + "/users/{userId}/territories", anotherSavedUser.getId()));
+                MockMvcRequestBuilders.get(UrlConstants.EVENT_URL + "/users/{userId}/territories", anotherSavedUser.getId())
+                        .with(SecurityMockMvcRequestPostProcessors.user(anotherSavedUser)));
 
         resultActions.andExpect(status().isNotFound());
         CheckResultActionsUtils.checkNotFoundFields(resultActions);
