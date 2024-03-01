@@ -32,7 +32,7 @@ public class OpenApiConfig {
     @Profile("prod")
     public OpenAPI openAPIProd() {
         return new OpenAPI()
-                .addServersItem(new Server().url("https://checkpoint-manager.ru/swagger"))
+                .addServersItem(new Server().url("https://checkpoint-manager.ru"))
                 .info(new Info().title("Checkpoint Manager")
                         .description(SWAGGER_DESCRIPTION_MESSAGE)
                         .version(appVersion));
