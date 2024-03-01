@@ -49,14 +49,14 @@ public class VisitorController {
     private final VisitorService visitorService;
 
     @Operation(summary = "Добавить нового посетителя",
-            description = "Доступ: ADMIN, MANAGER, USER")
+            description = ACCESS_ADMIN_MESSAGE)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Посетитель успешно добавлен",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = VisitorDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей")
     })
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_USER')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public VisitorDTO addVisitor(@Valid @RequestBody VisitorDTO visitorDTO) {
@@ -86,19 +86,19 @@ public class VisitorController {
             @ApiResponse(responseCode = "400", description = "Неуспешная валидация полей"),
             @ApiResponse(responseCode = "404", description = "Посетителя с таким ID не существует")
     })
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @visitorAuthFacade.isIdMatch(#visitorId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/{visitorId}")
     public VisitorDTO updateVisitor(@PathVariable UUID visitorId, @RequestBody @Valid VisitorDTO visitorDTO) {
         return visitorService.updateVisitor(visitorId, visitorDTO);
     }
 
     @Operation(summary = "Удалить посетителя",
-            description = "Доступ: ADMIN - все посетители, MANAGER, SECURITY, USER - входящие в собственные пропуска")
+            description = ACCESS_ADMIN_MESSAGE)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Посетитель успешно удален"),
             @ApiResponse(responseCode = "404", description = "Посетитель не существует")
     })
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @visitorAuthFacade.isIdMatch(#visitorId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{visitorId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteVisitor(@PathVariable UUID visitorId) {
