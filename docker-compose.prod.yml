@@ -26,6 +26,8 @@ services:
       - TZ=UTC
     env_file:
       - .env
+    networks:
+      - my_network
 
   # Сервис для базы данных PostgreSQL
   postgres-db:
@@ -44,6 +46,8 @@ services:
       interval: 5s
       timeout: 10s
       retries: 5
+    networks:
+      - my_network
 
   #Сервис для кеширования в Redis
   redis-cache:
@@ -57,6 +61,8 @@ services:
       - ./config/redis/redis.conf:/usr/local/etc/redis/redis.conf #copy config to redis
       - redis-cache-data:/data
     command: redis-server /usr/local/etc/redis/redis.conf --requirepass ${REDIS_PASS} #start with our config
+    networks:
+      - my_network
 
 
   # Сервис для хранения аватаров
@@ -70,6 +76,8 @@ services:
       - "8081:80"
     environment:
       - TZ=UTC
+    networks:
+      - my_network
 
 volumes:
   avatars: # Определение именованного тома для аватаров
