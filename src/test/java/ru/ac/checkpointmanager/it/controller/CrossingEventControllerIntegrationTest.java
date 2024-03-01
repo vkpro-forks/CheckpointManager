@@ -3,21 +3,17 @@ package ru.ac.checkpointmanager.it.controller;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
-import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 import ru.ac.checkpointmanager.config.EnablePostgresAndRedisTestContainers;
 import ru.ac.checkpointmanager.exception.ExceptionUtils;
 import ru.ac.checkpointmanager.model.Territory;
@@ -80,9 +76,6 @@ class CrossingEventControllerIntegrationTest {
     @Autowired
     CheckpointRepository checkpointRepository;
 
-    @Autowired
-    WebApplicationContext context;
-
     Territory savedTerritory;
 
     User savedUser;
@@ -90,16 +83,6 @@ class CrossingEventControllerIntegrationTest {
     Car savedCar;
 
     CarBrand savedCarBrand;
-
-    @BeforeEach
-    void init() {
-        User user = TestUtils.getUser();
-        user.setRole(Role.MANAGER);
-        savedUser = userRepository.saveAndFlush(user);
-        mockMvc = MockMvcBuilders.webAppContextSetup(context)
-                .apply(SecurityMockMvcConfigurers.springSecurity())
-                .build();
-    }
 
     @AfterEach
     void clear() {
@@ -194,10 +177,12 @@ class CrossingEventControllerIntegrationTest {
         Checkpoint savedCheckPoint = checkpointRepository.saveAndFlush(checkpoint);
         crossingRepository.saveAndFlush(TestUtils.getCrossing(savedPass, savedCheckPoint, Direction.IN));
         crossingRepository.saveAndFlush(TestUtils.getCrossing(savedPass, savedCheckPoint, Direction.OUT));
+        User user = savedPass.getUser();
+        user.setRole(Role.MANAGER);
 
         ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.get(UrlConstants.EVENT_URL + "/users/{userId}/territories", savedUser.getId())
-                        .with(SecurityMockMvcRequestPostProcessors.user(savedUser)));
+                MockMvcRequestBuilders.get(UrlConstants.EVENT_URL + "/users/{userId}/territories", user.getId())
+                        .with(SecurityMockMvcRequestPostProcessors.user(user)));
 
         checkEventFields(resultActions, savedPass);
     }
@@ -205,9 +190,10 @@ class CrossingEventControllerIntegrationTest {
     @Test
     @SneakyThrows
     void findEventsByUsersTerritories_UserHasNoAccess_ReturnPageWithObjects() {
+        User user = TestUtils.getUser();
         ResultActions resultActions = mockMvc.perform(
                 MockMvcRequestBuilders.get(UrlConstants.EVENT_URL + "/users/{userId}/territories", TestUtils.USER_ID)
-                        .with(SecurityMockMvcRequestPostProcessors.user(savedUser)));
+                        .with(SecurityMockMvcRequestPostProcessors.user(user)));
 
         resultActions.andExpect(status().isForbidden())
                 .andExpectAll(jsonPath(TestUtils.JSON_DETAIL).value("Access Denied"));

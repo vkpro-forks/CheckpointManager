@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import ru.ac.checkpointmanager.annotation.PreAuthorizeAllRoles;
 import ru.ac.checkpointmanager.dto.CarBrandDTO;
 import ru.ac.checkpointmanager.model.car.CarBrand;
 import ru.ac.checkpointmanager.service.car.CarBrandService;
@@ -72,7 +71,7 @@ public class CarBrandController {
                             schema = @Schema(implementation = CarBrand.class))}),
             @ApiResponse(responseCode = "400", description = FAILED_FIELD_VALIDATION_MESSAGE)
     })
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
     public CarBrand createBrand(@Valid @RequestBody CarBrandDTO brand) {
@@ -80,14 +79,14 @@ public class CarBrandController {
     }
 
     @Operation(summary = GET_CAR_BRAND_BY_ID_MESSAGE,
-            description = ACCESS_ALL_ROLES_MESSAGE)
+            description = ACCESS_ADMIN_MESSAGE)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = CAR_BRAND_RECEIVED_MESSAGE,
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CarBrand.class))}),
             @ApiResponse(responseCode = "404", description = BRAND_NOT_EXIST_MESSAGE)
     })
-    @PreAuthorizeAllRoles
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/{brandId}")
     public ResponseEntity<CarBrand> getCarBrandById(@PathVariable Long brandId) {
         CarBrand brand = carBrandService.getBrandById(brandId);
@@ -104,7 +103,7 @@ public class CarBrandController {
                             schema = @Schema(implementation = CarBrand.class))}),
             @ApiResponse(responseCode = "404", description = BRAND_NOT_EXIST_MESSAGE)
     })
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{brandId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCarBrandById(@PathVariable Long brandId) {
@@ -119,7 +118,7 @@ public class CarBrandController {
                             schema = @Schema(implementation = CarBrand.class))}),
             @ApiResponse(responseCode = "400", description = FAILED_FIELD_VALIDATION_MESSAGE)
     })
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/{brandId}")
     public CarBrand updateCarBrand(@Valid @PathVariable Long brandId,
                                    @Valid @RequestBody CarBrandDTO carBrandDetails) {
@@ -133,7 +132,6 @@ public class CarBrandController {
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CarBrand.class))}),
     })
-    @PreAuthorizeAllRoles
     @GetMapping()
     public ResponseEntity<List<CarBrand>> getAllBrands() {
         List<CarBrand> allBrands = carBrandService.getAllBrands();
@@ -142,13 +140,13 @@ public class CarBrandController {
     }
 
     @Operation(summary = GET_CAR_BRAND_BY_NAME_PART_MESSAGE,
-            description = ACCESS_ALL_ROLES_MESSAGE)
+            description = ACCESS_ADMIN_MESSAGE)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = CAR_BRANDS_LIST_RECEIVED_MESSAGE,
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CarBrand.class))}),
     })
-    @PreAuthorizeAllRoles
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/name")
     public ResponseEntity<List<CarBrand>> getBrandsByName(@RequestParam String brandNamePart) {
         List<CarBrand> brands = carBrandService.findByBrandsContainingIgnoreCase(brandNamePart);

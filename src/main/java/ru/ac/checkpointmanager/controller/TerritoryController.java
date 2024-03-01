@@ -76,7 +76,6 @@ public class TerritoryController {
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = TerritoryDTO.class))}),
             @ApiResponse(responseCode = "404", description = "Территория не найдена")})
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @GetMapping("/{territoryId}")
     public TerritoryDTO getTerritory(@PathVariable("territoryId") UUID territoryId) {
         return territoryService.findById(territoryId);
@@ -108,7 +107,6 @@ public class TerritoryController {
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = TerritoryDTO.class)))),
             @ApiResponse(responseCode = "404", description = "Территории не найдены")})
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @GetMapping("/name")
     public List<TerritoryDTO> getTerritoriesByName(@RequestParam String name) {
         return territoryService.findTerritoriesByName(name);

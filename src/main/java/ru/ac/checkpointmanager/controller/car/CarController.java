@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import ru.ac.checkpointmanager.annotation.PreAuthorizeAllRoles;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.mapper.CarMapper;
 import ru.ac.checkpointmanager.model.car.Car;
@@ -77,7 +76,6 @@ public class CarController {
             @ApiResponse(responseCode = "400", description = FAILED_FIELD_VALIDATION_MESSAGE,
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
-    @PreAuthorizeAllRoles
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public CarDTO addCar(@Valid @RequestBody CarDTO carDTO) {

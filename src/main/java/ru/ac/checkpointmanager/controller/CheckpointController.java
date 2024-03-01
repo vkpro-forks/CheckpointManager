@@ -74,7 +74,6 @@ public class CheckpointController {
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CheckpointDTO.class))}),
             @ApiResponse(responseCode = "404", description = KPP_NOT_FOUND_SINGULAR)})
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @GetMapping("/{checkpointId}")
     public ResponseEntity<CheckpointDTO> getCheckpoint(@PathVariable UUID checkpointId) {
         CheckpointDTO foundCheckpoint = checkpointService.findById(checkpointId);
@@ -88,7 +87,6 @@ public class CheckpointController {
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = CheckpointDTO.class)))),
             @ApiResponse(responseCode = "404", description = KPP_NOT_FOUND_PLURAL)})
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SECURITY', 'ROLE_USER')")
     @GetMapping("/name")
     public List<CheckpointDTO> getCheckpointsByName(@Parameter(description = "Часть названия")
                                                     @RequestParam String name) {

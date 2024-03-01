@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import ru.ac.checkpointmanager.annotation.PreAuthorizeAdminOrPassOwner;
 import ru.ac.checkpointmanager.annotation.PagingParam;
 import ru.ac.checkpointmanager.dto.passes.FilterParams;
 import ru.ac.checkpointmanager.dto.passes.PagingParams;
@@ -225,7 +224,7 @@ public class PassController {
                             schema = @Schema(implementation = PassResponseDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Пропуск не является активным"),
             @ApiResponse(responseCode = "404", description = PASS_NOT_FOUND_MESSAGE)})
-    @PreAuthorizeAdminOrPassOwner
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @passAuthFacade.isIdMatch(#passId)")
     @PatchMapping("/{passId}/cancel")
     public ResponseEntity<PassResponseDTO> cancelPass(@PathVariable UUID passId) {
 
@@ -241,7 +240,7 @@ public class PassController {
                             schema = @Schema(implementation = PassResponseDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Пропуск не является отмененным; время действия пропуска истекло"),
             @ApiResponse(responseCode = "404", description = PASS_NOT_FOUND_MESSAGE)})
-    @PreAuthorizeAdminOrPassOwner
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @passAuthFacade.isIdMatch(#passId)")
     @PatchMapping("/{passId}/activate")
     public ResponseEntity<PassResponseDTO> activatePass(@PathVariable UUID passId) {
 
@@ -271,7 +270,7 @@ public class PassController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Отмечен"),
             @ApiResponse(responseCode = "404", description = "Не найден")})
-    @PreAuthorizeAdminOrPassOwner
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @passAuthFacade.isIdMatch(#passId)")
     @PatchMapping("/{passId}/favorite")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void markFavorite(@PathVariable UUID passId) {
@@ -283,7 +282,7 @@ public class PassController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Отмечен"),
             @ApiResponse(responseCode = "404", description = "Не найден")})
-    @PreAuthorizeAdminOrPassOwner
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @passAuthFacade.isIdMatch(#passId)")
     @PatchMapping("/{passId}/not_favorite")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void unmarkFavorite(@PathVariable UUID passId) {
