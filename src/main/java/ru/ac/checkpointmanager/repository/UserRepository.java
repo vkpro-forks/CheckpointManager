@@ -1,12 +1,12 @@
 package ru.ac.checkpointmanager.repository;
 
-import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.model.User;
@@ -56,8 +56,8 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     @Query("SELECT u FROM User u " +
             "ORDER BY CASE WHEN u.role = 'ADMIN' THEN 1 WHEN u.role = 'MANAGER' THEN 2 " +
             "WHEN u.role = 'SECURITY' THEN 3 ELSE 4 END, u.fullName")
-    @NotNull
-    Page<User> findAll(@NotNull Pageable pageable);
+    @NonNull
+    Page<User> findAll(@NonNull Pageable pageable);
 
     @Query("SELECT u2 FROM User u1 JOIN u1.territories t JOIN t.users u2 WHERE u1.id = :userId AND u2.id != :userId " +
             "ORDER BY CASE WHEN u2.role = 'ADMIN' THEN 1 WHEN u2.role = 'MANAGER' THEN 2 " +
