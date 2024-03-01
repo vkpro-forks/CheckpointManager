@@ -71,9 +71,12 @@ services:
     environment:
       - TZ=UTC
 
-
 volumes:
   avatars: # Определение именованного тома для аватаров
   logs: # Определение именованного тома для логов
   db-data: # Определение именованного тома для базы данных
   redis-cache-data: # Вольюм для редиса, откуда он сюда подставится?
+
+networks:
+  my_network:
+    external: true
