@@ -561,6 +561,24 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
+     * Получает список пользователей, привязанных хотя бы к одной территории
+     * из списка территорий запрашивающего этот список менеджера
+     *
+     * @param pagingParams параметры пагинации и сортировки.
+     * @return Страница {@link Page<UserResponseDTO>} с информацией о пользователях.
+     */
+    @Override
+    public Page<UserResponseDTO> getTerritoriesAssociatedUsers(PagingParams pagingParams) {
+        log.debug("Method {}", MethodLog.getMethodName());
+
+        UUID currentUserid = authFacade.getCurrentUser().getId();
+        Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
+
+        Page<User> userPage = userRepository.findTerritoriesAssociatedUsers(currentUserid, pageable);
+        return userPage.map(userMapper::toUserResponseDTO);
+    }
+
+    /**
      * Находит все номера телефонов, связанные с пользователем.
      * <p>
      * Этот метод возвращает коллекцию номеров телефонов для указанного пользователя. Если пользователь
