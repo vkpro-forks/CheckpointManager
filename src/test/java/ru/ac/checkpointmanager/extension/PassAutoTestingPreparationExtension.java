@@ -28,7 +28,8 @@ import java.util.List;
 /**
  * Сохраняет в базу нужные для пропуска данные, а именно User, CarBrand, Car, Territory перед запуском теста;
  * Удаляет за собой эти данные;
- * Переносит в тестовый класс сохраненные сущности в качестве параметров
+ * Инжектит ДТО {@link SavedPassWithRequiredEntitiesDTO} с сохраненными сущностями в тестовый класс
+ * Внедрение происходит по аннотации {@link PassWithRequiredEntities}
  */
 @Slf4j
 public class PassAutoTestingPreparationExtension implements AfterEachCallback, BeforeEachCallback, ParameterResolver {
