@@ -12,7 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.util.unit.DataSize;
 import org.springframework.web.multipart.MultipartFile;
-import ru.ac.checkpointmanager.ext.ValidationContextTestResolver;
+import ru.ac.checkpointmanager.extension.ValidationContextTestResolver;
 import ru.ac.checkpointmanager.model.avatar.AvatarProperties;
 
 import java.util.List;

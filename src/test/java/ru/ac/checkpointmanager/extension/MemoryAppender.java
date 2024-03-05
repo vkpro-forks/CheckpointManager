@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.ext;
+package ru.ac.checkpointmanager.extension;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;

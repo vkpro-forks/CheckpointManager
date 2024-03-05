@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.ext;
+package ru.ac.checkpointmanager.extension;
 
 import jakarta.validation.ConstraintValidatorContext;
 import org.junit.jupiter.api.extension.ExtensionContext;

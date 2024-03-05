@@ -11,7 +11,7 @@ import ru.ac.checkpointmanager.dto.VisitorDTO;
 import ru.ac.checkpointmanager.dto.passes.PassBaseDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
-import ru.ac.checkpointmanager.ext.ValidationContextTestResolver;
+import ru.ac.checkpointmanager.extension.ValidationContextTestResolver;
 import ru.ac.checkpointmanager.util.PassTestData;
 
 import java.util.stream.Stream;

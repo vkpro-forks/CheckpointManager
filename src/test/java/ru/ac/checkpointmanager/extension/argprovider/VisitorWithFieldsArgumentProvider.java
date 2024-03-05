@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.ext.argprovider;
+package ru.ac.checkpointmanager.extension.argprovider;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Triple;

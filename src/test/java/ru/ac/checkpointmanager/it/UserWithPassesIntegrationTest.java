@@ -1,17 +1,20 @@
 package ru.ac.checkpointmanager.it;
 
-import org.assertj.core.api.Assertions;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.extension.ExtensionContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
 import ru.ac.checkpointmanager.config.EnablePostgresAndRedisTestContainers;
-import ru.ac.checkpointmanager.ext.UserTerritoryCarPassInRepositoryExtension;
-import ru.ac.checkpointmanager.model.car.Car;
+import ru.ac.checkpointmanager.extension.SavedPassWithRequiredEntitiesDTO;
+import ru.ac.checkpointmanager.extension.annotation.PassWithRequiredEntities;
+import ru.ac.checkpointmanager.util.MockMvcUtils;
+
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
@@ -19,15 +22,16 @@ import ru.ac.checkpointmanager.model.car.Car;
 @ActiveProfiles("test")
 @WithMockUser(roles = {"ADMIN"})
 @EnablePostgresAndRedisTestContainers
-@ExtendWith(UserTerritoryCarPassInRepositoryExtension.class)
-public class UserWithPassesIntegrationTest {
+class UserWithPassesIntegrationTest {
 
-    private Car car;
+    @Autowired
+    MockMvc mockMvc;
 
+    //https://junit.org/junit5/docs/current/user-guide/#extensions extension model in action
     @Test
-    void test() {
-        System.out.println("asdfasfasdf" + car);
-        Assertions.assertThat(car).isNotNull();
-        System.out.println("hahah");
+    @SneakyThrows
+    void deleteUser_UserWithPass_DeleteAndReturnNoContent(@PassWithRequiredEntities SavedPassWithRequiredEntitiesDTO passWithRequiredEntitiesDTO) {
+        mockMvc.perform(MockMvcUtils.deleteUser(passWithRequiredEntitiesDTO.getUser().getId()))
+                .andExpect(status().isNoContent());
     }
 }
