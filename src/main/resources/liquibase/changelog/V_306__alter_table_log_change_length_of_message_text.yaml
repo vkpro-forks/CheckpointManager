@@ -18,11 +18,11 @@ databaseChangeLog:
             dbms: postgresql
             encoding: utf8
             endDelimiter: GO
-            path: V_306__alter_table_log_change_length_of_message_text.sql
-            relativeToChangelogFile: true
+            path: liquibase/scripts/V_306__alter_table_log_change_length_of_message_text.sql
+            relativeToChangelogFile: false
             splitStatements: true
             stripComments: true
       rollback:
         changesetId: '306'
-        changesetPath: liquibase/scripts/V_306__alter_table_log_change_length_of_message_text.yaml
+        changesetPath: liquibase/changelog/V_306__alter_table_log_change_length_of_message_text.yaml
         changesetAuthor: 'veselov.nikolay'

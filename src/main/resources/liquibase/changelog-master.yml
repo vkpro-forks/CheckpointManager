@@ -66,15 +66,15 @@ databaseChangeLog:
   - include:
       file: liquibase/scripts/V_178__drop_tokens.sql
   - include:
-      file: liquibase/scripts/V_187__alter_table_passes_set_null_on_delete_car.yaml
+      file: liquibase/changelog/V_187__alter_table_passes_set_null_on_delete_car.yaml
   - include:
       file: liquibase/scripts/V_168__expected_direction.sql
   - include:
-      file: liquibase/scripts/V_170__alter_table_crossing_add_column_performed_at.yaml
+      file: liquibase/changelog/V_170__alter_table_crossing_add_column_performed_at.yaml
   - include:
       file: liquibase/scripts/V_208__drop_temporary_users_table.sql
   - include:
-      file: liquibase/scripts/V_216__alter_table_passes_delete_cascade_on_delete_territory.yaml
+      file: liquibase/changelog/V_216__alter_table_passes_delete_cascade_on_delete_territory.yaml
   - include:
       file: liquibase/scripts/V_199__alter_passes.sql
   - include:
@@ -82,11 +82,13 @@ databaseChangeLog:
   - include:
       file: liquibase/scripts/V_255__alter_territories.sql
   - include:
-      file: liquibase/scripts/V_272__alter_table_passes_create_pass_status_enum.yaml
+      file: liquibase/changelog/V_272__alter_table_passes_create_pass_status_enum.yaml
   - include:
       file: liquibase/scripts/V_291__alter_events_view.sql
   - include:
-      file: liquibase/scripts/V_306__alter_table_log_change_length_of_message_text.yaml
+      file: liquibase/changelog/V_306__alter_table_log_change_length_of_message_text.yaml
+  - include:
+      file: liquibase/changelog/V_342__alter_table_passes_on_delete_user_set_null.yaml
 
   ## ВНЕСЕНИЕ ДЕМО-ДАННЫХ, ОСТАВЛЯЙТЕ ВСЕГДА В КОНЦЕ ФАЙЛА
   - include:

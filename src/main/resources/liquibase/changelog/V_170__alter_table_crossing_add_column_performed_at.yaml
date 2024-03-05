@@ -18,11 +18,11 @@ databaseChangeLog:
             dbms: postgresql
             encoding: utf8
             endDelimiter: GO
-            path: V_170__script.sql
-            relativeToChangelogFile: true
+            path: liquibase/scripts/V_170__script.sql
+            relativeToChangelogFile: false
             splitStatements: true
             stripComments: true
       rollback:
         changesetId: '170'
-        changesetPath: liquibase/scripts/V_170__alter_table_crossing_add_column_performed_at.yaml
+        changesetPath: liquibase/changelog/V_170__alter_table_crossing_add_column_performed_at.yaml
         changesetAuthor: 'veselov.nikolay'
