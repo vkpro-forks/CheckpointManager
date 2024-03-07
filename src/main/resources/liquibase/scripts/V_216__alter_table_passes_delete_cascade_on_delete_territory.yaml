@@ -18,11 +18,11 @@ databaseChangeLog:
             dbms: postgresql
             encoding: utf8
             endDelimiter: GO
-            path: liquibase/scripts/V_216__script.sql
-            relativeToChangelogFile: false
+            path: V_216__script.sql
+            relativeToChangelogFile: true
             splitStatements: true
             stripComments: true
       rollback:
         changesetId: '216'
-        changesetPath: liquibase/changelog/V_216__alter_table_passes_delete_cascade_on_delete_territory.yaml
+        changesetPath: liquibase/scripts/V_216__alter_table_passes_delete_cascade_on_delete_territory.yaml
         changesetAuthor: 'veselov.nikolay'

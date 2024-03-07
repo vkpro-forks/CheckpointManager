@@ -18,11 +18,11 @@ databaseChangeLog:
             dbms: postgresql
             encoding: utf8
             endDelimiter: GO
-            path: liquibase/scripts/V_272__alter_table_passes_pass_status_enum.sql
-            relativeToChangelogFile: false
+            path: V_272__alter_table_passes_pass_status_enum.sql
+            relativeToChangelogFile: true
             splitStatements: true
             stripComments: true
       rollback:
         changesetId: '272'
-        changesetPath: liquibase/changelog/V_272__alter_table_passes_create_pass_status_enum.yaml
+        changesetPath: liquibase/scripts/V_272__alter_table_passes_create_pass_status_enum.yaml
         changesetAuthor: 'veselov.nikolay'

@@ -18,11 +18,11 @@ databaseChangeLog:
             dbms: postgresql
             encoding: utf8
             endDelimiter: GO
-            path: liquibase/scripts/V_342__alter_table_passes_on_delete_user_set_null.sql
-            relativeToChangelogFile: false
+            path: V_342__alter_table_passes_on_delete_user_set_null.sql
+            relativeToChangelogFile: true
             splitStatements: true
             stripComments: true
       rollback:
         changesetId: '342'
-        changesetPath: liquibase/changelog/V_342__alter_table_passes_on_delete_user_set_null.yaml
+        changesetPath: liquibase/scripts/V_342__alter_table_passes_on_delete_user_set_null.yaml
         changesetAuthor: 'veselov.nikolay'
