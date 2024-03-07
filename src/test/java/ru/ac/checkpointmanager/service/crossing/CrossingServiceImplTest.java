@@ -13,7 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.test.util.ReflectionTestUtils;
 import ru.ac.checkpointmanager.dto.CrossingRequestDTO;
-import ru.ac.checkpointmanager.ext.LoggingMemoryAppenderTestResolver;
+import ru.ac.checkpointmanager.extension.LoggingMemoryAppenderTestResolver;
 import ru.ac.checkpointmanager.mapper.CrossingMapper;
 import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.model.Territory;

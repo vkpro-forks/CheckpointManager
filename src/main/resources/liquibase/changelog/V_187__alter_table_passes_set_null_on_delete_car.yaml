@@ -18,11 +18,11 @@ databaseChangeLog:
             dbms: postgresql
             encoding: utf8
             endDelimiter: GO
-            path: V_187__script.sql
-            relativeToChangelogFile: true
+            path: liquibase/scripts/V_187__script.sql
+            relativeToChangelogFile: false
             splitStatements: true
             stripComments: true
       rollback:
         changesetId: '187'
-        changesetPath: liquibase/scripts/V_187__alter_table_passes_set_null_on_delete_car.yaml
+        changesetPath: liquibase/changelog/V_187__alter_table_passes_set_null_on_delete_car.yaml
         changesetAuthor: 'veselov.nikolay'

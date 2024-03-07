@@ -71,6 +71,11 @@ public class MockMvcUtils {
                 .content(TestUtils.jsonStringFromObject(userUpdateDTO));
     }
 
+    public static MockHttpServletRequestBuilder deleteUser(UUID userId) {
+        log.info(TestMessage.PERFORM_HTTP, HttpMethod.DELETE, UrlConstants.USER_URL + "/{userId}", userId);
+        return MockMvcRequestBuilders.delete(UrlConstants.USER_URL + "/{userId}", userId);
+    }
+
     public static MockHttpServletRequestBuilder uploadAvatarForUser(UUID userId, MockMultipartFile file) {
         log.info(TestMessage.PERFORM_HTTP, HttpMethod.POST, UrlConstants.AVATAR_USER_URL, userId);
         return MockMvcRequestBuilders.multipart(

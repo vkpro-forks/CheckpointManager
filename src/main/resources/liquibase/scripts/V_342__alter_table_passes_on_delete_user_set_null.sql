@@ -1,0 +1,13 @@
+ALTER TABLE passes
+    DROP CONSTRAINT pass_user_fk;
+GO
+
+ALTER TABLE passes
+    ALTER COLUMN user_id DROP NOT NULL;
+
+GO
+
+ALTER TABLE passes
+    ADD CONSTRAINT pass_user_fk FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE SET NULL;
+
+GO
