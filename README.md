@@ -63,7 +63,7 @@
 
 ## 📖 Как пользоваться
 
-1. **Перейти на сайт** [Checkpoint Manager]([https://checkpoint-manager.ru/]).
+1. **Перейти на сайт** [Checkpoint Manager](https://checkpoint-manager.ru/).
 
 2. **Ввод электронной почты**:
 
