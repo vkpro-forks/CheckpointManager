@@ -72,10 +72,11 @@
 <div align="center">
   <img alt="Ввод электронной почты" src="https://github.com/AnvilCoder/CheckpointManager/assets/124284597/a6784409-8162-44b9-97ef-c29d0fa60910" height="350" width="350"/>
   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-  <img alt="Выбор готового акка" src="https://github.com/AnvilCoder/CheckpointManager/assets/124284597/55f6cc8d-7c63-41c9-9dfe-7a46be1c61de" height="350" width="350"/>
+  <img alt="Выбор готового акка" src="https://github.com/AnvilCoder/CheckpointManager/assets/124284597/6c3b8b51-02cd-4b6f-8ab5-e3b3cf38eaeb" height="350" width="400"/>
 </div>
 
 3. **Определение статуса Пользователя**:
+
 
 - Система проверит, зарегистрирован ли уже этот email
 - Если электронная почта уже есть в базе данных, откроется страница входа
@@ -86,7 +87,7 @@
 - **Для зарегестрированных пользователей пользователей**: достаточно ввести пароль для входа
 
 <div align="center">
-<img alt="Форма входа" height="400" src="https://github.com/AnvilCoder/CheckpointManager/assets/124284597/3ef6a5c2-7824-4c5d-99b3-9c783495a6bc" width="400"/>
+<img alt="Форма входа" height="400" src="https://github.com/AnvilCoder/CheckpointManager/assets/124284597/f0f21dff-da9a-432e-9c2a-65bbe5623322" width="400"/>
 </div>
 
 - **Для новых пользователей**: Заполни форму регистрации. Это быстро и просто – нужно всего
@@ -94,17 +95,17 @@
   подтверждения твоей электронной почты
 
 <div align="center">
-  <img alt="Форма регистрации" src="https://github.com/AnvilCoder/CheckpointManager/assets/124284597/a578480e-8270-4dc3-96b2-a68ec7c76afc" height="400" width="400"/>
+  <img alt="Форма регистрации" src="https://github.com/AnvilCoder/CheckpointManager/assets/124284597/f6ce47aa-b4f0-4a3f-98bb-63a913530516" height="450" width="400"/>
   &nbsp; &nbsp; 
-  <img alt="Письмо" src="https://github.com/AnvilCoder/CheckpointManager/assets/124284597/7fad9df1-d87d-4681-bfc1-26e9c4656280" height="400" width="400"/>
+  <img alt="Письмо" src="https://github.com/AnvilCoder/CheckpointManager/assets/124284597/6f651cc6-8257-4388-b3fb-6df701485c0d" height="450" width="450"/>
 </div>
 
-5. **Начало Работы**:
+
 
 - После входа в систему перед тобой откроется главный интерфейс Checkpoint Manager
 
 <div align="center">
-<img alt="Главный интерфейс Checkpoint Manager" height="400" src="https://github.com/AnvilCoder/CheckpointManager/assets/124284597/10f8ce61-8cee-4fa7-a6f3-e4791ab9ba4d" width="900"/>
+<img alt="Главный интерфейс Checkpoint Manager" height="500" src="https://github.com/AnvilCoder/CheckpointManager/assets/124284597/8a67cf5c-e2b4-40a0-a492-e3624966428d" width="900"/>
 </div>
 
 - Если ты только зарегистрировался, то управляющий охраняемым объектом должен привязать твой аккаунт к соответствующей
