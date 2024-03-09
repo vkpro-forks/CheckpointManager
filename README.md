@@ -95,9 +95,9 @@
   подтверждения твоей электронной почты
 
 <div align="center">
-  <img alt="Форма регистрации" src="https://github.com/AnvilCoder/CheckpointManager/assets/124284597/f6ce47aa-b4f0-4a3f-98bb-63a913530516" height="450" width="400"/>
+  <img alt="Форма регистрации" src="https://github.com/AnvilCoder/CheckpointManager/assets/124284597/f6ce47aa-b4f0-4a3f-98bb-63a913530516" height="400" width="350"/>
   &nbsp; &nbsp; 
-  <img alt="Письмо" src="https://github.com/AnvilCoder/CheckpointManager/assets/124284597/6f651cc6-8257-4388-b3fb-6df701485c0d" height="450" width="450"/>
+  <img alt="Письмо" src="https://github.com/AnvilCoder/CheckpointManager/assets/124284597/6f651cc6-8257-4388-b3fb-6df701485c0d" height="400" width="400"/>
 </div>
 
 
