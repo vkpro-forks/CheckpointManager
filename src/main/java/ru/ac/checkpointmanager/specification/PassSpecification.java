@@ -108,9 +108,10 @@ public final class PassSpecification {
             Root<PassAuto> paRoot = criteriaBuilder.treat(root, PassAuto.class);
             Join<Car, PassAuto> carJoin = paRoot.join(PassAuto_.CAR, JoinType.LEFT);
             return criteriaBuilder.like(
-                    criteriaBuilder.lower(carJoin.get(Car_.LICENSE_PLATE)), part.toLowerCase() + "%");
+                    criteriaBuilder.lower(carJoin.get(Car_.LICENSE_PLATE)), "%" + part.toLowerCase() + "%");
         };
     }
+
 
     /**
      * Спецификация для создания критерия для поиска пропуска по совпадению имени вложенного посетителя.
@@ -126,7 +127,7 @@ public final class PassSpecification {
             Root<PassWalk> paRoot = criteriaBuilder.treat(root, PassWalk.class);
             Join<Visitor, PassWalk> visitorJoin = paRoot.join(PassWalk_.VISITOR, JoinType.LEFT);
             return criteriaBuilder.like(
-                    criteriaBuilder.lower(visitorJoin.get(Visitor_.NAME)), part.toLowerCase() + "%");
+                    criteriaBuilder.lower(visitorJoin.get(Visitor_.NAME)), "%" + part.toLowerCase() + "%");
         };
     }
 
