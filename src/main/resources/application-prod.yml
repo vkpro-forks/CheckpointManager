@@ -2,8 +2,8 @@ spring:
   mail:
     host: smtp.yandex.ru
     port: 465
-    username: ENC(WYb5Z/y2kaUCoIHeKCEYe5vVFTBYmctm46YOvEtuADsLdFDu1VOQMCjSCUgMd0RfFgx5bxAk7UG7bIHwyg2tkQ==)
-    password: ENC(LhX5eYcOFZy+m1eUY3UQOhTv+j9iPnGjsDFW9ngMX7AsU+PQ4F9SWXEiY4uB/WrP)
+    username: ENC(03puLAyfAIk49/ksIDYBr9mUvKGeiFOxvKlNPiYbjuzhhxsJKAZjM0RxysGTxpsGy4n2HZVr0msCkOIl/5ejkA==)
+    password: ENC(IoIoNKoDTPRhpM4jD7zvwNBjUBMgfrynz7Ar+bTsf3/ea6PCMAF1bq+3w37p1fA2j/waqrSWgYzvAphHaT08bQ==)
     protocol: smtp
     properties:
       mail:

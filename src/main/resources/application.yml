@@ -6,8 +6,8 @@ spring:
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/${PG_DB}
-    username: ENC(9k2UuAIGxxGILVSL+5HgpsnQkEPp2tkJf6jzDEh3bWR5l504rjbqZVYs72snlbFj)
-    password: ENC(6udLr6OyhcjLhsBgtcMIxwv4vsDvQZqiUMvpVir8iY4nj9M4nMmItjElLeAZFvFK)
+    username: ENC(lsksaRYX3S2BuNlhosZLveISYQEf7AqUSFEE1kYGPo4lWAkFx47mAs6Nn9KB0H1e)
+    password: ENC(/xwd4WaJRFnFP+HJu3gBu6XkgycEKqOOGQd9eBWMdpBsOfagzSjskd+SDZjknZeJ)
   servlet:
     multipart:
       max-file-size: 5MB
@@ -33,8 +33,8 @@ spring:
   mail:
     host: smtp.yandex.ru
     port: 465
-    username: ENC(2CNcQ+pxJrvy/gJ2OqPmPBCLETyaw96OApJ9ZoDwmshV0phAWM2+cZy+L8eU9lAjAi0eYRlZ8f7h3KKGs8Q35w==)
-    password: ENC(3ZZqKWtLB3XcA4FZ6cfzinSHOkzS2PC8QzMljRtk37kWg8zEgizYTpN3C8jrmTS9)
+    username: ENC(ddovr6Xerz5RXQS3vmc3DtSXnYW7/k8akDrcmMbw3ehZKth1dkNQ5bYKuUcq/nqLtAP9+2JB+anKvF40No5YPQ==)
+    password: ENC(Mmts7jvfpwm1xysyblPFxswQ2PmspS4iSx2zFT9YUg/kkDkX2inLeL3LF1R3h+MCLowaVXjoYblacqcy6+aSdQ==)
     protocol: smtp
     properties:
       mail:
@@ -60,7 +60,7 @@ spring:
 application:
   security:
     jwt:
-      secret-key: ENC(IFQIDSQX+poqlHFPutCvUd7m8Wn3obL8WKAwIC5fnxjGUnev47jsZ4q5MpPdvuUwpiHY+30ODWcsuSE0aVG1TQ3AZTLPBlETCSmhXzmw3uj+aWMn29T0Vz1c6THVVFDyO0iaXJA5J12NRUZMdHZVoQ==)
+      secret-key: ENC(QSwxn0NCNAFzcJprJPe6hlv+kH37gZDbUOsVl9tcF2RtfiRmcDEKYWkril6ZvFlVDnSjQzrg2gHuzK79fof3UhvrBkEtC+dBQ9r/vlI2sl62AJ8CiRmzuNMdb/WDj1mz+RWRUlaezVJRZjitEFfWpw==)
       expiration: 86400000 # a day
       refresh-token:
         expiration: 604800000 # 7 days
