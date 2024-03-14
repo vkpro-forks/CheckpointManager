@@ -40,3 +40,4 @@ out/
 ### Logger ####
 logFile*.log
 /logs/
+/.env
