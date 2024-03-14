@@ -283,6 +283,6 @@
 |  Frontend  |  Евгений   |     [Telegram](https://t.me/lepehun)     | [GitHub](https://github.com/PipolaPopala)  |
 |  Frontend  |   Софья    |  [Telegram](https://t.me/SofyaIakov)     |  [GitHub](https://github.com/YakovlevaSS)  |
 |  Frontend  |   Диана    | [Telegram](https://t.me/@Miiniistrelia)  | [GitHub](https://github.com/DianaSemenova) |
-|     QA     |  Алексей   |   [Telegram](https://t.me/@alexfef72)    |                                            |
+|     QA     |  Алексей   |   [Telegram](https://t.me/@alexfef72)    |  [GitHub](https://github.com/AlexeyFef)                                       |
 |     QA     | Александр  | [Telegram](https://t.me/@Aleksandr_9473) |                                            |
 | PM, Design |   Сергей   |  [Telegram](https://t.me/@NeonetSergey)  |                                            |
