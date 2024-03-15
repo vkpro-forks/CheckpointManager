@@ -10,7 +10,7 @@ public class TerritoryNotFoundException extends EntityNotFoundException {
         super(message);
     }
 
-    public TerritoryNotFoundException(UUID territoryId) {
-        super(String.format("Territory with id [%s] not found", territoryId));
+    public TerritoryNotFoundException(UUID territoryId, Class<?> className) {
+        super(String.format("Territory with id [%s] not found (%s)", territoryId, className));
     }
 }
