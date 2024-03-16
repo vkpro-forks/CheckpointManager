@@ -52,3 +52,8 @@ cors:
 
 logging:
   config: classpath:logback-prod.xml
+
+springdoc:
+  pre-loading-enabled: true
+  cache:
+    disabled: false

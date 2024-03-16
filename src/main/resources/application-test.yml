@@ -83,3 +83,7 @@ cors:
 logging:
   config: classpath:logback-test.xml
 
+springdoc:
+  pre-loading-enabled: true
+  cache:
+    disabled: false
