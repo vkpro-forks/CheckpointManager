@@ -14,7 +14,6 @@ import static ru.ac.checkpointmanager.utils.SwaggerConstants.SWAGGER_DESCRIPTION
 @Configuration
 public class OpenApiConfig {
 
-    private static final String CHECKPOINT_API_V_1 = "Checkpoint API: v1";
     private static final String API_V_1 = "/api/v1/**";
 
     @Value("${app.version}")
@@ -29,7 +28,7 @@ public class OpenApiConfig {
                 .addOpenApiCustomizer(openApi ->
                         openApi.addServersItem(new Server().url("https://checkpoint-manager.ru"))
                                 .info(CHP_INFO.version(appVersion)))
-                .group(CHECKPOINT_API_V_1)
+                .group("Checkpoint API: version %s".formatted(appVersion))
                 .pathsToMatch(API_V_1)
                 .build();
     }
