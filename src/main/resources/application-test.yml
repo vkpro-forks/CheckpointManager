@@ -84,6 +84,6 @@ logging:
   config: classpath:logback-test.xml
 
 springdoc:
-  pre-loading-enabled: true
+  pre-loading-enabled: false
   cache:
     disabled: false
