@@ -51,8 +51,12 @@ class FindPassesByPartOfVisitorOrCarIntegrationTest {
     @Autowired
     CarRepository carRepository;
 
-    @InjectSavedEntitiesForPassTest
-    CarVisitorUserTerritoryDto carVisitorUserTerritoryDto; //doesnt work now
+    CarVisitorUserTerritoryDto carVisitorUserTerritoryDto;
+
+    public FindPassesByPartOfVisitorOrCarIntegrationTest(@InjectSavedEntitiesForPassTest
+                                                         CarVisitorUserTerritoryDto carVisitorUserTerritoryDto) {
+        this.carVisitorUserTerritoryDto = carVisitorUserTerritoryDto;
+    }
 
 
     @AfterEach
