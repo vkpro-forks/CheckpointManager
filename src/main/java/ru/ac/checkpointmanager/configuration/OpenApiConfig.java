@@ -1,6 +1,5 @@
 package ru.ac.checkpointmanager.configuration;
 
-import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
 import org.springdoc.core.models.GroupedOpenApi;
@@ -15,34 +14,33 @@ import static ru.ac.checkpointmanager.utils.SwaggerConstants.SWAGGER_DESCRIPTION
 @Configuration
 public class OpenApiConfig {
 
+    private static final String API_V_1 = "/api/v1/**";
+
     @Value("${app.version}")
     private String appVersion;
 
-    @Bean
-    @Profile("dev")
-    public OpenAPI openAPIDev() {
-        return new OpenAPI()
-                .addServersItem(new Server().url("http://localhost:8080"))
-                .info(new Info().title("Checkpoint Manager")
-                        .description(SWAGGER_DESCRIPTION_MESSAGE)
-                        .version(appVersion));
-    }
+    private static final Info CHP_INFO = new Info().title("Checkpoint Manager").description(SWAGGER_DESCRIPTION_MESSAGE);
 
     @Bean
     @Profile("prod")
-    public OpenAPI openAPIProd() {
-        return new OpenAPI()
-                .addServersItem(new Server().url("https://checkpoint-manager.ru"))
-                .info(new Info().title("Checkpoint Manager")
-                        .description(SWAGGER_DESCRIPTION_MESSAGE)
-                        .version(appVersion));
+    public GroupedOpenApi prodApi() {
+        return GroupedOpenApi.builder()
+                .addOpenApiCustomizer(openApi ->
+                        openApi.addServersItem(new Server().url("https://checkpoint-manager.ru"))
+                                .info(CHP_INFO.version(appVersion)))
+                .group("Checkpoint API: version %s".formatted(appVersion))
+                .pathsToMatch(API_V_1)
+                .build();
     }
 
     @Bean
-    public GroupedOpenApi publicApi() {
-        return GroupedOpenApi.builder()
-                .group("божественная апишечка - Enjoy using our API") //TODO потом сменить
-                .pathsToMatch("/api/**")
+    @Profile({"dev", "test"})
+    public GroupedOpenApi devApi() {
+        return GroupedOpenApi.builder().addOpenApiCustomizer(openApi ->
+                        openApi.addServersItem(new Server().url("http://localhost:8080"))
+                                .info(CHP_INFO.version(appVersion)))
+                .group("Божественная апишечка - Enjoy using our API")
+                .pathsToMatch(API_V_1)
                 .build();
     }
 }
