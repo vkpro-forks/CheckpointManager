@@ -58,14 +58,14 @@ public class TerritoryServiceImpl implements TerritoryService {
     public TerritoryDTO findById(UUID territoryId) {
         log.debug(METHOD_CALLED_UUID_LOG, MethodLog.getMethodName(), territoryId);
         Territory territory = territoryRepository.findById(territoryId)
-                .orElseThrow(() -> new TerritoryNotFoundException(territoryId, this.getClass()));
+                .orElseThrow(() -> new TerritoryNotFoundException(territoryId));
         return territoryMapper.toTerritoryDTO(territory);
     }
 
     @Override
     public Territory findTerritoryById(UUID territoryId) {
         return territoryRepository.findById(territoryId)
-                .orElseThrow(() -> new TerritoryNotFoundException(territoryId, this.getClass()));
+                .orElseThrow(() -> new TerritoryNotFoundException(territoryId));
     }
 
     @Override
@@ -98,7 +98,7 @@ public class TerritoryServiceImpl implements TerritoryService {
         log.debug(METHOD_CALLED_UUID_LOG, MethodLog.getMethodName(), territoryId);
         StringTrimmer.trimThemAll(territoryDTO);
         Territory foundTerritory = territoryRepository.findById(territoryId)
-                .orElseThrow(() -> new TerritoryNotFoundException(territoryId, this.getClass()));
+                .orElseThrow(() -> new TerritoryNotFoundException(territoryId));
 
         if (territoryDTO.getName() != null) foundTerritory.setName(territoryDTO.getName());
         if (territoryDTO.getNote() != null) foundTerritory.setNote(territoryDTO.getNote());
@@ -114,7 +114,7 @@ public class TerritoryServiceImpl implements TerritoryService {
     public void attachUserToTerritory(UUID territoryId, UUID userId) {
         log.debug(METHOD_USER_TERR, MethodLog.getMethodName(), userId, territoryId);
         Territory territory = territoryRepository.findById(territoryId)
-                .orElseThrow(() -> new TerritoryNotFoundException(territoryId, this.getClass()));
+                .orElseThrow(() -> new TerritoryNotFoundException(territoryId));
 
         User user = userRepository.findById(userId).orElseThrow(
                 () -> {
@@ -137,7 +137,7 @@ public class TerritoryServiceImpl implements TerritoryService {
     public void deleteTerritoryById(UUID territoryId) {
         log.debug(METHOD_CALLED_UUID_LOG, MethodLog.getMethodName(), territoryId);
         if (territoryRepository.findById(territoryId).isEmpty()) {
-            throw new TerritoryNotFoundException(territoryId, this.getClass());
+            throw new TerritoryNotFoundException(territoryId);
         }
         log.info("Territory with [id: {}] was successfully deleted", territoryId);
         territoryRepository.deleteById(territoryId);
@@ -149,7 +149,7 @@ public class TerritoryServiceImpl implements TerritoryService {
         log.debug(METHOD_USER_TERR, MethodLog.getMethodName(), userId, territoryId);
 
         Territory territory = territoryRepository.findById(territoryId)
-                .orElseThrow(() -> new TerritoryNotFoundException(territoryId, this.getClass()));
+                .orElseThrow(() -> new TerritoryNotFoundException(territoryId));
 
         User user = userRepository.findById(userId).orElseThrow(
                 () -> {
