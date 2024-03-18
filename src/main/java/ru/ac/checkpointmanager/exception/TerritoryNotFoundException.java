@@ -8,7 +8,7 @@ import java.util.UUID;
 @Slf4j
 public class TerritoryNotFoundException extends EntityNotFoundException {
 
-    static String message = null;
+    static String message;
 
     public TerritoryNotFoundException(String message) {
         super(message);
