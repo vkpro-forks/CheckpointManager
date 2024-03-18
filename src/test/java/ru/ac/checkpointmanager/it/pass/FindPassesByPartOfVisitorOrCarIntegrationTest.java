@@ -13,7 +13,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.ac.checkpointmanager.config.EnablePostgresAndRedisTestContainers;
 import ru.ac.checkpointmanager.config.annotation.MockMvcIntegrationTest;
 import ru.ac.checkpointmanager.extension.annotation.InjectSavedEntitiesForPassTest;
-import ru.ac.checkpointmanager.extension.pass.CarVisitorUserTerritoryDto;
+import ru.ac.checkpointmanager.extension.pass.UserTerritoryCarBrandDto;
 import ru.ac.checkpointmanager.model.Visitor;
 import ru.ac.checkpointmanager.model.car.Car;
 import ru.ac.checkpointmanager.model.passes.PassAuto;
@@ -51,11 +51,11 @@ class FindPassesByPartOfVisitorOrCarIntegrationTest {
     @Autowired
     CarRepository carRepository;
 
-    CarVisitorUserTerritoryDto carVisitorUserTerritoryDto;
+    UserTerritoryCarBrandDto userTerritoryCarBrandDto;
 
     public FindPassesByPartOfVisitorOrCarIntegrationTest(@InjectSavedEntitiesForPassTest
-                                                         CarVisitorUserTerritoryDto carVisitorUserTerritoryDto) {
-        this.carVisitorUserTerritoryDto = carVisitorUserTerritoryDto;
+                                                         UserTerritoryCarBrandDto userTerritoryCarBrandDto) {
+        this.userTerritoryCarBrandDto = userTerritoryCarBrandDto;
     }
 
 
@@ -73,7 +73,7 @@ class FindPassesByPartOfVisitorOrCarIntegrationTest {
                 "Vasya");
 
         ResultActions resultActions = mockMvc
-                .perform(MockMvcUtils.getPassesByUserId(carVisitorUserTerritoryDto.getUser().getId())
+                .perform(MockMvcUtils.getPassesByUserId(userTerritoryCarBrandDto.getUser().getId())
                         .param(STATUS, FILTER_PARAMS)
                         .param(PART, "А")); //cyrillic A
 
@@ -88,7 +88,7 @@ class FindPassesByPartOfVisitorOrCarIntegrationTest {
         Pair<PassAuto, PassWalk> passes = savePassAutoAndPassWalkWithLicensePlateAndVisitorName(TestUtils.getCarDto().getLicensePlate(),
                 "Vasya");
         ResultActions resultActions = mockMvc
-                .perform(MockMvcUtils.getPassesByTerritoryId(carVisitorUserTerritoryDto.getTerritory().getId())
+                .perform(MockMvcUtils.getPassesByTerritoryId(userTerritoryCarBrandDto.getTerritory().getId())
                         .param(STATUS, FILTER_PARAMS)
                         .param(PART, "А"));
 
@@ -104,7 +104,7 @@ class FindPassesByPartOfVisitorOrCarIntegrationTest {
                 "Vasya");
 
         ResultActions resultActions = mockMvc
-                .perform(MockMvcUtils.getPassesByUsersTerritories(carVisitorUserTerritoryDto.getUser().getId())
+                .perform(MockMvcUtils.getPassesByUsersTerritories(userTerritoryCarBrandDto.getUser().getId())
                         .param(STATUS, FILTER_PARAMS)
                         .param(PART, "А"));
 
@@ -188,12 +188,12 @@ class FindPassesByPartOfVisitorOrCarIntegrationTest {
     void getPasses_WithPartOfVisitorNameAndCarNumberWithFilterActive_ReturnListWithPassesWalkOnly() {
         Car car = getCarWithLicensePlate(TestUtils.getCarDto().getLicensePlate());
         PassAuto passAuto = PassTestData.getSimpleActiveOneTimePassAutoFor3Hours(
-                carVisitorUserTerritoryDto.getUser(), carVisitorUserTerritoryDto.getTerritory(), car
+                userTerritoryCarBrandDto.getUser(), userTerritoryCarBrandDto.getTerritory(), car
         );
         passAuto.setStatus(PassStatus.DELAYED);
         PassWalk passWalk = PassTestData.getPassWalk(PassStatus.ACTIVE, LocalDateTime.now(),
-                LocalDateTime.now().plusDays(1), carVisitorUserTerritoryDto.getUser(),
-                carVisitorUserTerritoryDto.getTerritory(), getVisitorWithName("Вася"), PassTimeType.PERMANENT);
+                LocalDateTime.now().plusDays(1), userTerritoryCarBrandDto.getUser(),
+                userTerritoryCarBrandDto.getTerritory(), getVisitorWithName("Вася"), PassTimeType.PERMANENT);
 
         passRepository.saveAndFlush(passAuto);
         PassWalk savedPassWalk = passRepository.saveAndFlush(passWalk);
@@ -202,7 +202,7 @@ class FindPassesByPartOfVisitorOrCarIntegrationTest {
         ResultActions resultActions = mockMvc
                 .perform(MockMvcUtils.getPasses()
                         .param(STATUS, filterParams)
-                        .param(PART, "A"));
+                        .param(PART, "А")); //cyrillic A
 
         resultActions.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.content.size()").value(1))
@@ -212,7 +212,7 @@ class FindPassesByPartOfVisitorOrCarIntegrationTest {
 
     private Car getCarWithLicensePlate(String licensePlate) {
         return new Car(TestUtils.getCarDto().getId(), licensePlate,
-                carVisitorUserTerritoryDto.getCarBrand(),
+                userTerritoryCarBrandDto.getCarBrand(),
                 Collections.emptyList(),
                 TestUtils.PHONE_NUM);
     }
@@ -225,11 +225,11 @@ class FindPassesByPartOfVisitorOrCarIntegrationTest {
                                                                                            String name) {
         Car car = getCarWithLicensePlate(licensePlate); //LICENSE_PLATE = "А420ВХ799"; cyrillic A
         PassAuto passAuto = PassTestData.getSimpleActiveOneTimePassAutoFor3Hours(
-                carVisitorUserTerritoryDto.getUser(), carVisitorUserTerritoryDto.getTerritory(), car
+                userTerritoryCarBrandDto.getUser(), userTerritoryCarBrandDto.getTerritory(), car
         );
         PassWalk passWalk = PassTestData.getPassWalk(PassStatus.ACTIVE, LocalDateTime.now(),
-                LocalDateTime.now().plusDays(1), carVisitorUserTerritoryDto.getUser(),
-                carVisitorUserTerritoryDto.getTerritory(), getVisitorWithName(name), PassTimeType.PERMANENT);
+                LocalDateTime.now().plusDays(1), userTerritoryCarBrandDto.getUser(),
+                userTerritoryCarBrandDto.getTerritory(), getVisitorWithName(name), PassTimeType.PERMANENT);
         return Pair.of(passRepository.saveAndFlush(passAuto), passRepository.saveAndFlush(passWalk));
     }
 }
