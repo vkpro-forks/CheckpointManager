@@ -78,7 +78,7 @@ public class PassController {
 
     /* READ */
     @Operation(summary = "Получить список всех пропусков, с учетом фильтрации и совпадения" +
-            " по первым буквам посетителя или номера авто",
+            " по фрагменту имени или номера авто",
             description = ACCESS_ADMIN_MESSAGE,
             parameters = {
                     @Parameter(in = ParameterIn.QUERY, name = "page"),
@@ -120,7 +120,7 @@ public class PassController {
     }
 
     @Operation(summary = "Получить список пропусков конкретного пользователя, с учетом фильтрации и совпадения" +
-            " по первым буквам посетителя или номера авто",
+            " по фрагменту имени или номера авто",
             description = "Доступ: ADMIN - пропуска всех пользователей, MANAGER, SECURITY, USER - только свои",
             parameters = {
                     @Parameter(in = ParameterIn.QUERY, name = "page"),
@@ -146,7 +146,7 @@ public class PassController {
     }
 
     @Operation(summary = "Получить список пропусков на конкретную территорию, с учетом фильтрации и совпадения " +
-            "по первым буквам посетителя или номера авто",
+            " по фрагменту имени или номера авто",
             description = "Доступ: ADMIN - поиск по всем пропускам, SECURITY - по своим территориям",
             parameters = {
                     @Parameter(in = ParameterIn.QUERY, name = "page"),
@@ -173,7 +173,7 @@ public class PassController {
     }
 
     @Operation(summary = "Получить список пропусков по всем привязанным к пользователю территориям, " +
-            "с учетом фильтрации и совпадения по первым буквам посетителя или номера авто",
+            "с учетом фильтрации и совпадения по фрагменту имени или номера авто",
             description = "Доступ: ADMIN - поиск по всем пропускам, MANAGER, SECURITY - по своим территориям",
             parameters = {
                     @Parameter(in = ParameterIn.QUERY, name = "page"),
