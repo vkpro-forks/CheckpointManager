@@ -91,3 +91,15 @@ jobs:
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "bash deploy.sh"
         env:
           PROJECT_VERSION: ${{ env.PROJECT_VERSION }}
+      - name: Send Telegram Notification
+        if: success()
+        run: |
+          # Получаем заголовки последних 5 коммитов
+          COMMITS=$(git log -5 --pretty=format:"%h - %s")
+          MESSAGE="Произведен мерж в мастер:%0A$COMMITS%0AПроверьте изменения на GitHub: ${{ github.server_url }}/${{ github.repository }}/commits/master"
+          curl -X POST \
+            https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage \
+            -d chat_id=${{ secrets.CHAT_ID }} \
+            -d text="$MESSAGE"
+    
+      
