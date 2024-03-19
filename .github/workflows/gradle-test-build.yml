@@ -44,7 +44,7 @@ jobs:
       - name: Send Telegram Notification User Wants to merge
         run: |
           # Получаем имя пользователя, который делает мердж
-          USER= $ (git log -1 --pretty=format:'%an')
+          USER= $(git log -1 --pretty=format:'%an')
           MESSAGE="Пользователь %0A$USER%0A  начинает мердж в мастер ${{ github.server_url }}/${{ github.repository }}/commits/master"
           curl -X POST \
             https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage \
