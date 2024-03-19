@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import ru.ac.checkpointmanager.dto.payment.AmountResponseDto;
 
 import java.util.UUID;
 

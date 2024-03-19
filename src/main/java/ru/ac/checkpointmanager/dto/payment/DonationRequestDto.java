@@ -10,6 +10,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
+import java.math.BigDecimal;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,7 +20,10 @@ public class DonationRequestDto {
 
     @NotNull
     @Min(50)
-    Integer amount;
+    BigDecimal amount;
+
+    @NotNull
+    String currency;
 
     @NotBlank
     @Size(min = 10, max = 128)

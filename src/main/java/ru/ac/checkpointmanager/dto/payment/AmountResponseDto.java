@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.dto.payment.yookassa;
+package ru.ac.checkpointmanager.dto.payment;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

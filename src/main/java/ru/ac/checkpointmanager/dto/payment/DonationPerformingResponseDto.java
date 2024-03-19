@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import ru.ac.checkpointmanager.dto.payment.yookassa.AmountResponseDto;
 
 @AllArgsConstructor
 @Data

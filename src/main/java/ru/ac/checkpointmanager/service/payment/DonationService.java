@@ -1,9 +1,12 @@
 package ru.ac.checkpointmanager.service.payment;
 
-import ru.ac.checkpointmanager.dto.payment.DonationPerformingResponseDto;
 import ru.ac.checkpointmanager.dto.payment.DonationRequestDto;
+import ru.ac.checkpointmanager.dto.payment.yookassa.PaymentResponse;
+import ru.ac.checkpointmanager.model.payment.Donation;
 
 public interface DonationService {
 
-    DonationPerformingResponseDto makeDonation(DonationRequestDto donationRequestDto);
+    Donation saveUnconfirmed(DonationRequestDto donationRequestDto);
+
+    Donation confirm(PaymentResponse paymentResponse);
 }
