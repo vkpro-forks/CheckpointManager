@@ -15,6 +15,8 @@ public class ErrorMessage {
 
     public static final String MISSING_REQUEST_PARAM = "No required request param passed";
 
+    public static final String DONATION_ERROR = "Something went wrong with donation payment";
+
     private ErrorMessage() {
         throw new AssertionError("No instance, please");
     }
