@@ -8,14 +8,15 @@ import java.util.UUID;
 @Slf4j
 public class TerritoryNotFoundException extends EntityNotFoundException {
 
-    static String message;
+    public static final String MESSAGE = "Territory with id [%s] not found";
 
     public TerritoryNotFoundException(String message) {
         super(message);
+        log.warn(getMessage() + " - " + this.getStackTrace()[0].toString());
     }
 
     public TerritoryNotFoundException(UUID territoryId) {
-        super(message = "Territory with id [%s] not found".formatted(territoryId));
-        log.warn(message + " - " + this.getStackTrace()[0].toString());
+        super(MESSAGE.formatted(territoryId));
+        log.warn(getMessage() + " - " + this.getStackTrace()[0].toString());
     }
 }

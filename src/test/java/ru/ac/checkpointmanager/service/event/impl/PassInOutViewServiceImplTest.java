@@ -80,7 +80,7 @@ class PassInOutViewServiceImplTest {
         Assertions.assertThatExceptionOfType(TerritoryNotFoundException.class).isThrownBy(() ->
                         passInOutViewService.findEventsByTerritory(TestUtils.TERR_ID, pagingParams))
                 .isInstanceOf(EntityNotFoundException.class)
-                .withMessage(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(TestUtils.TERR_ID));
+                .withMessage(TerritoryNotFoundException.MESSAGE.formatted(TestUtils.TERR_ID));
 
         Mockito.verify(passRepository, Mockito.never()).findEventsByTerritory(Mockito.any(), Mockito.any());
     }

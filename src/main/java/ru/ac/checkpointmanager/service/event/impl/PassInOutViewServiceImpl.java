@@ -61,8 +61,7 @@ public class PassInOutViewServiceImpl implements PassInOutViewService {
     @Override
     public Page<PassInOutView> findEventsByTerritory(UUID terId, PagingParams pagingParams) {
         if (!territoryRepository.existsById(terId)) {
-            log.warn(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(terId));
-            throw new TerritoryNotFoundException(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(terId));
+            throw new TerritoryNotFoundException(terId);
         }
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
         return passRepository.findEventsByTerritory(terId, pageable);

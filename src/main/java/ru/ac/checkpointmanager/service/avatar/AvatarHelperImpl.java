@@ -204,7 +204,7 @@ class AvatarHelperImpl implements AvatarHelper {
     public void updateTerritoryAvatar(UUID territoryId, Avatar avatar) {
         log.debug("Attempting to update avatar for user ID: {}", territoryId);
         Territory territory = territoryRepository.findById(territoryId)
-                .orElseThrow(() -> new TerritoryNotFoundException("This check should be not here"));
+                .orElseThrow(() -> new TerritoryNotFoundException(territoryId));
         territory.setAvatar(avatar);
         territoryRepository.save(territory);
         log.info("Avatar updated successfully for user ID: {}", territoryId);

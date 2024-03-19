@@ -76,8 +76,7 @@ public class AvatarServiceImpl implements AvatarService {
     public AvatarDTO uploadAvatarByTerritory(UUID territoryId, MultipartFile avatarFile) {
         if (!territoryRepository.existsById(territoryId)) {
             log.warn(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
-            throw new TerritoryNotFoundException(ExceptionUtils.TERRITORY_NOT_FOUND_MSG
-                    .formatted(territoryId));
+            throw new TerritoryNotFoundException(territoryId);
         }
 
         Avatar avatar = avatarHelper.getOrCreateAvatarByTerritory(territoryId);
@@ -170,12 +169,7 @@ public class AvatarServiceImpl implements AvatarService {
     public AvatarImageDTO getAvatarImageByTerritoryId(UUID territoryId) {
         log.debug("Fetching avatar image for territory id: {}", territoryId);
         Territory territory = territoryRepository.findTerritoryByIdWithAvatar(territoryId)
-                .orElseThrow(() -> {
-                            log.warn(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
-                            return new TerritoryNotFoundException(
-                                    ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
-                        }
-                );
+                .orElseThrow(() ->  new TerritoryNotFoundException(territoryId));
         Avatar avatar = territory.getAvatar();
         if (avatar == null) {
             log.warn(ExceptionUtils.AVATAR_NOT_FOUND_FOR_TERRITORY.formatted(territoryId));

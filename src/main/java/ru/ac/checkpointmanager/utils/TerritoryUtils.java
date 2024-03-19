@@ -25,7 +25,6 @@ public class TerritoryUtils {
     public static List<UUID> getTerritoryIdsOrThrow(User user, UUID userId) {
         List<Territory> territories = user.getTerritories();
         if (territories.isEmpty()) {
-            log.warn(ExceptionUtils.USER_TERRITORY_NOT_FOUND_MSG.formatted(userId));
             throw new TerritoryNotFoundException(ExceptionUtils.USER_TERRITORY_NOT_FOUND_MSG.formatted(userId));
         }
         return territories.stream()
