@@ -12,7 +12,6 @@ import ru.ac.checkpointmanager.dto.payment.PaymentRequestDto;
 import ru.ac.checkpointmanager.dto.payment.yookassa.PaymentResponse;
 import ru.ac.checkpointmanager.mapper.payment.DonationMapper;
 import ru.ac.checkpointmanager.model.payment.Donation;
-import ru.ac.checkpointmanager.repository.payment.DonationRepository;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -22,7 +21,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class DonationYooKassaServiceImpl implements DonationYooKassaService {
+public class DonationYooKassaServiceImpl implements DonationApiService {
 
     private final DonationService donationService;
     private final DonationMapper mapper;

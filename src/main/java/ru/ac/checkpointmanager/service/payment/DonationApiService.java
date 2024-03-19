@@ -3,7 +3,7 @@ package ru.ac.checkpointmanager.service.payment;
 import ru.ac.checkpointmanager.dto.payment.DonationPerformingResponseDto;
 import ru.ac.checkpointmanager.dto.payment.DonationRequestDto;
 
-public interface DonationYooKassaService {
+public interface DonationApiService {
 
     DonationPerformingResponseDto makeDonation(DonationRequestDto donationRequestDto);
 }

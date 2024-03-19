@@ -85,3 +85,8 @@ avatars:
 
 logging:
   config: classpath:logback-local.xml
+
+yookassa:
+  secret-key: "test_lOHuqyL-ANU7bUA0Vxove7VURcveuOBWBdx-f_x81Mo"
+  shop-id: "353330"
+  url: "https://api.yookassa.ru/v3"

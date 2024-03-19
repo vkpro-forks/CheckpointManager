@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.dto.payment.DonationPerformingResponseDto;
 import ru.ac.checkpointmanager.dto.payment.DonationRequestDto;
-import ru.ac.checkpointmanager.service.payment.DonationYooKassaService;
+import ru.ac.checkpointmanager.service.payment.DonationApiService;
 
 @RestController
 @RequestMapping("/api/v1/donations")
@@ -15,9 +15,9 @@ import ru.ac.checkpointmanager.service.payment.DonationYooKassaService;
 @Validated
 public class DonationController {
 
-    private final DonationYooKassaService donationYooKassaService;
+    private final DonationApiService donationApiService;
 
     public DonationPerformingResponseDto donate(@RequestBody DonationRequestDto donationRequestDto) {
-        return donationYooKassaService.makeDonation(donationRequestDto);
+        return donationApiService.makeDonation(donationRequestDto);
     }
 }
