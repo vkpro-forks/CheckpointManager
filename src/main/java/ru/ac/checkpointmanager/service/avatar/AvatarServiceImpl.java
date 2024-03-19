@@ -75,7 +75,6 @@ public class AvatarServiceImpl implements AvatarService {
     @Override
     public AvatarDTO uploadAvatarByTerritory(UUID territoryId, MultipartFile avatarFile) {
         if (!territoryRepository.existsById(territoryId)) {
-            log.warn(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
             throw new TerritoryNotFoundException(territoryId);
         }
 
