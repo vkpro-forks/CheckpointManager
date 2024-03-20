@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import ru.ac.checkpointmanager.configuration.payment.YooKassaClient;
 import ru.ac.checkpointmanager.dto.payment.AmountRequestDto;
@@ -22,12 +23,13 @@ public class DonationYooKassaServiceImpl implements DonationApiService {
     private final DonationService donationService;
     private final YooKassaClient yooKassaClient;
 
-    @Value("${donation.redirect-url}")
-    private String redirectUrl;
+    @Value("${donation.return-url}")
+    private String returnUrl;
 
     @Override
     @SneakyThrows
-    public DonationPerformingResponseDto makeDonation(DonationRequestDto donationRequestDto) {
+    @NonNull
+    public DonationPerformingResponseDto makeDonation(@NonNull DonationRequestDto donationRequestDto) {
         Donation savedDonation = donationService.saveUnconfirmed(donationRequestDto);
         PaymentResponse paymentResponse = yooKassaClient.doPayment(convertToPaymentRequest(savedDonation));
         Donation donation = donationService.updateWithPaymentData(paymentResponse);
@@ -37,8 +39,9 @@ public class DonationYooKassaServiceImpl implements DonationApiService {
                 paymentResponse.getConfirmation().getConfirmationUrl());
     }
 
-    private PaymentRequestDto convertToPaymentRequest(Donation donation) {
+    @NonNull
+    private PaymentRequestDto convertToPaymentRequest(@NonNull Donation donation) {
         return new PaymentRequestDto(new AmountRequestDto(donation.getAmount(), donation.getCurrency().name()),
-                redirectUrl, donation.getComment(), donation.getId().toString());
+                returnUrl, donation.getComment(), donation.getId().toString());
     }
 }

@@ -59,7 +59,7 @@ springdoc:
     disabled: false
 
 donation:
-  redirect-url: "https://chgeckpoint-manager.ru"
+  return-url: "https://chgeckpoint-manager.ru"
 
 yookassa:
   secret-key: "test_lOHuqyL-ANU7bUA0Vxove7VURcveuOBWBdx-f_x81Mo"

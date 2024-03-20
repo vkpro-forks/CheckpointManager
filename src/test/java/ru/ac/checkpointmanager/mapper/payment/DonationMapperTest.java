@@ -17,7 +17,7 @@ class DonationMapperTest {
 
     @Test
     void paymentResponseToDonation_ExistingDonation_ReturnEnrichDonation() {
-        Donation mappedDonation = donationMapper.paymentResponseToDonation(YooKassaTestData.PAYMENT_RESPONSE, YooKassaTestData.preDonation);
+        Donation mappedDonation = donationMapper.paymentResponseToDonation(YooKassaTestData.PAYMENT_RESPONSE, YooKassaTestData.preSendDonation);
 
         YooKassaTestData.DONATION_MATCHER.assertMatch(mappedDonation, YooKassaTestData.updatedDonation);
     }

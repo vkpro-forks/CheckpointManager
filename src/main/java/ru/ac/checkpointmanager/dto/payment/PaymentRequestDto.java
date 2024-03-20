@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 
 /**
@@ -51,6 +52,7 @@ public class PaymentRequestDto {
     @AllArgsConstructor
     @FieldDefaults(level = AccessLevel.PRIVATE)
     @Getter
+    @ToString
     private static class MetadataRequestDto {
         @JsonProperty("order_id")
         String orderId;
@@ -59,6 +61,7 @@ public class PaymentRequestDto {
     @FieldDefaults(level = AccessLevel.PRIVATE)
     @NoArgsConstructor
     @Getter
+    @ToString
     private static class ConfirmationType {
         @JsonProperty("type")
         final String type = "redirect";
