@@ -53,10 +53,10 @@ class UserControllerValidationIntegrationTest {
         CheckResultActionsUtils.checkCommonValidationFields(resultActions);
     }
 
+
     private static Stream<String> getBadPhones() {
         return Stream.of(
                 "", "1".repeat(10), "1".repeat(21), "123456789011asdf"
         );
     }
-
 }

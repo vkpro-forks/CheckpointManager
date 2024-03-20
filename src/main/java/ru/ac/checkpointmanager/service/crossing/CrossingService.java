@@ -2,6 +2,7 @@ package ru.ac.checkpointmanager.service.crossing;
 
 import ru.ac.checkpointmanager.dto.CrossingDTO;
 import ru.ac.checkpointmanager.dto.CrossingRequestDTO;
+import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.model.enums.Direction;
 
 import java.util.List;
@@ -13,5 +14,5 @@ public interface CrossingService {
 
     CrossingDTO getCrossing(UUID uuid);
 
-    List<CrossingDTO> getByPassId(UUID passId);
+    List<CrossingDTO> getByPassId(UUID passId, PagingParams pagingParams);
 }

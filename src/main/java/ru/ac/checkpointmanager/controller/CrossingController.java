@@ -1,6 +1,7 @@
 package ru.ac.checkpointmanager.controller;
 
-
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -25,8 +26,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import ru.ac.checkpointmanager.annotation.PagingParam;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
 import ru.ac.checkpointmanager.dto.CrossingRequestDTO;
+import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.service.crossing.CrossingService;
@@ -126,7 +129,11 @@ public class CrossingController {
     }
 
     @Operation(summary = "Получить список пересечений по id пропуска",
-            description = "Доступ: ADMIN - все пропуска, MANAGER, SECURITY - пропуска на свои территории, USER - свои пропуска")
+            description = "Доступ: ADMIN - все пропуска, MANAGER, SECURITY - пропуска на свои территории, USER - свои пропуска",
+            parameters = {
+                    @Parameter(in = ParameterIn.QUERY, name = "page"),
+                    @Parameter(in = ParameterIn.QUERY, name = "size")
+            })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Найдены пересечения по пропуску",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -137,8 +144,9 @@ public class CrossingController {
             "or (hasAnyRole('ROLE_MANAGER', 'ROLE_SECURITY') and @passAuthFacade.isTerritoryIdMatch(#passId)) " +
             "or (hasRole('ROLE_USER') and @passAuthFacade.isIdMatch(#passId))")
     @GetMapping("/passes/{passId}")
-    public ResponseEntity<List<CrossingDTO>> getByPassId(@PathVariable UUID passId) {
-        List<CrossingDTO> foundCrossings = crossingService.getByPassId(passId);
+    public ResponseEntity<List<CrossingDTO>> getByPassId(@PathVariable UUID passId,
+                                                         @Valid @PagingParam PagingParams pagingParams) {
+        List<CrossingDTO> foundCrossings = crossingService.getByPassId(passId, pagingParams);
         return ResponseEntity.ok(foundCrossings);
     }
 }
