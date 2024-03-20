@@ -49,7 +49,7 @@ jobs:
           # Получаем имя пользователя, который делает мердж
           COMMIT_AUTHOR=$(git log -1 --pretty=%an)
           echo "Commit author: $COMMIT_AUTHOR"
-          MESSAGE="Внимание %0A$COMMIT_AUTHOR%0A начинает мердж в мастер, сервер будет недоступен 3-5 минут
+          MESSAGE="Внимание %0A$COMMIT_AUTHOR%0Aначинает мердж в мастер, backand приложение будет недоступно 3-5 минут.
           ${{ github.server_url }}/${{ github.repository }}/commits/master"
           curl -X POST \
             https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage \
