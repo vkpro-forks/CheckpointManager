@@ -71,6 +71,7 @@ public class Donation extends AbstractBaseEntity {
         this.currency = currency;
         this.comment = comment;
         this.status = CREATED;
+        this.setConfirmed(false);
     }
 
     public Donation(UUID id, BigDecimal amount, CurrencyEnum currency, String comment) {
