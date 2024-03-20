@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import ru.ac.checkpointmanager.model.payment.CurrencyEnum;
 
 import java.math.BigDecimal;
 
@@ -23,10 +24,10 @@ public class DonationRequestDto {
     BigDecimal amount;
 
     @NotNull
-    String currency;
+    CurrencyEnum currency;
 
     @NotBlank
-    @Size(min = 10, max = 128)
+    @Size(min = 5, max = 128)
     String comment;
 }
 

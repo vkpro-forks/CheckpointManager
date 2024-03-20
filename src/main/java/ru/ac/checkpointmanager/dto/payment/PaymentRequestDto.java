@@ -4,16 +4,32 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
+/**
+ * '{
+ * "amount": {
+ * "value": "100.00",
+ * "currency": "RUB"
+ * },
+ * "capture": true,
+ * "confirmation": {
+ * "type": "redirect",
+ * "return_url": "https://www.example.com/return_url"
+ * },
+ * "description": "Заказ №1"
+ * }'
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PaymentRequestDto {
 
-    AmountRequestDto amountRequestDto;
+    @JsonProperty("amount")
+    AmountRequestDto amount;
 
     Boolean capture;
 
@@ -25,7 +41,7 @@ public class PaymentRequestDto {
     MetadataRequestDto metadata;
 
     public PaymentRequestDto(AmountRequestDto amount, String returnUrl, String description, String orderId) {
-        this.amountRequestDto = amount;
+        this.amount = amount;
         this.confirmationType = new ConfirmationType(returnUrl);
         this.description = description;
         this.capture = true;
@@ -34,13 +50,17 @@ public class PaymentRequestDto {
 
     @AllArgsConstructor
     @FieldDefaults(level = AccessLevel.PRIVATE)
+    @Getter
     private static class MetadataRequestDto {
         @JsonProperty("order_id")
         String orderId;
     }
 
     @FieldDefaults(level = AccessLevel.PRIVATE)
+    @NoArgsConstructor
+    @Getter
     private static class ConfirmationType {
+        @JsonProperty("type")
         final String type = "redirect";
         @JsonProperty("return_url")
         String returnUrl;

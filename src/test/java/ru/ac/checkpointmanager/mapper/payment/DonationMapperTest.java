@@ -18,12 +18,21 @@ class DonationMapperTest {
     @Test
     void paymentResponseToDonation_ExistingDonation_ReturnEnrichDonation() {
         Donation mappedDonation = donationMapper.paymentResponseToDonation(YooKassaTestData.PAYMENT_RESPONSE, YooKassaTestData.preDonation);
-        YooKassaTestData.DONATION_MATHER.assertMatch(mappedDonation, YooKassaTestData.updatedDonation);
+
+        YooKassaTestData.DONATION_MATCHER.assertMatch(mappedDonation, YooKassaTestData.updatedDonation);
     }
 
     @Test
     void paymentResponseToDonation_NewDonation_ReturnEnrichDonation() {
         Donation mappedDonation = donationMapper.paymentResponseToDonation(YooKassaTestData.PAYMENT_RESPONSE, new Donation());
-        YooKassaTestData.DONATION_MATHER.assertMatch(mappedDonation, YooKassaTestData.newDonationAfterMapping);
+
+        YooKassaTestData.DONATION_MATCHER.assertMatch(mappedDonation, YooKassaTestData.newDonationAfterMapping);
+    }
+
+    @Test
+    void DonationRequestDtoToDonation_AllOk_ReturnPreFilledDonation() {
+        Donation donation = donationMapper.toDonation(YooKassaTestData.donationRequestDto);
+
+        YooKassaTestData.DONATION_MATCHER.assertMatch(donation, YooKassaTestData.preFilledDonation);
     }
 }

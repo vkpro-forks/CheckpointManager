@@ -31,11 +31,13 @@ import java.util.UUID;
 @Setter
 public class Donation extends AbstractBaseEntity {
 
+    public static final String CREATED = "created";
     @NotNull
     @Column(name = "amount")
     BigDecimal amount;
 
     @Type(CurrencyType.class)
+    @NotNull
     @Column(name = "currency", columnDefinition = "currency_enum")
     CurrencyEnum currency;
 
@@ -64,12 +66,19 @@ public class Donation extends AbstractBaseEntity {
     @JoinColumn(name = "user_id")
     User user;
 
+    public Donation(BigDecimal amount, CurrencyEnum currency, String comment) {
+        this.amount = amount;
+        this.currency = currency;
+        this.comment = comment;
+        this.status = CREATED;
+    }
+
     public Donation(UUID id, BigDecimal amount, CurrencyEnum currency, String comment) {
         super(id);
         this.amount = amount;
         this.currency = currency;
         this.comment = comment;
-        this.status = "created";
+        this.status = CREATED;
     }
 
     public Donation(UUID id, BigDecimal amount, CurrencyEnum currency, String comment, Boolean confirmed, String status,

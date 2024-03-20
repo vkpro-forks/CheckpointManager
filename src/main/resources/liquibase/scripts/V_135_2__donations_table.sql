@@ -12,7 +12,7 @@ CREATE TABLE donations
     comment      VARCHAR(128)  NOT NULL,
     confirmed    BOOLEAN DEFAULT FALSE,
     performed_at TIMESTAMP WITH TIME ZONE,
-    description  VARCHAR       NOT NULL,
+    description  VARCHAR,
     status       VARCHAR       NOT NULL,
     payment_id   UUID,
     user_id      UUID REFERENCES users (id)

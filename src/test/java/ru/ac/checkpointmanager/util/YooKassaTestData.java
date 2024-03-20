@@ -2,6 +2,7 @@ package ru.ac.checkpointmanager.util;
 
 import lombok.experimental.UtilityClass;
 import ru.ac.checkpointmanager.dto.payment.AmountResponseDto;
+import ru.ac.checkpointmanager.dto.payment.DonationRequestDto;
 import ru.ac.checkpointmanager.dto.payment.yookassa.ConfirmationTypeResponseDto;
 import ru.ac.checkpointmanager.dto.payment.yookassa.MetadataResponseDto;
 import ru.ac.checkpointmanager.dto.payment.yookassa.PaymentResponse;
@@ -18,7 +19,7 @@ import java.util.UUID;
 @UtilityClass
 public class YooKassaTestData {
 
-    public static MatcherFactory.Matcher<Donation> DONATION_MATHER = MatcherFactory.usingIgnoringFieldsComparator("user");
+    public static MatcherFactory.Matcher<Donation> DONATION_MATCHER = MatcherFactory.usingIgnoringFieldsComparator("user");
 
     public static final String DESCRIPTION = "payment";
 
@@ -30,6 +31,10 @@ public class YooKassaTestData {
 
     public static Donation preDonation = new Donation(DONATION_ID, BigDecimal.TEN, CurrencyEnum.RUB, COMMENT);
 
+    public static DonationRequestDto donationRequestDto = new DonationRequestDto(BigDecimal.TEN, CurrencyEnum.RUB,
+            COMMENT);
+
+    public static Donation preFilledDonation = new Donation(BigDecimal.TEN, CurrencyEnum.RUB, COMMENT);
 
     public static final PaymentResponse PAYMENT_RESPONSE =
             PaymentResponse.builder()

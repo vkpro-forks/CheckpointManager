@@ -1,6 +1,7 @@
 package ru.ac.checkpointmanager.service.payment;
 
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ public class DonationYooKassaServiceImpl implements DonationApiService {
     private String redirectUrl;
 
     @Override
+    @SneakyThrows
     public DonationPerformingResponseDto makeDonation(DonationRequestDto donationRequestDto) {
         Donation savedDonation = donationService.saveUnconfirmed(donationRequestDto);
         PaymentResponse paymentResponse = yooKassaClient.doPayment(convertToPaymentRequest(savedDonation));

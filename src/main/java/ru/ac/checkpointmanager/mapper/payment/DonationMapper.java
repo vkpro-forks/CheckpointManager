@@ -26,7 +26,10 @@ public class DonationMapper {
     }
 
     public Donation toDonation(DonationRequestDto donationRequestDto) {
-        return modelMapper.map(donationRequestDto, Donation.class);
+        Donation donation = modelMapper.map(donationRequestDto, Donation.class);
+        donation.setStatus(Donation.CREATED);
+        donation.setConfirmed(false);
+        return donation;
     }
 
     public Donation paymentResponseToDonation(PaymentResponse paymentResponse, Donation donation) {
@@ -35,12 +38,17 @@ public class DonationMapper {
     }
 
     private void configureModelMapper() {
+        configureTypeMapPaymentResponseToDonation();
+        configureTypeMapDonationRequestToDonation();
+    }
+
+    private void configureTypeMapPaymentResponseToDonation() {
         Condition<PaymentResponse, Donation> isNew = context -> {
             Donation donation = (Donation) context.getParent().getDestination();
             return donation.getId() == null;
         };
-        TypeMap<PaymentResponse, Donation> typeMap = modelMapper.createTypeMap(PaymentResponse.class, Donation.class);
-        typeMap.addMappings(mapping -> {
+        TypeMap<PaymentResponse, Donation> paymentResponseToDonationMap = modelMapper.createTypeMap(PaymentResponse.class, Donation.class);
+        paymentResponseToDonationMap.addMappings(mapping -> {
             mapping.when(isNew)
                     .using(ctx -> ctx.getSource() == null ? null : UUID.fromString((String) ctx.getSource()))
                     .map(source -> source.getMetadata().getOrderId(), Donation::setId);
@@ -53,6 +61,16 @@ public class DonationMapper {
             mapping.using(ctx -> ctx.getSource() == null ? null : ZonedDateTime.parse((String) ctx.getSource()))
                     .map(PaymentResponse::getCreatedAt, Donation::setPerformedAt);
             mapping.map(PaymentResponse::getStatus, Donation::setStatus);
+        });
+    }
+
+    private void configureTypeMapDonationRequestToDonation() {
+        TypeMap<DonationRequestDto, Donation> dtoToDonationMap = modelMapper
+                .createTypeMap(DonationRequestDto.class, Donation.class);
+        dtoToDonationMap.addMappings(mapping -> {
+            mapping.map(DonationRequestDto::getAmount, Donation::setAmount);
+            mapping.map(DonationRequestDto::getCurrency, Donation::setCurrency);
+            mapping.map(DonationRequestDto::getComment, Donation::setComment);
         });
     }
 }
