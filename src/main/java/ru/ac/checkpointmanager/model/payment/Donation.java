@@ -46,6 +46,10 @@ public class Donation extends AbstractBaseEntity {
     Boolean confirmed;
 
     @NotNull
+    @Column(name = "status")
+    String status;
+
+    @NotNull
     @Column(name = "performed_at")
     ZonedDateTime performedAt;
 

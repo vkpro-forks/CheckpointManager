@@ -13,6 +13,7 @@ CREATE TABLE donations
     confirmed    BOOLEAN DEFAULT FALSE,
     performed_at TIMESTAMP WITH TIME ZONE NOT NULL,
     description  VARCHAR                  NOT NULL,
+    status       VARCHAR                  NOT NULL,
     payment_id   UUID,
     user_id      UUID REFERENCES users (id)
 )

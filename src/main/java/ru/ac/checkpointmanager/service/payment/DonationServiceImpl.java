@@ -10,6 +10,7 @@ import ru.ac.checkpointmanager.mapper.payment.DonationMapper;
 import ru.ac.checkpointmanager.model.payment.Donation;
 import ru.ac.checkpointmanager.repository.payment.DonationRepository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -30,7 +31,8 @@ public class DonationServiceImpl implements DonationService {
     @Transactional
     @Override
     public Donation confirm(PaymentResponse paymentResponse) {
-        repository.findById(UUID.fromString(paymentResponse.getMetadata().getOrderId()));
+        Optional<Donation> byId = repository.findById(UUID.fromString(paymentResponse.getMetadata().getOrderId()))
+                .orElse()
         return null;
     }
 }
