@@ -15,6 +15,9 @@ import ru.ac.checkpointmanager.dto.payment.PaymentRequestDto;
 import ru.ac.checkpointmanager.dto.payment.yookassa.PaymentResponse;
 import ru.ac.checkpointmanager.model.payment.Donation;
 
+/**
+ * Сервис отправляет запрос с данными платежа на API ЮКасса
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -26,6 +29,15 @@ public class DonationYooKassaServiceImpl implements DonationApiService {
     @Value("${donation.return-url}")
     private String returnUrl;
 
+    /**
+     * Платеж предварительно сохраняется в бд с идентификационным номером, отправляется запрос на API,
+     * после получения ответа от API -> в бд обновляются и обогащаются данные о платеже
+     * <br>
+     * Возвращается ответ с ссылкой на оплату
+     *
+     * @param donationRequestDto {@link DonationRequestDto} запрос с данными на оплату
+     * @return {@link DonationPerformingResponseDto} ответ с данными оплаты и ссылкой
+     */
     @Override
     @SneakyThrows
     @NonNull
@@ -39,6 +51,9 @@ public class DonationYooKassaServiceImpl implements DonationApiService {
                 paymentResponse.getConfirmation().getConfirmationUrl());
     }
 
+    /**
+     * Маппит данные оплаты в запрос на API
+     */
     @NonNull
     private PaymentRequestDto convertToPaymentRequest(@NonNull Donation donation) {
         return new PaymentRequestDto(new AmountRequestDto(donation.getAmount(), donation.getCurrency().name()),
