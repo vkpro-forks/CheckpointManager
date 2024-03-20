@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
@@ -34,7 +35,6 @@ import ru.ac.checkpointmanager.model.Crossing;
 import ru.ac.checkpointmanager.model.enums.Direction;
 import ru.ac.checkpointmanager.service.crossing.CrossingService;
 
-import java.util.List;
 import java.util.UUID;
 
 import static ru.ac.checkpointmanager.utils.SwaggerConstants.BAD_REQUEST_MESSAGE;
@@ -144,9 +144,9 @@ public class CrossingController {
             "or (hasAnyRole('ROLE_MANAGER', 'ROLE_SECURITY') and @passAuthFacade.isTerritoryIdMatch(#passId)) " +
             "or (hasRole('ROLE_USER') and @passAuthFacade.isIdMatch(#passId))")
     @GetMapping("/passes/{passId}")
-    public ResponseEntity<List<CrossingDTO>> getByPassId(@PathVariable UUID passId,
-                                                         @Valid @PagingParam PagingParams pagingParams) {
-        List<CrossingDTO> foundCrossings = crossingService.getByPassId(passId, pagingParams);
+    public ResponseEntity<Page<CrossingDTO>> getByPassId(@PathVariable UUID passId,
+                                                         @Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams) {
+        Page<CrossingDTO> foundCrossings = crossingService.getByPassId(passId, pagingParams);
         return ResponseEntity.ok(foundCrossings);
     }
 }
