@@ -85,6 +85,8 @@ avatars:
 
 logging:
   config: classpath:logback-local.xml
+donation:
+  redirect-url: "https://chgeckpoint-manager.ru"
 
 yookassa:
   secret-key: "test_lOHuqyL-ANU7bUA0Vxove7VURcveuOBWBdx-f_x81Mo"

@@ -3,6 +3,7 @@ package ru.ac.checkpointmanager.configuration.payment;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatusCode;
@@ -27,6 +28,7 @@ public class YooKassaRestClientConfiguration {
     private final ObjectMapper objectMapper;
 
     @Bean
+    @Qualifier("yooKassa")
     public RestClient yooKassaRestClient() {
         log.info("Configuring rest client for yooKassa API, base URL: {}", yookassaProperties.getUrl());
         return RestClient.builder()

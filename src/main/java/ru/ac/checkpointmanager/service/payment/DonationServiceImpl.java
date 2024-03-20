@@ -10,7 +10,6 @@ import ru.ac.checkpointmanager.mapper.payment.DonationMapper;
 import ru.ac.checkpointmanager.model.payment.Donation;
 import ru.ac.checkpointmanager.repository.payment.DonationRepository;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -25,14 +24,19 @@ public class DonationServiceImpl implements DonationService {
     @Transactional
     @Override
     public Donation saveUnconfirmed(DonationRequestDto donationRequestDto) {
-        return repository.save(mapper.toDonation(donationRequestDto));
+        Donation savedDonation = repository.save(mapper.toDonation(donationRequestDto));
+        log.info("New donation {} payment saved to repository", savedDonation.getId());
+        return savedDonation;
     }
 
     @Transactional
     @Override
-    public Donation confirm(PaymentResponse paymentResponse) {
-        Optional<Donation> byId = repository.findById(UUID.fromString(paymentResponse.getMetadata().getOrderId()))
-                .orElse()
-        return null;
+    public Donation updateWithPaymentData(PaymentResponse paymentResponse) {
+        Donation donation = repository.findById(UUID.fromString(paymentResponse.getMetadata().getOrderId()))
+                .orElse(new Donation());
+        Donation updatedDonation = mapper.paymentResponseToDonation(paymentResponse, donation);
+        Donation savedDonation = repository.save(updatedDonation);
+        log.info("Donation: {} successfully updated with payment data from YooKassa", savedDonation.getId());
+        return savedDonation;
     }
 }

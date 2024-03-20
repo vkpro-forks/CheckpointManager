@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import ru.ac.checkpointmanager.model.payment.CurrencyEnum;
 
 import java.math.BigDecimal;
 
@@ -16,5 +17,5 @@ public class AmountResponseDto {
 
     BigDecimal value;
 
-    String currency;
+    CurrencyEnum currency;
 }

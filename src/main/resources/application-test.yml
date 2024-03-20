@@ -14,7 +14,6 @@ spring:
   jpa:
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
         show_sql: true
         ddl-auto: none
         use_sql_comments: true
@@ -87,3 +86,11 @@ springdoc:
   pre-loading-enabled: false
   cache:
     disabled: false
+
+donation:
+  redirect-url: "https://checkpoint-manager.ru"
+
+yookassa:
+  secret-key: "test_lOHuqyL-ANU7bUA0Vxove7VURcveuOBWBdx-f_x81Mo"
+  shop-id: "353330"
+  url: "https://api.yookassa.ru/v3"

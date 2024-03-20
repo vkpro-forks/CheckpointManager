@@ -2,15 +2,15 @@ package ru.ac.checkpointmanager.service.payment;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
+import ru.ac.checkpointmanager.configuration.payment.YooKassaClient;
 import ru.ac.checkpointmanager.dto.payment.AmountRequestDto;
+import ru.ac.checkpointmanager.dto.payment.AmountResponseDto;
 import ru.ac.checkpointmanager.dto.payment.DonationPerformingResponseDto;
 import ru.ac.checkpointmanager.dto.payment.DonationRequestDto;
 import ru.ac.checkpointmanager.dto.payment.PaymentRequestDto;
 import ru.ac.checkpointmanager.dto.payment.yookassa.PaymentResponse;
-import ru.ac.checkpointmanager.mapper.payment.DonationMapper;
 import ru.ac.checkpointmanager.model.payment.Donation;
 
 @Service
@@ -19,24 +19,24 @@ import ru.ac.checkpointmanager.model.payment.Donation;
 public class DonationYooKassaServiceImpl implements DonationApiService {
 
     private final DonationService donationService;
-    private final DonationMapper mapper;
-    private final RestClient restClient;
+    private final YooKassaClient yooKassaClient;
+
+    @Value("${donation.redirect-url}")
+    private String redirectUrl;
 
     @Override
     public DonationPerformingResponseDto makeDonation(DonationRequestDto donationRequestDto) {
         Donation savedDonation = donationService.saveUnconfirmed(donationRequestDto);
-        PaymentResponse paymentResponse = restClient.post().uri("/payments")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(convertToPaymentRequest(savedDonation))
-                .retrieve().body(PaymentResponse.class);
-        donationService.confirm(paymentResponse);
-
-        //send response to user
-        return null;
+        PaymentResponse paymentResponse = yooKassaClient.doPayment(convertToPaymentRequest(savedDonation));
+        Donation donation = donationService.updateWithPaymentData(paymentResponse);
+        log.info("Sending confirmation url for payment");
+        return new DonationPerformingResponseDto(new AmountResponseDto(donation.getAmount(), donation.getCurrency()),
+                donation.getDescription(),
+                paymentResponse.getConfirmation().getConfirmationUrl());
     }
 
     private PaymentRequestDto convertToPaymentRequest(Donation donation) {
         return new PaymentRequestDto(new AmountRequestDto(donation.getAmount(), donation.getCurrency().name()),
-                "https://checkpoint-manager.ru", donation.getComment(), donation.getId().toString());
+                redirectUrl, donation.getComment(), donation.getId().toString());
     }
 }

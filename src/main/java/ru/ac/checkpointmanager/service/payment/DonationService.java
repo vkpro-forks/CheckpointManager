@@ -8,5 +8,5 @@ public interface DonationService {
 
     Donation saveUnconfirmed(DonationRequestDto donationRequestDto);
 
-    Donation confirm(PaymentResponse paymentResponse);
+    Donation updateWithPaymentData(PaymentResponse paymentResponse);
 }
