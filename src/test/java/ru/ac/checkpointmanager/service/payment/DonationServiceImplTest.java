@@ -27,13 +27,13 @@ class DonationServiceImplTest {
     @InjectMocks
     DonationServiceImpl donationService;
 
+    @Captor
+    ArgumentCaptor<Donation> donationArgumentCaptor;
+
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(donationService, "mapper", new DonationMapper(new ModelMapper()), DonationMapper.class);
     }
-
-    @Captor
-    ArgumentCaptor<Donation> donationArgumentCaptor;
 
     @Test
     void saveUnconfirmed_AllOk_returnSavedDonation() {
@@ -50,7 +50,7 @@ class DonationServiceImplTest {
         Mockito.when(donationRepository.findById(Mockito.any())).thenReturn(Optional.of(YooKassaTestData.preSendDonation));
         Mockito.when(donationRepository.save(Mockito.any())).thenReturn(YooKassaTestData.updatedDonation);
 
-        donationService.updateWithPaymentData(YooKassaTestData.PAYMENT_RESPONSE);
+        donationService.updateWithPaymentData(YooKassaTestData.paymentResponse);
 
         Mockito.verify(donationRepository, Mockito.times(1)).save(donationArgumentCaptor.capture());
         YooKassaTestData.DONATION_MATCHER.assertMatch(donationArgumentCaptor.getValue(), YooKassaTestData.updatedDonation);
@@ -61,7 +61,7 @@ class DonationServiceImplTest {
         Mockito.when(donationRepository.findById(Mockito.any())).thenReturn(Optional.empty());
         Mockito.when(donationRepository.save(Mockito.any())).thenReturn(YooKassaTestData.newDonationAfterMapping);
 
-        donationService.updateWithPaymentData(YooKassaTestData.PAYMENT_RESPONSE);
+        donationService.updateWithPaymentData(YooKassaTestData.paymentResponse);
 
         Mockito.verify(donationRepository, Mockito.times(1)).save(donationArgumentCaptor.capture());
         YooKassaTestData.DONATION_MATCHER.assertMatch(donationArgumentCaptor.getValue(), YooKassaTestData.newDonationAfterMapping);

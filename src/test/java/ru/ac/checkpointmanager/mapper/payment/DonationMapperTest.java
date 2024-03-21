@@ -17,14 +17,14 @@ class DonationMapperTest {
 
     @Test
     void paymentResponseToDonation_ExistingDonation_ReturnEnrichDonation() {
-        Donation mappedDonation = donationMapper.paymentResponseToDonation(YooKassaTestData.PAYMENT_RESPONSE, YooKassaTestData.preSendDonation);
+        Donation mappedDonation = donationMapper.paymentResponseToDonation(YooKassaTestData.paymentResponse, YooKassaTestData.preSendDonation);
 
         YooKassaTestData.DONATION_MATCHER.assertMatch(mappedDonation, YooKassaTestData.updatedDonation);
     }
 
     @Test
     void paymentResponseToDonation_NewDonation_ReturnEnrichDonation() {
-        Donation mappedDonation = donationMapper.paymentResponseToDonation(YooKassaTestData.PAYMENT_RESPONSE, new Donation());
+        Donation mappedDonation = donationMapper.paymentResponseToDonation(YooKassaTestData.paymentResponse, new Donation());
 
         YooKassaTestData.DONATION_MATCHER.assertMatch(mappedDonation, YooKassaTestData.newDonationAfterMapping);
     }

@@ -55,6 +55,7 @@ public class DonationYooKassaServiceImpl implements DonationApiService {
      * Маппит данные оплаты в запрос на API
      *
      * @param donation сохраненные и обновленные данные
+     * @return {@link PaymentRequestDto} запрос для отправки на API
      */
     @NonNull
     private PaymentRequestDto convertToPaymentRequest(@NonNull Donation donation) {

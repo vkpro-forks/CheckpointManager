@@ -58,7 +58,7 @@ class DonationIntegrationTest {
     void donate_AllOk_ReturnDtoWithPaymentUrl() {
         wireMockServer.stubFor(WireMock.post("/payments").willReturn(WireMock.ok()
                 .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .withResponseBody(Body.fromJsonBytes(objectMapper.writeValueAsBytes(YooKassaTestData.PAYMENT_RESPONSE)))));
+                .withResponseBody(Body.fromJsonBytes(objectMapper.writeValueAsBytes(YooKassaTestData.paymentResponse)))));
 
         ResultActions resultActions = mockMvc.perform(PaymentMockMvcUtils.donate(YooKassaTestData.donationRequestDto))
                 .andExpect(MockMvcResultMatchers.status().isOk());
@@ -69,7 +69,7 @@ class DonationIntegrationTest {
     @Test
     @SneakyThrows
     void donate_ApiReturnBadRequest_ReturnErrorMessage() {
-        ErrorYooKassaResponse yooKassa400Error = YooKassaTestData.yooKassa400Error;
+        ErrorYooKassaResponse yooKassa400Error = YooKassaTestData.yooKassaBadRequestError;
         wireMockServer.stubFor(WireMock.post("/payments").willReturn(WireMock.badRequest()
                 .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withResponseBody(Body.fromJsonBytes(objectMapper.writeValueAsBytes(yooKassa400Error)))));
@@ -86,7 +86,7 @@ class DonationIntegrationTest {
     @Test
     @SneakyThrows
     void donate_ApiReturn500_ReturnErrorMessage() {
-        ErrorYooKassaResponse yooKassa400Error = YooKassaTestData.yooKassa400Error;
+        ErrorYooKassaResponse yooKassa400Error = YooKassaTestData.yooKassaBadRequestError;
         wireMockServer.stubFor(WireMock.post("/payments").willReturn(WireMock.serverError()
                 .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withResponseBody(Body.fromJsonBytes(objectMapper.writeValueAsBytes(yooKassa400Error)))));

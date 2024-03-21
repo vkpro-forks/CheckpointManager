@@ -39,7 +39,7 @@ class DonationYooKassaServiceImplTest {
     @Test
     void makeDonation_StandardFlow_ReturnResponse() {
         Mockito.when(donationService.saveUnconfirmed(Mockito.any())).thenReturn(YooKassaTestData.preSendDonation);
-        Mockito.when(yooKassaClient.doPayment(Mockito.any())).thenReturn(YooKassaTestData.PAYMENT_RESPONSE);
+        Mockito.when(yooKassaClient.doPayment(Mockito.any())).thenReturn(YooKassaTestData.paymentResponse);
         Mockito.when(donationService.updateWithPaymentData(Mockito.any())).thenReturn(YooKassaTestData.updatedDonation);
 
         DonationPerformingResponseDto donationPerforming = donationYooKassaService

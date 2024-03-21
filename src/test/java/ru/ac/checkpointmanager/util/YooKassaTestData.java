@@ -38,7 +38,7 @@ public class YooKassaTestData {
 
     public static final String PAYMENT_URL = "https://pay-me-please";
 
-    public static final PaymentResponse PAYMENT_RESPONSE =
+    public static PaymentResponse paymentResponse =
             PaymentResponse.builder()
                     .id(UUID.randomUUID())
                     .test(true)
@@ -65,14 +65,13 @@ public class YooKassaTestData {
     public static DonationPerformingResponseDto donationPerforming = new DonationPerformingResponseDto(
             new AmountResponseDto(BigDecimal.TEN, CurrencyEnum.RUB), DESCRIPTION, PAYMENT_URL);
 
-
-    public static final ErrorYooKassaResponse yooKassa400Error = new ErrorYooKassaResponse("error", "errorId",
+    public static ErrorYooKassaResponse yooKassaBadRequestError = new ErrorYooKassaResponse("error", "errorId",
             "errorCode", "description", "parameter");
 
     public static Donation updatedDonation = new Donation(DONATION_ID, BigDecimal.TEN, CurrencyEnum.RUB,
-            COMMENT, PAYMENT_RESPONSE.getPaid(), PAYMENT_RESPONSE.getStatus(), CREATED_AT, DESCRIPTION, PAYMENT_RESPONSE.getId());
+            COMMENT, paymentResponse.getPaid(), paymentResponse.getStatus(), CREATED_AT, DESCRIPTION, paymentResponse.getId());
 
-    public static Donation newDonationAfterMapping = new Donation(UUID.fromString(PAYMENT_RESPONSE.getMetadata().getOrderId()),
-            BigDecimal.TEN, CurrencyEnum.RUB, DESCRIPTION, PAYMENT_RESPONSE.getPaid(),
-            PAYMENT_RESPONSE.getStatus(), CREATED_AT, DESCRIPTION, PAYMENT_RESPONSE.getId());
+    public static Donation newDonationAfterMapping = new Donation(UUID.fromString(paymentResponse.getMetadata().getOrderId()),
+            BigDecimal.TEN, CurrencyEnum.RUB, DESCRIPTION, paymentResponse.getPaid(),
+            paymentResponse.getStatus(), CREATED_AT, DESCRIPTION, paymentResponse.getId());
 }
