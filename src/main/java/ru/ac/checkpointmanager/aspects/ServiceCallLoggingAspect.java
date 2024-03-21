@@ -16,6 +16,9 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ServiceCallLoggingAspect {
 
+    /**
+     * Pointcut для перехвата вызова публичных методов из сервисов
+     */
     @Pointcut("execution(public * ru.ac.checkpointmanager.service..*.*(..))")
     public void callAtServicesPublicMethods() { }
 
