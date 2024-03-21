@@ -59,7 +59,7 @@ springdoc:
     disabled: false
 
 donation:
-  return-url: "https://chgeckpoint-manager.ru"
+  return-url: "https://checkpoint-manager.ru"
 
 yookassa:
   secret-key: ENC(w69fQPDF+ytHWq5KlQq5I/u1ndZaHnfx0YkKyx6QhPizrkfgoy7rjRk+nLp0tpOjdek37q2XCAE20E+X2dsud9IBTJmvQwJwVSRCvW8teOxYVrPvp33V5Vx1BbUFmQPB)
