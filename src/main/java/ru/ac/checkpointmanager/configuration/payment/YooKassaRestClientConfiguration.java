@@ -55,7 +55,7 @@ public class YooKassaRestClientConfiguration {
                 .build());
     }
 
-    private String createAuthHeader(Integer shopId, String secret) {
+    private String createAuthHeader(String shopId, String secret) {
         byte[] message = (shopId + ":" + secret)
                 .getBytes(StandardCharsets.UTF_8);
         return new String(Base64.getEncoder().encode(message));

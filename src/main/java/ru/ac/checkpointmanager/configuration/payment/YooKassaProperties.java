@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class YooKassaProperties {
 
-    Integer shopId;
+    String shopId;
 
     String secretKey;
 
