@@ -1,5 +1,6 @@
 package ru.ac.checkpointmanager.dto.payment;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -21,13 +22,15 @@ public class DonationRequestDto {
 
     @NotNull
     @Min(50)
+    @Schema(description = "Сумма к оплате", example = "50")
     BigDecimal amount;
 
     @NotNull
+    @Schema(description = "Валюта", example = "RUB")
     CurrencyEnum currency;
 
     @NotBlank
     @Size(min = 5, max = 128)
+    @Schema(description = "Комментарий", example = "На кофе разработчикам")
     String comment;
 }
-

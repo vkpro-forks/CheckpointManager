@@ -1,5 +1,6 @@
 package ru.ac.checkpointmanager.dto.payment;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,7 +15,9 @@ public class DonationPerformingResponseDto {
 
     AmountResponseDto amount;
 
+    @Schema(description = "Комментарий", example = "На кофе разработчикам")
     String description;
 
+    @Schema(description = "Ссылка для оплаты", example = "https://here-you-can-pay")
     String paymentUrl;
 }
