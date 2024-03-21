@@ -16,6 +16,8 @@ import ru.ac.checkpointmanager.model.payment.Donation;
 import ru.ac.checkpointmanager.repository.payment.DonationRepository;
 import ru.ac.checkpointmanager.util.YooKassaTestData;
 
+import java.util.Optional;
+
 @ExtendWith(MockitoExtension.class)
 class DonationServiceImplTest {
 
@@ -41,5 +43,27 @@ class DonationServiceImplTest {
 
         Mockito.verify(donationRepository).save(donationArgumentCaptor.capture());
         YooKassaTestData.DONATION_MATCHER.assertMatch(donationArgumentCaptor.getValue(), YooKassaTestData.preFilledDonation);
+    }
+
+    @Test
+    void updateWithPaymentData_WithExistedDonation_ReturnUpdated() {
+        Mockito.when(donationRepository.findById(Mockito.any())).thenReturn(Optional.of(YooKassaTestData.preSendDonation));
+        Mockito.when(donationRepository.save(Mockito.any())).thenReturn(YooKassaTestData.updatedDonation);
+
+        donationService.updateWithPaymentData(YooKassaTestData.PAYMENT_RESPONSE);
+
+        Mockito.verify(donationRepository, Mockito.times(1)).save(donationArgumentCaptor.capture());
+        YooKassaTestData.DONATION_MATCHER.assertMatch(donationArgumentCaptor.getValue(), YooKassaTestData.updatedDonation);
+    }
+
+    @Test
+    void updateWithPaymentData_DonationAccidentallyNotInRepo_ReturnUpdated() {
+        Mockito.when(donationRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+        Mockito.when(donationRepository.save(Mockito.any())).thenReturn(YooKassaTestData.newDonationAfterMapping);
+
+        donationService.updateWithPaymentData(YooKassaTestData.PAYMENT_RESPONSE);
+
+        Mockito.verify(donationRepository, Mockito.times(1)).save(donationArgumentCaptor.capture());
+        YooKassaTestData.DONATION_MATCHER.assertMatch(donationArgumentCaptor.getValue(), YooKassaTestData.newDonationAfterMapping);
     }
 }

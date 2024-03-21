@@ -37,8 +37,7 @@ public class DonationServiceImpl implements DonationService {
     public Donation updateWithPaymentData(@NonNull PaymentResponse paymentResponse) {
         Donation donation = repository.findById(UUID.fromString(paymentResponse.getMetadata().getOrderId()))
                 .orElse(new Donation());
-        Donation updatedDonation = mapper.paymentResponseToDonation(paymentResponse, donation);
-        Donation savedDonation = repository.save(updatedDonation);
+        Donation savedDonation = repository.save(mapper.paymentResponseToDonation(paymentResponse, donation));
         log.info("Donation: {} successfully updated with payment data from YooKassa", savedDonation.getId());
         return savedDonation;
     }
