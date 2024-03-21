@@ -13,7 +13,6 @@ import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.checkpoints.Checkpoint;
 import ru.ac.checkpointmanager.repository.CheckpointRepository;
 import ru.ac.checkpointmanager.service.territories.TerritoryService;
-import ru.ac.checkpointmanager.utils.MethodLog;
 import ru.ac.checkpointmanager.utils.StringTrimmer;
 
 import java.util.List;
@@ -25,8 +24,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class CheckpointServiceImpl implements CheckpointService {
 
-    private static final String METHOD_CALLED_LOG = "Method {}, UUID - {}";
-
     private final CheckpointRepository checkpointRepository;
     private final TerritoryService territoryService;
     private final CheckpointMapper checkpointMapper;
@@ -34,7 +31,6 @@ public class CheckpointServiceImpl implements CheckpointService {
     @Override
     @Transactional
     public CheckpointDTO addCheckpoint(CheckpointDTO checkpointDTO) {
-        log.info(METHOD_CALLED_LOG, MethodLog.getMethodName(), checkpointDTO.getId());
         Checkpoint checkpoint = checkpointMapper.toCheckpoint(checkpointDTO);
 
         territoryService.findById(checkpoint.getTerritory().getId());
@@ -45,7 +41,6 @@ public class CheckpointServiceImpl implements CheckpointService {
 
     @Override
     public CheckpointDTO findById(UUID id) {
-        log.debug(METHOD_CALLED_LOG, MethodLog.getMethodName(), id);
         Checkpoint foundCheckpoint = checkpointRepository.findById(id).orElseThrow(
                 () -> {
                     log.warn(ExceptionUtils.CHECKPOINT_NOT_FOUND.formatted(id));
@@ -56,7 +51,6 @@ public class CheckpointServiceImpl implements CheckpointService {
 
     @Override
     public Checkpoint findCheckpointById(UUID id) {
-        log.debug(METHOD_CALLED_LOG, MethodLog.getMethodName(), id);
         return checkpointRepository.findById(id).orElseThrow(
                 () -> {
                     log.warn(ExceptionUtils.CHECKPOINT_NOT_FOUND.formatted(id));
@@ -66,21 +60,18 @@ public class CheckpointServiceImpl implements CheckpointService {
 
     @Override
     public List<CheckpointDTO> findCheckpointsByName(String name) {
-        log.debug("Method {}, name - {}", MethodLog.getMethodName(), name);
         List<Checkpoint> checkpoints = checkpointRepository.findCheckpointsByNameContainingIgnoreCase(name);
         return checkpointMapper.toCheckpointsDTO(checkpoints);
     }
 
     @Override
     public List<CheckpointDTO> findAllCheckpoints() {
-        log.debug("Method {}", MethodLog.getMethodName());
         List<Checkpoint> checkpoints = checkpointRepository.findAll();
         return checkpointMapper.toCheckpointsDTO(checkpoints);
     }
 
     @Override
     public List<CheckpointDTO> findCheckpointsByTerritoryId(UUID id) {
-        log.debug(METHOD_CALLED_LOG, MethodLog.getMethodName(), id);
         List<Checkpoint> foundCheckpoints = checkpointRepository.findCheckpointsByTerritoryIdOrderByName(id);
         log.debug("Checkpoint for [territory with id: {}] retrieved from repo", id);
         return checkpointMapper.toCheckpointsDTO(foundCheckpoints);
@@ -90,7 +81,6 @@ public class CheckpointServiceImpl implements CheckpointService {
     @Transactional
     public CheckpointDTO updateCheckpoint(CheckpointUpdateDTO checkpointDTO) {
         UUID checkpointId = checkpointDTO.getId();
-        log.info(METHOD_CALLED_LOG, MethodLog.getMethodName(), checkpointId);
         Checkpoint foundCheckpoint = checkpointRepository.findById(checkpointId)
                 .orElseThrow(() -> {
                     log.warn(ExceptionUtils.CHECKPOINT_NOT_FOUND.formatted(checkpointId));
@@ -113,7 +103,6 @@ public class CheckpointServiceImpl implements CheckpointService {
 
     @Override
     public void deleteCheckpointById(UUID id) {
-        log.info(METHOD_CALLED_LOG, MethodLog.getMethodName(), id);
         if (checkpointRepository.findById(id).isEmpty()) {
             log.warn(ExceptionUtils.CHECKPOINT_NOT_FOUND.formatted(id));
             throw new CheckpointNotFoundException(ExceptionUtils.CHECKPOINT_NOT_FOUND.formatted(id));
