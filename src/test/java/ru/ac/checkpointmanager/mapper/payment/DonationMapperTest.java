@@ -30,7 +30,7 @@ class DonationMapperTest {
     }
 
     @Test
-    void DonationRequestDtoToDonation_AllOk_ReturnPreFilledDonation() {
+    void donationRequestDtoToDonation_AllOk_ReturnPreFilledDonation() {
         Donation donation = donationMapper.toDonation(YooKassaTestData.donationRequestDto);
 
         YooKassaTestData.DONATION_MATCHER.assertMatch(donation, YooKassaTestData.preFilledDonation);
