@@ -92,9 +92,9 @@ springdoc:
     disabled: false
 
 donation:
-  return-url: "https://chgeckpoint-manager.ru"
+  return-url: "https://checkpoint-manager.ru"
 
 yookassa:
-  secret-key: "test_lOHuqyL-ANU7bUA0Vxove7VURcveuOBWBdx-f_x81Mo"
-  shop-id: "353330"
+  secret-key: ENC(bm07TWWbA2AAje23PIyzSpf+HdHSPX8OhoX+pXlMSUTPERwwCTiQBdgCuDbeYZub6OImpKlSUCp0hkzvRkShqsRwQMggk+PiJ2JfgmRwk9onbT+WAJQHx8fH2Sk9KS96)
+  shop-id: ENC(q52c+BdmobjQDw3E7c3yduVtaqfCzLB8q5B1j03Ha4NgVecFR7ZeMdWSxeHkScDv)
   url: "https://api.yookassa.ru/v3"
