@@ -95,6 +95,6 @@ donation:
   return-url: "https://checkpoint-manager.ru"
 
 yookassa:
-  secret-key: ENC(bm07TWWbA2AAje23PIyzSpf+HdHSPX8OhoX+pXlMSUTPERwwCTiQBdgCuDbeYZub6OImpKlSUCp0hkzvRkShqsRwQMggk+PiJ2JfgmRwk9onbT+WAJQHx8fH2Sk9KS96)
-  shop-id: ENC(q52c+BdmobjQDw3E7c3yduVtaqfCzLB8q5B1j03Ha4NgVecFR7ZeMdWSxeHkScDv)
+  secret-key: secret
+  shop-id: secret
   url: "https://api.yookassa.ru/v3"
