@@ -20,7 +20,9 @@ public class ServiceCallLoggingAspect {
      * Pointcut для перехвата вызова публичных методов из сервисов
      */
     @Pointcut("execution(public * ru.ac.checkpointmanager.service..*.*(..))")
-    public void callAtServicesPublicMethods() {/*body unnecessary*/}
+    public void callAtServicesPublicMethods() {
+        //body unnecessary
+    }
 
     @Before("callAtServicesPublicMethods()")
     public void beforeCallAnyMethod(JoinPoint joinPoint) {
