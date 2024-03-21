@@ -11,7 +11,6 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 import ru.ac.checkpointmanager.dto.payment.yookassa.ErrorYooKassaResponse;
-import ru.ac.checkpointmanager.exception.CriticalServerException;
 import ru.ac.checkpointmanager.exception.payment.DonationException;
 
 import java.net.http.HttpClient;
@@ -43,8 +42,7 @@ public class YooKassaRestClientConfiguration {
                                     errorYooKassaResponse.getDescription());
                         })
                 .defaultStatusHandler(HttpStatusCode::is5xxServerError, (request, response) -> {
-                    log.warn("Error status, please check: {}", response.getStatusText());
-                    throw new CriticalServerException("Something wrong YooKassa API: %s".formatted(response.getStatusText()));
+                    throw new DonationException("status: " + response.getStatusText());
                 })
                 .defaultStatusHandler(HttpStatusCode::is2xxSuccessful, ((request, response) ->
                         log.debug("Request successful")))

@@ -33,7 +33,7 @@ public class DonationYooKassaServiceImpl implements DonationApiService {
      * Платеж предварительно сохраняется в бд с идентификационным номером, отправляется запрос на API,
      * после получения ответа от API -> в бд обновляются и обогащаются данные о платеже
      * <br>
-     * Возвращается ответ с ссылкой на оплату
+     * Возвращается ответ со ссылкой на оплату
      *
      * @param donationRequestDto {@link DonationRequestDto} запрос с данными на оплату
      * @return {@link DonationPerformingResponseDto} ответ с данными оплаты и ссылкой
@@ -53,6 +53,8 @@ public class DonationYooKassaServiceImpl implements DonationApiService {
 
     /**
      * Маппит данные оплаты в запрос на API
+     *
+     * @param donation сохраненные и обновленные данные
      */
     @NonNull
     private PaymentRequestDto convertToPaymentRequest(@NonNull Donation donation) {

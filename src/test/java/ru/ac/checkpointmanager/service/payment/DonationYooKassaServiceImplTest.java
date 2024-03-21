@@ -49,7 +49,7 @@ class DonationYooKassaServiceImplTest {
         Mockito.verify(donationService, Mockito.times(1)).updateWithPaymentData(Mockito.any());
         Mockito.verify(yooKassaClient, Mockito.times(1)).doPayment(requestDtoArgumentCaptor.capture());
 
-        Assertions.assertThat(requestDtoArgumentCaptor.getValue()).usingRecursiveComparison().isEqualTo(YooKassaTestData.PAYMENT_REQUEST);
-        Assertions.assertThat(donationPerforming).isEqualTo(YooKassaTestData.DONATION_PERFORMING);
+        Assertions.assertThat(requestDtoArgumentCaptor.getValue()).usingRecursiveComparison().isEqualTo(YooKassaTestData.paymentRequest);
+        Assertions.assertThat(donationPerforming).isEqualTo(YooKassaTestData.donationPerforming);
     }
 }

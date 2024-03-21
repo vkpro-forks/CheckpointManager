@@ -9,6 +9,6 @@ public class DonationException extends RuntimeException {
 
     public DonationException(String message) {
         super(MESSAGE.formatted(message));
-        log.warn(getMessage() + " - " + this.getStackTrace()[0].toString());
+        log.error(getMessage() + " - " + this.getStackTrace()[0].toString());
     }
 }

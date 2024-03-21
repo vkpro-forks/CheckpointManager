@@ -7,6 +7,7 @@ import ru.ac.checkpointmanager.dto.payment.DonationPerformingResponseDto;
 import ru.ac.checkpointmanager.dto.payment.DonationRequestDto;
 import ru.ac.checkpointmanager.dto.payment.PaymentRequestDto;
 import ru.ac.checkpointmanager.dto.payment.yookassa.ConfirmationTypeResponseDto;
+import ru.ac.checkpointmanager.dto.payment.yookassa.ErrorYooKassaResponse;
 import ru.ac.checkpointmanager.dto.payment.yookassa.MetadataResponseDto;
 import ru.ac.checkpointmanager.dto.payment.yookassa.PaymentResponse;
 import ru.ac.checkpointmanager.dto.payment.yookassa.RecipientTypeResponseDto;
@@ -24,28 +25,18 @@ public class YooKassaTestData {
 
     public static MatcherFactory.Matcher<Donation> DONATION_MATCHER = MatcherFactory.usingIgnoringFieldsComparator("user");
 
-    public static final String DESCRIPTION = "payment";
+    public static final String DESCRIPTION = "for coffee";
 
-    public static final String COMMENT = "for coffee";
+    public static final String COMMENT = DESCRIPTION;
 
     public static final UUID DONATION_ID = UUID.randomUUID();
 
     public static final ZonedDateTime CREATED_AT = ZonedDateTime.of(LocalDateTime.of(2024, 3, 18, 10, 0, 0), ZoneId.of("UTC"));
 
-    public static Donation preSendDonation = new Donation(DONATION_ID, BigDecimal.TEN, CurrencyEnum.RUB, COMMENT);
-
-    public static DonationRequestDto donationRequestDto = new DonationRequestDto(BigDecimal.TEN, CurrencyEnum.RUB,
-            COMMENT);
-
-    public static Donation preFilledDonation = new Donation(BigDecimal.TEN, CurrencyEnum.RUB, COMMENT);
 
     public static final String RETURN_URL = "https://checkpoint-manager.ru/thank-you";
 
-    public static PaymentRequestDto PAYMENT_REQUEST = new PaymentRequestDto(
-            new AmountRequestDto(BigDecimal.TEN, CurrencyEnum.RUB.name()), RETURN_URL, COMMENT, DONATION_ID.toString());
-
-    public static DonationPerformingResponseDto DONATION_PERFORMING = new DonationPerformingResponseDto(
-            new AmountResponseDto(BigDecimal.TEN, CurrencyEnum.RUB), DESCRIPTION, RETURN_URL);
+    public static final String PAYMENT_URL = "https://pay-me-please";
 
     public static final PaymentResponse PAYMENT_RESPONSE =
             PaymentResponse.builder()
@@ -57,10 +48,26 @@ public class YooKassaTestData {
                     .recipient(new RecipientTypeResponseDto("id", "id"))
                     .createdAt(CREATED_AT.toString())
                     .refundable(false)
-                    .confirmation(new ConfirmationTypeResponseDto("redirect", RETURN_URL))
+                    .confirmation(new ConfirmationTypeResponseDto("redirect", PAYMENT_URL))
                     .paid(false)
                     .metadata(new MetadataResponseDto(UUID.randomUUID().toString()))
                     .build();
+
+    public static Donation preSendDonation = new Donation(DONATION_ID, BigDecimal.TEN, CurrencyEnum.RUB, COMMENT);
+
+    public static DonationRequestDto donationRequestDto = new DonationRequestDto(BigDecimal.TEN, CurrencyEnum.RUB,
+            COMMENT);
+
+    public static Donation preFilledDonation = new Donation(BigDecimal.TEN, CurrencyEnum.RUB, COMMENT);
+    public static PaymentRequestDto paymentRequest = new PaymentRequestDto(
+            new AmountRequestDto(BigDecimal.TEN, CurrencyEnum.RUB.name()), RETURN_URL, COMMENT, DONATION_ID.toString());
+
+    public static DonationPerformingResponseDto donationPerforming = new DonationPerformingResponseDto(
+            new AmountResponseDto(BigDecimal.TEN, CurrencyEnum.RUB), DESCRIPTION, PAYMENT_URL);
+
+
+    public static final ErrorYooKassaResponse yooKassa400Error = new ErrorYooKassaResponse("error", "errorId",
+            "errorCode", "description", "parameter");
 
     public static Donation updatedDonation = new Donation(DONATION_ID, BigDecimal.TEN, CurrencyEnum.RUB,
             COMMENT, PAYMENT_RESPONSE.getPaid(), PAYMENT_RESPONSE.getStatus(), CREATED_AT, DESCRIPTION, PAYMENT_RESPONSE.getId());

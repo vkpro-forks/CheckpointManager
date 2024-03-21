@@ -12,7 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import ru.ac.checkpointmanager.assertion.AssertPass;
+import ru.ac.checkpointmanager.assertion.PassAssert;
 import ru.ac.checkpointmanager.dto.passes.FilterParams;
 import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
@@ -120,7 +120,7 @@ class PassServiceImplTest {
         passService.updatePass(passUpdateDTO);
 
         Mockito.verify(passRepository).save(passArgumentCaptor.capture());
-        AssertPass.assertThat(passArgumentCaptor.getValue()).isPassFieldsMatches(
+        PassAssert.assertThat(passArgumentCaptor.getValue()).isPassFieldsMatches(
                 passUpdateDTO.getComment(), passUpdateDTO.getStartTime(), passUpdateDTO.getEndTime(),
                 passUpdateDTO.getTimeType()
         );
@@ -137,7 +137,7 @@ class PassServiceImplTest {
         passService.updatePass(passUpdateDTO);
 
         Mockito.verify(passRepository).save(passArgumentCaptor.capture());
-        AssertPass.assertThat(passArgumentCaptor.getValue()).isPassFieldsMatches(
+        PassAssert.assertThat(passArgumentCaptor.getValue()).isPassFieldsMatches(
                 passAuto.getComment(), passUpdateDTO.getStartTime(), passUpdateDTO.getEndTime(),
                 passUpdateDTO.getTimeType()
         );
