@@ -2,7 +2,6 @@ package ru.ac.checkpointmanager.it.controller;
 
 import lombok.SneakyThrows;
 import org.assertj.core.api.Assertions;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -700,5 +699,4 @@ class PassControllerIntegrationTest {
                 UrlConstants.PASS_URL_NOT_FAVORITE
         );
     }
-
 }

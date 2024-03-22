@@ -2,10 +2,14 @@ package ru.ac.checkpointmanager.service.crossing.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.CrossingDTO;
 import ru.ac.checkpointmanager.dto.CrossingRequestDTO;
+import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.exception.CrossingNotFoundException;
 import ru.ac.checkpointmanager.exception.MismatchedTerritoryException;
 import ru.ac.checkpointmanager.exception.pass.InactivePassException;
@@ -23,7 +27,6 @@ import ru.ac.checkpointmanager.service.passes.PassService;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
 import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Transactional(readOnly = true)
@@ -82,9 +85,12 @@ public class CrossingServiceImpl implements CrossingService {
     }
 
     @Override
-    public List<CrossingDTO> getByPassId(UUID passId) {
+    public Page<CrossingDTO> getByPassId(UUID passId, PagingParams pagingParams) {
         passService.findPassById(passId);
-        return mapper.toCrossingsDTO(crossingRepository.findCrossingsByPassId(passId));
+
+        Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
+        Page<Crossing> crossingPage = crossingRepository.findCrossingsByPassId(passId, pageable);
+        return crossingPage.map(mapper::toCrossingDTO);
     }
 
     private Crossing toCrossing(Direction direction, Pass pass, Checkpoint checkpoint, ZonedDateTime performedAt) {
