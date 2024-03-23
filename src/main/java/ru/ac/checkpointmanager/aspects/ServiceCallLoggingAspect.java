@@ -27,7 +27,7 @@ public class ServiceCallLoggingAspect {
     }
 
     @Before("callAtServicesPublicMethods()")
-    public void beforeCallMethod(JoinPoint joinPoint) {
+    public void logCallMethodWithArgs(JoinPoint joinPoint) {
         String args = Arrays.stream(joinPoint.getArgs())
                 .filter(Objects::nonNull)
                 .map(Object::toString)
