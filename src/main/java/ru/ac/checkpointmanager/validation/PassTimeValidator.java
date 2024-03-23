@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import ru.ac.checkpointmanager.dto.passes.PassBaseDTO;
 import ru.ac.checkpointmanager.validation.annotation.PassTimeCheck;
 
+import java.time.Duration;
+
 /**
  * Класс проверяет, что в пропуске дата начала < дата окончания
  */
@@ -32,6 +34,10 @@ public class PassTimeValidator implements ConstraintValidator<PassTimeCheck, Pas
         if (value == null) {
             return true;//not responsibility of this annotation
         }
+        if (isNotCorrectEndTime(value)) {
+            log.debug("End time validation failed");
+            return false;
+        }
         boolean isValid = value.getStartTime().isBefore(value.getEndTime());
         if (!isValid) {
             log.debug("Pass time validation failed");
@@ -39,5 +45,9 @@ public class PassTimeValidator implements ConstraintValidator<PassTimeCheck, Pas
         }
         log.debug("Pass time validation successful");
         return true;
+    }
+    private boolean isNotCorrectEndTime(PassBaseDTO value) {
+        Duration duration = Duration.between(value.getEndTime(), value.getStartTime());
+        return duration.toDays() > 30;
     }
 }
