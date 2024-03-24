@@ -1,4 +1,4 @@
-package ru.ac.checkpointmanager.utils;
+package ru.ac.checkpointmanager.configuration;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;

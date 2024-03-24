@@ -6,15 +6,14 @@ spring:
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/${PG_DB}
-    username: ENC(lsksaRYX3S2BuNlhosZLveISYQEf7AqUSFEE1kYGPo4lWAkFx47mAs6Nn9KB0H1e)
-    password: ENC(/xwd4WaJRFnFP+HJu3gBu6XkgycEKqOOGQd9eBWMdpBsOfagzSjskd+SDZjknZeJ)
+    username: ENC(oMsm9pVnMXOE2Y0a9Oh/tynLagnWVancP+BLHGHmfAWRhxrhlhs3SmBXfLPc9Mcb)
+    password: ENC(VOoPVuNcccdaG+Q4NOjgIfyRofGCtc32R9v0+x0O7pEf/OBAxsw4wcwcKWw2pz6V)
   servlet:
     multipart:
       max-file-size: 5MB
   jpa:
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
         show_sql: true
         ddl-auto: validate
         use_sql_comments: true
@@ -33,8 +32,8 @@ spring:
   mail:
     host: smtp.yandex.ru
     port: 465
-    username: ENC(ddovr6Xerz5RXQS3vmc3DtSXnYW7/k8akDrcmMbw3ehZKth1dkNQ5bYKuUcq/nqLtAP9+2JB+anKvF40No5YPQ==)
-    password: ENC(Mmts7jvfpwm1xysyblPFxswQ2PmspS4iSx2zFT9YUg/kkDkX2inLeL3LF1R3h+MCLowaVXjoYblacqcy6+aSdQ==)
+    username: ENC(AepNSyWVA0umzDKG3Z4LjmpUoSFxOrJPFLn3bINLR6BRFSZEHPvkW/xmkZSp1WNHPlR+N7TWiTEwr7vqgtna1A==)
+    password: ENC(l8cDKI9a9JV97LPhTww2jbPWqdBYUDX16K6AWrGdvgPZZahtO7SypI9wSCMlK+vqjwz2RcB1Hl6Jg9jA91NnJw==)
     protocol: smtp
     properties:
       mail:
@@ -60,7 +59,7 @@ spring:
 application:
   security:
     jwt:
-      secret-key: ENC(QSwxn0NCNAFzcJprJPe6hlv+kH37gZDbUOsVl9tcF2RtfiRmcDEKYWkril6ZvFlVDnSjQzrg2gHuzK79fof3UhvrBkEtC+dBQ9r/vlI2sl62AJ8CiRmzuNMdb/WDj1mz+RWRUlaezVJRZjitEFfWpw==)
+      secret-key: ENC(ecvTRZRx5YbJxPmPGXplxBVB1s5PY4yBPA+l3fOIkf/LH7CC78uMvocIAKFkrs6ufQmQNCHqnUUXIZnlPUeSaLd4A3qffsJPSKOy8Guhuz6fzqnDxsDqOfm9Lst2PI/fOTFjyUNnmHQlZ8G4AHimeA==)
       expiration: 86400000 # a day
       refresh-token:
         expiration: 604800000 # 7 days
@@ -88,3 +87,10 @@ logging:
   aspect:
     call-service: true
     include-non-public: true
+donation:
+  return-url: "https://checkpoint-manager.ru"
+
+yookassa:
+  secret-key: ENC(N6TDbCvQJ9PX/r2WDzBIVrL3x1mDv2vuOEhhcvm/eBGjurk7NOHP+LlYG7VlSdGWWCSic1Ev9lYfZkH1NDORnql89BfK+iGrcUsrfa32PwEygnK6f9FINkK3JllZROyw)
+  shop-id: ENC(jzEer76ShmqQG1ksqGBAljHHKGcT6pN1szSxfsCtXUFufWiJ35A8RrvbXNePa/+N)
+  url: "https://api.yookassa.ru/v3"

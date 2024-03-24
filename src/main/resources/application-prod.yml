@@ -2,8 +2,8 @@ spring:
   mail:
     host: smtp.yandex.ru
     port: 465
-    username: ENC(03puLAyfAIk49/ksIDYBr9mUvKGeiFOxvKlNPiYbjuzhhxsJKAZjM0RxysGTxpsGy4n2HZVr0msCkOIl/5ejkA==)
-    password: ENC(IoIoNKoDTPRhpM4jD7zvwNBjUBMgfrynz7Ar+bTsf3/ea6PCMAF1bq+3w37p1fA2j/waqrSWgYzvAphHaT08bQ==)
+    username: ENC(t1KNUI2vMTTgyc1kx5sbIzBgkqsC193CqyI/BTecn8+hAu54PXmidABUqaJXJJzw37CR/rcOqlzwc3wXgsY+cw==)
+    password: ENC(8AQW3PxekAw2XOrN7wZECyY2R5jxy8LJS8aGwQ7l0c6JQYpeJ0rE8slUZoU4eGTmKwgOzR7iGGiPCSn7wMw1Cw==)
     protocol: smtp
     properties:
       mail:
@@ -60,3 +60,11 @@ springdoc:
   pre-loading-enabled: false
   cache:
     disabled: false
+
+donation:
+  return-url: "https://checkpoint-manager.ru"
+
+yookassa:
+  secret-key: ENC(w69fQPDF+ytHWq5KlQq5I/u1ndZaHnfx0YkKyx6QhPizrkfgoy7rjRk+nLp0tpOjdek37q2XCAE20E+X2dsud9IBTJmvQwJwVSRCvW8teOxYVrPvp33V5Vx1BbUFmQPB)
+  shop-id: ENC(S3WNIfDRyOlU7uCuhVrOG9qXMXRR/Z/Y87wUiCK8eZjR8PJfQtOKyfFAt6cjBK4m)
+  url: "https://api.yookassa.ru/v3"

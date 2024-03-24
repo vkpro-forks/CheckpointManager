@@ -27,6 +27,7 @@ import ru.ac.checkpointmanager.exception.PasswordConfirmationException;
 import ru.ac.checkpointmanager.exception.PhoneAlreadyExistException;
 import ru.ac.checkpointmanager.exception.VisitorNotFoundException;
 import ru.ac.checkpointmanager.exception.pass.PassException;
+import ru.ac.checkpointmanager.exception.payment.DonationException;
 
 import java.time.Instant;
 import java.util.List;
@@ -247,6 +248,14 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
+    @ExceptionHandler(DonationException.class)
+    public ProblemDetail handleDonationException(DonationException e) {
+        ProblemDetail problemDetail = createProblemDetail(HttpStatus.INTERNAL_SERVER_ERROR, e);
+        problemDetail.setTitle(ErrorMessage.DONATION_ERROR);
+        problemDetail.setProperty(ERROR_CODE, ErrorCode.INTERNAL_SERVER_ERROR.toString());
+        return problemDetail;
+    }
+
 
     // 500
     @ExceptionHandler(CriticalServerException.class)
@@ -257,7 +266,6 @@ public class GlobalExceptionHandler {
         log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }
-
 
 
     private ProblemDetail createProblemDetail(HttpStatus status, Exception e) {

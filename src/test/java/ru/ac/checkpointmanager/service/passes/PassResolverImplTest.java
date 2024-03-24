@@ -13,7 +13,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.test.util.ReflectionTestUtils;
-import ru.ac.checkpointmanager.assertion.AssertPass;
+import ru.ac.checkpointmanager.assertion.PassAssert;
 import ru.ac.checkpointmanager.dto.CarBrandDTO;
 import ru.ac.checkpointmanager.dto.CarDTO;
 import ru.ac.checkpointmanager.dto.VisitorDTO;
@@ -170,7 +170,7 @@ class PassResolverImplTest {
 
         Pass updatedPass = passResolver.updatePass(passUpdateDTO, pass);
 
-        AssertPass.assertThat(updatedPass).isPassAutoWithMatchedCarFields(
+        PassAssert.assertThat(updatedPass).isPassAutoWithMatchedCarFields(
                 fields.getLeft() == null ? car.getLicensePlate() : carDTO.getLicensePlate(),
                 fields.getMiddle() == null ? car.getPhone() : carDTO.getPhone(),
                 TestUtils.getCarBrand());
@@ -188,7 +188,7 @@ class PassResolverImplTest {
         Pass updatedPass = passResolver.updatePass(passUpdateDTO, pass);
 
         CarDTO carDTO = passUpdateDTO.getCar();
-        AssertPass.assertThat(updatedPass).isPassAutoWithMatchedCarFields(
+        PassAssert.assertThat(updatedPass).isPassAutoWithMatchedCarFields(
                 carDTO.getLicensePlate(),
                 carDTO.getPhone(), TestUtils.getCarBrand());
         Mockito.verifyNoInteractions(carBrandRepository);
@@ -204,7 +204,7 @@ class PassResolverImplTest {
 
         Pass updatedPass = passResolver.updatePass(passUpdateDTO, pass);
 
-        AssertPass.assertThat(updatedPass).isPassAutoWithMatchedCarFields(
+        PassAssert.assertThat(updatedPass).isPassAutoWithMatchedCarFields(
                 TestUtils.getCarDto().getLicensePlate(), TestUtils.getCarDto().getPhone(), TestUtils.getCarBrand());
         Mockito.verify(carBrandRepository).findByBrand(Mockito.anyString());
         Mockito.verify(carBrandRepository).save(Mockito.any());
@@ -220,7 +220,7 @@ class PassResolverImplTest {
 
         Pass updatedPass = passResolver.updatePass(passUpdateDTO, pass);
 
-        AssertPass.assertThat(updatedPass).isPassWalkWithMatchedVisitorFields(
+        PassAssert.assertThat(updatedPass).isPassWalkWithMatchedVisitorFields(
                 fields.getLeft() == null ? visitor.getName() : visitorDTO.getName(),
                 fields.getMiddle() == null ? visitor.getPhone() : visitorDTO.getPhone(),
                 fields.getRight() == null ? visitor.getNote() : visitorDTO.getNote());
