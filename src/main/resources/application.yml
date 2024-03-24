@@ -87,3 +87,4 @@ logging:
   config: classpath:logback-local.xml
   aspect:
     call-service: true
+    include-non-public: true
