@@ -52,6 +52,9 @@ cors:
 
 logging:
   config: classpath:logback-prod.xml
+  aspect:
+    call-service: true
+    include-private: false
 
 springdoc:
   pre-loading-enabled: false
