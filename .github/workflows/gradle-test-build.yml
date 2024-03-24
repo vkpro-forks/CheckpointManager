@@ -17,7 +17,6 @@ on:
       - README.md
   workflow_dispatch:
 
-
 permissions:
   contents: read
 
@@ -41,15 +40,13 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     steps:
-
       - uses: actions/checkout@v3
-
       - name: Send Telegram Notification User Wants to merge
         run: |
           # Получаем имя пользователя, который делает мердж
           COMMIT_AUTHOR=$(git log -1 --pretty=%an)
           echo "Commit author: $COMMIT_AUTHOR"
-          MESSAGE="Внимание %0A$COMMIT_AUTHOR%0A начинает мердж в мастер, сервер будет недоступен 3-5 минут
+          MESSAGE="Внимание %0A$COMMIT_AUTHOR%0Aначинает мердж в мастер, backand приложение будет недоступно 3-5 минут.
           ${{ github.server_url }}/${{ github.repository }}/commits/master"
           curl -X POST \
             https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage \
@@ -61,17 +58,21 @@ jobs:
         with:
           java-version: '17'
           distribution: 'adopt'
+
       - name: Adjust permissions for Gradle Wrapper
         run: chmod +x gradlew
+
       - name: Set Project Version
         run: |
           echo "PROJECT_VERSION=$(grep -Po "version = '\K[^']+" build.gradle)" >> $GITHUB_ENV
+
       - name: Build with Gradle and Rename JAR
         run: |
           ./gradlew build
           mv build/libs/*-$PROJECT_VERSION.jar build/libs/app.jar
         env:
           PROJECT_VERSION: ${{ env.PROJECT_VERSION }}
+
       - name: Create .env file
         run: |
           echo "JASYPT_ENCRYPTOR_PASSWORD=${{ secrets.JASYPT_ENCRYPTOR_PASSWORD }}" >> .env
@@ -83,6 +84,7 @@ jobs:
           echo "PROJECT_VERSION=${{ env.PROJECT_VERSION }}" >> .env
           # Поскольку PROJECT_VERSION добавляется вручную, этот шаг не требуется
           echo "PROJECT_VERSION=0.1.19-SNAPSHOT-TEST" >> .env
+
       - name: Build and Push Docker Image
         run: |
           docker-compose build
@@ -92,12 +94,15 @@ jobs:
         env:
           PROJECT_VERSION: ${{ env.PROJECT_VERSION }}
           DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
+
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.5.1
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
       - name: Add server to known hosts
         run: ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+
       - name: Deploy to Server
         run: |
           scp .env docker-compose.prod.yml Dockerfile deploy.sh build/libs/app.jar nginx.conf ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }}:~

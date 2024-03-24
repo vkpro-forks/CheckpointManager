@@ -24,6 +24,7 @@ import org.springframework.web.context.WebApplicationContext;
 import ru.ac.checkpointmanager.config.EnablePostgresAndRedisTestContainers;
 import ru.ac.checkpointmanager.config.security.WithMockCustomUser;
 import ru.ac.checkpointmanager.exception.ExceptionUtils;
+import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.avatar.Avatar;
@@ -137,7 +138,7 @@ class AvatarControllerIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON));
 
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
-                .value(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(TestUtils.TERR_ID)));
+                .value(TerritoryNotFoundException.MESSAGE.formatted(TestUtils.TERR_ID)));
         CheckResultActionsUtils.checkNotFoundFields(resultActions);
     }
 
@@ -181,7 +182,7 @@ class AvatarControllerIntegrationTest {
         ResultActions resultActions = mockMvc.perform(MockMvcUtils.uploadAvatarForTerritory(TestUtils.TERR_ID, file));
 
         resultActions.andExpect(MockMvcResultMatchers.jsonPath(TestUtils.JSON_DETAIL)
-                .value(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(TestUtils.TERR_ID)));
+                .value(TerritoryNotFoundException.MESSAGE.formatted(TestUtils.TERR_ID)));
         CheckResultActionsUtils.checkNotFoundFields(resultActions);
     }
 

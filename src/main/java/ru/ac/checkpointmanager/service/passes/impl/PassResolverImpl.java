@@ -68,12 +68,7 @@ public class PassResolverImpl implements PassResolver {
                     return new UserNotFoundException(ExceptionUtils.USER_NOT_FOUND_MSG.formatted(userId));
                 });
         Territory territory = territoryRepository.findById(territoryId)
-                .orElseThrow(
-                        () -> {
-                            log.warn(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
-                            return new TerritoryNotFoundException(ExceptionUtils
-                                    .TERRITORY_NOT_FOUND_MSG.formatted(territoryId));
-                        });
+                .orElseThrow(() -> new TerritoryNotFoundException(territoryId));
         Pass pass;
         if (passCreateDTO.getCar() != null) {
             PassAuto passAuto = passMapper.toPassAuto(passCreateDTO);

@@ -42,5 +42,4 @@ public class PassProcessorOnetime implements PassProcessor {
             log.debug("Pass was processed for IN Direction");
         }
     }
-
 }

@@ -699,5 +699,4 @@ class PassControllerIntegrationTest {
                 UrlConstants.PASS_URL_NOT_FAVORITE
         );
     }
-
 }

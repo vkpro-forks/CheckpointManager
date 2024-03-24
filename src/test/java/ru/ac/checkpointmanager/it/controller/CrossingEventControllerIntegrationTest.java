@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import ru.ac.checkpointmanager.config.EnablePostgresAndRedisTestContainers;
 import ru.ac.checkpointmanager.exception.ExceptionUtils;
+import ru.ac.checkpointmanager.exception.TerritoryNotFoundException;
 import ru.ac.checkpointmanager.model.Territory;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.car.Car;
@@ -149,7 +150,7 @@ class CrossingEventControllerIntegrationTest {
 
         resultActions.andExpect(status().isNotFound())
                 .andExpectAll(jsonPath(TestUtils.JSON_DETAIL)
-                        .value(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(TestUtils.TERR_ID)));
+                        .value(TerritoryNotFoundException.MESSAGE.formatted(TestUtils.TERR_ID)));
         CheckResultActionsUtils.checkNotFoundFields(resultActions);
     }
 

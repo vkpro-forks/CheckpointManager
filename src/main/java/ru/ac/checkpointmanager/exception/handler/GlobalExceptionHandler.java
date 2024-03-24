@@ -53,7 +53,6 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.NOT_FOUND, e);
         problemDetail.setTitle(ErrorMessage.OBJECT_NOT_FOUND);
         problemDetail.setProperty(ERROR_CODE, ErrorCode.NOT_FOUND.toString());
-        log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }
 

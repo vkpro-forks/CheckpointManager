@@ -158,7 +158,7 @@ class AvatarServiceImplTest {
         TerritoryNotFoundException thrown = assertThrows(TerritoryNotFoundException.class,
                 () -> avatarService.getAvatarImageByTerritoryId(TestUtils.TERR_ID));
 
-        assertEquals(ExceptionUtils.TERRITORY_NOT_FOUND_MSG.formatted(TestUtils.TERR_ID), thrown.getMessage());
+        assertEquals(TerritoryNotFoundException.MESSAGE.formatted(TestUtils.TERR_ID), thrown.getMessage());
         verify(territoryRepository).findTerritoryByIdWithAvatar(TestUtils.TERR_ID);
     }
 

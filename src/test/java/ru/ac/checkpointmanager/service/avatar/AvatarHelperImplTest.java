@@ -95,7 +95,7 @@ class AvatarHelperImplTest {
         Exception exception = Assertions.assertThrows(TerritoryNotFoundException.class,
                 () -> avatarHelper.updateTerritoryAvatar(territoryId, avatar));
 
-        String expectedMessage = TestUtils.ERROR_MESSAGE_SHOULD;
+        String expectedMessage = TerritoryNotFoundException.MESSAGE.formatted(territoryId);
         String actualMessage = exception.getMessage();
         Assertions.assertTrue(actualMessage.contains(expectedMessage));
         verify(territoryRepository).findById(territoryId);

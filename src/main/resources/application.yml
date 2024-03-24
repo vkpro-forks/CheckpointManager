@@ -84,6 +84,9 @@ avatars:
 
 logging:
   config: classpath:logback-local.xml
+  aspect:
+    call-service: true
+    include-non-public: true
 donation:
   return-url: "https://checkpoint-manager.ru"
 
