@@ -1,4 +1,4 @@
-[![](https://img.shields.io/badge/Spring%20Boot%20Version-3.1.2-orange)](/build.gradle) [![](https://img.shields.io/badge/Java%20Version-17-orange)](/build.gradle)
+[![](https://img.shields.io/badge/Spring%20Boot%20Version-3.2.3-orange)](/build.gradle) [![](https://img.shields.io/badge/Java%20Version-17-orange)](/build.gradle)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/AnvilCoder/CheckpointManager/gradle-test-build.yml?label=test-and-build)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/d27cf1c00fbd44409c53bd7dc4a829f9)](https://app.codacy.com?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 ![GitHub top language](https://img.shields.io/github/languages/top/Anvilcoder/CheckpointManager?label=Java)
