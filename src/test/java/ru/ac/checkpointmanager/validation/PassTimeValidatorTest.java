@@ -2,14 +2,17 @@ package ru.ac.checkpointmanager.validation;
 
 import jakarta.validation.ConstraintValidatorContext;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.parameters.P;
 import ru.ac.checkpointmanager.dto.passes.PassBaseDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.extension.ValidationContextTestResolver;
+import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.util.PassTestData;
 
 import java.time.LocalDateTime;
@@ -36,11 +39,13 @@ class PassTimeValidatorTest {
 
     @ParameterizedTest
     @MethodSource("getIncorrectPassDtoArguments")
-    void shouldNotValidateForIncorrectPassDto(PassBaseDTO passDto) {
+    void endTimeExceedsLimitTest(PassBaseDTO passDto) {
         boolean valid = passTimeValidator.isValid(passDto, constraintContext);
 
         Assertions.assertThat(valid).isFalse();
     }
+
+
 
     private static Stream<Object> getCorrectPassDtoArguments() {
         PassUpdateDTO passUpdateDTO = PassTestData.getPassUpdateDTOWithCar();
@@ -57,10 +62,10 @@ class PassTimeValidatorTest {
 
     private static Stream<Object> getIncorrectPassDtoArguments() {
         PassCreateDTO passCreateDTO = PassTestData.getPassCreateDTOWithCar();
-        passCreateDTO.setEndTime(LocalDateTime.now().plusHours(1));
-        passCreateDTO.setStartTime(LocalDateTime.now().plusHours(2));
+        passCreateDTO.setEndTime(LocalDateTime.now().plusDays(35));
+        passCreateDTO.setStartTime(LocalDateTime.now().plusDays(1));
         PassUpdateDTO passUpdateDTO = PassTestData.getPassUpdateDTOWithCar();
-        passUpdateDTO.setEndTime(LocalDateTime.now().plusHours(1));
+        passUpdateDTO.setEndTime(LocalDateTime.now().plusMonths(3));
         passUpdateDTO.setStartTime(LocalDateTime.now().plusHours(2));
         return Stream.of(
                 passUpdateDTO,
