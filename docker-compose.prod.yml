@@ -43,7 +43,8 @@ services:
       - POSTGRES_USER=${PG_USER}
       - POSTGRES_PASSWORD=${PG_PASS}
       - TZ=UTC
-      - POSTGRES_HOST_AUTH_METHOD=trust
+
+      # https://github.com/citusdata/pg_cron
       - CRON_SCHEDULE_CLEAR=TRUNCATE cron.job; #Удаление предыдущих задач
       - CRON_SCHEDULE_TASK=SELECT cron.schedule('Delete logs','55 23 * * *', 'DELETE FROM logs WHERE time < now() - interval ''1 day'''); #Настройка задач по крону
     healthcheck:
