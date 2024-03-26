@@ -13,7 +13,15 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
     CREATE EXTENSION IF NOT EXISTS pg_cron;
 EOSQL
 
-# Добавление задания в pg_cron в виде: (NAME, CRON, SQL_QUERY)
+# Очистка предыдущих задач
+# Пример: TRUNCATE cron.job;
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
-    SELECT cron.schedule('Delete logs','55 23 * * *', 'DELETE FROM logs WHERE time < now() - interval ''1 day''');
+    ${CRON_SCHEDULE_CLEAR}
+EOSQL
+
+
+# Добавление задания в pg_cron в виде: (NAME, CRON, SQL_QUERY)
+# Пример: SELECT cron.schedule('Delete logs','55 23 * * *', 'DELETE FROM logs WHERE time < now() - interval ''1 day''');
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
+    ${CRON_SCHEDULE_TASK}
 EOSQL
