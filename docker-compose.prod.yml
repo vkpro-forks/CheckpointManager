@@ -33,7 +33,7 @@ services:
   postgres-db:
     build:
       context: .
-      dockerfile: Dockerfile-setup-postgres
+      dockerfile: config/postgres/Dockerfile-setup-postgres
     ports:
       - "5432:5432"
     volumes:
@@ -44,6 +44,8 @@ services:
       - POSTGRES_PASSWORD=${PG_PASS}
       - TZ=UTC
       - POSTGRES_HOST_AUTH_METHOD=trust
+      - CRON_SCHEDULE_CLEAR=TRUNCATE cron.job; #Удаление предыдущих задач
+      - CRON_SCHEDULE_TASK=SELECT cron.schedule('Delete logs','55 23 * * *', 'DELETE FROM logs WHERE time < now() - interval ''1 day'''); #Настройка задач по крону
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}" ]
       interval: 5s
