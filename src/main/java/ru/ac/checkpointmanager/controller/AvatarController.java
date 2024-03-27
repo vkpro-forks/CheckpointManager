@@ -56,7 +56,14 @@ public class AvatarController {
 
     private final AvatarService avatarService;
 
-    @Operation(summary = "Загрузить аватар пользователю(выбрать id пользователя и картинку).")
+    @Operation(summary = "Загрузить аватар пользователю(выбрать id пользователя и картинку)",
+            description = """
+                    Загрузить аватар пользователя.
+                    Ограничения для загрузки аватара:
+                    расширения - jpg, jpeg, png, ico, gif, eps, svg, bmp;
+                    размер - до 5 Мб,
+                    ширина/высота: до 400х400;
+                    """)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Аватар успешно добавлен",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -128,13 +135,6 @@ public class AvatarController {
         return createResponseEntity(avatarImageDTO);
     }
 
-    private ResponseEntity<byte[]> createResponseEntity(AvatarImageDTO avatarImageDTO) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.parseMediaType(avatarImageDTO.getMediaType()));
-        headers.setContentLength(avatarImageDTO.getImageData().length);
-        return ResponseEntity.ok().headers(headers).body(avatarImageDTO.getImageData());
-    }
-
     @Operation(summary = "Получить аватар по Id пользователя")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Аватар получен. Контент содержит изображение в формате JPEG.",
@@ -150,7 +150,14 @@ public class AvatarController {
         return ResponseEntity.ok(avatarImageDTO);
     }
 
-    @Operation(summary = "Загрузить аватар территории(выбрать id территории и картинку).")
+    @Operation(summary = "Загрузить аватар территории(выбрать id территории и картинку)",
+            description = """
+                    Загрузить аватар территории.
+                    Ограничения для загрузки аватара:
+                    расширения - jpg, jpeg, png, ico, gif, eps, svg, bmp;
+                    размер - до 5 Мб,
+                    ширина/высота: до 400х400;
+                    """)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Аватар успешно добавлен",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -179,4 +186,10 @@ public class AvatarController {
         return createResponseEntity(avatarImageDTO);
     }
 
+    private ResponseEntity<byte[]> createResponseEntity(AvatarImageDTO avatarImageDTO) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType(avatarImageDTO.getMediaType()));
+        headers.setContentLength(avatarImageDTO.getImageData().length);
+        return ResponseEntity.ok().headers(headers).body(avatarImageDTO.getImageData());
+    }
 }
