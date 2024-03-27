@@ -32,8 +32,8 @@ services:
   # Сервис для базы данных PostgreSQL
   postgres-db:
     build:
-      context: .
-      dockerfile: config/postgres/Dockerfile-setup-postgres
+      context: ./config/postgres
+      dockerfile: Dockerfile-setup-postgres
     ports:
       - "5432:5432"
     volumes:
@@ -45,6 +45,7 @@ services:
       - TZ=UTC
 
       # https://github.com/citusdata/pg_cron
+      - CRON_DB_NAME=${PG_DB}
       - CRON_SCHEDULE_CLEAR=TRUNCATE cron.job; #Удаление предыдущих задач
       - CRON_SCHEDULE_TASK=SELECT cron.schedule('Delete logs','55 23 * * *', 'DELETE FROM logs WHERE time < now() - interval ''1 day'''); #Настройка задач по крону
     healthcheck:
