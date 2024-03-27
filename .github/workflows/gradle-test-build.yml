@@ -105,7 +105,9 @@ jobs:
 
       - name: Deploy to Server
         run: |
-          scp -r config/ .env docker-compose.prod.yml Dockerfile deploy.sh build/libs/app.jar nginx.conf ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }}:~
+          tar -czf config.tar.gz config/
+          scp config.tar.gz .env docker-compose.prod.yml Dockerfile deploy.sh build/libs/app.jar nginx.conf ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }}:~
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "tar -xvzf config.tar.gz"
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "docker-compose --env-file .env -f docker-compose.prod.yml pull && docker-compose --env-file .env -f docker-compose.prod.yml up -d"
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "bash deploy.sh"
         env:
