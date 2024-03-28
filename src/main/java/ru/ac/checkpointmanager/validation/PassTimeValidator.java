@@ -3,6 +3,7 @@ package ru.ac.checkpointmanager.validation;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import ru.ac.checkpointmanager.dto.passes.PassBaseDTO;
 import ru.ac.checkpointmanager.validation.annotation.PassTimeCheck;
 
@@ -16,7 +17,8 @@ import java.time.Duration;
 public class PassTimeValidator implements ConstraintValidator<PassTimeCheck, PassBaseDTO> {
 
     private String validationMessage;
-    private static final long VALIDITY_PERIOD_OF_THE_PASS = 30;
+    @Value("${pass.duration-days}")
+    private long passDurationDays;
 
     @Override
     public void initialize(PassTimeCheck constraintAnnotation) {
@@ -50,6 +52,6 @@ public class PassTimeValidator implements ConstraintValidator<PassTimeCheck, Pas
     }
 
     private boolean endTimeExceedsLimit(PassBaseDTO value) {
-        return (Duration.between(value.getStartTime(), value.getEndTime())).toDays() <= VALIDITY_PERIOD_OF_THE_PASS;
+        return (Duration.between(value.getStartTime(), value.getEndTime())).toDays() <= passDurationDays;
     }
 }

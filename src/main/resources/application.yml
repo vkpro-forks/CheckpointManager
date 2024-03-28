@@ -85,3 +85,6 @@ avatars:
 
 logging:
   config: classpath:logback-local.xml
+
+pass:
+  duration-days: 30

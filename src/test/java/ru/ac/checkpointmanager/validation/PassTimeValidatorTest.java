@@ -8,16 +8,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.parameters.P;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
 import ru.ac.checkpointmanager.dto.passes.PassBaseDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
 import ru.ac.checkpointmanager.extension.ValidationContextTestResolver;
-import ru.ac.checkpointmanager.model.passes.Pass;
-import ru.ac.checkpointmanager.util.MockMvcUtils;
 import ru.ac.checkpointmanager.util.PassTestData;
 
 import java.time.LocalDateTime;
@@ -29,8 +23,6 @@ class PassTimeValidatorTest {
     PassTimeValidator passTimeValidator = new PassTimeValidator();
 
     ConstraintValidatorContext constraintContext;
-
-    MockMvc mockMvc;
 
     public PassTimeValidatorTest(ConstraintValidatorContext constraintContext) {
         this.constraintContext = constraintContext;
@@ -69,8 +61,8 @@ class PassTimeValidatorTest {
     void endTimeExceedsLimitTestInCorrect() {
         LocalDateTime baseLocalDateTime = LocalDateTime.of(2024, 4, 28, 0, 0, 0);
         PassCreateDTO passCreateDTO = PassTestData.getPassCreateDTOWithCar();
-        passCreateDTO.setEndTime(baseLocalDateTime.plusDays(15));
-        passCreateDTO.setStartTime(baseLocalDateTime.plusDays(1));
+        passCreateDTO.setEndTime(baseLocalDateTime.plusHours(15));
+        passCreateDTO.setStartTime(baseLocalDateTime.plusHours(1));
         boolean valid = passTimeValidator.isValid(passCreateDTO, constraintContext);
 
         Assertions.assertThat(valid).isTrue();
