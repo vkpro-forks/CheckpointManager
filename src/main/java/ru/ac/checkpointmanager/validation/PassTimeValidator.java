@@ -50,6 +50,6 @@ public class PassTimeValidator implements ConstraintValidator<PassTimeCheck, Pas
     }
 
     private boolean endTimeExceedsLimit(PassBaseDTO value) {
-       return (Duration.between(value.getStartTime(), value.getEndTime())).toDays() < 30;
+        return (Duration.between(value.getStartTime(), value.getEndTime())).toDays() <= VALIDITY_PERIOD_OF_THE_PASS;
     }
 }
