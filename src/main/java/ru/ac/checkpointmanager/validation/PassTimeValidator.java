@@ -18,7 +18,7 @@ public class PassTimeValidator implements ConstraintValidator<PassTimeCheck, Pas
 
     private String validationMessage;
     @Value("${pass.duration-days}")
-    private long passDurationDays;
+    private int passDurationDays;
 
     @Override
     public void initialize(PassTimeCheck constraintAnnotation) {
@@ -39,12 +39,12 @@ public class PassTimeValidator implements ConstraintValidator<PassTimeCheck, Pas
             return true;//not responsibility of this annotation
         }
         if (!endTimeExceedsLimit(value)) {
-            log.debug("End time validation failed");
+            log.debug("");
             return false;
         }
         boolean isValid = value.getStartTime().isBefore(value.getEndTime());
         if (!isValid) {
-            log.debug("Pass time validation failed");
+            log.debug("Pass is valid for more than 30 days");
             return false;
         }
         log.debug("Pass time validation successful");

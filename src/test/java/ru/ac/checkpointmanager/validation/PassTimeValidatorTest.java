@@ -1,7 +1,6 @@
 package ru.ac.checkpointmanager.validation;
 
 import jakarta.validation.ConstraintValidatorContext;
-import lombok.SneakyThrows;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,7 +44,6 @@ class PassTimeValidatorTest {
     }
 
     @Test
-    @SneakyThrows
     void endTimeExceedsLimitTestCorrect() {
         LocalDateTime baseLocalDateTime = LocalDateTime.of(2024, 4, 28, 0, 0, 0);
         PassCreateDTO passCreateDTO = PassTestData.getPassCreateDTOWithCar();
@@ -57,7 +55,6 @@ class PassTimeValidatorTest {
     }
 
     @Test
-    @SneakyThrows
     void endTimeExceedsLimitTestInCorrect() {
         LocalDateTime baseLocalDateTime = LocalDateTime.of(2024, 4, 28, 0, 0, 0);
         PassCreateDTO passCreateDTO = PassTestData.getPassCreateDTOWithCar();

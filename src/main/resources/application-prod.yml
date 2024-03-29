@@ -57,6 +57,3 @@ springdoc:
   pre-loading-enabled: false
   cache:
     disabled: false
-
-pass:
-  duration-days: 30
