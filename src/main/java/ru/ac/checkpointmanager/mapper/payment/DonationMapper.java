@@ -68,9 +68,9 @@ public class DonationMapper {
         TypeMap<DonationRequestDto, Donation> dtoToDonationMap = modelMapper
                 .createTypeMap(DonationRequestDto.class, Donation.class);
         dtoToDonationMap.addMappings(mapping -> {
-            mapping.map(DonationRequestDto::getAmount, Donation::setAmount);
-            mapping.map(DonationRequestDto::getCurrency, Donation::setCurrency);
-            mapping.map(DonationRequestDto::getComment, Donation::setComment);
+            mapping.map(DonationRequestDto::amount, Donation::setAmount);
+            mapping.map(DonationRequestDto::currency, Donation::setCurrency);
+            mapping.map(DonationRequestDto::comment, Donation::setComment);
         });
     }
 }
