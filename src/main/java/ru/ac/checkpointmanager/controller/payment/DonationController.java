@@ -21,7 +21,7 @@ import ru.ac.checkpointmanager.dto.payment.DonationRequestDto;
 import ru.ac.checkpointmanager.service.payment.DonationApiService;
 
 @RestController
-@RequestMapping("/api/v1/donations")
+@RequestMapping(value = DonationController.REST_URL)
 @RequiredArgsConstructor
 @Validated
 @Tag(name = "Управление донатами", description = "Отправка, просмотр, управление донатами")
@@ -33,6 +33,8 @@ import ru.ac.checkpointmanager.service.payment.DonationApiService;
 )
 @SecurityRequirement(name = "bearerAuth")
 public class DonationController {
+
+    public static final String REST_URL = "/api/v1/donations";
 
     private final DonationApiService donationApiService;
 
