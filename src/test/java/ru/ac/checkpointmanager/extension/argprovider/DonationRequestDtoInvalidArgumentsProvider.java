@@ -13,7 +13,6 @@ public class DonationRequestDtoInvalidArgumentsProvider implements ArgumentsProv
 
     private static final String COMMENT = "comment";
     private static final String AMOUNT = "amount";
-    private static final String CURRENCY = "currency";
 
     @Override
     public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
