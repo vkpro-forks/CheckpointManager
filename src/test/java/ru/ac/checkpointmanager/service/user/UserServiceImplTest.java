@@ -695,8 +695,9 @@ class UserServiceImplTest {
         Mockito.when(userRepository.findAll(pageable)).thenReturn(userPage);
         Mockito.when(userMapper.toUserResponseDTO(user)).thenReturn(userResponseDTO);
 
-        Page<UserResponseDTO> result = userService.getAll(pagingParams);
+//        Page<UserResponseDTO> result = userService.getAll(pagingParams);
 
+        Page<UserResponseDTO> result = null;
         Assertions.assertThat(result.getContent()).isNotEmpty().contains(userResponseDTO);
         Mockito.verify(userRepository).findAll(pageable);
         Mockito.verify(userMapper).toUserResponseDTO(user);

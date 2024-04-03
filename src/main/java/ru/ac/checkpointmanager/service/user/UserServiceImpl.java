@@ -9,6 +9,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSendException;
@@ -19,12 +20,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.passes.PagingParams;
-import ru.ac.checkpointmanager.dto.user.AuthResponseDTO;
-import ru.ac.checkpointmanager.dto.user.EmailConfirmationDTO;
-import ru.ac.checkpointmanager.dto.user.NewEmailDTO;
-import ru.ac.checkpointmanager.dto.user.NewPasswordDTO;
-import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
-import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
+import ru.ac.checkpointmanager.dto.user.*;
 import ru.ac.checkpointmanager.exception.EmailAlreadyExistsException;
 import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
 import ru.ac.checkpointmanager.exception.ExceptionUtils;
@@ -41,12 +37,15 @@ import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.avatar.Avatar;
 import ru.ac.checkpointmanager.model.enums.PhoneNumberType;
 import ru.ac.checkpointmanager.model.enums.Role;
+import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
 import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.security.authfacade.AuthFacade;
 import ru.ac.checkpointmanager.security.jwt.JwtService;
 import ru.ac.checkpointmanager.service.email.EmailService;
+import ru.ac.checkpointmanager.specification.PassSpecification;
+import ru.ac.checkpointmanager.specification.UserSpecification;
 import ru.ac.checkpointmanager.utils.FieldsValidation;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
@@ -553,10 +552,12 @@ public class UserServiceImpl implements UserService {
      * @return Страница {@link Page<UserResponseDTO>} с информацией о пользователях.
      */
     @Override
-    public Page<UserResponseDTO> getAll(PagingParams pagingParams) {
+    public Page<UserResponseDTO> getAll(PagingParams pagingParams, UserFilterParams userFilterParams, String part) {
         log.debug("Method {}", MethodLog.getMethodName());
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
-        Page<User> userPage = userRepository.findAll(pageable);
+        Specification<User> spec = UserSpecification.byFilterParams(userFilterParams);
+        spec = addFullNamePartForSpecification(part, spec);
+        Page<User> userPage = userRepository.findAll(spec, pageable);
         return userPage.map(userMapper::toUserResponseDTO);
     }
 
@@ -568,13 +569,14 @@ public class UserServiceImpl implements UserService {
      * @return Страница {@link Page<UserResponseDTO>} с информацией о пользователях.
      */
     @Override
-    public Page<UserResponseDTO> getTerritoriesAssociatedUsers(PagingParams pagingParams) {
+    public Page<UserResponseDTO> getTerritoriesAssociatedUsers(PagingParams pagingParams, UserFilterParams userFilterParams,
+                                                               String part) {
         log.debug("Method {}", MethodLog.getMethodName());
-
         UUID currentUserid = authFacade.getCurrentUser().getId();
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
-
-        Page<User> userPage = userRepository.findTerritoriesAssociatedUsers(currentUserid, pageable);
+        Specification<User> spec = UserSpecification.byFilterParams(userFilterParams);
+        spec = addFullNamePartForSpecification(part, spec);
+        Page<User> userPage = userRepository.findTerritoriesAssociatedUsers(currentUserid, spec, pageable);
         return userPage.map(userMapper::toUserResponseDTO);
     }
 
@@ -623,5 +625,12 @@ public class UserServiceImpl implements UserService {
                 }
         );
         return user.getTerritories();
+    }
+
+    private Specification<User> addFullNamePartForSpecification(String part, Specification<User> spec) {
+        if (!StringUtils.isBlank(part)) {
+            spec = spec.and(Specification.where(UserSpecification.byFullNamePart(part)));
+        }
+        return spec;
     }
 }
