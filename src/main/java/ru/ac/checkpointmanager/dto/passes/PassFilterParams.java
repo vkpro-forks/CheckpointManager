@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class FilterParams {
+public class PassFilterParams {
 
     private String dtype;
 
