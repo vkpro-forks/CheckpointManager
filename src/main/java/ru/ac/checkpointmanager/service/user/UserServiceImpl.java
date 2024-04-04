@@ -7,6 +7,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -37,14 +38,12 @@ import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.avatar.Avatar;
 import ru.ac.checkpointmanager.model.enums.PhoneNumberType;
 import ru.ac.checkpointmanager.model.enums.Role;
-import ru.ac.checkpointmanager.model.passes.Pass;
 import ru.ac.checkpointmanager.repository.PhoneRepository;
 import ru.ac.checkpointmanager.repository.TerritoryRepository;
 import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.security.authfacade.AuthFacade;
 import ru.ac.checkpointmanager.security.jwt.JwtService;
 import ru.ac.checkpointmanager.service.email.EmailService;
-import ru.ac.checkpointmanager.specification.PassSpecification;
 import ru.ac.checkpointmanager.specification.UserSpecification;
 import ru.ac.checkpointmanager.utils.FieldsValidation;
 import ru.ac.checkpointmanager.utils.MethodLog;
@@ -576,7 +575,13 @@ public class UserServiceImpl implements UserService {
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
         Specification<User> spec = UserSpecification.byFilterParams(userFilterParams);
         spec = addFullNamePartForSpecification(part, spec);
-        Page<User> userPage = userRepository.findTerritoriesAssociatedUsers(currentUserid, spec, pageable);
+
+        Page<User> userPage = userRepository.findTerritoriesAssociatedUsers(currentUserid, pageable);
+        List<User> userPageContent = userPage.getContent();
+        List<User> filteredUsers = userRepository.findAll(spec).stream()
+                .filter(user -> userPageContent.contains(user))
+                .toList();
+        userPage = new PageImpl<>(filteredUsers, pageable, userPage.getTotalElements());
         return userPage.map(userMapper::toUserResponseDTO);
     }
 
@@ -627,7 +632,7 @@ public class UserServiceImpl implements UserService {
         return user.getTerritories();
     }
 
-    private Specification<User> addFullNamePartForSpecification(String part, Specification<User> spec) {
+    private static Specification<User> addFullNamePartForSpecification(String part, Specification<User> spec) {
         if (!StringUtils.isBlank(part)) {
             spec = spec.and(Specification.where(UserSpecification.byFullNamePart(part)));
         }

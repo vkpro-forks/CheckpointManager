@@ -4,16 +4,21 @@ import jakarta.persistence.criteria.Predicate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
 import ru.ac.checkpointmanager.dto.user.UserFilterParams;
+import ru.ac.checkpointmanager.exception.InvalidUserRoleException;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.enums.Role;
-import ru.ac.checkpointmanager.specification.model.User_;
 import ru.ac.checkpointmanager.specification.model.Territory_;
+import ru.ac.checkpointmanager.specification.model.User_;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-public class UserSpecification {
+public final class UserSpecification {
+
+    private UserSpecification() {
+        throw new AssertionError("No PassSpecification instances for you!");
+    }
 
     public static Specification<User> byFilterParams(UserFilterParams filterParams) {
         log.debug("Filtering parameters are taken: %s".formatted(filterParams));
@@ -41,7 +46,7 @@ public class UserSpecification {
                         validRoles.add(Role.valueOf(roleString));
                     } catch (IllegalArgumentException e) {
                         log.warn("The role {} does not exist, exception - {}", roleString, e.getMessage());
-                        throw new RuntimeException("The role %s does not exist".formatted(roleString));
+                        throw new InvalidUserRoleException("The role %s does not exist".formatted(roleString));
                     }
                 }
                 if (!validRoles.isEmpty()) {
@@ -52,6 +57,11 @@ public class UserSpecification {
         };
     }
 
+    /**
+     * Генерация спецификации для фильтрации записей по фрагменту переданной строки
+     * @param part фрагмент строки поиска
+     * @return {@link Specification<User>} спецификация для генерации SQL
+     */
     public static Specification<User> byFullNamePart(String part) {
         log.debug("Setting specification for User for LIKE query with part {}", part);
         return (root, query, criteriaBuilder) -> {

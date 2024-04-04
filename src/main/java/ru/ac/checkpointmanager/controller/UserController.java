@@ -191,7 +191,11 @@ public class UserController {
             description = "Доступ: MANAGER",
             parameters = {
                     @Parameter(in = ParameterIn.QUERY, name = "page", example = "0"),
-                    @Parameter(in = ParameterIn.QUERY, name = "size", example = "20")
+                    @Parameter(in = ParameterIn.QUERY, name = "size", example = "20"),
+                    @Parameter(in = ParameterIn.QUERY, name = User_.TERRITORIES),
+                    @Parameter(in = ParameterIn.QUERY, name = User_.ROLE),
+                    @Parameter(in = ParameterIn.QUERY, name = User_.IS_BLOCKED),
+                    @Parameter(in = ParameterIn.QUERY, name = "part")
             })
     @ApiResponses(value = {
             @ApiResponse(

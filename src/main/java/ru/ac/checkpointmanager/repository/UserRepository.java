@@ -2,7 +2,6 @@ package ru.ac.checkpointmanager.repository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -64,7 +63,7 @@ public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificat
     @Query("SELECT u2 FROM User u1 JOIN u1.territories t JOIN t.users u2 WHERE u1.id = :userId AND u2.id != :userId " +
             "ORDER BY CASE WHEN u2.role = 'ADMIN' THEN 1 WHEN u2.role = 'MANAGER' THEN 2 " +
             "WHEN u2.role = 'SECURITY' THEN 3 ELSE 4 END, u2.fullName")
-    Page<User> findTerritoriesAssociatedUsers(@Param("userId") UUID userId, Specification<User> spec, Pageable pageable);
+    Page<User> findTerritoriesAssociatedUsers(@Param("userId") UUID userId, Pageable pageable);
 
     boolean existsByEmail(String email);
 
