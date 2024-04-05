@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
@@ -20,7 +21,7 @@ import ru.ac.checkpointmanager.dto.payment.DonationRequestDto;
 import ru.ac.checkpointmanager.service.payment.DonationApiService;
 
 @RestController
-@RequestMapping("/api/v1/donations")
+@RequestMapping(value = DonationController.REST_URL)
 @RequiredArgsConstructor
 @Validated
 @Tag(name = "Управление донатами", description = "Отправка, просмотр, управление донатами")
@@ -32,6 +33,8 @@ import ru.ac.checkpointmanager.service.payment.DonationApiService;
 )
 @SecurityRequirement(name = "bearerAuth")
 public class DonationController {
+
+    public static final String REST_URL = "/api/v1/donations";
 
     private final DonationApiService donationApiService;
 
@@ -59,7 +62,7 @@ public class DonationController {
     public DonationPerformingResponseDto donate(@io.swagger.v3.oas.annotations.parameters.RequestBody(
             content = @Content(schema = @Schema(implementation = DonationRequestDto.class),
                     mediaType = MediaType.APPLICATION_JSON_VALUE))
-                                                @RequestBody DonationRequestDto donationRequestDto) {
+                                                @Valid @RequestBody DonationRequestDto donationRequestDto) {
         return donationApiService.makeDonation(donationRequestDto);
     }
 }

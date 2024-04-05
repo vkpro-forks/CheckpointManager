@@ -31,6 +31,8 @@ public class YooKassaTestData {
 
     public static final UUID DONATION_ID = UUID.randomUUID();
 
+    public static final BigDecimal AMOUNT = BigDecimal.valueOf(100);
+
     public static final ZonedDateTime CREATED_AT = ZonedDateTime.of(LocalDateTime.of(2024, 3, 18, 10, 0, 0), ZoneId.of("UTC"));
 
 
@@ -43,7 +45,7 @@ public class YooKassaTestData {
                     .id(UUID.randomUUID())
                     .test(true)
                     .description(DESCRIPTION)
-                    .amount(new AmountResponseDto(BigDecimal.TEN, CurrencyEnum.RUB))
+                    .amount(new AmountResponseDto(AMOUNT, CurrencyEnum.RUB))
                     .status("pending")
                     .recipient(new RecipientTypeResponseDto("id", "id"))
                     .createdAt(CREATED_AT.toString())
@@ -53,25 +55,25 @@ public class YooKassaTestData {
                     .metadata(new MetadataResponseDto(UUID.randomUUID().toString()))
                     .build();
 
-    public static Donation preSendDonation = new Donation(DONATION_ID, BigDecimal.TEN, CurrencyEnum.RUB, COMMENT);
+    public static Donation preSendDonation = new Donation(DONATION_ID, AMOUNT, CurrencyEnum.RUB, COMMENT);
 
-    public static DonationRequestDto donationRequestDto = new DonationRequestDto(BigDecimal.TEN, CurrencyEnum.RUB,
+    public static DonationRequestDto donationRequestDto = new DonationRequestDto(AMOUNT, CurrencyEnum.RUB,
             COMMENT);
 
-    public static Donation preFilledDonation = new Donation(BigDecimal.TEN, CurrencyEnum.RUB, COMMENT);
+    public static Donation preFilledDonation = new Donation(AMOUNT, CurrencyEnum.RUB, COMMENT);
     public static PaymentRequestDto paymentRequest = new PaymentRequestDto(
-            new AmountRequestDto(BigDecimal.TEN, CurrencyEnum.RUB.name()), RETURN_URL, COMMENT, DONATION_ID.toString());
+            new AmountRequestDto(AMOUNT, CurrencyEnum.RUB.name()), RETURN_URL, COMMENT, DONATION_ID.toString());
 
     public static DonationPerformingResponseDto donationPerforming = new DonationPerformingResponseDto(
-            new AmountResponseDto(BigDecimal.TEN, CurrencyEnum.RUB), DESCRIPTION, PAYMENT_URL);
+            new AmountResponseDto(AMOUNT, CurrencyEnum.RUB), DESCRIPTION, PAYMENT_URL);
 
     public static ErrorYooKassaResponse yooKassaBadRequestError = new ErrorYooKassaResponse("error", "errorId",
             "errorCode", "description", "parameter");
 
-    public static Donation updatedDonation = new Donation(DONATION_ID, BigDecimal.TEN, CurrencyEnum.RUB,
+    public static Donation updatedDonation = new Donation(DONATION_ID, AMOUNT, CurrencyEnum.RUB,
             COMMENT, paymentResponse.getPaid(), paymentResponse.getStatus(), CREATED_AT, DESCRIPTION, paymentResponse.getId());
 
     public static Donation newDonationAfterMapping = new Donation(UUID.fromString(paymentResponse.getMetadata().getOrderId()),
-            BigDecimal.TEN, CurrencyEnum.RUB, DESCRIPTION, paymentResponse.getPaid(),
+            AMOUNT, CurrencyEnum.RUB, DESCRIPTION, paymentResponse.getPaid(),
             paymentResponse.getStatus(), CREATED_AT, DESCRIPTION, paymentResponse.getId());
 }

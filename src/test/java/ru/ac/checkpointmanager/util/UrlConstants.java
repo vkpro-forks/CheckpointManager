@@ -87,8 +87,6 @@ public class UrlConstants {
 
     public static final String EVENT_TERRITORY_URL = EVENT_URL + "/territories/{territoryId}";
 
-    public static final String DONATION_URL = "/api/v1/donations";
-
     private UrlConstants() {
     }
 }
