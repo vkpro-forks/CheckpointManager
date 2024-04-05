@@ -22,6 +22,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -63,6 +64,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @EnablePostgresAndRedisTestContainers
 class UserControllerIntegrationTest {
 
+    public static final String USER = "User";
+
+    public final static String ROLE = "role";
+
+    public final static String TERRITORIES = "territories";
+
     MockMvc mockMvc;
 
     @Autowired
@@ -82,7 +89,6 @@ class UserControllerIntegrationTest {
 
     User savedUser;
 
-    public static final String USER = "User";
 
     @BeforeEach
     void init() {
@@ -333,6 +339,57 @@ class UserControllerIntegrationTest {
         mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockCustomUser
+    void getAll_ReturnsOnlyUsersWithUserRole_WithAdminRoleAndUserRoleInFilterParams() {
+        // saving user with MANAGER role
+        User user = TestUtils.getUser();
+        user.setRole(Role.MANAGER);
+        userRepository.saveAndFlush(user);
+
+        mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param(ROLE, Role.USER.name()))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpectAll(
+                        status().isOk(),
+                        jsonPath("$.content[*].role", Matchers.hasItem("USER")));
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockCustomUser
+    void getAll_IsOk_WithAdminRoleAndFilterParams() {
+        User user = TestUtils.getUser();
+        user.setRole(Role.USER);
+        savedUser = userRepository.saveAndFlush(user);
+        mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param(ROLE, "USER"))
+                .andExpectAll(
+                        status().isOk(),
+                        jsonPath("$.content[*].id", Matchers.hasItem(savedUser.getId().toString())),
+                        jsonPath("$.content[*].fullName", Matchers.hasItem(savedUser.getFullName())),
+                        jsonPath("$.content[*].email", Matchers.hasItem(savedUser.getEmail())),
+                        jsonPath("$.content[*].avatar").doesNotExist());
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockCustomUser
+    void getAll_ReturnsEmptyList_WhenThereAreNoUsersThatAssociatedWithTerritoryInFilterParams() {
+        mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param(TERRITORIES, "some_territory"))
+                .andExpectAll(
+                        status().isOk(),
+                        jsonPath("$.content[*].id").doesNotExist(),
+                        jsonPath("$.content[*].fullName").doesNotExist(),
+                        jsonPath("$.content[*].email").doesNotExist(),
+                        jsonPath("$.content[*].avatar").doesNotExist());
     }
 
     @Test

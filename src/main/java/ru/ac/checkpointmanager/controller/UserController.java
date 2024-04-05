@@ -91,10 +91,10 @@ public class UserController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping()
     public Page<UserResponseDTO> getAll(@Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams,
-                                        @Schema(hidden = true) UserFilterParams userFilterParams,
+                                        @Schema(hidden = true) UserFilterParams filterParams,
                                         @Schema(hidden = true)
                                         @RequestParam(value = "part", required = false) String part) {
-        return userService.getAll(pagingParams, userFilterParams, part);
+        return userService.getAll(pagingParams, filterParams, part);
     }
 
     @Operation(summary = "Поиск пользователя по id",
@@ -213,10 +213,10 @@ public class UserController {
     @PreAuthorize("hasRole('ROLE_MANAGER')")
     @GetMapping("/associated/")
     public Page<UserResponseDTO> getTerritoriesAssociatedUsers(@Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams,
-                                                               @Schema(hidden = true) UserFilterParams userFilterParams,
+                                                               @Schema(hidden = true) UserFilterParams filterParams,
                                                                @Schema(hidden = true)
                                                                @RequestParam(value = "part", required = false) String part) {
-        return userService.getTerritoriesAssociatedUsers(pagingParams, userFilterParams, part);
+        return userService.getTerritoriesAssociatedUsers(pagingParams, filterParams, part);
     }
 
     @Operation(summary = "Поиск пользователя по почте",
