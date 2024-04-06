@@ -39,12 +39,12 @@ public class PassTimeValidator implements ConstraintValidator<PassTimeCheck, Pas
             return true;//not responsibility of this annotation
         }
         if (!endTimeExceedsLimit(value)) {
-            log.debug("Pass time validation failed");
+            log.debug("Pass time validation failed, exceeds limit: {}", passDurationDays);
             return false;
         }
         boolean isValid = value.getStartTime().isBefore(value.getEndTime());
         if (!isValid) {
-            log.debug("Pass time validation failed");
+            log.debug("Pass time validation failed, start: {}, end: {}", value.getStartTime(), value.getEndTime());
             return false;
         }
         log.debug("Pass time validation successful");
