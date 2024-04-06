@@ -37,7 +37,7 @@ class PassTimeValidatorTest {
 
     @ParameterizedTest
     @MethodSource("getIncorrectPassDtoArguments")
-    void endTimeExceedsLimitTest(PassBaseDTO passDto) {
+    void shouldNotValidateForCorrectPathDto(PassBaseDTO passDto) {
         boolean valid = passTimeValidator.isValid(passDto, constraintContext);
 
         Assertions.assertThat(valid).isFalse();

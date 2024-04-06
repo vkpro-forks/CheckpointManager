@@ -11,7 +11,7 @@ import java.time.Duration;
 
 /**
  * Класс проверяет, что в пропуске дата начала < дата окончания
- * и что время действия пропуска не превышает значение {@code  VALIDITY_PERIOD_OF_THE_PASS}
+ * и что время действия пропуска не превышает значение {@code  passDurationDays}
  */
 @Slf4j
 public class PassTimeValidator implements ConstraintValidator<PassTimeCheck, PassBaseDTO> {
@@ -39,12 +39,12 @@ public class PassTimeValidator implements ConstraintValidator<PassTimeCheck, Pas
             return true;//not responsibility of this annotation
         }
         if (!endTimeExceedsLimit(value)) {
-            log.debug("");
+            log.debug("Pass time validation failed");
             return false;
         }
         boolean isValid = value.getStartTime().isBefore(value.getEndTime());
         if (!isValid) {
-            log.debug("Pass is valid for more than 30 days");
+            log.debug("Pass time validation failed");
             return false;
         }
         log.debug("Pass time validation successful");
