@@ -58,5 +58,4 @@ class UserControllerValidationIntegrationTest {
                 "", "1".repeat(10), "1".repeat(21), "123456789011asdf"
         );
     }
-
 }

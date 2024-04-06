@@ -36,7 +36,6 @@ import ru.ac.checkpointmanager.service.passes.PassService;
 import ru.ac.checkpointmanager.service.territories.TerritoryService;
 import ru.ac.checkpointmanager.service.user.UserService;
 import ru.ac.checkpointmanager.specification.PassSpecification;
-import ru.ac.checkpointmanager.utils.MethodLog;
 import ru.ac.checkpointmanager.utils.TerritoryUtils;
 
 import java.time.LocalDateTime;
@@ -57,10 +56,8 @@ import static ru.ac.checkpointmanager.utils.StringTrimmer.trimThemAll;
 @Transactional(readOnly = true)
 public class PassServiceImpl implements PassService {
     private static final String PAGE_NO_CONTENT = "Page %d, size - %d, has no content (total pages - %d, total elements - %d)";
-
     private static final String PASS_NOT_CANCEL = "Pass [%s] cannot be canceled (%s)";
     private static final String PASS_NOT_ACTIVATED = "Pass [%s] cannot be activated (%s)";
-    private static final String METHOD_INVOKE = "Method {} [{}]";
     private static final String PASS_STATUS = "Pass [{}], changed status on {}";
     private static final String PASS_STATUS_CROSS = "Pass [{}], exist {} crossings, changed status on {}";
 
@@ -77,7 +74,6 @@ public class PassServiceImpl implements PassService {
     @Override
     @Transactional
     public PassResponseDTO addPass(PassCreateDTO passCreateDTO) {
-        log.debug(METHOD_INVOKE, MethodLog.getMethodName(), passCreateDTO);
 
         Pass pass = passResolver.createPass(passCreateDTO);
         passChecker.checkUserTerritoryRelation(pass.getUser().getId(), pass.getTerritory().getId());
@@ -109,7 +105,6 @@ public class PassServiceImpl implements PassService {
      */
     @Override
     public Page<PassResponseDTO> findPasses(PagingParams pagingParams, FilterParams filterParams, String part) {
-        log.debug(METHOD_INVOKE, MethodLog.getMethodName(), "all");
 
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
         Specification<Pass> spec = PassSpecification.byFilterParams(filterParams);
@@ -123,7 +118,6 @@ public class PassServiceImpl implements PassService {
 
     @Override
     public PassResponseDTO findById(UUID id) {
-        log.debug(METHOD_INVOKE, MethodLog.getMethodName(), id);
         return mapper.toPassDTO(findPassById(id));
     }
 
@@ -139,7 +133,6 @@ public class PassServiceImpl implements PassService {
     @Override
     public Page<PassResponseDTO> findPassesByUser(UUID userId, PagingParams pagingParams,
                                                   FilterParams filterParams, String part) {
-        log.debug(METHOD_INVOKE, MethodLog.getMethodName(), userId);
         userService.findById(userId);
 
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
@@ -163,7 +156,6 @@ public class PassServiceImpl implements PassService {
     @Override
     public Page<PassResponseDTO> findPassesByTerritory(UUID terId, PagingParams pagingParams, FilterParams filterParams,
                                                        String part) {
-        log.debug(METHOD_INVOKE, MethodLog.getMethodName(), terId);
         territoryService.findById(terId);
 
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
@@ -212,7 +204,6 @@ public class PassServiceImpl implements PassService {
     @Transactional
     @NonNull
     public PassResponseDTO updatePass(@NonNull PassUpdateDTO passUpdateDTO) {
-        log.debug(METHOD_INVOKE, MethodLog.getMethodName(), passUpdateDTO);
 
         UUID passId = passUpdateDTO.getId();
         Pass existPass = findPassById(passId);
@@ -241,7 +232,6 @@ public class PassServiceImpl implements PassService {
     @Override
     @Transactional
     public PassResponseDTO cancelPass(UUID id) {
-        log.info(METHOD_INVOKE, MethodLog.getMethodName(), id);
 
         Pass pass = findPassById(id);
         PassStatus passStatus = pass.getStatus();
@@ -270,7 +260,6 @@ public class PassServiceImpl implements PassService {
     @Override
     @Transactional
     public PassResponseDTO activateCancelledPass(UUID id) {
-        log.info(METHOD_INVOKE, MethodLog.getMethodName(), id);
 
         Pass pass = findPassById(id);
         PassStatus passStatus = pass.getStatus();
@@ -298,7 +287,6 @@ public class PassServiceImpl implements PassService {
     @Override
     @Transactional
     public PassResponseDTO unWarningPass(UUID id) {
-        log.info(METHOD_INVOKE, MethodLog.getMethodName(), id);
 
         Pass pass = findPassById(id);
         if (pass.getStatus() != PassStatus.WARNING) {
@@ -315,7 +303,6 @@ public class PassServiceImpl implements PassService {
     @Override
     @Transactional
     public void markFavorite(UUID id) {
-        log.info(METHOD_INVOKE, MethodLog.getMethodName(), id);
         Pass pass = findPassById(id);
         pass.setFavorite(true);
         passRepository.save(pass);
@@ -325,7 +312,6 @@ public class PassServiceImpl implements PassService {
     @Override
     @Transactional
     public void unmarkFavorite(UUID id) {
-        log.info(METHOD_INVOKE, MethodLog.getMethodName(), id);
         Pass pass = findPassById(id);
         pass.setFavorite(false);
         passRepository.save(pass);
@@ -335,7 +321,6 @@ public class PassServiceImpl implements PassService {
     @Override
     @Transactional
     public void deletePass(UUID id) {
-        log.info(METHOD_INVOKE, MethodLog.getMethodName(), id);
         findPassById(id);
         passRepository.deleteById(id);
         log.info("Pass [{}] successfully deleted", id);
@@ -374,7 +359,7 @@ public class PassServiceImpl implements PassService {
     public void updatePassStatusByScheduler() {
         if (LocalDateTime.now().getHour() != hourForLogInScheduledCheck) {
             hourForLogInScheduledCheck = LocalDateTime.now().getHour();
-            log.debug("Method {} continues to work", MethodLog.getMethodName());
+            log.debug("Scheduled method for update passes state continues to work");
         }
 
         updateDelayedPassesOnStartTimeReached();
@@ -390,7 +375,7 @@ public class PassServiceImpl implements PassService {
      *
      * @see PassStatus
      */
-    public void updateDelayedPassesOnStartTimeReached() {
+    private void updateDelayedPassesOnStartTimeReached() {
         PassStatus sourceStatus = PassStatus.DELAYED;
         PassStatus targetStatus = PassStatus.ACTIVE;
 
@@ -399,8 +384,7 @@ public class PassServiceImpl implements PassService {
         if (passes.isEmpty()) {
             return;
         }
-
-        log.info("Method {}, startTime reached on {} delayed pass(es)", MethodLog.getMethodName(), passes.size());
+        log.info("Check passes - startTime reached on {} delayed pass(es)", passes.size());
 
         for (Pass pass : passes) {
             pass.setStatus(targetStatus);
@@ -418,7 +402,7 @@ public class PassServiceImpl implements PassService {
      *
      * @see PassStatus
      */
-    public void updateActivePassesOnEndTimeReached() {
+    private void updateActivePassesOnEndTimeReached() {
         PassStatus sourceStatus = PassStatus.ACTIVE;
         PassStatus targetStatus;
 
@@ -427,8 +411,7 @@ public class PassServiceImpl implements PassService {
         if (passes.isEmpty()) {
             return;
         }
-
-        log.info("Method {}, endTime reached on {} active pass(es)", MethodLog.getMethodName(), passes.size());
+        log.info("Check passes - endTime reached on {} active pass(es)", passes.size());
 
         for (Pass pass : passes) {
             List<Crossing> passCrossings = crossingRepository.findCrossingsByPassId(pass.getId());

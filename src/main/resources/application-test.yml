@@ -2,7 +2,11 @@ app:
   version: test
   confirmation-link: http://localhost:8080/api/v1/confirm/registration?token=
   confirmation-email-link: http://localhost:8080/api/v1/confirm/email?token=
+
 spring:
+  main:
+    allow-bean-definition-overriding: true
+
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/chpmanDB
@@ -14,7 +18,6 @@ spring:
   jpa:
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
         show_sql: true
         ddl-auto: none
         use_sql_comments: true
@@ -87,3 +90,11 @@ springdoc:
   pre-loading-enabled: false
   cache:
     disabled: false
+
+donation:
+  return-url: "https://checkpoint-manager.ru"
+
+yookassa:
+  secret-key: secret
+  shop-id: secret
+  url: "https://api.yookassa.ru/v3"

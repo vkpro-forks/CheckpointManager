@@ -12,12 +12,12 @@ import ru.ac.checkpointmanager.model.passes.PassWalk;
 
 import java.time.LocalDateTime;
 
-public class AssertPass extends AbstractAssert<AssertPass, Pass> {
-    protected AssertPass(Pass pass) {
-        super(pass, AssertPass.class);
+public class PassAssert extends AbstractAssert<PassAssert, Pass> {
+    protected PassAssert(Pass pass) {
+        super(pass, PassAssert.class);
     }
 
-    public AssertPass isPassAutoWithMatchedCarFields(String licensePlate, String phone, CarBrand carBrand) {
+    public PassAssert isPassAutoWithMatchedCarFields(String licensePlate, String phone, CarBrand carBrand) {
         isNotNull();
         assertThat(actual).asInstanceOf(InstanceOfAssertFactories.type(PassAuto.class))
                 .extracting(PassAuto::getCar).extracting(Car::getLicensePlate, Car::getPhone, Car::getBrand)
@@ -25,7 +25,7 @@ public class AssertPass extends AbstractAssert<AssertPass, Pass> {
         return this;
     }
 
-    public AssertPass isPassWalkWithMatchedVisitorFields(String name, String phone, String note) {
+    public PassAssert isPassWalkWithMatchedVisitorFields(String name, String phone, String note) {
         isNotNull();
         assertThat(actual).asInstanceOf(InstanceOfAssertFactories.type(PassWalk.class))
                 .extracting(PassWalk::getVisitor).extracting(Visitor::getName, Visitor::getPhone, Visitor::getNote)
@@ -33,7 +33,7 @@ public class AssertPass extends AbstractAssert<AssertPass, Pass> {
         return this;
     }
 
-    public AssertPass isPassFieldsMatches(String comment, LocalDateTime startTime, LocalDateTime endTime,
+    public PassAssert isPassFieldsMatches(String comment, LocalDateTime startTime, LocalDateTime endTime,
                                           PassTimeType passTimeType) {
         isNotNull();
         assertThat(actual).asInstanceOf(InstanceOfAssertFactories.type(Pass.class))
@@ -42,8 +42,8 @@ public class AssertPass extends AbstractAssert<AssertPass, Pass> {
         return this;
     }
 
-    public static AssertPass assertThat(Pass pass) {
-        return new AssertPass(pass);
+    public static PassAssert assertThat(Pass pass) {
+        return new PassAssert(pass);
     }
 
 }

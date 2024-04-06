@@ -62,6 +62,7 @@ dependencies {
     testImplementation 'org.testcontainers:postgresql:1.18.3'
     testImplementation 'org.instancio:instancio-junit:3.5.0'
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'com.maciejwalkowiak.spring:wiremock-spring-boot:2.1.2'
 }
 
 encryptProperties {

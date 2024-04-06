@@ -2,7 +2,6 @@ package ru.ac.checkpointmanager.it.controller;
 
 import lombok.SneakyThrows;
 import org.assertj.core.api.Assertions;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -20,7 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import ru.ac.checkpointmanager.assertion.AssertPassResultActions;
+import ru.ac.checkpointmanager.assertion.PassResultActionsAssert;
 import ru.ac.checkpointmanager.config.EnablePostgresAndRedisTestContainers;
 import ru.ac.checkpointmanager.dto.VisitorDTO;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
@@ -338,7 +337,7 @@ class PassControllerIntegrationTest {
         resultActions.andExpect(MockMvcResultMatchers.status().isOk());
         assert passUpdateDTO.getCar() != null;
 
-        AssertPassResultActions.assertThat(resultActions).commentMatches(passUpdateDTO.getComment())
+        PassResultActionsAssert.assertThat(resultActions).commentMatches(passUpdateDTO.getComment())
                 .startDateMatches(passUpdateDTO.getStartTime())
                 .endDateMatches(passUpdateDTO.getEndTime())
                 .passTimeTypeMatches(passUpdateDTO.getTimeType())
@@ -361,7 +360,7 @@ class PassControllerIntegrationTest {
         resultActions.andExpect(MockMvcResultMatchers.status().isOk());
 
         assert visitorDTO != null;
-        AssertPassResultActions.assertThat(resultActions).commentMatches(passUpdateDTO.getComment())
+        PassResultActionsAssert.assertThat(resultActions).commentMatches(passUpdateDTO.getComment())
                 .startDateMatches(passUpdateDTO.getStartTime())
                 .endDateMatches(passUpdateDTO.getEndTime())
                 .passTimeTypeMatches(passUpdateDTO.getTimeType())
@@ -700,5 +699,4 @@ class PassControllerIntegrationTest {
                 UrlConstants.PASS_URL_NOT_FAVORITE
         );
     }
-
 }

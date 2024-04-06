@@ -109,8 +109,9 @@ class VisitorControllerValidationIntegrationTest {
         VisitorDTO nullName = new VisitorDTO(TestUtils.VISITOR_ID, null, null, "n");
         VisitorDTO emptyName = new VisitorDTO(TestUtils.VISITOR_ID, "", TestUtils.PHONE_NUM, "n");
         VisitorDTO badPhone = new VisitorDTO(TestUtils.VISITOR_ID, "name", "sdf", "note");
+        VisitorDTO longName = new VisitorDTO(TestUtils.VISITOR_ID, "q".repeat(31), TestUtils.PHONE_NUM, "n");
         return Stream.of(
-                nullName, emptyName, badPhone
+                nullName, emptyName, badPhone, longName
         );
     }
 

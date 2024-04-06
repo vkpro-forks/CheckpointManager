@@ -93,5 +93,4 @@ class CrossingServiceImplTest {
                         .isEqualTo(crossingRequestDTO.getPerformedAt())
         );
     }
-
 }

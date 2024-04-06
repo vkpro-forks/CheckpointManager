@@ -6,6 +6,7 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.mail.MailSendException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
@@ -27,6 +28,7 @@ import ru.ac.checkpointmanager.exception.PasswordConfirmationException;
 import ru.ac.checkpointmanager.exception.PhoneAlreadyExistException;
 import ru.ac.checkpointmanager.exception.VisitorNotFoundException;
 import ru.ac.checkpointmanager.exception.pass.PassException;
+import ru.ac.checkpointmanager.exception.payment.DonationException;
 
 import java.time.Instant;
 import java.util.List;
@@ -247,6 +249,21 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
+    @ExceptionHandler(DonationException.class)
+    public ProblemDetail handleDonationException(DonationException e) {
+        ProblemDetail problemDetail = createProblemDetail(HttpStatus.INTERNAL_SERVER_ERROR, e);
+        problemDetail.setTitle(ErrorMessage.DONATION_ERROR);
+        problemDetail.setProperty(ERROR_CODE, ErrorCode.INTERNAL_SERVER_ERROR.toString());
+        return problemDetail;
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ProblemDetail handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+        ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
+        problemDetail.setTitle(ErrorMessage.WRONG_ARGUMENT_PASSED);
+        problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
+        return problemDetail;
+    }
 
     // 500
     @ExceptionHandler(CriticalServerException.class)
@@ -257,7 +274,6 @@ public class GlobalExceptionHandler {
         log.debug(LOG_MSG, e.getClass());
         return problemDetail;
     }
-
 
 
     private ProblemDetail createProblemDetail(HttpStatus status, Exception e) {

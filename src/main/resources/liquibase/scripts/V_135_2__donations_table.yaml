@@ -1,0 +1,28 @@
+databaseChangeLog:
+  - changeSet:
+      id: '135'
+      author: 'veselov.nikolay'
+      comment: 'tag before creating donations table'
+      changes:
+        - tagDatabase:
+            tag: '135-tag-before'
+
+  - changeSet:
+      id: '135.1'
+      author: 'veselov.nikolay'
+      labels: 'donations, user, 135'
+      comment: 'create donations table'
+      created: '2024-03-19'
+      changes:
+        - sqlFile:
+            dbms: postgresql
+            encoding: utf8
+            endDelimiter: GO
+            path: V_135_2__donations_table.sql
+            relativeToChangelogFile: true
+            splitStatements: true
+            stripComments: true
+      rollback:
+        changesetId: '135'
+        changesetPath: liquibase/scripts/V_135_2__donations_table.yaml
+        changesetAuthor: 'veselov.nikolay'
