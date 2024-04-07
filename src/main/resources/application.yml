@@ -94,3 +94,6 @@ yookassa:
   secret-key: ENC(N6TDbCvQJ9PX/r2WDzBIVrL3x1mDv2vuOEhhcvm/eBGjurk7NOHP+LlYG7VlSdGWWCSic1Ev9lYfZkH1NDORnql89BfK+iGrcUsrfa32PwEygnK6f9FINkK3JllZROyw)
   shop-id: ENC(jzEer76ShmqQG1ksqGBAljHHKGcT6pN1szSxfsCtXUFufWiJ35A8RrvbXNePa/+N)
   url: "https://api.yookassa.ru/v3"
+
+pass:
+  duration-days: 30
