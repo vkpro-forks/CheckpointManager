@@ -2,6 +2,7 @@ package ru.ac.checkpointmanager.validation;
 
 import jakarta.validation.ConstraintValidatorContext;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -36,11 +37,34 @@ class PassTimeValidatorTest {
 
     @ParameterizedTest
     @MethodSource("getIncorrectPassDtoArguments")
-    void shouldNotValidateForIncorrectPassDto(PassBaseDTO passDto) {
+    void shouldNotValidateForCorrectPathDto(PassBaseDTO passDto) {
         boolean valid = passTimeValidator.isValid(passDto, constraintContext);
 
         Assertions.assertThat(valid).isFalse();
     }
+
+    @Test
+    void endTimeExceedsLimitTestCorrect() {
+        LocalDateTime baseLocalDateTime = LocalDateTime.of(2024, 4, 28, 0, 0, 0);
+        PassCreateDTO passCreateDTO = PassTestData.getPassCreateDTOWithCar();
+        passCreateDTO.setEndTime(baseLocalDateTime.plusMonths(3));
+        passCreateDTO.setStartTime(baseLocalDateTime.plusDays(1));
+        boolean valid = passTimeValidator.isValid(passCreateDTO, constraintContext);
+
+        Assertions.assertThat(valid).isFalse();
+    }
+
+    @Test
+    void endTimeExceedsLimitTestInCorrect() {
+        LocalDateTime baseLocalDateTime = LocalDateTime.of(2024, 4, 28, 0, 0, 0);
+        PassCreateDTO passCreateDTO = PassTestData.getPassCreateDTOWithCar();
+        passCreateDTO.setEndTime(baseLocalDateTime.plusHours(15));
+        passCreateDTO.setStartTime(baseLocalDateTime.plusHours(1));
+        boolean valid = passTimeValidator.isValid(passCreateDTO, constraintContext);
+
+        Assertions.assertThat(valid).isTrue();
+    }
+
 
     private static Stream<Object> getCorrectPassDtoArguments() {
         PassUpdateDTO passUpdateDTO = PassTestData.getPassUpdateDTOWithCar();
