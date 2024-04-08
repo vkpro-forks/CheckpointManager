@@ -21,7 +21,13 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.passes.PagingParams;
-import ru.ac.checkpointmanager.dto.user.*;
+import ru.ac.checkpointmanager.dto.user.AuthResponseDTO;
+import ru.ac.checkpointmanager.dto.user.EmailConfirmationDTO;
+import ru.ac.checkpointmanager.dto.user.NewEmailDTO;
+import ru.ac.checkpointmanager.dto.user.NewPasswordDTO;
+import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
+import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
+import ru.ac.checkpointmanager.dto.user.UserFilterParams;
 import ru.ac.checkpointmanager.exception.EmailAlreadyExistsException;
 import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
 import ru.ac.checkpointmanager.exception.ExceptionUtils;
@@ -48,7 +54,13 @@ import ru.ac.checkpointmanager.specification.UserSpecification;
 import ru.ac.checkpointmanager.utils.FieldsValidation;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.ArrayList;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**

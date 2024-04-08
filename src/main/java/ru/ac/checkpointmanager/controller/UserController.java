@@ -39,7 +39,6 @@ import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
 import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.service.user.UserService;
-import ru.ac.checkpointmanager.specification.model.Pass_;
 import ru.ac.checkpointmanager.specification.model.User_;
 
 import java.util.Collection;
