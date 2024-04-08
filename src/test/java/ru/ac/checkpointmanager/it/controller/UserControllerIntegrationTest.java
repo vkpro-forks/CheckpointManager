@@ -356,7 +356,7 @@ class UserControllerIntegrationTest {
                 .andDo(MockMvcResultHandlers.print())
                 .andExpectAll(
                         status().isOk(),
-                        jsonPath("$.content[*].role", Matchers.hasItem("USER")));
+                        jsonPath("$.content[*].role", Matchers.hasItem(Role.USER.name())));
     }
 
     @Test
@@ -368,7 +368,7 @@ class UserControllerIntegrationTest {
         savedUser = userRepository.saveAndFlush(user);
         mockMvc.perform(MockMvcRequestBuilders.get(UrlConstants.USER_URL)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param(ROLE, "USER"))
+                        .param(ROLE, Role.USER.name()))
                 .andExpectAll(
                         status().isOk(),
                         jsonPath("$.content[*].id", Matchers.hasItem(savedUser.getId().toString())),
