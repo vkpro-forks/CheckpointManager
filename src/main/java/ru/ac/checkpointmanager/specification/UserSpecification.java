@@ -45,8 +45,8 @@ public final class UserSpecification {
                     try {
                         validRoles.add(Role.valueOf(roleString));
                     } catch (IllegalArgumentException e) {
-                        log.warn("The role {} does not exist, exception - {}", roleString, e.getMessage());
-                        throw new InvalidUserRoleException("The role %s does not exist".formatted(roleString));
+                        log.warn("The role '{}' does not exist, exception - {}", roleString, e.getMessage());
+                        throw new InvalidUserRoleException("The role '%s' does not exist".formatted(roleString));
                     }
                 }
                 if (!validRoles.isEmpty()) {

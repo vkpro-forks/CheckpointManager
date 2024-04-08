@@ -15,17 +15,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
-import ru.ac.checkpointmanager.exception.CriticalServerException;
-import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
-import ru.ac.checkpointmanager.exception.ImageProcessingException;
-import ru.ac.checkpointmanager.exception.InvalidTokenException;
-import ru.ac.checkpointmanager.exception.MismatchCurrentPasswordException;
-import ru.ac.checkpointmanager.exception.ObjectAlreadyExistsException;
-import ru.ac.checkpointmanager.exception.ObjectsRelationConflictException;
-import ru.ac.checkpointmanager.exception.PassAlreadyUsedException;
-import ru.ac.checkpointmanager.exception.PasswordConfirmationException;
-import ru.ac.checkpointmanager.exception.PhoneAlreadyExistException;
-import ru.ac.checkpointmanager.exception.VisitorNotFoundException;
+import ru.ac.checkpointmanager.exception.*;
 import ru.ac.checkpointmanager.exception.pass.PassException;
 import ru.ac.checkpointmanager.exception.payment.DonationException;
 
@@ -248,6 +238,15 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
+    @ExceptionHandler(InvalidUserRoleException.class)
+    public ProblemDetail handleInvalidUserRoleException(InvalidUserRoleException e) {
+        ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
+        problemDetail.setTitle("Specified role is not valid");
+        problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
+        log.debug(LOG_MSG, e.getClass());
+        return problemDetail;
+    }
+
     @ExceptionHandler(DonationException.class)
     public ProblemDetail handleDonationException(DonationException e) {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.INTERNAL_SERVER_ERROR, e);
@@ -255,7 +254,6 @@ public class GlobalExceptionHandler {
         problemDetail.setProperty(ERROR_CODE, ErrorCode.INTERNAL_SERVER_ERROR.toString());
         return problemDetail;
     }
-
 
     // 500
     @ExceptionHandler(CriticalServerException.class)
