@@ -8,7 +8,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
-import ru.ac.checkpointmanager.dto.passes.FilterParams;
+import ru.ac.checkpointmanager.dto.passes.PassFilterParams;
 import ru.ac.checkpointmanager.exception.pass.InvalidPassStatusException;
 import ru.ac.checkpointmanager.model.Visitor;
 import ru.ac.checkpointmanager.model.car.Car;
@@ -35,7 +35,7 @@ public final class PassSpecification {
         throw new AssertionError("No PassSpecification instances for you!");
     }
 
-    public static Specification<Pass> byFilterParams(FilterParams filterParams) {
+    public static Specification<Pass> byFilterParams(PassFilterParams filterParams) {
         log.debug("Filtering parameters are taken: %s".formatted(filterParams));
 
         return (root, query, cb) -> {

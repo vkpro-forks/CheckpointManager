@@ -7,8 +7,10 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSendException;
@@ -25,6 +27,7 @@ import ru.ac.checkpointmanager.dto.user.NewEmailDTO;
 import ru.ac.checkpointmanager.dto.user.NewPasswordDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
+import ru.ac.checkpointmanager.dto.user.UserFilterParams;
 import ru.ac.checkpointmanager.exception.EmailAlreadyExistsException;
 import ru.ac.checkpointmanager.exception.EmailVerificationTokenException;
 import ru.ac.checkpointmanager.exception.ExceptionUtils;
@@ -47,6 +50,7 @@ import ru.ac.checkpointmanager.repository.UserRepository;
 import ru.ac.checkpointmanager.security.authfacade.AuthFacade;
 import ru.ac.checkpointmanager.security.jwt.JwtService;
 import ru.ac.checkpointmanager.service.email.EmailService;
+import ru.ac.checkpointmanager.specification.UserSpecification;
 import ru.ac.checkpointmanager.utils.FieldsValidation;
 import ru.ac.checkpointmanager.utils.MethodLog;
 
@@ -55,6 +59,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Сервисный класс для управления информацией о пользователях.
@@ -548,33 +555,44 @@ public class UserServiceImpl implements UserService {
      * предоставляемых параметром {@link Pageable}. Если пользователи отсутствуют в базе данных,
      * возвращается пустая страница, а не выбрасывается исключение.
      * <p>
+     * Применяет фильтры, если таковые обозначены в {@code userFiltersParam} и/или в {@code fullNamePart}
      *
      * @param pagingParams параметры пагинации и сортировки.
+     * @param filterParams параметры фильтрации {@link UserFilterParams}.
+     * @param fullNamePart полное имя пользователя или его часть.
      * @return Страница {@link Page<UserResponseDTO>} с информацией о пользователях.
      */
     @Override
-    public Page<UserResponseDTO> getAll(PagingParams pagingParams) {
+    public Page<UserResponseDTO> getAll(PagingParams pagingParams, UserFilterParams filterParams, String fullNamePart) {
         log.debug("Method {}", MethodLog.getMethodName());
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
-        Page<User> userPage = userRepository.findAll(pageable);
+        Specification<User> spec = UserSpecification.byFilterParams(filterParams);
+        spec = addFullNamePartForSpecification(fullNamePart, spec);
+        Page<User> userPage = userRepository.findAll(spec, pageable);
         return userPage.map(userMapper::toUserResponseDTO);
     }
 
     /**
      * Получает список пользователей, привязанных хотя бы к одной территории
-     * из списка территорий запрашивающего этот список менеджера
+     * из списка территорий запрашивающего этот список менеджера.
+     * Применяет фильтры, если таковые обозначены в {@code userFiltersParam} и/или в {@code part}
      *
      * @param pagingParams параметры пагинации и сортировки.
+     * @param filterParams параметры фильтрации {@link UserFilterParams}
+     * @param part         фрагмент строки
      * @return Страница {@link Page<UserResponseDTO>} с информацией о пользователях.
      */
     @Override
-    public Page<UserResponseDTO> getTerritoriesAssociatedUsers(PagingParams pagingParams) {
+    public Page<UserResponseDTO> getTerritoriesAssociatedUsers(PagingParams pagingParams, UserFilterParams filterParams,
+                                                               String part) {
         log.debug("Method {}", MethodLog.getMethodName());
-
         UUID currentUserid = authFacade.getCurrentUser().getId();
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
-
         Page<User> userPage = userRepository.findTerritoriesAssociatedUsers(currentUserid, pageable);
+        Specification<User> spec = UserSpecification.byFilterParams(filterParams);
+        spec = addFullNamePartForSpecification(part, spec);
+
+        userPage = new PageImpl<>(applyFilterSpecification(userPage, spec), pageable, userPage.getTotalElements());
         return userPage.map(userMapper::toUserResponseDTO);
     }
 
@@ -623,5 +641,30 @@ public class UserServiceImpl implements UserService {
                 }
         );
         return user.getTerritories();
+    }
+
+    private Specification<User> addFullNamePartForSpecification(String fullNamePart, Specification<User> spec) {
+        if (!StringUtils.isBlank(fullNamePart)) {
+            spec = spec.and(Specification.where(UserSpecification.byFullNamePart(fullNamePart)));
+        }
+        return spec;
+    }
+
+    /**
+     * Вспомогательный метод, который применяет фильтры, обозначенные в {@link Specification}.
+     * Формирует результирующий список пользователей, которые содержатся и в {@code userPage}
+     * и в списке пользователей {@code allFilteredUsers}, подходящих под критерии фильтрации
+     *
+     * @param userPage результат запроса метода репозитория в виде {@link Page}
+     * @param spec     {@link Specification}, хранящая в себе заданные параметры фильтрации
+     * @return список отфильтрованных пользователей
+     */
+    private List<User> applyFilterSpecification(Page<User> userPage, Specification<User> spec) {
+        List<User> userPageContent = new ArrayList<>(userPage.getContent());
+        Map<String, User> allFilteredUsers = userRepository.findAll(spec).stream()
+                .collect(Collectors.toMap(user -> user.getFullName(), user -> user));
+        return userPageContent.stream()
+                .filter(user -> allFilteredUsers.containsKey(user.getFullName()))
+                .toList();
     }
 }

@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.annotation.PagingParam;
 import ru.ac.checkpointmanager.dto.TerritoryDTO;
 import ru.ac.checkpointmanager.dto.passes.PagingParams;
+import ru.ac.checkpointmanager.dto.user.UserFilterParams;
 import ru.ac.checkpointmanager.dto.user.EmailConfirmationDTO;
 import ru.ac.checkpointmanager.dto.user.NewEmailDTO;
 import ru.ac.checkpointmanager.dto.user.NewPasswordDTO;
@@ -38,6 +39,7 @@ import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
 import ru.ac.checkpointmanager.model.enums.Role;
 import ru.ac.checkpointmanager.service.user.UserService;
+import ru.ac.checkpointmanager.specification.model.User_;
 
 import java.util.Collection;
 import java.util.List;
@@ -52,7 +54,7 @@ import static ru.ac.checkpointmanager.utils.SwaggerConstants.UNAUTHORIZED_MSG;
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Пользовательский интерфейс", description = "Комплекс операций по управлению жизненным циклом " +
-                                                        "пользовательских учетных записей, включая создание, модификацию, просмотр и удаление аккаунтов")
+        "пользовательских учетных записей, включая создание, модификацию, просмотр и удаление аккаунтов")
 @ApiResponses(value = {
         @ApiResponse(responseCode = "401",
                 description = UNAUTHORIZED_MSG),
@@ -61,6 +63,37 @@ import static ru.ac.checkpointmanager.utils.SwaggerConstants.UNAUTHORIZED_MSG;
 public class UserController {
 
     private final UserService userService;
+
+    @Operation(summary = "Получить список всех пользователей",
+            description = "Доступ: ADMIN",
+            parameters = {
+                    @Parameter(in = ParameterIn.QUERY, name = "page", example = "0"),
+                    @Parameter(in = ParameterIn.QUERY, name = "size", example = "20"),
+                    @Parameter(in = ParameterIn.QUERY, name = User_.TERRITORIES),
+                    @Parameter(in = ParameterIn.QUERY, name = User_.ROLE),
+                    @Parameter(in = ParameterIn.QUERY, name = User_.IS_BLOCKED),
+                    @Parameter(in = ParameterIn.QUERY, name = "part")
+            })
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "OK: возвращает страницу пользователей, содержащую объекты UserResponseDTO",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = Page.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "FORBIDDEN: роль пользователя не предоставляет доступ к данному api"
+            )
+    })
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping()
+    public Page<UserResponseDTO> getAll(@Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams,
+                                        @Schema(hidden = true) UserFilterParams filterParams,
+                                        @Schema(hidden = true) @RequestParam(value = "part", required = false) String part) {
+        return userService.getAll(pagingParams, filterParams, part);
+    }
 
     @Operation(summary = "Поиск пользователя по id",
             description = "Доступ: USER, ADMIN, MANAGER, SECURITY."
@@ -152,36 +185,15 @@ public class UserController {
         return userService.findByName(name);
     }
 
-    @Operation(summary = "Получить список всех пользователей",
-            description = "Доступ: ADMIN",
-            parameters = {
-                    @Parameter(in = ParameterIn.QUERY, name = "page", example = "0"),
-                    @Parameter(in = ParameterIn.QUERY, name = "size", example = "20")
-            })
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "OK: возвращает страницу пользователей, содержащую объекты UserResponseDTO",
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = Page.class))
-            ),
-            @ApiResponse(
-                    responseCode = "403",
-                    description = "FORBIDDEN: роль пользователя не предоставляет доступ к данному api"
-            )
-    })
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @GetMapping()
-    public Page<UserResponseDTO> getAll(@Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams) {
-        return userService.getAll(pagingParams);
-    }
-
     @Operation(summary = "Получить список пользователей, связанных с территориями менеджера",
             description = "Доступ: MANAGER",
             parameters = {
                     @Parameter(in = ParameterIn.QUERY, name = "page", example = "0"),
-                    @Parameter(in = ParameterIn.QUERY, name = "size", example = "20")
+                    @Parameter(in = ParameterIn.QUERY, name = "size", example = "20"),
+                    @Parameter(in = ParameterIn.QUERY, name = User_.TERRITORIES),
+                    @Parameter(in = ParameterIn.QUERY, name = User_.ROLE),
+                    @Parameter(in = ParameterIn.QUERY, name = User_.IS_BLOCKED),
+                    @Parameter(in = ParameterIn.QUERY, name = "part")
             })
     @ApiResponses(value = {
             @ApiResponse(
@@ -198,8 +210,11 @@ public class UserController {
     })
     @PreAuthorize("hasRole('ROLE_MANAGER')")
     @GetMapping("/associated/")
-    public Page<UserResponseDTO> getTerritoriesAssociatedUsers(@Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams) {
-        return userService.getTerritoriesAssociatedUsers(pagingParams);
+    public Page<UserResponseDTO> getTerritoriesAssociatedUsers(@Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams,
+                                                               @Schema(hidden = true) UserFilterParams filterParams,
+                                                               @Schema(hidden = true)
+                                                               @RequestParam(value = "part", required = false) String part) {
+        return userService.getTerritoriesAssociatedUsers(pagingParams, filterParams, part);
     }
 
     @Operation(summary = "Поиск пользователя по почте",

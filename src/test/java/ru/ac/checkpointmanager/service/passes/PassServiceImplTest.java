@@ -13,7 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import ru.ac.checkpointmanager.assertion.PassAssert;
-import ru.ac.checkpointmanager.dto.passes.FilterParams;
+import ru.ac.checkpointmanager.dto.passes.PassFilterParams;
 import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassUpdateDTO;
@@ -100,12 +100,12 @@ class PassServiceImplTest {
     @SuppressWarnings({"rawtypes", "unchecked"})
     void findPasses_AllOk_ReturnPageWithPasses() {
         PagingParams pagingParams = new PagingParams(0, 100);
-        FilterParams filterParams = new FilterParams(null, null, null, null);
+        PassFilterParams passFilterParams = new PassFilterParams(null, null, null, null);
         Page mockPage = Mockito.mock(Page.class);
         Mockito.when(passRepository.findAll(Mockito.any(Specification.class), Mockito.any(Pageable.class)))
                 .thenReturn(mockPage);
 
-        passService.findPasses(pagingParams, filterParams, "part");
+        passService.findPasses(pagingParams, passFilterParams, "part");
 
         Mockito.verify(passRepository, Mockito.times(1)).findAll(Mockito.any(Specification.class), Mockito.any(Pageable.class));
     }

@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.ac.checkpointmanager.annotation.PagingParam;
-import ru.ac.checkpointmanager.dto.passes.FilterParams;
+import ru.ac.checkpointmanager.dto.passes.PassFilterParams;
 import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassResponseDTO;
@@ -97,7 +97,7 @@ public class PassController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping
     public Page<PassResponseDTO> getPasses(@Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams,
-                                           @Schema(hidden = true) FilterParams filterParams,
+                                           @Schema(hidden = true) PassFilterParams filterParams,
                                            @Schema(hidden = true)
                                            @RequestParam(value = "part", required = false) String part) {
         return service.findPasses(pagingParams, filterParams, part);
@@ -140,9 +140,9 @@ public class PassController {
     @GetMapping("/users/{userId}")
     public Page<PassResponseDTO> getPassesByUserId(@PathVariable UUID userId,
                                                    @Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams,
-                                                   @Schema(hidden = true) FilterParams filterParams,
+                                                   @Schema(hidden = true) PassFilterParams passFilterParams,
                                                    @RequestParam(value = "part", required = false) String part) {
-        return service.findPassesByUser(userId, pagingParams, filterParams, part);
+        return service.findPassesByUser(userId, pagingParams, passFilterParams, part);
     }
 
     @Operation(summary = "Получить список пропусков на конкретную территорию, с учетом фильтрации и совпадения " +
@@ -167,9 +167,9 @@ public class PassController {
     public Page<PassResponseDTO> getPassesByTerritoryId(@PathVariable UUID territoryId,
                                                         @Schema(hidden = true)
                                                         @Valid @PagingParam PagingParams pagingParams,
-                                                        @Schema(hidden = true) FilterParams filterParams,
+                                                        @Schema(hidden = true) PassFilterParams passFilterParams,
                                                         @RequestParam(value = "part", required = false) String part) {
-        return service.findPassesByTerritory(territoryId, pagingParams, filterParams, part);
+        return service.findPassesByTerritory(territoryId, pagingParams, passFilterParams, part);
     }
 
     @Operation(summary = "Получить список пропусков по всем привязанным к пользователю территориям, " +
@@ -195,9 +195,9 @@ public class PassController {
     public Page<PassResponseDTO> getPassesByUsersTerritories(@PathVariable UUID userId,
                                                              @Schema(hidden = true)
                                                              @Valid @PagingParam PagingParams pagingParams,
-                                                             @Schema(hidden = true) FilterParams filterParams,
+                                                             @Schema(hidden = true) PassFilterParams passFilterParams,
                                                              @RequestParam(value = "part", required = false) String part) {
-        return service.findPassesByUsersTerritories(userId, pagingParams, filterParams, part);
+        return service.findPassesByUsersTerritories(userId, pagingParams, passFilterParams, part);
     }
 
     /* UPDATE */

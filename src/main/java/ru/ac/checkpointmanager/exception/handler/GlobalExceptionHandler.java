@@ -27,6 +27,7 @@ import ru.ac.checkpointmanager.exception.PassAlreadyUsedException;
 import ru.ac.checkpointmanager.exception.PasswordConfirmationException;
 import ru.ac.checkpointmanager.exception.PhoneAlreadyExistException;
 import ru.ac.checkpointmanager.exception.VisitorNotFoundException;
+import ru.ac.checkpointmanager.exception.InvalidUserRoleException;
 import ru.ac.checkpointmanager.exception.pass.PassException;
 import ru.ac.checkpointmanager.exception.payment.DonationException;
 
@@ -249,19 +250,20 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
+    @ExceptionHandler(InvalidUserRoleException.class)
+    public ProblemDetail handleInvalidUserRoleException(InvalidUserRoleException e) {
+        ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
+        problemDetail.setTitle("Specified role is not valid");
+        problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
+        log.debug(LOG_MSG, e.getClass());
+        return problemDetail;
+    }
+
     @ExceptionHandler(DonationException.class)
     public ProblemDetail handleDonationException(DonationException e) {
         ProblemDetail problemDetail = createProblemDetail(HttpStatus.INTERNAL_SERVER_ERROR, e);
         problemDetail.setTitle(ErrorMessage.DONATION_ERROR);
         problemDetail.setProperty(ERROR_CODE, ErrorCode.INTERNAL_SERVER_ERROR.toString());
-        return problemDetail;
-    }
-
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ProblemDetail handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
-        ProblemDetail problemDetail = createProblemDetail(HttpStatus.BAD_REQUEST, e);
-        problemDetail.setTitle(ErrorMessage.WRONG_ARGUMENT_PASSED);
-        problemDetail.setProperty(ERROR_CODE, ErrorCode.BAD_REQUEST.toString());
         return problemDetail;
     }
 

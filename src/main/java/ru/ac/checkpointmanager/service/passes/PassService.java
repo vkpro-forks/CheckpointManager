@@ -1,7 +1,7 @@
 package ru.ac.checkpointmanager.service.passes;
 
 import org.springframework.data.domain.Page;
-import ru.ac.checkpointmanager.dto.passes.FilterParams;
+import ru.ac.checkpointmanager.dto.passes.PassFilterParams;
 import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassResponseDTO;
@@ -14,17 +14,17 @@ public interface PassService {
 
     PassResponseDTO addPass(PassCreateDTO passCreateDTO);
 
-    Page<PassResponseDTO> findPasses(PagingParams pagingParams, FilterParams filterParams, String part);
+    Page<PassResponseDTO> findPasses(PagingParams pagingParams, PassFilterParams passFilterParams, String part);
 
     PassResponseDTO findById(UUID id);
 
     Pass findPassById(UUID passId);
 
-    Page<PassResponseDTO> findPassesByUser(UUID userId, PagingParams pagingParams, FilterParams filterParams, String part);
+    Page<PassResponseDTO> findPassesByUser(UUID userId, PagingParams pagingParams, PassFilterParams passFilterParams, String part);
 
-    Page<PassResponseDTO> findPassesByTerritory(UUID terId, PagingParams pagingParams, FilterParams filterParams, String part);
+    Page<PassResponseDTO> findPassesByTerritory(UUID terId, PagingParams pagingParams, PassFilterParams passFilterParams, String part);
 
-    Page<PassResponseDTO> findPassesByUsersTerritories(UUID userId, PagingParams pagingParams, FilterParams filterParams,
+    Page<PassResponseDTO> findPassesByUsersTerritories(UUID userId, PagingParams pagingParams, PassFilterParams passFilterParams,
                                                        String part);
 
     PassResponseDTO updatePass(PassUpdateDTO passUpdateDTO);

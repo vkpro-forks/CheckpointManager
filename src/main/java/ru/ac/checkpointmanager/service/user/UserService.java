@@ -9,6 +9,7 @@ import ru.ac.checkpointmanager.dto.user.NewEmailDTO;
 import ru.ac.checkpointmanager.dto.user.NewPasswordDTO;
 import ru.ac.checkpointmanager.dto.user.UserResponseDTO;
 import ru.ac.checkpointmanager.dto.user.UserUpdateDTO;
+import ru.ac.checkpointmanager.dto.user.UserFilterParams;
 import ru.ac.checkpointmanager.model.User;
 import ru.ac.checkpointmanager.model.avatar.Avatar;
 import ru.ac.checkpointmanager.model.enums.Role;
@@ -49,9 +50,10 @@ public interface UserService {
 
     void deleteUser(UUID id);
 
-    Page<UserResponseDTO> getAll(PagingParams pagingParams);
+    Page<UserResponseDTO> getAll(PagingParams pagingParams, UserFilterParams userFilterParams, String part);
 
-    Page<UserResponseDTO> getTerritoriesAssociatedUsers(PagingParams pagingParams);
+    Page<UserResponseDTO> getTerritoriesAssociatedUsers(PagingParams pagingParams, UserFilterParams userFilterParams,
+                                                        String part);
 
     Collection<String> findUsersPhones(UUID userId);
 

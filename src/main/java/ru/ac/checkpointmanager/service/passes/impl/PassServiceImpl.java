@@ -11,7 +11,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.ac.checkpointmanager.dto.passes.FilterParams;
+import ru.ac.checkpointmanager.dto.passes.PassFilterParams;
 import ru.ac.checkpointmanager.dto.passes.PagingParams;
 import ru.ac.checkpointmanager.dto.passes.PassCreateDTO;
 import ru.ac.checkpointmanager.dto.passes.PassResponseDTO;
@@ -99,15 +99,15 @@ public class PassServiceImpl implements PassService {
      * и (опционально) по частичному совпадению номера авто и/или имени посетителя
      *
      * @param pagingParams Параметры страницы
-     * @param filterParams Параметры фильтрации
+     * @param passFilterParams Параметры фильтрации
      * @param part         часть текста по которому будет сравнение
      * @return {@link Page<PassResponseDTO>} страница с дто пропусков
      */
     @Override
-    public Page<PassResponseDTO> findPasses(PagingParams pagingParams, FilterParams filterParams, String part) {
+    public Page<PassResponseDTO> findPasses(PagingParams pagingParams, PassFilterParams passFilterParams, String part) {
 
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
-        Specification<Pass> spec = PassSpecification.byFilterParams(filterParams);
+        Specification<Pass> spec = PassSpecification.byFilterParams(passFilterParams);
         spec = addByVisitorAndByCarNumberPartSpecIfPartPresent(part, spec);
 
         Page<Pass> foundPasses = passRepository.findAll(spec, pageable);
@@ -132,12 +132,12 @@ public class PassServiceImpl implements PassService {
 
     @Override
     public Page<PassResponseDTO> findPassesByUser(UUID userId, PagingParams pagingParams,
-                                                  FilterParams filterParams, String part) {
+                                                  PassFilterParams passFilterParams, String part) {
         userService.findById(userId);
 
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
         Specification<Pass> spec = Specification.where(PassSpecification.byUserId(userId))
-                .and(PassSpecification.byFilterParams(filterParams));
+                .and(PassSpecification.byFilterParams(passFilterParams));
         spec = addByVisitorAndByCarNumberPartSpecIfPartPresent(part, spec);
 
         Page<Pass> foundPasses = passRepository.findAll(spec, pageable);
@@ -154,13 +154,13 @@ public class PassServiceImpl implements PassService {
     }
 
     @Override
-    public Page<PassResponseDTO> findPassesByTerritory(UUID terId, PagingParams pagingParams, FilterParams filterParams,
+    public Page<PassResponseDTO> findPassesByTerritory(UUID terId, PagingParams pagingParams, PassFilterParams passFilterParams,
                                                        String part) {
         territoryService.findById(terId);
 
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
         Specification<Pass> spec = Specification.where(PassSpecification.byTerritoryId(terId))
-                .and(PassSpecification.byFilterParams(filterParams));
+                .and(PassSpecification.byFilterParams(passFilterParams));
         spec = addByVisitorAndByCarNumberPartSpecIfPartPresent(part, spec);
 
         Page<Pass> foundPasses = passRepository.findAll(spec, pageable);
@@ -173,7 +173,7 @@ public class PassServiceImpl implements PassService {
      *
      * @param userId       идентификатор пользователя, для которого нужно найти пропуска.
      * @param pagingParams параметры пагинации, управляющие размером и номером страницы в результатах.
-     * @param filterParams параметры фильтрации для поиска пропусков.
+     * @param passFilterParams параметры фильтрации для поиска пропусков.
      * @return страница с объектами PassResponseDTO, содержащая найденные пропуска.
      * @throws UserNotFoundException      если пользователь с указанным идентификатором не найден.
      * @throws TerritoryNotFoundException если пользователь не привязан к территории.
@@ -181,7 +181,7 @@ public class PassServiceImpl implements PassService {
     @Override
     @Transactional(readOnly = true)
     public Page<PassResponseDTO> findPassesByUsersTerritories(UUID userId, PagingParams pagingParams,
-                                                              FilterParams filterParams, String part) {
+                                                              PassFilterParams passFilterParams, String part) {
         User user = userService.findUserById(userId);
         List<UUID> terIds = TerritoryUtils.getTerritoryIdsOrThrow(user, userId);
 
@@ -190,7 +190,7 @@ public class PassServiceImpl implements PassService {
                 .reduce(Specification::or)
                 .get();
 
-        spec = spec.and(PassSpecification.byFilterParams(filterParams));
+        spec = spec.and(PassSpecification.byFilterParams(passFilterParams));
         spec = addByVisitorAndByCarNumberPartSpecIfPartPresent(part, spec);
 
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
