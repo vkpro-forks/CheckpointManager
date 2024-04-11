@@ -16,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.ac.checkpointmanager.assertion.DonationPerformingResultActionsAssert;
 import ru.ac.checkpointmanager.assertion.ErrorResponseResultActionsAssert;
@@ -29,8 +30,6 @@ import ru.ac.checkpointmanager.exception.payment.DonationException;
 import ru.ac.checkpointmanager.model.payment.CurrencyEnum;
 import ru.ac.checkpointmanager.util.PaymentMockMvcUtils;
 import ru.ac.checkpointmanager.util.YooKassaTestData;
-
-import java.math.BigDecimal;
 
 @MockMvcIntegrationTest
 @WithMockUser(roles = {"ADMIN"})
@@ -61,9 +60,10 @@ class DonationIntegrationTest {
                 .withResponseBody(Body.fromJsonBytes(objectMapper.writeValueAsBytes(YooKassaTestData.paymentResponse)))));
 
         ResultActions resultActions = mockMvc.perform(PaymentMockMvcUtils.donate(YooKassaTestData.donationRequestDto))
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print());
         DonationPerformingResultActionsAssert.assertThat(resultActions).returnUrlMatches(YooKassaTestData.PAYMENT_URL)
-                .amountMatches(BigDecimal.TEN, CurrencyEnum.RUB).descriptionMatches(YooKassaTestData.COMMENT);
+                .amountMatches(YooKassaTestData.AMOUNT, CurrencyEnum.RUB).descriptionMatches(YooKassaTestData.COMMENT);
     }
 
     @Test
@@ -75,7 +75,8 @@ class DonationIntegrationTest {
                 .withResponseBody(Body.fromJsonBytes(objectMapper.writeValueAsBytes(yooKassa400Error)))));
 
         ResultActions resultActions = mockMvc.perform(PaymentMockMvcUtils.donate(YooKassaTestData.donationRequestDto))
-                .andExpect(MockMvcResultMatchers.status().isInternalServerError());
+                .andExpect(MockMvcResultMatchers.status().isInternalServerError())
+                .andDo(MockMvcResultHandlers.print());
 
         ErrorResponseResultActionsAssert.assertThat(resultActions).errorCodeMatches(ErrorCode.INTERNAL_SERVER_ERROR)
                 .timeStampNotEmpty().detailsIsNotEmpty().contentTypeIsApplicationProblemJson()
@@ -92,7 +93,8 @@ class DonationIntegrationTest {
                 .withResponseBody(Body.fromJsonBytes(objectMapper.writeValueAsBytes(yooKassa400Error)))));
 
         ResultActions resultActions = mockMvc.perform(PaymentMockMvcUtils.donate(YooKassaTestData.donationRequestDto))
-                .andExpect(MockMvcResultMatchers.status().isInternalServerError());
+                .andExpect(MockMvcResultMatchers.status().isInternalServerError())
+                .andDo(MockMvcResultHandlers.print());
 
         ErrorResponseResultActionsAssert.assertThat(resultActions).errorCodeMatches(ErrorCode.INTERNAL_SERVER_ERROR)
                 .timeStampNotEmpty().detailsIsNotEmpty().contentTypeIsApplicationProblemJson()
