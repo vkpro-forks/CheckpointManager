@@ -91,8 +91,7 @@ public class UserController {
     @GetMapping()
     public Page<UserResponseDTO> getAll(@Schema(hidden = true) @Valid @PagingParam PagingParams pagingParams,
                                         @Schema(hidden = true) UserFilterParams filterParams,
-                                        @Schema(hidden = true)
-                                        @RequestParam(value = "part", required = false) String part) {
+                                        @Schema(hidden = true) @RequestParam(value = "part", required = false) String part) {
         return userService.getAll(pagingParams, filterParams, part);
     }
 

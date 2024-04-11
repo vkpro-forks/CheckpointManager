@@ -555,19 +555,19 @@ public class UserServiceImpl implements UserService {
      * предоставляемых параметром {@link Pageable}. Если пользователи отсутствуют в базе данных,
      * возвращается пустая страница, а не выбрасывается исключение.
      * <p>
-     * Применяет фильтры, если таковые обозначены в {@code userFiltersParam} и/или в {@code part}
+     * Применяет фильтры, если таковые обозначены в {@code userFiltersParam} и/или в {@code fullNamePart}
      *
-     * @param pagingParams     параметры пагинации и сортировки.
+     * @param pagingParams параметры пагинации и сортировки.
      * @param filterParams параметры фильтрации {@link UserFilterParams}.
-     * @param part             фрагмент строки.
+     * @param fullNamePart полное имя пользователя или его часть.
      * @return Страница {@link Page<UserResponseDTO>} с информацией о пользователях.
      */
     @Override
-    public Page<UserResponseDTO> getAll(PagingParams pagingParams, UserFilterParams filterParams, String part) {
+    public Page<UserResponseDTO> getAll(PagingParams pagingParams, UserFilterParams filterParams, String fullNamePart) {
         log.debug("Method {}", MethodLog.getMethodName());
         Pageable pageable = PageRequest.of(pagingParams.getPage(), pagingParams.getSize());
         Specification<User> spec = UserSpecification.byFilterParams(filterParams);
-        spec = addFullNamePartForSpecification(part, spec);
+        spec = addFullNamePartForSpecification(fullNamePart, spec);
         Page<User> userPage = userRepository.findAll(spec, pageable);
         return userPage.map(userMapper::toUserResponseDTO);
     }
@@ -577,9 +577,9 @@ public class UserServiceImpl implements UserService {
      * из списка территорий запрашивающего этот список менеджера.
      * Применяет фильтры, если таковые обозначены в {@code userFiltersParam} и/или в {@code part}
      *
-     * @param pagingParams     параметры пагинации и сортировки.
+     * @param pagingParams параметры пагинации и сортировки.
      * @param filterParams параметры фильтрации {@link UserFilterParams}
-     * @param part             фрагмент строки
+     * @param part         фрагмент строки
      * @return Страница {@link Page<UserResponseDTO>} с информацией о пользователях.
      */
     @Override
@@ -643,9 +643,9 @@ public class UserServiceImpl implements UserService {
         return user.getTerritories();
     }
 
-    private Specification<User> addFullNamePartForSpecification(String part, Specification<User> spec) {
-        if (!StringUtils.isBlank(part)) {
-            spec = spec.and(Specification.where(UserSpecification.byFullNamePart(part)));
+    private Specification<User> addFullNamePartForSpecification(String fullNamePart, Specification<User> spec) {
+        if (!StringUtils.isBlank(fullNamePart)) {
+            spec = spec.and(Specification.where(UserSpecification.byFullNamePart(fullNamePart)));
         }
         return spec;
     }
